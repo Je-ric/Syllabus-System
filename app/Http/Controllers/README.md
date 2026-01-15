@@ -1,5 +1,5 @@
 AuthenticationController
-    - Signup
+    - Signup (input not OAuth)
     - Login
 UserApprovalController
 CalendarController
@@ -16,3 +16,7 @@ SyllabusController
     - Helper per Step
 SyllabusApprovalController
 SyllabusPreview
+
+Livewire:
+    Table
+    Multiplying Form
