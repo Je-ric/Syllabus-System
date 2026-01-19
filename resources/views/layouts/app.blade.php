@@ -8,7 +8,7 @@
 
     @livewireStyles
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="min-h-screen">
 
     <header class="bg-blue-700 text-white">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
