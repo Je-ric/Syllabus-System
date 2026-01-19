@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div x-data="{ openModal: false, action: '', userId: null, selectedRole: '' }">
+<div x-data="{ openModal: false, action: '', userId: null, selectedRole: [] }">
 
     <p class="text-lg font-semibold mb-4">Accounts Lists</p>
 
