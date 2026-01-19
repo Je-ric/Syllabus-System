@@ -87,6 +87,8 @@
     <div>
         <p class="text-gray-700 mb-4">Assign roles to this user:</p>
 
+        <p>Faculty role is a foundational role after approval and cannot be removed.</p>
+
         <form method="POST" action="{{ route('account-approval.assign-role') }}">
             @csrf
             <input type="hidden" name="user_id" :value="userId">
