@@ -4,7 +4,7 @@
     <div class="flex justify-center items-center min-h-screen bg-gray-50">
         <div class="bg-white shadow-lg rounded-lg w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 overflow-hidden">
 
-            <!-- Left Side: Forms -->
+            <!-- Left -->
             <div class="p-10 bg-gray-50 flex flex-col justify-center">
 
                 @if (!session('verify_email') && !session('waiting_approval'))
@@ -19,10 +19,16 @@
 
                     <form method="POST" action="{{ route('login') }}" class="space-y-4">
                         @csrf
-                        <input type="email" name="email" placeholder="Email" class="w-full border rounded px-3 py-2"
-                            required>
-                        <input type="password" name="password" placeholder="Password"
-                            class="w-full border rounded px-3 py-2" required>
+                        <input type="email" 
+                                name="email" 
+                                placeholder="Email" 
+                                class="w-full border rounded px-3 py-2"
+                                required>
+                        <input type="password" 
+                                name="password" 
+                                placeholder="Password"
+                                class="w-full border rounded px-3 py-2" 
+                                required>
                         <button class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Login</button>
                     </form>
 
@@ -32,22 +38,36 @@
                     <h2 class="text-2xl font-bold mb-4">Sign Up</h2>
                     <form method="POST" action="{{ route('register') }}" class="space-y-4">
                         @csrf
-                        <input type="text" name="name" placeholder="Full Name" class="w-full border rounded px-3 py-2"
-                            required>
-                        <input type="email" name="email" placeholder="Email" class="w-full border rounded px-3 py-2"
-                            required>
-                        <input type="password" name="password" placeholder="Password"
-                            class="w-full border rounded px-3 py-2" required>
-                        <input type="password" name="password_confirmation" placeholder="Confirm Password"
-                            class="w-full border rounded px-3 py-2" required>
-                        <button class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">Create
-                            Account</button>
+                        <input type="text" 
+                                name="name" 
+                                placeholder="Full Name" 
+                                class="w-full border rounded px-3 py-2"
+                                required>
+                        <input type="email" 
+                                name="email" 
+                                placeholder="Email" 
+                                class="w-full border rounded px-3 py-2"
+                                required>
+                        <input type="password" 
+                                name="password"
+                                placeholder="Password"
+                                class="w-full border rounded px-3 py-2" 
+                                required>
+                        <input type="password" 
+                                name="password_confirmation" 
+                                placeholder="Confirm Password"
+                                class="w-full border rounded px-3 py-2" 
+                                required>
+                        <button 
+                                class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">
+                                Create Account
+                        </button>
                     </form>
                 @endif
 
             </div>
 
-            <!-- Right Side: Info -->
+            <!-- Right -->
             <div class="p-10 bg-blue-600 text-white flex flex-col justify-center">
                 <h2 class="text-3xl font-bold mb-4">Welcome to CSMS</h2>
                 <p class="mb-4">
@@ -81,17 +101,23 @@
 
                 <div class="p-6">
                     <p class="mb-4 text-gray-700">
-                        We sent a 6-digit OTP to <strong>{{ session('verify_email') }}</strong>. Enter it below to verify
-                        your account.
+                        We sent a 6-digit OTP to <strong>{{ session('verify_email') }}</strong>. 
+                        <br>Enter it below to verify your account.
                     </p>
 
                     <form method="POST" action="{{ route('verify.otp') }}" class="space-y-4">
                         @csrf
-                        <input type="hidden" name="email" value="{{ session('verify_email') }}">
-                        <input type="text" name="otp" placeholder="Enter OTP" class="w-full border rounded px-3 py-2"
-                            required>
-                        <button class="w-full bg-yellow-500 text-white py-2 rounded hover:bg-yellow-600">Verify
-                            Email</button>
+                        <input type="hidden" 
+                                name="email" 
+                                value="{{ session('verify_email') }}">
+                        <input type="text" 
+                                name="otp" 
+                                placeholder="Enter OTP" 
+                                class="w-full border rounded px-3 py-2"
+                                required>
+                        <button class="w-full bg-yellow-500 text-white py-2 rounded hover:bg-yellow-600">
+                            Verify Email
+                        </button>
                     </form>
 
                     <form method="POST" action="{{ route('request.otp') }}" class="mt-2">
