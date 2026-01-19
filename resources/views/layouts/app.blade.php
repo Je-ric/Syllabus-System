@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{{ $title ?? 'OBE System' }}</title>
+    <title>{{ $title ?? 'Syllabus System' }}</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
 

@@ -2,10 +2,18 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AccountApprovalController;
+use Illuminate\Support\Facades\Auth;
+
 
 Route::get('/', function () {
+    if (Auth::check()) {
+        return redirect()->route('dashboard');
+    }
+
     return view('Authentication.auth');
 });
+
 
 Route::get('/auth', [AuthController::class, 'show'])->name('auth.show');
 
@@ -20,3 +28,15 @@ Route::post('/request-otp', [AuthController::class, 'requestOTP'])->name('reques
 Route::get('/waiting-approval', function () {
     return view('Authentication.waiting-approval');
 })->name('waiting.approval');
+
+
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->name('dashboard');
+
+Route::get('/account-approval', [AccountApprovalController::class, 'index'])->name('accounts.approval');
+
+Route::post('/account-approval/approve', [AccountApprovalController::class, 'approve']);
+Route::post('/account-approval/reject', [AccountApprovalController::class, 'reject']);
+Route::post('/account-approval/restore', [AccountApprovalController::class, 'restore']);
+Route::post('/account-approval/assign-role', [AccountApprovalController::class, 'assignRole'])->name('account-approval.assign-role');

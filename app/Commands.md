@@ -7,9 +7,11 @@ php artisan make:migration create_user_roles_table
 
 
 php artisan make:controller AuthController
-
+php artisan make:controller AccountApprovalController
 
 
 ----------------------------------
 php artisan migrate
 php artisan migrate:fresh
+
+php artisan db:seed --class=AdminSeeder
