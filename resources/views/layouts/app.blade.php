@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>{{ $title ?? 'Syllabus System' }}</title>
@@ -8,6 +9,7 @@
 
     @livewireStyles
 </head>
+
 <body class="min-h-screen">
 
     <header class="bg-blue-700 text-white">
@@ -18,6 +20,13 @@
                 <a href="{{ route('attendance.records') }}" class="hover:underline">Records</a>
                 <a href="{{ route('people.index') }}" class="hover:underline">People</a>
                 <a href="{{ route('families.index') }}" class="hover:underline">Families</a> --}}
+                <form action="{{ route('logout') }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit" class="hover:underline bg-transparent border-0 p-0 cursor-pointer">
+                        Logout
+                    </button>
+                </form>
+
             </nav>
         </div>
     </header>
@@ -28,4 +37,5 @@
 
     @livewireScripts
 </body>
+
 </html>

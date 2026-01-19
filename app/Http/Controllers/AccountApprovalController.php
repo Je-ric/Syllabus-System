@@ -26,8 +26,7 @@ class AccountApprovalController extends Controller
             $user->account_status = 'active';
             $user->save();
 
-            // Assign faculty role if not already assigned
-            $facultyRole = Role::where('name', 'faculty')->first();
+            $facultyRole = Role::where('name', '=', 'faculty')->first();  // Assign faculty role if not already assigned
 
             if ($facultyRole && !$user->roles()->wherePivot('role_id', $facultyRole->id)->exists()) {
                 $user->roles()->attach($facultyRole->id);
@@ -60,8 +59,6 @@ class AccountApprovalController extends Controller
         return redirect()->route('accounts.approval');
     }
 
-
-
     public function assignRole(Request $request)
     {
         $request->validate([
@@ -72,11 +69,9 @@ class AccountApprovalController extends Controller
 
         $user = User::find($request->user_id);
 
-        // Detach all existing roles
-        $user->roles()->sync([]);
+        $user->roles()->sync([]);  // Detach all existing roles
 
-        // Attach selected roles
-        $roles = Role::whereIn('name', $request->roles)->get();
+        $roles = Role::whereIn('name', $request->roles)->get();  // Attach selected roles
         $user->roles()->attach($roles->pluck('id'));
 
         return redirect()->route('accounts.ap
