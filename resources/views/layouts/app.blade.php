@@ -16,10 +16,8 @@
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
             <h1 class="font-bold text-xl">Syllabus System</h1>
             <nav class="space-x-4 text-sm">
-                {{-- <a href="{{ route('attendance.index') }}" class="hover:underline">Attendance</a>
-                <a href="{{ route('attendance.records') }}" class="hover:underline">Records</a>
-                <a href="{{ route('people.index') }}" class="hover:underline">People</a>
-                <a href="{{ route('families.index') }}" class="hover:underline">Families</a> --}}
+                <a href="{{ route('accounts.approval') }}" class="hover:underline">User Management</a>
+                
                 @auth
                     <form action="{{ route('logout') }}" method="POST" class="inline">
                         @csrf

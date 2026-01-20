@@ -2,7 +2,6 @@
 
 @section('content')
 
-
-<a href="{{ route('accounts.approval') }}">Accounts</a>
+    <h1 class="text-2xl font-bold mt-4 flex justify-center items-center">Landing Page</h1>
 
 @endsection

@@ -62,6 +62,7 @@ class AccountApprovalController extends Controller
     public function disable(Request $request)
     {
         $user = User::find($request->input('user_id'));
+
         if ($user) {
             $user->account_status = "disabled";
             $user->save();
@@ -69,6 +70,21 @@ class AccountApprovalController extends Controller
 
         return redirect()->route('accounts.approval');
     }
+
+    // public function changeStatus(Request $request)
+    // {
+    //     $request->validate([
+    //         'user_id' => 'required|exists:users,id',
+    //         'status'  => 'required|in:pending,active,rejected,disabled',
+    //     ]);
+
+    //     $user = User::findOrFail($request->user_id);
+    //     $user->update(['account_status' => $request->status]);
+
+    //     return redirect()->route('accounts.approval');
+    // }
+
+
     public function assignRole(Request $request)
     {
         $request->validate([
@@ -78,6 +94,10 @@ class AccountApprovalController extends Controller
         ]);
 
         $user = User::findOrFail($request->user_id);
+
+        if ($user->account_status !== 'active') {
+            abort(403, 'Roles can only be assigned to active accounts.');
+        }
 
         $roles = collect($request->roles)
             ->push('faculty') // always include faculty
@@ -94,13 +114,5 @@ class AccountApprovalController extends Controller
         return redirect()
             ->route('accounts.approval')
             ->with('success', "Roles assigned to {$user->name} successfully.");
-    }
-
-    private function ensureActiveAccount(User $user)
-    {
-
-        if ($user->account_status !== 'active') {
-            abort(403, 'Roles can only be assigned to active accounts.');
-        }
     }
 }
