@@ -10,7 +10,7 @@ class AccountApprovalController extends Controller
 {
     public function index()
     {
-        $users = User::all();
+        $users = User::with('roles')->get();
 
         return view(
             'AccountApproval.index',
@@ -41,7 +41,7 @@ class AccountApprovalController extends Controller
     {
         $user = User::find($request->input('user_id'));
         if ($user) {
-            $user->account_status = "disabled";
+            $user->account_status = "rejected";
             $user->save();
         }
 
@@ -59,23 +59,35 @@ class AccountApprovalController extends Controller
         return redirect()->route('accounts.approval');
     }
 
+    public function disable(Request $request)
+    {
+        $user = User::find($request->input('user_id'));
+        if ($user) {
+            $user->account_status = "disabled";
+            $user->save();
+        }
+
+        return redirect()->route('accounts.approval');
+    }
     public function assignRole(Request $request)
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
             'roles'   => 'required|array',
-            'roles.*' => 'in:admin,oloi,dean,faculty',
+            'roles.*' => 'in:admin,chair,dean,faculty',
         ]);
 
-        $user = User::find($request->user_id);
+        $user = User::findOrFail($request->user_id);
 
-        $user->roles()->sync([]);  // Detach all existing roles
+        $roles = collect($request->roles)->push('faculty')->unique(); // Always set faculty role
 
-        $roles = Role::whereIn('name', $request->roles)->get();  // Attach selected roles
-        $user->roles()->attach($roles->pluck('id'));
+        $roleIds = Role::whereIn('name', $roles)->pluck('id'); // Get role IDs
 
-        return redirect()->route('accounts.ap
-        proval')
+        $user->roles()->sync($roleIds); // replace all roles
+
+        return redirect()
+            ->route('accounts.approval')
             ->with('success', "Roles assigned to {$user->name} successfully.");
     }
+
 }

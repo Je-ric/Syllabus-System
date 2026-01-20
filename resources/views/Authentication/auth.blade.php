@@ -9,7 +9,17 @@
 
                 @if (!session('verify_email') && !session('waiting_approval'))
                     <!-- LOGIN -->
+                    
                     <h2 class="text-2xl font-bold mb-6">Login</h2>
+                    @if ($errors->any())
+                        <div class="mb-4">
+                            <ul class="list-disc list-inside text-red-600">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
 
                     @if (session('success'))
                         <div class="text-green-600 text-sm mb-2">
@@ -19,15 +29,15 @@
 
                     <form method="POST" action="{{ route('login') }}" class="space-y-4">
                         @csrf
-                        <input type="email" 
-                                name="email" 
-                                placeholder="Email" 
+                        <input type="email"
+                                name="email"
+                                placeholder="Email"
                                 class="w-full border rounded px-3 py-2"
                                 required>
-                        <input type="password" 
-                                name="password" 
+                        <input type="password"
+                                name="password"
                                 placeholder="Password"
-                                class="w-full border rounded px-3 py-2" 
+                                class="w-full border rounded px-3 py-2"
                                 required>
                         <button class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Login</button>
                     </form>
@@ -38,27 +48,27 @@
                     <h2 class="text-2xl font-bold mb-4">Sign Up</h2>
                     <form method="POST" action="{{ route('register') }}" class="space-y-4">
                         @csrf
-                        <input type="text" 
-                                name="name" 
-                                placeholder="Full Name" 
+                        <input type="text"
+                                name="name"
+                                placeholder="Full Name"
                                 class="w-full border rounded px-3 py-2"
                                 required>
-                        <input type="email" 
-                                name="email" 
-                                placeholder="Email" 
+                        <input type="email"
+                                name="email"
+                                placeholder="Email"
                                 class="w-full border rounded px-3 py-2"
                                 required>
-                        <input type="password" 
+                        <input type="password"
                                 name="password"
                                 placeholder="Password"
-                                class="w-full border rounded px-3 py-2" 
+                                class="w-full border rounded px-3 py-2"
                                 required>
-                        <input type="password" 
-                                name="password_confirmation" 
+                        <input type="password"
+                                name="password_confirmation"
                                 placeholder="Confirm Password"
-                                class="w-full border rounded px-3 py-2" 
+                                class="w-full border rounded px-3 py-2"
                                 required>
-                        <button 
+                        <button
                                 class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">
                                 Create Account
                         </button>
@@ -101,18 +111,18 @@
 
                 <div class="p-6">
                     <p class="mb-4 text-gray-700">
-                        We sent a 6-digit OTP to <strong>{{ session('verify_email') }}</strong>. 
+                        We sent a 6-digit OTP to <strong>{{ session('verify_email') }}</strong>.
                         <br>Enter it below to verify your account.
                     </p>
 
                     <form method="POST" action="{{ route('verify.otp') }}" class="space-y-4">
                         @csrf
-                        <input type="hidden" 
-                                name="email" 
+                        <input type="hidden"
+                                name="email"
                                 value="{{ session('verify_email') }}">
-                        <input type="text" 
-                                name="otp" 
-                                placeholder="Enter OTP" 
+                        <input type="text"
+                                name="otp"
+                                placeholder="Enter OTP"
                                 class="w-full border rounded px-3 py-2"
                                 required>
                         <button class="w-full bg-yellow-500 text-white py-2 rounded hover:bg-yellow-600">

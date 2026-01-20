@@ -39,4 +39,5 @@ Route::get('/account-approval', [AccountApprovalController::class, 'index'])->na
 Route::post('/account-approval/approve', [AccountApprovalController::class, 'approve']);
 Route::post('/account-approval/reject', [AccountApprovalController::class, 'reject']);
 Route::post('/account-approval/restore', [AccountApprovalController::class, 'restore']);
+Route::post('/account-approval/disable', [AccountApprovalController::class, 'disable']);
 Route::post('/account-approval/assign-role', [AccountApprovalController::class, 'assignRole'])->name('account-approval.assign-role');
