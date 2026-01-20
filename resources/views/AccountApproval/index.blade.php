@@ -29,7 +29,24 @@
                         <td class="border px-3 py-2">{{ $user->id }}</td>
                         <td class="border px-3 py-2">{{ $user->name }}</td>
                         <td class="border px-3 py-2">{{ $user->email }}</td>
-                        <td class="border px-3 py-2">{{ $user->account_status }}</td>
+                        <td class="border px-3 py-2">
+                            @php
+                                $statusClasses = [
+                                    'active' => 'bg-green-100 text-green-800',
+                                    'pending' => 'bg-yellow-100 text-yellow-800',
+                                    'disabled' => 'bg-gray-200 text-gray-800',
+                                    'rejected' => 'bg-red-100 text-red-800',
+                                ];
+
+                                $class = $statusClasses[$user->account_status] ?? 'bg-slate-100 text-slate-800';
+                            @endphp
+
+                            <span class="px-2 py-1 rounded text-xs font-semibold {{ $class }}">
+                                {{ ucfirst($user->account_status) }}
+                            </span>
+                        </td>
+
+
                         <td class="border px-3 py-2">
                             {{ $user->roles->pluck('name')->join(', ') ?: 'No Role Assigned' }}
                         </td>
@@ -61,16 +78,18 @@
                                 </button>
                             @endif
 
-                            <button
-                                @click="
-                                    openModal = true;
-                                    action = 'assignRole';
-                                    userId = {{ $user->id }};
-                                    selectedRole = @js($user->roles->pluck('name'));
-                        "
-                                class="bg-yellow-500 text-white px-3 py-1 rounded">
-                                Assign Role
-                            </button>
+                            @if ($user->account_status === 'active')
+                                <button
+                                    @click="
+                                        openModal = true;
+                                        action = 'assignRole';
+                                        userId = {{ $user->id }};
+                                        selectedRole = @js($user->roles->pluck('name'));
+                            "
+                                    class="bg-yellow-500 text-white px-3 py-1 rounded">
+                                    Assign Role
+                                </button>
+                            @endif
 
                         </td>
                     </tr>

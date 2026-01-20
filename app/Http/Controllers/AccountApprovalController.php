@@ -95,4 +95,12 @@ class AccountApprovalController extends Controller
             ->route('accounts.approval')
             ->with('success', "Roles assigned to {$user->name} successfully.");
     }
+
+    private function ensureActiveAccount(User $user)
+    {
+
+        if ($user->account_status !== 'active') {
+            abort(403, 'Roles can only be assigned to active accounts.');
+        }
+    }
 }
