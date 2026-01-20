@@ -79,15 +79,20 @@ class AccountApprovalController extends Controller
 
         $user = User::findOrFail($request->user_id);
 
-        $roles = collect($request->roles)->push('faculty')->unique(); // Always set faculty role
+        $roles = collect($request->roles)
+            ->push('faculty') // always include faculty
+            ->unique();
 
-        $roleIds = Role::whereIn('name', $roles)->pluck('id'); // Get role IDs
+        $roleIds = $roles->map(function ($roleName) { // ensure roles exist in database
+            return Role::firstOrCreate(
+                ['name' => $roleName]
+            )->id;
+        });
 
-        $user->roles()->sync($roleIds); // replace all roles
+        $user->roles()->sync($roleIds); // Sync roles
 
         return redirect()
             ->route('accounts.approval')
             ->with('success', "Roles assigned to {$user->name} successfully.");
     }
-
 }
