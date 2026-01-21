@@ -33,9 +33,9 @@ class AccountApprovalController extends Controller
             if ($facultyRole && !$user->roles()->wherePivot('role_id', $facultyRole->id)->exists()) {
                 $user->roles()->attach($facultyRole->id);
             }
-        }
 
-        Mail::to($user->email)->send(new AccountStatusUpdated($user, 'active'));
+            Mail::to($user->email)->send(new AccountStatusUpdated($user, 'active'));
+        }
 
         return redirect()->route('accounts.approval')
             ->with('success', 'User approved and assigned as Faculty.');
@@ -47,9 +47,9 @@ class AccountApprovalController extends Controller
         if ($user) {
             $user->account_status = "rejected";
             $user->save();
-        }
 
-        Mail::to($user->email)->send(new AccountStatusUpdated($user, 'rejected'));
+            Mail::to($user->email)->send(new AccountStatusUpdated($user, 'rejected'));
+        }
 
         return redirect()->route('accounts.approval');
     }
@@ -72,9 +72,9 @@ class AccountApprovalController extends Controller
         if ($user) {
             $user->account_status = "disabled";
             $user->save();
-        }
 
-        Mail::to($user->email)->send(new AccountStatusUpdated($user, 'disabled'));
+            Mail::to($user->email)->send(new AccountStatusUpdated($user, 'disabled'));
+        }
 
         return redirect()->route('accounts.approval');
     }
