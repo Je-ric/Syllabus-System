@@ -26,7 +26,6 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // OTP routes
 Route::get('/show-otp', [OTPController::class, 'showOTP'])->name('otp.show');
 Route::post('/verify-otp', [OTPController::class, 'verifyOTP'])->name('otp.verify');
-Route::post('/request-otp', [OTPController::class, 'requestOTP'])->name('otp.request');
 Route::get('/resend-otp', function () {
     return view('Authentication.resendOTP');
 })->name('otp.resend');

@@ -22,6 +22,8 @@ class AuthController extends Controller
     {
         $request->validate([
             'name'  => 'required|string|max:255',
+            'phone_number' => 'required|string|max:20',
+            'office' => 'required|string|max:255',
             'email' => [
                 'required',
                 'email',
@@ -47,6 +49,9 @@ class AuthController extends Controller
             'password'       => Hash::make($request->password),
             'account_status' => 'pending',
             'otp'            => Hash::make($otp),
+            'otp_expires_at' => now()->addMinutes(10),
+            'phone_number'   => $request->phone_number,
+            'office'         => $request->office,
         ]);
 
         // Send OTP email

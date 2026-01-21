@@ -19,29 +19,6 @@ class OTPController extends Controller
         return view('Authentication.verifyOTP');
     }
 
-    
-    // Request OTP using session email
-    public function requestOTP(Request $request)
-    {
-        $email = $request->session()->get('verify_email');
-
-        if (!$email) {
-            return redirect()->route('auth.show')
-                ->withErrors(['email' => 'No email found for OTP request.']);
-        }
-
-        $user = User::where('email', $email)->firstOrFail();
-
-        if ($user->email_verified_at) {
-            return redirect()->route('auth.show')
-                ->with('success', 'Email is already verified.');
-        }
-
-        $this->generateAndSendOtp($user);
-
-        return back()->with('success', 'OTP sent to your email.');
-    }
-
     // Resend OTP using email input (cross-device / cross-day)
     public function resendOtpByEmail(Request $request)
     {
@@ -88,7 +65,7 @@ class OTPController extends Controller
 
         $user = User::where('email', $email)->firstOrFail();
 
-        //  Null OTP safety
+        // Null OTP safety
         if (!$user->otp) {
             return back()->withErrors([
                 'otp' => 'OTP is invalid or has already been used.',
@@ -109,7 +86,7 @@ class OTPController extends Controller
             ]);
         }
 
-        // Mark email as verified
+        // After the OTP insert, mark email as verified, the otp and expiry as null
         $user->update([
             'email_verified_at' => now(),
             'otp' => null,

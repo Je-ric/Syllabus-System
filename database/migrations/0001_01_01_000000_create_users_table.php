@@ -18,6 +18,8 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('account_status')->default('pending'); // active, disabled
+            $table->string('phone_number')->nullable();
+            $table->string('office')->nullable();
             $table->string('otp')->nullable();
             $table->timestamp('otp_expires_at')->nullable();
             $table->rememberToken();
