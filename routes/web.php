@@ -1,12 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AccountApprovalController;
 use App\Http\Controllers\OTPController;
 use App\Http\Controllers\AcademicStructureController;
-use Illuminate\Support\Facades\Auth;
-
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -52,4 +51,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/account-approval/assign-role', [AccountApprovalController::class, 'assignRole'])->name('account-approval.assign-role');
 
     Route::get('/academic-structure', [AcademicStructureController::class, 'index'])->name('academic.structure.index');
+    Route::post('/academic-structure/college', [AcademicStructureController::class, 'storeCollege'])->name('college.store');
+    Route::post('/academic-structure/department', [AcademicStructureController::class, 'storeDepartment'])->name('department.store');
+    Route::post('/academic-structure/program', [AcademicStructureController::class, 'storeProgram'])->name('program.store');
+
 });
