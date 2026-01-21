@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Role;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\AccountStatusUpdated;
 
 class AccountApprovalController extends Controller
 {
@@ -33,6 +35,8 @@ class AccountApprovalController extends Controller
             }
         }
 
+        Mail::to($user->email)->send(new AccountStatusUpdated($user, 'active'));
+
         return redirect()->route('accounts.approval')
             ->with('success', 'User approved and assigned as Faculty.');
     }
@@ -44,6 +48,8 @@ class AccountApprovalController extends Controller
             $user->account_status = "rejected";
             $user->save();
         }
+
+        Mail::to($user->email)->send(new AccountStatusUpdated($user, 'rejected'));
 
         return redirect()->route('accounts.approval');
     }
@@ -67,6 +73,8 @@ class AccountApprovalController extends Controller
             $user->account_status = "disabled";
             $user->save();
         }
+
+        Mail::to($user->email)->send(new AccountStatusUpdated($user, 'disabled'));
 
         return redirect()->route('accounts.approval');
     }
