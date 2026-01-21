@@ -5,16 +5,25 @@
 
         <h1 class="text-xl font-bold">Academic Structure Management</h1>
 
-        {{-- ADD COLLEGE BUTTON --}}
+        {{-- ADD COLLEGE --}}
         <div class="border p-4 rounded">
             <button class="bg-black text-white px-4 py-2 rounded" onclick="toggleAddCollegeForm()">Add College</button>
             <div id="addCollegeForm" class="mt-4 hidden">
-                <form method="POST" action="{{ route('college.store') }}">
+                <form method="POST" 
+                    action="{{ route('college.store') }}">
                     @csrf
-                    <input type="text" name="name" placeholder="College Name" class="border p-2 rounded w-1/3"
-                        required>
+                    <input type="text" 
+                            name="name" 
+                            placeholder="College Name" 
+                            class="border p-2 rounded w-1/3"
+                            required>
                     <button class="bg-black text-white px-4 py-2 rounded ml-2">
                         Add College
+                    </button>
+                    <button type="button" 
+                            onclick="toggleAddCollegeForm()"
+                            class="ml-2 bg-gray-500 text-white px-4 py-2 rounded">
+                            Cancel
                     </button>
                 </form>
             </div>
@@ -26,17 +35,30 @@
                 <details>
                     <summary class="font-semibold cursor-pointer text-lg">{{ $college->name }}</summary>
                     <div class="ml-6 mt-4">
-                        {{-- ADD DEPARTMENT BUTTON INSIDE COLLEGE --}}
+                        {{-- ADD DEPARTMENT INSIDE COLLEGE --}}
                         <button class="bg-black text-white px-4 py-2 rounded mb-4"
-                            onclick="toggleAddDeptForm({{ $college->id }})">Add Department</button>
+                                onclick="toggleAddDeptForm({{ $college->id }})">
+                                Add Department
+                        </button>
+
                         <div id="addDeptForm{{ $college->id }}" class="hidden mb-4">
-                            <form method="POST" action="{{ route('department.store') }}">
+                            <form method="POST" 
+                                action="{{ route('department.store') }}">
                                 @csrf
-                                <input type="hidden" name="college_id" value="{{ $college->id }}">
-                                <input type="text" name="name" placeholder="Department Name"
-                                    class="border p-2 rounded w-1/3" required>
+                                <input type="hidden" 
+                                        name="college_id" 
+                                        value="{{ $college->id }}">
+                                <input type="text" 
+                                        name="name" 
+                                        placeholder="Department Name"
+                                        class="border p-2 rounded w-1/3" required>
                                 <button class="bg-black text-white px-4 py-2 rounded ml-2">
                                     Add Department
+                                </button>
+                                <button type="button" 
+                                        onclick="toggleAddDeptForm({{ $college->id }})"
+                                        class="ml-2 bg-gray-500 text-white px-4 py-2 rounded">
+                                        Cancel
                                 </button>
                             </form>
                         </div>
@@ -50,19 +72,36 @@
                                     <div class="ml-6 mt-2">
                                         {{-- ADD PROGRAM BUTTON INSIDE DEPARTMENT --}}
                                         <button class="bg-black text-white px-4 py-2 rounded mb-4"
-                                            onclick="toggleAddProgramForm({{ $dept->id }})">Add Program</button>
+                                                onclick="toggleAddProgramForm({{ $dept->id }})">Add Program</button>
+
                                         <div id="addProgramForm{{ $dept->id }}" class="hidden mb-4">
                                             <form method="POST" action="{{ route('program.store') }}">
                                                 @csrf
-                                                <input type="hidden" name="department_id" value="{{ $dept->id }}">
-                                                <input type="text" name="name" placeholder="Program Name"
-                                                    class="border p-2 rounded w-1/3" required>
-                                                <input type="text" name="bor_approval_no" placeholder="BOR Approval No"
-                                                    class="border p-2 rounded ml-2">
-                                                <input type="date" name="bor_approval_date"
-                                                    placeholder="BOR Approval Date" class="border p-2 rounded ml-2">
+                                                <input type="hidden" 
+                                                        name="department_id" 
+                                                        value="{{ $dept->id }}">
+                                                <input type="text" 
+                                                        name="name" 
+                                                        placeholder="Program Name"
+                                                        class="border p-2 rounded w-1/3" 
+                                                        required>
+                                                <input type="text" 
+                                                        name="bor_approval_no" 
+                                                        placeholder="BOR Approval No"
+                                                        class="border p-2 rounded ml-2"
+                                                        required>
+                                                <input type="date" 
+                                                        name="bor_approval_date"
+                                                        placeholder="BOR Approval Date" 
+                                                        class="border p-2 rounded ml-2"
+                                                        required>
                                                 <button class="bg-black text-white px-4 py-2 rounded ml-2">
                                                     Add Program
+                                                </button>
+                                                <button type="button"
+                                                        onclick="toggleAddProgramForm({{ $dept->id }})"
+                                                        class="ml-2 bg-gray-500 text-white px-4 py-2 rounded">
+                                                    Cancel
                                                 </button>
                                             </form>
                                         </div>
@@ -72,8 +111,8 @@
                                             @foreach ($dept->programs as $program)
                                                 <li>
                                                     <strong>{{ $program->name }}</strong><br>
-                                                    BOR Approval No: {{ $program->bor_approval_no }}<br>
-                                                    BOR Approval Date: {{ $program->bor_approval_date }}
+                                                    <b>BOR Approval No:</b> {{ $program->bor_approval_no }}<br>
+                                                    <b>BOR Approval Date:</b> {{ \Carbon\Carbon::parse($program->bor_approval_date)->format('F d, Y') }}
                                                 </li>
                                             @endforeach
                                         </ul>
