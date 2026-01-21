@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AccountApprovalController;
 use App\Http\Controllers\OTPController;
+use App\Http\Controllers\AcademicStructureController;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -37,7 +38,6 @@ Route::get('/waiting-approval', function () {
 })->name('waiting.approval');
 
 
-
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
@@ -50,4 +50,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/account-approval/restore', [AccountApprovalController::class, 'restore']);
     Route::post('/account-approval/disable', [AccountApprovalController::class, 'disable']);
     Route::post('/account-approval/assign-role', [AccountApprovalController::class, 'assignRole'])->name('account-approval.assign-role');
+
+    Route::get('/academic-structure', [AcademicStructureController::class, 'index'])->name('academic.structure.index');
 });

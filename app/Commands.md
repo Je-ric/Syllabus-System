@@ -1,14 +1,25 @@
 php artisan make:model User -m
 php artisan make:model Role -m
 php artisan make:model UserRole -m
+php artisan make:model College
+php artisan make:model CollegeGoal
+php artisan make:model Department
+php artisan make:model DepartmentObjective
+php artisan make:model Program
 
 php artisan make:migration create_roles_table
 php artisan make:migration create_user_roles_table
-
+php artisan make:migration create_colleges_table 
+php artisan make:migration create_college_goals_table 
+php artisan make:migration create_departments_table
+php artisan make:migration create_department_objectives_table
+php artisan make:migration create_programs_table
+php artisan make:migration create_program_departments_table
 
 php artisan make:controller AuthController
 php artisan make:controller AccountApprovalController
 php artisan make:controller OTPController
+php artisan make:controller AcademicStructureController
 
 ----------------------------------
 php artisan migrate
