@@ -6,19 +6,8 @@
 
         <h2 class="text-xl font-bold mb-4 text-center">Resend Verification Code</h2>
 
-        @if ($errors->any())
-            <div class="text-red-600 mb-3 text-sm">
-                @foreach ($errors->all() as $error)
-                    <p>{{ $error }}</p>
-                @endforeach
-            </div>
-        @endif
-
-        @if (session('success'))
-            <div class="text-green-600 mb-3 text-sm">
-                {{ session('success') }}
-            </div>
-        @endif
+        @include('includes.error-lists')
+        @include('includes.session-success')
 
         <form method="POST" action="{{ route('otp.resend.email') }}">
             @csrf

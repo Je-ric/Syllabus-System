@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AccountApprovalController;
+use App\Http\Controllers\OTPController;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -10,8 +11,8 @@ Route::get('/', function () {
     if (Auth::check()) {
         return redirect()->route('dashboard');
     }
-
-    return view('Authentication.auth');
+    // Keep a single source of truth for the auth view
+    return redirect()->route('auth.show');
 });
 
 
@@ -22,13 +23,15 @@ Route::post('/register', [AuthController::class, 'register'])->name('register');
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('/show-otp', [AuthController::class, 'showOTP'])->name('otp.show');
-Route::post('/verify-otp', [AuthController::class, 'verifyOTP'])->name('verify.otp');
-Route::post('/request-otp', [AuthController::class, 'requestOTP'])->name('request.otp');
+// OTP routes
+Route::get('/show-otp', [OTPController::class, 'showOTP'])->name('otp.show');
+Route::post('/verify-otp', [OTPController::class, 'verifyOTP'])->name('otp.verify');
+Route::post('/request-otp', [OTPController::class, 'requestOTP'])->name('otp.request');
 Route::get('/resend-otp', function () {
     return view('Authentication.resendOTP');
 })->name('otp.resend');
-Route::post('/resend-otp', [AuthController::class, 'resendOtpByEmail'])->name('otp.resend.email');
+Route::post('/resend-otp', [OTPController::class, 'resendOtpByEmail'])->name('otp.resend.email');
+
 
 Route::get('/waiting-approval', function () {
     return view('Authentication.waiting-approval');

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('password');
             $table->string('account_status')->default('pending'); // active, disabled
             $table->string('otp')->nullable();
-            // $table->timestamp('otp_expires_at')->nullable();
+            $table->timestamp('otp_expires_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

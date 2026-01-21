@@ -8,21 +8,8 @@
             <div class="p-10 bg-gray-50 flex flex-col justify-center">
                 <!-- LOGIN -->
                 <h2 class="text-2xl font-bold mb-6">Login</h2>
-                    @if ($errors->any())
-                        <div class="mb-4">
-                            <ul class="list-disc list-inside text-red-600">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-
-                    @if (session('success'))
-                        <div class="text-green-600 text-sm mb-2">
-                            {{ session('success') }}
-                        </div>
-                    @endif
+                    @include('includes.error-lists')
+                    @include('includes.session-success')
 
                     <form method="POST" action="{{ route('login') }}" class="space-y-4">
                         @csrf

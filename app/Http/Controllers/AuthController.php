@@ -59,80 +59,8 @@ class AuthController extends Controller
             ->with('success', 'Account created. Please verify your email.');
     }
 
-    public function showOTP()
-    {
-        if (!session('verify_email')) {
-            return redirect()->route('auth.show');
-        }
-
-        return view('Authentication.verifyOTP');
-    }
 
 
-    public function resendOtpByEmail(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email',
-        ]);
-
-        $user = User::where('email', $request->email)->first();
-
-        if (!$user) {
-            return back()->withErrors([
-                'email' => 'No account found with this email.',
-            ]);
-        }
-
-        if ($user->email_verified_at) {
-            return back()->withErrors([
-                'email' => 'This email is already verified.',
-            ]);
-        }
-
-        $otp = rand(100000, 999999);
-
-        $user->otp = Hash::make($otp);
-        $user->save();
-
-        Mail::to($user->email)->send(new OtpMail($otp));
-
-        return redirect()
-            ->route('otp.show')
-            ->with('verify_email', $user->email)
-            ->with('success', 'A new OTP has been sent to your email.');
-    }
-
-    // Verify OTP
-    public function verifyOTP(Request $request)
-    {
-        $request->validate([
-            'otp' => 'required|digits:6',
-        ]);
-
-        $email = $request->input('email') ?? $request->session()->get('verify_email');
-        if (!$email) {
-            return redirect()->route('auth.show')->with('error', 'No email to verify.');
-        }
-
-
-        $user = User::where('email', $email)->firstOrFail();
-
-        // Check OTP match
-        if (!Hash::check($request->otp, $user->otp)) {
-            return back()->withErrors(['otp' => 'Invalid OTP.']);
-        }
-
-        // Mark email as verified
-        $user->email_verified_at = now();
-        $user->otp = null;
-        $user->save();
-
-        // Remove verify_email from session
-        $request->session()->forget('verify_email');
-
-        // Redirect to waiting approval page
-        return redirect()->route('waiting.approval')->with('success', 'Email verified! Await admin approval.');
-    }
 
     // Login
     public function login(Request $request)
@@ -173,28 +101,7 @@ class AuthController extends Controller
         ]);
     }
 
-    // Request OTP (resend)
-    public function requestOTP(Request $request)
-    {
-        $email = $request->session()->get('verify_email');
-        if (!$email) {
-            return redirect()->route('auth.show')->with('error', 'No email to resend OTP.');
-        }
 
-        $user = User::where('email', $email)->firstOrFail();
-
-        if ($user->email_verified_at) {
-            return back()->with('success', 'Email is already verified.');
-        }
-
-        $otp = rand(100000, 999999);
-        $user->otp = Hash::make($otp);
-        $user->save();
-
-        Mail::to($user->email)->send(new OtpMail($otp));
-
-        return back()->with('success', 'OTP sent to your email.');
-    }
 
     // Logout
     public function logout(Request $request)

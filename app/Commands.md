@@ -8,7 +8,7 @@ php artisan make:migration create_user_roles_table
 
 php artisan make:controller AuthController
 php artisan make:controller AccountApprovalController
-
+php artisan make:controller OTPController
 
 ----------------------------------
 php artisan migrate
