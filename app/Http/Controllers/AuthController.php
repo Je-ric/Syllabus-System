@@ -54,9 +54,52 @@ class AuthController extends Controller
 
         // Store email in session for OTP verification form
         return redirect()
-            ->route('auth.show')
+            ->route('otp.show')
             ->with('verify_email', $user->email)
-            ->with('success', 'Account created. Please verify your email with the OTP sent.');
+            ->with('success', 'Account created. Please verify your email.');
+    }
+
+    public function showOTP()
+    {
+        if (!session('verify_email')) {
+            return redirect()->route('auth.show');
+        }
+
+        return view('Authentication.verifyOTP');
+    }
+
+
+    public function resendOtpByEmail(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return back()->withErrors([
+                'email' => 'No account found with this email.',
+            ]);
+        }
+
+        if ($user->email_verified_at) {
+            return back()->withErrors([
+                'email' => 'This email is already verified.',
+            ]);
+        }
+
+        $otp = rand(100000, 999999);
+
+        $user->otp = Hash::make($otp);
+        $user->save();
+
+        Mail::to($user->email)->send(new OtpMail($otp));
+
+        return redirect()
+            ->route('otp.show')
+            ->with('verify_email', $user->email)
+            ->with('success', 'A new OTP has been sent to your email.');
     }
 
     // Verify OTP
@@ -107,7 +150,7 @@ class AuthController extends Controller
             if (!$user->email_verified_at) {
                 Auth::logout();
                 return back()->withErrors([
-                    'email' => 'Please verify your email first.',
+                    'email' => 'Please verify your email first using OTP.',
                 ]);
             }
 

@@ -6,11 +6,8 @@
 
             <!-- Left -->
             <div class="p-10 bg-gray-50 flex flex-col justify-center">
-
-                @if (!session('verify_email') && !session('waiting_approval'))
-                    <!-- LOGIN -->
-                    
-                    <h2 class="text-2xl font-bold mb-6">Login</h2>
+                <!-- LOGIN -->
+                <h2 class="text-2xl font-bold mb-6">Login</h2>
                     @if ($errors->any())
                         <div class="mb-4">
                             <ul class="list-disc list-inside text-red-600">
@@ -73,8 +70,10 @@
                                 Create Account
                         </button>
                     </form>
-                @endif
 
+                    <p class="text-sm text-gray-600 mt-4">
+                        Already registered but need to verify email? <a class="text-blue-600 hover:underline" href="{{ route('otp.resend') }}">Resend OTP</a>
+                    </p>
             </div>
 
             <!-- Right -->
@@ -98,46 +97,4 @@
 
         </div>
     </div>
-
-    <!-- OTP Modal -->
-    @if (session('verify_email'))
-        <div x-data="{ open: true }" x-show="open"
-            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div class="bg-white rounded-lg shadow-lg w-full max-w-md mx-4" x-transition>
-                <div class="flex justify-between items-center border-b px-6 py-4">
-                    <h2 class="text-lg font-semibold">Verify Your Email</h2>
-                    <button @click="open = false" class="text-gray-500 hover:text-gray-700">&times;</button>
-                </div>
-
-                <div class="p-6">
-                    <p class="mb-4 text-gray-700">
-                        We sent a 6-digit OTP to <strong>{{ session('verify_email') }}</strong>.
-                        <br>Enter it below to verify your account.
-                    </p>
-
-                    <form method="POST" action="{{ route('verify.otp') }}" class="space-y-4">
-                        @csrf
-                        <input type="hidden"
-                                name="email"
-                                value="{{ session('verify_email') }}">
-                        <input type="text"
-                                name="otp"
-                                placeholder="Enter OTP"
-                                class="w-full border rounded px-3 py-2"
-                                required>
-                        <button class="w-full bg-yellow-500 text-white py-2 rounded hover:bg-yellow-600">
-                            Verify Email
-                        </button>
-                    </form>
-
-                    <form method="POST" action="{{ route('request.otp') }}" class="mt-2">
-                        @csrf
-                        <input type="hidden" name="email" value="{{ session('verify_email') }}">
-                        <button class="text-blue-600 underline">Resend OTP</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    @endif
-
 @endsection
