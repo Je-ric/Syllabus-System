@@ -18,6 +18,10 @@ class AcademicStructureController extends Controller
         ]);
     }
 
+    // =======================
+    //  COLLEGE
+    // =======================
+
     public function storeCollege(Request $request)
     {
         $request->validate([
@@ -30,6 +34,23 @@ class AcademicStructureController extends Controller
 
         return back()->with('success', 'College added successfully.');
     }
+
+    public function updateCollege(Request $request, College $college)
+    {
+        $request->validate([
+            'name' => 'required|string|unique:colleges,name,' . $college->id,
+        ]);
+
+        $college->update([
+            'name' => $request->name,
+        ]);
+
+        return back()->with('success', 'College updated successfully.');
+    }
+
+    // =======================
+    //  DEPARTMENT
+    // =======================
 
     public function storeDepartment(Request $request)
     {
@@ -45,6 +66,25 @@ class AcademicStructureController extends Controller
 
         return back()->with('success', 'Department added successfully.');
     }
+
+    public function updateDepartment(Request $request, Department $department)
+    {
+        $request->validate([
+            'name' => 'required|string',
+            'college_id' => 'required|exists:colleges,id',
+        ]);
+
+        $department->update([
+            'name' => $request->name,
+            'college_id' => $request->college_id,
+        ]);
+
+        return back()->with('success', 'Department updated successfully.');
+    }
+
+    // =======================
+    //  PROGRAM
+    // =======================
 
     public function storeProgram(Request $request)
     {
@@ -65,5 +105,26 @@ class AcademicStructureController extends Controller
         $program->departments()->attach($request->department_id, ['role' => 'primary']);
 
         return back()->with('success', 'Program added successfully.');
+    }
+
+    public function updateProgram(Request $request, Program $program)
+    {
+        $request->validate([
+            'name' => 'required|string|unique:programs,name,' . $program->id,
+            'department_id' => 'required|exists:departments,id',
+            'bor_approval_no' => 'nullable|string',
+            'bor_approval_date' => 'nullable|date',
+        ]);
+
+        // $program->update([
+        //     'name' => $request->name,
+        //     'bor_approval_no' => $request->bor_approval_no,
+        //     'bor_approval_date' => $request->bor_approval_date,
+        // ]);
+
+        // Update program_departments junction table
+        $program->departments()->sync([$request->department_id => ['role' => 'primary']]);
+
+        return back()->with('success', 'Program updated successfully.');
     }
 }

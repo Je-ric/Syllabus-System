@@ -53,8 +53,11 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/academic-structure', [AcademicStructureController::class, 'index'])->name('academic.structure.index');
     Route::post('/academic-structure/college', [AcademicStructureController::class, 'storeCollege'])->name('college.store');
+    Route::put('/academic-structure/college/{college}', [AcademicStructureController::class, 'updateCollege'])->name('college.update');
     Route::post('/academic-structure/department', [AcademicStructureController::class, 'storeDepartment'])->name('department.store');
+    Route::put('/academic-structure/department/{department}', [AcademicStructureController::class, 'updateDepartment'])->name('department.update');
     Route::post('/academic-structure/program', [AcademicStructureController::class, 'storeProgram'])->name('program.store');
+    Route::put('/academic-structure/program/{program}', [AcademicStructureController::class, 'updateProgram'])->name('program.update');
 
     Route::get('/goal-objective/goals', [GoalObjectiveController::class, 'goal_index'])->name('goal.index');
     Route::post('/goal-objective/goals', [GoalObjectiveController::class, 'goal_store'])->name('goal.store');
