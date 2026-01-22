@@ -5,7 +5,7 @@
 
         <h1 class="text-xl font-bold">Academic Structure Management</h1>
 
-        {{-- ADD COLLEGE --}}
+        {{-- ADD COLLEGE (grandparent) --}}
         <div class="border p-4 rounded">
             <button class="bg-black text-white px-4 py-2 rounded"
                     onclick="toggleAddCollegeForm()"
@@ -39,7 +39,8 @@
                 <details>
                     <summary class="font-semibold cursor-pointer text-lg">{{ $college->name }}</summary>
                     <div class="ml-6 mt-4">
-                        {{-- ADD DEPARTMENT INSIDE COLLEGE --}}
+
+                        {{-- Add department inside college (parent) --}}
                         <button class="bg-black text-white px-4 py-2 rounded mb-4"
                                 onclick="toggleAddDeptForm({{ $college->id }})"
                                 id="departmentAdd">
@@ -78,7 +79,8 @@
                                 <details class="mb-4 border-t pt-2">
                                     <summary class="cursor-pointer font-medium">{{ $dept->name }}</summary>
                                     <div class="ml-6 mt-2">
-                                        {{-- ADD PROGRAM BUTTON INSIDE DEPARTMENT --}}
+
+                                        {{-- Add program inside department (grandchild) --}}
                                         <button class="bg-black text-white px-4 py-2 rounded mb-4"
                                                 onclick="toggleAddProgramForm({{ $dept->id }})"
                                                 id="programAdd">

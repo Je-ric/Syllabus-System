@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AccountApprovalController;
 use App\Http\Controllers\OTPController;
 use App\Http\Controllers\AcademicStructureController;
+use App\Http\Controllers\GoalObjectiveController;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -55,4 +56,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/academic-structure/department', [AcademicStructureController::class, 'storeDepartment'])->name('department.store');
     Route::post('/academic-structure/program', [AcademicStructureController::class, 'storeProgram'])->name('program.store');
 
+    Route::get('/goal-objective/goals', [GoalObjectiveController::class, 'goal_index'])->name('goal.index');
+    Route::post('/goal-objective/goals', [GoalObjectiveController::class, 'goal_store'])->name('goal.store');
+    Route::get('/goal-objective/objectives', [GoalObjectiveController::class, 'objective_index'])->name('objective.index');
+    Route::post('/goal-objective/objectives', [GoalObjectiveController::class, 'objective_store'])->name('objective.store');
 });
