@@ -1,11 +1,11 @@
-@extends('layouts.app')
+{{-- @extends('layouts.app')
 
 @section('content')
     <div class="p-6 space-y-10 bg-white text-black">
 
         <h1 class="text-xl font-bold">Academic Structure Management</h1>
 
-        {{-- ADD COLLEGE (grandparent) --}}
+        ADD COLLEGE (grandparent)
         <div class="border p-4 rounded">
             <button class="bg-black text-white px-4 py-2 rounded"
                     onclick="toggleAddCollegeForm()"
@@ -34,14 +34,13 @@
         </div>
 
         <div class="border p-6 rounded space-y-6">
-            {{-- COLLEGE ACCORDIONS --}}
+            COLLEGE ACCORDIONS
             @foreach ($colleges as $college)
                 <div class="border p-4 rounded">
                     <details>
                         <summary class="font-semibold cursor-pointer text-lg flex justify-between items-center">
                             <span>
-                                {{-- <x-lucide-university class="w-5 h-5 text-black"/> --}}
-                                {{ $loop->iteration }} {{ $college->name }}
+                                {{ $loop->iteration }}.   {{ $college->name }}
                             </span>
                             <button type="button"
                                     class="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
@@ -50,7 +49,7 @@
                             </button>
                         </summary>
 
-                        {{-- Edit College Form --}}
+                        Edit College Form
                         <div id="editCollegeForm{{ $college->id }}" class="hidden bg-gray-100 p-4 rounded mt-2 mb-4">
                             <form method="POST" action="{{ route('college.update', $college) }}">
                                 @csrf
@@ -74,7 +73,7 @@
 
                         <div class="ml-6 mt-4">
 
-                            {{-- Add department inside college (parent) --}}
+                            Add department inside college (parent)
                             <button class="bg-black text-white px-4 py-2 rounded mb-4"
                                     onclick="toggleAddDeptForm({{ $college->id }})"
                                     id="departmentAdd{{ $college->id }}">
@@ -103,7 +102,7 @@
                                 </form>
                             </div>
 
-                            {{-- DEPARTMENTS --}}
+                            DEPARTMENTS
                             @php
                                 $collegeDepartments = $departments->where('college_id', $college->id);
                             @endphp
@@ -113,7 +112,7 @@
                                     <details class="mb-4 border-t pt-2">
                                         <summary class="cursor-pointer font-medium flex justify-between items-center">
                                             <span>
-                                                {{-- <x-lucide-building class="w-4 h-4 text-gray-700"/> --}}
+                                                <i class="bx bx-building"></i>
                                                 {{ $dept->name }}
                                             </span>
                                             <button type="button"
@@ -123,7 +122,7 @@
                                             </button>
                                         </summary>
 
-                                        {{-- Edit Department Form --}}
+                                        Edit Department Form
                                         <div id="editDeptForm{{ $dept->id }}" class="hidden bg-gray-100 p-4 rounded mt-2 mb-4">
                                             <form method="POST" action="{{ route('department.update', $dept) }}">
                                                 @csrf
@@ -147,7 +146,7 @@
 
                                         <div class="ml-6 mt-2">
 
-                                            {{-- Add program inside department (grandchild) --}}
+                                            Add program inside department (grandchild)
                                             <button class="bg-black text-white px-4 py-2 rounded mb-4"
                                                     onclick="toggleAddProgramForm({{ $dept->id }})"
                                                     id="programAdd{{ $dept->id }}">
@@ -186,11 +185,11 @@
                                                 </form>
                                             </div>
 
-                                            {{-- PROGRAMS --}}
+                                            PROGRAMS
                                             <ul class="list-disc pl-5 space-y-2">
                                                 @foreach ($dept->programs as $program)
                                                     <li class="flex items-start gap-2">
-                                                        {{-- <x-lucide-book class="w-4 h-4 text-gray-500 mt-1"/> --}}
+                                                        <i class="bx bx-book-open"></i>
                                                         <div class="flex-1">
                                                             <div class="flex justify-between items-start mb-1">
                                                                 <strong>{{ $program->name }}</strong>
@@ -201,7 +200,7 @@
                                                                 </button>
                                                             </div>
 
-                                                            {{-- Edit Program Form --}}
+                                                            Edit Program Form
                                                             <div id="editProgramForm{{ $program->id }}" class="hidden bg-gray-100 p-3 rounded mb-2">
                                                                 <form method="POST" action="{{ route('program.update', $program) }}">
                                                                     @csrf
@@ -238,7 +237,7 @@
                                                                 </form>
                                                             </div>
 
-                                                            {{-- Display Program Details --}}
+                                                            Display Program Details
                                                             <div id="programDetails{{ $program->id }}">
                                                                 <b>BOR Approval No:</b> {{ $program->bor_approval_no }}<br>
                                                                 <b>BOR Approval Date:</b> {{ \Carbon\Carbon::parse($program->bor_approval_date)->format('F d, Y') }}
@@ -297,4 +296,33 @@
             details.classList.toggle('hidden');
         }
     </script>
+@endsection --}}
+
+@extends('layouts.app')
+
+@section('content')
+<div class="p-6 space-y-6">
+
+    <h1 class="text-xl font-bold">Academic Structure Management</h1>
+
+    {{-- ADD COLLEGE --}}
+    @include('AcademicStructure.partials.college-form')
+
+    {{-- COLLEGES --}}
+    @foreach ($colleges as $college)
+        @include('AcademicStructure.partials.college-item', [
+            'college' => $college,
+            'departments' => $departments
+        ])
+    @endforeach
+
+</div>
 @endsection
+
+<script>
+function toggle(id) {
+    document.getElementById(id).classList.toggle('hidden');
+}
+</script>
+
+

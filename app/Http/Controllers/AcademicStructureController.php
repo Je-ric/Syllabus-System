@@ -37,6 +37,7 @@ class AcademicStructureController extends Controller
 
     public function updateCollege(Request $request, College $college)
     {
+        $college = College::findOrFail($college->id);
         $request->validate([
             'name' => 'required|string|unique:colleges,name,' . $college->id,
         ]);
@@ -69,6 +70,7 @@ class AcademicStructureController extends Controller
 
     public function updateDepartment(Request $request, Department $department)
     {
+        $department = Department::findOrFail($department->id);
         $request->validate([
             'name' => 'required|string',
             'college_id' => 'required|exists:colleges,id',
@@ -109,6 +111,7 @@ class AcademicStructureController extends Controller
 
     public function updateProgram(Request $request, Program $program)
     {
+        $program = Program::findOrFail($program->id);
         $request->validate([
             'name' => 'required|string|unique:programs,name,' . $program->id,
             'department_id' => 'required|exists:departments,id',
@@ -116,11 +119,11 @@ class AcademicStructureController extends Controller
             'bor_approval_date' => 'nullable|date',
         ]);
 
-        // $program->update([
-        //     'name' => $request->name,
-        //     'bor_approval_no' => $request->bor_approval_no,
-        //     'bor_approval_date' => $request->bor_approval_date,
-        // ]);
+        $program->update([
+            'name' => $request->name,
+            'bor_approval_no' => $request->bor_approval_no,
+            'bor_approval_date' => $request->bor_approval_date,
+        ]);
 
         // Update program_departments junction table
         $program->departments()->sync([$request->department_id => ['role' => 'primary']]);
