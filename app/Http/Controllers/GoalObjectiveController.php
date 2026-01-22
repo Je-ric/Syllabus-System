@@ -20,8 +20,8 @@ class GoalObjectiveController extends Controller
         $colleges = College::orderBy('name')->get();
 
         $goals = collect();
-        if ($request->filled('college_id')) {
-            $goals = CollegeGoal::where('college_id', $request->college_id)
+        if ($request->filled('college_id')) { // If a college is selected
+            $goals = CollegeGoal::where('college_id', $request->college_id) // Fetch goals for that college
                 ->orderBy('college_goals_code')
                 ->get();
         }
@@ -64,25 +64,25 @@ class GoalObjectiveController extends Controller
         $departments = collect();
         $objectives = collect();
 
-        if ($request->filled('college_id')) {
-            $departments = Department::where('college_id', $request->college_id)
+        if ($request->filled('college_id')) { // If a college is selected
+            $departments = Department::where('college_id', $request->college_id) // Fetch departments for that college
                 ->orderBy('name')
                 ->get();
 
-            if ($request->filled('department_id')) {
-                $objectives = DepartmentObjective::where('department_id', $request->department_id)
-                    ->with('department')
-                    ->orderBy('dept_obj_code')
-                    ->get();
-            } elseif ($departments->isNotEmpty()) {
-                $objectives = DepartmentObjective::whereIn('department_id', $departments->pluck('id'))
+            if ($request->filled('department_id')) { // If a department is selected
+                $objectives = DepartmentObjective::where('department_id', $request->department_id) // Fetch objectives for that department
                     ->with('department')
                     ->orderBy('dept_obj_code')
                     ->get();
             }
         }
 
-        return view('GoalObjective.objective', compact('colleges', 'departments', 'objectives'));
+        return view('GoalObjective.objective',
+                compact(
+                        'colleges',
+                        'departments',
+                                    'objectives')
+                            );
     }
 
     public function objective_store(Request $request)

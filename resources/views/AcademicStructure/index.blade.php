@@ -43,7 +43,7 @@
                         {{-- Add department inside college (parent) --}}
                         <button class="bg-black text-white px-4 py-2 rounded mb-4"
                                 onclick="toggleAddDeptForm({{ $college->id }})"
-                                id="departmentAdd">
+                                id="departmentAdd{{ $college->id }}">
                                 Add Department
                         </button>
 
@@ -83,7 +83,7 @@
                                         {{-- Add program inside department (grandchild) --}}
                                         <button class="bg-black text-white px-4 py-2 rounded mb-4"
                                                 onclick="toggleAddProgramForm({{ $dept->id }})"
-                                                id="programAdd">
+                                                id="programAdd{{ $dept->id }}">
                                                 Add Program
                                         </button>
 
@@ -152,13 +152,13 @@
         function toggleAddDeptForm(collegeId) {
             const form = document.getElementById('addDeptForm' + collegeId);
             form.classList.toggle('hidden');
-            document.getElementById('departmentAdd').classList.toggle('hidden');
+            document.getElementById('departmentAdd' + collegeId).classList.toggle('hidden');
         }
 
         function toggleAddProgramForm(deptId) {
             const form = document.getElementById('addProgramForm' + deptId);
             form.classList.toggle('hidden');
-            document.getElementById('programAdd').classList.toggle('hidden');
+            document.getElementById('programAdd' + deptId).classList.toggle('hidden');
         }
     </script>
 @endsection
