@@ -12,9 +12,9 @@ class AcademicStructureController extends Controller
     public function index()
     {
         return view('AcademicStructure.index', [
-            'colleges' => College::all(),
-            'departments' => Department::with('college', 'programs')->get(),
-            'programs' => Program::all(),
+            'colleges' => College::orderBy('name')->get(),
+            'departments' => Department::with('college', 'programs')->orderBy('name')->get(),
+            'programs' => Program::all()->sortBy('name'),
         ]);
     }
 
