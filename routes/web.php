@@ -45,10 +45,10 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/account-approval', [AccountApprovalController::class, 'index'])->name('accounts.approval');
 
-    Route::post('/account-approval/approve', [AccountApprovalController::class, 'approve']);
-    Route::post('/account-approval/reject', [AccountApprovalController::class, 'reject']);
-    Route::post('/account-approval/restore', [AccountApprovalController::class, 'restore']);
-    Route::post('/account-approval/disable', [AccountApprovalController::class, 'disable']);
+    Route::post('/account-approval/approve', [AccountApprovalController::class, 'approve'])->name('account-approval.approve');
+    Route::post('/account-approval/reject', [AccountApprovalController::class, 'reject'])->name('account-approval.reject');
+    Route::post('/account-approval/restore', [AccountApprovalController::class, 'restore'])->name('account-approval.restore');
+    Route::post('/account-approval/disable', [AccountApprovalController::class, 'disable'])->name('account-approval.disable');
     Route::post('/account-approval/assign-role', [AccountApprovalController::class, 'assignRole'])->name('account-approval.assign-role');
 
     Route::get('/academic-structure', [AcademicStructureController::class, 'index'])->name('academic.structure.index');
