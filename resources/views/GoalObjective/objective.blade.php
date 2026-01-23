@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="p-6 bg-white text-black max-w-5xl mx-auto space-y-6">
+<div class="p-6 bg-white text-black max-w-7xl mx-auto space-y-6">
 
     <h1 class="text-xl font-bold">Objective Management</h1>
 
@@ -65,7 +65,7 @@
                                     type="text"
                                     name="dept_obj_code"
                                     value="{{ old('dept_obj_code') }}"
-                                    placeholder="Code (e.g., OBJ-01)"
+                                    placeholder="Code (e.g., a, b, c)"
                                     class="w-full border rounded px-3 py-2"
                                     required
                                 >

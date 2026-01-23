@@ -38,13 +38,13 @@
                         transition-transform duration-200',
 
         'add-button' => '
-                    bg-green-600 text-white
+                    bg-black text-white
                     px-4 py-2.5
                     rounded-lg
                     font-medium text-sm leading-5
                     shadow-xs
-                    hover:bg-green-700
-                    focus:ring-4 focus:ring-green-200
+                    hover:bg-black-700
+                    focus:ring-2 focus:ring-black-200
                     focus:outline-none
                     transition-colors
                 ',
@@ -55,7 +55,7 @@
                     font-medium text-sm leading-5
                     shadow-xs
                     hover:bg-green-700
-                    focus:ring-4 focus:ring-green-200
+                    focus:ring-2 focus:ring-green-200
                     focus:outline-none
                     transition-colors
                 ',
@@ -68,9 +68,10 @@
                     rounded-base
                     font-medium text-sm leading-5
                     shadow-xs
+                    rounded-lg
                     hover:bg-neutral-tertiary-medium
                     hover:text-heading
-                    focus:ring-4 focus:ring-neutral-tertiary
+                    focus:ring-2 focus:ring-neutral-tertiary
                     focus:outline-none
                 ',
     ];

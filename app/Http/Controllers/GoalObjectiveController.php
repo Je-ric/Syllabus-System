@@ -44,7 +44,7 @@ class GoalObjectiveController extends Controller
 
         CollegeGoal::create([
             'college_id' => $request->college_id,
-            'college_goals_code' => $request->college_goals_code,
+            'college_goals_code' => $request->college_goals_code, // auto sana (a,b,c per college)
             'goal_text' => $request->goal_text,
         ]);
 

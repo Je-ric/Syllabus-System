@@ -1,7 +1,7 @@
-<button class="bg-black text-white px-4 py-2 rounded"
+<x-button variant="add-button"
         onclick="toggle('addCollegeForm')">
     <i class="bx bx-plus"></i> Add College
-</button>
+</x-button>
 
 <div id="addCollegeForm"
     class="hidden mb-3 bg-green-50 border border-green-200 p-4 rounded-lg">

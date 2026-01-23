@@ -1,7 +1,7 @@
-<button class="text-sm bg-black text-white px-3 py-1 rounded"
+<x-button variant="add-button"
         onclick="toggle('addProgram{{ $dept->id }}')">
     <i class="bx bx-plus"></i> Add Program
-</button>
+</x-button>
 
 <div id="addProgram{{ $dept->id }}"
     class="hidden mt-2 bg-gray-100 p-3 rounded">

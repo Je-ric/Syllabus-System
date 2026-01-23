@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="p-6 bg-white text-black max-w-5xl mx-auto space-y-6">
+<div class="p-6 bg-white text-black max-w-7xl mx-auto space-y-6">
 
     <h1 class="text-xl font-bold">College Goal Management</h1>
 
@@ -15,8 +15,7 @@
                 <select
                     name="college_id"
                     onchange="this.form.submit()"
-                    class="w-full border rounded px-3 py-2"
-                >
+                    class="w-full border rounded px-3 py-2">
                     <option value="">-- Choose College --</option>
 
                     @foreach ($colleges as $college)
@@ -41,7 +40,7 @@
                             type="text"
                             name="college_goals_code"
                             value="{{ old('college_goals_code') }}"
-                            placeholder="Code (e.g., CG-01)"
+                            placeholder="Code (e.g., a, b, c)"
                             class="w-full border rounded px-3 py-2"
                             required
                         >
@@ -53,6 +52,8 @@
                             required
                         >{{ old('goal_text') }}</textarea>
                     </div>
+
+                    <button></button>
 
                     <button
                         type="submit"
