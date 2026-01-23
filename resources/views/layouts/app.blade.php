@@ -4,14 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ $title ?? 'Syllabus System' }}</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     @livewireStyles
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
 <body class="min-h-screen">
 
-    <header class="bg-blue-700 text-white">
+    <header class="bg-black text-white">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
             <h1 class="font-bold text-xl">Syllabus System</h1>
             <nav class="space-x-4 text-sm">

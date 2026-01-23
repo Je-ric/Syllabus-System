@@ -4,7 +4,7 @@
 </button>
 
 <div id="addDept{{ $college->id }}"
-    class="hidden mt-2 bg-gray-100 p-3 rounded">
+    class="hidden mb-3 bg-red-50 border border-red-200 p-4 rounded-lg">
 
     <form method="POST"
         action="{{ route('department.store') }}">
@@ -16,7 +16,7 @@
         <input type="text"
                 name="name"
                 placeholder="Department Name"
-                class="border p-2 rounded w-1/2" required>
+                class="border p-2 rounded w-1/2 focus:ring-2 focus:ring-red-500 focus:border-transparent" required>
         <button class="bg-green-600 text-white px-3 py-1 rounded ml-2">Save</button>
         <button type="button"
                 onclick="toggle('addDept{{ $college->id }}')"

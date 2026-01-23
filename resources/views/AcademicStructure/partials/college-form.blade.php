@@ -3,23 +3,24 @@
     <i class="bx bx-plus"></i> Add College
 </button>
 
-<div id="addCollegeForm" class="hidden mt-4 bg-gray-100 p-4 rounded">
+<div id="addCollegeForm"
+    class="hidden mb-3 bg-green-50 border border-green-200 p-4 rounded-lg">
 
     <form method="POST" action="{{ route('college.store') }}">
         @csrf
         <input type="text"
                 name="name"
                 placeholder="College Name"
-                class="border p-2 rounded w-1/3"
+                class="border p-2 rounded w-1/3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 required>
 
         <div class="mt-2 space-x-2">
             <button class="bg-green-600 text-white px-3 py-1 rounded">Save</button>
-            <button type="button"
+            <x-button type="button"
                     onclick="toggle('addCollegeForm')"
-                    class="bg-gray-500 text-white px-3 py-1 rounded">
+                    variant="cancel">
                     Cancel
-            </button>
+            </x-button>
         </div>
     </form>
 

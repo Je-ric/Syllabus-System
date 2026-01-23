@@ -13,13 +13,13 @@
                 value="{{ $dept->id }}">
         <input name="name"
                 placeholder="Program Name"
-                class="border p-2 rounded w-full mb-1">
+                class="border p-2 rounded w-full mb-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
         <input name="bor_approval_no"
                 placeholder="BOR Approval No"
-                class="border p-2 rounded w-full mb-1">
+                class="border p-2 rounded w-full mb-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
         <input type="date"
                 name="bor_approval_date"
-                class="border p-2 rounded w-full">
+                class="border p-2 rounded w-full focus:ring-2 focus:ring-blue-500 focus:border-transparent">
         <button class="bg-green-600 text-white px-3 py-1 rounded mt-2">Save</button>
         <button type="button"
                     onclick="toggle('addProgram{{ $dept->id }}')"

@@ -11,3 +11,21 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+/* accordion */
+.chevron-icon {
+    transition: transform 0.2s ease;
+}
+
+details[open] > summary .chevron-icon {
+    transform: rotate(180deg);
+}
+
+/* Smooth accordion transitions */
+details summary {
+    list-style: none;
+}
+
+details summary::-webkit-details-marker {
+    display: none;
+}
