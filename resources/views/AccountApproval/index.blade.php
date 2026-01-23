@@ -116,12 +116,12 @@
             --}}
 
             <template x-if="action !== 'assignRole'"> {{-- Needs to be true --}}
-                @include('AccountApproval.approvalModal')
+                @include('AccountApproval.modals.approvalModal')
             </template>
 
             {{-- Displayed when the selected action is "assignRole" --}}
             <template x-if="action === 'assignRole'">
-                @include('AccountApproval.assignRolesModal')
+                @include('AccountApproval.modals.assignRolesModal')
             </template>
         </x-modal>
 

@@ -21,6 +21,11 @@
                 name="bor_approval_date"
                 class="border p-2 rounded w-full">
         <button class="bg-green-600 text-white px-3 py-1 rounded mt-2">Save</button>
+        <button type="button"
+                    onclick="toggle('addProgram{{ $dept->id }}')"
+                    class="bg-gray-500 text-white px-3 py-1 rounded">
+                    Cancel
+            </button>
     </form>
 
 </div>

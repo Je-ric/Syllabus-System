@@ -4,7 +4,7 @@
 </button>
 
 <div id="addCollegeForm" class="hidden mt-4 bg-gray-100 p-4 rounded">
-    
+
     <form method="POST" action="{{ route('college.store') }}">
         @csrf
         <input type="text"

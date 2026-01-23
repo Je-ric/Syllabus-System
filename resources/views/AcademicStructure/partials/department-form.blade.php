@@ -18,6 +18,11 @@
                 placeholder="Department Name"
                 class="border p-2 rounded w-1/2" required>
         <button class="bg-green-600 text-white px-3 py-1 rounded ml-2">Save</button>
+        <button type="button"
+                onclick="toggle('addDept{{ $college->id }}')"
+                class="bg-gray-500 text-white px-3 py-1 rounded">
+                Cancel
+        </button>
     </form>
 
 </div>

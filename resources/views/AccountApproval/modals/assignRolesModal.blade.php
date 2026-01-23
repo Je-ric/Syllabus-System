@@ -33,7 +33,7 @@
                     <span x-show="selectedRole.includes('chair')" class="ml-2 text-xs text-green-600 font-semibold">(Already assigned)</span>
                 </label>
 
-                <!-- Faculty always assigned -->
+                {{-- Faculty always assigned --}}
                 <label class="inline-flex items-center opacity-70">
                     <input type="checkbox" checked disabled>
                     <input type="hidden" name="roles[]" value="faculty">
