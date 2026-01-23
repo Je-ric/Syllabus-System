@@ -36,6 +36,8 @@ php artisan make:controller GoalObjectiveController
 php artisan make:mail OtpMail
 php artisan make:mail AccountStatusUpdated
 
+php artisan make:component StatusIndicator
+php artisan make:component Button
 ----------------------------------
 php artisan migrate
 php artisan migrate:fresh
