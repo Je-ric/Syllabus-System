@@ -6,7 +6,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AccountApprovalController;
 use App\Http\Controllers\OTPController;
 use App\Http\Controllers\AcademicStructureController;
-use App\Http\Controllers\GoalObjectiveController;
+use App\Http\Controllers\GoalController;
+use App\Http\Controllers\ObjectiveController;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -59,8 +60,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/academic-structure/program', [AcademicStructureController::class, 'storeProgram'])->name('program.store');
     Route::put('/academic-structure/program/{program}', [AcademicStructureController::class, 'updateProgram'])->name('program.update');
 
-    Route::get('/goal-objective/goals', [GoalObjectiveController::class, 'goal_index'])->name('goal.index');
-    Route::post('/goal-objective/goals', [GoalObjectiveController::class, 'goal_store'])->name('goal.store');
-    Route::get('/goal-objective/objectives', [GoalObjectiveController::class, 'objective_index'])->name('objective.index');
-    Route::post('/goal-objective/objectives', [GoalObjectiveController::class, 'objective_store'])->name('objective.store');
+    Route::get('/goal-objective/goals', [GoalController::class, 'goal_index'])->name('goal.index');
+    Route::post('/goal-objective/goals', [GoalController::class, 'goal_store'])->name('goal.store');
+    Route::put('/goal-objective/{goal}', [GoalController::class, 'goal_update'])->name('goal.update');
+    Route::delete('/goal-objective/{goal}', [GoalController::class, 'goal_destroy'])->name('goal.destroy');
+
+    Route::get('/goal-objective/objectives', [ObjectiveController::class, 'objective_index'])->name('objective.index');
+    Route::post('/goal-objective/objectives', [ObjectiveController::class, 'objective_store'])->name('objective.store');
 });

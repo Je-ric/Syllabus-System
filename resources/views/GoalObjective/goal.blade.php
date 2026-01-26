@@ -36,13 +36,19 @@
 
                     <div class="space-y-2">
                         <label class="block font-semibold">Add Goal</label>
-                        <input
+                        {{-- <input
                             type="text"
                             name="college_goals_code"
                             value="{{ old('college_goals_code') }}"
                             placeholder="Code (e.g., a, b, c)"
                             class="w-full border rounded px-3 py-2"
                             required
+                        > --}}
+                        <input
+                            type="text"
+                            value="Goal Code (auto)"
+                            class="w-full border rounded px-3 py-2 bg-gray-100 text-gray-500"
+                            disabled
                         >
                         <textarea
                             name="goal_text"
@@ -52,8 +58,6 @@
                             required
                         >{{ old('goal_text') }}</textarea>
                     </div>
-
-                    <button></button>
 
                     <button
                         type="submit"
@@ -76,15 +80,88 @@
                             <tr>
                                 <th class="border p-2 text-left">Code</th>
                                 <th class="border p-2 text-left">Goal</th>
+                                <th class="border p-2 text-left">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($goals as $goal)
-                                <tr class="odd:bg-white even:bg-gray-50">
-                                    <td class="border p-2 align-top">{{ $goal->college_goals_code }}</td>
-                                    <td class="border p-2">{{ $goal->goal_text }}</td>
+                                <tr x-data="{ editing: false }" class="odd:bg-white even:bg-gray-50">
+                                    {{-- when button clicked, the value of "editing" will be = true
+                                        then all input fields will be shown --}}
+
+                                    <form
+                                        method="POST"
+                                        action="{{ route('goal.update', $goal->id) }}"
+                                        class="contents"
+                                    >
+                                        @csrf
+                                        @method('PUT')
+
+                                        <td class="border p-2 align-top">
+                                            <span>{{ $goal->college_goals_code }}</span>
+
+                                            {{-- <input
+                                                x-show="editing"
+                                                type="text"
+                                                name="college_goals_code"
+                                                value="{{ $goal->college_goals_code }}"
+                                                class="w-full border rounded px-2 py-1 text-sm resize-none overflow-hidden"> --}}
+                                        </td>
+
+                                        <td class="border p-2">
+                                            <span x-show="!editing">{{ $goal->goal_text }}</span>
+
+                                            <textarea
+                                                x-show="editing"
+                                                name="goal_text"
+                                                rows="9"
+                                                class="w-full border rounded px-2 py-1 text-sm">
+                                                {{ $goal->goal_text }}
+                                            </textarea>
+                                        </td>
+
+                                        <td class="border p-2 space-y-1">
+                                            <button
+                                                type="button"
+                                                x-show="!editing"
+                                                @click="editing = true"
+                                                class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 w-full">
+                                                Edit
+                                            </button>
+
+                                            <button
+                                                type="submit"
+                                                x-show="editing"
+                                                class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 w-full">
+                                                Save
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                x-show="editing"
+                                                @click="editing = false"
+                                                class="bg-gray-400 text-white px-3 py-1 rounded hover:bg-gray-500 w-full">
+                                                Cancel
+                                            </button>
+                                        </td>
+                                    </form>
+
+                                    <td class="border p-2">
+                                        <form method="POST" action="{{ route('goal.destroy', $goal->id) }}">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button
+                                                type="submit"
+                                                class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 w-full"
+                                                onclick="return confirm('Delete this goal?')"
+                                            >
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </td>
                                 </tr>
-                            @endforeach
+                                @endforeach
+
                         </tbody>
                     </table>
                 @else

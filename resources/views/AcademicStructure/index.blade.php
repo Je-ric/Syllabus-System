@@ -51,6 +51,27 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+// Department accordion - only one open at a time within each college
+document.addEventListener('DOMContentLoaded', function() {
+    const collegeDetails = document.querySelectorAll('#collegeAccordions > details');
+
+    collegeDetails.forEach(college => {
+        const departmentAccordions = college.querySelectorAll('div > details');
+
+        departmentAccordions.forEach(details => {
+            details.addEventListener('toggle', function() {
+                if (this.open) {
+                    departmentAccordions.forEach(other => {
+                        if (other !== this && other.open) {
+                            other.open = false;
+                        }
+                    });
+                }
+            });
+        });
+    });
+});
 </script>
 
 

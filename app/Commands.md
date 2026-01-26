@@ -31,7 +31,8 @@ php artisan make:controller AuthController
 php artisan make:controller AccountApprovalController
 php artisan make:controller OTPController
 php artisan make:controller AcademicStructureController
-php artisan make:controller GoalObjectiveController
+php artisan make:controller ObjectiveController
+php artisan make:controller GoalController
 
 php artisan make:mail OtpMail
 php artisan make:mail AccountStatusUpdated
