@@ -59,11 +59,12 @@
                         >{{ old('goal_text') }}</textarea>
                     </div>
 
-                    <button
-                        type="submit"
-                        class="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800">
+                    <x-button
+                        variant="add-button"
+                        type="submit">
+                        <i class="bx bx-plus"></i>
                         Add Goal
-                    </button>
+                    </x-button>
                 </form>
             @else
                 <p class="text-gray-600 text-sm">Select a college to add goals.</p>

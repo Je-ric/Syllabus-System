@@ -57,15 +57,16 @@
             transition-transform duration-200',
 
         'add-button' => '
-                    bg-black text-white
+                    inline-flex items-center gap-2
                     px-4 py-2.5
+                    text-sm font-semibold
                     rounded-lg
-                    font-medium text-sm leading-5
-                    shadow-xs
-                    hover:bg-black-700
-                    focus:ring-2 focus:ring-black-200
-                    focus:outline-none
-                    transition-colors
+                    bg-black text-white
+                    shadow-sm
+                    hover:bg-slate-800 hover:shadow-md
+                    focus:ring-2 focus:ring-black/30 focus:outline-none
+                    active:scale-95
+                    transition-all duration-200
                 ',
 
     ];

@@ -77,10 +77,11 @@
                                 >{{ old('objective_text') }}</textarea>
                             </div>
 
-                            <button type="submit"
-                                    class="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800">
-                                Add Objective
-                            </button>
+                            <x-button type="submit"
+                                    variant="add-button">
+                                    <i class="bx bx-plus"></i>
+                                    Add Objective
+                            </x-button>
                         </form>
                     @else
                         <p class="text-gray-600 text-sm">Select a department to add objectives.</p>
