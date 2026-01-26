@@ -39,14 +39,14 @@
                         <select
                             name="department_id"
                             onchange="this.form.submit()"
-                            class="w-full border rounded px-3 py-2"
-                        >
+                            class="w-full border rounded px-3 py-2">
+
                             <option value="">-- Choose Department --</option>
+
                             @foreach ($departments as $dept)
                                 <option
                                     value="{{ $dept->id }}"
-                                    @selected(request('department_id') == $dept->id)
-                                >
+                                    @selected(request('department_id') == $dept->id)>
                                     {{ $dept->name }}
                                 </option>
                             @endforeach
@@ -61,14 +61,7 @@
 
                             <div class="space-y-2">
                                 <label class="block font-semibold">Add Objective</label>
-                                {{-- <input
-                                    type="text"
-                                    name="dept_obj_code"
-                                    value="{{ old('dept_obj_code') }}"
-                                    placeholder="Code (e.g., a, b, c)"
-                                    class="w-full border rounded px-3 py-2"
-                                    required
-                                > --}}
+
                                 <input
                                     type="text"
                                     value="Goal Code (auto)"
@@ -84,10 +77,8 @@
                                 >{{ old('objective_text') }}</textarea>
                             </div>
 
-                            <button
-                                type="submit"
-                                class="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800"
-                            >
+                            <button type="submit"
+                                    class="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800">
                                 Add Objective
                             </button>
                         </form>
@@ -117,13 +108,70 @@
                         </thead>
                         <tbody>
                             @foreach ($objectives as $objective)
-                                <tr class="odd:bg-white even:bg-gray-50">
-                                    <td class="border p-2 align-top">{{ $objective->dept_obj_code }}</td>
-                                    <td class="border p-2">{{ $objective->objective_text }}</td>
-                                    <td class="border p-2">
-                            
-                                    </td>
-                                </tr>
+                                <tr  x-data="{ editing: false }" class="odd:bg-white even:bg-gray-50">
+                                    <form method="POST"
+                                        action="{{ route('objective.update', $objective->id) }}"
+                                        class="contents">
+                                        @csrf
+                                        @method('PUT')
+
+                                        <td class="border p-2 align-top">
+                                            <span>{{ $objective->dept_obj_code  }}</span>
+                                        </td>
+
+                                        <td class="border p-2">
+                                            <span x-show="!editing">{{ $objective->objective_text }}</span>
+
+                                            <textarea
+                                                x-show="editing"
+                                                name="objective_text"
+                                                rows="3"
+                                                placeholder="Objective description"
+                                                class="w-full border rounded px-3 py-2"
+                                                required
+                                            >{{ old('objective_text', $objective->objective_text) }}</textarea>
+                                        </td>
+
+                                        <td class="border p-2 space-y-1">
+                                            <button
+                                                type="button"
+                                                x-show="!editing"
+                                                @click="editing = true"
+                                                class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 w-full">
+                                                Edit
+                                            </button>
+
+                                            <button
+                                                type="submit"
+                                                x-show="editing"
+                                                class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 w-full">
+                                                Save
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                x-show="editing"
+                                                @click="editing = false"
+                                                class="bg-gray-400 text-white px-3 py-1 rounded hover:bg-gray-500 w-full">
+                                                Cancel
+                                            </button>
+                                        </td>
+                                    </form>
+
+                                        <td class="border p-2">
+                                            <form method="POST" action="{{ route('objective.destroy', $objective->id) }}">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button
+                                                    type="submit"
+                                                    class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 w-full"
+                                                    onclick="return confirm('Delete this objective?')"
+                                                >
+                                                    Delete
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
                             @endforeach
                         </tbody>
                     </table>
