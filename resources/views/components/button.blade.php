@@ -14,28 +14,47 @@
         'danger' => 'btn bg-red-600 text-white hover:bg-red-400 active:scale-95 transition-transform duration-200',
         'warning' => 'btn btn-warning text-white hover:bg-[#e6a011] active:scale-95 transition-transform duration-200',
         'info' => 'btn btn-info text-white hover:bg-blue-600 active:scale-95 transition-transform duration-200',
-        'manage' =>
-            'btn bg-emerald-500 text-white hover:bg-emerald-600 active:scale-95 transition-transform duration-200',
+        'manage' => 'btn bg-emerald-500 text-white hover:bg-emerald-600 active:scale-95 transition-transform duration-200',
 
-        'restore' => 'inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md
-                    bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95
-                    transition-transform duration-200',
+       // restore, undo, recover
+        'table-restore' => 'inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md
+            bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95
+            transition-transform duration-200',
 
-        'active' => 'inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md
-                    bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95
-                    transition-transform duration-200',
+        // active, save, approve, confirm
+        'table-confirm' => 'inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md
+            bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95
+            transition-transform duration-200',
 
-        'disable' => 'inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md
-                    bg-slate-500 text-white hover:bg-slate-600 active:scale-95
-                    transition-transform duration-200',
+        // neutral, disable, inactive
+        'table-disable' => 'inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md
+            bg-slate-500 text-white hover:bg-slate-600 active:scale-95
+            transition-transform duration-200',
 
-        'reject' => 'inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md
-                    bg-rose-600 text-white hover:bg-rose-700 active:scale-95
-                    transition-transform duration-200',
+        // reject, delete, remove (destructive)
+        'table-danger' => 'inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md
+            bg-rose-600 text-white hover:bg-rose-700 active:scale-95
+            transition-transform duration-200',
 
-        'assign-role' => 'inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md
-                        bg-slate-600 text-white hover:bg-slate-700 active:scale-95
-                        transition-transform duration-200',
+        // assign role, permissions, manage access
+        'table-manage' => 'inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md
+            bg-slate-600 text-white hover:bg-slate-700 active:scale-95
+            transition-transform duration-200',
+
+        // edit, update, modify
+        'table-edit' => 'inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md
+            bg-blue-600 text-white hover:bg-blue-700 active:scale-95
+            transition-transform duration-200',
+
+        // view, preview, inspect
+        'table-view' => 'inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md
+            bg-cyan-600 text-white hover:bg-cyan-700 active:scale-95
+            transition-transform duration-200',
+
+        // cancel, abort, back
+        'table-cancel' => 'inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md
+            bg-gray-500 text-white hover:bg-gray-600 active:scale-95
+            transition-transform duration-200',
 
         'add-button' => '
                     bg-black text-white
@@ -48,32 +67,7 @@
                     focus:outline-none
                     transition-colors
                 ',
-        'save-input' => '
-                    bg-green-600 text-white
-                    px-4 py-2.5
-                    rounded-lg
-                    font-medium text-sm leading-5
-                    shadow-xs
-                    hover:bg-green-700
-                    focus:ring-2 focus:ring-green-200
-                    focus:outline-none
-                    transition-colors
-                ',
 
-        'cancel' => '
-                    text-body
-                    bg-neutral-secondary-medium
-                    border border-default-medium
-                    px-4 py-2.5
-                    rounded-base
-                    font-medium text-sm leading-5
-                    shadow-xs
-                    rounded-lg
-                    hover:bg-neutral-tertiary-medium
-                    hover:text-heading
-                    focus:ring-2 focus:ring-neutral-tertiary
-                    focus:outline-none
-                ',
     ];
 
     // $class =

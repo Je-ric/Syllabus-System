@@ -51,34 +51,34 @@
                         </td>
                         <td class="px-4 py-3 border-b border-slate-200 align-middle space-x-2">
                             @if ($user->account_status === 'pending')
-                                <x-button variant='active'
+                                <x-button variant='table-confirm'
                                         onclick="document.getElementById('approveModal-{{ $user->id }}').showModal();">
                                         Active
                                 </x-button>
 
-                                <x-button variant='reject'
+                                <x-button variant='table-danger'
                                         onclick="document.getElementById('rejectModal-{{ $user->id }}').showModal();">
                                         Reject
                                 </x-button>
                             @elseif ($user->account_status === 'disabled')
-                                <x-button variant='active'
+                                <x-button variant='table-confirm'
                                         onclick="document.getElementById('approveModal-{{ $user->id }}').showModal();">
                                         Active
                                 </x-button>
                             @elseif ($user->account_status === 'rejected')
-                                <x-button variant='restore'
+                                <x-button variant='table-restore'
                                         onclick="document.getElementById('restoreModal-{{ $user->id }}').showModal();">
                                         Restore
                                 </x-button>
                             @elseif ($user->account_status === 'active')
-                                <x-button variant='disable'
+                                <x-button variant='table-disable'
                                         onclick="document.getElementById('disableModal-{{ $user->id }}').showModal();">
                                         Disable
                                 </x-button>
                             @endif
 
                             @if ($user->account_status === 'active')
-                                <x-button variant='assign-role'
+                                <x-button variant='table-manage'
                                         onclick="document.getElementById('assignRoleModal-{{ $user->id }}').showModal();">
                                         Assign Role
                                 </x-button>

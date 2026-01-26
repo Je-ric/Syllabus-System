@@ -121,28 +121,26 @@
                                         </td>
 
                                         <td class="border p-2 space-y-1">
-                                            <button
-                                                type="button"
+                                            <x-button
                                                 x-show="!editing"
                                                 @click="editing = true"
-                                                class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 w-full">
+                                                variant="table-edit">
                                                 Edit
-                                            </button>
+                                            </x-button>
 
-                                            <button
+                                            <x-button
                                                 type="submit"
                                                 x-show="editing"
-                                                class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 w-full">
+                                                variant="table-confirm">
                                                 Save
-                                            </button>
+                                            </x-button>
 
-                                            <button
-                                                type="button"
+                                            <x-button
                                                 x-show="editing"
                                                 @click="editing = false"
-                                                class="bg-gray-400 text-white px-3 py-1 rounded hover:bg-gray-500 w-full">
+                                                variant="table-cancel">
                                                 Cancel
-                                            </button>
+                                            </x-button>
                                         </td>
                                     </form>
 
@@ -150,13 +148,12 @@
                                         <form method="POST" action="{{ route('goal.destroy', $goal->id) }}">
                                             @csrf
                                             @method('DELETE')
-                                            <button
+                                            <x-button
                                                 type="submit"
-                                                class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 w-full"
-                                                onclick="return confirm('Delete this goal?')"
-                                            >
+                                                variant="table-danger"
+                                                onclick="return confirm('Delete this goal?')">
                                                 Delete
-                                            </button>
+                                            </x-button>
                                         </form>
                                     </td>
                                 </tr>
