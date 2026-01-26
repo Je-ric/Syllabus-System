@@ -60,11 +60,13 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/academic-structure/program', [AcademicStructureController::class, 'storeProgram'])->name('program.store');
     Route::put('/academic-structure/program/{program}', [AcademicStructureController::class, 'updateProgram'])->name('program.update');
 
-    Route::get('/goal-objective/goals', [GoalController::class, 'goal_index'])->name('goal.index');
-    Route::post('/goal-objective/goals', [GoalController::class, 'goal_store'])->name('goal.store');
-    Route::put('/goal-objective/{goal}', [GoalController::class, 'goal_update'])->name('goal.update');
-    Route::delete('/goal-objective/{goal}', [GoalController::class, 'goal_destroy'])->name('goal.destroy');
-
-    Route::get('/goal-objective/objectives', [ObjectiveController::class, 'objective_index'])->name('objective.index');
-    Route::post('/goal-objective/objectives', [ObjectiveController::class, 'objective_store'])->name('objective.store');
+    Route::get('/college/goals', [GoalController::class, 'goal_index'])->name('goal.index');
+    Route::post('/college/goals', [GoalController::class, 'goal_store'])->name('goal.store');
+    Route::put('/college/goals/{goal}', [GoalController::class, 'goal_update'])->name('goal.update');
+    Route::delete('/college/goals/{goal}', [GoalController::class, 'goal_destroy'])->name('goal.destroy');
+    
+    Route::get('/department/objectives', [ObjectiveController::class, 'objective_index'])->name('objective.index');
+    Route::post('/department/objectives', [ObjectiveController::class, 'objective_store'])->name('objective.store');
+    Route::put('/department/objectives/{objective}', [ObjectiveController::class, 'objective_update'])->name('objective.update');
+    Route::delete('/department/objectives/{objective}', [ObjectiveController::class, 'objective_destroy'])->name('objective.destroy');
 });

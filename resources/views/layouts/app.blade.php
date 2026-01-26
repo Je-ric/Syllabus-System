@@ -20,7 +20,7 @@
                 <a href="{{ route('accounts.approval') }}" class="hover:underline">User Management</a>
                 <a href="{{ route('academic.structure.index') }}" class="hover:underline">Academic Structure</a>
                 <a href="{{ route('goal.index') }}" class="hover:underline">College Goals</a>
-                {{--<a href="{{ route('objective.index') }}" class="hover:underline">Department Objectives</a> --}}
+                <a href="{{ route('objective.index') }}" class="hover:underline">Department Objectives</a>
                 @auth
                     <form action="{{ route('logout') }}" method="POST" class="inline">
                         @csrf

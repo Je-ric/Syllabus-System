@@ -52,17 +52,23 @@ class ObjectiveController extends Controller
                 Rule::exists('departments', 'id')
                     ->where('college_id', $request->college_id),
             ],
-            'dept_obj_code' => [
-                'required',
-                Rule::unique('department_objectives', 'dept_obj_code')
-                    ->where('department_id', $request->department_id),
-            ],
+            // 'dept_obj_code' => [
+            //     'required',
+            //     Rule::unique('department_objectives', 'dept_obj_code')
+            //         ->where('department_id', $request->department_id),
+            // ],
             'objective_text' => ['required', 'string'],
         ]);
 
+        $department = Department::findOrFail($request->department_id);
+        $count = $department->objectives()->count();
+
+        // similar to goals (READ in GoalController)
+        $deptObjCode = chr(ord('a') + $count);
+
         DepartmentObjective::create([
             'department_id' => $request->department_id,
-            'dept_obj_code' => $request->dept_obj_code,
+            'dept_obj_code' => $deptObjCode,
             'objective_text' => $request->objective_text,
         ]);
 
@@ -72,5 +78,53 @@ class ObjectiveController extends Controller
                 'department_id' => $request->department_id,
             ])
             ->with('success', 'Objective added successfully.');
+    }
+
+    public function objective_update(Request $request, DepartmentObjective $objective)
+    {
+        $request->validate([
+            'objective_text' => ['required', 'string'],
+        ]);
+
+        $objective->update([
+            'objective_text' => $request->objective_text,
+        ]);
+
+        return redirect()
+            ->route('objective.index', [
+                'college_id' => $objective->department->college_id,
+                'department_id' => $objective->department_id,
+            ])
+            ->with('success', 'Objective updated successfully.');
+    }
+
+    public function objective_destroy(DepartmentObjective $objective)
+    {
+        // similar approach to goal_destroy (READ in GoalController)
+        $department_id = $objective->department_id;
+        $objective->delete();
+
+        // Get remaining objectives of the department in selected college
+        $remainingObjectives = DepartmentObjective::where('department_id', $department_id)
+            ->orderBy('dept_obj_code')
+            ->get();
+
+        // Reindex 
+        $count = 0;
+        foreach ($remainingObjectives as $obj) {
+            $newCode = chr(ord('a') + $count);
+            if ($obj->dept_obj_code !== $newCode) {
+                $obj->dept_obj_code = $newCode;
+                $obj->save();
+            }
+            $count++;
+        }
+
+        return redirect()
+            ->route('objective.index', [
+                'college_id' => $objective->department->college_id,
+                'department_id' => $objective->department_id,
+            ])
+            ->with('success', 'Objective deleted successfully.');
     }
 }

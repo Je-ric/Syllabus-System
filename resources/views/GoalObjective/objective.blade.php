@@ -61,13 +61,19 @@
 
                             <div class="space-y-2">
                                 <label class="block font-semibold">Add Objective</label>
-                                <input
+                                {{-- <input
                                     type="text"
                                     name="dept_obj_code"
                                     value="{{ old('dept_obj_code') }}"
                                     placeholder="Code (e.g., a, b, c)"
                                     class="w-full border rounded px-3 py-2"
                                     required
+                                > --}}
+                                <input
+                                    type="text"
+                                    value="Goal Code (auto)"
+                                    class="w-full border rounded px-3 py-2 bg-gray-100 text-gray-500"
+                                    disabled
                                 >
                                 <textarea
                                     name="objective_text"
@@ -104,17 +110,19 @@
                     <table class="w-full border text-sm">
                         <thead class="bg-gray-100">
                             <tr>
-                                <th class="border p-2 text-left">Department</th>
                                 <th class="border p-2 text-left">Code</th>
                                 <th class="border p-2 text-left">Objective</th>
+                                <th class="border p-2 text-left">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($objectives as $objective)
                                 <tr class="odd:bg-white even:bg-gray-50">
-                                    <td class="border p-2 align-top">{{ $objective->department->name ?? 'N/A' }}</td>
                                     <td class="border p-2 align-top">{{ $objective->dept_obj_code }}</td>
                                     <td class="border p-2">{{ $objective->objective_text }}</td>
+                                    <td class="border p-2">
+                            
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
