@@ -5,9 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ProgramEducationObjective extends Model
+class ProgramEducationalObjective extends Model
 {
     use HasFactory;
+
+    protected $table = 'program_eos';
 
     protected $fillable = [
         'program_id',

@@ -11,18 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('program_education_objectives', function (Blueprint $table) {
+        Schema::create('program_outcome_peo', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('program_id')
-                ->constrained()
+            $table->foreignId('program_outcome_id')
+                ->constrained('program_outcomes')
                 ->cascadeOnDelete();
 
-            $table->string('peo_code');
-            $table->text('peo_text');
+            $table->foreignId('program_eo_id') // updated to new table name
+                ->constrained('program_eos')
+                ->cascadeOnDelete();
 
             $table->timestamps();
 
-            $table->unique(['program_id', 'peo_code']);
+            $table->unique(['program_outcome_id', 'program_eo_id']);
         });
     }
 
@@ -31,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('program_education_objectives');
+        Schema::dropIfExists('program_outcome_peo');
     }
 };

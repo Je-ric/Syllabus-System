@@ -15,7 +15,8 @@
                 required>
 
         <div class="mt-2 space-x-2">
-            <x-button variant="save">Save</x-button>
+            <x-button variant="save"
+                    type="submit">Save</x-button>
             <x-button type="button"
                     onclick="toggle('addCollegeForm')"
                     variant="cancel">

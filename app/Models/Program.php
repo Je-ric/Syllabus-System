@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Department;
+use App\Models\ProgramEducationalObjective;
+use App\Models\ProgramOutcome;
 
 class Program extends Model
 {
@@ -24,7 +27,7 @@ class Program extends Model
 
     public function peos()
     {
-        return $this->hasMany(ProgramEducationObjective::class);
+        return $this->hasMany(ProgramEducationalObjective::class);
     }
 
     public function outcomes()

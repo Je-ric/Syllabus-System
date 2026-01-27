@@ -11,18 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('program_outcomes', function (Blueprint $table) {
+        Schema::create('program_eos', function (Blueprint $table) {
             $table->id();
             $table->foreignId('program_id')
                 ->constrained()
                 ->cascadeOnDelete();
 
-            $table->string('po_code'); // a, b, c (used in CO)
-            $table->text('po_text');
+            $table->string('peo_code');
+            $table->text('peo_text');
 
             $table->timestamps();
 
-            $table->unique(['program_id', 'po_code']);
+            $table->unique(['program_id', 'peo_code']);
         });
     }
 
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('program_outcomes');
+        Schema::dropIfExists('program_eos');
     }
 };

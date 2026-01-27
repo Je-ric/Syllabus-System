@@ -8,6 +8,7 @@ use App\Http\Controllers\OTPController;
 use App\Http\Controllers\AcademicStructureController;
 use App\Http\Controllers\GoalController;
 use App\Http\Controllers\ObjectiveController;
+use App\Http\Controllers\ProgramController;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -64,9 +65,18 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/college/goals', [GoalController::class, 'goal_store'])->name('goal.store');
     Route::put('/college/goals/{goal}', [GoalController::class, 'goal_update'])->name('goal.update');
     Route::delete('/college/goals/{goal}', [GoalController::class, 'goal_destroy'])->name('goal.destroy');
-    
+
     Route::get('/department/objectives', [ObjectiveController::class, 'objective_index'])->name('objective.index');
     Route::post('/department/objectives', [ObjectiveController::class, 'objective_store'])->name('objective.store');
     Route::put('/department/objectives/{objective}', [ObjectiveController::class, 'objective_update'])->name('objective.update');
     Route::delete('/department/objectives/{objective}', [ObjectiveController::class, 'objective_destroy'])->name('objective.destroy');
+
+    Route::prefix('programs')->name('programs.')->group(function () {
+        Route::get('/', [ProgramController::class, 'index'])
+            ->name('index');
+
+        // Optional: direct access to a program
+        Route::get('/{program}', [ProgramController::class, 'show'])
+            ->name('show');
+    });
 });

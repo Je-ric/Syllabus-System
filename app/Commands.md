@@ -26,7 +26,7 @@ php artisan make:migration create_departments_table
 php artisan make:migration create_department_objectives_table
 php artisan make:migration create_programs_table
 php artisan make:migration create_program_departments_table
-php artisan make:migration create_program_education_objectives_table
+php artisan make:migration create_program_eos_table
 php artisan make:migration create_program_outcomes_table
 php artisan make:migration create_program_outcome_peo_table
 
@@ -40,10 +40,27 @@ php artisan make:controller OTPController
 php artisan make:controller AcademicStructureController
 php artisan make:controller ObjectiveController
 php artisan make:controller GoalController
+php artisan make:controller ProgramController
 
+
+----------------------------------
+LIVEWIRE
+----------------------------------
+php artisan make:livewire Programs/ManagePeos
+php artisan make:livewire Programs/ProgramSelector
+
+
+
+----------------------------------
+MAIL
+----------------------------------
 php artisan make:mail OtpMail
 php artisan make:mail AccountStatusUpdated
 
+
+----------------------------------
+COMPONENT
+----------------------------------
 php artisan make:component StatusIndicator
 php artisan make:component Button
 ----------------------------------
