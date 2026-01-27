@@ -15,7 +15,7 @@
                 required>
 
         <div class="mt-2 space-x-2">
-            <button class="bg-green-600 text-white px-3 py-1 rounded">Save</button>
+            <x-button variant="save">Save</x-button>
             <x-button type="button"
                     onclick="toggle('addCollegeForm')"
                     variant="cancel">

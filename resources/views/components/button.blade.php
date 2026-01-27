@@ -69,6 +69,33 @@
                     transition-all duration-200
                 ',
 
+        'cancel' => '
+                    inline-flex items-center gap-2
+                    px-4 py-2.5
+                    text-sm font-semibold
+                    rounded-lg
+                    bg-white text-gray-700
+                    border border-gray-300
+                    shadow-sm
+                    hover:bg-gray-100 hover:shadow-md
+                    focus:ring-2 focus:ring-gray-400/30 focus:outline-none
+                    active:scale-95
+                    transition-all duration-200
+                ',
+
+        'save' => '
+                    inline-flex items-center gap-2
+                    px-4 py-2.5
+                    text-sm font-semibold
+                    rounded-lg
+                    bg-emerald-600 text-white
+                    shadow-sm
+                    hover:bg-emerald-700 hover:shadow-md
+                    focus:ring-2 focus:ring-emerald-600/30 focus:outline-none
+                    active:scale-95
+                    transition-all duration-200
+                ',
+
     ];
 
     // $class =
