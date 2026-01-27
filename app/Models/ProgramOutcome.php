@@ -23,10 +23,10 @@ class ProgramOutcome extends Model
     public function peos()
     {
         return $this->belongsToMany(
-            ProgramEducationObjective::class,
+            ProgramEducationalObjective::class,
             'program_outcome_peo',
             'program_outcome_id',
-            'program_peo_id'
+            'program_eo_id'
         );
     }
 }

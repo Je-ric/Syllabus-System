@@ -17,8 +17,9 @@
             <thead class="sticky top-0 z-10 bg-slate-50">
                 <tr class="text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
                     <th class="border px-3 py-2">ID</th>
-                    <th class="border px-3 py-2">Name</th>
-                    <th class="border px-3 py-2">Email</th>
+                    <th class="border px-3 py-2">Name & Email</th>
+                    <th class="border px-3 py-2">Phone Number</th>
+                    <th class="border px-3 py-2">Office</th>
                     <th class="border px-3 py-2">Account Status</th>
                     <th class="border px-3 py-2">Role</th>
                     <th class="border px-3 py-2">Actions</th>
@@ -28,8 +29,9 @@
                 @foreach ($users as $user)
                     <tr class="hover:bg-slate-50 transition-colors group">
                         <td class="px-4 py-3 border border-slate-200 align-middle">{{ $loop->iteration }}</td>
-                        <td class="px-4 py-3 border border-slate-200 font-medium text-slate-800">{{ $user->name }}</td>
-                        <td class="px-4 py-3 border border-slate-200 text-slate-600 text-sm">{{ $user->email }}</td>
+                        <td class="px-4 py-3 border border-slate-200 font-medium text-slate-800">{{ $user->name }}<br><span class="text-sm text-slate-500">{{ $user->email }}</span></td>
+                        <td class="px-4 py-3 border border-slate-200 text-slate-600 text-sm">{{ $user->phone_number }}</td>
+                        <td class="px-4 py-3 border border-slate-200 text-slate-600 text-sm">{{ $user->office }}</td>
                         <td class="px-4 py-3 border border-slate-200 align-middle">
                             <x-feedback-status.status-indicator status="{{ $user->account_status }}" />
                         </td>

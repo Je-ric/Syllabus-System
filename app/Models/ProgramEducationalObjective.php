@@ -27,7 +27,7 @@ class ProgramEducationalObjective extends Model
         return $this->belongsToMany(
             ProgramOutcome::class,
             'program_outcome_peo',
-            'program_peo_id',
+            'program_eo_id',
             'program_outcome_id'
         );
     }
