@@ -11,6 +11,9 @@ php artisan make:model CollegeGoal
 php artisan make:model Department
 php artisan make:model DepartmentObjective
 php artisan make:model Program
+php artisan make:model ProgramEducationObjective
+php artisan make:model ProgramOutcome
+
 
 ----------------------------------
 MIGRATION
@@ -23,6 +26,10 @@ php artisan make:migration create_departments_table
 php artisan make:migration create_department_objectives_table
 php artisan make:migration create_programs_table
 php artisan make:migration create_program_departments_table
+php artisan make:migration create_program_education_objectives_table
+php artisan make:migration create_program_outcomes_table
+php artisan make:migration create_program_outcome_peo_table
+
 
 ----------------------------------
 CONTROLLER

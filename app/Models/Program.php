@@ -10,8 +10,8 @@ class Program extends Model
     use HasFactory;
 
     protected $fillable = [
-                'name', 
-                'bor_approval_no', 
+                'name',
+                'bor_approval_no',
                 'bor_approval_date'
                 ];
 
@@ -21,4 +21,15 @@ class Program extends Model
                     ->withPivot('role') // similar to Department model, programs can belong to multiple departments with different roles
                     ->withTimestamps();
     }
+
+    public function peos()
+    {
+        return $this->hasMany(ProgramEducationObjective::class);
+    }
+
+    public function outcomes()
+    {
+        return $this->hasMany(ProgramOutcome::class);
+    }
+
 }

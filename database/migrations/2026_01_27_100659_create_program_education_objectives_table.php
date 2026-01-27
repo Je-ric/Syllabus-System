@@ -1,0 +1,36 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('program_education_objectives', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('program_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->string('peo_code');
+            $table->text('peo_text');
+
+            $table->timestamps();
+
+            $table->unique(['program_id', 'peo_code']);
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('program_education_objectives');
+    }
+};
