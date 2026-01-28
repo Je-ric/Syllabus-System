@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Program;
 use App\Models\ProgramEducationalObjective;
 use App\Models\ProgramOutcome;
+use App\Helpers\ProgramCodeHelper;
+use Illuminate\Http\Request;
 
 class ProgramController extends Controller
 {
@@ -34,18 +36,9 @@ class ProgramController extends Controller
 
         $peo->delete();
 
-        // Re-sequence remaining PEO codes
-        $peos = ProgramEducationalObjective::where('program_id', $programId)
-            ->orderBy('id')
-            ->get();
+        // Use helper instead of repeating resequence logic
+        ProgramCodeHelper::resequencePeoCodes($programId);
 
-        $counter = 1;
-        foreach ($peos as $p) {
-            $p->update(['peo_code' => 'PEO' . $counter]);
-            $counter++;
-        }
-
-        // Redirect back to the program page
         return redirect()->route('programs.show', ['program' => $programId])
             ->with('message', 'PEO deleted and codes re-sequenced!');
     }
@@ -57,30 +50,10 @@ class ProgramController extends Controller
 
         $po->delete();
 
-        // Re-sequence remaining PO codes (a, b, c…)
-        $pos = ProgramOutcome::where('program_id', $programId)
-            ->orderBy('id')
-            ->get();
-
-        $counter = 1;
-        foreach ($pos as $p) {
-            $p->update(['po_code' => $this->numberToLetter($counter)]);
-            $counter++;
-        }
+        // Use helper instead of repeating resequence logic
+        ProgramCodeHelper::resequencePoCodes($programId);
 
         return redirect()->route('programs.show', ['program' => $programId])
             ->with('message', 'PO deleted and codes re-sequenced!');
-    }
-
-    // helper method
-    private function numberToLetter(int $number): string
-    {
-        $letter = '';
-        while ($number > 0) {
-            $remainder = ($number - 1) % 26;
-            $letter = chr(97 + $remainder) . $letter;
-            $number = floor(($number - 1) / 26);
-        }
-        return $letter;
     }
 }

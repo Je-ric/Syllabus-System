@@ -5,6 +5,7 @@ namespace App\Livewire\Programs;
 use App\Models\Program;
 use App\Models\ProgramEducationalObjective;
 use Livewire\Component;
+use App\Helpers\ProgramCodeHelper;
 
 class ManagePeos extends Component
 {
@@ -34,22 +35,62 @@ class ManagePeos extends Component
         }
     }
 
+    // public function savePeos(array $peosData): void
+    // {
+    //     $existingIds  = $this->program->peos()->pluck('id')->toArray();
+    //     $submittedIds = [];
+
+    //     foreach ($peosData as $peoData) {
+    //         if (empty(trim($peoData['peo_text'] ?? ''))) {
+    //             continue;
+    //         }
+
+    //         $peo = ProgramEducationalObjective::updateOrCreate(
+    //             ['id' => $peoData['id'] ?? null],
+    //             [
+    //                 'program_id' => $this->program->id,
+    //                 'peo_text'   => trim($peoData['peo_text']),
+    //             ]
+    //         );
+
+    //         $submittedIds[] = $peo->id;
+    //     }
+
+    //     // Delete removed PEOs
+    //     $idsToDelete = array_diff($existingIds, $submittedIds);
+    //     if ($idsToDelete) {
+    //         ProgramEducationalObjective::whereIn('id', $idsToDelete)->delete();
+    //     }
+
+    //     // Re-sequence PEO codes
+    //     $peos = $this->program->peos()
+    //         ->orderBy('id')
+    //         ->get();
+
+    //     foreach ($peos as $index => $peo) {
+    //         $peo->update([
+    //             'peo_code' => 'PEO' . ($index + 1),
+    //         ]);
+    //     }
+
+    //     $this->loadPeos();
+
+    //     session()->flash('message', 'PEOs saved and re-sequenced successfully!');
+    //     $this->dispatch('peosUpdated', programId: $this->program->id);
+    // }
+
+
     public function savePeos(array $peosData): void
     {
         $existingIds  = $this->program->peos()->pluck('id')->toArray();
         $submittedIds = [];
 
         foreach ($peosData as $peoData) {
-            if (empty(trim($peoData['peo_text'] ?? ''))) {
-                continue;
-            }
+            if (empty(trim($peoData['peo_text'] ?? ''))) continue;
 
             $peo = ProgramEducationalObjective::updateOrCreate(
                 ['id' => $peoData['id'] ?? null],
-                [
-                    'program_id' => $this->program->id,
-                    'peo_text'   => trim($peoData['peo_text']),
-                ]
+                ['program_id' => $this->program->id, 'peo_text' => trim($peoData['peo_text'])]
             );
 
             $submittedIds[] = $peo->id;
@@ -57,23 +98,12 @@ class ManagePeos extends Component
 
         // Delete removed PEOs
         $idsToDelete = array_diff($existingIds, $submittedIds);
-        if ($idsToDelete) {
-            ProgramEducationalObjective::whereIn('id', $idsToDelete)->delete();
-        }
+        if ($idsToDelete) ProgramEducationalObjective::whereIn('id', $idsToDelete)->delete();
 
-        // Re-sequence PEO codes
-        $peos = $this->program->peos()
-            ->orderBy('id')
-            ->get();
-
-        foreach ($peos as $index => $peo) {
-            $peo->update([
-                'peo_code' => 'PEO' . ($index + 1),
-            ]);
-        }
+        // Use helper
+        ProgramCodeHelper::resequencePeoCodes($this->program->id);
 
         $this->loadPeos();
-
         session()->flash('message', 'PEOs saved and re-sequenced successfully!');
         $this->dispatch('peosUpdated', programId: $this->program->id);
     }
