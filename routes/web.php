@@ -71,12 +71,8 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/department/objectives/{objective}', [ObjectiveController::class, 'objective_update'])->name('objective.update');
     Route::delete('/department/objectives/{objective}', [ObjectiveController::class, 'objective_destroy'])->name('objective.destroy');
 
-    Route::prefix('programs')->name('programs.')->group(function () {
-        Route::get('/', [ProgramController::class, 'index'])
-            ->name('index');
-
-        // Optional: direct access to a program
-        Route::get('/{program}', [ProgramController::class, 'show'])
-            ->name('show');
-    });
+    Route::get('/programs', [ProgramController::class, 'index']) ->name('programs.index');
+    Route::get('/programs/{program}', [ProgramController::class, 'show'])->name('programs.show');
+    Route::delete('/programs/peo/{peo}', [ProgramController::class, 'deletePeo'])->name('programs.peo.delete');
+    Route::delete('/programs/po/{po}', [ProgramController::class, 'deletePo'])->name('programs.po.delete');
 });

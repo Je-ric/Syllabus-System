@@ -2,22 +2,23 @@
 
     {{-- Flash message --}}
     <template x-if="flashMessage">
-        <div class="p-2 rounded border border-green-300 bg-green-50 text-green-800 text-sm font-medium" x-text="flashMessage"></div>
+        <div class="p-2 rounded border border-green-300 bg-green-50 text-green-800 text-sm font-medium"
+             x-text="flashMessage">
+        </div>
     </template>
 
     {{-- Loading indicator --}}
-    <div x-show="isSaving" class="p-2 rounded border border-yellow-300 bg-yellow-50 text-yellow-800 text-sm font-medium animate-pulse">
+    <div x-show="isSaving"
+            class="p-2 rounded border border-yellow-300 bg-yellow-50 text-yellow-800 text-sm font-medium animate-pulse">
         <i class='bx bx-loader bx-spin mr-2'></i> Saving PEOs...
     </div>
 
-    {{-- PEO Inputs --}}
-    <template x-for="(peo, index) in peos" :key="index">
+    <template x-for="(peo, index) in peos" :key="peo.id ?? index">
         <div class="flex items-center gap-3 p-2 border border-gray-200 rounded-lg">
+            <span class="w-6 text-center font-semibold text-gray-700"
+                x-text="String.fromCharCode(97 + index)"> <!-- a, b, c... -->
+            </span>
 
-            {{-- Index number --}}
-            <span class="w-6 text-center font-semibold text-gray-700" x-text="index + 1"></span>
-
-            {{-- PEO text input --}}
             <input
                 type="text"
                 x-model="peo.peo_text"
@@ -25,7 +26,6 @@
                 class="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
 
-            {{-- Remove button --}}
             <button
                 @click="removePeo(index)"
                 type="button"
@@ -37,7 +37,6 @@
         </div>
     </template>
 
-    {{-- Add new PEO --}}
     <button
         @click="addPeo()"
         type="button"
@@ -46,7 +45,6 @@
         <i class='bx bx-plus'></i> Add PEO
     </button>
 
-    {{-- Save all PEOs --}}
     <button
         @click="savePeos()"
         type="button"
@@ -66,40 +64,60 @@ function peosManager(initialPeos) {
         isSaving: false,
 
         addPeo() {
-            this.peos.push({ id: null, peo_code: '', peo_text: '' });
+            this.peos.push({ //
+                id: null,
+                peo_code: '',
+                peo_text: ''
+            });
         },
 
         removePeo(index) {
             const peo = this.peos[index];
-            const peoText = (peo && peo.peo_text) ? peo.peo_text : '(empty)';
 
-            if (confirm(`Are you sure you want to delete this PEO: "${peoText}"?`)) {
-                // If already persisted, call Livewire delete first
+            // Get the PEO text for confirmation message
+            let peoText = '(empty)';
+            if (peo && peo.peo_text) {
+                peoText = peo.peo_text;
+            }
+
+            // Ask for confirmation
+            const confirmDelete = confirm('Are you sure you want to delete this PEO: "' + peoText + '"?');
+
+            if (confirmDelete) {
+                // Check if this PEO is already saved in database
                 if (peo && peo.id) {
-                    this.isSaving = true;
-                    @this.call('deletePeo', peo.id)
-                        .then(() => {
-                            this.peos.splice(index, 1);
-                            this.flashMessage = 'PEO deleted successfully!';
-                            // Optional: sync other changes
-                            this.savePeos();
-                        })
-                        .catch(() => {
-                            this.flashMessage = 'Error deleting PEO!';
-                        })
-                        .finally(() => {
-                            this.isSaving = false;
-                            setTimeout(() => this.flashMessage = '', 3000);
-                        });
+                    // Saved PEO - submit form to controller
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/programs/peo/' + peo.id;
+
+                    // Add CSRF token
+                    const csrfInput = document.createElement('input');
+                    csrfInput.type = 'hidden';
+                    csrfInput.name = '_token';
+                    csrfInput.value = '{{ csrf_token() }}';
+                    form.appendChild(csrfInput);
+
+                    // Add method spoofing for DELETE
+                    const methodInput = document.createElement('input');
+                    methodInput.type = 'hidden';
+                    methodInput.name = '_method';
+                    methodInput.value = 'DELETE';
+                    form.appendChild(methodInput);
+
+                    document.body.appendChild(form);
+                    form.submit();
                 } else {
-                    // Not yet saved - just remove locally
+                    // Not saved yet - just remove from array
                     this.peos.splice(index, 1);
                 }
             }
         },
 
+        // Save all PEOs
         savePeos() {
             this.isSaving = true;
+
             @this.call('savePeos', this.peos)
                 .then(() => {
                     this.flashMessage = 'PEOs saved successfully!';
@@ -109,7 +127,9 @@ function peosManager(initialPeos) {
                 })
                 .finally(() => {
                     this.isSaving = false;
-                    setTimeout(() => this.flashMessage = '', 3000);
+                    setTimeout(() => {
+                        this.flashMessage = '';
+                    }, 3000);
                 });
         }
     }

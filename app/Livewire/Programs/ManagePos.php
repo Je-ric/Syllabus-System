@@ -5,137 +5,161 @@ namespace App\Livewire\Programs;
 use App\Models\Program;
 use App\Models\ProgramOutcome;
 use Livewire\Component;
+use Livewire\Attributes\On;
 
 class ManagePos extends Component
 {
     public Program $program;
-
-    /** @var array<int,array{id:int|null,po_code:string,po_text:string}> */
     public array $pos = [];
-
-    /** @var array<int,array{id:int,peo_code:string,peo_text:string}> */
     public array $peos = [];
-
-    /** @var array<int,array<int,int>> Mapping: po_id => [peo_id,...] */
     public array $mapping = [];
 
     public function mount(Program $program): void
     {
         $this->program = $program;
+        $this->loadPos();
+        $this->loadPeos();
+        $this->loadMapping();
+    }
 
-        // Load existing POs
-        $this->pos = $program->outcomes()
-            ->orderBy('po_code')
-            ->get(['id', 'po_code', 'po_text'])
-            ->map(fn ($po) => $po->toArray())
-            ->all();
+    private function loadPos(): void
+    {
+        $dbPos = $this->program->outcomes()
+            ->orderBy('id')
+            ->get();
 
-        // Load PEOs for checkbox rendering
-        $this->peos = $program->peos()
+        $this->pos = [];
+        foreach ($dbPos as $po) {
+            $this->pos[] = [
+                'id' => $po->id,
+                'po_code' => $po->po_code,
+                'po_text' => $po->po_text,
+            ];
+        }
+    }
+
+    private function loadPeos(): void
+    {
+        $dbPeos = $this->program->peos()
             ->orderBy('peo_code')
-            ->get(['id', 'peo_code', 'peo_text'])
-            ->map(fn ($peo) => $peo->toArray())
-            ->all();
+            ->get();
 
-        // Load existing mappings (PO -> selected PEO ids)
-        foreach ($program->outcomes()->with('peos:id')->get(['id']) as $po) {
-            /** @var \App\Models\ProgramOutcome $po */
-            $this->mapping[$po->id] = $po->peos->pluck('id')->all();
+        $this->peos = [];
+        foreach ($dbPeos as $peo) {
+            $this->peos[] = [
+                'id' => $peo->id,
+                'peo_code' => $peo->peo_code,
+                'peo_text' => $peo->peo_text,
+            ];
+        }
+    }
+
+    // Load mapping (which PEOs are linked to which POs)
+    private function loadMapping(): void
+    {
+        $dbPos = $this->program->outcomes()
+            ->with('peos')
+            ->get();
+
+        $this->mapping = [];
+        foreach ($dbPos as $po) {
+            $peoIds = [];
+            foreach ($po->peos as $peo) {
+                $peoIds[] = $peo->id;
+            }
+            $this->mapping[$po->id] = $peoIds;
         }
     }
 
     public function savePos(array $posData, array $mappingData): void
     {
-        // Track existing DB ids and codes
-        $existingIds = $this->program->outcomes()->pluck('id')->toArray();
-        $existingCodes = $this->program->outcomes()->pluck('po_code')->toArray();
-
+        $existingIds  = $this->program->outcomes()->pluck('id')->toArray();
         $submittedIds = [];
 
-        foreach ($posData as $index => $poData) {
-            // Skip empty POs
-            if (!isset($poData['po_text']) || trim($poData['po_text']) === '') {
+        // 1. Update / Create
+        foreach ($posData as $poData) {
+            if (empty(trim($poData['po_text'] ?? ''))) {
                 continue;
             }
-
-            // Assign code if missing (use next available letter)
-            $poCode = ($poData['po_code'] ?? '') !== ''
-                ? $poData['po_code']
-                : $this->generateNextPoCode($existingCodes);
 
             $po = ProgramOutcome::updateOrCreate(
                 ['id' => $poData['id'] ?? null],
                 [
                     'program_id' => $this->program->id,
-                    'po_code'    => $poCode,
-                    'po_text'    => $poData['po_text'],
+                    'po_text'    => trim($poData['po_text']),
                 ]
             );
 
-            // Update local state
-            $posData[$index]['id'] = $po->id;
-            $posData[$index]['po_code'] = $poCode;
+            // Sync PEO mappings
+            if (isset($mappingData[$po->id])) {
+                $po->peos()->sync($mappingData[$po->id]);
+            }
 
-            $existingCodes[] = $poCode;
             $submittedIds[] = $po->id;
-
-            // Sync mappings for this PO
-            $selectedPeoIds = $mappingData[$po->id] ?? [];
-            $po->peos()->sync($selectedPeoIds);
         }
 
-        // Delete removed POs
+        // 2. Delete removed POs
         $idsToDelete = array_diff($existingIds, $submittedIds);
-        if (!empty($idsToDelete)) {
+        if ($idsToDelete) {
             ProgramOutcome::whereIn('id', $idsToDelete)->delete();
         }
 
-        // Clean state (remove blanks)
-        $this->pos = array_values(array_filter($posData, function ($row) {
-            return isset($row['po_text']) && trim($row['po_text']) !== '';
-        }));
+        // 3. Resequence PO codes (a, b, c...)
+        $pos = $this->program->outcomes()
+            ->orderBy('id') // IMPORTANT
+            ->get();
 
-        // Keep mapping updated
-        $this->mapping = $mappingData;
+        foreach ($pos as $index => $po) {
+            $po->update([
+                'po_code' => $this->numberToLetter($index + 1),
+            ]);
+        }
 
-        session()->flash('message', 'POs and mappings saved successfully!');
+        // 4. Reload state
+        $this->loadPos();
+        $this->loadMapping();
+
+        session()->flash('message', 'POs saved and resequenced successfully!');
     }
 
-    private function generateNextPoCode(array $existingCodes): string
+    // Convert number to letter (1=a, 2=b, etc.)
+    private function numberToLetter(int $number): string
     {
-        // Codes expected as letters a, b, c ... (lowercase)
-        $i = 0;
-        while (true) {
-            $code = $this->intToLetters($i);
-            if (!in_array($code, $existingCodes, true)) {
-                return $code;
+        $letter = '';
+        while ($number > 0) {
+            $remainder = ($number - 1) % 26;
+            $letter = chr(97 + $remainder) . $letter;
+            $number = floor(($number - 1) / 26);
+        }
+        return $letter;
+    }
+
+    // Listen for PEO updates
+    #[On('peosUpdated')]
+    public function refreshPeos(int $programId): void
+    {
+        // Only refresh if it's for this program
+        if ($this->program->id != $programId) {
+            return;
+        }
+
+        $this->loadPeos();
+
+        // Clean up mappings - remove any PEO IDs that no longer exist
+        $validPeoIds = [];
+        foreach ($this->peos as $peo) {
+            $validPeoIds[] = $peo['id'];
+        }
+
+        // Check each PO's mappings
+        foreach ($this->mapping as $poId => $peoIds) {
+            $cleanedPeoIds = [];
+            foreach ($peoIds as $peoId) {
+                if (in_array($peoId, $validPeoIds)) {
+                    $cleanedPeoIds[] = $peoId;
+                }
             }
-            $i++;
-        }
-    }
-
-    private function intToLetters(int $n): string
-    {
-        // 0 -> 'a', 1 -> 'b', ..., 25 -> 'z', 26 -> 'aa', etc.
-        $s = '';
-        $n++; // shift to 1-based
-        while ($n > 0) {
-            $n--; // 0-25
-            $s = chr(ord('a') + ($n % 26)) . $s;
-            $n = intdiv($n, 26);
-        }
-        return $s;
-    }
-
-    public function deletePo(int $id): void
-    {
-        $po = ProgramOutcome::find($id);
-        if ($po) {
-            $po->delete(); // cascades pivot
-            // Update local state
-            $this->pos = array_values(array_filter($this->pos, fn ($row) => ($row['id'] ?? null) !== $id));
-            unset($this->mapping[$id]);
-            session()->flash('message', 'PO deleted successfully!');
+            $this->mapping[$poId] = $cleanedPeoIds;
         }
     }
 

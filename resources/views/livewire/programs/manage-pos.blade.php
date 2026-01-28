@@ -1,23 +1,29 @@
-<div x-data="posManager(@entangle('pos'),
-                        @entangle('peos'),
-                        @entangle('mapping'))"
-                        class="space-y-4">
+<div x-data="posManager(@entangle('pos'), @entangle('peos'), @entangle('mapping'))"
+     class="space-y-4">
 
     {{-- Flash message --}}
     <template x-if="flashMessage">
-        <div class="p-2 rounded border border-green-300 bg-green-50 text-green-800 text-sm font-medium" x-text="flashMessage"></div>
+        <div class="p-2 rounded border border-green-300 bg-green-50 text-green-800 text-sm font-medium"
+             x-text="flashMessage">
+        </div>
     </template>
 
     {{-- Loading indicator --}}
-    <div x-show="isSaving" class="p-2 rounded border border-yellow-300 bg-yellow-50 text-yellow-800 text-sm font-medium animate-pulse">
+    <div x-show="isSaving"
+            class="p-2 rounded border border-yellow-300 bg-yellow-50 text-yellow-800 text-sm font-medium animate-pulse">
         <i class='bx bx-loader bx-spin mr-2'></i> Saving POs...
     </div>
 
     {{-- PO Inputs with PEO checkboxes --}}
     <template x-for="(po, index) in pos" :key="index">
         <div class="space-y-2 p-3 border border-gray-200 rounded-lg">
+
+            {{-- PO Input Row --}}
             <div class="flex items-center gap-3">
-                <span class="w-6 text-center font-semibold text-gray-700" x-text="index + 1"></span>
+                (<span class="w-6 text-center font-semibold text-gray-700"
+                    x-text="String.fromCharCode(97 + index)">
+                </span>)
+
                 <input
                     type="text"
                     x-model="po.po_text"
@@ -35,16 +41,19 @@
                 </button>
             </div>
 
+            {{-- PEO Mapping Checkboxes --}}
             <div class="pl-9">
                 <div class="text-xs text-gray-600 mb-1">Map to PEOs:</div>
                 <div class="flex flex-wrap gap-3">
                     <template x-for="peo in peos" :key="peo.id">
                         <label class="inline-flex items-center gap-2 text-sm">
-                            <input type="checkbox"
-                                    :checked="(mapping[po.id] || []).includes(peo.id)"
-                                    @change="toggleMapping(po.id, peo.id, $event.target.checked)"
-                                    class="rounded border-gray-300">
-                                <span x-text="peo.peo_code"></span>
+                            <input
+                                type="checkbox"
+                                :checked="isPoMappedToPeo(po.id, peo.id)"
+                                @change="toggleMapping(po.id, peo.id, $event.target.checked)"
+                                class="rounded border-gray-300"
+                            >
+                            <span x-text="peo.peo_code"></span>
                         </label>
                     </template>
                 </div>
@@ -52,6 +61,7 @@
         </div>
     </template>
 
+    {{-- Action Buttons --}}
     <div class="flex items-center gap-2">
         <button
             @click="addPo()"
@@ -82,49 +92,119 @@ function posManager(initialPos, initialPeos, initialMapping) {
         flashMessage: '',
         isSaving: false,
 
+        // Add a new empty PO
         addPo() {
-            this.pos.push({ id: null, po_code: '', po_text: '' });
+            this.pos.push({
+                id: null,
+                po_code: '',
+                po_text: ''
+            });
         },
 
+        // Remove a PO
         removePo(index) {
             const po = this.pos[index];
-            const poText = (po && po.po_text) ? po.po_text : '(empty)';
-            if (confirm(`Are you sure you want to delete this PO: "${poText}"?`)) {
+
+            // Get the PO text for confirmation message
+            let poText = '(empty)';
+            if (po && po.po_text) {
+                poText = po.po_text;
+            }
+
+            // Ask for confirmation
+            const confirmDelete = confirm('Are you sure you want to delete this PO: "' + poText + '"?');
+
+            if (confirmDelete) {
+                // Check if this PO is already saved in database
                 if (po && po.id) {
-                    this.isSaving = true;
-                    @this.call('deletePo', po.id)
-                        .then(() => {
-                            this.pos.splice(index, 1);
-                            delete this.mapping[po.id];
-                            this.flashMessage = 'PO deleted successfully!';
-                            this.savePos();
-                        })
-                        .catch(() => {
-                            this.flashMessage = 'Error deleting PO!';
-                        })
-                        .finally(() => {
-                            this.isSaving = false;
-                            setTimeout(() => this.flashMessage = '', 3000);
-                        });
+                    // Saved PO - submit form to controller
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/programs/po/' + po.id;
+
+                    // Add CSRF token
+                    const csrfInput = document.createElement('input');
+                    csrfInput.type = 'hidden';
+                    csrfInput.name = '_token';
+                    csrfInput.value = '{{ csrf_token() }}';
+                    form.appendChild(csrfInput);
+
+                    // Add method spoofing for DELETE
+                    const methodInput = document.createElement('input');
+                    methodInput.type = 'hidden';
+                    methodInput.name = '_method';
+                    methodInput.value = 'DELETE';
+                    form.appendChild(methodInput);
+
+                    document.body.appendChild(form);
+                    form.submit();
                 } else {
+                    // Not saved yet - just remove from array
                     this.pos.splice(index, 1);
                 }
             }
         },
 
-        toggleMapping(poId, peoId, checked) {
-            const current = this.mapping[poId] || [];
-            if (checked) {
-                if (!current.includes(peoId)) current.push(peoId);
-            } else {
-                this.mapping[poId] = current.filter(id => id !== peoId);
-                return;
+        // Check if a PO is mapped to a PEO
+        isPoMappedToPeo(poId, peoId) {
+            // Check if mapping exists for this PO
+            if (!this.mapping[poId]) {
+                return false;
             }
-            this.mapping[poId] = current;
+
+            // Check if the PEO ID is in the array
+            const mappedPeoIds = this.mapping[poId];
+            for (let i = 0; i < mappedPeoIds.length; i++) {
+                if (mappedPeoIds[i] === peoId) {
+                    return true;
+                }
+            }
+
+            return false;
         },
 
+        // Toggle PEO mapping for a PO
+        toggleMapping(poId, peoId, checked) {
+            // Get current mappings for this PO
+            let currentMappings = this.mapping[poId];
+
+            // Initialize if doesn't exist
+            if (!currentMappings) {
+                currentMappings = [];
+            }
+
+            if (checked) {
+                // Add PEO if not already in the list
+                let alreadyExists = false;
+                for (let i = 0; i < currentMappings.length; i++) {
+                    if (currentMappings[i] === peoId) {
+                        alreadyExists = true;
+                        break;
+                    }
+                }
+
+                if (!alreadyExists) {
+                    currentMappings.push(peoId);
+                }
+            } else {
+                // Remove PEO from the list
+                const newMappings = [];
+                for (let i = 0; i < currentMappings.length; i++) {
+                    if (currentMappings[i] !== peoId) {
+                        newMappings.push(currentMappings[i]);
+                    }
+                }
+                currentMappings = newMappings;
+            }
+
+            // Update mapping
+            this.mapping[poId] = currentMappings;
+        },
+
+        // Save all POs
         savePos() {
             this.isSaving = true;
+
             @this.call('savePos', this.pos, this.mapping)
                 .then(() => {
                     this.flashMessage = 'POs saved successfully!';
@@ -134,7 +214,9 @@ function posManager(initialPos, initialPeos, initialMapping) {
                 })
                 .finally(() => {
                     this.isSaving = false;
-                    setTimeout(() => this.flashMessage = '', 3000);
+                    setTimeout(() => {
+                        this.flashMessage = '';
+                    }, 3000);
                 });
         }
     }

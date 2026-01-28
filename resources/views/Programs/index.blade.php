@@ -24,14 +24,8 @@
             <div class="mt-6 border-t pt-6 space-y-6">
 
                 <h2 class="text-xl font-semibold text-gray-800 mb-4">Program: {{ $program->name }}</h2>
-
-                <div class="bg-white border rounded-lg shadow-sm p-4">
-                    @include('Programs.partials.peos', ['program' => $program])
-                </div>
-
-                <div class="bg-white border rounded-lg shadow-sm p-4">
-                    @include('Programs.partials.outcomes', ['program' => $program])
-                </div>
+                @include('Programs.partials.peos', ['program' => $program])
+                @include('Programs.partials.outcomes', ['program' => $program])
 
             </div>
         @else
