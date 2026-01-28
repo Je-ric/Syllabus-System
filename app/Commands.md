@@ -1,19 +1,5 @@
 Notes Commands:
 
-----------------------------------
-MODEL
-----------------------------------
-php artisan make:model User -m
-php artisan make:model Role -m
-php artisan make:model UserRole -m
-php artisan make:model College
-php artisan make:model CollegeGoal
-php artisan make:model Department
-php artisan make:model DepartmentObjective
-php artisan make:model Program
-php artisan make:model ProgramEducationObjective
-php artisan make:model ProgramOutcome
-
 
 ----------------------------------
 MIGRATION
@@ -29,6 +15,25 @@ php artisan make:migration create_program_departments_table
 php artisan make:migration create_program_eos_table
 php artisan make:migration create_program_outcomes_table
 php artisan make:migration create_program_outcome_peo_table
+php artisan make:migration create_academic_calendars_table
+php artisan make:migration create_academic_calendar_events_table
+
+
+----------------------------------
+MODEL
+----------------------------------
+php artisan make:model User -m
+php artisan make:model Role -m
+php artisan make:model UserRole -m
+php artisan make:model College
+php artisan make:model CollegeGoal
+php artisan make:model Department
+php artisan make:model DepartmentObjective
+php artisan make:model Program
+php artisan make:model ProgramEducationObjective
+php artisan make:model ProgramOutcome
+php artisan make:model AcademicCalendar
+php artisan make:model AcademicCalendarEvent
 
 
 ----------------------------------
@@ -48,7 +53,6 @@ LIVEWIRE
 ----------------------------------
 php artisan make:livewire Programs/ManagePeos
 php artisan make:livewire Programs/ProgramSelector
-
 
 
 ----------------------------------
