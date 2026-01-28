@@ -3,12 +3,24 @@
 
     {{-- Show PEOs of the selected program for reference --}}
     <div class="mb-4">
-        <h3 class="text-sm font-medium text-gray-700">Program Educational Objectives (PEOs)</h3>
-        <div class="mt-1 flex flex-wrap gap-2">
-            @foreach ($program->peos()
-                            ->orderBy('peo_code')
-                            ->get(['peo_code','peo_text']) as $peo)
-                <span class="px-2 py-1 text-xs rounded bg-gray-50 border">{{ $peo->peo_code }}: {{ $peo->peo_text }}</span>
+        <h3 class="text-sm font-medium text-gray-700 mb-2">
+            Program Educational Objectives (PEOs)
+        </h3>
+
+        <div class="space-y-1">
+            @foreach (
+                $program->peos()
+                    ->orderBy('peo_code')
+                    ->get(['peo_code', 'peo_text']) as $peo
+            )
+                <div class="text-sm text-gray-800 flex gap-2">
+                    <span class="font-semibold whitespace-nowrap">
+                        {{ $peo->peo_code }}:
+                    </span>
+                    <span>
+                        {{ $peo->peo_text }}
+                    </span>
+                </div>
             @endforeach
         </div>
     </div>

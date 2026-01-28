@@ -21,7 +21,6 @@ details[open] > summary .chevron-icon {
     transform: rotate(180deg);
 }
 
-/* Smooth accordion transitions */
 details summary {
     list-style: none;
 }

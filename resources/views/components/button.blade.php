@@ -7,100 +7,55 @@
 ])
 
 @php
+    $tableBtn = 'inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md
+                active:scale-95 transition-transform duration-200 '; //remember dapat may space sa dulo, concatenation kase, it's either dito or sa isa.
+    $formBtn = 'inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg
+                shadow-sm transition-all duration-200 hover:shadow-md active:scale-95 focus:ring-2 focus:outline-none ';
+                
     $variant = strval($variant);
     $styles = [
         'primary' => 'btn btn-primary text-white hover:bg-blue-600 active:scale-95 transition-transform duration-200',
-        'success' => 'btn btn-success text-white hover:bg-green-600 active:scale-95 transition-transform duration-200',
-        'danger' => 'btn bg-red-600 text-white hover:bg-red-400 active:scale-95 transition-transform duration-200',
-        'warning' => 'btn btn-warning text-white hover:bg-[#e6a011] active:scale-95 transition-transform duration-200',
-        'info' => 'btn btn-info text-white hover:bg-blue-600 active:scale-95 transition-transform duration-200',
-        'manage' => 'btn bg-emerald-500 text-white hover:bg-emerald-600 active:scale-95 transition-transform duration-200',
 
-       // restore, undo, recover
-        'table-restore' => 'inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md
-            bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95
-            transition-transform duration-200',
+        // ================================
+        // TABLE BUTTONS
+        // ================================
+        // restore, undo, recover
+        'table-restore' => $tableBtn . 'text-white bg-indigo-600 hover:bg-indigo-700', // or dito
 
         // active, save, approve, confirm
-        'table-confirm' => 'inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md
-            bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95
-            transition-transform duration-200',
+        'table-confirm' => $tableBtn . 'text-white bg-emerald-600 hover:bg-emerald-700',
 
         // neutral, disable, inactive
-        'table-disable' => 'inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md
-            bg-slate-500 text-white hover:bg-slate-600 active:scale-95
-            transition-transform duration-200',
+        'table-disable' => $tableBtn . 'text-white bg-slate-500 hover:bg-slate-600',
 
         // reject, delete, remove (destructive)
-        'table-danger' => 'inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md
-            bg-rose-600 text-white hover:bg-rose-700 active:scale-95
-            transition-transform duration-200',
+        'table-danger' => $tableBtn . 'text-white bg-rose-600 hover:bg-rose-700',
 
         // assign role, permissions, manage access
-        'table-manage' => 'inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md
-            bg-slate-600 text-white hover:bg-slate-700 active:scale-95
-            transition-transform duration-200',
+        'table-manage' => $tableBtn . 'text-white bg-slate-600 hover:bg-slate-700',
 
         // edit, update, modify
-        'table-edit' => 'inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md
-            bg-blue-600 text-white hover:bg-blue-700 active:scale-95
-            transition-transform duration-200',
+        'table-edit' => $tableBtn . 'text-white bg-blue-600 hover:bg-blue-700',
 
         // view, preview, inspect
-        'table-view' => 'inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md
-            bg-cyan-600 text-white hover:bg-cyan-700 active:scale-95
-            transition-transform duration-200',
+        'table-view' => $tableBtn . 'text-white bg-cyan-600 hover:bg-cyan-700',
 
         // cancel, abort, back
-        'table-cancel' => 'inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md
-            bg-gray-500 text-white hover:bg-gray-600 active:scale-95
-            transition-transform duration-200',
+        'table-cancel' => $tableBtn . 'bg-white text-gray-700  border border-gray-300',
 
-        'add-button' => '
-                    inline-flex items-center gap-2
-                    px-4 py-2.5
-                    text-sm font-semibold
-                    rounded-lg
-                    bg-black text-white
-                    shadow-sm
-                    hover:bg-slate-800 hover:shadow-md
-                    focus:ring-2 focus:ring-black/30 focus:outline-none
-                    active:scale-95
-                    transition-all duration-200
-                ',
 
-        'cancel' => '
-                    inline-flex items-center gap-2
-                    px-4 py-2.5
-                    text-sm font-semibold
-                    rounded-lg
-                    bg-white text-gray-700
-                    border border-gray-300
-                    shadow-sm
-                    hover:bg-gray-100 hover:shadow-md
-                    focus:ring-2 focus:ring-gray-400/30 focus:outline-none
-                    active:scale-95
-                    transition-all duration-200
-                ',
 
-        'save' => '
-                    inline-flex items-center gap-2
-                    px-4 py-2.5
-                    text-sm font-semibold
-                    rounded-lg
-                    bg-emerald-600 text-white
-                    shadow-sm
-                    hover:bg-emerald-700 hover:shadow-md
-                    focus:ring-2 focus:ring-emerald-600/30 focus:outline-none
-                    active:scale-95
-                    transition-all duration-200
-                ',
+        // ================================
+        // FORM BUTTONS
+        // ================================
+        'add-button' => $formBtn . 'bg-black text-white hover:bg-slate-800 focus:ring-black/30',
+
+        'cancel' => $formBtn . 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 focus:ring-gray-400/30',
+
+        'save' => $formBtn . 'bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-600/30',
 
     ];
 
-    // $class =
-    //     'inline-flex items-center justify-center gap-1 px-2 py-2 rounded-md font-medium transition duration-200 ' .
-    //     ($styles[$variant] ?? $styles['primary']);
     $class = $styles[$variant] ?? $styles['primary'];
 @endphp
 

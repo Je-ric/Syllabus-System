@@ -30,14 +30,13 @@
                 </div>
 
                 <div class="bg-white border rounded-lg shadow-sm p-4">
-                    {{-- <h3 class="text-md font-medium mb-3 text-gray-700">Program Outcomes</h3> --}}
                     @include('Programs.partials.outcomes', ['program' => $program])
                 </div>
 
             </div>
         @else
             <div class="text-center text-gray-500 mt-8">
-                <p>Select a program to manage its PEOs and outcomes</p>
+                <p>Select a program to manage its Program Educational Objectives (PEO) and Program Outcomes (PO).</p>
             </div>
         @endif
 
