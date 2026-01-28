@@ -46,6 +46,8 @@ php artisan make:controller AcademicStructureController
 php artisan make:controller ObjectiveController
 php artisan make:controller GoalController
 php artisan make:controller ProgramController
+php artisan make:controller AcademicCalendarController
+php artisan make:controller AcademicCalendarEventController
 
 
 ----------------------------------

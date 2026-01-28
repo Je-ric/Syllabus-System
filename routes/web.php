@@ -9,6 +9,8 @@ use App\Http\Controllers\AcademicStructureController;
 use App\Http\Controllers\GoalController;
 use App\Http\Controllers\ObjectiveController;
 use App\Http\Controllers\ProgramController;
+use App\Http\Controllers\AcademicCalendarController;
+use App\Http\Controllers\AcademicCalendarEventController;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -75,4 +77,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/programs/{program}', [ProgramController::class, 'show'])->name('programs.show');
     Route::delete('/programs/peo/{peo}', [ProgramController::class, 'deletePeo'])->name('programs.peo.delete');
     Route::delete('/programs/po/{po}', [ProgramController::class, 'deletePo'])->name('programs.po.delete');
+
+    Route::get('/academic-calendars', [AcademicCalendarController::class, 'index'])->name('academic.calendars.index');
+    Route::get('/academic-calendars/create', [AcademicCalendarController::class, 'create'])->name('academic.calendars.create');
+    Route::post('/academic-calendars', [AcademicCalendarController::class, 'store'])->name('academic.calendars.store');
+
+    Route::get('/academic-calendars/{academicYear}/events', [AcademicCalendarEventController::class, 'index'])->name('academic.calendar.events.index');
+    Route::post('/academic-calendars/{semester}/events', [AcademicCalendarEventController::class, 'store'])->name('academic.calendar.events.store');
 });
