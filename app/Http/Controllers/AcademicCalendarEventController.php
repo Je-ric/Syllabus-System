@@ -49,6 +49,15 @@ class AcademicCalendarEventController extends Controller
                             ->with('success', 'Event added successfully.');
     }
 
+    public function destroy(AcademicCalendarEvent $event)
+    {
+        $academicYear = $event->calendar->academic_year;
+        $event->delete();
+
+        return redirect()->route('academic.calendar.events.index', $academicYear)
+                            ->with('success', 'Event deleted successfully.');
+    }
+
 
 
 }

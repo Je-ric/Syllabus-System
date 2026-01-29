@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\AcademicCalendar;
 use Illuminate\Http\Request;
+use App\Models\AcademicCalendarEvent;
 
 class AcademicCalendarController extends Controller
 {
     public function index()
     {
-        $calendars = AcademicCalendar::orderBy('academic_year', 'desc')->get();
+        $calendars = AcademicCalendar::orderBy('academic_year', 'desc')
+                                        ->with('events')
+                                        ->get();
         return view('AcademicCalendar.index', compact('calendars'));
     }
 
@@ -52,18 +55,24 @@ class AcademicCalendarController extends Controller
 
     public function edit(string $academicYear)
     {
-        $semesters = AcademicCalendar::where('academic_year', $academicYear)->get();
+        $semesters = AcademicCalendar::where('academic_year', $academicYear)
+                                        ->with('events')
+                                        ->get();
 
         if ($semesters->isEmpty()) {
             return redirect()->route('academic.calendars.index')
                 ->with('error', 'Academic year not found.');
         }
 
+        // Check if any semester has events
+        $hasEvents = $semesters->flatMap->events->isNotEmpty();
+
         // Pass semesters collection and academic year
         return view('AcademicCalendar.form', [
             'semesters' => $semesters,
             'academicYear' => $academicYear,
-            'isEdit' => true
+            'isEdit' => true,
+            'hasEvents' => $hasEvents
         ]);
     }
 
@@ -75,6 +84,15 @@ class AcademicCalendarController extends Controller
         if ($semesters->isEmpty()) {
             return redirect()->route('academic.calendars.index')
                 ->with('error', 'Academic year not found.');
+        }
+
+        if ( $academicYear !== $request->academic_year ) {
+            $existing = AcademicCalendar::where('academic_year', $request->academic_year)->first();
+            if ($existing) {
+                return redirect()->back()
+                    ->withErrors(['academic_year' => 'The academic year has already been taken.'])
+                    ->withInput();
+            }
         }
 
         $request->validate([
@@ -104,7 +122,6 @@ class AcademicCalendarController extends Controller
         return redirect()->route('academic.calendars.index')
             ->with('success', 'Academic year updated successfully.');
     }
-
 
 
     public function destroy($academic_year)

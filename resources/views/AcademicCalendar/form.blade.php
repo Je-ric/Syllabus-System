@@ -13,10 +13,20 @@
 
         @include('includes.error-lists')
 
-        <form action="{{ isset($isEdit)
+        @if(isset($hasEvents) && $hasEvents)
+            <div class="mb-4 p-4 bg-amber-50 border border-amber-200 rounded text-sm text-amber-800">
+                <i class="bx bx-alert-circle"></i>
+                <strong>Note:</strong> This academic calendar has events associated with it. You can only edit the dates. To delete this calendar, please remove all events from the Manage Events page first.
+            </div>
+        @endif
+
+        <form id="academicCalendarForm"
+                action="{{ isset($isEdit)
                 ? route('academic.calendars.update', $academicYear)
                 : route('academic.calendars.store') }}"
-                method="POST" class="grid grid-cols-2 gap-6">
+                method="POST"
+                class="grid grid-cols-2 gap-6"
+                @if(!isset($isEdit)) onsubmit="return false;" @endif>
             @csrf
             @if (isset($isEdit))
                 @method('PUT')
@@ -74,21 +84,42 @@
             </div>
 
             <div class="col-span-2 flex gap-2">
-                <x-button type="submit" variant="save">
-                    {{ isset($isEdit) ? 'Update Calendar' : 'Create Calendar' }}
-                </x-button>
-
                 @if(isset($isEdit))
-                    <x-button href="{{ route('academic.calendars.index') }}" variant="cancel">
-                        Cancel
+                    @if($hasEvents ?? false)
+                        <x-button type="button" variant="save" disabled title="Cannot update while events exist">
+                            <i class="bx bx-save"></i> Update Calendar
+                        </x-button>
+                    @else
+                        <x-button type="submit" variant="save">
+                            <i class="bx bx-save"></i> Update Calendar
+                        </x-button>
+                    @endif
+                    <x-button
+                        type="button"
+                        variant="cancel"
+                        onclick="document.getElementById('cancelEditModal').showModal()">
+                        <i class="bx bx-x"></i> Cancel
                     </x-button>
                 @else
+                    <x-button
+                        type="button"
+                        variant="save"
+                        onclick="showConfirmModal()">
+                        <i class="bx bx-save"></i> Create Calendar
+                    </x-button>
                     <x-button type="reset" variant="cancel">
-                        Reset
+                        <i class="bx bx-reset"></i> Reset
                     </x-button>
                 @endif
             </div>
         </form>
+
+        {{-- Modals --}}
+        @if(!isset($isEdit))
+            @include('AcademicCalendar.modals.confirmAYModal')
+        @else
+            @include('AcademicCalendar.modals.cancelEditModal')
+        @endif
 
     </div>
 @endsection

@@ -13,6 +13,10 @@
         @else
             <div class="space-y-4">
                 @foreach ($calendars->groupBy('academic_year') as $year => $semesters)
+                    @php
+                        $totalEvents = $semesters->flatMap->events->count();
+                        $hasEvents = $totalEvents > 0;
+                    @endphp
                     <div class="border p-4 rounded">
                         <h2 class="font-semibold">Academic Year: {{ $year }}</h2>
                         <ul class="mt-2">
@@ -25,23 +29,46 @@
                                 </li>
                             @endforeach
                         </ul>
-                        <x-button href="{{ route('academic.calendar.events.index', $sem->academic_year) }}"
-                            variant="table-manage">Manage Events</x-button>
 
-                        <x-button href="{{ route('academic.calendars.edit', $year) }}"
-                            variant="table-edit">
-                            <i class="bx bx-edit"></i> Edit A.Y. {{ $year }}
-                        </x-button>
+                        @if($hasEvents)
+                            <div class="mt-3 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-700">
+                                <i class="bx bx-info-circle"></i>
+                                This academic year has <strong>{{ $totalEvents }} event(s)</strong>. Edit and delete are disabled while events exist. Delete the events from the Manage Events page if you need to modify this calendar.
+                            </div>
+                        @endif
 
-                        <form action="{{ route('academic.calendars.destroy', $year) }}"
-                            method="POST"
-                            onsubmit="return confirm('Are you sure you want to delete this academic year and all its semesters?');">
-                            @csrf
-                            @method('DELETE')
-                            <x-button type="submit" variant="table-danger">
-                                <i class="bx bx-trash"></i> Delete A.Y. {{ $year }}
-                            </x-button>
-                        </form>
+                        <div class="mt-3 space-x-2">
+                            <x-button href="{{ route('academic.calendar.events.index', $sem->academic_year) }}"
+                                variant="table-manage">Manage Events</x-button>
+
+                            @if($hasEvents)
+                                <x-button variant="table-edit" disabled class="opacity-50 cursor-not-allowed">
+                                    <i class="bx bx-edit"></i> Edit
+                                </x-button>
+                            @else
+                                <x-button href="{{ route('academic.calendars.edit', $year) }}"
+                                    variant="table-edit">
+                                    <i class="bx bx-edit"></i> Edit
+                                </x-button>
+                            @endif
+
+                            @if($hasEvents)
+                                <x-button type="button" variant="table-danger" disabled class="opacity-50 cursor-not-allowed">
+                                    <i class="bx bx-trash"></i> Delete
+                                </x-button>
+                            @else
+                                <x-button
+                                    type="button"
+                                    variant="table-danger"
+                                    onclick="document.getElementById('deleteAYModal_{{ str_replace('-', '_', $year) }}').showModal()">
+                                    <i class="bx bx-trash"></i> Delete
+                                </x-button>
+                            @endif
+                        </div>
+
+                        @if(!$hasEvents)
+                            @include('AcademicCalendar.modals.deleteAYModal', ['year' => $year, 'semesters' => $semesters])
+                        @endif
                     </div>
                 @endforeach
             </div>
