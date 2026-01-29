@@ -5,7 +5,7 @@
     'class' => '',
 ])
 
-<dialog id="{{ $id }}" class="modal backdrop-blur-md" {{ $attributes }}>
+<dialog id="{{ $id }}" class="modal backdrop-blur-sm" {{ $attributes }}>
     <div class="modal-box {{ $width }} {{ $maxWidth }} p-0 overflow-hidden rounded-xl bg-white shadow-xl flex flex-col {{ $class }}">
         {{ $slot }}
     </div>
