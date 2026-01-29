@@ -146,18 +146,15 @@
                                     </form>
 
                                     <td class="border p-2">
-                                        <form method="POST" action="{{ route('goal.destroy', $goal->id) }}">
-                                            @csrf
-                                            @method('DELETE')
-                                            <x-button
-                                                type="submit"
-                                                variant="table-danger"
-                                                onclick="return confirm('Delete this goal?')">
-                                                Delete
-                                            </x-button>
-                                        </form>
+                                        <x-button
+                                            type="button"
+                                            variant="table-danger"
+                                            onclick="document.getElementById('deleteGoalModal_{{ $goal->id }}').showModal()">
+                                            Delete
+                                        </x-button>
                                     </td>
                                 </tr>
+                                @include('GoalObjective.modals.deleteGoalModal', ['goal' => $goal])
                                 @endforeach
 
                         </tbody>
