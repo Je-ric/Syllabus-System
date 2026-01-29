@@ -10,7 +10,7 @@
             <i class="bx bx-arrow-back"></i> Back
         </x-button>
     </div>
-    
+
     @include('includes.session-success')
 
     @php
@@ -31,24 +31,27 @@
 
                     <form action="{{ route('academic.calendar.events.store', $semester) }}" method="POST">
                         @csrf
-                        <div>
-                            <label>Type</label>
-                            <select name="type" class="border rounded px-2 py-1 w-full">
-                                <option value="holiday">Holiday</option>
-                                <option value="exam">Exam</option>
-                                <option value="break">Break</option>
-                                <option value="other">Other</option>
-                            </select>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label>Type</label>
+                                <select name="type" class="border rounded px-2 py-1 w-full">
+                                    <option value="holiday">Holiday</option>
+                                    <option value="exam">Exam</option>
+                                    <option value="break">Break</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Date</label>
+                                <input type="date" name="date" class="border rounded px-2 py-1 w-full"
+                                        min="{{ $semester->start_date }}" max="{{ $semester->end_date }}">
+                            </div>
                         </div>
                         <div>
                             <label>Name</label>
                             <input type="text" name="name" class="border rounded px-2 py-1 w-full">
                         </div>
-                        <div>
-                            <label>Date</label>
-                            <input type="date" name="date" class="border rounded px-2 py-1 w-full"
-                                    min="{{ $semester->start_date }}" max="{{ $semester->end_date }}">
-                        </div>
+
                         <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded mt-2">Add Event</button>
                     </form>
                 </div>
@@ -78,7 +81,14 @@
                                     <td class="border px-2 py-1">{{ \Carbon\Carbon::parse($event->date)->format('F j, Y') }}</td>
                                     <td class="border px-2 py-1">{{ ucfirst($event->type) }}</td>
                                     <td class="border px-2 py-1">{{ $event->name }}</td>
-                                    <td class="border px-2 py-1">
+
+                                    <td class="border px-2 py-1 space-x-2">
+                                        <button
+                                            type="button"
+                                            onclick="document.getElementById('updateEventModal_{{ $event->id }}').showModal()"
+                                            class="text-blue-600 hover:text-blue-800 cursor-pointer">
+                                            <i class="bx bx-edit"></i>
+                                        </button>
                                         <button
                                             type="button"
                                             onclick="document.getElementById('deleteEventModal_{{ $event->id }}').showModal()"
@@ -87,6 +97,7 @@
                                         </button>
                                     </td>
                                 </tr>
+                                @include('AcademicCalendarEvent.modals.updateEventModal', ['event' => $event])
                                 @include('AcademicCalendarEvent.modals.deleteEventModal', ['event' => $event])
                             @empty
                                 <tr>
