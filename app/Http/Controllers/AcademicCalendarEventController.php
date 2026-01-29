@@ -29,7 +29,18 @@ class AcademicCalendarEventController extends Controller
         $request->validate([
             'type' => 'required|in:holiday,exam,break,other',
             'name' => 'required|string',
-            'date' => 'required|date|after_or_equal:' . $semester->start_date . '|before_or_equal:' . $semester->end_date,
+            'date' => [
+                'required',
+                'date',
+                'after_or_equal:' . $semester->start_date,
+                'before_or_equal:' . $semester->end_date,
+                // Custom unique validation
+                function($attribute, $value, $fail) use ($semester) {
+                    if ($semester->events()->where('date', $value)->exists()) {
+                        $fail('An event for this date already exists in this semester.');
+                    }
+                }
+            ],
         ]);
 
         $semester->events()->create($request->all());
@@ -37,4 +48,7 @@ class AcademicCalendarEventController extends Controller
         return redirect()->route('academic.calendar.events.index', $semester->academic_year)
                             ->with('success', 'Event added successfully.');
     }
+
+
+
 }
