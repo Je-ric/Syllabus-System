@@ -11,35 +11,27 @@
                 active:scale-95 transition-transform duration-200 '; //remember dapat may space sa dulo, concatenation kase, it's either dito or sa isa.
     $formBtn = 'inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg
                 shadow-sm transition-all duration-200 hover:shadow-md active:scale-95 focus:ring-2 focus:outline-none ';
-                
+
     $variant = strval($variant);
     $styles = [
-        'primary' => 'btn btn-primary text-white hover:bg-blue-600 active:scale-95 transition-transform duration-200',
 
         // ================================
         // TABLE BUTTONS
         // ================================
         // restore, undo, recover
         'table-restore' => $tableBtn . 'text-white bg-indigo-600 hover:bg-indigo-700', // or dito
-
         // active, save, approve, confirm
         'table-confirm' => $tableBtn . 'text-white bg-emerald-600 hover:bg-emerald-700',
-
         // neutral, disable, inactive
         'table-disable' => $tableBtn . 'text-white bg-slate-500 hover:bg-slate-600',
-
         // reject, delete, remove (destructive)
         'table-danger' => $tableBtn . 'text-white bg-rose-600 hover:bg-rose-700',
-
         // assign role, permissions, manage access
         'table-manage' => $tableBtn . 'text-white bg-slate-600 hover:bg-slate-700',
-
         // edit, update, modify
         'table-edit' => $tableBtn . 'text-white bg-blue-600 hover:bg-blue-700',
-
         // view, preview, inspect
         'table-view' => $tableBtn . 'text-white bg-cyan-600 hover:bg-cyan-700',
-
         // cancel, abort, back
         'table-cancel' => $tableBtn . 'bg-white text-gray-700  border border-gray-300',
 
@@ -49,10 +41,11 @@
         // FORM BUTTONS
         // ================================
         'add-button' => $formBtn . 'bg-black text-white hover:bg-slate-800 focus:ring-black/30',
-
         'cancel' => $formBtn . 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 focus:ring-gray-400/30',
-
         'save' => $formBtn . 'bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-600/30',
+        'primary' => $formBtn . 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-600/30',
+        'danger' => $formBtn . 'bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-600/30',
+
 
     ];
 

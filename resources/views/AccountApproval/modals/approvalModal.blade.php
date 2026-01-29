@@ -21,7 +21,12 @@
             <input type="hidden" name="user_id" value="{{ $user->id }}">
             <x-modal.close-button :modalId="$modalId" text="Cancel" variant="cancel" />
             <x-button type="submit"
-                variant="{{ $action === 'approve' ? 'active' : ($action === 'reject' ? 'reject' : ($action === 'restore' ? 'restore' : 'disable')) }}">
+                variant="{{ $action === 'approve' ? 'active' :
+                            ($action === 'reject' ? 'reject' :
+                            ($action === 'restore' ? 'restore' : 'disable')
+                            )
+                        }}"
+                >
                 {{ ucfirst($action) }}
             </x-button>
         </form>

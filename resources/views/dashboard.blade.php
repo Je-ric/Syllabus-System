@@ -3,7 +3,7 @@
 @section('content')
 <div class="max-w-6xl mx-auto p-6 space-y-10">
 
-    <h1 class="text-2xl font-bold text-center">Button Component Showcase</h1>
+    <h1 class="text-2xl font-bold text-center">Button Component</h1>
 
     {{-- TABLE ACTION BUTTONS --}}
     <div class="space-y-4">
@@ -28,8 +28,11 @@
             <x-button variant="add-button">Add</x-button>
             <x-button variant="cancel">Cancel</x-button>
             <x-button variant="save">Save</x-button>
+            <x-button variant="primary">Primary</x-button>
+            <x-button variant="danger">Danger</x-button>
         </div>
     </div>
+
 
 </div>
 @endsection
