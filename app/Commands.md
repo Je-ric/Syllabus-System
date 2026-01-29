@@ -76,4 +76,5 @@ php artisan migrate:fresh
 php artisan db:seed --class=AdminSeeder
 composer require blade-ui-kit/blade-heroicons
 php artisan vendor:publish --tag=heroicons
-
+npm install -D daisyui
+npm i -D daisyui@latest

@@ -45,8 +45,16 @@ class AcademicCalendarController extends Controller
             'end_date' => $request->end_date_2,
         ]);
 
-        // Redirect to event management page for this academic year (optional)
+        //
         return redirect()->route('academic.calendar.events.index', $sem1->academic_year)
                             ->with('success', 'Academic year created successfully. You can now add events.');
     }
+
+    public function destroy($academic_year)
+    {
+        AcademicCalendar::where('academic_year', $academic_year)->delete();
+        return redirect()->route('academic.calendar.index')
+                            ->with('success', 'Academic year and its semesters deleted successfully.');
+    }
+
 }

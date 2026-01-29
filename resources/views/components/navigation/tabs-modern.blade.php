@@ -71,14 +71,4 @@ Usage: <x-navigation-layout.tabs-modern :tabs="[
                 <p>Settings content here</p>
             </x-slot>
         </x-navigation-layout.tabs-modern>
-
-Used in:
-- resources/views/volunteers/index.blade.php
-- resources/views/roles/index.blade.php
-- resources/views/programs_volunteers/program-volunteers.blade.php
-- resources/views/programs/index.blade.php
-- resources/views/member/index.blade.php
-- resources/views/finance/membership_payments.blade.php
-- resources/views/finance/donations.blade.php
-- resources/views/components/showcase.blade.php
 --}}

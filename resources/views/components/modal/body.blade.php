@@ -8,7 +8,7 @@
 @endphp
 
 <div {{ $attributes->merge([
-    'class' => "flex-1 min-h-0 overflow-y-auto space-y-6 max-h-[60vh] sm:max-h-[70vh] custom-scrollbar-gold $paddingClass $class"
+    'class' => "flex-1 min-h-0 overflow-y-auto space-y-4 $paddingClass $class"
 ]) }}>
     {{ $slot }}
 </div>

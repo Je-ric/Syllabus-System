@@ -10,8 +10,7 @@
         'end' => 'justify-end',
     ];
 
-    // $baseClasses = 'border-t border-slate-200 px-6 py-4 bg-slate-50 flex gap-3 flex-shrink-0 sticky bottom-0 z-10';
-    $baseClasses = 'border-t border-slate-200 px-6 py-4 bg-slate-50 flex gap-3 flex-shrink-0';
+    $baseClasses = 'border-t border-slate-200 px-6 py-4 flex gap-3 flex-shrink-0';
     $alignmentClass = $alignmentClasses[$align] ?? $alignmentClasses['end'];
 @endphp
 

@@ -81,6 +81,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/academic-calendars', [AcademicCalendarController::class, 'index'])->name('academic.calendars.index');
     Route::get('/academic-calendars/create', [AcademicCalendarController::class, 'create'])->name('academic.calendars.create');
     Route::post('/academic-calendars', [AcademicCalendarController::class, 'store'])->name('academic.calendars.store');
+    Route::delete('/academic-calendars/{academic_year}', [AcademicCalendarController::class, 'destroy'])->name('academic.calendar.destroy');
 
     Route::get('/academic-calendars/{academicYear}/events', [AcademicCalendarEventController::class, 'index'])->name('academic.calendar.events.index');
     Route::post('/academic-calendars/{semester}/events', [AcademicCalendarEventController::class, 'store'])->name('academic.calendar.events.store');

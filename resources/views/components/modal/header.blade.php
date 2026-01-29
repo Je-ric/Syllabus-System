@@ -3,12 +3,12 @@
 ])
 
 @php
-    $baseClasses = 'px-6 py-4 border-b border-slate-200 bg-slate-50 flex-shrink-0';
+    $baseClasses = 'px-6 py-4 border-b border-slate-200 flex-shrink-0';
     $finalClasses = $class ? "{$baseClasses} {$class}" : $baseClasses;
 @endphp
 
 <header {{ $attributes->merge(['class' => $finalClasses]) }}>
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between gap-4">
         <div class="flex-1">
             {{ $slot }}
         </div>
