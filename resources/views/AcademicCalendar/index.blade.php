@@ -28,14 +28,18 @@
                         <x-button href="{{ route('academic.calendar.events.index', $sem->academic_year) }}"
                             variant="table-manage">Manage Events</x-button>
 
+                        <x-button href="{{ route('academic.calendars.edit', $year) }}"
+                            variant="table-edit">
+                            <i class="bx bx-edit"></i> Edit A.Y. {{ $year }}
+                        </x-button>
 
-                        <form action="{{ route('academic.calendar.destroy', $year) }}"
+                        <form action="{{ route('academic.calendars.destroy', $year) }}"
                             method="POST"
                             onsubmit="return confirm('Are you sure you want to delete this academic year and all its semesters?');">
                             @csrf
                             @method('DELETE')
                             <x-button type="submit" variant="table-danger">
-                                <i class="bx bx-trash"></i>Delete Academic Year {{ $year }}
+                                <i class="bx bx-trash"></i> Delete A.Y. {{ $year }}
                             </x-button>
                         </form>
                     </div>

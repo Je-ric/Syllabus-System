@@ -15,7 +15,7 @@ class AcademicCalendarController extends Controller
 
     public function create()
     {
-        return view('AcademicCalendar.create');
+        return view('AcademicCalendar.form');
     }
 
     // create 2 semesters for a new academic year
@@ -47,14 +47,71 @@ class AcademicCalendarController extends Controller
 
         //
         return redirect()->route('academic.calendar.events.index', $sem1->academic_year)
-                            ->with('success', 'Academic year created successfully. You can now add events.');
+            ->with('success', 'Academic year created successfully. You can now add events.');
     }
+
+    public function edit(string $academicYear)
+    {
+        $semesters = AcademicCalendar::where('academic_year', $academicYear)->get();
+
+        if ($semesters->isEmpty()) {
+            return redirect()->route('academic.calendars.index')
+                ->with('error', 'Academic year not found.');
+        }
+
+        // Pass semesters collection and academic year
+        return view('AcademicCalendar.form', [
+            'semesters' => $semesters,
+            'academicYear' => $academicYear,
+            'isEdit' => true
+        ]);
+    }
+
+
+    public function update(Request $request, string $academicYear)
+    {
+        $semesters = AcademicCalendar::where('academic_year', $academicYear)->get();
+
+        if ($semesters->isEmpty()) {
+            return redirect()->route('academic.calendars.index')
+                ->with('error', 'Academic year not found.');
+        }
+
+        $request->validate([
+            'academic_year' => 'required|string|unique:academic_calendars,academic_year,' . $academicYear . ',academic_year',
+            'start_date_1' => 'required|date',
+            'end_date_1' => 'required|date|after_or_equal:start_date_1',
+            'start_date_2' => 'required|date',
+            'end_date_2' => 'required|date|after_or_equal:start_date_2',
+        ]);
+
+        // Update 1st semester
+        $sem1 = $semesters->where('semester', '1st')->first();
+        $sem1->update([
+            'academic_year' => $request->academic_year,
+            'start_date' => $request->start_date_1,
+            'end_date' => $request->end_date_1,
+        ]);
+
+        // Update 2nd semester
+        $sem2 = $semesters->where('semester', '2nd')->first();
+        $sem2->update([
+            'academic_year' => $request->academic_year,
+            'start_date' => $request->start_date_2,
+            'end_date' => $request->end_date_2,
+        ]);
+
+        return redirect()->route('academic.calendars.index')
+            ->with('success', 'Academic year updated successfully.');
+    }
+
+
 
     public function destroy($academic_year)
     {
         AcademicCalendar::where('academic_year', $academic_year)->delete();
-        return redirect()->route('academic.calendar.index')
-                            ->with('success', 'Academic year and its semesters deleted successfully.');
-    }
 
+        return redirect()->route('academic.calendars.index')
+            ->with('success', 'Academic year and its semesters deleted successfully.');
+    }
 }
