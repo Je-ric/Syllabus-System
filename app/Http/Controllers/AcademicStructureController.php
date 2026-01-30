@@ -32,7 +32,10 @@ class AcademicStructureController extends Controller
             'name' => $request->name,
         ]);
 
-        return back()->with('success', 'College added successfully.');
+        return back()->with('toast', [
+            'message' => 'College added successfully.',
+            'type' => 'success'
+        ]);
     }
 
     public function updateCollege(Request $request, College $college)
@@ -46,7 +49,10 @@ class AcademicStructureController extends Controller
             'name' => $request->name,
         ]);
 
-        return back()->with('success', 'College updated successfully.');
+        return back()->with('toast', [
+            'message' => 'College updated successfully.',
+            'type' => 'success'
+        ]);
     }
 
     // =======================
@@ -65,7 +71,10 @@ class AcademicStructureController extends Controller
             'college_id' => $request->college_id,
         ]);
 
-        return back()->with('success', 'Department added successfully.');
+        return back()->with('toast', [
+            'message' => 'Department added successfully.',
+            'type' => 'success'
+        ]);
     }
 
     public function updateDepartment(Request $request, Department $department)
@@ -81,7 +90,10 @@ class AcademicStructureController extends Controller
             'college_id' => $request->college_id,
         ]);
 
-        return back()->with('success', 'Department updated successfully.');
+        return back()->with('toast', [
+            'message' => 'Department updated successfully.',
+            'type' => 'success'
+        ]);
     }
 
     // =======================
@@ -106,7 +118,10 @@ class AcademicStructureController extends Controller
         // Insert into program_departments junction table
         $program->departments()->attach($request->department_id, ['role' => 'primary']);
 
-        return back()->with('success', 'Program added successfully.');
+        return back()->with('toast', [
+            'message' => 'Program added successfully.',
+            'type' => 'success'
+        ]);
     }
 
     public function updateProgram(Request $request, Program $program)
@@ -128,6 +143,9 @@ class AcademicStructureController extends Controller
         // Update program_departments junction table
         $program->departments()->sync([$request->department_id => ['role' => 'primary']]);
 
-        return back()->with('success', 'Program updated successfully.');
+        return back()->with('toast', [
+            'message' => 'Program updated successfully.',
+            'type' => 'success'
+        ]);
     }
 }

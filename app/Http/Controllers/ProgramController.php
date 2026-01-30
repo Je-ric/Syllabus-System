@@ -40,7 +40,10 @@ class ProgramController extends Controller
         ProgramCodeHelper::resequencePeoCodes($programId);
 
         return redirect()->route('programs.show', ['program' => $programId])
-            ->with('message', 'PEO deleted and codes re-sequenced!');
+            ->with('toast', [
+                'message' => 'PEO deleted and codes re-sequenced!',
+                'type' => 'success'
+            ]);
     }
 
     public function deletePo(int $poId)
@@ -54,6 +57,9 @@ class ProgramController extends Controller
         ProgramCodeHelper::resequencePoCodes($programId);
 
         return redirect()->route('programs.show', ['program' => $programId])
-            ->with('message', 'PO deleted and codes re-sequenced!');
+            ->with('toast', [
+                'message' => 'PO deleted and codes re-sequenced!',
+                'type' => 'success'
+            ]);
     }
 }

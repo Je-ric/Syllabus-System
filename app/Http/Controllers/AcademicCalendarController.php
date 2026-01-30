@@ -50,7 +50,11 @@ class AcademicCalendarController extends Controller
 
         //
         return redirect()->route('academic.calendar.events.index', $sem1->academic_year)
-            ->with('success', 'Academic year created successfully. You can now add events.');
+            ->with('toast', [
+                'message' => 'Academic year created successfully. You can now add events.',
+                'type' => 'success'
+            ]);
+
     }
 
     public function edit(string $academicYear)
@@ -61,7 +65,10 @@ class AcademicCalendarController extends Controller
 
         if ($semesters->isEmpty()) {
             return redirect()->route('academic.calendars.index')
-                ->with('error', 'Academic year not found.');
+                ->with('toast', [
+                    'message' => 'Academic year not found.',
+                    'type' => 'error'
+                ]);
         }
 
         // Check if any semester has events
@@ -83,7 +90,10 @@ class AcademicCalendarController extends Controller
 
         if ($semesters->isEmpty()) {
             return redirect()->route('academic.calendars.index')
-                ->with('error', 'Academic year not found.');
+                ->with('toast', [
+                    'message' => 'Academic year not found.',
+                    'type' => 'error'
+                ]);
         }
 
         if ( $academicYear !== $request->academic_year ) {
@@ -91,6 +101,10 @@ class AcademicCalendarController extends Controller
             if ($existing) {
                 return redirect()->back()
                     ->withErrors(['academic_year' => 'The academic year has already been taken.'])
+                    ->with('toast', [
+                        'message' => 'The academic year has already been taken.',
+                        'type' => 'error'
+                    ])
                     ->withInput();
             }
         }
@@ -120,7 +134,10 @@ class AcademicCalendarController extends Controller
         ]);
 
         return redirect()->route('academic.calendars.index')
-            ->with('success', 'Academic year updated successfully.');
+            ->with('toast', [
+                'message' => 'Academic year updated successfully.',
+                'type' => 'success'
+            ]);
     }
 
 
@@ -129,6 +146,9 @@ class AcademicCalendarController extends Controller
         AcademicCalendar::where('academic_year', $academic_year)->delete();
 
         return redirect()->route('academic.calendars.index')
-            ->with('success', 'Academic year and its semesters deleted successfully.');
+            ->with('toast', [
+                'message' => 'Academic year deleted successfully.',
+                'type' => 'success'
+            ]);
     }
 }

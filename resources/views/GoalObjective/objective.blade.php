@@ -6,7 +6,6 @@
     <h1 class="text-xl font-bold">Objective Management</h1>
 
     @include('includes.error-lists')
-    @include('includes.session-success')
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="space-y-4 bg-gray-50 p-4 rounded border border-gray-200">
@@ -62,12 +61,12 @@
                             <div class="space-y-2">
                                 <label class="block font-semibold">Add Objective</label>
 
-                                <input
+                                {{-- <input
                                     type="text"
                                     value="Goal Code (auto)"
                                     class="w-full border rounded px-3 py-2 bg-gray-100 text-gray-500"
                                     disabled
-                                >
+                                > --}}
                                 <textarea
                                     name="objective_text"
                                     rows="3"

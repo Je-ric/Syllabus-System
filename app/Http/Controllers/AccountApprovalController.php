@@ -38,7 +38,10 @@ class AccountApprovalController extends Controller
         }
 
         return redirect()->route('accounts.approval')
-            ->with('success', 'User approved and assigned as Faculty.');
+            ->with('toast', [
+                'message' => 'User approved and assigned as Faculty.',
+                'type' => 'success'
+            ]);
     }
 
     public function reject(Request $request)
@@ -51,7 +54,11 @@ class AccountApprovalController extends Controller
             Mail::to($user->email)->send(new AccountStatusUpdated($user, 'rejected'));
         }
 
-        return redirect()->route('accounts.approval');
+        return redirect()->route('accounts.approval')
+            ->with('toast', [
+                'message' => 'User account rejected.',
+                'type' => 'success'
+            ]);
     }
 
     public function restore(Request $request)
@@ -62,7 +69,11 @@ class AccountApprovalController extends Controller
             $user->save();
         }
 
-        return redirect()->route('accounts.approval');
+        return redirect()->route('accounts.approval')
+            ->with('toast', [
+                'message' => 'User account restored to pending.',
+                'type' => 'success'
+            ]);
     }
 
     public function disable(Request $request)
@@ -76,7 +87,11 @@ class AccountApprovalController extends Controller
             Mail::to($user->email)->send(new AccountStatusUpdated($user, 'disabled'));
         }
 
-        return redirect()->route('accounts.approval');
+        return redirect()->route('accounts.approval')
+            ->with('toast', [
+                'message' => 'User account disabled.',
+                'type' => 'success'
+            ]);
     }
 
     // public function changeStatus(Request $request)
@@ -121,6 +136,9 @@ class AccountApprovalController extends Controller
 
         return redirect()
             ->route('accounts.approval')
-            ->with('success', "Roles assigned to {$user->name} successfully.");
+            ->with('toast', [
+                'message' => "Roles assigned to {$user->name} successfully.",
+                'type' => 'success'
+            ]);
     }
 }
