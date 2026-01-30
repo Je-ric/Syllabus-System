@@ -86,66 +86,23 @@
                         </thead>
                         <tbody>
                             @foreach ($goals as $goal)
-                                <tr x-data="{ editing: false }" class="odd:bg-white even:bg-gray-50">
-                                    {{-- when button clicked, the value of "editing" will be = true
-                                        then all input fields will be shown --}}
-
-                                    <form
-                                        method="POST"
-                                        action="{{ route('goal.update', $goal->id) }}"
-                                        class="contents"
-                                    >
-                                        @csrf
-                                        @method('PUT')
-
-                                        <td class="border p-2 align-top">
-                                            <span>{{ $goal->college_goals_code }}</span>
-
-                                            {{-- <input
-                                                x-show="editing"
-                                                type="text"
-                                                name="college_goals_code"
-                                                value="{{ $goal->college_goals_code }}"
-                                                class="w-full border rounded px-2 py-1 text-sm resize-none overflow-hidden"> --}}
-                                        </td>
-
-                                        <td class="border p-2">
-                                            <span x-show="!editing">{{ $goal->goal_text }}</span>
-
-                                            <textarea
-                                                x-show="editing"
-                                                name="goal_text"
-                                                rows="9"
-                                                class="w-full border rounded px-2 py-1 text-sm">
-                                                {{ $goal->goal_text }}
-                                            </textarea>
-                                        </td>
-
-                                        <td class="border p-2 space-y-1">
-                                            <x-button
-                                                x-show="!editing"
-                                                @click="editing = true"
-                                                variant="table-edit">
-                                                Edit
-                                            </x-button>
-
-                                            <x-button
-                                                type="submit"
-                                                x-show="editing"
-                                                variant="table-confirm">
-                                                Save
-                                            </x-button>
-
-                                            <x-button
-                                                x-show="editing"
-                                                @click="editing = false"
-                                                variant="table-cancel">
-                                                Cancel
-                                            </x-button>
-                                        </td>
-                                    </form>
+                                <tr class="odd:bg-white even:bg-gray-50">
+                                    <td class="border p-2 align-top">
+                                        <span>{{ $goal->college_goals_code }}</span>
+                                    </td>
 
                                     <td class="border p-2">
+                                        {{ $goal->goal_text }}
+                                    </td>
+
+                                    <td class="border p-2 space-x-2">
+                                        <x-button
+                                            type="button"
+                                            variant="table-edit"
+                                            onclick="document.getElementById('updateGoalModal_{{ $goal->id }}').showModal()">
+                                            Edit
+                                        </x-button>
+
                                         <x-button
                                             type="button"
                                             variant="table-danger"
@@ -154,8 +111,9 @@
                                         </x-button>
                                     </td>
                                 </tr>
+                                @include('GoalObjective.modals.updateGoalModal', ['goal' => $goal])
                                 @include('GoalObjective.modals.deleteGoalModal', ['goal' => $goal])
-                                @endforeach
+                            @endforeach
 
                         </tbody>
                     </table>

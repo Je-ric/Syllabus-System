@@ -109,64 +109,33 @@
                         </thead>
                         <tbody>
                             @foreach ($objectives as $objective)
-                                <tr  x-data="{ editing: false }" class="odd:bg-white even:bg-gray-50">
-                                    <form method="POST"
-                                        action="{{ route('objective.update', $objective->id) }}"
-                                        class="contents">
-                                        @csrf
-                                        @method('PUT')
+                                <tr class="odd:bg-white even:bg-gray-50">
+                                    <td class="border p-2 align-top">
+                                        <span>{{ $objective->dept_obj_code }}</span>
+                                    </td>
 
-                                        <td class="border p-2 align-top">
-                                            <span>{{ $objective->dept_obj_code  }}</span>
-                                        </td>
+                                    <td class="border p-2">
+                                        {{ $objective->objective_text }}
+                                    </td>
 
-                                        <td class="border p-2">
-                                            <span x-show="!editing">{{ $objective->objective_text }}</span>
+                                    <td class="border p-2 space-x-2">
+                                        <x-button
+                                            type="button"
+                                            variant="table-edit"
+                                            onclick="document.getElementById('updateObjectiveModal_{{ $objective->id }}').showModal()">
+                                            Edit
+                                        </x-button>
 
-                                            <textarea
-                                                x-show="editing"
-                                                name="objective_text"
-                                                rows="3"
-                                                placeholder="Objective description"
-                                                class="w-full border rounded px-3 py-2"
-                                                required
-                                            >{{ old('objective_text', $objective->objective_text) }}</textarea>
-                                        </td>
-
-                                        <td class="border p-2 space-y-1">
-                                            <x-button
-                                                x-show="!editing"
-                                                @click="editing = true"
-                                                variant="table-edit">
-                                                Edit
-                                            </x-button>
-
-                                            <x-button
-                                                type="submit"
-                                                x-show="editing"
-                                                variant="table-confirm">
-                                                Save
-                                            </x-button>
-
-                                            <x-button
-                                                x-show="editing"
-                                                @click="editing = false"
-                                                variant="table-cancel">
-                                                Cancel
-                                            </x-button>
-                                        </td>
-                                    </form>
-
-                                        <td class="border p-2">
-                                            <x-button
-                                                type="button"
-                                                variant="table-danger"
-                                                onclick="document.getElementById('deleteObjectiveModal_{{ $objective->id }}').showModal()">
-                                                Delete
-                                            </x-button>
-                                        </td>
-                                    </tr>
-                            @include('GoalObjective.modals.deleteObjectiveModal', ['objective' => $objective])
+                                        <x-button
+                                            type="button"
+                                            variant="table-danger"
+                                            onclick="document.getElementById('deleteObjectiveModal_{{ $objective->id }}').showModal()">
+                                            Delete
+                                        </x-button>
+                                    </td>
+                                </tr>
+                                @include('GoalObjective.modals.updateObjectiveModal', ['objective' => $objective])
+                                @include('GoalObjective.modals.deleteObjectiveModal', ['objective' => $objective])
                             @endforeach
                         </tbody>
                     </table>
