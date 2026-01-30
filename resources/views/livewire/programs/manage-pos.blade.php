@@ -19,8 +19,10 @@
 
             {{-- PO Input Row --}}
             <div class="flex items-center gap-3">
-                (<span class="w-6 text-center font-semibold text-gray-700" x-text="String.fromCharCode(97 + index)">
-                </span>)
+                <span class="w-16 text-center font-semibold text-gray-700"
+                    {{-- x-text="peo.peo_code + index" --}}
+                    x-text="'PO' + (index + 1)">
+                </span>
 
                 <input type="text" x-model="po.po_text" placeholder="Enter PO description"
                     class="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">

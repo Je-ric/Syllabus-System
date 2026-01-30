@@ -17,6 +17,7 @@ php artisan make:migration create_program_outcomes_table
 php artisan make:migration create_program_outcome_peo_table
 php artisan make:migration create_academic_calendars_table
 php artisan make:migration create_academic_calendar_events_table
+php artisan make:migration create_courses_table
 
 
 ----------------------------------
