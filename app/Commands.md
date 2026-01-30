@@ -69,7 +69,10 @@ COMPONENT
 ----------------------------------
 php artisan make:component StatusIndicator
 php artisan make:component Button
+php artisan make:component Toast
 ----------------------------------
+
+
 php artisan migrate
 php artisan migrate:fresh
 

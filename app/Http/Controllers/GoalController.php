@@ -54,14 +54,17 @@ class GoalController extends Controller
                 // if we will do that, we need to check the college, then check its existing goals to get the count which convert to a-z.
             'goal_text' => $request->goal_text,
         ]);
-        
+
 
         return redirect()
             ->route('goal.index', ['college_id' => $request->college_id])
-            ->with('success', 'Goal added successfully.');
+            ->with('toast', [
+            'message' => 'Goal added successfully.',
+            'type' => 'success'
+        ]);
     }
 
-    
+
     public function goal_update(Request $request, CollegeGoal $goal)
     {
         $request->validate([

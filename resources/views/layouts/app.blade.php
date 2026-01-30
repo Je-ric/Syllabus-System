@@ -7,13 +7,17 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-    
+
     @livewireStyles
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
 <body class="min-h-screen">
 
+    @if (session('toast'))
+        <x-feedback-status.toast :message="session('toast')['message']" :type="session('toast')['type']" />
+    @endif
+    
     <header class="bg-black text-white">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
             <h1 class="font-bold text-xl">Syllabus System</h1>

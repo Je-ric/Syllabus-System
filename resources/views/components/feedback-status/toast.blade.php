@@ -70,4 +70,7 @@ Usage: <x-feedback-status.toast type="success" message="Your action was complete
 
 Note: Toast automatically disappears after 3.5 seconds and can be manually closed
 
+@if (session('toast'))
+    <x-feedback-status.toast :message="session('toast')['message']" :type="session('toast')['type']" />
+@endif
 --}}
