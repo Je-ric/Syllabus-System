@@ -77,7 +77,10 @@ class ObjectiveController extends Controller
                 'college_id' => $request->college_id,
                 'department_id' => $request->department_id,
             ])
-            ->with('success', 'Objective added successfully.');
+            ->with('toast', [
+            'message' => 'Objective added successfully.',
+            'type' => 'success'
+        ]);
     }
 
     public function objective_update(Request $request, DepartmentObjective $objective)
@@ -95,7 +98,10 @@ class ObjectiveController extends Controller
                 'college_id' => $objective->department->college_id,
                 'department_id' => $objective->department_id,
             ])
-            ->with('success', 'Objective updated successfully.');
+            ->with('toast', [
+            'message' => 'Objective updated successfully.',
+            'type' => 'success'
+        ]);
     }
 
     public function objective_destroy(DepartmentObjective $objective)
@@ -109,7 +115,7 @@ class ObjectiveController extends Controller
             ->orderBy('dept_obj_code')
             ->get();
 
-        // Reindex 
+        // Reindex
         $count = 0;
         foreach ($remainingObjectives as $obj) {
             $newCode = chr(ord('a') + $count);
@@ -125,6 +131,9 @@ class ObjectiveController extends Controller
                 'college_id' => $objective->department->college_id,
                 'department_id' => $objective->department_id,
             ])
-            ->with('success', 'Objective deleted successfully.');
+            ->with('toast', [
+            'message' => 'Objective deleted successfully.',
+            'type' => 'success'
+        ]);
     }
 }

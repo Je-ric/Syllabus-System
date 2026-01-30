@@ -84,7 +84,10 @@ class GoalController extends Controller
 
         return redirect()
             ->route('goal.index', ['college_id' => $goal->college_id])
-            ->with('success', 'Goal updated successfully.');
+            ->with('toast', [
+            'message' => 'Goal updated successfully.',
+            'type' => 'success'
+        ]);
     }
 
     public function goal_destroy(Request $request, CollegeGoal $goal)
@@ -110,7 +113,10 @@ class GoalController extends Controller
 
         return redirect()
             ->route('goal.index', ['college_id' => $college_id])
-            ->with('success', 'Goal deleted and codes reset successfully.');
+            ->with('toast', [
+            'message' => 'Goal deleted and codes reset successfully.',
+            'type' => 'success'
+        ]);
     }
 
 }
