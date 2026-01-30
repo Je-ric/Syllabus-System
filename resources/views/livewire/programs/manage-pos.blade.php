@@ -9,7 +9,7 @@
 
     {{-- Loading indicator --}}
     <div x-show="isSaving"
-        class="p-2 rounded border border-yellow-300 bg-yellow-50 text-yellow-800 text-sm font-medium animate-pulse">
+        class="fixed top-4 left-1/2 -translate-x-1/2 z-50 p-2 rounded border border-yellow-300 bg-yellow-50 text-yellow-800 text-sm font-medium animate-pulse">
         <i class='bx bx-loader bx-spin mr-2'></i> Saving POs...
     </div>
 

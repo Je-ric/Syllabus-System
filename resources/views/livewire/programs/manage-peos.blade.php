@@ -9,7 +9,7 @@
 
     {{-- Loading indicator --}}
     <div x-show="isSaving"
-        class="p-2 rounded border border-yellow-300 bg-yellow-50 text-yellow-800 text-sm font-medium animate-pulse">
+        class="fixed top-4 left-1/2 -translate-x-1/2 z-50 p-2 rounded border border-yellow-300 bg-yellow-50 text-yellow-800 text-sm font-medium animate-pulse">
         <i class='bx bx-loader bx-spin mr-2'></i> Saving PEOs...
     </div>
 
@@ -29,10 +29,10 @@
             <form x-show="peo.id"
                     method="POST"
                     action="{{ route('programs.peo.delete', '__ID__') }}"
-                x-bind:action="'/programs/peo/' + peo.id"
-                @submit.prevent="
-                if (confirm('Delete this PEO?')) $el.submit()
-            ">
+                    x-bind:action="'/programs/peo/' + peo.id"
+                    @submit.prevent="
+                    if (confirm('Delete this PEO?')) $el.submit()
+                ">
                 @csrf
                 @method('DELETE')
 
@@ -42,7 +42,6 @@
                 </button>
             </form>
 
-            <!-- Unsaved PEO -->
             <button x-show="!peo.id" @click="peos.splice(index, 1)" type="button"
                 class="p-2 text-red-600 hover:text-red-800 rounded-full hover:bg-red-100 transition">
                 <i class='bx bx-trash'></i>
