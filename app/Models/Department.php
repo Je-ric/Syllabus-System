@@ -10,8 +10,9 @@ class Department extends Model
     use HasFactory;
 
     protected $fillable = [
-                'college_id', 
-                'name'
+                'college_id',
+                'name',
+                'chair_user_id',
                 ];
 
     public function college()
@@ -29,5 +30,10 @@ class Department extends Model
         return $this->belongsToMany(Program::class, 'program_departments')
                     ->withPivot('role') // there are cases na programs can belong to multiple departments with different roles
                     ->withTimestamps();
+    }
+
+    public function chair()
+    {
+        return $this->belongsTo(User::class, 'chair_user_id');
     }
 }

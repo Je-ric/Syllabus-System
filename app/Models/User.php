@@ -62,4 +62,9 @@ class User extends Authenticatable
     {
         return $this->roles()->where('name', $role)->exists();
     }
+
+    public function chairedDepartments()
+    {
+        return $this->hasMany(Department::class, 'chair_user_id');
+    }
 }
