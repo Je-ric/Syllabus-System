@@ -18,7 +18,7 @@ php artisan make:migration create_program_outcome_peo_table
 php artisan make:migration create_academic_calendars_table
 php artisan make:migration create_academic_calendar_events_table
 php artisan make:migration create_courses_table
-
+php artisan make:migration create_course_curriculum_maps_table
 
 ----------------------------------
 MODEL
@@ -35,6 +35,8 @@ php artisan make:model ProgramEducationObjective
 php artisan make:model ProgramOutcome
 php artisan make:model AcademicCalendar
 php artisan make:model AcademicCalendarEvent
+php artisan make:model Course
+php artisan make:model CourseCurriculumMap 
 
 
 ----------------------------------
