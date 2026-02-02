@@ -11,15 +11,18 @@ class Course extends Model
         'course_code',
         'course_title',
         'course_description',
-        'credit_units',
-        'has_lec_lab',
-        'year_level',
-        'semester',
         'prerequisite',
         'corequisite',
         'status',
         'version',
         'created_by',
+    ];
+
+    protected $casts = [
+        'has_lec_lab' => 'boolean',
+        'credit_units' => 'integer',
+        'year_level' => 'integer',
+        'semester' => 'integer',
     ];
 
     public function program()

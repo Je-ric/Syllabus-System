@@ -51,7 +51,7 @@ php artisan make:controller GoalController
 php artisan make:controller ProgramController
 php artisan make:controller AcademicCalendarController
 php artisan make:controller AcademicCalendarEventController
-
+php artisan make:controller CourseController
 
 ----------------------------------
 LIVEWIRE

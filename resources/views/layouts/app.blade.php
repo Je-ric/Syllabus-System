@@ -17,17 +17,18 @@
     @if (session('toast'))
         <x-feedback-status.toast :message="session('toast')['message']" :type="session('toast')['type']" />
     @endif
-    
+
     <header class="bg-black text-white">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
             <h1 class="font-bold text-xl">Syllabus System</h1>
             <nav class="space-x-4 text-sm">
                 <a href="{{ route('accounts.approval') }}" class="hover:underline">User Management</a>
+                <a href="{{ route('academic.calendars.index') }}" class="hover:underline">Academic Calendars</a>
                 <a href="{{ route('academic.structure.index') }}" class="hover:underline">Academic Structure</a>
                 <a href="{{ route('goal.index') }}" class="hover:underline">College Goals</a>
                 <a href="{{ route('objective.index') }}" class="hover:underline">Department Objectives</a>
                 <a href="{{ route('programs.index') }}" class="hover:underline">Manage Programs</a>
-                <a href="{{ route('academic.calendars.index') }}" class="hover:underline">Academic Calendars</a>
+                <a href="{{ route('courses.index') }}" class="hover:underline">Manage Courses</a>
                 @auth
                     <form action="{{ route('logout') }}" method="POST" class="inline">
                         @csrf

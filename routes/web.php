@@ -11,6 +11,7 @@ use App\Http\Controllers\ObjectiveController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\AcademicCalendarController;
 use App\Http\Controllers\AcademicCalendarEventController;
+use App\Http\Controllers\CourseController;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -89,4 +90,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/academic-calendars/{semester}/events', [AcademicCalendarEventController::class, 'store'])->name('academic.calendar.events.store');
     Route::put('/academic-calendars/events/{event}', [AcademicCalendarEventController::class, 'update'])->name('academic.calendar.events.update');
     Route::delete('/academic-calendars/events/{event}', [AcademicCalendarEventController::class, 'destroy'])->name('academic.calendar.events.destroy');
+
+    Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
+    Route::get('/courses/create', [CourseController::class, 'create'])->name('courses.create');
+    Route::post('/courses', [CourseController::class, 'store'])->name('courses.store');
 });
