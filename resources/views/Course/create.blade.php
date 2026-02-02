@@ -2,26 +2,30 @@
 
 @section('content')
 
+<div class="mb-6">
+    <a href="{{ route('courses.index') }}" class="text-blue-600 hover:underline mb-4 inline-block">
+        <i class="bx bx-chevron-left"></i> Back to Courses
+    </a>
+    <h1 class="text-2xl font-bold">Create New Course</h1>
+</div>
+
+@if(!$program)
+    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+        <p class="text-yellow-800">Please select a program from the courses page before creating a course.</p>
+    </div>
+@endif
+
 <form action="{{ route('courses.store') }}" method="POST">
     @csrf
-    
-    {{-- Program Selection --}}
-    <div class="mb-4">
-        <label class="block font-semibold">Program</label>
-        <select name="program_id" class="border rounded px-2 py-1 w-full" required>
-            <option value="">Select a Program</option>
-            @forelse($programs as $program)
-                <option value="{{ $program->id }}" {{ old('program_id') == $program->id ? 'selected' : '' }}>
-                    {{ $program->name }}
-                </option>
-            @empty
-                <option disabled>No programs available</option>
-            @endforelse
-        </select>
-        @error('program_id')
-            <span class="text-red-600 text-sm">{{ $message }}</span>
-        @enderror
-    </div>
+
+    {{-- Program Selection (Hidden if passed via URL) --}}
+    <input type="hidden" name="program_id" value="{{ $program?->id ?? '' }}">
+
+    @if($program)
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <p class="text-gray-700"><span class="font-semibold">Program:</span> {{ $program->name }}</p>
+        </div>
+    @endif
 
     {{-- Course Code and Title --}}
     <div class="grid grid-cols-2 gap-4 mb-4">
@@ -100,37 +104,53 @@
     <hr class="my-6">
 
     {{-- Program Course (PO and IED Mapping) --}}
-    <h2 class="text-lg font-semibold mb-4">Program Outcomes Mapping</h2>
+    @if($program)
+        <hr class="my-6">
+        <h2 class="text-lg font-semibold mb-4">Program Outcomes Mapping</h2>
 
-    <div class="grid grid-cols-2 gap-6 mb-4">
-        {{-- Left Column - Program Outcomes List --}}
-        <div>
-            <label class="block font-semibold mb-2">Select Program Outcomes</label>
-            <div class="border rounded p-3 bg-gray-50 h-64 overflow-y-auto">
-                <div id="program-outcomes" class="space-y-2">
-                    {{-- PO checkboxes will be populated here --}}
-                    <p class="text-gray-500 text-sm">Select a program above to see outcomes</p>
-                </div>
+        @if($programOutcomes->isEmpty())
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                <p class="text-yellow-800">No program outcomes defined for {{ $program->name }}. Please define outcomes first.</p>
             </div>
-        </div>
-
-        {{-- Right Column - IED Radio Buttons --}}
-        <div>
-            <label class="block font-semibold mb-2">Integrated Educational Design (IED)</label>
-            <div class="border rounded p-3 bg-gray-50">
-                <div class="space-y-3">
-                    <div>
-                        <label class="block font-semibold text-sm mb-2">Select IED Level for Checked Outcomes:</label>
-                        <div class="space-y-2">
-                            <label><input type="radio" name="ied" value="1" {{ old('ied') == '1' ? 'checked' : '' }}> 1 - Introduced</label>
-                            <label><input type="radio" name="ied" value="2" {{ old('ied') == '2' ? 'checked' : '' }}> 2 - Developed</label>
-                            <label><input type="radio" name="ied" value="3" {{ old('ied') == '3' ? 'checked' : '' }}> 3 - Mastered</label>
-                        </div>
-                    </div>
-                </div>
+        @else
+            <div class="border rounded-lg overflow-hidden">
+                <table class="w-full">
+                    <thead class="bg-gray-100 border-b">
+                        <tr>
+                            <th class="px-4 py-3 text-left font-semibold">PO Code</th>
+                            <th class="px-4 py-3 text-left font-semibold">Learning Outcome</th>
+                            <th class="px-4 py-3 text-left font-semibold">IED Level</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($programOutcomes as $outcome)
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="px-4 py-3 font-semibold text-blue-600">{{ $outcome->po_code }}</td>
+                                <td class="px-4 py-3 text-sm">{{ $outcome->po_text }}</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex gap-4">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="po_mapping[{{ $outcome->id }}]" value="1" class="mr-1">
+                                            <span class="text-xs text-gray-600">1 - Intro</span>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="po_mapping[{{ $outcome->id }}]" value="2" class="mr-1">
+                                            <span class="text-xs text-gray-600">2 - Emph</span>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="po_mapping[{{ $outcome->id }}]" value="3" class="mr-1">
+                                            <span class="text-xs text-gray-600">3 - Dem</span>
+                                        </label>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
-        </div>
-    </div>
+            <p class="text-sm text-gray-500 mt-2">Select IED level for each outcome that applies to this course (leave blank if not applicable)</p>
+        @endif
+    @endif
 
     <div class="flex gap-2 mt-6">
         <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Create Course</button>

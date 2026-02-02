@@ -5,18 +5,33 @@ namespace App\Http\Controllers;
 use App\Models\Course;
 use App\Models\Program;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CourseController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return view('Course.index');
+        $program = null;
+
+        if ($request->filled('program_id')) {
+            $program = Program::findOrFail($request->program_id);
+        }
+
+        return view('Course.index', compact('program'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        $programs = Program::all();
-        return view('Course.create', compact('programs'));
+        $programId = $request->query('program_id');
+        $program = null;
+        $programOutcomes = collect();
+
+        if ($programId) {
+            $program = Program::findOrFail($programId);
+            $programOutcomes = $program->outcomes()->orderBy('po_code')->get();
+        }
+
+        return view('Course.create', compact('program', 'programOutcomes'));
     }
 
     public function store(Request $request)
@@ -32,7 +47,8 @@ class CourseController extends Controller
             'semester' => 'nullable|integer|in:1,2',
             'prerequisite' => 'nullable|string',
             'corequisite' => 'nullable|string',
-            'ied' => 'nullable|integer|in:1,2,3',
+            'po_mapping' => 'nullable|array',
+            'po_mapping.*' => 'nullable|integer|in:1,2,3',
         ]);
 
         $course = Course::create([
@@ -46,10 +62,25 @@ class CourseController extends Controller
             'credit_units' => $request->credits,
             'year_level' => $request->year_level,
             'semester' => $request->semester,
-            'created_by' => Auth::auth()->id(),
+            'created_by' => Auth::id(),
         ]);
 
-        return redirect()->route('courses.index')
+        // Attach outcomes with IED level (only those with selected IED level)
+        $poMapping = $request->input('po_mapping', []);
+        if (!empty($poMapping)) {
+            $outcomeData = [];
+            foreach ($poMapping as $outcomeId => $iedLevel) {
+                if ($iedLevel) { // Only attach if IED level is selected
+                    $outcomeData[$outcomeId] = ['ied' => $iedLevel];
+                }
+            }
+            if (!empty($outcomeData)) {
+                $course->programOutcomes()->attach($outcomeData);
+            }
+        }
+
+        $program = Program::find($request->program_id);
+        return redirect()->route('courses.index', ['program_id' => $program->id])
                         ->with('toast', [
                             'message' => 'Course created successfully.',
                             'type' => 'success'
@@ -58,7 +89,6 @@ class CourseController extends Controller
 
     public function show($id)
     {
-        //
     }
 
 }

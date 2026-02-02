@@ -35,4 +35,10 @@ class Program extends Model
         return $this->hasMany(ProgramOutcome::class);
     }
 
+    // each program has many courses
+    public function courses()
+    {
+        return $this->hasMany(Course::class);
+    }
+
 }

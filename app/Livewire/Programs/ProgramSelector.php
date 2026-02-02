@@ -16,11 +16,17 @@ class ProgramSelector extends Component
     public $collegeId;
     public $departmentId;
     public $programId;
+    
+    public $redirectRoute = 'programs.show'; // Default route, can be overridden
 
-    public function mount($programId = null)
+    public function mount($programId = null, $redirectRoute = null)
     {
         $this->colleges = College::orderBy('name')->get();
         $this->programId = $programId;
+        
+        if ($redirectRoute) {
+            $this->redirectRoute = $redirectRoute;
+        }
 
         if ($this->programId) {
             $this->preselectFromProgram($this->programId);
@@ -48,7 +54,11 @@ class ProgramSelector extends Component
     public function updatedProgramId()
     {
         if ($this->programId) {
-            return redirect()->route('programs.show', $this->programId);
+            // Redirect to appropriate route based on context
+            if ($this->redirectRoute === 'courses.index') {
+                return redirect()->route('courses.index', ['program_id' => $this->programId]);
+            }
+            return redirect()->route($this->redirectRoute, $this->programId);
         }
     }
 
