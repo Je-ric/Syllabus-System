@@ -39,7 +39,7 @@
                     {{-- Admin + Dean + Chair --}}
                     @if(auth()->user()->hasRole('admin') || auth()->user()->hasRole('chair'))
                         <a href="{{ route('objective.index') }}" class="hover:underline">Department Objectives</a>
-                        <a href="{{ route('programs.index') }}" class="hover:underline">Manage Programs</a>
+                        <a href="{{ route('programs.index') }}" class="hover:underline">PEOs & POs</a>
                         <a href="{{ route('courses.index') }}" class="hover:underline">Manage Courses</a>
                     @endif
 

@@ -141,4 +141,9 @@ class AccountApprovalController extends Controller
                 'type' => 'success'
             ]);
     }
+
+    public function edit(User $user)
+    {
+        
+    }
 }

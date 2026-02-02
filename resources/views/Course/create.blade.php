@@ -106,7 +106,11 @@
     {{-- Program Course (PO and IED Mapping) --}}
     @if($program)
         <hr class="my-6">
-        <h2 class="text-lg font-semibold mb-4">Program Outcomes Mapping</h2>
+        <div class="flex justify-between mb-4">
+            <h2 class="text-lg font-semibold mb-4">Program Outcomes Mapping</h2>
+
+            <p><b>Level:</b> I – Introductory, E – Enabling, D – Demonstrative</p>
+        </div>
 
         @if($programOutcomes->isEmpty())
             <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
@@ -125,21 +129,26 @@
                     <tbody>
                         @foreach($programOutcomes as $outcome)
                             <tr class="border-b hover:bg-gray-50">
-                                <td class="px-4 py-3 font-semibold text-blue-600">{{ $outcome->po_code }}</td>
-                                <td class="px-4 py-3 text-sm">{{ $outcome->po_text }}</td>
+                                <td class="px-4 py-3 font-semibold text-blue-600">
+                                    {{-- {{ $outcome->po_code }} --}}
+                                    PO{{ $loop->iteration }}
+                                </td>
+                                <td class="px-4 py-3 text-sm" >
+                                    {{ $outcome->po_text }}
+                                </td>
                                 <td class="px-4 py-3">
                                     <div class="flex gap-4">
                                         <label class="flex items-center cursor-pointer">
-                                            <input type="radio" name="po_mapping[{{ $outcome->id }}]" value="1" class="mr-1">
-                                            <span class="text-xs text-gray-600">1 - Intro</span>
+                                            <input type="radio" name="po_mapping[{{ $outcome->id }}]" value="I" class="mr-1">
+                                            <span class="text-xs text-gray-600">I</span>
                                         </label>
                                         <label class="flex items-center cursor-pointer">
-                                            <input type="radio" name="po_mapping[{{ $outcome->id }}]" value="2" class="mr-1">
-                                            <span class="text-xs text-gray-600">2 - Emph</span>
+                                            <input type="radio" name="po_mapping[{{ $outcome->id }}]" value="E" class="mr-1">
+                                            <span class="text-xs text-gray-600">E</span>
                                         </label>
                                         <label class="flex items-center cursor-pointer">
-                                            <input type="radio" name="po_mapping[{{ $outcome->id }}]" value="3" class="mr-1">
-                                            <span class="text-xs text-gray-600">3 - Dem</span>
+                                            <input type="radio" name="po_mapping[{{ $outcome->id }}]" value="D" class="mr-1">
+                                            <span class="text-xs text-gray-600">D</span>
                                         </label>
                                     </div>
                                 </td>
