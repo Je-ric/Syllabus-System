@@ -4,23 +4,50 @@
         <x-modal.x-button :modalId="'addProgramModal'" />
     </x-modal.header>
 
-    <x-modal.body>
-        <div class="space-y-3">
-            <p class="text-gray-700">Please review before creating:</p>
-            <div class="bg-gray-50 p-3 rounded border border-gray-200">
-                <p class="font-semibold text-sm">Goal Details:</p>
-                {{-- <ul class="text-sm mt-2 space-y-1">
-                    <li><span class="font-medium">Code:</span> {{ $goal->college_goals_code }}</li>
-                    <li><span class="font-medium">Text:</span> {{ $goal->goal_text }}</li>
-                </ul> --}}
+    <form method="POST" action="{{ route('program.store') }}">
+        @csrf
+
+        <input type="hidden" name="department_id" id="addProgram_department_id" value="">
+
+        <x-modal.body>
+            <div class="space-y-3">
+                <div>
+                    <label class="block font-medium text-sm text-gray-700">Program Name</label>
+                    <input
+                        type="text"
+                        name="name"
+                        placeholder="Program Name"
+                        class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-green-500"
+                        required>
+                </div>
+
+                <div>
+                    <label class="block font-medium text-sm text-gray-700">BOR Approval No</label>
+                    <input type="text"
+                            name="bor_approval_no"
+                            placeholder="BOR Resolution No."
+                            class="w-full border rounded px-3 py-2"
+                            required>
+                </div>
+
+                <div>
+                    <label class="block font-medium text-sm text-gray-700">BOR Approval Date</label>
+                    <input type="date"
+                            name="bor_approval_date"
+                            class="w-full border rounded px-3 py-2"
+                            required>
+                </div>
+
+                <p class="text-gray-500 text-sm">This program will be created under the selected department.</p>
             </div>
-            <p class="text-red-600 text-sm font-medium"><i class="bx bx-error"></i> This action cannot be undone. Goal codes will be automatically reindexed.</p>
-        </div>
-    </x-modal.body>
+        </x-modal.body>
 
-    <x-modal.footer>
-        <x-modal.close-button :modalId="'addProgramModal'" text="Cancel" />
-
-
-    </x-modal.footer>
+        <x-modal.footer>
+            <x-modal.close-button :modalId="'addProgramModal'" text="Cancel" variant="close" />
+            <x-button type="submit" variant="save">
+                <i class="bx bx-save"></i>
+                Create Program
+            </x-button>
+        </x-modal.footer>
+    </form>
 </x-modal.dialog>

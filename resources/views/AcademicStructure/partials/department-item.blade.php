@@ -1,7 +1,9 @@
 <div class="ml-8 space-y-3">
 
     {{-- ADD DEPARTMENT --}}
-    @include('AcademicStructure.partials.department-form', ['college' => $college])
+    <x-button variant="add-button" onclick="openAddDepartmentModal({{ $college->id }})">
+        <i class="bx bx-plus"></i> Add Department
+    </x-button>
 
     @foreach ($departments->where('college_id', $college->id) as $dept)
         <details class="bg-gray-50 border border-gray-200 rounded-lg shadow-sm">

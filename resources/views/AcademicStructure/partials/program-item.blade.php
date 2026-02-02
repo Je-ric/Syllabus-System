@@ -1,7 +1,10 @@
 <div class="ml-8 space-y-2">
 
     {{-- ADD PROGRAM --}}
-    @include('AcademicStructure.partials.program-form', ['dept' => $dept])
+    <x-button variant="add-button" onclick="openAddProgramModal({{ $dept->id }})">
+        <i class="bx bx-plus"></i> Add Program
+    </x-button>
+
 
     <div class="space-y-2">
         @foreach ($dept->programs as $program)

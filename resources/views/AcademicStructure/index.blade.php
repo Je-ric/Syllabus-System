@@ -6,7 +6,10 @@
     <h1 class="text-2xl font-bold mb-6">Academic Structure Management</h1>
 
     {{-- ADD COLLEGE --}}
-    @include('AcademicStructure.partials.college-form')
+    <x-button variant="add-button" onclick="document.getElementById('addCollegeModal').showModal()">
+        <i class="bx bx-plus"></i> Add College
+    </x-button>
+
 
     {{-- COLLEGES --}}
     <div id="collegeAccordions" class="space-y-3">
@@ -19,11 +22,16 @@
     </div>
 
 </div>
+
+    @include('AcademicStructure.modals.addCollegeModal')
+    @include('AcademicStructure.modals.addDepartmentModal')
+    @include('AcademicStructure.modals.addProgramModal')
 @endsection
 
 <script>
 function toggle(id) {
     const element = document.getElementById(id);
+    if (!element) return;
     element.classList.toggle('hidden');
 
     // Auto-open parent accordion if form is being shown
@@ -35,8 +43,22 @@ function toggle(id) {
     }
 }
 
-// College accordion - only one open at a time
+function openAddDepartmentModal(collegeId) {
+    const input = document.getElementById('addDepartment_college_id');
+    if (input) input.value = collegeId;
+    const modal = document.getElementById('addDepartmentModal');
+    if (modal) modal.showModal();
+}
+
+function openAddProgramModal(departmentId) {
+    const input = document.getElementById('addProgram_department_id');
+    if (input) input.value = departmentId;
+    const modal = document.getElementById('addProgramModal');
+    if (modal) modal.showModal();
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    // College accordion - only one open at a time
     const collegeAccordions = document.querySelectorAll('#collegeAccordions > details');
 
     collegeAccordions.forEach(details => {
@@ -50,15 +72,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-});
 
-// Department accordion - only one open at a time within each college
-document.addEventListener('DOMContentLoaded', function() {
-    const collegeDetails = document.querySelectorAll('#collegeAccordions > details');
-
-    collegeDetails.forEach(college => {
+    // Department accordion - only one open at a time within each college
+    collegeAccordions.forEach(college => {
         const departmentAccordions = college.querySelectorAll('div > details');
-
         departmentAccordions.forEach(details => {
             details.addEventListener('toggle', function() {
                 if (this.open) {
