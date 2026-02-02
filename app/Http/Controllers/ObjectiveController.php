@@ -52,11 +52,6 @@ class ObjectiveController extends Controller
                 Rule::exists('departments', 'id')
                     ->where('college_id', $request->college_id),
             ],
-            // 'dept_obj_code' => [
-            //     'required',
-            //     Rule::unique('department_objectives', 'dept_obj_code')
-            //         ->where('department_id', $request->department_id),
-            // ],
             'objective_text' => ['required', 'string'],
         ]);
 

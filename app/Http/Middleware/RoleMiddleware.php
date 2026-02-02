@@ -14,7 +14,7 @@ class RoleMiddleware
     {
         $user = Auth::user();
 
-        // Check if user is logged in
+        // if auth
         if (!$user) {
             abort(403, 'Unauthorized'); // cleaner than calling auth() twice
         }

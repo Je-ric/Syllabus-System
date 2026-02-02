@@ -85,6 +85,4 @@ class AcademicCalendarEventController extends Controller
                             ->with('success', 'Event deleted successfully.');
     }
 
-
-
 }

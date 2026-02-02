@@ -64,9 +64,6 @@ class AuthController extends Controller
             ->with('success', 'Account created. Please verify your email.');
     }
 
-
-
-
     // Login
     public function login(Request $request)
     {

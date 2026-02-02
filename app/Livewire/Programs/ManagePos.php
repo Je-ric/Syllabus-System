@@ -71,63 +71,12 @@ class ManagePos extends Component
             $this->mapping[$po->id] = $peoIds;
         }
     }
-
-    // public function savePos(array $posData, array $mappingData): void
-    // {
-    //     $existingIds  = $this->program->outcomes()->pluck('id')->toArray();
-    //     $submittedIds = [];
-
-    //     // 1. Update / Create
-    //     foreach ($posData as $poData) {
-    //         if (empty(trim($poData['po_text'] ?? ''))) {
-    //             continue;
-    //         }
-
-    //         $po = ProgramOutcome::updateOrCreate(
-    //             ['id' => $poData['id'] ?? null],
-    //             [
-    //                 'program_id' => $this->program->id,
-    //                 'po_text'    => trim($poData['po_text']),
-    //             ]
-    //         );
-
-    //         // Sync PEO mappings
-    //         if (isset($mappingData[$po->id])) {
-    //             $po->peos()->sync($mappingData[$po->id]);
-    //         }
-
-    //         $submittedIds[] = $po->id;
-    //     }
-
-    //     // 2. Delete removed POs
-    //     $idsToDelete = array_diff($existingIds, $submittedIds);
-    //     if ($idsToDelete) {
-    //         ProgramOutcome::whereIn('id', $idsToDelete)->delete();
-    //     }
-
-    //     // 3. Resequence PO codes (a, b, c...)
-    //     $pos = $this->program->outcomes()
-    //         ->orderBy('id') // IMPORTANT
-    //         ->get();
-
-    //     foreach ($pos as $index => $po) {
-    //         $po->update([
-    //             'po_code' => $this->numberToLetter($index + 1),
-    //         ]);
-    //     }
-
-    //     // 4. Reload state
-    //     $this->loadPos();
-    //     $this->loadMapping();
-
-    //     session()->flash('message', 'POs saved and resequenced successfully!');
-    // }
-
     public function savePos(array $posData, array $mappingData): void
     {
         $existingIds  = $this->program->outcomes()->pluck('id')->toArray();
         $submittedIds = [];
 
+        // Save or update POs
         foreach ($posData as $poData) {
             if (empty(trim($poData['po_text'] ?? ''))) continue;
 

@@ -133,6 +133,7 @@ class AccountApprovalController extends Controller
         });
 
         $user->roles()->sync($roleIds); // Sync roles
+        // means any roles not in the list will be removed
 
         return redirect()
             ->route('accounts.approval')
@@ -144,6 +145,6 @@ class AccountApprovalController extends Controller
 
     public function edit(User $user)
     {
-        
+
     }
 }

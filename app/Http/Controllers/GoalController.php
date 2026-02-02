@@ -33,12 +33,6 @@ class GoalController extends Controller
     {
         $request->validate([
             'college_id' => ['required', 'exists:colleges,id'],
-            // 'college_goals_code' => [
-            //     'required',
-            //     'string',
-            //     Rule::unique('college_goals', 'college_goals_code')
-            //         ->where('college_id', $request->college_id),
-            // ],
             'goal_text' => ['required', 'string'],
         ]);
 
@@ -55,7 +49,6 @@ class GoalController extends Controller
             'goal_text' => $request->goal_text,
         ]);
 
-
         return redirect()
             ->route('goal.index', ['college_id' => $request->college_id])
             ->with('toast', [
@@ -64,21 +57,14 @@ class GoalController extends Controller
         ]);
     }
 
-
+    // auto code re-sequence
     public function goal_update(Request $request, CollegeGoal $goal)
     {
         $request->validate([
-            // 'college_goals_code' => [
-            //     'required',
-            //     Rule::unique('college_goals', 'college_goals_code')
-            //         ->where('college_id', $goal->college_id)
-            //         ->ignore($goal->id),
-            // ],
             'goal_text' => ['required', 'string'],
         ]);
 
         $goal->update([
-            // 'college_goals_code' => $request->college_goals_code,
             'goal_text' => $request->goal_text,
         ]);
 
