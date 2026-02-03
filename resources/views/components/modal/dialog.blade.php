@@ -6,7 +6,7 @@
 ])
 
 <dialog id="{{ $id }}" class="modal backdrop-blur-sm" {{ $attributes }}>
-    <div class="modal-box {{ $width }} {{ $maxWidth }} p-0 overflow-hidden rounded-xl bg-white shadow-xl flex flex-col {{ $class }}">
+    <div class="modal-box {{ $width }} {{ $maxWidth }} max-h-[85vh] p-0 overflow-hidden rounded-xl bg-white shadow-xl flex flex-col {{ $class }}">
         {{ $slot }}
     </div>
 </dialog>
