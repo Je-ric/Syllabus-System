@@ -34,6 +34,19 @@ class CourseController extends Controller
         return view('Course.index', compact('program', 'groupedCourses'));
     }
 
+    // public function create(Request $request)
+    // {
+    //     $programId = $request->query('program_id');
+    //     $program = null;
+    //     $programOutcomes = collect();
+
+    //     if ($programId) {
+    //         $program = Program::findOrFail($programId);
+    //         $programOutcomes = $program->outcomes()->orderBy('po_code')->get();
+    //     }
+
+    //     return view('Course.create', compact('program', 'programOutcomes'));
+    // }
     public function create(Request $request)
     {
         $programId = $request->query('program_id');
@@ -45,7 +58,45 @@ class CourseController extends Controller
             $programOutcomes = $program->outcomes()->orderBy('po_code')->get();
         }
 
-        return view('Course.create', compact('program', 'programOutcomes'));
+        $poSelections = collect();
+        $formAction = route('courses.store');
+        $formMethod = 'POST';
+        $pageTitle = 'Create New Course';
+        $submitLabel = 'Create Course';
+
+        return view('Course.form', compact(
+            'program',
+            'programOutcomes',
+            'poSelections',
+            'formAction',
+            'formMethod',
+            'pageTitle',
+            'submitLabel'
+        ));
+    }
+
+    public function edit(Course $course)
+    {
+        $course->load(['program', 'programOutcomes']);
+        $program = $course->program;
+        $programOutcomes = $program->outcomes()->orderBy('po_code')->get();
+
+        $poSelections = $course->programOutcomes->pluck('pivot.ied', 'id');
+        $formAction = route('courses.update', $course->id);
+        $formMethod = 'PUT';
+        $pageTitle = 'Edit Course';
+        $submitLabel = 'Update Course';
+
+        return view('Course.form', compact(
+            'course',
+            'program',
+            'programOutcomes',
+            'poSelections',
+            'formAction',
+            'formMethod',
+            'pageTitle',
+            'submitLabel'
+        ));
     }
 
     public function store(Request $request)
@@ -102,13 +153,13 @@ class CourseController extends Controller
         return view('Course.show', compact('course'));
     }
 
-    public function edit(Course $course)
-    {
-        $program = $course->program;
-        $programOutcomes = $program->outcomes()->orderBy('po_code')->get();
+    // public function edit(Course $course)
+    // {
+    //     $program = $course->program;
+    //     $programOutcomes = $program->outcomes()->orderBy('po_code')->get();
 
-        return view('Course.edit', compact('course', 'program', 'programOutcomes'));
-    }
+    //     return view('Course.form', compact('course', 'program', 'programOutcomes'));
+    // }
 
     public function update(Request $request, Course $course)
     {
