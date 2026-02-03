@@ -1,4 +1,4 @@
-@extends('layouts.app')
+{{-- @extends('layouts.app')
 
 @section('content')
 
@@ -9,7 +9,7 @@
     </div>
 </div>
 
-@if($program)
+@if ($program)
     <div class="mb-6 flex justify-between items-center">
         <h2 class="text-xl font-semibold">Courses in {{ $program->name }}</h2>
         <a href="{{ route('courses.create', ['program_id' => $program->id]) }}" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
@@ -38,7 +38,7 @@
                 <p><span class="text-gray-600">Semester:</span> {{ $course->semester ? 'Sem ' . $course->semester : 'N/A' }}</p>
                 <p><span class="text-gray-600">Lab:</span> {{ $course->has_lec_lab ? 'Yes' : 'No' }}</p>
             </div>
-            @if($course->course_description)
+            @if ($course->course_description)
                 <p class="mt-2 text-sm text-gray-700">{{ $course->course_description }}</p>
             @endif
             <div class="mt-3">
@@ -65,5 +65,121 @@
 @endif
 
 @include('Course.modals.viewCourseModal', ['course' => $course])
+
+@endsection --}}
+
+@extends('layouts.app')
+
+@section('content')
+
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold mb-4">Manage Courses</h1>
+        <div class="border rounded-lg p-6 bg-gray-50">
+            <livewire:programs.program-selector :program-id="optional($program)?->id" redirect-route="courses.index" />
+        </div>
+    </div>
+
+    @if ($program)
+        <div class="mb-6 flex justify-between items-center">
+            <h2 class="text-xl font-semibold">Courses in {{ $program->name }}</h2>
+            <a href="{{ route('courses.create', ['program_id' => $program->id]) }}"
+                class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                <i class="bx bx-plus"></i> Add Course
+            </a>
+        </div>
+
+        @php
+            // Group courses by year level, then sort by semester
+            $groupedCourses = $program
+                ->courses()
+                ->orderBy('year_level')
+                ->orderBy('semester')
+                ->orderBy('course_code')
+                ->get()
+                ->groupBy('year_level');
+        @endphp
+
+        @foreach ($groupedCourses as $year => $courses)
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold mb-2">Year {{ $year ?? 'N/A' }}</h3>
+
+                @php
+                    $semGrouped = $courses->groupBy('semester');
+                @endphp
+
+                @foreach ($semGrouped as $sem => $semCourses)
+                    <h4 class="font-medium mb-1">Semester {{ $sem ?? 'N/A' }}</h4>
+                    <div class="overflow-x-auto">
+                        <table class="table-auto w-full border-collapse border border-gray-300 text-sm">
+                            <thead class="bg-gray-100 text-xs">
+                                <tr>
+                                    <th class="border px-2 py-1">Year/Sem</th>
+                                    <th class="border px-2 py-1">CODE</th>
+                                    <th class="border px-2 py-1">TITLE OF THE COURSE</th>
+                                    <th class="border px-2 py-1">Units</th>
+                                    @foreach ($program->outcomes as $outcome)
+                                        <th class="border px-2 py-1 text-center">{{ $outcome->po_code }}</th>
+                                    @endforeach
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @php
+                                    $grouped = $program
+                                        ->courses()
+                                        ->orderBy('year_level')
+                                        ->orderBy('semester')
+                                        ->get()
+                                        ->groupBy(function ($c) {
+                                            return $c->year_level . '-' . $c->semester;
+                                        });
+                                @endphp
+
+                                @foreach ($grouped as $yearSem => $courses)
+                                    @php
+                                        $parts = explode('-', $yearSem);
+                                        $year = $parts[0];
+                                        $sem = $parts[1];
+                                    @endphp
+
+                                    @foreach ($courses as $index => $course)
+                                        <tr class="hover:bg-gray-50">
+                                            @if ($index === 0)
+                                                <td class="border px-2 py-1 text-center" rowspan="{{ count($courses) }}">
+                                                    Year {{ $year ?? 'N/A' }}<br>Sem {{ $sem ?? 'N/A' }}
+                                                </td>
+                                            @endif
+                                            <td class="border px-2 py-1 font-mono">{{ $course->course_code }}</td>
+                                            <td class="border px-2 py-1">{{ $course->course_title }}</td>
+                                            <td class="border px-2 py-1 text-center">{{ $course->credit_units }}</td>
+
+                                            @foreach ($program->outcomes as $outcome)
+                                                @php
+                                                    $mapped = $course->programOutcomes->firstWhere('id', $outcome->id);
+                                                @endphp
+                                                <td class="border px-2 py-1 text-center">
+                                                    @if ($mapped)
+                                                        {{ $mapped->pivot->ied }}
+                                                    @endif
+                                                </td>
+                                            @endforeach
+                                        </tr>
+                                    @endforeach
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endforeach
+            </div>
+        @endforeach
+
+        {{-- Include all course modals --}}
+        @foreach ($program->courses as $course)
+            @include('Course.modals.viewCourseModal', ['course' => $course])
+        @endforeach
+    @else
+        <div class="text-center py-12 bg-gray-50 rounded-lg">
+            <p class="text-gray-500">Select a program above to view and manage courses</p>
+        </div>
+    @endif
 
 @endsection
