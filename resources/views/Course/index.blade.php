@@ -133,6 +133,12 @@
                                                         <i class="bx bx-edit"></i> Edit
                                                     </a>
                                                     <button
+                                                        class="text-blue-600 hover:underline text-sm"
+                                                        onclick="document.getElementById('viewCourseModal_{{ $course->id }}').showModal()"
+                                                    >
+                                                        <i class="bx bx-show"></i> View
+                                                    </button>
+                                                    <button
                                                         onclick="confirm('Delete this course?') && document.getElementById('delete-form-{{ $course->id }}').submit()"
                                                         class="text-red-600 hover:text-red-800 text-sm font-medium"
                                                     >
@@ -167,5 +173,7 @@
             <p class="text-gray-500">Select a program above to view and manage courses</p>
         </div>
     @endif
+
+    @include('Course.modals.viewCourseModal', ['course' => $course])
 
 @endsection
