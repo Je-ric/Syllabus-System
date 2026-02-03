@@ -25,13 +25,15 @@ class CourseController extends Controller
                 ->orderBy('course_code')
                 ->get();
 
+            $modalCourses = $courses->unique('id');
+
             // Group by year_level, then by semester in controller, not blade
             $groupedCourses = $courses->groupBy('year_level')->map(function ($yearCourses) {
                 return $yearCourses->groupBy('semester');
             });
         }
 
-        return view('Course.index', compact('program', 'groupedCourses'));
+        return view('Course.index', compact('program', 'groupedCourses', 'modalCourses'));
     }
 
     // public function create(Request $request)

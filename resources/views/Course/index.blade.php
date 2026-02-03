@@ -2,9 +2,9 @@
 
 @section('content')
 
-    @php
+    {{-- @php
         $modalCourses = collect();
-    @endphp
+    @endphp --}}
 
     <div class="mb-6">
         <h1 class="text-2xl font-bold mb-4">Manage Courses</h1>

@@ -1,136 +1,144 @@
 <x-modal.dialog id="viewCourseModal_{{ $course->id }}" maxWidth="max-w-6xl" width="w-11/12">
-    <x-modal.header>
+    <x-modal.header class="bg-gray-50">
         <h3 class="text-xl font-semibold text-gray-800">Course Details</h3>
     </x-modal.header>
 
     <x-modal.body>
-        <div id="modalContent" class="space-y-4">
-            <div class="shadow-xl mb-6">
-                <div>
-                    <h1 class="text-3xl">{{ $course->course_title }}</h1>
-                    <p class="text-lg">{{ $course->course_code }}</p>
+        <div class="space-y-6">
 
-                    <div class="divider"></div>
+            {{-- Basic Course Info --}}
+            <div class="border rounded-lg p-6 bg-white">
+                <h1 class="text-2xl font-semibold text-gray-900">
+                    {{ $course->course_title }}
+                </h1>
+                <p class="text-sm text-gray-600 mt-1">
+                    {{ $course->course_code }}
+                </p>
 
-                    {{-- Course Details Grid --}}
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <h3 class="font-semibold text-sm text-base-content/70">Program</h3>
-                            <p>{{ $course->program->program_name ?? 'N/A' }}</p>
-                        </div>
+                <div class="border-t my-4"></div>
 
-                        <div>
-                            <h3 class="font-semibold text-sm text-base-content/70">Credit Units</h3>
-                            <p>{{ $course->credit_units }}</p>
-                        </div>
-
-                        @if ($course->year_level)
-                            <div>
-                                <h3 class="font-semibold text-sm text-base-content/70">Year Level</h3>
-                                <p>Year {{ $course->year_level }}</p>
-                            </div>
-                        @endif
-
-                        @if ($course->semester)
-                            <div>
-                                <h3 class="font-semibold text-sm text-base-content/70">Semester</h3>
-                                <p>Semester {{ $course->semester }}</p>
-                            </div>
-                        @endif
-
-                        <div>
-                            <h3 class="font-semibold text-sm text-base-content/70">Lecture/Laboratory</h3>
-                            <p>
-                                @if ($course->has_lec_lab)
-                                    <span class="badge badge-success">Yes</span>
-                                @else
-                                    <span class="badge badge-ghost">No</span>
-                                @endif
-                            </p>
-                        </div>
-
-                        @if ($course->prerequisite)
-                            <div>
-                                <h3 class="font-semibold text-sm text-base-content/70">Prerequisite</h3>
-                                <p>{{ $course->prerequisite }}</p>
-                            </div>
-                        @endif
-
-                        @if ($course->corequisite)
-                            <div>
-                                <h3 class="font-semibold text-sm text-base-content/70">Corequisite</h3>
-                                <p>{{ $course->corequisite }}</p>
-                            </div>
-                        @endif
-
-                        @if ($course->creator)
-                            <div>
-                                <h3 class="font-semibold text-sm text-base-content/70">Created By</h3>
-                                <p>{{ $course->creator->name ?? 'N/A' }}</p>
-                            </div>
-                        @endif
+                {{-- Details Grid --}}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <p class="text-gray-500 font-medium">Program</p>
+                        <p>{{ $course->program->program_name ?? 'N/A' }}</p>
                     </div>
 
-                    @if ($course->course_description)
-                        <div class="mt-4">
-                            <h3 class="font-semibold text-sm text-base-content/70 mb-2">Course Description</h3>
-                            <p class="text-base-content/90">{{ $course->course_description }}</p>
+                    <div>
+                        <p class="text-gray-500 font-medium">Credit Units</p>
+                        <p>{{ $course->credit_units }}</p>
+                    </div>
+
+                    @if ($course->year_level)
+                        <div>
+                            <p class="text-gray-500 font-medium">Year Level</p>
+                            <p>Year {{ $course->year_level }}</p>
+                        </div>
+                    @endif
+
+                    @if ($course->semester)
+                        <div>
+                            <p class="text-gray-500 font-medium">Semester</p>
+                            <p>Semester {{ $course->semester }}</p>
+                        </div>
+                    @endif
+
+                    <div>
+                        <p class="text-gray-500 font-medium">Lecture / Laboratory</p>
+                        <p class="inline-flex px-2 py-0.5 rounded text-xs font-medium
+                            {{ $course->has_lec_lab ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600' }}">
+                            {{ $course->has_lec_lab ? 'Yes' : 'No' }}
+                        </p>
+                    </div>
+
+                    @if ($course->prerequisite)
+                        <div>
+                            <p class="text-gray-500 font-medium">Prerequisite</p>
+                            <p>{{ $course->prerequisite }}</p>
+                        </div>
+                    @endif
+
+                    @if ($course->corequisite)
+                        <div>
+                            <p class="text-gray-500 font-medium">Corequisite</p>
+                            <p>{{ $course->corequisite }}</p>
+                        </div>
+                    @endif
+
+                    @if ($course->creator)
+                        <div>
+                            <p class="text-gray-500 font-medium">Created By</p>
+                            <p>{{ $course->creator->name ?? 'N/A' }}</p>
                         </div>
                     @endif
                 </div>
+
+                @if ($course->course_description)
+                    <div class="mt-5">
+                        <p class="text-gray-500 font-medium mb-1">Course Description</p>
+                        <p class="text-sm text-gray-700 leading-relaxed">
+                            {{ $course->course_description }}
+                        </p>
+                    </div>
+                @endif
             </div>
 
             {{-- Program Outcomes Mapping --}}
-            <div class="card bg-base-100 shadow-xl">
-                <div class="card-body">
-                    <h2 class="card-title text-2xl">Program Outcomes Mapping (IED Levels)</h2>
-
-                    @if ($course->programOutcomes->isEmpty())
-                        <div class="alert alert-info">
-                            <span>No program outcomes mapped to this course yet.</span>
-                        </div>
-                    @else
-                        <div class="overflow-x-auto">
-                            <table class="table table-zebra w-full">
-                                <thead>
-                                    <tr>
-                                        <th>PO Code</th>
-                                        <th>Program Outcome</th>
-                                        <th>IED Level</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($course->programOutcomes as $outcome)
-                                        <tr>
-                                            <td class="font-mono font-semibold">
-                                                {{-- {{ $outcome->po_code }} --}}
-                                                PO{{ $loop->iteration }}
-                                            </td>
-                                            <td>{{ $outcome->po_text }}</td>
-                                            <td>
-                                                @if ($outcome->pivot->ied === 'I')
-                                                    <span class="badge badge-info">I</span>
-                                                @elseif($outcome->pivot->ied === 'E')
-                                                    <span class="badge badge-warning">E</span>
-                                                @elseif($outcome->pivot->ied === 'D')
-                                                    <span class="badge badge-success">D</span>
-                                                @else
-                                                    <span class="badge badge-ghost">{{ $outcome->pivot->ied }}</span>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-
-                    @endif
+            <div class="border rounded-lg bg-white">
+                <div class="px-6 py-4 border-b">
+                    <h2 class="text-lg font-semibold text-gray-800">
+                        Program Outcomes Mapping (IED)
+                    </h2>
                 </div>
+
+                @if ($course->programOutcomes->isEmpty())
+                    <div class="px-6 py-4 text-sm text-gray-600">
+                        No program outcomes mapped to this course.
+                    </div>
+                @else
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-50 border-b">
+                                <tr>
+                                    <th class="px-4 py-2 text-left font-semibold">PO</th>
+                                    <th class="px-4 py-2 text-left font-semibold">Program Outcome</th>
+                                    <th class="px-4 py-2 text-center font-semibold">IED</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($course->programOutcomes as $outcome)
+                                    <tr class="border-b last:border-b-0">
+                                        <td class="px-4 py-2 font-mono font-semibold">
+                                            {{ $outcome->po_code }}
+                                        </td>
+                                        <td class="px-4 py-2">
+                                            {{ $outcome->po_text }}
+                                        </td>
+                                        <td class="px-4 py-2 text-center">
+                                            <span class="inline-flex px-2 py-0.5 rounded text-xs font-semibold
+                                                {{ $outcome->pivot->ied === 'I' ? 'bg-blue-100 text-blue-700' :
+                                                   ($outcome->pivot->ied === 'E' ? 'bg-yellow-100 text-yellow-700' :
+                                                   ($outcome->pivot->ied === 'D' ? 'bg-green-100 text-green-700' :
+                                                   'bg-gray-100 text-gray-600')) }}">
+                                                {{ $outcome->pivot->ied }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
             </div>
+
         </div>
     </x-modal.body>
 
-    <x-modal.footer>
-        <x-modal.close-button modalId="viewCourseModal_{{ $course->id }}" text="Close" variant="close" />
+    <x-modal.footer class="bg-gray-50">
+        <x-modal.close-button
+            modalId="viewCourseModal_{{ $course->id }}"
+            text="Close"
+            variant="close"
+        />
     </x-modal.footer>
 </x-modal.dialog>
