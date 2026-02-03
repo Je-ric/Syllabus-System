@@ -12,12 +12,20 @@ class CourseController extends Controller
     public function index(Request $request)
     {
         $program = null;
+        $courses = collect();
 
         if ($request->filled('program_id')) {
             $program = Program::findOrFail($request->program_id);
+            // Get all courses for this program with their mappings
+            $courses = Course::where('program_id', $program->id)
+                ->with(['programOutcomes', 'creator'])
+                ->orderBy('year_level')
+                ->orderBy('semester')
+                ->orderBy('course_code')
+                ->get();
         }
 
-        return view('Course.index', compact('program'));
+        return view('Course.index', compact('program', 'courses'));
     }
 
     public function create(Request $request)
@@ -36,7 +44,8 @@ class CourseController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        // Validate input
+        $validatedData = $request->validate([
             'program_id' => 'required|exists:programs,id',
             'code' => 'required|string|unique:courses,course_code',
             'name' => 'required|string',
@@ -48,47 +57,52 @@ class CourseController extends Controller
             'prerequisite' => 'nullable|string',
             'corequisite' => 'nullable|string',
             'po_mapping' => 'nullable|array',
-            'po_mapping.*' => 'nullable|integer|in:1,2,3',
+            'po_mapping.*' => 'nullable|in:I,E,D',
         ]);
 
-        $course = Course::create([
-            'program_id' => $request->program_id,
-            'course_code' => $request->code,
-            'course_title' => $request->name,
-            'course_description' => $request->description,
-            'prerequisite' => $request->prerequisite,
-            'corequisite' => $request->corequisite,
-            'has_lec_lab' => $request->has_lec_lab ?? false,
-            'credit_units' => $request->credits,
-            'year_level' => $request->year_level,
-            'semester' => $request->semester,
-            'created_by' => Auth::id(),
-        ]);
+        // Create course first
+        $course = new Course();
+        $course->program_id = $validatedData['program_id'];
+        $course->course_code = $validatedData['code'];
+        $course->course_title = $validatedData['name'];
+        $course->course_description = $validatedData['description'] ?? null;
+        $course->prerequisite = $validatedData['prerequisite'] ?? null;
+        $course->corequisite = $validatedData['corequisite'] ?? null;
+        $course->credit_units = $validatedData['credits'];
+        $course->year_level = $validatedData['year_level'] ?? null;
+        $course->semester = $validatedData['semester'] ?? null;
+        $course->created_by = Auth::id();
 
-        // Attach outcomes with IED level (only those with selected IED level)
+        // Default to false if not present (unchecked)
+        $course->has_lec_lab = $validatedData['has_lec_lab'] ?? false;
+
+        $course->save();
+
+        // Handle PO mapping if provided
         $poMapping = $request->input('po_mapping', []);
-        if (!empty($poMapping)) {
-            $outcomeData = [];
-            foreach ($poMapping as $outcomeId => $iedLevel) {
-                if ($iedLevel) { // Only attach if IED level is selected
-                    $outcomeData[$outcomeId] = ['ied' => $iedLevel];
-                }
-            }
-            if (!empty($outcomeData)) {
-                $course->programOutcomes()->attach($outcomeData);
+
+        foreach ($poMapping as $outcomeId => $iedLevel) {
+            if (in_array($iedLevel, ['I', 'E', 'D'])) {
+                $course->programOutcomes()->attach($outcomeId, [
+                    'ied' => $iedLevel
+                ]);
             }
         }
 
-        $program = Program::find($request->program_id);
-        return redirect()->route('courses.index', ['program_id' => $program->id])
-                        ->with('toast', [
-                            'message' => 'Course created successfully.',
-                            'type' => 'success'
-                        ]);
+        // Redirect back to course listing for this program
+        return redirect()->route('courses.index', ['program_id' => $validatedData['program_id']])
+            ->with('toast', [
+                'message' => 'Course created successfully.',
+                'type' => 'success'
+            ]);
     }
 
     public function show($id)
     {
-    }
+        // Get course with all relationships
+        $course = Course::with(['program', 'programOutcomes', 'creator'])
+            ->findOrFail($id);
 
+        return view('Course.show', compact('course'));
+    }
 }

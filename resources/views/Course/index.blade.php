@@ -41,11 +41,14 @@
             @if($course->course_description)
                 <p class="mt-2 text-sm text-gray-700">{{ $course->course_description }}</p>
             @endif
-            <div class="mt-3 flex gap-2">
-                <button class="text-blue-600 hover:underline text-sm" onclick="viewCourseModal('{{ $course->id }}')">
-                    <i class="bx bx-show"></i> View Details
-                </button>
-            </div>
+            <div class="mt-3">
+            <button
+                class="text-blue-600 hover:underline text-sm"
+                onclick="document.getElementById('viewCourseModal_{{ $course->id }}').showModal()"
+            >
+                <i class="bx bx-show"></i> View Details
+            </button>
+        </div>
         </div>
     @empty
         <div class="text-center py-8 bg-gray-50 rounded-lg">
@@ -61,6 +64,6 @@
     </div>
 @endif
 
-@include('Course.modals.viewCourseModal')
+@include('Course.modals.viewCourseModal', ['course' => $course])
 
 @endsection

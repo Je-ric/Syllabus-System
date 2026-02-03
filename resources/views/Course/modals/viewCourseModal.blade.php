@@ -1,123 +1,137 @@
-<x-modal.dialog id="viewCourseModal" maxWidth="max-w-3xl">
+<x-modal.dialog id="viewCourseModal_{{ $course->id }}" maxWidth="max-w-6xl" width="w-11/12">
     <x-modal.header>
         <h3 class="text-xl font-semibold text-gray-800">Course Details</h3>
     </x-modal.header>
 
     <x-modal.body>
         <div id="modalContent" class="space-y-4">
-            <div class="flex items-center justify-center py-8">
-                <i class='bx bx-loader bx-spin text-4xl text-gray-400'></i>
+            <div class="card bg-base-100 shadow-xl mb-6">
+        <div class="card-body">
+            <h1 class="card-title text-3xl">{{ $course->course_title }}</h1>
+            <p class="text-lg font-mono text-primary">{{ $course->course_code }}</p>
+
+            <div class="divider"></div>
+
+            {{-- Course Details Grid --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <h3 class="font-semibold text-sm text-base-content/70">Program</h3>
+                    <p>{{ $course->program->program_name ?? 'N/A' }}</p>
+                </div>
+
+                <div>
+                    <h3 class="font-semibold text-sm text-base-content/70">Credit Units</h3>
+                    <p>{{ $course->credit_units }}</p>
+                </div>
+
+                @if($course->year_level)
+                <div>
+                    <h3 class="font-semibold text-sm text-base-content/70">Year Level</h3>
+                    <p>Year {{ $course->year_level }}</p>
+                </div>
+                @endif
+
+                @if($course->semester)
+                <div>
+                    <h3 class="font-semibold text-sm text-base-content/70">Semester</h3>
+                    <p>Semester {{ $course->semester }}</p>
+                </div>
+                @endif
+
+                <div>
+                    <h3 class="font-semibold text-sm text-base-content/70">Lecture/Laboratory</h3>
+                    <p>
+                        @if($course->has_lec_lab)
+                            <span class="badge badge-success">Yes</span>
+                        @else
+                            <span class="badge badge-ghost">No</span>
+                        @endif
+                    </p>
+                </div>
+
+                @if($course->prerequisite)
+                <div>
+                    <h3 class="font-semibold text-sm text-base-content/70">Prerequisite</h3>
+                    <p>{{ $course->prerequisite }}</p>
+                </div>
+                @endif
+
+                @if($course->corequisite)
+                <div>
+                    <h3 class="font-semibold text-sm text-base-content/70">Corequisite</h3>
+                    <p>{{ $course->corequisite }}</p>
+                </div>
+                @endif
+
+                @if($course->creator)
+                <div>
+                    <h3 class="font-semibold text-sm text-base-content/70">Created By</h3>
+                    <p>{{ $course->creator->name ?? 'N/A' }}</p>
+                </div>
+                @endif
             </div>
+
+            @if($course->course_description)
+            <div class="mt-4">
+                <h3 class="font-semibold text-sm text-base-content/70 mb-2">Course Description</h3>
+                <p class="text-base-content/90">{{ $course->course_description }}</p>
+            </div>
+            @endif
+        </div>
+    </div>
+
+    {{-- Program Outcomes Mapping --}}
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title text-2xl">Program Outcomes Mapping (IED Levels)</h2>
+
+            @if($course->programOutcomes->isEmpty())
+                <div class="alert alert-info">
+                    <span>No program outcomes mapped to this course yet.</span>
+                </div>
+            @else
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra w-full">
+                        <thead>
+                            <tr>
+                                <th>PO Code</th>
+                                <th>Program Outcome</th>
+                                <th>IED Level</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($course->programOutcomes as $outcome)
+                            <tr>
+                                <td class="font-mono font-semibold">
+                                    {{-- {{ $outcome->po_code }} --}}
+                                    PO{{ $loop->iteration }}
+                                </td>
+                                <td>{{ $outcome->po_text }}</td>
+                                <td>
+                                    @if($outcome->pivot->ied === 'I')
+                                        <span class="badge badge-info">I - Introduced</span>
+                                    @elseif($outcome->pivot->ied === 'E')
+                                        <span class="badge badge-warning">E - Emphasized</span>
+                                    @elseif($outcome->pivot->ied === 'D')
+                                        <span class="badge badge-success">D - Demonstrated</span>
+                                    @else
+                                        <span class="badge badge-ghost">{{ $outcome->pivot->ied }}</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+            @endif
+        </div>
+    </div>
         </div>
     </x-modal.body>
 
     <x-modal.footer>
-        <x-modal.close-button modalId="viewCourseModal" text="Close" />
+        <x-modal.close-button modalId="viewCourseModal_{{ $course->id }}" text="Close" variant="close" />
     </x-modal.footer>
 </x-modal.dialog>
 
-<script>
-    function viewCourseModal(courseId) {
-        const modal = document.getElementById('viewCourseModal');
-        const content = document.getElementById('modalContent');
-        
-        // Show modal immediately with loading state
-        modal.showModal();
-        
-        // Fetch course data
-        fetch(`/api/courses/${courseId}`)
-            .then(response => {
-                if (!response.ok) throw new Error('Failed to fetch course');
-                return response.json();
-            })
-            .then(data => {
-                content.innerHTML = `
-                    <div class="grid grid-cols-2 gap-6">
-                        <div>
-                            <h4 class="font-semibold text-gray-600 text-sm mb-1">Course Code</h4>
-                            <p class="text-lg font-bold text-blue-600">${data.course_code}</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-gray-600 text-sm mb-1">Credit Units</h4>
-                            <p class="text-lg font-semibold">${data.credit_units}</p>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h4 class="font-semibold text-gray-600 text-sm mb-1">Course Title</h4>
-                        <p class="text-lg font-semibold">${data.course_title}</p>
-                    </div>
-
-                    ${data.course_description ? `
-                    <div>
-                        <h4 class="font-semibold text-gray-600 text-sm mb-1">Description</h4>
-                        <p class="text-gray-700">${data.course_description}</p>
-                    </div>
-                    ` : ''}
-
-                    <div class="grid grid-cols-3 gap-4">
-                        <div>
-                            <h4 class="font-semibold text-gray-600 text-sm mb-1">Year Level</h4>
-                            <p>${data.year_level ? 'Year ' + data.year_level : 'N/A'}</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-gray-600 text-sm mb-1">Semester</h4>
-                            <p>${data.semester ? 'Semester ' + data.semester : 'N/A'}</p>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-gray-600 text-sm mb-1">Has Laboratory</h4>
-                            <p>${data.has_lec_lab ? 'Yes' : 'No'}</p>
-                        </div>
-                    </div>
-
-                    ${(data.prerequisite || data.corequisite) ? `
-                    <div class="grid grid-cols-2 gap-4">
-                        ${data.prerequisite ? `
-                        <div>
-                            <h4 class="font-semibold text-gray-600 text-sm mb-1">Prerequisite</h4>
-                            <p class="text-gray-700">${data.prerequisite}</p>
-                        </div>
-                        ` : ''}
-                        ${data.corequisite ? `
-                        <div>
-                            <h4 class="font-semibold text-gray-600 text-sm mb-1">Corequisite</h4>
-                            <p class="text-gray-700">${data.corequisite}</p>
-                        </div>
-                        ` : ''}
-                    </div>
-                    ` : ''}
-
-                    ${data.outcomes && data.outcomes.length > 0 ? `
-                    <div class="border-t pt-4">
-                        <h4 class="font-semibold text-gray-800 mb-3">Program Outcomes Mapped</h4>
-                        <div class="space-y-2">
-                            ${data.outcomes.map(o => `
-                                <div class="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                                    <span class="font-semibold text-blue-600 min-w-[60px]">${o.po_code}</span>
-                                    <span class="flex-1 text-sm text-gray-700">${o.po_text}</span>
-                                    <span class="px-2 py-1 text-xs font-medium rounded ${
-                                        o.pivot.ied === 1 ? 'bg-green-100 text-green-700' : 
-                                        o.pivot.ied === 2 ? 'bg-yellow-100 text-yellow-700' : 
-                                        'bg-blue-100 text-blue-700'
-                                    }">
-                                        ${o.pivot.ied === 1 ? 'Introduced' : o.pivot.ied === 2 ? 'Emphasized' : 'Demonstrated'}
-                                    </span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                    ` : ''}
-                `;
-            })
-            .catch(error => {
-                console.error('Error fetching course data:', error);
-                content.innerHTML = `
-                    <div class="text-center py-8">
-                        <i class='bx bx-error-circle text-5xl text-red-400 mb-3'></i>
-                        <p class="text-red-600 font-medium">Error loading course details</p>
-                        <p class="text-sm text-gray-500 mt-2">${error.message}</p>
-                    </div>
-                `;
-            });
-    }
-</script>

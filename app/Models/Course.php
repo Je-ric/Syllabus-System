@@ -13,6 +13,10 @@ class Course extends Model
         'course_description',
         'prerequisite',
         'corequisite',
+        'has_lec_lab',
+        'credit_units',
+        'year_level',
+        'semester',
         'status',
         'version',
         'created_by',
@@ -39,9 +43,12 @@ class Course extends Model
     {
         return $this->belongsToMany(
             ProgramOutcome::class,
-            'course_curriculum_maps'
-            )->withPivot('ied')
-            ->withTimestamps();
+            'course_curriculum_maps',
+            'course_id',
+            'program_outcome_id'
+        )
+        ->withPivot('ied')
+        ->withTimestamps();
     }
 
     public function creator()
