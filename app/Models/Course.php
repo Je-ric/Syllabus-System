@@ -11,22 +11,13 @@ class Course extends Model
         'course_code',
         'course_title',
         'course_description',
-        'prerequisite',
-        'corequisite',
-        'has_lec_lab',
         'credit_units',
         'year_level',
         'semester',
-        'status',
-        'version',
+        'has_lec_lab',
+        'prerequisite',
+        'corequisite',
         'created_by',
-    ];
-
-    protected $casts = [
-        'has_lec_lab' => 'boolean',
-        'credit_units' => 'integer',
-        'year_level' => 'integer',
-        'semester' => 'integer',
     ];
 
     public function program()
@@ -34,21 +25,10 @@ class Course extends Model
         return $this->belongsTo(Program::class);
     }
 
-    public function curriculumMaps()
-    {
-        return $this->hasMany(CourseCurriculumMap::class);
-    }
-
     public function programOutcomes()
     {
-        return $this->belongsToMany(
-            ProgramOutcome::class,
-            'course_curriculum_maps',
-            'course_id',
-            'program_outcome_id'
-        )
-        ->withPivot('ied')
-        ->withTimestamps();
+        return $this->belongsToMany(ProgramOutcome::class, 'course_curriculum_maps')
+            ->withPivot('ied');
     }
 
     public function creator()

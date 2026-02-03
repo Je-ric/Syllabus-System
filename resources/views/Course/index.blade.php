@@ -68,10 +68,10 @@
 
 @endsection --}}
 
+{{-- filepath: c:\Users\Janice\Desktop\csms\resources\views\Course\index.blade.php --}}
 @extends('layouts.app')
 
 @section('content')
-
     <div class="mb-6">
         <h1 class="text-2xl font-bold mb-4">Manage Courses</h1>
         <div class="border rounded-lg p-6 bg-gray-50">
@@ -88,94 +88,80 @@
             </a>
         </div>
 
-        @php
-            // Group courses by year level, then sort by semester
-            $groupedCourses = $program
-                ->courses()
-                ->orderBy('year_level')
-                ->orderBy('semester')
-                ->orderBy('course_code')
-                ->get()
-                ->groupBy('year_level');
-        @endphp
+        @forelse ($groupedCourses as $year => $semesters)
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold mb-4 border-b pb-2">Year {{ $year ?? 'N/A' }}</h3>
 
-        @foreach ($groupedCourses as $year => $courses)
-            <div class="mb-6">
-                <h3 class="text-lg font-semibold mb-2">Year {{ $year ?? 'N/A' }}</h3>
-
-                @php
-                    $semGrouped = $courses->groupBy('semester');
-                @endphp
-
-                @foreach ($semGrouped as $sem => $semCourses)
-                    <h4 class="font-medium mb-1">Semester {{ $sem ?? 'N/A' }}</h4>
-                    <div class="overflow-x-auto">
-                        <table class="table-auto w-full border-collapse border border-gray-300 text-sm">
-                            <thead class="bg-gray-100 text-xs">
-                                <tr>
-                                    <th class="border px-2 py-1">Year/Sem</th>
-                                    <th class="border px-2 py-1">CODE</th>
-                                    <th class="border px-2 py-1">TITLE OF THE COURSE</th>
-                                    <th class="border px-2 py-1">Units</th>
-                                    @foreach ($program->outcomes as $outcome)
-                                        <th class="border px-2 py-1 text-center">{{ $outcome->po_code }}</th>
-                                    @endforeach
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @php
-                                    $grouped = $program
-                                        ->courses()
-                                        ->orderBy('year_level')
-                                        ->orderBy('semester')
-                                        ->get()
-                                        ->groupBy(function ($c) {
-                                            return $c->year_level . '-' . $c->semester;
-                                        });
-                                @endphp
-
-                                @foreach ($grouped as $yearSem => $courses)
-                                    @php
-                                        $parts = explode('-', $yearSem);
-                                        $year = $parts[0];
-                                        $sem = $parts[1];
-                                    @endphp
-
-                                    @foreach ($courses as $index => $course)
-                                        <tr class="hover:bg-gray-50">
-                                            @if ($index === 0)
-                                                <td class="border px-2 py-1 text-center" rowspan="{{ count($courses) }}">
-                                                    Year {{ $year ?? 'N/A' }}<br>Sem {{ $sem ?? 'N/A' }}
-                                                </td>
-                                            @endif
-                                            <td class="border px-2 py-1 font-mono">{{ $course->course_code }}</td>
-                                            <td class="border px-2 py-1">{{ $course->course_title }}</td>
-                                            <td class="border px-2 py-1 text-center">{{ $course->credit_units }}</td>
+                @forelse ($semesters as $semester => $courses)
+                    <div class="mb-6">
+                        <h4 class="font-medium text-gray-700 mb-3">Semester {{ $semester ?? 'N/A' }}</h4>
+                        <div class="overflow-x-auto rounded-lg border">
+                            <table class="w-full text-sm">
+                                <thead class="bg-gray-100 border-b">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left font-semibold">CODE</th>
+                                        <th class="px-4 py-2 text-left font-semibold">COURSE TITLE</th>
+                                        <th class="px-4 py-2 text-center font-semibold">UNITS</th>
+                                        @foreach ($program->outcomes as $outcome)
+                                            <th class="px-2 py-2 text-center font-semibold text-xs">{{ $outcome->po_code }}</th>
+                                        @endforeach
+                                        <th class="px-4 py-2 text-center font-semibold">ACTIONS</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($courses as $course)
+                                        <tr class="border-b hover:bg-gray-50">
+                                            <td class="px-4 py-2 font-mono font-semibold">{{ $course->course_code }}</td>
+                                            <td class="px-4 py-2">{{ $course->course_title }}</td>
+                                            <td class="px-4 py-2 text-center">{{ $course->credit_units }}</td>
 
                                             @foreach ($program->outcomes as $outcome)
                                                 @php
-                                                    $mapped = $course->programOutcomes->firstWhere('id', $outcome->id);
+                                                    $mapping = $course->programOutcomes->firstWhere('id', $outcome->id);
+                                                    $ied = $mapping?->pivot->ied ?? '-';
                                                 @endphp
-                                                <td class="border px-2 py-1 text-center">
-                                                    @if ($mapped)
-                                                        {{ $mapped->pivot->ied }}
-                                                    @endif
+                                                <td class="px-2 py-2 text-center font-medium">
+                                                    <span class="px-2 py-1 rounded text-xs {{ $ied === 'I' ? 'bg-blue-100 text-blue-700' : ($ied === 'E' ? 'bg-yellow-100 text-yellow-700' : ($ied === 'D' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500')) }}">
+                                                        {{ $ied }}
+                                                    </span>
                                                 </td>
                                             @endforeach
+
+                                            <td class="px-4 py-2 text-center">
+                                                <div class="flex gap-2 justify-center">
+                                                    <a href="{{ route('courses.edit', $course->id) }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                                        <i class="bx bx-edit"></i> Edit
+                                                    </a>
+                                                    <button
+                                                        onclick="confirm('Delete this course?') && document.getElementById('delete-form-{{ $course->id }}').submit()"
+                                                        class="text-red-600 hover:text-red-800 text-sm font-medium"
+                                                    >
+                                                        <i class="bx bx-trash"></i> Delete
+                                                    </button>
+                                                    <form id="delete-form-{{ $course->id }}" action="{{ route('courses.destroy', $course->id) }}" method="POST" style="display:none;">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                    </form>
+                                                </div>
+                                            </td>
                                         </tr>
                                     @endforeach
-                                @endforeach
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                @endforeach
+                @empty
+                    <p class="text-gray-500 text-sm">No courses for this semester.</p>
+                @endforelse
             </div>
-        @endforeach
-
-        {{-- Include all course modals --}}
-        @foreach ($program->courses as $course)
-            @include('Course.modals.viewCourseModal', ['course' => $course])
-        @endforeach
+        @empty
+            <div class="text-center py-8 bg-gray-50 rounded-lg">
+                <p class="text-gray-500 mb-3">No courses found for this program</p>
+                <a href="{{ route('courses.create', ['program_id' => $program->id]) }}" class="text-blue-600 hover:underline">
+                    Create the first course
+                </a>
+            </div>
+        @endforelse
     @else
         <div class="text-center py-12 bg-gray-50 rounded-lg">
             <p class="text-gray-500">Select a program above to view and manage courses</p>
