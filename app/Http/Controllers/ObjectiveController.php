@@ -56,14 +56,10 @@ class ObjectiveController extends Controller
         ]);
 
         $department = Department::findOrFail($request->department_id);
-        $count = $department->objectives()->count();
-
-        // similar to goals (READ in GoalController)
-        $deptObjCode = chr(ord('a') + $count);
 
         DepartmentObjective::create([
             'department_id' => $request->department_id,
-            'dept_obj_code' => $deptObjCode,
+            'dept_obj_code' => $department->getNextObjectiveCode(), // use model helper (Department.php)
             'objective_text' => $request->objective_text,
         ]);
 
@@ -101,30 +97,15 @@ class ObjectiveController extends Controller
 
     public function objective_destroy(DepartmentObjective $objective)
     {
-        // similar approach to goal_destroy (READ in GoalController)
-        $department_id = $objective->department_id;
+        $department = $objective->department;
         $objective->delete();
 
-        // Get remaining objectives of the department in selected college
-        $remainingObjectives = DepartmentObjective::where('department_id', $department_id)
-            ->orderBy('dept_obj_code')
-            ->get();
-
-        // Reindex
-        $count = 0;
-        foreach ($remainingObjectives as $obj) {
-            $newCode = chr(ord('a') + $count);
-            if ($obj->dept_obj_code !== $newCode) {
-                $obj->dept_obj_code = $newCode;
-                $obj->save();
-            }
-            $count++;
-        }
+        $department->resequenceObjectiveCodes(); // Department.php
 
         return redirect()
             ->route('objective.index', [
-                'college_id' => $objective->department->college_id,
-                'department_id' => $objective->department_id,
+                'college_id' => $department->college_id,
+                'department_id' => $department->id,
             ])
             ->with('toast', [
             'message' => 'Objective deleted successfully.',

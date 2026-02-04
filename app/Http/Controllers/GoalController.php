@@ -37,15 +37,10 @@ class GoalController extends Controller
         ]);
 
         $college = College::findOrFail($request->college_id);
-        $count = $college->goals()->count();
-
-        // a (1), b (2), c (3), ...
-        $collegeGoalsCode = chr(ord('a') + $count);
 
         CollegeGoal::create([
             'college_id' => $request->college_id,
-            'college_goals_code' => $collegeGoalsCode, // auto sana (a,b,c per college)
-                // if we will do that, we need to check the college, then check its existing goals to get the count which convert to a-z.
+            'college_goals_code' => $college->getNextGoalCode(), // use model helper (College.php)
             'goal_text' => $request->goal_text,
         ]);
 
@@ -78,27 +73,13 @@ class GoalController extends Controller
 
     public function goal_destroy(Request $request, CollegeGoal $goal)
     {
-        $college_id = $goal->college_id;
+        $college = $goal->college;
+        $goal->delete();
 
-        $goal->delete(); // delete the selected goal first, before reindexing
-
-        // get goals of the same college
-        $remainingGoals = CollegeGoal::where('college_id', $college_id)
-                            ->orderBy('college_goals_code')
-                            ->get();
-
-        $count = 0; // Reindex codes
-        foreach ($remainingGoals as $g) {
-            $newCode = chr(ord('a') + $count); // a (1), b (2), c (3) ...
-            if ($g->college_goals_code !== $newCode) { // only update if code is different
-                $g->college_goals_code = $newCode; // update code
-                $g->save();
-            }
-            $count++; // use for re-indexing
-        }
+        $college->resequenceGoalCodes(); // College.php
 
         return redirect()
-            ->route('goal.index', ['college_id' => $college_id])
+            ->route('goal.index', ['college_id' => $college->id])
             ->with('toast', [
             'message' => 'Goal deleted and codes reset successfully.',
             'type' => 'success'

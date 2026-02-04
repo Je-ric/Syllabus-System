@@ -13,7 +13,7 @@ class AcademicStructureController extends Controller
     {
         return view('AcademicStructure.index', [
             'colleges' => College::orderBy('name')->get(),
-            'departments' => Department::with('college', 'programs')->orderBy('name')->get(),
+            'departments' => Department::withRelations()->orderBy('name')->get(), 
             'programs' => Program::all()->sortBy('name'),
         ]);
     }

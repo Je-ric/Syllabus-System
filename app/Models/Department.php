@@ -40,4 +40,32 @@ class Department extends Model
     {
         return $this->belongsTo(User::class, 'chair_user_id');
     }
+
+    // Query scope: Load department with relationships
+    public function scopeWithRelations($query)
+    {
+        return $query->with('college', 'programs');
+    }
+
+    // Helper: Get next objective code
+    public function getNextObjectiveCode()
+    {
+        $count = $this->objectives()->count();
+        return chr(ord('a') + $count);
+    }
+
+    // Helper: Resequence objective codes after deletion
+    public function resequenceObjectiveCodes()
+    {
+        $objectives = $this->objectives()->orderBy('dept_obj_code')->get();
+
+        $count = 0;
+        foreach ($objectives as $objective) {
+            $newCode = chr(ord('a') + $count);
+            if ($objective->dept_obj_code !== $newCode) {
+                $objective->update(['dept_obj_code' => $newCode]);
+            }
+            $count++;
+        }
+    }
 }

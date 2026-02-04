@@ -15,28 +15,11 @@ class CourseController extends Controller
         $groupedCourses = collect();
 
         if ($request->filled('program_id')) {
-            $program = Program::with(['outcomes' => fn($q) => $q->orderBy('po_code')])
-                                ->findOrFail($request->program_id);
-
-            // Get all courses with relationships - eager load to prevent N+1
-            $courses = Course::where('program_id', $program->id)
-                ->with(['programOutcomes' => fn($q) => $q->select('program_outcomes.id', 'po_code', 'po_text')->orderBy('po_code')])
-                ->orderBy('year_level')
-                ->orderBy('semester')
-                ->orderBy('course_code')
-                ->get();
-
-            // $modalCourses = $courses->unique('id');
-
-            // Group by year_level, then by semester in controller, not blade
-            $groupedCourses = $courses->groupBy('year_level')->map(function ($yearCourses) {
-                return $yearCourses->groupBy('semester');
-            });
+            $program = Program::withOrderedOutcomes()->findOrFail($request->program_id);
+            $groupedCourses = $program->getCoursesGroupedByYearAndSemester();
         }
 
-        return view('Course.index', compact('program', 'groupedCourses',
-        //  'modalCourses'
-        ));
+        return view('Course.index', compact('program', 'groupedCourses'));
     }
 
     public function create(Request $request)
@@ -69,7 +52,7 @@ class CourseController extends Controller
 
     public function edit(Course $course)
     {
-        $course->load(['program', 'programOutcomes']);
+        $course->loadMissing(['program', 'programOutcomes']);
         $program = $course->program;
         $programOutcomes = $program->outcomes()->orderBy('po_code')->get();
 
@@ -124,12 +107,9 @@ class CourseController extends Controller
         $course->has_lec_lab = $validatedData['has_lec_lab'] ?? false;
         $course->save();
 
-        // Handle PO mapping - store IED values
-        $poMapping = $request->input('po_mapping', []);
-        foreach ($poMapping as $outcomeId => $iedLevel) {
-            if (in_array($iedLevel, ['I', 'E', 'D'])) {
-                $course->programOutcomes()->attach($outcomeId, ['ied' => $iedLevel]);
-            }
+        // Handle PO mapping using model helper
+        if ($request->filled('po_mapping')) {
+            $course->syncPoMappings($request->input('po_mapping'));
         }
 
         return redirect()->route('courses.index', ['program_id' => $validatedData['program_id']])
@@ -141,7 +121,7 @@ class CourseController extends Controller
 
     public function show(Course $course)
     {
-        $course->load(['program', 'programOutcomes', 'creator']);
+        $course->loadMissing(['program', 'programOutcomes', 'creator']);
         return view('Course.show', compact('course'));
     }
 
@@ -184,8 +164,8 @@ class CourseController extends Controller
         // Sync PO mappings
         $poMapping = $request->input('po_mapping', []);
         $syncData = [];
-        foreach ($poMapping as $outcomeId => $iedLevel) {
-            if (in_array($iedLevel, ['I', 'E', 'D'])) {
+        foreach ($poMapping as $outcomeId => $iedLevel) { // only sync valid IED levels
+            if (in_array($iedLevel, ['I', 'E', 'D'])) { // valid IED level
                 $syncData[$outcomeId] = ['ied' => $iedLevel];
             }
         }

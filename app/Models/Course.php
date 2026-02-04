@@ -35,4 +35,30 @@ class Course extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    // Query: Load course with program and in it's outcomes
+    public function scopeWithFullDetails($query)
+    {
+        return $query->with(['program', 'programOutcomes', 'creator']);
+    }
+
+    // Query: Load course for editing
+    public function scopeWithEditData($query)
+    {
+        return $query->with(['program', 'programOutcomes']);
+    }
+
+    // Helper: Sync PO mappings
+    public function syncPoMappings(array $poMapping)
+    {
+        // Detach all existing mappings
+        $this->programOutcomes()->detach();
+
+        // Attach new mappings with IED levels
+        foreach ($poMapping as $outcomeId => $iedLevel) {
+            if (in_array($iedLevel, ['I', 'E', 'D'])) {
+                $this->programOutcomes()->attach($outcomeId, ['ied' => $iedLevel]);
+            }
+        }
+    }
 }
