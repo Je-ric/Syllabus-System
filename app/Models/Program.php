@@ -67,6 +67,16 @@ class Program extends Model
             ->map(fn($yearCourses) => $yearCourses->groupBy('semester'));
     }
 
-    
+        //     [
+        //       1 => [
+        //         1 => [Course, Course],
+        //         2 => [Course]
+        //       ],
+        //       2 => [
+        //         1 => [Course]
+        //       ]
+        //     ]
+
+
 
 }

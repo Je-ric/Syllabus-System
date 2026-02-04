@@ -124,8 +124,9 @@
                     <tbody>
                         @foreach($programOutcomes as $outcome)
                             <tr class="border-b hover:bg-gray-50">
-                                <td class="px-4 py-3 font-semibold text-blue-600">
-                                    {{ $outcome->po_code }}
+                                <td class="px-4 py-3 font-semibold">
+                                    {{-- {{ $outcome->po_code }} --}}
+                                    PO{{ $loop->iteration }}
                                 </td>
                                 <td class="px-4 py-3 text-sm">
                                     {{ $outcome->po_text }}
@@ -158,7 +159,7 @@
 
     <div class="flex gap-2 mt-6">
         <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">{{ $submitLabel }}</button>
-        <a href="{{ route('courses.index') }}" class="bg-gray-400 text-white px-4 py-2 rounded">Cancel</a>
+        <x-button href="{{ route('courses.index') }}" variant="cancel">Cancel</x-button>
     </div>
 </form>
 

@@ -15,8 +15,8 @@ class CourseController extends Controller
         $groupedCourses = collect();
 
         if ($request->filled('program_id')) {
-            $program = Program::withOrderedOutcomes()->findOrFail($request->program_id);
-            $groupedCourses = $program->getCoursesGroupedByYearAndSemester();
+            $program = Program::withOrderedOutcomes()->findOrFail($request->program_id); // helper
+            $groupedCourses = $program->getCoursesGroupedByYearAndSemester(); // helper
         }
 
         return view('Course.index', compact('program', 'groupedCourses'));
@@ -30,13 +30,16 @@ class CourseController extends Controller
 
         if ($programId) {
             $program = Program::findOrFail($programId);
-            $programOutcomes = $program->outcomes()->orderBy('po_code')->get();
+            $programOutcomes = $program->outcomes()
+                ->orderBy('po_code')
+                ->get();
         }
 
         $poSelections = collect();
-        $formAction = route('courses.store');
-        $formMethod = 'POST';
-        $pageTitle = 'Create New Course';
+
+        $formAction  = route('courses.store');
+        $formMethod  = 'POST';
+        $pageTitle   = 'Create New Course';
         $submitLabel = 'Create Course';
 
         return view('Course.form', compact(
@@ -53,13 +56,17 @@ class CourseController extends Controller
     public function edit(Course $course)
     {
         $course->loadMissing(['program', 'programOutcomes']);
+
         $program = $course->program;
-        $programOutcomes = $program->outcomes()->orderBy('po_code')->get();
+        $programOutcomes = $program->outcomes()
+            ->orderBy('po_code')
+            ->get();
 
         $poSelections = $course->programOutcomes->pluck('pivot.ied', 'id');
-        $formAction = route('courses.update', $course->id);
-        $formMethod = 'PUT';
-        $pageTitle = 'Edit Course';
+
+        $formAction  = route('courses.update', $course->id);
+        $formMethod  = 'PUT';
+        $pageTitle   = 'Edit Course';
         $submitLabel = 'Update Course';
 
         return view('Course.form', compact(
@@ -73,6 +80,7 @@ class CourseController extends Controller
             'submitLabel'
         ));
     }
+
 
     public function store(Request $request)
     {
@@ -109,14 +117,20 @@ class CourseController extends Controller
 
         // Handle PO mapping using model helper
         if ($request->filled('po_mapping')) {
-            $course->syncPoMappings($request->input('po_mapping'));
+            $course->syncPoMappings(
+                $request->input('po_mapping')
+            );
         }
 
-        return redirect()->route('courses.index', ['program_id' => $validatedData['program_id']])
+        return redirect()
+            ->route('courses.index', [
+                'program_id' => $validatedData['program_id'],
+            ])
             ->with('toast', [
                 'message' => 'Course created successfully.',
-                'type' => 'success'
+                'type'    => 'success',
             ]);
+
     }
 
     public function show(Course $course)
@@ -125,69 +139,67 @@ class CourseController extends Controller
         return view('Course.show', compact('course'));
     }
 
-    // public function edit(Course $course)
-    // {
-    //     $program = $course->program;
-    //     $programOutcomes = $program->outcomes()->orderBy('po_code')->get();
-
-    //     return view('Course.form', compact('course', 'program', 'programOutcomes'));
-    // }
-
     public function update(Request $request, Course $course)
     {
         $validatedData = $request->validate([
-            'code' => 'required|string|unique:courses,course_code,' . $course->id,
-            'name' => 'required|string',
-            'description' => 'nullable|string',
-            'credits' => 'required|integer|min:1',
-            'has_lec_lab' => 'nullable|boolean',
-            'year_level' => 'nullable|integer|between:1,5',
-            'semester' => 'nullable|integer|in:1,2',
-            'prerequisite' => 'nullable|string',
-            'corequisite' => 'nullable|string',
-            'po_mapping' => 'nullable|array',
-            'po_mapping.*' => 'nullable|in:I,E,D',
+            'code'           => 'required|string|unique:courses,course_code,' . $course->id,
+            'name'           => 'required|string',
+            'description'    => 'nullable|string',
+            'credits'        => 'required|integer|min:1',
+            'has_lec_lab'    => 'nullable|boolean',
+            'year_level'     => 'nullable|integer|between:1,5',
+            'semester'       => 'nullable|integer|in:1,2',
+            'prerequisite'   => 'nullable|string',
+            'corequisite'    => 'nullable|string',
+            'po_mapping'     => 'nullable|array',
+            'po_mapping.*'   => 'nullable|in:I,E,D',
         ]);
 
         $course->update([
-            'course_code' => $validatedData['code'],
-            'course_title' => $validatedData['name'],
+            'course_code'        => $validatedData['code'],
+            'course_title'       => $validatedData['name'],
             'course_description' => $validatedData['description'] ?? null,
-            'prerequisite' => $validatedData['prerequisite'] ?? null,
-            'corequisite' => $validatedData['corequisite'] ?? null,
-            'credit_units' => $validatedData['credits'],
-            'year_level' => $validatedData['year_level'] ?? null,
-            'semester' => $validatedData['semester'] ?? null,
-            'has_lec_lab' => $validatedData['has_lec_lab'] ?? false,
+            'prerequisite'       => $validatedData['prerequisite'] ?? null,
+            'corequisite'        => $validatedData['corequisite'] ?? null,
+            'credit_units'       => $validatedData['credits'],
+            'year_level'         => $validatedData['year_level'] ?? null,
+            'semester'           => $validatedData['semester'] ?? null,
+            'has_lec_lab'        => $validatedData['has_lec_lab'] ?? false,
         ]);
 
         // Sync PO mappings
         $poMapping = $request->input('po_mapping', []);
-        $syncData = [];
-        foreach ($poMapping as $outcomeId => $iedLevel) { // only sync valid IED levels
-            if (in_array($iedLevel, ['I', 'E', 'D'])) { // valid IED level
+        $syncData  = [];
+
+        foreach ($poMapping as $outcomeId => $iedLevel) {
+            if (in_array($iedLevel, ['I', 'E', 'D'], true)) {
                 $syncData[$outcomeId] = ['ied' => $iedLevel];
             }
         }
+
         $course->programOutcomes()->sync($syncData);
 
-        return redirect()->route('courses.index', ['program_id' => $course->program_id])
+        return redirect()
+            ->route('courses.index', ['program_id' => $course->program_id])
             ->with('toast', [
                 'message' => 'Course updated successfully.',
-                'type' => 'success'
+                'type'    => 'success',
             ]);
     }
 
     public function destroy(Course $course)
     {
         $programId = $course->program_id;
+
         $course->programOutcomes()->detach();
         $course->delete();
 
-        return redirect()->route('courses.index', ['program_id' => $programId])
+        return redirect()
+            ->route('courses.index', ['program_id' => $programId])
             ->with('toast', [
                 'message' => 'Course deleted successfully.',
-                'type' => 'success'
+                'type'    => 'success',
             ]);
     }
+
 }

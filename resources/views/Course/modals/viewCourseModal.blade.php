@@ -115,13 +115,7 @@
                                             {{ $outcome->po_text }}
                                         </td>
                                         <td class="px-4 py-2 text-center">
-                                            <span class="inline-flex px-2 py-0.5 rounded text-xs font-semibold
-                                                {{ $outcome->pivot->ied === 'I' ? 'bg-blue-100 text-blue-700' :
-                                                   ($outcome->pivot->ied === 'E' ? 'bg-yellow-100 text-yellow-700' :
-                                                   ($outcome->pivot->ied === 'D' ? 'bg-green-100 text-green-700' :
-                                                   'bg-gray-100 text-gray-600')) }}">
-                                                {{ $outcome->pivot->ied }}
-                                            </span>
+                                            <x-feedback-status.ied-badge :level="$outcome->pivot->ied" />
                                         </td>
                                     </tr>
                                 @endforeach
