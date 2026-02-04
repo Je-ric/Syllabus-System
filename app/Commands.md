@@ -19,13 +19,17 @@ php artisan make:migration create_academic_calendars_table
 php artisan make:migration create_academic_calendar_events_table
 php artisan make:migration create_courses_table
 php artisan make:migration create_course_curriculum_maps_table
+php artisan make:migration create_syllabi_table
+php artisan make:migration create_syllabus_revisions_table
+php artisan make:migration create_course_components_table
+
 
 ----------------------------------
 MODEL
 ----------------------------------
-php artisan make:model User -m
-php artisan make:model Role -m
-php artisan make:model UserRole -m
+php artisan make:model User
+php artisan make:model Role
+php artisan make:model UserRole
 php artisan make:model College
 php artisan make:model CollegeGoal
 php artisan make:model Department
@@ -37,6 +41,9 @@ php artisan make:model AcademicCalendar
 php artisan make:model AcademicCalendarEvent
 php artisan make:model Course
 php artisan make:model CourseCurriculumMap 
+php artisan make:model Syllabus
+php artisan make:model SyllabusRevision
+php artisan make:model CourseComponent 
 
 
 ----------------------------------
@@ -52,6 +59,7 @@ php artisan make:controller ProgramController
 php artisan make:controller AcademicCalendarController
 php artisan make:controller AcademicCalendarEventController
 php artisan make:controller CourseController
+php artisan make:controller SyllabusController
 
 ----------------------------------
 LIVEWIRE
