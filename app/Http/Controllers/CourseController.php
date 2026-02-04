@@ -84,7 +84,6 @@ class CourseController extends Controller
 
     public function store(Request $request)
     {
-        // Validate input
         $validatedData = $request->validate([
             'program_id' => 'required|exists:programs,id',
             'code' => 'required|string|unique:courses,course_code',
@@ -187,19 +186,19 @@ class CourseController extends Controller
             ]);
     }
 
-    public function destroy(Course $course)
-    {
-        $programId = $course->program_id;
+    // public function destroy(Course $course)
+    // {
+    //     $programId = $course->program_id;
 
-        $course->programOutcomes()->detach();
-        $course->delete();
+    //     $course->programOutcomes()->detach();
+    //     $course->delete();
 
-        return redirect()
-            ->route('courses.index', ['program_id' => $programId])
-            ->with('toast', [
-                'message' => 'Course deleted successfully.',
-                'type'    => 'success',
-            ]);
-    }
+    //     return redirect()
+    //         ->route('courses.index', ['program_id' => $programId])
+    //         ->with('toast', [
+    //             'message' => 'Course deleted successfully.',
+    //             'type'    => 'success',
+    //         ]);
+    // }
 
 }

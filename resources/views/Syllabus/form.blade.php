@@ -11,7 +11,7 @@
             <h1 class="text-2xl font-bold">{{ $pageTitle }}</h1>
         </div>
 
-        <!-- Course Information -->
+        {{-- Course Information --}}
         <div class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
             <h2 class="text-lg font-semibold mb-4">Course Information</h2>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -44,7 +44,7 @@
             </div>
         </div>
 
-        <!-- Syllabus Form -->
+        {{-- Syllabus Form --}}
         <form action="{{ $formAction }}" method="POST" class="space-y-6">
             @csrf
             @if ($formMethod === 'PUT')
@@ -53,7 +53,6 @@
 
             <input type="hidden" name="course_id" value="{{ $course->id }}">
 
-            <!-- Academic Calendar Selection (at the top) -->
             <div class="border rounded-lg p-6 bg-white">
                 <div class="mb-4 pb-4 border-b">
                     <h3 class="text-xl font-semibold text-blue-600 flex items-center gap-2">
@@ -85,7 +84,7 @@
                 </div>
             </div>
 
-            <!-- LECTURE Component -->
+            {{-- LECTURE --}}
             @if (!$hasLab || $hasLab)
                 <div class="border rounded-lg p-6 bg-white">
                     <div class="mb-4 pb-4 border-b">
@@ -96,7 +95,7 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Instructor Info -->
+
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Instructor Name</label>
@@ -139,7 +138,6 @@
                             </div>
                         </div>
 
-                        <!-- Schedule & Requirements -->
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Class Hours</label>
@@ -194,7 +192,7 @@
                 </div>
             @endif
 
-            <!-- LABORATORY Component (if has_lec_lab = true) -->
+            {{-- LABORATORY Component (if has_lec_lab = true) --}}
             @if ($hasLab)
                 <div class="border rounded-lg p-6 bg-white">
                     <div class="mb-4 pb-4 border-b">
@@ -205,7 +203,7 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Instructor Info -->
+
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Instructor Name</label>
@@ -248,7 +246,7 @@
                             </div>
                         </div>
 
-                        <!-- Schedule & Requirements -->
+                        {{-- Schedule & Requirements --}}
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Class Hours</label>
@@ -303,7 +301,6 @@
                 </div>
             @endif
 
-            <!-- Form Actions -->
             <div class="flex gap-4 justify-end">
                 <a href="{{ route('syllabus.index') }}"
                     class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
