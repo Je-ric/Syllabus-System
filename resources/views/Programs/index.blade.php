@@ -5,7 +5,11 @@
     <h1 class="text-2xl font-bold text-gray-800">Program Management</h1>
 
     <div class="mt-4">
-        <livewire:programs.program-selector :program-id="optional($program)->id" />
+        <livewire:programs.program-selector
+            :program-id="optional($program)->id"
+            redirect-route="programs.show"
+            :autoRedirect="true"
+        />
     </div>
 
     <div class="mt-6">

@@ -13,6 +13,7 @@
         <livewire:programs.program-selector
             :program-id="optional($program)?->id"
             redirect-route="courses.index"
+            :autoRedirect="true"
         />
     </div>
 </div>

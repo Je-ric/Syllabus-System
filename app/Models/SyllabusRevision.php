@@ -18,6 +18,11 @@ class SyllabusRevision extends Model
         'contributors',
     ];
 
+    protected $casts = [
+        'revision_date' => 'date',
+        'revision_no' => 'integer',
+    ];
+
     public function syllabus()
     {
         return $this->belongsTo(Syllabus::class);

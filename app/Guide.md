@@ -32,3 +32,9 @@ Separate lecture and laboratory components under one subject. when determined na
 WEEK 7 - Syllabus Creation
 Implement Course Outcomes (CO) definition.
 Implement CO–PO Mapping
+
+WEEK 8-9 - Review, Approval
+Implement Review & Approval Workflow:
+Faculty → Reviewer → Dean.
+Status tracking (Draft, Under Review, For Revision, Approved).
+Implement Syllabus Locking & Date History. 

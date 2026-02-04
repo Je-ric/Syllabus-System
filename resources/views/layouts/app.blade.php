@@ -43,6 +43,10 @@
                         <a href="{{ route('courses.index') }}" class="hover:underline">Manage Courses</a>
                     @endif
 
+                    @if(auth()->user()->hasRole('admin') || auth()->user()->hasRole('faculty'))
+                        <a href="{{ route('syllabus.index') }}" class="hover:underline">Syllabi</a>
+                    @endif
+
                     <form action="{{ route('logout') }}" method="POST" class="inline">
                         @csrf
                         <button type="submit" class="hover:underline bg-transparent border-0 p-0 cursor-pointer">

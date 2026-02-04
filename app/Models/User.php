@@ -69,4 +69,28 @@ class User extends Authenticatable
     {
         return $this->hasMany(Department::class, 'chair_user_id');
     }
+
+    // User (faculty) can prepare many syllabi
+    public function preparedSyllabi()
+    {
+        return $this->hasMany(Syllabus::class, 'prepared_by');
+    }
+
+    // User (chair) can concur many syllabi
+    public function concurredSyllabi()
+    {
+        return $this->hasMany(Syllabus::class, 'concurred_by');
+    }
+
+    // User (dean) can approve many syllabi
+    public function approvedSyllabi()
+    {
+        return $this->hasMany(Syllabus::class, 'approved_by');
+    }
+
+    // User can create many courses
+    public function createdCourses()
+    {
+        return $this->hasMany(Course::class, 'created_by');
+    }
 }

@@ -36,6 +36,36 @@ class Course extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    // Course has many syllabi (different semesters/years)
+    public function syllabi()
+    {
+        return $this->hasMany(Syllabus::class);
+    }
+
+    // Course has many components (LEC/LAB)
+    public function components()
+    {
+        return $this->hasMany(CourseComponent::class);
+    }
+
+    // Helper: Check if course has lab component
+    public function hasLabComponent()
+    {
+        return $this->has_lec_lab;
+    }
+
+    // Helper: Get LEC component
+    public function getLecComponent()
+    {
+        return $this->components()->where('type', 'LEC')->first();
+    }
+
+    // Helper: Get LAB component
+    public function getLabComponent()
+    {
+        return $this->components()->where('type', 'LAB')->first();
+    }
+
     // Query: Load course with program and in it's outcomes
     public function scopeWithFullDetails($query)
     {
