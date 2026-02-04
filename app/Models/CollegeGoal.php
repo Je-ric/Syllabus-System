@@ -10,11 +10,12 @@ class CollegeGoal extends Model
     use HasFactory;
 
     protected $fillable = [
-                'college_id', 
-                'college_goals_code', 
+                'college_id',
+                'college_goals_code',
                 'goal_text'
                 ];
 
+    // many goals to one college
     public function college()
     {
         return $this->belongsTo(College::class);

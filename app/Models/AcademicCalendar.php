@@ -16,6 +16,7 @@ class AcademicCalendar extends Model
         'end_date',
     ];
 
+    // calendar has many events
     public function events()
     {
         return $this->hasMany(AcademicCalendarEvent::class);

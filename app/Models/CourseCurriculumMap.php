@@ -12,11 +12,13 @@ class CourseCurriculumMap extends Model
         'ied',
     ];
 
+    // many curriculum maps to one course
     public function course()
     {
         return $this->belongsTo(Course::class);
     }
 
+    // courses map to many program outcomes
     public function programOutcome()
     {
         return $this->belongsTo(ProgramOutcome::class);

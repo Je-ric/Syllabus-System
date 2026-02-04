@@ -15,11 +15,13 @@ class ProgramOutcome extends Model
         'po_text',
     ];
 
+    // many POs to one program
     public function program()
     {
         return $this->belongsTo(Program::class);
     }
 
+    // POs belong to many PEOs
     public function peos()
     {
         return $this->belongsToMany(

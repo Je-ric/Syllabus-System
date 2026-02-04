@@ -28,7 +28,7 @@ class Course extends Model
     public function programOutcomes()
     {
         return $this->belongsToMany(ProgramOutcome::class, 'course_curriculum_maps')
-            ->withPivot('ied');
+                    ->withPivot('ied');
     }
 
     public function creator()

@@ -11,11 +11,13 @@ class College extends Model
 
     protected $fillable = ['name'];
 
+    // college has many goals
     public function goals()
     {
         return $this->hasMany(CollegeGoal::class);
     }
 
+    // college has many departments
     public function departments()
     {
         return $this->hasMany(Department::class);

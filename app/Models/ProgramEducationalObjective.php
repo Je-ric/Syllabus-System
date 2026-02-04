@@ -17,11 +17,14 @@ class ProgramEducationalObjective extends Model
         'peo_text',
     ];
 
+    // many PEOs to one program
     public function program()
     {
         return $this->belongsTo(Program::class);
     }
 
+    // PEOs belong to many outcomes
+    // PEO - PO
     public function outcomes()
     {
         return $this->belongsToMany(

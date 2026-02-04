@@ -16,6 +16,7 @@ class AcademicCalendarEvent extends Model
         'date',
     ];
 
+    // many events to one calendar (per sem)
     public function calendar()
     {
         return $this->belongsTo(AcademicCalendar::class, 'academic_calendar_id');

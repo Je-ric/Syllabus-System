@@ -15,7 +15,8 @@ class CourseController extends Controller
         $groupedCourses = collect();
 
         if ($request->filled('program_id')) {
-            $program = Program::with(['outcomes' => fn($q) => $q->orderBy('po_code')])->findOrFail($request->program_id);
+            $program = Program::with(['outcomes' => fn($q) => $q->orderBy('po_code')])
+                                ->findOrFail($request->program_id);
 
             // Get all courses with relationships - eager load to prevent N+1
             $courses = Course::where('program_id', $program->id)
@@ -25,7 +26,7 @@ class CourseController extends Controller
                 ->orderBy('course_code')
                 ->get();
 
-            $modalCourses = $courses->unique('id');
+            // $modalCourses = $courses->unique('id');
 
             // Group by year_level, then by semester in controller, not blade
             $groupedCourses = $courses->groupBy('year_level')->map(function ($yearCourses) {
@@ -33,22 +34,11 @@ class CourseController extends Controller
             });
         }
 
-        return view('Course.index', compact('program', 'groupedCourses', 'modalCourses'));
+        return view('Course.index', compact('program', 'groupedCourses',
+        //  'modalCourses'
+        ));
     }
 
-    // public function create(Request $request)
-    // {
-    //     $programId = $request->query('program_id');
-    //     $program = null;
-    //     $programOutcomes = collect();
-
-    //     if ($programId) {
-    //         $program = Program::findOrFail($programId);
-    //         $programOutcomes = $program->outcomes()->orderBy('po_code')->get();
-    //     }
-
-    //     return view('Course.create', compact('program', 'programOutcomes'));
-    // }
     public function create(Request $request)
     {
         $programId = $request->query('program_id');

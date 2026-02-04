@@ -16,7 +16,7 @@ class RoleMiddleware
 
         // if auth
         if (!$user) {
-            abort(403, 'Unauthorized'); // cleaner than calling auth() twice
+            abort(403, 'Unauthorized'); 
         }
 
         // Check if user has any of the required roles

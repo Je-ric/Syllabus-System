@@ -18,6 +18,7 @@ class Program extends Model
                 'bor_approval_date'
                 ];
 
+    // program belongs to many departments, pero again ideally 1 - 1
     public function departments()
     {
         return $this->belongsToMany(Department::class, 'program_departments')
@@ -25,11 +26,13 @@ class Program extends Model
                     ->withTimestamps();
     }
 
+    // each program has many PEOs
     public function peos()
     {
         return $this->hasMany(ProgramEducationalObjective::class);
     }
 
+    // each program has many POs
     public function outcomes()
     {
         return $this->hasMany(ProgramOutcome::class);
