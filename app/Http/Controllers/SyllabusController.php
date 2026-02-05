@@ -36,8 +36,6 @@ class SyllabusController extends Controller
             'groupedCourses' => $groupedCourses,
         ]);
     }
-
-
     public function showCourses(Request $request)
     {
         $program = null;
@@ -59,32 +57,49 @@ class SyllabusController extends Controller
 
     public function showForm($courseId)
     {
-        $course = Course::with('components', 'program.outcomes', 'programOutcomes')
-            ->findOrFail($courseId);
+        // Redirect to wizard instead
+        return redirect()->route('syllabus.wizard', ['courseId' => $courseId]);
+    }
 
-        $academicCalendars = AcademicCalendar::orderBy('academic_year', 'desc')
-            ->orderBy('semester', 'desc')
-            ->get();
+    public function wizard(Request $request)
+    {
+        $syllabusId = $request->query('syllabusId');
+        $courseId = $request->query('courseId');
 
-        // Get components
-        $lecComponent = $course->getLecComponent();
-        $labComponent = $course->getLabComponent();
-        $hasLab = $course->has_lec_lab;
+        // At least one is required
+        if (!$syllabusId && !$courseId) {
+            abort(404, 'No syllabus or course specified.');
+        }
 
-        $formAction = route('syllabus.store');
-        $formMethod = 'POST';
-        $pageTitle = 'Create Syllabus';
+        // If no existing syllabusId, check if a draft already exists
+        if (!$syllabusId) {
+            $existing = Syllabus::where('course_id', $courseId)
+                ->where('prepared_by', Auth::id())
+                ->first();
 
-        return view('Syllabus.form', compact(
-            'course',
-            'academicCalendars',
-            'lecComponent',
-            'labComponent',
-            'hasLab',
-            'formAction',
-            'formMethod',
-            'pageTitle'
-        ));
+            if ($existing) {
+                // Redirect to the existing syllabus wizard with info
+                return redirect()->route('syllabus.wizard', ['syllabusId' => $existing->id])
+                    ->with('toast', [
+                        'message' => 'A syllabus for this course already exists. You can continue editing it.',
+                        'type' => 'info'
+                    ]);
+            }
+
+            // No existing syllabus → create a new draft
+            $syllabus = Syllabus::create([
+                'course_id' => $courseId,
+                'prepared_by' => Auth::id(),
+                'status' => 'draft',
+                'current_step' => 'academic_calendar',
+            ]);
+
+            $syllabusId = $syllabus->id;
+        }
+
+
+
+        return view('Syllabus.wizard', compact('syllabusId', 'courseId'));
     }
 
     public function store(Request $request)
@@ -129,37 +144,17 @@ class SyllabusController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        $syllabus->load([
-            'course.program.outcomes',
-            'course.components',
-            'course.programOutcomes',
-            'academicCalendar'
-        ]);
+        // Check if editable
+        if (!$syllabus->isEditable()) {
+            return redirect()->route('syllabus.show', $syllabus->id)
+                ->with('toast', [
+                    'message' => 'This syllabus cannot be edited in its current status.',
+                    'type' => 'error'
+                ]);
+        }
 
-        $course = $syllabus->course;
-        $lecComponent = $course->getLecComponent();
-        $labComponent = $course->getLabComponent();
-        $hasLab = $course->has_lec_lab;
-
-        $academicCalendars = AcademicCalendar::orderBy('academic_year', 'desc')
-            ->orderBy('semester', 'desc')
-            ->get();
-
-        $formAction = route('syllabus.update', $syllabus->id);
-        $formMethod = 'PUT';
-        $pageTitle = 'Edit Syllabus';
-
-        return view('Syllabus.form', compact(
-            'syllabus',
-            'course',
-            'academicCalendars',
-            'lecComponent',
-            'labComponent',
-            'hasLab',
-            'formAction',
-            'formMethod',
-            'pageTitle'
-        ));
+        // Redirect to wizard for editing (Livewire handles the editing)
+        return redirect()->route('syllabus.wizard', ['syllabusId' => $syllabus->id]);
     }
 
     public function update(Syllabus $syllabus, Request $request)
@@ -177,16 +172,12 @@ class SyllabusController extends Controller
             ]);
         }
 
-        $validated = $request->validate([
-            // Add validation for other fields as needed
-        ]);
-
-        $syllabus->update($validated);
-
-        return redirect()->route('syllabus.show', $syllabus->id)
+        // Note: Most updates are handled by Livewire wizard
+        // This method is kept for compatibility but redirects to wizard
+        return redirect()->route('syllabus.wizard', ['syllabusId' => $syllabus->id])
             ->with('toast', [
-                'message' => 'Syllabus updated successfully.',
-                'type' => 'success'
+                'message' => 'Please use the wizard to edit the syllabus.',
+                'type' => 'info'
             ]);
     }
 
@@ -194,7 +185,8 @@ class SyllabusController extends Controller
     {
         $syllabus->load([
             'course.program',
-            'course.components',
+            'components',
+            'courseOutcomes.programOutcomes',
             'academicCalendar',
             'preparer',
             'chair',
@@ -206,27 +198,27 @@ class SyllabusController extends Controller
     }
 
 
-    public function destroy(Syllabus $syllabus)
-    {
-        // Check authorization
-        if ($syllabus->prepared_by !== Auth::id()) {
-            abort(403, 'Unauthorized');
-        }
+    // public function destroy(Syllabus $syllabus)
+    // {
+    //     // Check authorization
+    //     if ($syllabus->prepared_by !== Auth::id()) {
+    //         abort(403, 'Unauthorized');
+    //     }
 
-        // Only allow deletion of draft syllabi
-        if ($syllabus->status !== 'draft') {
-            return back()->with('toast', [
-                'message' => 'Only draft syllabi can be deleted.',
-                'type' => 'error'
-            ]);
-        }
+    //     // Only allow deletion of draft syllabi
+    //     if ($syllabus->status !== 'draft') {
+    //         return back()->with('toast', [
+    //             'message' => 'Only draft syllabi can be deleted.',
+    //             'type' => 'error'
+    //         ]);
+    //     }
 
-        $syllabus->delete();
+    //     $syllabus->delete();
 
-        return redirect()->route('syllabus.index')
-            ->with('toast', [
-                'message' => 'Syllabus deleted successfully.',
-                'type' => 'success'
-            ]);
-    }
+    //     return redirect()->route('syllabus.index')
+    //         ->with('toast', [
+    //             'message' => 'Syllabus deleted successfully.',
+    //             'type' => 'success'
+    //         ]);
+    // }
 }

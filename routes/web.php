@@ -107,6 +107,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/syllabus', [App\Http\Controllers\SyllabusController::class, 'index'])->name('syllabus.index');
         Route::get('/syllabus/create', [App\Http\Controllers\SyllabusController::class, 'create'])->name('syllabus.create');
         Route::get('/syllabus/courses/{programId}', [App\Http\Controllers\SyllabusController::class, 'showCourses'])->name('syllabus.courses');
+        Route::get('/syllabus/wizard', [App\Http\Controllers\SyllabusController::class, 'wizard'])->name('syllabus.wizard');
         Route::get('/syllabus/form/{courseId}', [App\Http\Controllers\SyllabusController::class, 'showForm'])->name('syllabus.form');
         Route::post('/syllabus', [App\Http\Controllers\SyllabusController::class, 'store'])->name('syllabus.store');
         Route::get('/syllabus/{syllabus}', [App\Http\Controllers\SyllabusController::class, 'show'])->name('syllabus.show');

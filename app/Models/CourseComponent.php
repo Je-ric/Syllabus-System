@@ -10,7 +10,7 @@ class CourseComponent extends Model
     use HasFactory;
 
     protected $fillable = [
-        'course_id',
+        'syllabus_id',
         'type',
         'units',
         'class_hours',
@@ -27,9 +27,9 @@ class CourseComponent extends Model
         'units' => 'integer',
     ];
 
-    public function course()
+    public function syllabus()
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsTo(Syllabus::class);
     }
 
     // Scope: Get only LEC components

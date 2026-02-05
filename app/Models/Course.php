@@ -42,10 +42,13 @@ class Course extends Model
         return $this->hasMany(Syllabus::class);
     }
 
-    // Course has many components (LEC/LAB)
+    // Note: Components are now tied to Syllabus, not Course directly
+    // This method is kept for backward compatibility but should use syllabus->components() instead
     public function components()
     {
-        return $this->hasMany(CourseComponent::class);
+        // Return components from the most recent syllabus, if any
+        $latestSyllabus = $this->syllabi()->latest()->first();
+        return $latestSyllabus ? $latestSyllabus->components() : collect();
     }
 
     // Helper: Check if course has lab component
@@ -54,16 +57,18 @@ class Course extends Model
         return $this->has_lec_lab;
     }
 
-    // Helper: Get LEC component
+    // Helper: Get LEC component (from latest syllabus)
     public function getLecComponent()
     {
-        return $this->components()->where('type', 'LEC')->first();
+        $latestSyllabus = $this->syllabi()->latest()->first();
+        return $latestSyllabus ? $latestSyllabus->getLecComponent() : null;
     }
 
-    // Helper: Get LAB component
+    // Helper: Get LAB component (from latest syllabus)
     public function getLabComponent()
     {
-        return $this->components()->where('type', 'LAB')->first();
+        $latestSyllabus = $this->syllabi()->latest()->first();
+        return $latestSyllabus ? $latestSyllabus->getLabComponent() : null;
     }
 
     // Query: Load course with program and in it's outcomes
