@@ -21,10 +21,6 @@ class SyllabusController extends Controller
         return view('Syllabus.index', compact('syllabi'));
     }
 
-    // public function create()
-    // {
-    //     return view('Syllabus.selectCourse');
-    // }
     public function create(Request $request)
     {
         $program = null;
@@ -60,21 +56,6 @@ class SyllabusController extends Controller
             'groupedCourses' => $groupedCourses,
         ]);
     }
-    // public function showCourses($programId)
-    // {
-
-    //     $courses = Course::where('program_id', $programId)
-    //         ->with('components')
-    //         ->orderBy('year_level')
-    //         ->orderBy('semester')
-    //         ->orderBy('course_code')
-    //         ->get();
-
-    //     return response()->json([
-    //         'success' => true,
-    //         'courses' => $courses
-    //     ]);
-    // } // copy like the management of courses
 
     public function showForm($courseId)
     {

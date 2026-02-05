@@ -8,7 +8,6 @@
             <p class="text-gray-600 mt-2">Step 1: Select program → Step 2: Choose course → Step 3: Fill details</p>
         </div>
 
-        <!-- Program Selector -->
         <div class="mb-6 bg-gray-50 border rounded-lg p-6">
             <h2 class="text-lg font-semibold mb-4">Select Program</h2>
             <livewire:programs.program-selector :program-id="optional($program)?->id" redirect-route="syllabus.create" :autoRedirect="true" />
@@ -57,10 +56,10 @@
                                                     @endif
                                                 </td>
                                                 <td class="px-4 py-2 text-center">
-                                                    <a href="{{ route('syllabus.form', $course->id) }}"
-                                                       class="text-blue-600 hover:underline font-medium">
+                                                    <x-button href="{{ route('syllabus.form', $course->id) }}"
+                                                            variant="table-confirm">
                                                         Create Syllabus
-                                                    </a>
+                                                    </x-button>
                                                 </td>
                                             </tr>
                                         @endforeach
