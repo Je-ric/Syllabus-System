@@ -87,7 +87,7 @@ class ProgramSelector extends Component
     // even when we select a program directly, page will reload and the college and department would be empty
 
     // This function loads the program with its related departments and colleges after selecting a program,
-    // while the other 3 functions react to user input changes 
+    // while the other 3 functions react to user input changes
     private function preselectFromProgram(int $programId): void
     {
         // load program with its departments and their colleges
@@ -109,4 +109,10 @@ class ProgramSelector extends Component
             $query->where('department_id', $this->departmentId);
         })->orderBy('name')->get();
     }
+
+
+    // preselectFromProgram() → Restores college, department, and program when loading the page with an existing program.
+    // updatedCollegeId() → Reacts when the user changes the college and resets dependent selections.
+    // updatedDepartmentId() → Reacts when the user changes the department and reloads available programs.
+    // updatedProgramId() → Reacts when the user selects a program and syncs it with the rest of the app.
 }
