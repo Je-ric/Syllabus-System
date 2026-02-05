@@ -57,6 +57,7 @@ class CourseComponent extends Model
     }
 
     // Helper: Get formatted schedule
+    // E.g., "Mon, Wed 10:00-11:00" => "Mon, Wed 10:00-11:00"
     public function getFormattedSchedule()
     {
         return $this->schedule ? str_replace(',', ', ', $this->schedule) : 'TBA';

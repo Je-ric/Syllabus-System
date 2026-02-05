@@ -15,11 +15,13 @@ class CourseOutcome extends Model
         'description',
     ];
 
+    // many outcomes to one syllabus
     public function syllabus()
     {
         return $this->belongsTo(Syllabus::class);
     }
 
+    // course outcomes map to many program outcomes
     public function programOutcomes()
     {
         return $this->belongsToMany(
