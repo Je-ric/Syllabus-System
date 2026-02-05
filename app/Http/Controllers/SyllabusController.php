@@ -7,6 +7,7 @@ use App\Models\Course;
 use App\Models\AcademicCalendar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Program;
 
 class SyllabusController extends Controller
 {
@@ -20,25 +21,60 @@ class SyllabusController extends Controller
         return view('Syllabus.index', compact('syllabi'));
     }
 
-    public function create()
+    // public function create()
+    // {
+    //     return view('Syllabus.selectCourse');
+    // }
+    public function create(Request $request)
     {
-        return view('Syllabus.selectCourse');
-    }
+        $program = null;
+        $groupedCourses = collect();
 
-    public function showCourses($programId)
-    {
-        $courses = Course::where('program_id', $programId)
-            ->with('components')
-            ->orderBy('year_level')
-            ->orderBy('semester')
-            ->orderBy('course_code')
-            ->get();
+        if ($request->filled('program_id')) {
+            $program = Program::withOrderedOutcomes()->findOrFail($request->program_id);
+            $groupedCourses = $program->getCoursesGroupedByYearAndSemester();
+        }
 
-        return response()->json([
-            'success' => true,
-            'courses' => $courses
+        return view('Syllabus.selectCourse', [
+            'program' => $program,
+            'groupedCourses' => $groupedCourses,
         ]);
     }
+
+
+    public function showCourses(Request $request)
+    {
+        $program = null;
+        $groupedCourses = collect();
+
+        if ($request->filled('program_id')) {
+            // Load the selected program with outcomes
+            $program = Program::withOrderedOutcomes()->findOrFail($request->program_id);
+
+            // Get courses grouped by year and semester
+            $groupedCourses = $program->getCoursesGroupedByYearAndSemester();
+        }
+
+        return view('Syllabus.selectCourse', [
+            'program' => $program,
+            'groupedCourses' => $groupedCourses,
+        ]);
+    }
+    // public function showCourses($programId)
+    // {
+
+    //     $courses = Course::where('program_id', $programId)
+    //         ->with('components')
+    //         ->orderBy('year_level')
+    //         ->orderBy('semester')
+    //         ->orderBy('course_code')
+    //         ->get();
+
+    //     return response()->json([
+    //         'success' => true,
+    //         'courses' => $courses
+    //     ]);
+    // } // copy like the management of courses
 
     public function showForm($courseId)
     {

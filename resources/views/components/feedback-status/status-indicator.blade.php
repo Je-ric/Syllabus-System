@@ -23,6 +23,10 @@ $variant = [
     'dean'     => 'bg-indigo-50 text-indigo-800 ring-1 ring-indigo-300',
     'chair'    => 'bg-blue-50 text-blue-800 ring-1 ring-blue-300',
     'faculty'  => 'bg-green-50 text-green-800 ring-1 ring-green-300',
+
+    // Course Components
+    'lec' => 'bg-sky-50 text-sky-700 ring-1 ring-sky-200',
+    'lec_lab' => 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200',
 ];
 
 $style = $variant[$status] ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-300';

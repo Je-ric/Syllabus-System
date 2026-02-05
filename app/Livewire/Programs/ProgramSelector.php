@@ -62,11 +62,15 @@ class ProgramSelector extends Component
             // Dispatch event for parent component to listen to
             $this->dispatch('programSelected', programId: $this->programId);
 
-            // Only redirect if autoRedirect is enabled and redirectRoute is set
+            // Only redirect if autoRedirect is enabled and redirectRoute is set, not auto HAHAHAHAA
+            // I mean, we need to set the route first before redirecting
             if ($this->autoRedirect && $this->redirectRoute) {
                 // Handle special cases
                 if ($this->redirectRoute === 'courses.index') {
                     return redirect()->route('courses.index', ['program_id' => $this->programId]);
+                }
+                if ($this->redirectRoute === 'syllabus.create') {
+                    return redirect()->route('syllabus.create', ['program_id' => $this->programId]);
                 }
                 return redirect()->route($this->redirectRoute, $this->programId);
             }
@@ -78,20 +82,28 @@ class ProgramSelector extends Component
         return view('livewire.programs.program-selector');
     }
 
+    // Preselect college and department based on given program ID
+    // without this, the selector would not know which college/department to select
+    // even when we select a program directly, page will reload and the college and department would be empty
+
+    // This function loads the program with its related departments and colleges after selecting a program,
+    // while the other 3 functions react to user input changes 
     private function preselectFromProgram(int $programId): void
     {
+        // load program with its departments and their colleges
         $program = Program::with(['departments.college'])->find($programId);
         $department = $program?->departments->first();
 
         if (!$department) {
             return;
         }
-
+        // set college and load departments
         $this->collegeId = $department->college_id;
         $this->departments = Department::where('college_id', $this->collegeId)
             ->orderBy('name')
             ->get();
 
+        // set department and load programs
         $this->departmentId = $department->id;
         $this->programs = Program::whereHas('departments', function ($query) {
             $query->where('department_id', $this->departmentId);
