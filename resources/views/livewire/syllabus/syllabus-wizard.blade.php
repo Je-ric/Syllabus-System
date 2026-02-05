@@ -66,10 +66,10 @@
     <div class="mt-6 flex justify-between">
         <div>
             @if($syllabus->getPreviousStep())
-                <button wire:click="saveAndPrevious"
-                        class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                <x-button variant="cancel"
+                        wire:click="saveAndPrevious">
                     <i class="bx bx-chevron-left"></i> Previous
-                </button>
+                </x-button>
             @endif
         </div>
 
@@ -80,10 +80,10 @@
             </button>
 
             @if($syllabus->getNextStep())
-                <button wire:click="saveAndNext"
-                        class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                <x-button variant="primary"
+                        wire:click="saveAndNext">
                     Next <i class="bx bx-chevron-right"></i>
-                </button>
+                </x-button>
             @else
                 <button wire:click="submitForReview"
                         class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">

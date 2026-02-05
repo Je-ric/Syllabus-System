@@ -21,10 +21,10 @@
                 x-text="'PEO' + (index + 1)">
             </span>
 
-            <input type="text"
+            <x-form.textarea rows="3"
                     x-model="peo.peo_text"
-                    placeholder="Enter PEO description"
-                    class="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400">
+                    placeholder="Enter PEO description">
+            </x-form.textarea>
 
             <form x-show="peo.id"
                     method="POST"

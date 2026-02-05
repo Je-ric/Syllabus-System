@@ -24,8 +24,10 @@
                     x-text="'PO' + (index + 1)">
                 </span>
 
-                <input type="text" x-model="po.po_text" placeholder="Enter PO description"
-                    class="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
+                <x-form.textarea x-model="po.po_text"
+                        placeholder="Enter PO description"
+                        rows="3">
+                </x-form.textarea>
 
                 <template x-if="po.id">
                     <form method="POST" :action="'/programs/po/' + po.id"

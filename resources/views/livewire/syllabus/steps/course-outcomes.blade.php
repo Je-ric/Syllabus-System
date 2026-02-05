@@ -16,17 +16,10 @@
                 <div class="flex items-start gap-4">
                     {{-- CO Code --}}
                     <div class="w-24 shrink-0">
-                        <input
-                            type="text"
-                            wire:model="courseOutcomes.{{ $index }}.co_code"
-                            readonly
-                            class="
-                                w-full text-center font-semibold text-sm
-                                border border-green-300 rounded-md
-                                px-3 py-2
-                                bg-green-100 text-green-800
-                            "
-                        >
+                        <span class="w-16 text-center font-semibold text-gray-700">
+                             {{ $outcome['co_code'] }}
+                        </span>
+
                     </div>
 
                     {{-- Description --}}

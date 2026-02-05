@@ -40,11 +40,57 @@
         // ================================
         // FORM BUTTONS
         // ================================
-        'add-button' => $formBtn . 'bg-black text-white hover:bg-slate-800 focus:ring-black/30',
+        // 'add-button' => $formBtn . 'bg-black text-white hover:bg-slate-800 focus:ring-black/30',
         'cancel' => $formBtn . 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 focus:ring-gray-400/30',
-        'save' => $formBtn . 'bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-600/30',
-        'primary' => $formBtn . 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-600/30',
+        // 'save' => $formBtn . 'bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-600/30',
         'danger' => $formBtn . 'bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-600/30',
+
+        'add-button' => $formBtn . '
+            bg-[linear-gradient(90deg,#003a10_0%,#009639_100%)]
+            text-white font-semibold
+            hover:bg-[linear-gradient(90deg,#002b0c_0%,#007a2e_100%)]
+            focus:ring-[#009639]/30
+        ',
+
+        'save' => $formBtn . '
+            bg-[linear-gradient(90deg,#009639_0%,#92d12c_100%)]
+            text-white font-semibold
+            hover:bg-[linear-gradient(90deg,#007a2e_0%,#7fbf26_100%)]
+            focus:ring-[#009639]/30
+        ',
+
+        // =================================
+        // CLSU THEMED
+        // =================================
+        'primary' => $formBtn . '
+            bg-[linear-gradient(90deg,#003a10_0%,#009639_100%)]
+            text-white font-semibold
+            hover:bg-[linear-gradient(90deg,#002b0c_0%,#007a2e_100%)]
+            focus:ring-[#009639]/30
+        ',
+
+        'secondary' => $formBtn . '
+            bg-[linear-gradient(90deg,#ffd700_0%,#e0a70d_100%)]
+            text-[#1a5f30] font-semibold
+            border border-[#1a5f30]
+            hover:bg-[linear-gradient(90deg,#e0a70d_0%,#ffd700_100%)]
+            focus:ring-[#e0a70d]/30
+        ',
+
+        'soft' => $formBtn . '
+            bg-[linear-gradient(90deg,#92d12c_0%,#cdfb13_100%)]
+            text-[#003a10] font-medium
+            hover:bg-[linear-gradient(90deg,#7fbf26_0%,#b8e911_100%)]
+            focus:ring-[#92d12c]/30
+        ',
+
+        'outline' => $formBtn . '
+            bg-white
+            text-[#1a5f30] font-semibold
+            border-2 border-[#1a5f30]
+            hover:bg-[#1a5f30] hover:text-white
+            focus:ring-[#1a5f30]/30
+        ',
 
 
     ];
