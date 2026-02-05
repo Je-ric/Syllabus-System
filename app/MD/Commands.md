@@ -22,6 +22,8 @@ php artisan make:migration create_course_curriculum_maps_table
 php artisan make:migration create_syllabi_table
 php artisan make:migration create_syllabus_revisions_table
 php artisan make:migration create_course_components_table
+php artisan make:migration create_course_outcomes_table
+php artisan make:migration create_course_outcome_po_table
 
 
 ----------------------------------
@@ -44,7 +46,7 @@ php artisan make:model CourseCurriculumMap
 php artisan make:model Syllabus
 php artisan make:model SyllabusRevision
 php artisan make:model CourseComponent 
-
+php artisan make:model CourseOutcome 
 
 ----------------------------------
 CONTROLLER

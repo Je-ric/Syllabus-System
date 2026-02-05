@@ -31,4 +31,16 @@ class ProgramOutcome extends Model
             'program_eo_id'
         );
     }
+
+    // POs belong to many COs
+    public function courseOutcomes()
+    {
+        return $this->belongsToMany(
+            CourseOutcome::class,
+            'course_outcome_po'
+        )
+        ->withPivot('ied')
+        ->withTimestamps();
+    }
+
 }
