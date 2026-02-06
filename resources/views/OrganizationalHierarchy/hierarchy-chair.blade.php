@@ -78,20 +78,4 @@
             @endif
         </div>
     </div>
-
-    {{-- Summary Stats --}}
-    <div class="mt-8 grid grid-cols-3 gap-4">
-        <div class="bg-linear-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200 p-6 text-center">
-            <p class="text-sm text-blue-700 font-semibold">Active Faculty</p>
-            <p class="text-4xl font-bold text-blue-600 mt-2">{{ $faculty->count() }}</p>
-        </div>
-        <div class="bg-linear-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200 p-6 text-center">
-            <p class="text-sm text-purple-700 font-semibold">Department Name</p>
-            <p class="text-lg font-bold text-purple-600 mt-2 truncate">{{ $department->name }}</p>
-        </div>
-        <div class="bg-linear-to-br from-slate-50 to-slate-100 rounded-lg border border-slate-200 p-6 text-center">
-            <p class="text-sm text-slate-700 font-semibold">College</p>
-            <p class="text-lg font-bold text-slate-600 mt-2 truncate">{{ $department->college->name }}</p>
-        </div>
-    </div>
 @endsection

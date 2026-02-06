@@ -1,107 +1,169 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="mb-6">
-        <a href="{{ route('organizational.colleges.index') }}" class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium mb-4">
+
+    {{-- HEADER --}}
+    <div class="mb-8 border-b pb-4">
+        <a href="{{ route('organizational.colleges.index') }}" class="text-sm text-black hover:underline">
             ← Back to Colleges
         </a>
-        <h1 class="text-3xl font-bold text-slate-900">{{ $college->name }}</h1>
-        <p class="text-slate-600 mt-1">Assign and manage chairs for each department</p>
+
+        <h1 class="text-3xl font-bold text-black mt-3">
+            {{ $college->name }}
+        </h1>
+        <p class="text-gray-600 text-sm mt-1">
+            Manage department chairs and faculty members
+        </p>
     </div>
 
     @if ($college->departments->isEmpty())
-        <div class="bg-slate-50 border border-slate-200 rounded-lg p-8 text-center">
-            <p class="text-slate-600">No departments found in this college.</p>
+        <div class="border border-black rounded-lg p-10 text-center">
+            <p class="text-gray-600">No departments found in this college.</p>
         </div>
     @else
-        <div class="grid gap-6">
+        <div class="space-y-8">
+
             @foreach ($college->departments as $department)
-                <div class="bg-white rounded-lg shadow-md border border-slate-200 overflow-hidden">
-                    <div class="bg-linear-to-r from-purple-50 to-purple-100 border-b border-slate-200 px-6 py-4">
-                        <h2 class="text-xl font-semibold text-slate-900">{{ $department->name }}</h2>
+                <div class="border border-black rounded-xl bg-white">
+
+                    {{-- DEPARTMENT HEADER --}}
+                    <div class="border-b border-black px-6 py-4 flex justify-between items-center">
+                        <h2 class="text-xl font-bold text-black">
+                            {{ $department->name }}
+                        </h2>
+
+                        <button onclick="document.getElementById('assignFacultyModal-{{ $department->id }}').showModal()"
+                            class="border border-black px-4 py-1.5 text-sm rounded-md hover:bg-black hover:text-white transition">
+                            + Add Faculty
+                        </button>
                     </div>
 
-                    <div class="flex">
-                        {{-- Left Column: Actions --}}
-                        <div class="w-1/3 border-r border-slate-200 px-6 py-6 bg-slate-50">
-                            <h3 class="text-sm font-semibold text-slate-700 uppercase mb-4">Actions</h3>
-                            <button
-                                type="button"
-                                onclick="document.getElementById('assignChairModal-{{ $department->id }}').showModal()"
-                                class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors">
-                                + Assign Chair
-                            </button>
-                            <p class="text-xs text-slate-600 mt-3">Add a new chair to this department</p>
-                        </div>
 
-                        {{-- Right Column: Chair & Faculty List --}}
-                        <div class="w-2/3 px-6 py-6">
-                            <h3 class="text-sm font-semibold text-slate-700 uppercase mb-4">Assigned Chairs</h3>
+                    <div class="p-6 space-y-6">
 
-                            @php
-                                $departmentChairs = $chairAssignments[$department->id] ?? [];
-                            @endphp
+                        {{-- CHAIR SECTION --}}
+                        <div>
+                            <h3 class="text-xs uppercase tracking-wider text-gray-500 mb-2">
+                                Department Chair
+                            </h3>
 
-                            @if (empty($departmentChairs))
-                                <div class="bg-slate-50 rounded-lg p-4 text-center mb-6">
-                                    <p class="text-slate-500 text-sm">No chairs assigned yet</p>
+                            @if ($chairAssignments->get($department->id)?->first())
+                                <div class="border border-black rounded-lg p-4 flex justify-between items-center">
+
+                                    <div>
+                                        <p class="font-semibold text-black">
+                                            {{ $chairAssignments->get($department->id)->first()->user->name }}
+                                        </p>
+                                        <p class="text-sm text-gray-600">
+                                            {{ $chairAssignments->get($department->id)->first()->user->email }}
+                                        </p>
+                                    </div>
+
+                                    <form action="{{ route('organizational.remove-chair') }}" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="department_id" value="{{ $department->id }}">
+                                        <input type="hidden" name="user_id"
+                                            value="{{ $chairAssignments->get($department->id)->first()->user->id }}">
+
+                                        <button type="submit"
+                                            class="px-4 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-black transition">
+                                            Delete Chair
+                                        </button>
+                                    </form>
                                 </div>
                             @else
-                                <div class="space-y-3 mb-6">
-                                    @foreach ($departmentChairs as $assignment)
-                                        <div class="flex items-center justify-between p-4 bg-purple-50 rounded-lg border border-purple-200">
-                                            <div class="flex-1">
-                                                <p class="font-semibold text-slate-900">{{ $assignment->user->name }}</p>
-                                                <p class="text-sm text-slate-600">{{ $assignment->user->email }}</p>
-                                            </div>
-                                            <form method="POST" action="{{ route('organizational.remove-chair') }}" class="inline" onsubmit="return confirm('Remove this chair assignment?');">
-                                                @csrf
-                                                <input type="hidden" name="department_id" value="{{ $department->id }}">
-                                                <input type="hidden" name="user_id" value="{{ $assignment->user->id }}">
-                                                <button type="submit" class="px-3 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors font-medium">
-                                                    Remove
-                                                </button>
-                                            </form>
-                                        </div>
-                                    @endforeach
+                                <div class="border border-dashed border-black rounded-lg p-4 text-center mb-2">
+                                    <p class="text-gray-500 text-sm">No chair assigned</p>
                                 </div>
+
+                                @if ($potentialChairs->count() > 0)
+                                    <button
+                                        onclick="document.getElementById('assignChairModal-{{ $department->id }}').showModal()"
+                                        class="border border-black px-4 py-2 rounded-md bg-black text-white hover:bg-red-600 transition text-sm">
+                                        Assign Chair
+                                    </button>
+                                @endif
                             @endif
+                        </div>
 
-                            {{-- Faculty List --}}
-                            <div class="pt-4 border-t border-slate-200">
-                                <h4 class="text-sm font-semibold text-slate-700 uppercase mb-3">Faculty Members</h4>
-                                @php
-                                    $faculty = \App\Models\UserAssignment::where('department_id', $department->id)
-                                        ->where('context', 'faculty')
-                                        ->with('user')
-                                        ->orderBy('created_at', 'desc')
-                                        ->get();
-                                @endphp
 
-                                @if ($faculty->isEmpty())
-                                    <p class="text-sm text-slate-500">No faculty assigned yet.</p>
-                                @else
-                                    <div class="space-y-2">
-                                        @foreach ($faculty as $member)
-                                            <div class="p-3 bg-green-50 border border-green-200 rounded-lg">
-                                                <p class="font-medium text-slate-800 text-sm">{{ $member->user->name }}</p>
-                                                <p class="text-xs text-slate-600">{{ $member->user->email }}</p>
+                        {{-- FACULTY SECTION --}}
+                        <div>
+                            <h3 class="text-xs uppercase tracking-wider text-gray-500 mb-3">
+                                Faculty Members
+                            </h3>
+
+                            @if ($facultyAssignments->get($department->id)?->count() > 0)
+                                <div class="border border-black rounded-lg overflow-hidden">
+
+                                    {{-- table header --}}
+                                    <div class="grid grid-cols-3 bg-black text-white text-sm font-medium px-4 py-2">
+                                        <div>Name</div>
+                                        <div>Office</div>
+                                        <div class="text-right">Action</div>
+                                    </div>
+
+                                    {{-- scrollable faculty list --}}
+                                    <div class="max-h-64 overflow-y-auto divide-y divide-black">
+                                        @foreach ($facultyAssignments->get($department->id) as $facultyAssignment)
+                                            <div class="grid grid-cols-3 items-center px-4 py-3 text-sm">
+
+                                                <div class="font-medium text-black">
+                                                    {{ $facultyAssignment->user->name }}
+                                                    {{ $facultyAssignment->user->email }}
+                                                </div>
+                                                <div class="text-gray-600">
+                                                    {{ $facultyAssignment->user->office }}
+                                                </div>
+
+                                                <div class="text-right">
+                                                    <form action="{{ route('organizational.remove-faculty') }}"
+                                                        method="POST">
+                                                        @csrf
+                                                        <input type="hidden" name="department_id"
+                                                            value="{{ $department->id }}">
+                                                        <input type="hidden" name="user_id"
+                                                            value="{{ $facultyAssignment->user->id }}">
+
+                                                        <button type="submit"
+                                                            class="px-3 py-1 bg-red-600 text-white text-xs rounded-md hover:bg-black transition">
+                                                            Delete
+                                                        </button>
+                                                    </form>
+                                                </div>
+
                                             </div>
                                         @endforeach
                                     </div>
-                                @endif
-                            </div>
+
+                                </div>
+                            @else
+                                <div class="border border-dashed border-black rounded-lg p-6 text-center">
+                                    <p class="text-gray-500 text-sm">No faculty assigned yet</p>
+                                </div>
+                            @endif
                         </div>
+
                     </div>
                 </div>
 
-                {{-- Modal for assigning chair --}}
+
+                {{-- MODALS --}}
                 @include('OrganizationalHierarchy.modals.assignChairModal', [
                     'departmentId' => $department->id,
                     'departmentName' => $department->name,
                     'potentialChairs' => $potentialChairs,
                 ])
+
+                @include('OrganizationalHierarchy.modals.assignFacultyModal', [
+                    'departmentId' => $department->id,
+                    'departmentName' => $department->name,
+                    'potentialFaculty' => $potentialFaculty,
+                    'assignedFacultyIds' =>
+                        $facultyAssignments->get($department->id)?->pluck('user_id')->toArray() ?? [],
+                ])
             @endforeach
+
         </div>
     @endif
 

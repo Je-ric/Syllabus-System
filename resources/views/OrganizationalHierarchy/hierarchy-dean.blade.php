@@ -86,26 +86,4 @@
             </div>
         @endforelse
     </div>
-
-    {{-- Summary Card --}}
-    @php
-        $totalFaculty = $chairsWithFaculty->sum(fn($item) => $item['faculty']->count());
-        $totalChairs = $chairsWithFaculty->filter(fn($item) => $item['chair'])->count();
-    @endphp
-    <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-        <div class="grid grid-cols-3 gap-6">
-            <div>
-                <p class="text-sm text-slate-600 font-medium">Total Departments</p>
-                <p class="text-3xl font-bold text-blue-600 mt-1">{{ count($chairsWithFaculty) }}</p>
-            </div>
-            <div>
-                <p class="text-sm text-slate-600 font-medium">Assigned Chairs</p>
-                <p class="text-3xl font-bold text-purple-600 mt-1">{{ $totalChairs }}</p>
-            </div>
-            <div>
-                <p class="text-sm text-slate-600 font-medium">Total Faculty</p>
-                <p class="text-3xl font-bold text-green-600 mt-1">{{ $totalFaculty }}</p>
-            </div>
-        </div>
-    </div>
 @endsection

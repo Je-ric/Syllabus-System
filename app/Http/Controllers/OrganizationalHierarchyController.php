@@ -20,10 +20,16 @@ class OrganizationalHierarchyController extends Controller
         $colleges = College::with('departments')->get();
 
         // Get users who could be deans (active with admin/dean role)
+        // EXCLUDE users already assigned as deans of ANY college
         $potentialDeans = User::whereHas('roles', function ($query) {
             $query->whereIn('name', ['admin', 'dean']);
         })
         ->where('account_status', 'active')
+        ->whereNotIn('id', function ($query) {
+            $query->select('user_id')
+                ->from('user_assignments')
+                ->where('context', 'dean');
+        })
         ->orderBy('name')
         ->get();
 
@@ -135,22 +141,43 @@ class OrganizationalHierarchyController extends Controller
         $college = College::with('departments')->findOrFail($collegeId);
 
         // Get users who could be chairs (active with admin/chair role)
+        // EXCLUDE users already assigned as chairs of ANY department
         $potentialChairs = User::whereHas('roles', function ($query) {
             $query->whereIn('name', ['admin', 'chair']);
+        })
+        ->where('account_status', 'active')
+        ->whereNotIn('id', function ($query) {
+            $query->select('user_id')
+                ->from('user_assignments')
+                ->where('context', 'chair');
+        })
+        ->orderBy('name')
+        ->get();
+
+        // Get potential faculty (users with faculty role, not already assigned to this department)
+        $departmentIds = $college->departments->pluck('id')->toArray();
+        $potentialFaculty = User::whereHas('roles', function ($query) {
+            $query->whereIn('name', ['admin', 'faculty']);
         })
         ->where('account_status', 'active')
         ->orderBy('name')
         ->get();
 
-        // Get all chair assignments for this college's departments
-        $departmentIds = $college->departments->pluck('id')->toArray();
+        // Get all chair assignments
         $chairAssignments = UserAssignment::whereIn('department_id', $departmentIds)
             ->where('context', 'chair')
             ->with('user')
             ->get()
             ->groupBy('department_id');
 
-        return view('OrganizationalHierarchy.departments', compact('college', 'potentialChairs', 'chairAssignments'));
+        // Get all faculty assignments
+        $facultyAssignments = UserAssignment::whereIn('department_id', $departmentIds)
+            ->where('context', 'faculty')
+            ->with('user')
+            ->get()
+            ->groupBy('department_id');
+
+        return view('OrganizationalHierarchy.departments', compact('college', 'potentialChairs', 'chairAssignments', 'potentialFaculty', 'facultyAssignments'));
     }
 
     /**
@@ -240,6 +267,73 @@ class OrganizationalHierarchyController extends Controller
 
         return back()->with('toast', [
             'message' => 'Chair assignment removed.',
+            'type' => 'success'
+        ]);
+    }
+
+    /**
+     * Assign faculty to a department
+     */
+    public function assignFaculty(Request $request)
+    {
+        $request->validate([
+            'department_id' => 'required|exists:departments,id',
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        $department = Department::findOrFail($request->department_id);
+        $user = User::findOrFail($request->user_id);
+
+        // Check if user has faculty role
+        if (!$user->hasRole('faculty') && !$user->hasRole('admin')) {
+            return back()->with('toast', [
+                'message' => 'User must have faculty role assigned.',
+                'type' => 'error'
+            ]);
+        }
+
+        // Check if already faculty of this department
+        if ($user->assignments()
+            ->where('context', 'faculty')
+            ->where('department_id', $department->id)
+            ->exists()) {
+            return back()->with('toast', [
+                'message' => "User is already faculty of {$department->name}.",
+                'type' => 'info'
+            ]);
+        }
+
+        // Create faculty assignment
+        UserAssignment::create([
+            'user_id' => $user->id,
+            'college_id' => null,
+            'department_id' => $department->id,
+            'context' => 'faculty',
+        ]);
+
+        return back()->with('toast', [
+            'message' => "{$user->name} assigned as faculty to {$department->name}.",
+            'type' => 'success'
+        ]);
+    }
+
+    /**
+     * Remove faculty assignment from a department
+     */
+    public function removeFaculty(Request $request)
+    {
+        $request->validate([
+            'department_id' => 'required|exists:departments,id',
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        UserAssignment::where('department_id', $request->department_id)
+            ->where('user_id', $request->user_id)
+            ->where('context', 'faculty')
+            ->delete();
+
+        return back()->with('toast', [
+            'message' => 'Faculty assignment removed.',
             'type' => 'success'
         ]);
     }
