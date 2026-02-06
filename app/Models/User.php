@@ -113,4 +113,98 @@ class User extends Authenticatable
             ->exists();
     }
 
+    /**
+     * Get the user's primary department assignment (chair or faculty)
+     * Returns the first department assignment found
+     */
+    public function getPrimaryDepartmentAssignment()
+    {
+        // Check for chair assignment first (most specific)
+        $chairAssignment = $this->assignments()
+            ->where('context', 'chair')
+            ->whereNotNull('department_id')
+            ->with('department.college')
+            ->first();
+
+        if ($chairAssignment) {
+            return $chairAssignment;
+        }
+
+        // Check for faculty assignment
+        $facultyAssignment = $this->assignments()
+            ->where('context', 'faculty')
+            ->whereNotNull('department_id')
+            ->with('department.college')
+            ->first();
+
+        return $facultyAssignment;
+    }
+
+    /**
+     * Get the user's primary college assignment (dean)
+     * Returns the first college assignment found
+     */
+    public function getPrimaryCollegeAssignment()
+    {
+        return $this->assignments()
+            ->where('context', 'dean')
+            ->whereNotNull('college_id')
+            ->with('college')
+            ->first();
+    }
+
+    /**
+     * Check if user is already assigned as dean (of any college)
+     */
+    public function isAssignedAsDean(): bool
+    {
+        return $this->assignments()
+            ->where('context', 'dean')
+            ->exists();
+    }
+
+    /**
+     * Check if user is already assigned as chair (of any department)
+     */
+    public function isAssignedAsChair(): bool
+    {
+        return $this->assignments()
+            ->where('context', 'chair')
+            ->exists();
+    }
+
+    /**
+     * Check if user is assigned as faculty to a specific department
+     */
+    public function isFacultyOfDepartment(int $departmentId): bool
+    {
+        return $this->assignments()
+            ->where('context', 'faculty')
+            ->where('department_id', $departmentId)
+            ->exists();
+    }
+
+    /**
+     * Ensure user has faculty role and create faculty assignment if not exists
+     */
+    public function ensureFacultyRoleAndAssignment(?int $collegeId = null, ?int $departmentId = null): void
+    {
+        $facultyRole = Role::where('name', 'faculty')->firstOrCreate(['name' => 'faculty']);
+
+        // Add faculty role if not already assigned
+        if (!$this->roles()->where('role_id', $facultyRole->id)->exists()) {
+            $this->roles()->attach($facultyRole->id);
+        }
+
+        // Create faculty assignment if not exists
+        UserAssignment::firstOrCreate(
+            [
+                'user_id' => $this->id,
+                'college_id' => $collegeId,
+                'department_id' => $departmentId,
+                'context' => 'faculty',
+            ]
+        );
+    }
+
 }

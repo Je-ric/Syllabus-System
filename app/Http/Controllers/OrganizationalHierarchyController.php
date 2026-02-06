@@ -12,26 +12,17 @@ use Illuminate\Support\Facades\Auth;
 
 class OrganizationalHierarchyController extends Controller
 {
-    /**
-     * Display colleges with dean assignments
-     */
+    // colleges with deans
     public function collegesIndex()
     {
-        $colleges = College::with('departments')->get();
+        $colleges = College::with('departments')
+                ->orderBy('name')
+                ->get();
 
         // Get users who could be deans (active with admin/dean role)
+        // DEAN roles (not assignments)
         // EXCLUDE users already assigned as deans of ANY college
-        $potentialDeans = User::whereHas('roles', function ($query) {
-            $query->whereIn('name', ['admin', 'dean']);
-        })
-        ->where('account_status', 'active')
-        ->whereNotIn('id', function ($query) {
-            $query->select('user_id')
-                ->from('user_assignments')
-                ->where('context', 'dean');
-        })
-        ->orderBy('name')
-        ->get();
+        $potentialDeans = $this->getPotentialUsers(['admin', 'dean'], 'dean');
 
         // Get all dean assignments grouped by college
         $deanAssignments = UserAssignment::where('context', 'dean')
@@ -42,8 +33,9 @@ class OrganizationalHierarchyController extends Controller
         return view('OrganizationalHierarchy.colleges', compact('colleges', 'potentialDeans', 'deanAssignments'));
     }
 
+
     /**
-     * Assign dean to a college (allow multiple colleges)
+     * Assign dean to a college (one dean per college, one college per dean)
      */
     public function assignDean(Request $request)
     {
@@ -64,14 +56,23 @@ class OrganizationalHierarchyController extends Controller
         }
 
         // Prevent user from being both dean and chair
-        if ($user->assignments()->where('context', 'chair')->exists()) {
+        if ($user->isAssignedAsChair()) {
             return back()->with('toast', [
                 'message' => 'User cannot be both dean and chair. Remove their chair assignment first.',
                 'type' => 'error'
             ]);
         }
 
-        // Check if already dean of this college
+        // Check if already dean of ANY college
+        if ($user->isAssignedAsDean()) {
+            $currentDean = $user->getPrimaryCollegeAssignment();
+            return back()->with('toast', [
+                'message' => "User is already dean of {$currentDean->college->name}. A dean can only be assigned to one college.",
+                'type' => 'error'
+            ]);
+        }
+
+        // Check if already dean of this college specifically (redundant but kept for safety)
         if ($user->assignments()
             ->where('context', 'dean')
             ->where('college_id', $college->id)
@@ -82,7 +83,7 @@ class OrganizationalHierarchyController extends Controller
             ]);
         }
 
-        // Create new dean assignment (allow multiple colleges)
+        // Create dean assignment
         UserAssignment::create([
             'user_id' => $user->id,
             'college_id' => $college->id,
@@ -90,21 +91,7 @@ class OrganizationalHierarchyController extends Controller
             'context' => 'dean',
         ]);
 
-        // Also assign faculty role if not already assigned
-        $facultyRole = Role::where('name', 'faculty')->firstOrCreate(['name' => 'faculty']);
-        if (!$user->roles()->where('role_id', $facultyRole->id)->exists()) {
-            $user->roles()->attach($facultyRole->id);
-        }
-
-        // Also create faculty assignment for this college
-        UserAssignment::firstOrCreate(
-            [
-                'user_id' => $user->id,
-                'college_id' => $college->id,
-                'department_id' => null,
-                'context' => 'faculty',
-            ]
-        );
+        $user->ensureFacultyRoleAndAssignment($college->id, null);
 
         return back()->with('toast', [
             'message' => "{$user->name} is now dean of {$college->name}.",
@@ -142,26 +129,11 @@ class OrganizationalHierarchyController extends Controller
 
         // Get users who could be chairs (active with admin/chair role)
         // EXCLUDE users already assigned as chairs of ANY department
-        $potentialChairs = User::whereHas('roles', function ($query) {
-            $query->whereIn('name', ['admin', 'chair']);
-        })
-        ->where('account_status', 'active')
-        ->whereNotIn('id', function ($query) {
-            $query->select('user_id')
-                ->from('user_assignments')
-                ->where('context', 'chair');
-        })
-        ->orderBy('name')
-        ->get();
+        $potentialChairs = $this->getPotentialUsers(['admin', 'chair'], 'chair');
 
         // Get potential faculty (users with faculty role, not already assigned to this department)
         $departmentIds = $college->departments->pluck('id')->toArray();
-        $potentialFaculty = User::whereHas('roles', function ($query) {
-            $query->whereIn('name', ['admin', 'faculty']);
-        })
-        ->where('account_status', 'active')
-        ->orderBy('name')
-        ->get();
+        $potentialFaculty = $this->getPotentialUsers(['admin', 'faculty']);
 
         // Get all chair assignments
         $chairAssignments = UserAssignment::whereIn('department_id', $departmentIds)
@@ -181,7 +153,7 @@ class OrganizationalHierarchyController extends Controller
     }
 
     /**
-     * Assign chair to a department (allow multiple departments)
+     * Assign chair to a department (one chair per department, one department per chair)
      */
     public function assignChair(Request $request)
     {
@@ -202,14 +174,23 @@ class OrganizationalHierarchyController extends Controller
         }
 
         // Prevent user from being both dean and chair
-        if ($user->assignments()->where('context', 'dean')->exists()) {
+        if ($user->isAssignedAsDean()) {
             return back()->with('toast', [
                 'message' => 'User cannot be both dean and chair. Remove their dean assignment first.',
                 'type' => 'error'
             ]);
         }
 
-        // Check if already chair of this department
+        // Check if already chair of ANY department
+        if ($user->isAssignedAsChair()) {
+            $currentChair = $user->getPrimaryDepartmentAssignment();
+            return back()->with('toast', [
+                'message' => "User is already chair of {$currentChair->department->name}. A chair can only be assigned to one department.",
+                'type' => 'error'
+            ]);
+        }
+
+        // Check if already chair of this department specifically (redundant but kept for safety)
         if ($user->assignments()
             ->where('context', 'chair')
             ->where('department_id', $department->id)
@@ -220,7 +201,7 @@ class OrganizationalHierarchyController extends Controller
             ]);
         }
 
-        // Create new chair assignment (allow multiple departments)
+        // Create chair assignment
         UserAssignment::create([
             'user_id' => $user->id,
             'college_id' => null,
@@ -228,21 +209,7 @@ class OrganizationalHierarchyController extends Controller
             'context' => 'chair',
         ]);
 
-        // Also assign faculty role if not already assigned
-        $facultyRole = Role::where('name', 'faculty')->firstOrCreate(['name' => 'faculty']);
-        if (!$user->roles()->where('role_id', $facultyRole->id)->exists()) {
-            $user->roles()->attach($facultyRole->id);
-        }
-
-        // Also create faculty assignment for this department
-        UserAssignment::firstOrCreate(
-            [
-                'user_id' => $user->id,
-                'college_id' => null,
-                'department_id' => $department->id,
-                'context' => 'faculty',
-            ]
-        );
+        $user->ensureFacultyRoleAndAssignment(null, $department->id);
 
         return back()->with('toast', [
             'message' => "{$user->name} is now chair of {$department->name}.",
@@ -338,9 +305,8 @@ class OrganizationalHierarchyController extends Controller
         ]);
     }
 
-    /**
-     * Display hierarchy view: Dean sees their college, departments, chairs, and faculty
-     */
+
+    // Display hierarchy view: Dean sees their college, departments, chairs, and faculty
     public function hierarchyView()
     {
         $user = Auth::user();
@@ -404,4 +370,23 @@ class OrganizationalHierarchyController extends Controller
 
         return view('OrganizationalHierarchy.no-assignment');
     }
+
+    private function getPotentialUsers(array $roles, ?string $excludeContext = null)
+    {
+        $query = User::whereHas('roles', function ($query) use ($roles) {
+            $query->whereIn('name', $roles);
+        })
+        ->where('account_status', 'active');
+
+        if ($excludeContext) {
+            $query->whereNotIn('id', function ($query) use ($excludeContext) {
+                $query->select('user_id')
+                    ->from('user_assignments')
+                    ->where('context', $excludeContext);
+            });
+        }
+
+        return $query->orderBy('name')->get();
+    }
+
 }
