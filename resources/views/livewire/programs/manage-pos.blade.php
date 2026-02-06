@@ -87,7 +87,16 @@
     {{-- Action Buttons --}}
     <div class="flex items-center gap-2">
         <button @click="addPo()" type="button"
-            class="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition text-sm font-medium">
+            class="
+                w-full
+                border-2 border-dashed border-green-300
+                rounded-lg p-4
+                text-sm font-medium text-green-700
+                hover:border-green-600
+                hover:bg-green-50
+                transition
+                flex items-center justify-center gap-2
+            ">
             <i class='bx bx-plus'></i> Add PO
         </button>
 

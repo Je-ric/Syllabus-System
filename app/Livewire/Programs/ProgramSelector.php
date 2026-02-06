@@ -133,10 +133,9 @@ class ProgramSelector extends Component
     }
 
 
-    /**
-     * Redirect to the redirectRoute with the program ID in query string
-     * This is called from mount, so we use $this->redirect() which works in mount
-     */
+
+    // Redirect to the redirectRoute with the program ID in query string
+    // This is called from mount, so we use $this->redirect() which works in mount
     private function redirectWithProgramId(int $programId): void
     {
         // Handle special cases
@@ -161,6 +160,10 @@ class ProgramSelector extends Component
      * Priority: Department assignment (chair/faculty) > College assignment (dean)
      * Returns the preselected program ID if one was preselected, null otherwise
      */
+
+    // This function checks the authenticated user's assignments to determine if they should have a program preselected.
+    // It first checks if the user has a department assignment (either as chair or faculty).
+    // If so, it preselects the college and department associated with that assignment, and loads the programs
     private function preselectFromUserAssignments(): ?int
     {
         /** @var \App\Models\User|null $user */
@@ -245,7 +248,6 @@ class ProgramSelector extends Component
 
         return null;
     }
-
 
     // preselectFromProgram() → Restores college, department, and program when loading the page with an existing program.
     // preselectFromUserAssignments() → Preselects based on user's role assignments (chair/faculty/dean).

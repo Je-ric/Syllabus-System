@@ -21,17 +21,17 @@
                     <option value="">-- Choose College --</option>
 
                     @foreach ($colleges as $college)
-                        <option value="{{ $college->id }}" @selected(request('college_id') == $college->id)>
+                        <option value="{{ $college->id }}" @selected($selectedCollegeId == $college->id)>
                             {{ $college->name }}
                         </option>
                     @endforeach
                 </select>
             </form>
 
-            @if(request('college_id'))
+            @if($selectedCollegeId)
                 <form method="POST" action="{{ route('goal.store') }}" class="space-y-4">
                     @csrf
-                    <input type="hidden" name="college_id" value="{{ request('college_id') }}">
+                    <input type="hidden" name="college_id" value="{{ $selectedCollegeId }}">
 
                     <x-form.label for="goalText" variant="description" isRequired>Add Goal</x-form.label>
 
@@ -59,7 +59,7 @@
         <div class="bg-green-50/30 p-6 rounded-xl border border-green-200 shadow-sm">
             <h2 class="font-semibold text-green-800 mb-4">Goals</h2>
 
-            @if(request('college_id'))
+            @if($selectedCollegeId)
                 @if($goals->count())
                     <div class="overflow-x-auto">
                         <table class="w-full border-collapse text-sm">

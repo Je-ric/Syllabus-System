@@ -60,15 +60,26 @@
     </template>
 
 
-    <button @click="addPeo()" type="button"
-        class="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition text-sm font-medium">
-        <i class='bx bx-plus'></i> Add PEO
-    </button>
+    <div class="flex items-center gap-2">
+        <button @click="addPeo()" type="button"
+            class="
+                    w-full
+                    border-2 border-dashed border-green-300
+                    rounded-lg p-4
+                    text-sm font-medium text-green-700
+                    hover:border-green-600
+                    hover:bg-green-50
+                    transition
+                    flex items-center justify-center gap-2
+                ">
+            <i class='bx bx-plus'></i> Add PEO
+        </button>
 
-    <button @click="savePeos()" type="button" :disabled="isSaving"
-        class="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed">
-        <i class='bx bx-save'></i> Save All
-    </button>
+        <button @click="savePeos()" type="button" :disabled="isSaving"
+            class="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+            <i class='bx bx-save'></i> Save All
+        </button>
+    </div>
 
 </div>
 

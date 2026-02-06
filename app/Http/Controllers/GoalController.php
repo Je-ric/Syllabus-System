@@ -8,6 +8,7 @@ use App\Models\Department;
 use App\Models\CollegeGoal;
 use App\Models\DepartmentObjective;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 
 class GoalController extends Controller
 {
@@ -19,14 +20,22 @@ class GoalController extends Controller
     {
         $colleges = College::orderBy('name')->get();
 
+        $selectedCollegeId = $request->input('college_id');
+        if (!$selectedCollegeId) {
+            /** @var \App\Models\User|null $user */
+            $user = Auth::user();
+            $assignment = $user?->getPrimaryCollegeAssignment();
+            $selectedCollegeId = $assignment?->college_id;
+        }
+
         $goals = collect();
-        if ($request->filled('college_id')) { // If a college is selected
-            $goals = CollegeGoal::where('college_id', $request->college_id) // Fetch goals for that college
+        if ($selectedCollegeId) { // If a college is selected
+            $goals = CollegeGoal::where('college_id', $selectedCollegeId) // Fetch goals for that college
                 ->orderBy('college_goals_code')
                 ->get();
         }
 
-        return view('GoalObjective.goal', compact('colleges', 'goals'));
+        return view('GoalObjective.goal', compact('colleges', 'goals', 'selectedCollegeId'));
     }
 
     public function goal_store(Request $request)

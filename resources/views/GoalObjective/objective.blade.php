@@ -23,7 +23,7 @@
                 >
                     <option value="">-- Choose College --</option>
                     @foreach ($colleges as $college)
-                        <option value="{{ $college->id }}" @selected(request('college_id') == $college->id)>
+                        <option value="{{ $college->id }}" @selected($selectedCollegeId == $college->id)>
                             {{ $college->name }}
                         </option>
                     @endforeach
@@ -31,10 +31,10 @@
             </form>
 
             {{-- Department Selection --}}
-            @if(request('college_id'))
+            @if($selectedCollegeId)
                 @if($departments->count())
                     <form method="GET" action="{{ route('objective.index') }}" class="space-y-2">
-                        <input type="hidden" name="college_id" value="{{ request('college_id') }}">
+                        <input type="hidden" name="college_id" value="{{ $selectedCollegeId }}">
 
                         <x-form.label for="departmentSelect" variant="title">Select Department</x-form.label>
                         <select
@@ -45,7 +45,7 @@
                         >
                             <option value="">-- Choose Department --</option>
                             @foreach ($departments as $dept)
-                                <option value="{{ $dept->id }}" @selected(request('department_id') == $dept->id)>
+                                <option value="{{ $dept->id }}" @selected($selectedDepartmentId == $dept->id)>
                                     {{ $dept->name }}
                                 </option>
                             @endforeach
@@ -53,11 +53,11 @@
                     </form>
 
                     {{-- Add Objective Form --}}
-                    @if(request('department_id'))
+                    @if($selectedDepartmentId)
                         <form method="POST" action="{{ route('objective.store') }}" class="space-y-4">
                             @csrf
-                            <input type="hidden" name="college_id" value="{{ request('college_id') }}">
-                            <input type="hidden" name="department_id" value="{{ request('department_id') }}">
+                            <input type="hidden" name="college_id" value="{{ $selectedCollegeId }}">
+                            <input type="hidden" name="department_id" value="{{ $selectedDepartmentId }}">
 
                             <x-form.label for="objectiveText" variant="description" isRequired>Add Objective</x-form.label>
                             <x-form.textarea
@@ -90,7 +90,7 @@
         <div class="bg-green-50/30 p-6 rounded-xl border border-green-200 shadow-sm">
             <h2 class="font-semibold text-green-800 mb-4">Objectives</h2>
 
-            @if(request('college_id'))
+            @if($selectedCollegeId)
                 @if($objectives->count())
                     <div class="overflow-x-auto">
                         <table class="w-full border-collapse text-sm">

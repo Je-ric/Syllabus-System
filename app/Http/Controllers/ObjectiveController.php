@@ -8,6 +8,7 @@ use App\Models\Department;
 use App\Models\CollegeGoal;
 use App\Models\DepartmentObjective;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 
 class ObjectiveController extends Controller
 {
@@ -19,16 +20,29 @@ class ObjectiveController extends Controller
     {
         $colleges = College::orderBy('name')->get();
 
+        $selectedCollegeId = $request->input('college_id');
+        $selectedDepartmentId = $request->input('department_id');
+
+        if (!$selectedCollegeId || !$selectedDepartmentId) {
+            /** @var \App\Models\User|null $user */
+            $user = Auth::user();
+            $assignment = $user?->getPrimaryDepartmentAssignment();
+            if ($assignment?->department) {
+                $selectedDepartmentId = $assignment->department_id;
+                $selectedCollegeId = $assignment->department->college_id;
+            }
+        }
+
         $departments = collect();
         $objectives = collect();
 
-        if ($request->filled('college_id')) { // If a college is selected
-            $departments = Department::where('college_id', $request->college_id) // Fetch departments for that college
+        if ($selectedCollegeId) { // If a college is selected
+            $departments = Department::where('college_id', $selectedCollegeId) // Fetch departments for that college
                 ->orderBy('name')
                 ->get();
 
-            if ($request->filled('department_id')) { // If a department is selected
-                $objectives = DepartmentObjective::where('department_id', $request->department_id) // Fetch objectives for that department
+            if ($selectedDepartmentId) { // If a department is selected
+                $objectives = DepartmentObjective::where('department_id', $selectedDepartmentId) // Fetch objectives for that department
                     ->with('department')
                     ->orderBy('dept_obj_code')
                     ->get();
@@ -39,7 +53,9 @@ class ObjectiveController extends Controller
                 compact(
                         'colleges',
                         'departments',
-                                    'objectives')
+                                    'objectives',
+                                    'selectedCollegeId',
+                                    'selectedDepartmentId')
                             );
     }
 
