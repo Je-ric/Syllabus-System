@@ -72,7 +72,6 @@
         'secondary' => $formBtn . '
             bg-[linear-gradient(90deg,#ffd700_0%,#e0a70d_100%)]
             text-[#1a5f30] font-semibold
-            border border-[#1a5f30]
             hover:bg-[linear-gradient(90deg,#e0a70d_0%,#ffd700_100%)]
             focus:ring-[#e0a70d]/30
         ',
