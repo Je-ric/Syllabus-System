@@ -12,6 +12,8 @@ use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\AcademicCalendarController;
 use App\Http\Controllers\AcademicCalendarEventController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\SyllabusController;
+use App\Http\Controllers\OrganizationalHierarchyController;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -74,7 +76,17 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/academic-calendars/{semester}/events', [AcademicCalendarEventController::class, 'store'])->name('academic.calendar.events.store');
         Route::put('/academic-calendars/events/{event}', [AcademicCalendarEventController::class, 'update'])->name('academic.calendar.events.update');
         Route::delete('/academic-calendars/events/{event}', [AcademicCalendarEventController::class, 'destroy'])->name('academic.calendar.events.destroy');
+
+        Route::get('/organizational/colleges', [OrganizationalHierarchyController::class, 'collegesIndex'])->name('organizational.colleges.index');
+        Route::post('/organizational/assign-dean', [OrganizationalHierarchyController::class, 'assignDean'])->name('organizational.assign-dean');
+        Route::post('/organizational/remove-dean', [OrganizationalHierarchyController::class, 'removeDean'])->name('organizational.remove-dean');
+        Route::get('/organizational/college/{collegeId}/departments', [OrganizationalHierarchyController::class, 'departmentsIndex'])->name('organizational.departments.index');
+        Route::post('/organizational/assign-chair', [OrganizationalHierarchyController::class, 'assignChair'])->name('organizational.assign-chair');
+        Route::post('/organizational/remove-chair', [OrganizationalHierarchyController::class, 'removeChair'])->name('organizational.remove-chair');
     });
+
+    Route::middleware(['role:admin,dean,chair'])->group(function () {
+        Route::get('/organizational/hierarchy', [OrganizationalHierarchyController::class, 'hierarchyView'])->name('organizational.hierarchy');    });
 
     Route::middleware(['role:admin,dean'])->group(function () {
         Route::get('/college/goals', [GoalController::class, 'goal_index'])->name('goal.index');
@@ -104,16 +116,16 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::middleware(['role:admin,faculty'])->group(function () {
-        Route::get('/syllabus', [App\Http\Controllers\SyllabusController::class, 'index'])->name('syllabus.index');
-        Route::get('/syllabus/create', [App\Http\Controllers\SyllabusController::class, 'create'])->name('syllabus.create');
-        Route::get('/syllabus/courses/{programId}', [App\Http\Controllers\SyllabusController::class, 'showCourses'])->name('syllabus.courses');
-        Route::get('/syllabus/wizard', [App\Http\Controllers\SyllabusController::class, 'wizard'])->name('syllabus.wizard');
-        Route::get('/syllabus/form/{courseId}', [App\Http\Controllers\SyllabusController::class, 'showForm'])->name('syllabus.form');
-        Route::post('/syllabus', [App\Http\Controllers\SyllabusController::class, 'store'])->name('syllabus.store');
-        Route::get('/syllabus/{syllabus}', [App\Http\Controllers\SyllabusController::class, 'show'])->name('syllabus.show');
-        Route::get('/syllabus/{syllabus}/edit', [App\Http\Controllers\SyllabusController::class, 'edit'])->name('syllabus.edit');
-        Route::put('/syllabus/{syllabus}', [App\Http\Controllers\SyllabusController::class, 'update'])->name('syllabus.update');
-        Route::delete('/syllabus/{syllabus}', [App\Http\Controllers\SyllabusController::class, 'destroy'])->name('syllabus.destroy');
+        Route::get('/syllabus', [SyllabusController::class, 'index'])->name('syllabus.index');
+        Route::get('/syllabus/create', [SyllabusController::class, 'create'])->name('syllabus.create');
+        Route::get('/syllabus/courses/{programId}', [SyllabusController::class, 'showCourses'])->name('syllabus.courses');
+        Route::get('/syllabus/wizard', [SyllabusController::class, 'wizard'])->name('syllabus.wizard');
+        Route::get('/syllabus/form/{courseId}', [SyllabusController::class, 'showForm'])->name('syllabus.form');
+        Route::post('/syllabus', [SyllabusController::class, 'store'])->name('syllabus.store');
+        Route::get('/syllabus/{syllabus}', [SyllabusController::class, 'show'])->name('syllabus.show');
+        Route::get('/syllabus/{syllabus}/edit', [SyllabusController::class, 'edit'])->name('syllabus.edit');
+        Route::put('/syllabus/{syllabus}', [SyllabusController::class, 'update'])->name('syllabus.update');
+        Route::delete('/syllabus/{syllabus}', [SyllabusController::class, 'destroy'])->name('syllabus.destroy');
     });
 
 });

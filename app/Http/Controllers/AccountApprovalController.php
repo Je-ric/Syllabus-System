@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Role;
+use App\Models\UserAssignment;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\AccountStatusUpdated;
 
@@ -122,6 +123,9 @@ class AccountApprovalController extends Controller
             abort(403, 'Roles can only be assigned to active accounts.');
         }
 
+        // Get old roles before modification (for comparison)
+        $oldRoleNames = $user->roles->pluck('name')->toArray();
+
         $roles = collect($request->roles)
             ->push('faculty') // always include faculty
             ->unique();
@@ -131,6 +135,23 @@ class AccountApprovalController extends Controller
                 ['name' => $roleName]
             )->id;
         });
+
+        // Handle role removal: clean up UserAssignments when dean/chair roles are removed
+        $newRoleNames = $roles->toArray();
+        
+        // If dean role is being removed, delete all dean assignments for this user
+        if (in_array('dean', $oldRoleNames) && !in_array('dean', $newRoleNames)) {
+            UserAssignment::where('user_id', $user->id)
+                ->where('context', 'dean')
+                ->delete();
+        }
+
+        // If chair role is being removed, delete all chair assignments for this user
+        if (in_array('chair', $oldRoleNames) && !in_array('chair', $newRoleNames)) {
+            UserAssignment::where('user_id', $user->id)
+                ->where('context', 'chair')
+                ->delete();
+        }
 
         $user->roles()->sync($roleIds); // Sync roles
         // means any roles not in the list will be removed

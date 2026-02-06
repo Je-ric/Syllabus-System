@@ -93,4 +93,24 @@ class User extends Authenticatable
     {
         return $this->hasMany(Course::class, 'created_by');
     }
+
+    public function assignments()
+    {
+        return $this->hasMany(UserAssignment::class);
+    }
+
+    // Convenience helpers
+    public function isDean(): bool
+    {
+        return $this->assignments()->where('context', 'dean')->exists();
+    }
+
+    public function isChairOfDepartment(int $departmentId): bool
+    {
+        return $this->assignments()
+            ->where('context', 'chair')
+            ->where('department_id', $departmentId)
+            ->exists();
+    }
+
 }

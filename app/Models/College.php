@@ -23,6 +23,15 @@ class College extends Model
         return $this->hasMany(Department::class);
     }
 
+    // college has one dean through user assignments
+    public function deanAssignment()
+    {
+        return UserAssignment::where('college_id', $this->id)
+            ->where('context', 'dean')
+            ->with('user')
+            ->first();
+    }
+
     // Helper: Get next goal code
     // used in:
         // GoalController@goal_store

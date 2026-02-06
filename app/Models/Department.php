@@ -41,6 +41,17 @@ class Department extends Model
         return $this->belongsTo(User::class, 'chair_user_id');
     }
 
+    // department has one chair through user assignments
+    public function deptChair()
+    {
+        $assignment = UserAssignment::where('department_id', $this->id)
+            ->where('context', 'chair')
+            ->with('user')
+            ->first();
+
+        return $assignment ? $assignment->user : null;
+    }
+
     // Query scope: Load department with relationships
     public function scopeWithRelations($query)
     {

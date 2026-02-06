@@ -8,11 +8,12 @@
 
     {{-- Header --}}
     <div class="mb-6">
-        <a href="{{ route('syllabus.index') }}" class="text-blue-600 hover:underline text-sm flex items-center gap-1 mb-4">
-            <i class="bx bx-chevron-left"></i> Back to Syllabi
-        </a>
         <h1 class="text-2xl font-bold">{{ $syllabus->id ? 'Edit' : 'Create' }} Syllabus</h1>
         <p class="text-gray-600 mt-1">{{ $course->course_code }} - {{ $course->course_title }}</p>
+
+        <x-button variant="cancel" href="{{ route('syllabus.index') }}">
+            <i class="bx bx-chevron-left"></i> Back to Syllabi
+        </x-button>
     </div>
 
     {{-- Progress Steps --}}
@@ -64,7 +65,7 @@
         </div>
     </div>
 
-    {{-- Navigation Buttons --}}
+    {{-- Buttoness --}}
     <div class="mt-6 flex justify-between items-center">
         <div>
             <x-button variant="cancel"

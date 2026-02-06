@@ -27,6 +27,7 @@
                     {{-- Admin-only links --}}
                     @if(auth()->user()->hasRole('admin'))
                         <a href="{{ route('accounts.approval') }}" class="hover:underline">User Management</a>
+                        <a href="{{ route('organizational.colleges.index') }}" class="hover:underline">Organizational Hierarchy</a>
                         <a href="{{ route('academic.structure.index') }}" class="hover:underline">Academic Structure</a>
                         <a href="{{ route('academic.calendars.index') }}" class="hover:underline">Academic Calendars</a>
                     @endif
