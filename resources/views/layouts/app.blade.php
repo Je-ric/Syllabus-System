@@ -34,13 +34,15 @@
 
                     {{-- Admin + Dean --}}
                     @if(auth()->user()->hasRole('admin') || auth()->user()->hasRole('dean'))
-                        <a href="{{ route('organizational.hierarchy') }}">My Hierarchy</a>
                         <a href="{{ route('goal.index') }}" class="hover:underline">College Goals</a>
+                    @endif
+
+                    @if(auth()->user()->hasRole('dean') || auth()->user()->hasRole('chair'))
+                        <a href="{{ route('organizational.hierarchy') }}" class="hover:underline">Role</a>
                     @endif
 
                     {{-- Admin + Dean + Chair --}}
                     @if(auth()->user()->hasRole('admin') || auth()->user()->hasRole('chair'))
-                        <a href="{{ route('organizational.hierarchy') }}" class="hover:underline">My Hierarchy</a>
                         <a href="{{ route('objective.index') }}" class="hover:underline">Department Objectives</a>
                         <a href="{{ route('programs.index') }}" class="hover:underline">PEOs & POs</a>
                         <a href="{{ route('courses.index') }}" class="hover:underline">Manage Courses</a>

@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\Auth;
 
 class OrganizationalHierarchyController extends Controller
 {
+
+    // ############################################################
+    // ################### DEAN FUNCTIONS ###################
+    // ############################################################
+
     // colleges with deans
     public function collegesIndex()
     {
@@ -33,10 +38,7 @@ class OrganizationalHierarchyController extends Controller
         return view('OrganizationalHierarchy.colleges', compact('colleges', 'potentialDeans', 'deanAssignments'));
     }
 
-
-    /**
-     * Assign dean to a college (one dean per college, one college per dean)
-     */
+    // Assign dean to a college (one dean per college, one college per dean)
     public function assignDean(Request $request)
     {
         $request->validate([
@@ -47,7 +49,7 @@ class OrganizationalHierarchyController extends Controller
         $college = College::findOrFail($request->college_id);
         $user = User::findOrFail($request->user_id);
 
-        // Check if user has dean role
+        // Check if user has dean role (in user_roles table)
         if (!$user->hasRole('dean') && !$user->hasRole('admin')) {
             return back()->with('toast', [
                 'message' => 'User must have dean role assigned.',
@@ -72,7 +74,7 @@ class OrganizationalHierarchyController extends Controller
             ]);
         }
 
-        // Check if already dean of this college specifically (redundant but kept for safety)
+        // Check if already dean of this college specifically (redundant but, i-keep na den for safety)
         if ($user->assignments()
             ->where('context', 'dean')
             ->where('college_id', $college->id)
@@ -91,7 +93,7 @@ class OrganizationalHierarchyController extends Controller
             'context' => 'dean',
         ]);
 
-        $user->ensureFacultyRoleAndAssignment($college->id, null);
+        $user->ensureFacultyRoleAndAssignment($college->id, null); // User.php
 
         return back()->with('toast', [
             'message' => "{$user->name} is now dean of {$college->name}.",
@@ -99,9 +101,7 @@ class OrganizationalHierarchyController extends Controller
         ]);
     }
 
-    /**
-     * Remove dean assignment from a college
-     */
+    // Remove dean assignment from a college
     public function removeDean(Request $request)
     {
         $request->validate([
@@ -120,9 +120,11 @@ class OrganizationalHierarchyController extends Controller
         ]);
     }
 
-    /**
-     * Display departments with chair assignments for a college
-     */
+    // ############################################################
+    // ################### CHAIR FUNCTIONS ###################
+    // ############################################################
+
+    // Display departments with chair assignments for a college
     public function departmentsIndex($collegeId)
     {
         $college = College::with('departments')->findOrFail($collegeId);
@@ -152,9 +154,7 @@ class OrganizationalHierarchyController extends Controller
         return view('OrganizationalHierarchy.departments', compact('college', 'potentialChairs', 'chairAssignments', 'potentialFaculty', 'facultyAssignments'));
     }
 
-    /**
-     * Assign chair to a department (one chair per department, one department per chair)
-     */
+    // Assign chair to a department (one chair per department, one department per chair)
     public function assignChair(Request $request)
     {
         $request->validate([
@@ -217,9 +217,7 @@ class OrganizationalHierarchyController extends Controller
         ]);
     }
 
-    /**
-     * Remove chair assignment from a department
-     */
+    // Remove chair assignment from a department
     public function removeChair(Request $request)
     {
         $request->validate([
@@ -238,9 +236,10 @@ class OrganizationalHierarchyController extends Controller
         ]);
     }
 
-    /**
-     * Assign faculty to a department
-     */
+    // ############################################################
+    // ################### FACULTY FUNCTIONS ###################
+    // ############################################################
+    // Assign faculty to a department
     public function assignFaculty(Request $request)
     {
         $request->validate([
@@ -284,9 +283,7 @@ class OrganizationalHierarchyController extends Controller
         ]);
     }
 
-    /**
-     * Remove faculty assignment from a department
-     */
+    // Remove faculty assignment from a department
     public function removeFaculty(Request $request)
     {
         $request->validate([
@@ -306,13 +303,16 @@ class OrganizationalHierarchyController extends Controller
     }
 
 
+    // If user is dean, show their college with departments, chairs, and faculty.
+    // If chair, show their department with faculty.
+    // Otherwise, show no assignment message.
     // Display hierarchy view: Dean sees their college, departments, chairs, and faculty
     public function hierarchyView()
     {
+        /** @var \App\Models\User|null $user */ // this is just for IDE type hinting, can be removed without affecting functionality (linted)
         $user = Auth::user();
 
-        if ($user->isDean()) {
-            // Get dean's college
+        if ($user->isDean()) { // Get dean's college
             $deanAssignment = UserAssignment::where('user_id', $user->id)
                 ->where('context', 'dean')
                 ->first();
@@ -344,7 +344,10 @@ class OrganizationalHierarchyController extends Controller
                 ];
             }
 
-            return view('OrganizationalHierarchy.hierarchy-dean', compact('college', 'chairsWithFaculty'));
+            return view('OrganizationalHierarchy.hierarchy-dean',
+                    compact('college',
+                    'chairsWithFaculty')
+                    );
         }
 
         // Check if user is a chair
@@ -353,9 +356,7 @@ class OrganizationalHierarchyController extends Controller
             ->with('department')
             ->first();
 
-        if ($chairAssignment) {
-            // Get chair's department
-
+        if ($chairAssignment) { // Get chair's department
             $department = $chairAssignment->department;
 
             // Get all faculty in this department
@@ -365,7 +366,10 @@ class OrganizationalHierarchyController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->get();
 
-            return view('OrganizationalHierarchy.hierarchy-chair', compact('department', 'faculty'));
+            return view('OrganizationalHierarchy.hierarchy-chair',
+                    compact('department',
+                    'faculty')
+                            );
         }
 
         return view('OrganizationalHierarchy.no-assignment');

@@ -163,6 +163,7 @@ class ProgramSelector extends Component
      */
     private function preselectFromUserAssignments(): ?int
     {
+        /** @var \App\Models\User|null $user */
         $user = Auth::user();
 
         if (!$user) {
