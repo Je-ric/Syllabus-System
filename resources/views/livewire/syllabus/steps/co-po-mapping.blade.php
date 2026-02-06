@@ -21,7 +21,11 @@
                 </thead>
                 <tbody>
                     @foreach ($courseOutcomes as $index => $co)
-                        <tr class="border-b hover:bg-gray-50">
+                        @php
+                            $coId = $co['id'] ?? null;
+                            $rowKey = $coId ? $coId : 'new_' . $index;
+                        @endphp
+                        <tr class="border-b hover:bg-gray-50" wire:key="co-row-{{ $rowKey }}">
                             <td class="px-4 py-3">
                                 <div class="flex items-start gap-2">
                                     <span class="font-semibold text-blue-600">{{ $co['co_code'] }}</span>
@@ -29,13 +33,9 @@
                                 </div>
                             </td>
                             @foreach ($course->program->outcomes as $po)
-                                <td class="px-2 py-3 text-center">
-                                    @php
-                                        $coId = $co['id'] ?? null;
-                                        $mappingKey = $coId ? $coId : 'new_' . $index;
-                                    @endphp
+                                <td class="px-2 py-3 text-center" wire:key="co-po-{{ $rowKey }}-{{ $po->id }}">
                                     <input type="checkbox"
-                                        wire:model.debounce.500ms="coPoMappings.{{ $mappingKey }}.{{ $po->id }}"
+                                        wire:model.debounce.500ms="coPoMappings.{{ $rowKey }}.{{ $po->id }}"
                                         class="h-4 w-4 cursor-pointer rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
                                 </td>
                             @endforeach
@@ -49,7 +49,7 @@
         <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-sm">
             <h4 class="font-semibold text-sm text-blue-700 mb-3">Program Outcomes Reference</h4>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+            <div class="grid grid-cols-1 gap-3">
                 @foreach ($course->program->outcomes as $po)
                     @php
                         $iedLevel = $course->programOutcomes->firstWhere('id', $po->id)?->pivot?->ied ?? '-';

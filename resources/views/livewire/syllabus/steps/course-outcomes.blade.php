@@ -25,7 +25,8 @@
                     {{-- Description --}}
                     <div class="flex-1">
                         <textarea
-                            wire:model.debounce.1000ms="courseOutcomes.{{ $index }}.description"
+                            wire:model.defer="courseOutcomes.{{ $index }}.description"
+                            wire:blur="saveCurrentStep"
                             rows="3"
                             placeholder="Describe what students will be able to do after completing this course..."
                             class="

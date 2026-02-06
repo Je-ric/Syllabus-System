@@ -63,7 +63,7 @@
     </div>
 
     {{-- Navigation Buttons --}}
-    <div class="mt-6 flex justify-between">
+    <div class="mt-6 flex justify-between items-center">
         <div>
             @if($syllabus->getPreviousStep())
                 <x-button variant="cancel"
@@ -73,7 +73,13 @@
             @endif
         </div>
 
-        <div class="flex gap-3">
+        <div class="flex items-center gap-4">
+            @if($lastSavedAt)
+                <span class="text-xs text-gray-500">
+                    Draft saved {{ $lastSavedAt }}
+                </span>
+            @endif
+
             <button wire:click="saveCurrentStep"
                     class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
                 <i class="bx bx-save"></i> Save Draft
@@ -93,9 +99,4 @@
         </div>
     </div>
 
-    {{-- Loading Indicator --}}
-    <div wire:loading
-        class="fixed top-4 left-1/2 -translate-x-1/2 z-50 p-2 rounded border border-yellow-300 bg-yellow-50 text-yellow-800 text-sm font-medium animate-pulse">
-        <i class='bx bx-loader bx-spin mr-2'></i> Saving...
-    </div>
 </div>

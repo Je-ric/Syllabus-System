@@ -2,49 +2,27 @@
 
 namespace App\Livewire\Syllabus;
 
+use App\Livewire\Syllabus\Concerns\HandlesAcademicCalendar;
+use App\Livewire\Syllabus\Concerns\HandlesCoPoMapping;
+use App\Livewire\Syllabus\Concerns\HandlesComponents;
+use App\Livewire\Syllabus\Concerns\HandlesCourseOutcomes;
 use App\Models\AcademicCalendar;
 use App\Models\Course;
-use App\Models\CourseComponent;
-use App\Models\CourseOutcome;
 use App\Models\Syllabus;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
-use Livewire\Attributes\On;
 
 class SyllabusWizard extends Component
 {
+    use HandlesAcademicCalendar;
+    use HandlesComponents;
+    use HandlesCourseOutcomes;
+    use HandlesCoPoMapping;
+
     public ?Syllabus $syllabus = null;
     public ?Course $course = null;
     public $currentStep;
-
-    // Step 1: Academic Calendar
-    public $academic_calendar_id;
-    public $academicCalendars = [];
-
-    // Step 2: Course Components
-    public $lec_instructor_name;
-    public $lec_instructor_email;
-    public $lec_phone;
-    public $lec_office;
-    public $lec_class_hours;
-    public $lec_schedule;
-    public $lec_consultation_hours;
-    public $lec_performance_standard = '50%';
-
-    public $lab_instructor_name;
-    public $lab_instructor_email;
-    public $lab_phone;
-    public $lab_office;
-    public $lab_class_hours;
-    public $lab_schedule;
-    public $lab_consultation_hours;
-    public $lab_performance_standard = '50%';
-
-    // Step 3: Course Outcomes
-    public $courseOutcomes = [];
-
-    // Step 4: CO-PO Mapping
-    public $coPoMappings = [];
+    public ?string $lastSavedAt = null;
 
     public function mount($syllabusId = null, $courseId = null)
     {
@@ -143,7 +121,6 @@ class SyllabusWizard extends Component
     public function saveAndNext()
     {
         $this->saveCurrentStep();
-
         $nextStep = $this->syllabus->getNextStep();
         if ($nextStep) {
             $this->currentStep = $nextStep;
@@ -154,7 +131,6 @@ class SyllabusWizard extends Component
     public function saveAndPrevious()
     {
         $this->saveCurrentStep();
-
         $previousStep = $this->syllabus->getPreviousStep();
         if ($previousStep) {
             $this->currentStep = $previousStep;
@@ -162,8 +138,10 @@ class SyllabusWizard extends Component
         }
     }
 
-    public function saveCurrentStep()
+    public function saveCurrentStep(): bool
     {
+        $saved = false;
+
         switch ($this->currentStep) {
             case 'academic_calendar':
                 if ($this->academic_calendar_id) {
@@ -174,15 +152,16 @@ class SyllabusWizard extends Component
                     $this->syllabus->update([
                         'academic_calendar_id' => $this->academic_calendar_id,
                     ]);
+                    $saved = true;
                 }
                 break;
 
             case 'course_components':
-                $this->saveComponents();
+                $saved = $this->saveComponents();
                 break;
 
             case 'course_outcomes':
-                $this->saveCourseOutcomes();
+                $saved = $this->saveCourseOutcomes();
                 break;
 
             case 'co_po_mapping':
@@ -192,225 +171,15 @@ class SyllabusWizard extends Component
                     break;
                 }
                 $this->saveCourseOutcomes();
-                $this->saveCoPoMappings();
+                $saved = $this->saveCoPoMappings();
                 break;
         }
-    }
 
-    private function saveComponents()
-    {
-        // Save LEC component
-        CourseComponent::updateOrCreate(
-            [
-                'syllabus_id' => $this->syllabus->id,
-                'type' => 'LEC',
-            ],
-            [
-                'units' => $this->course->credit_units,
-                'instructor_name' => $this->lec_instructor_name,
-                'instructor_email' => $this->lec_instructor_email,
-                'phone' => $this->lec_phone,
-                'office' => $this->lec_office,
-                'class_hours' => $this->lec_class_hours,
-                'schedule' => $this->lec_schedule,
-                'consultation_hours' => $this->lec_consultation_hours,
-                'performance_standard' => $this->lec_performance_standard,
-            ]
-        );
-
-        // Save LAB component if course has lab
-        if ($this->course->has_lec_lab) {
-            CourseComponent::updateOrCreate(
-                [
-                    'syllabus_id' => $this->syllabus->id,
-                    'type' => 'LAB',
-                ],
-                [
-                    'units' => $this->course->credit_units,
-                    'instructor_name' => $this->lab_instructor_name,
-                    'instructor_email' => $this->lab_instructor_email,
-                    'phone' => $this->lab_phone,
-                    'office' => $this->lab_office,
-                    'class_hours' => $this->lab_class_hours,
-                    'schedule' => $this->lab_schedule,
-                    'consultation_hours' => $this->lab_consultation_hours,
-                    'performance_standard' => $this->lab_performance_standard,
-                ]
-            );
-        }
-    }
-
-    private function saveCourseOutcomes()
-    {
-        // Filter out empty outcomes (no description)
-        $validOutcomes = collect($this->courseOutcomes)->filter(function ($outcome) {
-            return !empty(trim($outcome['description'] ?? ''));
-        })->values()->toArray();
-
-        // Get existing outcome IDs
-        $existingIds = collect($validOutcomes)->pluck('id')->filter()->toArray();
-
-        // Delete existing outcomes not in the current list
-        if (!empty($existingIds)) {
-            $this->syllabus->courseOutcomes()->whereNotIn('id', $existingIds)->delete();
-        } else {
-            // If no valid IDs, delete all (user cleared all outcomes)
-            $this->syllabus->courseOutcomes()->delete();
+        if ($saved) {
+            $this->markDraftSaved();
         }
 
-        // Save/update each outcome
-        foreach ($validOutcomes as $index => $outcome) {
-            if (isset($outcome['id']) && $outcome['id']) {
-                // Update existing
-                $co = CourseOutcome::where('id', $outcome['id'])
-                    ->where('syllabus_id', $this->syllabus->id)
-                    ->first();
-                if ($co) {
-                    $co->update([
-                        'co_code' => $outcome['co_code'],
-                        'description' => $outcome['description'],
-                    ]);
-                }
-            } else {
-                // Create new
-                $newCo = CourseOutcome::create([
-                    'syllabus_id' => $this->syllabus->id,
-                    'co_code' => $outcome['co_code'],
-                    'description' => $outcome['description'],
-                ]);
-                // Update the array with the new ID
-                $validOutcomes[$index]['id'] = $newCo->id;
-            }
-        }
-
-        // Update the courseOutcomes array with valid outcomes
-        $this->courseOutcomes = $validOutcomes;
-
-        // Refresh course outcomes to get updated IDs and sync mappings
-        $this->syllabus->refresh();
-        $this->courseOutcomes = $this->syllabus->courseOutcomes->map(function ($co) {
-            return [
-                'id' => $co->id,
-                'co_code' => $co->co_code,
-                'description' => $co->description,
-            ];
-        })->toArray();
-
-        // Update CO-PO mapping keys to use actual IDs
-        $newMappings = [];
-        foreach ($this->courseOutcomes as $co) {
-            if (isset($co['id'])) {
-                // Check if there are existing mappings for this CO
-                foreach ($this->coPoMappings as $key => $mappings) {
-                    if ($key === $co['id'] || (is_string($key) && str_contains($key, 'new_'))) {
-                        $newMappings[$co['id']] = $mappings;
-                        break;
-                    }
-                }
-                if (!isset($newMappings[$co['id']])) {
-                    $newMappings[$co['id']] = [];
-                }
-            }
-        }
-        $this->coPoMappings = $newMappings;
-    }
-
-    private function saveCoPoMappings()
-    {
-        if (empty($this->coPoMappings)) {
-            return;
-        }
-
-        // Ensure course outcomes are saved first
-        $this->saveCourseOutcomes();
-
-        foreach ($this->coPoMappings as $coKey => $poMappings) {
-            if (!is_array($poMappings)) {
-                continue;
-            }
-
-            // Handle both ID keys and temporary keys (new_X)
-            $coId = null;
-            if (is_numeric($coKey)) {
-                $coId = $coKey;
-            } else {
-                // Extract index from 'new_X' format
-                if (str_starts_with($coKey, 'new_')) {
-                    $index = (int) str_replace('new_', '', $coKey);
-                    if (isset($this->courseOutcomes[$index]['id'])) {
-                        $coId = $this->courseOutcomes[$index]['id'];
-                    }
-                }
-            }
-
-            if (!$coId) {
-                continue;
-            }
-
-            $co = CourseOutcome::where('id', $coId)
-                ->where('syllabus_id', $this->syllabus->id)
-                ->first();
-
-            if ($co) {
-                $syncData = [];
-                foreach ($poMappings as $poId => $isConnected) {
-                    if ($isConnected) {
-                        $syncData[$poId] = [];  // No IED needed, just connect them
-                    }
-                }
-                $co->programOutcomes()->sync($syncData);
-            }
-        }
-    }
-
-    public function addCourseOutcome()
-    {
-        $nextNumber = count($this->courseOutcomes) + 1;
-        $this->courseOutcomes[] = [
-            'id' => null,
-            'co_code' => 'CO' . $nextNumber,
-            'description' => '',
-        ];
-
-        // Initialize CO-PO mapping for new outcome
-        $index = count($this->courseOutcomes) - 1;
-        $this->coPoMappings['new_' . $index] = [];
-    }
-
-    public function removeCourseOutcome($index)
-    {
-        // Remove CO-PO mappings for this outcome
-        if (isset($this->courseOutcomes[$index]['id'])) {
-            $coId = $this->courseOutcomes[$index]['id'];
-            unset($this->coPoMappings[$coId]);
-        }
-        unset($this->coPoMappings['new_' . $index]);
-
-        // Delete from database if it exists
-        if (isset($this->courseOutcomes[$index]['id']) && $this->courseOutcomes[$index]['id']) {
-            CourseOutcome::where('id', $this->courseOutcomes[$index]['id'])->delete();
-        }
-
-        unset($this->courseOutcomes[$index]);
-        $this->courseOutcomes = array_values($this->courseOutcomes);
-
-        // Resequence codes and update mapping keys
-        $newMappings = [];
-        foreach ($this->courseOutcomes as $i => $outcome) {
-            $this->courseOutcomes[$i]['co_code'] = 'CO' . ($i + 1);
-
-            // Update mapping keys
-            if (isset($outcome['id']) && $outcome['id']) {
-                if (isset($this->coPoMappings[$outcome['id']])) {
-                    $newMappings[$outcome['id']] = $this->coPoMappings[$outcome['id']];
-                }
-            } else {
-                if (isset($this->coPoMappings['new_' . $index])) {
-                    $newMappings['new_' . $i] = $this->coPoMappings['new_' . $index];
-                }
-            }
-        }
-        $this->coPoMappings = $newMappings;
+        return $saved;
     }
 
     public function submitForReview()
@@ -429,117 +198,13 @@ class SyllabusWizard extends Component
             ]);
     }
 
-    // Auto-save hooks - debounce is handled in views via wire:model.debounce
-    public function updatedAcademicCalendarId()
-    {
-        if ($this->currentStep === 'academic_calendar' && $this->syllabus) {
-            $this->saveCurrentStep();
-        }
-    }
-
-    public function updatedLecInstructorName()
-    {
-        $this->autoSaveComponents();
-    }
-
-    public function updatedLecInstructorEmail()
-    {
-        $this->autoSaveComponents();
-    }
-
-    public function updatedLecPhone()
-    {
-        $this->autoSaveComponents();
-    }
-
-    public function updatedLecOffice()
-    {
-        $this->autoSaveComponents();
-    }
-
-    public function updatedLecClassHours()
-    {
-        $this->autoSaveComponents();
-    }
-
-    public function updatedLecSchedule()
-    {
-        $this->autoSaveComponents();
-    }
-
-    public function updatedLecConsultationHours()
-    {
-        $this->autoSaveComponents();
-    }
-
-    public function updatedLecPerformanceStandard()
-    {
-        $this->autoSaveComponents();
-    }
-
-    public function updatedLabInstructorName()
-    {
-        $this->autoSaveComponents();
-    }
-
-    public function updatedLabInstructorEmail()
-    {
-        $this->autoSaveComponents();
-    }
-
-    public function updatedLabPhone()
-    {
-        $this->autoSaveComponents();
-    }
-
-    public function updatedLabOffice()
-    {
-        $this->autoSaveComponents();
-    }
-
-    public function updatedLabClassHours()
-    {
-        $this->autoSaveComponents();
-    }
-
-    public function updatedLabSchedule()
-    {
-        $this->autoSaveComponents();
-    }
-
-    public function updatedLabConsultationHours()
-    {
-        $this->autoSaveComponents();
-    }
-
-    public function updatedLabPerformanceStandard()
-    {
-        $this->autoSaveComponents();
-    }
-
-    public function updatedCourseOutcomes()
-    {
-        if ($this->currentStep === 'course_outcomes' && $this->syllabus) {
-            $this->saveCurrentStep();
-        }
-    }
-
-    public function updatedCoPoMappings()
-    {
-        if ($this->currentStep === 'co_po_mapping' && $this->syllabus) {
-            $this->saveCurrentStep();
-        }
-    }
-
-    private function autoSaveComponents()
-    {
-        if ($this->currentStep === 'course_components' && $this->syllabus) {
-            $this->saveCurrentStep();
-        }
-    }
-
     public function render()
     {
         return view('livewire.syllabus.syllabus-wizard');
+    }
+
+    private function markDraftSaved(): void
+    {
+        $this->lastSavedAt = now()->format('M d, Y h:i A');
     }
 }

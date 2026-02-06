@@ -1,16 +1,26 @@
 <div x-data="posManager(@entangle('pos'), @entangle('peos'), @entangle('mapping'))" class="space-y-4">
 
-    {{-- Flash message --}}
-    <template x-if="flashMessage">
-        <div class="p-2 rounded border border-green-300 bg-green-50 text-green-800 text-sm font-medium"
-            x-text="flashMessage">
-        </div>
-    </template>
+    {{-- Notification stack --}}
+    {{-- If both are visible → they stack neatly
+    If one disappears → layout auto-adjusts --}}
+    <div class="fixed top-4 inset-x-0 z-50 flex justify-center pointer-events-none">
+        <div class="flex flex-col gap-2 items-center">
 
-    {{-- Loading indicator --}}
-    <div x-show="isSaving"
-        class="fixed top-4 left-1/2 -translate-x-1/2 z-50 p-2 rounded border border-yellow-300 bg-yellow-50 text-yellow-800 text-sm font-medium animate-pulse">
-        <i class='bx bx-loader bx-spin mr-2'></i> Saving POs...
+            {{-- Loading indicator --}}
+            <div x-show="isSaving"
+                class="p-2 rounded border border-yellow-300 bg-yellow-50 text-yellow-800 text-sm font-medium animate-pulse">
+                <i class='bx bx-loader bx-spin mr-2'></i> Saving POs...
+            </div>
+
+            {{-- Flash message --}}
+            <template x-if="flashMessage">
+                <div
+                    class="p-2 rounded border border-green-300 bg-green-50 text-green-800 text-sm font-medium"
+                    x-text="flashMessage">
+                </div>
+            </template>
+
+        </div>
     </div>
 
     {{-- PO Inputs with PEO checkboxes --}}
@@ -100,6 +110,15 @@
 
             // Add a new empty PO
             addPo() {
+                const hasBlank = this.pos.some(po => !po.po_text || po.po_text.trim() === '');
+                if (hasBlank) {
+                    this.flashMessage = 'Please fill the blank PO before adding a new one.';
+                    setTimeout(() => {
+                        this.flashMessage = '';
+                    }, 3000);
+                    return;
+                }
+
                 this.pos.push({
                     id: null,
                     po_code: '',
