@@ -1,4 +1,10 @@
-<div class="container mx-auto p-6">
+@php
+    $steps = $syllabus->getWizardSteps();
+    $stepsOrder = array_keys($steps);
+@endphp
+
+<div x-data="syllabusWizard(@js($stepsOrder), @js($currentStep))"
+        class="container mx-auto p-6">
 
     {{-- Header --}}
     <div class="mb-6">
@@ -12,35 +18,27 @@
     {{-- Progress Steps --}}
     <div class="mb-8 bg-white border rounded-lg p-6">
         <div class="flex items-center justify-between">
-            @php
-                $steps = $syllabus->getWizardSteps();
-                $currentIndex = array_search($currentStep, array_keys($steps));
-            @endphp
-
             @foreach($steps as $step => $label)
-                @php
-                    $index = array_search($step, array_keys($steps));
-                    $isActive = $step === $currentStep;
-                    $isCompleted = $index < $currentIndex;
-                @endphp
-
                 <div class="flex items-center {{ $loop->last ? '' : 'flex-1' }}">
                     <div class="flex flex-col items-center">
-                        <div class="w-10 h-10 rounded-full flex items-center justify-center font-semibold
-                            {{ $isActive ? 'bg-blue-600 text-white' : ($isCompleted ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600') }}">
-                            @if($isCompleted)
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center font-semibold"
+                            :class="stepCircleClass('{{ $step }}')">
+                            <template x-if="isCompleted('{{ $step }}')">
                                 <i class="bx bx-check text-xl"></i>
-                            @else
-                                {{ $index + 1 }}
-                            @endif
+                            </template>
+                            <template x-if="!isCompleted('{{ $step }}')">
+                                <span x-text="stepNumber('{{ $step }}')"></span>
+                            </template>
                         </div>
-                        <span class="text-xs mt-2 text-center {{ $isActive ? 'font-semibold text-blue-600' : 'text-gray-600' }}">
+                        <span class="text-xs mt-2 text-center"
+                            :class="stepLabelClass('{{ $step }}')">
                             {{ $label }}
                         </span>
                     </div>
 
                     @if(!$loop->last)
-                        <div class="flex-1 h-1 mx-2 {{ $isCompleted ? 'bg-green-500' : 'bg-gray-300' }}"></div>
+                        <div class="flex-1 h-1 mx-2"
+                            :class="stepLineClass('{{ $step }}')"></div>
                     @endif
                 </div>
             @endforeach
@@ -49,28 +47,31 @@
 
     {{-- Step Content --}}
     <div class="bg-white border rounded-lg p-6">
-        @if($currentStep === 'academic_calendar')
+        <div x-show="localStep === 'academic_calendar'">
             @include('livewire.syllabus.steps.academic-calendar')
-        @elseif($currentStep === 'course_components')
+        </div>
+        <div x-show="localStep === 'course_components'">
             @include('livewire.syllabus.steps.course-components')
-        @elseif($currentStep === 'course_outcomes')
+        </div>
+        <div x-show="localStep === 'course_outcomes'">
             @include('livewire.syllabus.steps.course-outcomes')
-        @elseif($currentStep === 'co_po_mapping')
+        </div>
+        <div x-show="localStep === 'co_po_mapping'">
             @include('livewire.syllabus.steps.co-po-mapping')
-        @elseif($currentStep === 'review')
+        </div>
+        <div x-show="localStep === 'review'">
             @include('livewire.syllabus.steps.review')
-        @endif
+        </div>
     </div>
 
     {{-- Navigation Buttons --}}
     <div class="mt-6 flex justify-between items-center">
         <div>
-            @if($syllabus->getPreviousStep())
-                <x-button variant="cancel"
-                        wire:click="saveAndPrevious">
-                    <i class="bx bx-chevron-left"></i> Previous
-                </x-button>
-            @endif
+            <x-button variant="cancel"
+                    x-show="hasPrevious()"
+                    @click="goPrevious()">
+                <i class="bx bx-chevron-left"></i> Previous
+            </x-button>
         </div>
 
         <div class="flex items-center gap-4">
@@ -85,18 +86,87 @@
                 <i class="bx bx-save"></i> Save Draft
             </button>
 
-            @if($syllabus->getNextStep())
-                <x-button variant="primary"
-                        wire:click="saveAndNext">
-                    Next <i class="bx bx-chevron-right"></i>
-                </x-button>
-            @else
-                <button wire:click="submitForReview"
-                        class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
-                    <i class="bx bx-check-double"></i> Submit for Review
-                </button>
-            @endif
+            <x-button variant="primary"
+                    x-show="hasNext()"
+                    @click="goNext()">
+                Next <i class="bx bx-chevron-right"></i>
+            </x-button>
+
+            <button x-show="!hasNext()"
+                    wire:click="submitForReview"
+                    class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                <i class="bx bx-check-double"></i> Submit for Review
+            </button>
         </div>
     </div>
 
 </div>
+
+<script>
+    function syllabusWizard(steps, initialStep) {
+        return {
+            steps,
+            localStep: initialStep,
+
+            stepIndex(step) {
+                return this.steps.indexOf(step);
+            },
+
+            stepNumber(step) {
+                return this.stepIndex(step) + 1;
+            },
+
+            isCompleted(step) {
+                return this.stepIndex(step) < this.stepIndex(this.localStep);
+            },
+
+            stepCircleClass(step) {
+                if (this.localStep === step) return 'bg-blue-600 text-white';
+                if (this.isCompleted(step)) return 'bg-green-500 text-white';
+                return 'bg-gray-300 text-gray-600';
+            },
+
+            stepLabelClass(step) {
+                return this.localStep === step ? 'font-semibold text-blue-600' : 'text-gray-600';
+            },
+
+            stepLineClass(step) {
+                return this.isCompleted(step) ? 'bg-green-500' : 'bg-gray-300';
+            },
+
+            hasNext() {
+                return this.stepIndex(this.localStep) < this.steps.length - 1;
+            },
+
+            hasPrevious() {
+                return this.stepIndex(this.localStep) > 0;
+            },
+
+            nextStep() {
+                if (!this.hasNext()) return null;
+                return this.steps[this.stepIndex(this.localStep) + 1];
+            },
+
+            previousStep() {
+                if (!this.hasPrevious()) return null;
+                return this.steps[this.stepIndex(this.localStep) - 1];
+            },
+
+            goToStep(target) {
+                if (!target || target === this.localStep) return;
+                const previous = this.localStep;
+                this.localStep = target;
+                this.$wire.saveStep(previous);
+                this.$wire.set('currentStep', target);
+            },
+
+            goNext() {
+                this.goToStep(this.nextStep());
+            },
+
+            goPrevious() {
+                this.goToStep(this.previousStep());
+            },
+        };
+    }
+</script>

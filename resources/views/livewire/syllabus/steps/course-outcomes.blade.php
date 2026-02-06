@@ -77,5 +77,10 @@
             <i class="bx bx-plus"></i>
             Add Course Outcome
         </button>
+        @if($coAddError)
+            <div class="text-xs text-red-600">
+                {{ $coAddError }}
+            </div>
+        @endif
     </div>
 </div>

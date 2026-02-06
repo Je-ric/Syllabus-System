@@ -138,6 +138,16 @@ class SyllabusWizard extends Component
         }
     }
 
+    public function saveStep(string $step): bool
+    {
+        $previous = $this->currentStep;
+        $this->currentStep = $step;
+        $saved = $this->saveCurrentStep();
+        $this->currentStep = $previous;
+
+        return $saved;
+    }
+
     public function saveCurrentStep(): bool
     {
         $saved = false;

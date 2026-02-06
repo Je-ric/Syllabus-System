@@ -7,15 +7,18 @@ use App\Models\CourseOutcome;
 trait HandlesCourseOutcomes
 {
     public $courseOutcomes = [];
+    public ?string $coAddError = null;
 
     public function addCourseOutcome()
     {
         foreach ($this->courseOutcomes as $outcome) {
             if (empty(trim($outcome['description'] ?? ''))) {
+                $this->coAddError = 'Fill the blank before adding.';
                 return;
             }
         }
 
+        $this->coAddError = null;
         $nextNumber = count($this->courseOutcomes) + 1;
         $this->courseOutcomes[] = [
             'id' => null,
