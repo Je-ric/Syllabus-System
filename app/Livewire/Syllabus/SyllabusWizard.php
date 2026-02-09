@@ -30,6 +30,8 @@ class SyllabusWizard extends Component
         $syllabusId = $syllabusId ? (int) $syllabusId : null;
         $courseId = $courseId ? (int) $courseId : null;
 
+        $user = Auth::user();
+
         if ($syllabusId) {
             // Editing existing syllabus
             $this->syllabus = Syllabus::with([
@@ -46,6 +48,7 @@ class SyllabusWizard extends Component
             $this->course = $this->syllabus->course;
             $this->currentStep = $this->syllabus->current_step;
             $this->loadExistingData();
+            $this->prefillLecFromUser($user);
         } elseif ($courseId) {
             // Creating new syllabus
             $this->course = Course::with('program.outcomes')->findOrFail($courseId);
@@ -60,6 +63,7 @@ class SyllabusWizard extends Component
             ]);
 
             $this->currentStep = 'academic_calendar';
+            $this->prefillLecFromUser($user);
         } else {
             abort(404);
         }
@@ -115,6 +119,27 @@ class SyllabusWizard extends Component
             foreach ($co->programOutcomes as $po) {
                 $this->coPoMappings[$co->id][$po->id] = true;  // Just mark as connected
             }
+        }
+    }
+
+    // Prefill instructor info from user profile if not already set
+    private function prefillLecFromUser($user): void
+    {
+        if (!$user) {
+            return;
+        }
+
+        if (empty($this->lec_instructor_name) && !empty($user->name)) {
+            $this->lec_instructor_name = $user->name;
+        }
+        if (empty($this->lec_instructor_email) && !empty($user->email)) {
+            $this->lec_instructor_email = $user->email;
+        }
+        if (empty($this->lec_phone) && !empty($user->phone_number)) {
+            $this->lec_phone = $user->phone_number;
+        }
+        if (empty($this->lec_office) && !empty($user->office)) {
+            $this->lec_office = $user->office;
         }
     }
 

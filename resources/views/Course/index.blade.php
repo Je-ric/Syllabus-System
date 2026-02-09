@@ -6,8 +6,10 @@
     $modalCourses = collect();
 @endphp
 
-<div class="mb-6">
-    <h1 class="text-2xl font-bold mb-4">Manage Courses</h1>
+    <x-header-with-button
+        title="Manage Courses"
+        description="Program Educational Objectives (PEO) and Program Outcomes (PO)"
+    />
 
     <div class="border rounded-lg p-6 bg-gray-50">
         <livewire:programs.program-selector
@@ -16,7 +18,7 @@
             :autoRedirect="true"
         />
     </div>
-</div>
+
 
 @if ($program)
     <div class="mb-6 flex justify-between items-center">
