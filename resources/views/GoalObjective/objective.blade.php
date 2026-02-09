@@ -1,16 +1,19 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="p-6 bg-white text-black max-w-7xl mx-auto space-y-6">
 
-    <h1 class="text-2xl font-bold text-green-800">Objective Management</h1>
+<x-header-with-button
+        title="Department Objective Management"
+        description="Set and manage objectives"
+    />
+<div class="clsu-shell p-6 max-w-7xl mx-auto space-y-6">
 
     @include('includes.error-lists')
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         {{-- Add Objective Section --}}
-        <div class="space-y-4 bg-green-50/40 p-6 rounded-xl border border-green-200 shadow-sm">
+        <div class="clsu-card space-y-4">
 
             {{-- College Selection --}}
             <form method="GET" action="{{ route('objective.index') }}" class="space-y-2">
@@ -19,7 +22,7 @@
                     id="collegeSelect"
                     name="college_id"
                     onchange="this.form.submit()"
-                    class="w-full border border-green-300 rounded-md px-3 py-2 text-gray-800 focus:outline-none focus:ring-1 focus:ring-green-600 focus:border-green-600 transition"
+                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-800 focus:outline-none focus:ring-1 focus:ring-clsu-gold focus:border-clsu-gold transition"
                 >
                     <option value="">-- Choose College --</option>
                     @foreach ($colleges as $college)
@@ -41,7 +44,7 @@
                             id="departmentSelect"
                             name="department_id"
                             onchange="this.form.submit()"
-                            class="w-full border border-green-300 rounded-md px-3 py-2 text-gray-800 focus:outline-none focus:ring-1 focus:ring-green-600 focus:border-green-600 transition"
+                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-800 focus:outline-none focus:ring-1 focus:ring-clsu-gold focus:border-clsu-gold transition"
                         >
                             <option value="">-- Choose Department --</option>
                             @foreach ($departments as $dept)
@@ -71,7 +74,7 @@
                                 required>
                             </x-form.textarea>
 
-                            <x-button type="submit" variant="primary">
+                            <x-button type="submit" variant="primary" class="flex items-center gap-1 bg-clsu-green hover:bg-clsu-green-dark text-white">
                                 <i class="bx bx-plus"></i> Add Objective
                             </x-button>
                         </form>
@@ -87,14 +90,20 @@
         </div>
 
         {{-- Objectives List --}}
-        <div class="bg-green-50/30 p-6 rounded-xl border border-green-200 shadow-sm">
-            <h2 class="font-semibold text-green-800 mb-4">Objectives</h2>
+        <div class="clsu-card">
+            <div class="flex items-center gap-2 mb-4 font-bold text-lg ">
+                <i class="bx bx-target-lock text-2xl text-clsu-green"></i>
+                <h2 class="text-clsu-green">Objectives</h2>
+                @if($selectedDepartmentId)
+                    <span class="text-md text-gray-600 underline">of {{ $departments->firstWhere('id', $selectedDepartmentId)->name }}</span>
+                @endif
+            </div>
 
             @if($selectedCollegeId)
                 @if($objectives->count())
                     <div class="overflow-x-auto">
                         <table class="w-full border-collapse text-sm">
-                            <thead class="bg-green-100 text-green-800">
+                            <thead class="bg-clsu-gold/20 text-clsu-green">
                                 <tr>
                                     <th class="border p-3 text-left">Code</th>
                                     <th class="border p-3 text-left">Objective</th>
@@ -103,8 +112,8 @@
                             </thead>
                             <tbody>
                                 @foreach ($objectives as $objective)
-                                    <tr class="odd:bg-white even:bg-green-50">
-                                        <td class="border p-2 align-top font-mono text-green-700">
+                                    <tr class="odd:bg-white even:bg-gray-50 hover:bg-clsu-gold/10 transition">
+                                        <td class="border p-2 align-top font-mono text-clsu-green">
                                             {{ $objective->dept_obj_code }}
                                         </td>
 
@@ -116,6 +125,7 @@
                                             <x-button
                                                 type="button"
                                                 variant="table-edit"
+                                                class="bg-clsu-gold hover:bg-clsu-gold-dark text-white"
                                                 onclick="document.getElementById('updateObjectiveModal_{{ $objective->id }}').showModal()">
                                                 <i class="bx bx-edit-alt"></i> Edit
                                             </x-button>
@@ -123,6 +133,7 @@
                                             <x-button
                                                 type="button"
                                                 variant="table-danger"
+                                                class="bg-red-500 hover:bg-red-600 text-white"
                                                 onclick="document.getElementById('deleteObjectiveModal_{{ $objective->id }}').showModal()">
                                                 <i class="bx bx-trash"></i> Delete
                                             </x-button>

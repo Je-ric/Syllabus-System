@@ -1,77 +1,72 @@
 @extends('layouts.app')
 
 @section('content')
-    <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium mb-6">
-        ← Back to Dashboard
-    </a>
 
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold text-slate-900">{{ $college->name }}</h1>
-        <p class="text-slate-600 mt-2">Dean Overview & Organization Structure</p>
-    </div>
+    <x-header-with-button title="{{ $college->name }}" description="Dean Overview & Organization Structure">
+        <x-button variant="cancel" href="{{ route('dashboard') }}">← Back to Dashboard</x-button>
+    </x-header-with-button>
 
-    {{-- Header Card --}}
-    <div class="bg-linear-to-r from-blue-50 to-blue-100 rounded-lg shadow-md border border-slate-200 p-6 mb-8">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm text-slate-600 font-medium">Your Role</p>
-                <p class="text-2xl font-bold text-slate-900">Dean of {{ $college->name }}</p>
-            </div>
-            <div class="text-right">
-                <p class="text-sm text-slate-600 font-medium">Total Departments</p>
-                <p class="text-3xl font-bold text-blue-600">{{ count($chairsWithFaculty) }}</p>
-            </div>
+    {{-- Overview Card --}}
+    <div class="bg-linear-to-r from-clsu-green to-clsu-cobra rounded-lg shadow-md border border-clsu-green p-5 md:p-6 mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
+        <div>
+            <p class="text-sm text-clsu-green-100 font-medium">Your Role</p>
+            <p class="text-xl md:text-2xl font-bold text-white mt-1">Dean of {{ $college->name }}</p>
+        </div>
+        <div class="text-left md:text-right">
+            <p class="text-sm text-clsu-green-100 font-medium">Total Departments</p>
+            <p class="text-2xl md:text-3xl font-bold text-clsu-yellow">{{ count($chairsWithFaculty) }}</p>
         </div>
     </div>
 
-    {{-- Departments and Organization --}}
-    <div class="space-y-6">
+    {{-- Departments --}}
+    <div class="space-y-4 md:space-y-6">
         @forelse ($chairsWithFaculty as $item)
-            <div class="bg-white rounded-lg shadow-md border border-slate-200 overflow-hidden">
+            <div class="bg-white rounded-xl shadow-sm border border-clsu-green overflow-hidden">
+
                 {{-- Department Header --}}
-                <div class="bg-linear-to-r from-purple-50 to-purple-100 border-b border-slate-200 px-6 py-4">
-                    <h2 class="text-xl font-semibold text-slate-900">{{ $item['department']->name }}</h2>
+                <div class="bg-linear-to-r from-clsu-green to-clsu-cobra border-b border-clsu-green px-4 md:px-6 py-3 md:py-4">
+                    <h2 class="text-lg md:text-xl font-semibold text-white">{{ $item['department']->name }}</h2>
                 </div>
 
                 {{-- Chair Section --}}
-                <div class="px-6 py-4 border-b border-slate-200 bg-slate-50">
+                <div class="px-4 md:px-6 py-3 md:py-4 border-b border-clsu-green bg-clsu-green-50">
                     @if ($item['chair'])
-                        <div class="flex items-center justify-between">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 md:gap-4">
                             <div>
-                                <p class="text-sm font-semibold text-slate-600 uppercase tracking-wide">Department Chair</p>
-                                <p class="text-lg font-semibold text-slate-900 mt-1">{{ $item['chair']->user->name }}</p>
-                                <p class="text-sm text-slate-500">{{ $item['chair']->user->email }}</p>
+                                <p class="text-xs font-semibold text-clsu-cobra uppercase tracking-wide">Department Chair</p>
+                                <p class="text-lg font-bold text-clsu-cobra mt-1">{{ $item['chair']->user->name }}</p>
+                                <p class="text-sm text-clsu-green-100">{{ $item['chair']->user->email }}</p>
                             </div>
-                            <div class="text-right">
-                                <span class="inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">Chair</span>
+                            <div class="ml-0 sm:ml-4 mt-2 sm:mt-0">
+                                <x-feedback-status.status-indicator status="chair" label="Chair" />
                             </div>
                         </div>
                     @else
-                        <div class="text-center py-4">
-                            <p class="text-slate-500 font-medium">No chair assigned to this department</p>
+                        <div class="text-center py-3 md:py-4">
+                            <p class="text-clsu-green-100 font-medium">No chair assigned</p>
                         </div>
                     @endif
                 </div>
 
                 {{-- Faculty Section --}}
                 @if ($item['chair'])
-                    <div class="px-6 py-4">
-                        <h3 class="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">Faculty</h3>
+                    <div class="px-4 md:px-6 py-3 md:py-4">
+                        <h3 class="text-xs font-semibold text-clsu-cobra uppercase tracking-wide mb-3">Faculty Members</h3>
 
                         @if ($item['faculty']->isEmpty())
-                            <div class="bg-slate-50 rounded-lg p-4 text-center">
-                                <p class="text-slate-500">No faculty assigned yet</p>
+                            <div class="bg-clsu-green-50 rounded-lg p-3 text-center">
+                                <p class="text-clsu-green-100 text-sm">No faculty assigned yet</p>
                             </div>
                         @else
-                            <div class="space-y-3">
+                            <div class="space-y-2 md:space-y-3">
                                 @foreach ($item['faculty'] as $member)
-                                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors">
+                                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 md:p-4 bg-clsu-green-50 rounded-lg border border-clsu-green hover:border-clsu-cobra transition-all gap-2 md:gap-3">
                                         <div class="flex-1">
-                                            <p class="font-semibold text-slate-900">{{ $member->user->name }}</p>
-                                            <p class="text-sm text-slate-500">{{ $member->user->email }}</p>
+                                            <p class="font-semibold text-clsu-cobra">{{ $member->user->name }}</p>
+                                            <p class="text-sm text-clsu-green-100">{{ $member->user->email }}</p>
                                         </div>
-                                        <div class="ml-4 text-right">
-                                            <span class="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">Faculty</span>
+                                        <div class="ml-0 sm:ml-4 mt-1 sm:mt-0">
+                                            <x-feedback-status.status-indicator status="faculty" label="Faculty" />
                                         </div>
                                     </div>
                                 @endforeach
@@ -81,8 +76,8 @@
                 @endif
             </div>
         @empty
-            <div class="bg-slate-50 border border-slate-200 rounded-lg p-8 text-center">
-                <p class="text-slate-600">No departments found in {{ $college->name }}</p>
+            <div class="bg-clsu-green-50 border border-clsu-green rounded-lg p-6 md:p-8 text-center">
+                <p class="text-clsu-green-100">No departments found in {{ $college->name }}</p>
             </div>
         @endforelse
     </div>

@@ -1,8 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+
+<x-header-with-button
+        title="Program Management"
+        description="Program Educational Objectives (PEO) and Program Outcomes (PO)"
+    />
+
 <div class="p-6 space-y-8">
-    <h1 class="text-2xl font-bold text-gray-800">Program Management</h1>
 
     <div class="mt-4">
         <livewire:programs.program-selector

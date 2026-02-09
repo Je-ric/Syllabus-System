@@ -2,22 +2,20 @@
     'for' => null,
     'class' => '',
     'icon' => null,
-    'iconColor' => 'text-gray-600',
     'isRequired' => false,
     'variant' => null, // 'title', 'description', 'date', 'time', 'location', 'user', 'amount', 'notes', 'image'
 ])
 
 @php
     $variants = [
-        'title' => ['icon' => 'bx-book', 'color' => 'text-blue-600'],
-        'description' => ['icon' => 'bx-align-left', 'color' => 'text-green-600'],
-        'date' => ['icon' => 'bx-calendar', 'color' => 'text-green-500'],
-        'year' => ['icon' => 'bx-time-five', 'color' => 'text-green-600'],
+        'title' => ['icon' => 'bx-book'],
+        'description' => ['icon' => 'bx-align-left'],
+        'date' => ['icon' => 'bx-calendar'],
+        'year' => ['icon' => 'bx-time-five'],
     ];
 
     if ($variant && isset($variants[$variant])) {
         $icon = $variants[$variant]['icon'];
-        $iconColor = $variants[$variant]['color'];
     }
 @endphp
 
@@ -26,7 +24,7 @@
     class="flex items-center text-sm font-medium sm:gap-2 text-[#1a2235] mb-2 {{ $class }}"
 >
     @if($icon)
-        <i class="bx {{ $icon }} {{ $iconColor }} mr-1"></i>
+        <i class="bx {{ $icon }} text-green-800 mr-1"></i>
     @endif
     {{ $slot }}
     @if($isRequired)

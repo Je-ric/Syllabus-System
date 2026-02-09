@@ -13,6 +13,40 @@
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
+.anton-regular {
+    font-family: "Anton", "Libre Franklin", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+
+/* App.css */
+:root {
+    --yellow: #cdfb13;
+    --clsu-yellow: #ffd700;
+    --clsu-gold: #e0a70d;
+    --clsu-cobra: #1a5f30;
+    --clsu-green: #009639;
+    --clsu-surface: #f9fbf7;
+    --clsu-border: #d8e7d4;
+    --clsu-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+    --green: #92d12c;
+    --green-50: #4eab18;
+    --green-100: #038303;
+    --green-150: #003a10;
+    --green-grad: linear-gradient(90deg, rgba(0, 129, 2, 1) 0%,
+                                    rgba(149, 210, 45, 1) 100%);
+}
+
+.clsu-card {
+    background: #ffffff;
+    border: 1px solid var(--clsu-border);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: var(--clsu-shadow);
+}
+
+
 /* accordion */
 .chevron-icon {
     transition: transform 0.2s ease;
@@ -29,3 +63,4 @@ details summary {
 details summary::-webkit-details-marker {
     display: none;
 }
+
