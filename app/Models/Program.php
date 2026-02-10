@@ -19,6 +19,9 @@ class Program extends Model
                 ];
 
     // program belongs to many departments, pero again ideally 1 - 1
+    // Used in:
+        // storeProgram() - AcademicStructureController;
+        // updateProgram() - AcademicStructureController
     public function departments()
     {
         return $this->belongsToMany(Department::class, 'program_departments')
@@ -27,30 +30,35 @@ class Program extends Model
     }
 
     // each program has many PEOs
+    // Used in: loadPeos() - ManagePeos; savePeos() - ManagePeos; loadPeos() - ManagePos; savePos() - ManagePos; loadPeos() - PeoDisplay
     public function peos()
     {
         return $this->hasMany(ProgramEducationalObjective::class);
     }
 
     // each program has many POs
+    // Used in: create() - CourseController; edit() - CourseController; loadPos() - ManagePos; loadMapping() - ManagePos; savePos() - ManagePos
     public function outcomes()
     {
         return $this->hasMany(ProgramOutcome::class);
     }
 
     // each program has many courses
+    // Used in:
     public function courses()
     {
         return $this->hasMany(Course::class);
     }
 
     // Query: Load program with ordered outcomes
+    // Used in:
     public function scopeWithOrderedOutcomes($query)
     {
         return $query->with(['outcomes' => fn($q) => $q->orderBy('po_code')]);
     }
 
     // Helper: Get courses grouped by year and semester
+    // Used in: index() - CourseController; create() - SyllabusController; showCourses() - SyllabusController
     public function getCoursesGroupedByYearAndSemester()
     {
         return $this->courses()

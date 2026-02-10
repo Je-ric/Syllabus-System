@@ -18,11 +18,13 @@ class WeekContent extends Model
         'topics',
     ];
 
+    // Used in:
     public function syllabusWeek()
     {
         return $this->belongsTo(SyllabusWeek::class);
     }
 
+    // Used in:
     public function assessmentPlan()
     {
         return $this->belongsTo(COAssessmentPlan::class, 'co_assessment_plan_id');

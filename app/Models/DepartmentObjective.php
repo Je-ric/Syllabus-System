@@ -16,6 +16,7 @@ class DepartmentObjective extends Model
                 ];
 
     // many objectives to one department
+    // Used in:
     public function department()
     {
         return $this->belongsTo(Department::class);

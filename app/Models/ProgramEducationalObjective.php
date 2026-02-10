@@ -18,6 +18,7 @@ class ProgramEducationalObjective extends Model
     ];
 
     // many PEOs to one program
+    // Used in:
     public function program()
     {
         return $this->belongsTo(Program::class);
@@ -25,6 +26,7 @@ class ProgramEducationalObjective extends Model
 
     // PEOs belong to many outcomes
     // PEO - PO
+    // Used in:
     public function outcomes()
     {
         return $this->belongsToMany(

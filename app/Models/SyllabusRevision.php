@@ -23,6 +23,7 @@ class SyllabusRevision extends Model
         'revision_no' => 'integer',
     ];
 
+    // Used in:
     public function syllabus()
     {
         return $this->belongsTo(Syllabus::class);

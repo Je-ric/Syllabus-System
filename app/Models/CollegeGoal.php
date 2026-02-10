@@ -16,6 +16,7 @@ class CollegeGoal extends Model
                 ];
 
     // many goals to one college
+    // Used in:
     public function college()
     {
         return $this->belongsTo(College::class);

@@ -18,11 +18,13 @@ class SyllabusWeek extends Model
         'exam_type',
     ];
 
+    // Used in:
     public function syllabus()
     {
         return $this->belongsTo(Syllabus::class);
     }
 
+    // Used in:
     public function contents()
     {
         return $this->hasMany(WeekContent::class);

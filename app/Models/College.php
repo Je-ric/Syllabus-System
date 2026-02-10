@@ -12,18 +12,23 @@ class College extends Model
     protected $fillable = ['name'];
 
     // college has many goals
+    // Used in:
     public function goals()
     {
         return $this->hasMany(CollegeGoal::class);
     }
 
     // college has many departments
+    // Used in:
+        // storeProgram() - AcademicStructureController;
+        // updateProgram() - AcademicStructureController
     public function departments()
     {
         return $this->hasMany(Department::class);
     }
 
     // college has one dean through user assignments
+    // Used in:
     public function deanAssignment()
     {
         return UserAssignment::where('college_id', $this->id)
@@ -33,8 +38,8 @@ class College extends Model
     }
 
     // Helper: Get next goal code
-    // used in:
-        // GoalController@goal_store
+    // Used in:
+        // goal_store() - GoalController
     public function getNextGoalCode()
     {
         $count = $this->goals()->count();
@@ -42,8 +47,8 @@ class College extends Model
     }
 
     // Helper: Resequence goal codes after deletion
-    // used in:
-        // GoalController@goal_update
+    // Used in:
+        // goal_destroy() - GoalController
     public function resequenceGoalCodes()
     {
         $goals = $this->goals()->orderBy('college_goals_code')->get();

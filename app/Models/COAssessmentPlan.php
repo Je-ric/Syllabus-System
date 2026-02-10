@@ -17,11 +17,13 @@ class COAssessmentPlan extends Model
         'raw_score',
     ];
 
+    // Used in:
     public function courseOutcome()
     {
         return $this->belongsTo(CourseOutcome::class);
     }
 
+    // Used in:
     public function weekContents()
     {
         return $this->hasMany(WeekContent::class, 'co_assessment_plan_id');

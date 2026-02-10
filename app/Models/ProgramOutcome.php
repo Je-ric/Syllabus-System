@@ -16,12 +16,16 @@ class ProgramOutcome extends Model
     ];
 
     // many POs to one program
+    // Used in:
     public function program()
     {
         return $this->belongsTo(Program::class);
     }
 
     // POs belong to many PEOs
+    // Used in:
+        // loadPeos() - ManagePos;
+        // savePos() - ManagePos
     public function peos()
     {
         return $this->belongsToMany(
@@ -33,6 +37,7 @@ class ProgramOutcome extends Model
     }
 
     // POs belong to many COs
+    // Used in:
     public function courseOutcomes()
     {
         return $this->belongsToMany(

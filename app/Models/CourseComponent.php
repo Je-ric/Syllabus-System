@@ -27,30 +27,35 @@ class CourseComponent extends Model
         'units' => 'integer',
     ];
 
+    // Used in:
     public function syllabus()
     {
         return $this->belongsTo(Syllabus::class);
     }
 
     // Scope: Get only LEC components
+    // Used in:
     public function scopeLecture($query)
     {
         return $query->where('type', 'LEC');
     }
 
     // Scope: Get only LAB components
+    // Used in:
     public function scopeLaboratory($query)
     {
         return $query->where('type', 'LAB');
     }
 
     // Helper: Check if component is lecture
+    // Used in:
     public function isLecture()
     {
         return $this->type === 'LEC';
     }
 
     // Helper: Check if component is laboratory
+    // Used in:
     public function isLaboratory()
     {
         return $this->type === 'LAB';
@@ -58,6 +63,7 @@ class CourseComponent extends Model
 
     // Helper: Get formatted schedule
     // E.g., "Mon, Wed 10:00-11:00" => "Mon, Wed 10:00-11:00"
+    // Used in:
     public function getFormattedSchedule()
     {
         return $this->schedule ? str_replace(',', ', ', $this->schedule) : 'TBA';

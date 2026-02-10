@@ -16,16 +16,19 @@ class UserAssignment extends Model
         'context',
     ];
 
+    // Used in:
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
+    // Used in:
     public function college()
     {
         return $this->belongsTo(College::class);
     }
 
+    // Used in:
     public function department()
     {
         return $this->belongsTo(Department::class);
