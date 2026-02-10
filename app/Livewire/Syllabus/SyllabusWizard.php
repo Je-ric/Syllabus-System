@@ -248,7 +248,7 @@ class SyllabusWizard extends Component
 
     public function updatedCurrentStep($value): void
     {
-        if ($value === 'weekly_coverage') {
+        if ($value === 'weekly_coverage' || $value === 'review') {
             $this->refreshWeeklyCoverage();
         }
     }
@@ -258,6 +258,18 @@ class SyllabusWizard extends Component
         $this->currentStep = $step;
         if ($this->syllabus) {
             $this->syllabus->update(['current_step' => $step]);
+        }
+
+        if ($step === 'weekly_coverage') {
+            if ($this->academic_calendar_id && $this->syllabus) {
+                // Ensure calendar is persisted before generating weeks.
+                if ($this->syllabus->academic_calendar_id !== $this->academic_calendar_id) {
+                    $this->syllabus->update([
+                        'academic_calendar_id' => $this->academic_calendar_id,
+                    ]);
+                }
+            }
+            $this->refreshWeeklyCoverage();
         }
     }
 

@@ -8,7 +8,7 @@
 
     {{-- No Colleges --}}
     @if ($colleges->isEmpty())
-        <div class="border border-emerald-200 rounded-xl p-12 text-center bg-gradient-to-br from-emerald-50 to-green-50 shadow-sm">
+        <div class="border border-emerald-200 rounded-xl p-12 text-center bg-linear-to-br from-emerald-50 to-green-50 shadow-sm">
             <div class="flex justify-center mb-4">
                 <i class="bx bxs-building text-5xl text-emerald-300"></i>
             </div>
@@ -45,7 +45,7 @@
 
                         {{-- Current Dean --}}
                         @if ($deanAssignments->get($college->id)?->first())
-                            <div class="border border-emerald-200 rounded-lg p-4 bg-gradient-to-br from-emerald-50 to-green-50 hover:from-emerald-100 hover:to-green-100 transition-colors">
+                            <div class="border border-emerald-200 rounded-lg p-4 bg-linear-to-br from-emerald-50 to-green-50 hover:from-emerald-100 hover:to-green-100 transition-colors">
                                 <p class="text-xs uppercase tracking-wider text-emerald-800 font-semibold flex items-center gap-2 mb-3">
                                     <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-700 text-white text-xs">
                                         <i class="bx bxs-user-badge text-xs"></i>

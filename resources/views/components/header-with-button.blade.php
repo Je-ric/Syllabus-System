@@ -6,7 +6,7 @@
 <div class="w-full mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6 md:gap-0 mb-5
             border-b-4 border-yellow-500 pb-4">
     <div class="flex flex-col grow">
-        <h2 class="text-green-900 text-2xl md:text-3xl font-bold tracking-tight mb-1">
+        <h2 class="text-green-900 text-xl md:text-2xl font-bold tracking-tight mb-1">
             {{ $title }}
         </h2>
 

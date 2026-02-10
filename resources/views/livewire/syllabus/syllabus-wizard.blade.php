@@ -3,21 +3,24 @@
     $stepsOrder = array_keys($steps);
 @endphp
 
-<div x-data="syllabusWizard(@js($stepsOrder), @js($currentStep))"
+<div x-data="syllabusWizard(@js($stepsOrder), @js($currentStep), @js($steps))"
         class="container mx-auto p-6">
 
-    {{-- Header --}}
-    <div class="mb-6">
-        <h1 class="text-2xl font-bold">{{ $syllabus->id ? 'Edit' : 'Create' }} Syllabus</h1>
-        <p class="text-gray-600 mt-1">{{ $course->course_code }} - {{ $course->course_title }}</p>
 
-        <x-button variant="cancel" href="{{ route('syllabus.index') }}">
-            <i class="bx bx-chevron-left"></i> Back to Syllabi
-        </x-button>
-    </div>
+    <x-header-with-button title="{{ $syllabus->id ? 'Edit' : 'Create' }} Syllabus"
+                            description="{{ $course->course_code }} - {{ $course->course_title }}">
+        <x-button variant="cancel" href="{{ route('dashboard') }}">← Back to Syllabi</x-button>
+    </x-header-with-button>
 
     {{-- Progress Steps --}}
-    <div class="mb-8 bg-white border rounded-lg p-6">
+    <div class="mb-6 bg-white border border-slate-200 rounded-xl p-6">
+        <div class="flex items-center justify-between mb-4">
+            <div class="text-sm text-slate-600">
+                Step <span class="font-semibold" x-text="stepNumber(localStep)"></span>
+                of <span class="font-semibold" x-text="steps.length"></span>
+            </div>
+            <div class="text-sm font-semibold text-slate-800" x-text="labels[localStep]"></div>
+        </div>
         <div class="flex items-center justify-between">
             @foreach($steps as $step => $label)
                 <div class="flex items-center {{ $loop->last ? '' : 'flex-1' }}">
@@ -47,23 +50,23 @@
     </div>
 
     {{-- Step Content --}}
-    <div class="bg-white border rounded-lg p-6">
-        <div x-show="localStep === 'academic_calendar'">
+    <div class="bg-white border border-slate-200 rounded-xl p-6">
+        <div x-show="localStep === 'academic_calendar'" x-cloak>
             @include('livewire.syllabus.steps.academic-calendar')
         </div>
-        <div x-show="localStep === 'course_components'">
+        <div x-show="localStep === 'course_components'" x-cloak>
             @include('livewire.syllabus.steps.course-components')
         </div>
-        <div x-show="localStep === 'course_outcomes'">
+        <div x-show="localStep === 'course_outcomes'" x-cloak>
             @include('livewire.syllabus.steps.course-outcomes')
         </div>
-        <div x-show="localStep === 'co_po_mapping'">
+        <div x-show="localStep === 'co_po_mapping'" x-cloak>
             @include('livewire.syllabus.steps.co-po-mapping')
         </div>
-        <div x-show="localStep === 'weekly_coverage'">
+        <div x-show="localStep === 'weekly_coverage'" x-cloak>
             @include('livewire.syllabus.steps.weekly-coverage')
         </div>
-        <div x-show="localStep === 'review'">
+        <div x-show="localStep === 'review'" x-cloak>
             @include('livewire.syllabus.steps.review')
         </div>
     </div>
@@ -107,9 +110,10 @@
 </div>
 
 <script>
-    function syllabusWizard(steps, initialStep) {
+    function syllabusWizard(steps, initialStep, labels) {
         return {
             steps,
+            labels,
             localStep: initialStep,
 
             stepIndex(step) {
@@ -125,13 +129,13 @@
             },
 
             stepCircleClass(step) {
-                if (this.localStep === step) return 'bg-blue-600 text-white';
+                if (this.localStep === step) return 'bg-blue-600 text-white ring-4 ring-blue-100';
                 if (this.isCompleted(step)) return 'bg-green-500 text-white';
                 return 'bg-gray-300 text-gray-600';
             },
 
             stepLabelClass(step) {
-                return this.localStep === step ? 'font-semibold text-blue-600' : 'text-gray-600';
+                return this.localStep === step ? 'font-semibold text-blue-700' : 'text-slate-600';
             },
 
             stepLineClass(step) {

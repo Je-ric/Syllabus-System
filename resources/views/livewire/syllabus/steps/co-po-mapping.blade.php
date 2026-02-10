@@ -1,19 +1,21 @@
 <div>
-    <h3 class="text-xl font-semibold mb-4">Map Course Outcomes to Program Outcomes</h3>
-    <p class="text-gray-600 text-sm mb-6">Select which Program Outcomes each Course Outcome supports.</p>
+    <div class="mb-4">
+        <h3 class="text-xl font-semibold text-slate-900">CO-PO Mapping</h3>
+        <p class="text-sm text-slate-600">Select which Program Outcomes each Course Outcome supports.</p>
+    </div>
 
     @if (count($courseOutcomes) === 0)
         <div class="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed">
             <p class="text-gray-500">Please define Course Outcomes in the previous step first.</p>
         </div>
     @else
-        <div class="overflow-x-auto">
-            <table class="w-full border-collapse">
-                <thead class="bg-gray-100 border-b">
+        <div class="overflow-x-auto border border-slate-200 rounded-xl">
+            <table class="w-full border-collapse text-sm">
+                <thead class="bg-slate-100 border-b sticky top-0 z-10">
                     <tr>
-                        <th class="px-4 py-3 text-left font-semibold">Course Outcome</th>
+                        <th class="px-4 py-3 text-left font-semibold text-slate-700 w-64">Course Outcome</th>
                         @foreach ($course->program->outcomes as $po)
-                            <th class="px-2 py-3 text-center font-semibold text-sm">
+                            <th class="px-2 py-3 text-center font-semibold text-slate-700 text-xs">
                                 {{ $po->po_code }}
                             </th>
                         @endforeach
@@ -25,18 +27,19 @@
                             $coId = $co['id'] ?? null;
                             $rowKey = $coId ? $coId : 'new_' . $index;
                         @endphp
-                        <tr class="border-b hover:bg-gray-50" wire:key="co-row-{{ $rowKey }}">
+                        <tr class="border-b hover:bg-slate-50" wire:key="co-row-{{ $rowKey }}">
                             <td class="px-4 py-3">
                                 <div class="flex items-start gap-2">
-                                    <span class="font-semibold text-blue-600">{{ $co['co_code'] }}</span>
-                                    <span class="text-sm text-gray-700">{{ Str::limit($co['description'], 60) }}</span>
+                                    <span class="font-semibold text-green-700">{{ $co['co_code'] }}</span>
+                                    <span class="text-xs text-slate-600">{{ Str::limit($co['description'], 60) }}</span>
                                 </div>
                             </td>
                             @foreach ($course->program->outcomes as $po)
-                                <td class="px-2 py-3 text-center" wire:key="co-po-{{ $rowKey }}-{{ $po->id }}">
+                                <td class="px-2 py-3 text-center"
+                                    wire:key="co-po-{{ $rowKey }}-{{ $po->id }}">
                                     <input type="checkbox"
                                         wire:model.debounce.500ms="coPoMappings.{{ $rowKey }}.{{ $po->id }}"
-                                        class="h-4 w-4 cursor-pointer rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                                        class="h-4 w-4 cursor-pointer rounded border-slate-300 text-green-600 focus:ring-green-500" />
                                 </td>
                             @endforeach
                         </tr>
@@ -46,8 +49,10 @@
         </div>
 
         {{-- PO Reference --}}
-        <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-sm">
-            <h4 class="font-semibold text-sm text-blue-700 mb-3">Program Outcomes Reference</h4>
+        <div class="mt-6 border border-green-200 rounded-xl p-4 shadow-sm">
+            <h4 class="font-semibold text-sm text-green-800 mb-3">
+                Program Outcomes Reference
+            </h4>
 
             <div class="grid grid-cols-1 gap-3">
                 @foreach ($course->program->outcomes as $po)
@@ -56,18 +61,23 @@
                     @endphp
 
                     <div
-                        class="bg-white border border-gray-200 rounded p-3 flex flex-col shadow-sm hover:shadow-md transition">
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="font-semibold text-blue-600 text-sm">{{ $po->po_code }}</span>
-                            <span class="text-[10px] text-gray-500 px-2 py-0.5 bg-gray-100 rounded">
-                                {{ $iedLevel }}
+                        class="bg-white border border-green-400 rounded-lg p-3 shadow-sm hover:shadow-md transition flex items-start justify-between gap-4">
+                        <div class="flex gap-2">
+                            <span class="font-semibold text-green-700 text-sm shrink-0">
+                                {{ $po->po_code }}.
                             </span>
+                            <p class="text-slate-700 text-sm">
+                                {{ $po->po_text }}
+                            </p>
                         </div>
-                        <p class="text-gray-700 text-sm">{{ $po->po_text }}</p>
+                        <div class="shrink-0">
+                            <x-feedback-status.ied-badge :level="$iedLevel" />
+                        </div>
                     </div>
                 @endforeach
             </div>
         </div>
+
 
     @endif
 </div>

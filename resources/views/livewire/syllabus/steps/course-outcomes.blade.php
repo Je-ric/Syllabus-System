@@ -1,22 +1,21 @@
 <div>
-    <h3 class="text-xl font-semibold text-green-800 mb-2">
-        Define Course Outcomes
-    </h3>
-
-    <p class="text-gray-600 text-sm mb-6">
-        Define what students should be able to do after completing this course.
-    </p>
+    <div class="mb-4">
+        <h3 class="text-xl font-semibold text-slate-900">Course Outcomes</h3>
+        <p class="text-sm text-slate-600">
+            Define what students should be able to do after completing this course.
+        </p>
+    </div>
 
     <div class="space-y-4">
         @foreach($courseOutcomes as $index => $outcome)
             <div
-                class="border border-green-200 rounded-lg p-4 bg-green-50/40"
+                class="border border-emerald-200 rounded-lg p-4 bg-emerald-50/40"
                 wire:key="outcome-{{ $index }}"
             >
                 <div class="flex items-start gap-4">
                     {{-- CO Code --}}
                     <div class="w-24 shrink-0">
-                        <span class="w-16 text-center font-semibold text-gray-700">
+                        <span class="w-16 text-center font-semibold text-emerald-700">
                              {{ $outcome['co_code'] }}
                         </span>
 

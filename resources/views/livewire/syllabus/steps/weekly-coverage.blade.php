@@ -1,18 +1,20 @@
 <div>
-    <h3 class="text-xl font-semibold mb-2">Weekly Coverage</h3>
-    <p class="text-gray-600 text-sm mb-6">
-        Weeks are generated based on the academic calendar. Events are displayed per week.
-    </p>
+    <div class="mb-4">
+        <h3 class="text-xl font-semibold text-slate-900">Weekly Coverage</h3>
+        <p class="text-sm text-slate-600">
+            Weeks are generated from the academic calendar. Events and dates are shown per week.
+        </p>
+    </div>
 
     @if ($syllabusWeeks->isEmpty())
-        <div class="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed">
-            <p class="text-gray-500">
+        <div class="text-center py-12 bg-slate-50 rounded-lg border-2 border-dashed">
+            <p class="text-slate-500">
                 No weeks generated yet. Please select an academic calendar with start/end dates first.
             </p>
         </div>
     @else
-        <div class="mb-4 text-xs text-gray-600 bg-gray-50 border border-gray-200 rounded px-3 py-2">
-            <div class="font-semibold text-gray-700">Quick info</div>
+        <div class="mb-4 text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+            <div class="font-semibold text-slate-700">Quick info</div>
             <div>
                 Calendar:
                 @if ($syllabus?->academicCalendar)
@@ -24,10 +26,7 @@
                 @endif
             </div>
             <div>Total weeks: {{ $syllabusWeeks->count() }}</div>
-            <div>
-                Total events:
-                {{ collect($weekEvents)->flatten(1)->count() }}
-            </div>
+            <div>Total events: {{ collect($weekEvents)->flatten(1)->count() }}</div>
         </div>
 
         @php
@@ -41,15 +40,14 @@
                 ->toArray();
         @endphp
 
-        <div x-data="{ activeWeek: @entangle('activeWeekTab') }" class="border rounded-lg bg-white">
-            <div class="border-b border-gray-200">
+        <div x-data="{ activeWeek: @entangle('activeWeekTab') }" class="border border-slate-200 rounded-xl bg-white">
+            <div class="border-b border-slate-200">
                 <nav class="flex flex-wrap px-2 sm:px-4 gap-x-2 md:gap-x-4" aria-label="Weeks">
                     @foreach ($weekTabs as $tab)
                         <button type="button" @click="activeWeek = '{{ $tab['id'] }}'"
                             :class="activeWeek === '{{ $tab['id'] }}'
-                                ?
-                                'border-b-2 border-[#1a2235] text-[#1a2235] font-semibold' :
-                                'border-b-0 text-gray-500 hover:text-[#ffb51b] hover:border-b-2 hover:border-[#ffb51b]'"
+                                ? 'border-b-2 border-[#1a2235] text-[#1a2235] font-semibold'
+                                : 'border-b-0 text-slate-500 hover:text-[#ffb51b] hover:border-b-2 hover:border-[#ffb51b]'"
                             class="whitespace-nowrap py-2 px-3 text-sm transition-all duration-200 focus:outline-none">
                             {{ $tab['label'] }}
                         </button>
@@ -61,46 +59,62 @@
                 @foreach ($syllabusWeeks as $week)
                     @php
                         $panelId = 'week_' . $week->week_no;
+                        $start = \Carbon\Carbon::parse($week->start_date);
+                        $end = \Carbon\Carbon::parse($week->end_date);
+                        $day = $start->copy();
                     @endphp
                     <div x-show="activeWeek === '{{ $panelId }}'" x-cloak class="space-y-4">
-                        <div class="bg-white border rounded-lg p-4 space-y-4">
-                            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-                                <div class="font-semibold text-gray-800">
+                        <div class="bg-white border border-slate-200 rounded-lg p-4 space-y-4">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <div class="font-semibold text-slate-800">
                                     Week {{ $week->week_no }}
                                 </div>
-                                <div class="text-xs text-gray-500">
-                                    {{ \Carbon\Carbon::parse($week->start_date)->format('M d, Y') }}
-                                    -
-                                    {{ \Carbon\Carbon::parse($week->end_date)->format('M d, Y') }}
-                                </div>
-                                <div>
-                                    <div class="text-xs font-semibold text-gray-600 mb-2">Events</div>
-                                    @php
-                                        $events = $weekEvents[$week->week_no] ?? collect();
-                                    @endphp
-                                    @if ($events->isEmpty())
-                                        <div class="text-sm text-gray-500">No events for this week.</div>
-                                    @else
-                                        <ul class="space-y-2 text-sm text-gray-700">
-                                            @foreach ($events as $event)
-                                                <li class="flex items-start gap-2">
-                                                    <span class="text-gray-400">•</span>
-                                                    <span>
-                                                        <span class="font-medium">{{ $event->name }}</span>
-                                                        <span class="text-gray-500">
-                                                            ({{ \Carbon\Carbon::parse($event->date)->format('M d, Y') }})
-                                                        </span>
-                                                    </span>
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    @endif
+                                <div class="text-xs text-slate-500">
+                                    {{ $start->format('M d, Y') }} - {{ $end->format('M d, Y') }}
                                 </div>
                             </div>
 
+                            <div>
+                                <div class="text-xs font-semibold text-slate-600 mb-2">Weekdays</div>
+                                <div class="text-xs text-slate-700 mb-2">
+                                    {{ $start->format('M d') }} - {{ $end->format('M d, Y') }}
+                                </div>
+                                <div class="flex flex-wrap gap-2 text-xs text-slate-700">
+                                    @while ($day->lte($end))
+                                        <span class="px-2 py-1 rounded bg-slate-100 border border-slate-200">
+                                            {{ $day->format('D, M d') }}
+                                        </span>
+                                        @php $day->addDay(); @endphp
+                                    @endwhile
+                                </div>
+                            </div>
 
-                            <div class="mb-3">
-                                <div class="text-xs font-semibold text-gray-600 mb-2">Exam Weeks</div>
+                            <div>
+                                <div class="text-xs font-semibold text-slate-600 mb-2">Events</div>
+                                @php
+                                    $events = $weekEvents[$week->week_no] ?? collect();
+                                @endphp
+                                @if ($events->isEmpty())
+                                    <div class="text-sm text-slate-500">No events for this week.</div>
+                                @else
+                                    <ul class="space-y-2 text-sm text-slate-700">
+                                        @foreach ($events as $event)
+                                            <li class="flex items-start gap-2">
+                                                <span class="text-slate-400">•</span>
+                                                <span>
+                                                    <span class="font-medium">{{ $event->name }}</span>
+                                                    <span class="text-slate-500">
+                                                        ({{ \Carbon\Carbon::parse($event->date)->format('M d, Y') }})
+                                                    </span>
+                                                </span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @endif
+                            </div>
+
+                            <div>
+                                <div class="text-xs font-semibold text-slate-600 mb-2">Exam Weeks</div>
                                 <div class="flex flex-wrap gap-2">
                                     @php
                                         $types = [
@@ -125,7 +139,7 @@
                                                 wire:click="assignExamWeek('{{ $type }}', {{ $week->week_no }})"
                                                 @if ($isAssignedElsewhere) disabled @endif
                                                 class="px-3 py-1 text-xs font-medium rounded border border-blue-200
-                                                    {{ $isAssignedElsewhere ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-blue-50 text-blue-700 hover:bg-blue-100' }}">
+                                                    {{ $isAssignedElsewhere ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-blue-50 text-blue-700 hover:bg-blue-100' }}">
                                                 Set {{ $label }} Exam
                                             </button>
                                         @endif
@@ -137,7 +151,6 @@
                                     </div>
                                 @endif
                             </div>
-                            
                         </div>
                     </div>
                 @endforeach

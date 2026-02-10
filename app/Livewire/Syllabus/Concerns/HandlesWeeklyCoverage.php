@@ -14,6 +14,7 @@ trait HandlesWeeklyCoverage
     public array $weekEvents = [];
     public array $examWeeks = [];
     public ?string $activeWeekTab = null;
+    // ? is for nullable, it means that the variable can be either a string or null
 
     public function bootHandlesWeeklyCoverage(): void
     {
@@ -31,11 +32,14 @@ trait HandlesWeeklyCoverage
             return;
         }
 
+        // Validate exam type
+        // Only allow specific exam types to be assigned
         $validTypes = ['first_term', 'second_term', 'final_term'];
         if (!in_array($type, $validTypes, true)) {
             return;
         }
 
+        // Find the week to assign the exam type to
         $week = SyllabusWeek::where('syllabus_id', $this->syllabus->id)
             ->where('week_no', $weekNo)
             ->first();
@@ -124,7 +128,7 @@ trait HandlesWeeklyCoverage
         // gt is greater than
         while ($cursor->lte($end)) {
             $weekStart = $cursor->copy();
-            $weekEnd = $cursor->copy()->addDays(6); // Assuming a 5-day week (Mon-Fri)
+            $weekEnd = $cursor->copy()->addDays(6); // 7-day week (Mon-Sunday)
             if ($weekEnd->gt($end)) {
                 $weekEnd = $end->copy();
             }
@@ -140,6 +144,16 @@ trait HandlesWeeklyCoverage
             $weekNo++;
             $cursor = $weekEnd->copy()->addDay();
         }
+
+        // example:
+        // calendar start: 2024-09-01 (Sunday)
+        // calendar end: 2024-09-30 (Monday)
+        // generated weeks:
+        // week 1: 2024-09-01 to 2024-09-07
+        // week 2: 2024-09-08 to 2024-09-14
+        // week 3: 2024-09-15 to 2024-09-21
+        // week 4: 2024-09-22 to 2024-09-28
+        // week 5: 2024-09-29 to 2024-09-30
     }
 
     private function loadWeeks(): void

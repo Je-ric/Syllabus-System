@@ -1,9 +1,12 @@
 <div>
-    <h3 class="text-xl font-semibold mb-6">Course Components</h3>
+    <div class="mb-4">
+        <h3 class="text-xl font-semibold text-slate-900">Course Components</h3>
+        <p class="text-sm text-slate-600">Fill out lecture and laboratory details. Autosaves on blur.</p>
+    </div>
 
     {{-- LECTURE --}}
-    <div class="mb-8 border rounded-lg p-6 bg-gray-50">
-        <h4 class="text-lg font-semibold text-blue-600 mb-4 flex items-center gap-2">
+    <div class="mb-8 border border-slate-200 rounded-xl p-6">
+        <h4 class="text-lg font-semibold text-green-700 mb-4 flex items-center gap-2">
             <i class="bx bx-book-open"></i> Lecture (LEC)
         </h4>
 
@@ -100,7 +103,7 @@
                         wire:model.blur="lec_performance_standard"
                         required
                         class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm
-                                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                     >
                         <option value="50%">50%</option>
                         <option value="60%">60%</option>
@@ -113,8 +116,8 @@
     </div>
 
     @if ($course->has_lec_lab)
-        <div class="border rounded-lg p-6 bg-gray-50">
-            <h4 class="text-lg font-semibold text-purple-600 mb-4 flex items-center gap-2">
+        <div class="border border-slate-200 rounded-xl p-6">
+            <h4 class="text-lg font-semibold text-green-700 mb-4 flex items-center gap-2">
                 <i class="bx bx-test-tube"></i> Laboratory (LAB)
             </h4>
 
@@ -211,7 +214,7 @@
                             wire:model.blur="lab_performance_standard"
                             required
                             class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm
-                                focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                         >
                             <option value="50%">50%</option>
                             <option value="60%">60%</option>

@@ -1,7 +1,10 @@
 <div>
-    <h3 class="text-xl font-semibold mb-4">Select Academic Year & Semester</h3>
+    <div class="mb-4">
+        <h3 class="text-xl font-semibold text-slate-900">Academic Calendar</h3>
+        <p class="text-sm text-slate-600">Choose the academic year and semester for this syllabus.</p>
+    </div>
 
-    <div class="max-w-md">
+    <div class="max-w-md bg-white border border-slate-200 rounded-xl p-4">
         <label class="block text-sm font-medium text-gray-700 mb-2">
             Academic Calendar <span class="text-red-600">*</span>
         </label>

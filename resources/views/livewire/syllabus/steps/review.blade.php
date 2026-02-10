@@ -1,17 +1,23 @@
 <div>
-    <h3 class="text-xl font-semibold mb-6">Review & Submit</h3>
+    <div class="mb-4">
+        <h3 class="text-xl font-semibold text-slate-900">Review & Submit</h3>
+        <p class="text-sm text-slate-600">Review all details before submitting for approval.</p>
+    </div>
 
     {{-- Summary Sections --}}
     <div class="space-y-6">
         {{-- Academic Calendar --}}
-        <div class="border rounded-lg p-4 bg-gray-50">
-            <h4 class="font-semibold text-gray-700 mb-2">Academic Calendar</h4>
+        <div class="border border-slate-200 rounded-xl p-4 bg-slate-50">
+            <h4 class="font-semibold text-slate-700 mb-2">Academic Calendar</h4>
             @php
                 $calendar = $academicCalendars->firstWhere('id', $academic_calendar_id);
             @endphp
             <p class="text-sm">
                 @if($calendar)
                     {{ $calendar->academic_year }} - {{ $calendar->getFormattedSemester() }}
+                    <span class="text-slate-500">
+                        ({{ $calendar->start_date?->format('M d, Y') }} - {{ $calendar->end_date?->format('M d, Y') }})
+                    </span>
                 @else
                     <span class="text-red-600">Not selected</span>
                 @endif
@@ -19,54 +25,62 @@
         </div>
 
         {{-- Course Components --}}
-        <div class="border rounded-lg p-4 bg-gray-50">
-            <h4 class="font-semibold text-gray-700 mb-3">Course Components</h4>
+        <div class="border border-slate-200 rounded-xl p-4 bg-slate-50">
+            <h4 class="font-semibold text-slate-700 mb-3">Course Components</h4>
 
             <div class="mb-4">
-                <h5 class="text-sm font-semibold text-blue-600 mb-2">Lecture</h5>
-                <div class="grid grid-cols-2 gap-2 text-sm">
-                    <div><span class="text-gray-600">Instructor:</span> {{ $lec_instructor_name ?: '—' }}</div>
-                    <div><span class="text-gray-600">Email:</span> {{ $lec_instructor_email ?: '—' }}</div>
-                    <div><span class="text-gray-600">Schedule:</span> {{ $lec_schedule ?: '—' }}</div>
-                    <div><span class="text-gray-600">Office:</span> {{ $lec_office ?: '—' }}</div>
+                <h5 class="text-sm font-semibold text-blue-700 mb-2">Lecture</h5>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                    <div><span class="text-slate-600">Instructor:</span> {{ $lec_instructor_name ?: '—' }}</div>
+                    <div><span class="text-slate-600">Email:</span> {{ $lec_instructor_email ?: '—' }}</div>
+                    <div><span class="text-slate-600">Phone:</span> {{ $lec_phone ?: '—' }}</div>
+                    <div><span class="text-slate-600">Office:</span> {{ $lec_office ?: '—' }}</div>
+                    <div><span class="text-slate-600">Class Hours:</span> {{ $lec_class_hours ?: '—' }}</div>
+                    <div><span class="text-slate-600">Schedule:</span> {{ $lec_schedule ?: '—' }}</div>
+                    <div><span class="text-slate-600">Consultation:</span> {{ $lec_consultation_hours ?: '—' }}</div>
+                    <div><span class="text-slate-600">Performance:</span> {{ $lec_performance_standard ?: '—' }}</div>
                 </div>
             </div>
 
             @if($course->has_lec_lab)
                 <div>
-                    <h5 class="text-sm font-semibold text-purple-600 mb-2">Laboratory</h5>
-                    <div class="grid grid-cols-2 gap-2 text-sm">
-                        <div><span class="text-gray-600">Instructor:</span> {{ $lab_instructor_name ?: '—' }}</div>
-                        <div><span class="text-gray-600">Email:</span> {{ $lab_instructor_email ?: '—' }}</div>
-                        <div><span class="text-gray-600">Schedule:</span> {{ $lab_schedule ?: '—' }}</div>
-                        <div><span class="text-gray-600">Office:</span> {{ $lab_office ?: '—' }}</div>
+                    <h5 class="text-sm font-semibold text-purple-700 mb-2">Laboratory</h5>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                        <div><span class="text-slate-600">Instructor:</span> {{ $lab_instructor_name ?: '—' }}</div>
+                        <div><span class="text-slate-600">Email:</span> {{ $lab_instructor_email ?: '—' }}</div>
+                        <div><span class="text-slate-600">Phone:</span> {{ $lab_phone ?: '—' }}</div>
+                        <div><span class="text-slate-600">Office:</span> {{ $lab_office ?: '—' }}</div>
+                        <div><span class="text-slate-600">Class Hours:</span> {{ $lab_class_hours ?: '—' }}</div>
+                        <div><span class="text-slate-600">Schedule:</span> {{ $lab_schedule ?: '—' }}</div>
+                        <div><span class="text-slate-600">Consultation:</span> {{ $lab_consultation_hours ?: '—' }}</div>
+                        <div><span class="text-slate-600">Performance:</span> {{ $lab_performance_standard ?: '—' }}</div>
                     </div>
                 </div>
             @endif
         </div>
 
         {{-- Course Outcomes --}}
-        <div class="border rounded-lg p-4 bg-gray-50">
-            <h4 class="font-semibold text-gray-700 mb-3">Course Outcomes ({{ count($courseOutcomes) }})</h4>
+        <div class="border border-slate-200 rounded-xl p-4 bg-slate-50">
+            <h4 class="font-semibold text-slate-700 mb-3">Course Outcomes ({{ count($courseOutcomes) }})</h4>
             @if(count($courseOutcomes) > 0)
                 <ul class="space-y-2 text-sm">
                     @foreach($courseOutcomes as $co)
                         <li class="flex items-start gap-2">
-                            <span class="font-semibold text-blue-600">{{ $co['co_code'] }}:</span>
-                            <span class="text-gray-700">{{ $co['description'] }}</span>
+                            <span class="font-semibold text-blue-700">{{ $co['co_code'] }}:</span>
+                            <span class="text-slate-700">{{ $co['description'] }}</span>
                         </li>
                     @endforeach
                 </ul>
             @else
-                <p class="text-sm text-gray-500">No course outcomes defined yet.</p>
+                <p class="text-sm text-slate-500">No course outcomes defined yet.</p>
             @endif
         </div>
 
         {{-- CO-PO Mapping Summary --}}
-        <div class="border rounded-lg p-4 bg-gray-50">
-            <h4 class="font-semibold text-gray-700 mb-3">CO-PO Mapping</h4>
+        <div class="border border-slate-200 rounded-xl p-4 bg-slate-50">
+            <h4 class="font-semibold text-slate-700 mb-3">CO-PO Mapping</h4>
             @if(count($coPoMappings) > 0)
-                <div class="text-sm">
+                <div class="text-sm text-slate-700">
                     @php
                         $totalMappings = 0;
                         foreach ($coPoMappings as $coId => $poMappings) {
@@ -76,7 +90,39 @@
                     <p>Total mappings: <span class="font-semibold">{{ $totalMappings }}</span></p>
                 </div>
             @else
-                <p class="text-sm text-gray-500">No CO-PO mappings defined yet.</p>
+                <p class="text-sm text-slate-500">No CO-PO mappings defined yet.</p>
+            @endif
+        </div>
+
+        {{-- Weekly Coverage Summary --}}
+        <div class="border border-slate-200 rounded-xl p-4 bg-slate-50">
+            <h4 class="font-semibold text-slate-700 mb-3">Weekly Coverage</h4>
+            @if(isset($syllabusWeeks) && $syllabusWeeks->count() > 0)
+                <div class="text-sm text-slate-700">
+                    <p>Total weeks: <span class="font-semibold">{{ $syllabusWeeks->count() }}</span></p>
+                    <div class="mt-2">
+                        @php
+                            $examLabels = [
+                                'first_term' => '1st Term Exam',
+                                'second_term' => '2nd Term Exam',
+                                'final_term' => 'Final Term Exam',
+                            ];
+                        @endphp
+                        @foreach($examLabels as $key => $label)
+                            @php
+                                $weekNo = $examWeeks[$key] ?? null;
+                            @endphp
+                            <div>
+                                {{ $label }}:
+                                <span class="font-semibold">
+                                    {{ $weekNo ? 'Week ' . $weekNo : 'Not set' }}
+                                </span>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @else
+                <p class="text-sm text-slate-500">Weekly coverage not generated yet.</p>
             @endif
         </div>
     </div>
