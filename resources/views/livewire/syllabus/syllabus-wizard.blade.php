@@ -3,8 +3,11 @@
     $stepsOrder = array_keys($steps);
 @endphp
 
-<div x-data="syllabusWizard(@js($stepsOrder), @js($currentStep), @js($steps))"
-        class="container mx-auto p-6">
+<div x-data="syllabusWizard(@js($stepsOrder),
+                            @js($currentStep),
+                            @js($steps)
+                            )"
+    >
 
 
     <x-header-with-button title="{{ $syllabus->id ? 'Edit' : 'Create' }} Syllabus"

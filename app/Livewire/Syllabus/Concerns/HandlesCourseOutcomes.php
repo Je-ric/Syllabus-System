@@ -7,10 +7,13 @@ use App\Models\CourseOutcome;
 trait HandlesCourseOutcomes
 {
     public $courseOutcomes = [];
-    public ?string $coAddError = null;
+    // an array of arrays, each inner array has keys: id, co_code, description
 
+    public ?string $coAddError = null;
     public function addCourseOutcome()
     {
+
+    // foreach course outcome, if description is empty, set coAddError to 'Fill the blank before adding.' and return
         foreach ($this->courseOutcomes as $outcome) {
             if (empty(trim($outcome['description'] ?? ''))) {
                 $this->coAddError = 'Fill the blank before adding.';
@@ -18,6 +21,7 @@ trait HandlesCourseOutcomes
             }
         }
 
+        // if all descriptions are filled, clear the error and add a new course outcome with empty description and code CO{n+1}
         $this->coAddError = null;
         $nextNumber = count($this->courseOutcomes) + 1;
         $this->courseOutcomes[] = [
@@ -27,6 +31,10 @@ trait HandlesCourseOutcomes
         ];
 
         // Initialize CO-PO mapping for new outcome
+        // examples:
+        // if we have 2 existing outcomes, and we add a new one,
+        // the new outcome will have a temporary key 'new_2'
+        // (since index starts at 0), and we will initialize an empty array for it in the coPoMappings
         $index = count($this->courseOutcomes) - 1;
         $this->coPoMappings['new_' . $index] = [];
     }
@@ -47,6 +55,7 @@ trait HandlesCourseOutcomes
             CourseOutcome::where('id', $this->courseOutcomes[$index]['id'])->delete();
         }
 
+        // Remove from the courseOutcomes array
         unset($this->courseOutcomes[$index]);
         $this->courseOutcomes = array_values($this->courseOutcomes);
 

@@ -39,7 +39,7 @@ trait HandlesWeeklyCoverage
             return;
         }
 
-        // Find the week to assign the exam type to
+        // Find the week to assign the exam type to based on the week number
         $week = SyllabusWeek::where('syllabus_id', $this->syllabus->id)
             ->where('week_no', $weekNo)
             ->first();
@@ -91,10 +91,13 @@ trait HandlesWeeklyCoverage
 
     private function refreshWeeklyCoverage(): void
     {
+
+        // If syllabus or academic calendar is not set, we cannot load weeks or events
         if (!$this->syllabus || !$this->syllabus->academic_calendar_id) {
             return;
         }
 
+        // Load the academic calendar with its events to ensure we have the latest data
         $this->syllabus->loadMissing('academicCalendar.events');
         $this->ensureWeeksGenerated();
         $this->loadWeeks();
@@ -158,6 +161,7 @@ trait HandlesWeeklyCoverage
 
     private function loadWeeks(): void
     {
+        // Reload weeks from the database to get the latest data after any changes
         $this->syllabusWeeks = SyllabusWeek::where('syllabus_id', $this->syllabus->id)
             ->orderBy('week_no')
             ->get();
@@ -165,10 +169,11 @@ trait HandlesWeeklyCoverage
 
     private function syncActiveWeekTab(): void
     {
+
         if ($this->activeWeekTab) {
             return;
         }
-
+        // If no active tab is set, default to the first week
         $firstWeek = $this->syllabusWeeks->first();
         if ($firstWeek) {
             $this->activeWeekTab = 'week_' . $firstWeek->week_no;
@@ -177,6 +182,8 @@ trait HandlesWeeklyCoverage
 
     private function loadExamWeeks(): void
     {
+        // for each week, if exam_type is not null,
+        // add it to the examWeeks array with the exam type as the key and the week number as the value
         $examWeeks = [];
         foreach ($this->syllabusWeeks as $week) {
             if ($week->exam_type) {
@@ -188,16 +195,25 @@ trait HandlesWeeklyCoverage
 
     private function loadWeekEvents(): void
     {
+        // If no academic calendar is associated, there are no events to load
         $calendarId = $this->syllabus->academic_calendar_id;
         if (!$calendarId) {
             $this->weekEvents = [];
             return;
         }
 
+        // Load all events for the academic calendar and group them by week
         $events = AcademicCalendarEvent::where('academic_calendar_id', $calendarId)
             ->orderBy('date')
             ->get();
 
+        // foreach weeks, filter events that fall within the week's start and end date, and assign them to the weekEvents array with the week number as the key
+        // example:
+        // week 1: 2024-09-01 to 2024-09-07
+        // events: 2024-09-02, 2024-09-09, 2024-09-15
+        // weekEvents[1] = [2024-09-02]
+        // weekEvents[2] = [2024-09-09]
+        // weekEvents[3] = [2024-09-15]
         $weekEvents = [];
         foreach ($this->syllabusWeeks as $week) {
             $weekEvents[$week->week_no] = $events->filter(function ($event) use ($week) {

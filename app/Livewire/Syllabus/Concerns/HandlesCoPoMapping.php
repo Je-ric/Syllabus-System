@@ -22,7 +22,12 @@ trait HandlesCoPoMapping
         if (empty($this->coPoMappings)) {
             return false;
         }
-
+        // Loop through each CO and sync its associated POs based on the current mappings
+        // foreach mapping example:
+        // coPoMappings = [
+        //     '1' => [2 => true, 3 => true], // CO with ID 1 is mapped to PO 2 and PO 3
+        //     'new_0' => [1 => true], // A new CO (not yet saved to DB) is mapped to PO 1
+        // ]
         $saved = false;
         foreach ($this->coPoMappings as $coKey => $poMappings) {
             if (!is_array($poMappings)) {

@@ -66,12 +66,15 @@
                     <div x-show="activeWeek === '{{ $panelId }}'" x-cloak class="space-y-4">
                         <div class="bg-white border border-slate-200 rounded-lg p-4 space-y-4">
                             <div class="flex flex-wrap items-center justify-between gap-2">
-                                <div class="font-semibold text-slate-800">
+                                <div class="text-xs font-semibold text-slate-800">
+                                    Class Schedule:
+                                </div>
+                                {{-- <div class="font-semibold text-slate-800">
                                     Week {{ $week->week_no }}
-                                </div>
-                                <div class="text-xs text-slate-500">
+                                </div> --}}
+                                {{-- <div class="text-xs text-slate-500">
                                     {{ $start->format('M d, Y') }} - {{ $end->format('M d, Y') }}
-                                </div>
+                                </div> --}}
                             </div>
 
                             <div>

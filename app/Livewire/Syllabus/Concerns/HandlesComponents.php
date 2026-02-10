@@ -111,6 +111,7 @@ trait HandlesComponents
         }
     }
 
+    // return true if all required LEC fields are filled
     private function isLecComplete(): bool
     {
         return !empty(trim((string) $this->lec_instructor_name))
