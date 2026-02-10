@@ -1,16 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
-    <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium">
-        ← Back
-    </a>
 
-    <div class="mb-4">
-        <p class="text-lg font-semibold text-slate-800">Accounts</p>
-        <p class="text-sm text-slate-500">
-            Manage user access, statuses, and role assignments
-        </p>
-    </div>
+    <x-header-with-button title="User Accounts"
+                        description="Manage user access, statuses, and role assignments">
+        <x-button variant="cancel" href="{{ route('dashboard') }}">Back</x-button>
+    </x-header-with-button>
 
     <div class="overflow-x-auto bg-white rounded-lg shadow-sm ring-1 ring-slate-200">
         <table class="min-w-full border-collapse">
