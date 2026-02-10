@@ -3,12 +3,14 @@
 @section('content')
 <div class="p-6 space-y-4">
 
-    <h1 class="text-2xl font-bold mb-6">Academic Structure Management</h1>
-
-    {{-- ADD COLLEGE --}}
-    <x-button variant="add-button" onclick="document.getElementById('addCollegeModal').showModal()">
-        <i class="bx bx-plus"></i> Add College
-    </x-button>
+    <x-header-with-button
+        title="Academic Structure Management"
+        description="Manage colleges, departments, and academic programs across the institution"
+    >
+        <x-button variant="add-button" onclick="document.getElementById('addCollegeModal').showModal()">
+            <i class="bx bx-plus mr-1"></i> Add College
+        </x-button>
+    </x-header-with-button>
 
     <div id="collegeAccordions" class="space-y-3">
         @foreach ($colleges as $college)

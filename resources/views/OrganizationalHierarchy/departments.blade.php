@@ -2,13 +2,22 @@
 
 @section('content')
 
-    <x-header-with-button title="{{ $college->name }}" description="Assign and manage department chairs and faculty members">
+    <x-header-with-button title="{{ $college->name }}" description="Manage department leadership, faculty assignments, and academic structure">
         <x-button variant="cancel" href="{{ route('organizational.colleges.index') }}">← Back to Colleges</x-button>
     </x-header-with-button>
 
+    {{-- No Departments --}}
     @if ($college->departments->isEmpty())
-        <div class="border border-green-900 rounded-lg p-10 text-center bg-green-50">
-            <p class="text-green-900 font-medium">No departments found in this college.</p>
+        <div class="border border-emerald-200 rounded-xl p-12 text-center bg-gradient-to-br from-emerald-50 to-green-50 shadow-sm">
+            <div class="flex justify-center mb-4">
+                <i class="bx bxs-building text-5xl text-emerald-300"></i>
+            </div>
+            <p class="text-emerald-800 font-semibold text-lg mb-2">
+                No departments found
+            </p>
+            <p class="text-emerald-700 text-sm">
+                Departments for this college will appear here once created.
+            </p>
         </div>
     @else
 
@@ -16,113 +25,138 @@
         <div class="space-y-6">
 
             @foreach ($college->departments as $department)
-                <div class="border border-green-900 rounded-xl bg-white shadow-sm">
+                <div class="border border-emerald-200 rounded-xl bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden">
 
-                    <div class="bg-green-grad px-5 py-3 flex justify-between items-center rounded-t-xl">
-                        <h2 class="text-lg font-bold text-white tracking-wide flex items-center gap-2">
-                            <i class="bx bxs-buildings text-yellow-400 text-xl"></i>
-                            {{ $department->name }}
-                        </h2>
+                    {{-- Department Header --}}
+                    <div class="bg-emerald-800 px-6 py-5 flex justify-between items-center">
+                        <div class="flex items-center gap-4 min-w-0 flex-1">
+                            <div class="flex-shrink-0 w-11 h-11 rounded-lg bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center shadow-md">
+                                <i class="bx bxs-buildings text-white text-lg font-bold"></i>
+                            </div>
+                            <h2 class="text-lg font-bold text-white truncate" title="{{ $department->name }}">
+                                {{ $department->name }}
+                            </h2>
+                        </div>
 
                         <x-button
                             onclick="document.getElementById('assignFacultyModal-{{ $department->id }}').showModal()"
-                            variant="secondary">
-                            <i class="bx bx-user-plus mr-1"></i> Add Faculty
+                            variant="secondary"
+                            class="ml-4 text-sm font-medium flex items-center gap-2">
+                            <i class="bx bx-user-plus"></i>
+                            Add Faculty
                         </x-button>
                     </div>
 
                     {{-- CARD BODY --}}
-                    <div class="p-5 space-y-6">
+                    <div class="p-6 space-y-6">
 
-                        {{-- CHAIR --}}
+                        {{-- DEPARTMENT CHAIR --}}
                         <div>
-                            <h3
-                                class="text-xs uppercase tracking-wider text-green-800 mb-2 font-semibold flex items-center gap-1">
-                                <i class="bx bxs-user-badge text-green-900"></i>
-                                Department Chair
-                            </h3>
+                            <div class="flex items-center gap-2 mb-3">
+                                <i class="bx bxs-user-badge text-emerald-700 text-lg"></i>
+                                <h3 class="text-xs uppercase tracking-wider text-emerald-800 font-semibold">
+                                    Department Chair
+                                </h3>
+                            </div>
 
                             @if ($chairAssignments->get($department->id)?->first())
-                                <div
-                                    class="border border-green-900 rounded-lg p-4 flex justify-between items-center bg-green-50 max-w-xl">
+                                @php
+                                    $chair = $chairAssignments->get($department->id)->first()->user;
+                                @endphp
 
-                                    <div>
-                                        <p class="font-semibold text-green-900 leading-tight">
-                                            {{ $chairAssignments->get($department->id)->first()->user->name }}
+                                <div class="border border-emerald-200 rounded-lg p-4 bg-gradient-to-br from-emerald-50 to-green-50 hover:from-emerald-100 hover:to-green-100 transition-colors flex justify-between items-start gap-4">
+                                    <div class="flex-1 min-w-0">
+                                        <p class="font-semibold text-emerald-900 leading-tight" title="{{ $chair->name }}">
+                                            {{ $chair->name }}
                                         </p>
-                                        <p class="text-xs text-green-800">
-                                            {{ $chairAssignments->get($department->id)->first()->user->email }}
+                                        <p class="text-xs text-emerald-700 mt-1.5">
+                                            {{ $chair->email }}
                                         </p>
                                     </div>
 
-                                    <form action="{{ route('organizational.remove-chair') }}" method="POST">
+                                    <form action="{{ route('organizational.remove-chair') }}" method="POST" class="shrink-0">
                                         @csrf
                                         <input type="hidden" name="department_id" value="{{ $department->id }}">
-                                        <input type="hidden" name="user_id"
-                                            value="{{ $chairAssignments->get($department->id)->first()->user->id }}">
+                                        <input type="hidden" name="user_id" value="{{ $chair->id }}">
 
                                         <button type="submit"
-                                            class="w-9 h-9 flex items-center justify-center bg-red-600 text-white rounded hover:bg-black transition"
-                                            title="Remove Chair">
-                                            <i class="bx bx-trash text-lg"></i>
+                                            class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                                            title="Remove chair">
+                                            <i class="bx bx-trash text-base"></i>
                                         </button>
                                     </form>
                                 </div>
                             @else
-                                <div
-                                    class="border border-dashed border-green-900 rounded-lg p-4 text-center bg-green-50 max-w-xl mb-2">
-                                    <p class="text-green-900 text-sm font-medium">No chair assigned</p>
+                                <div class="border border-dashed border-emerald-300 rounded-lg p-5 text-center bg-emerald-50 hover:bg-green-50 transition-colors">
+                                    <i class="bx bx-user text-2xl text-emerald-400 mb-2 block"></i>
+                                    <p class="text-emerald-700 text-sm font-medium mb-3">
+                                        No chair assigned
+                                    </p>
+                                    @if ($potentialChairs->count() > 0)
+                                        <x-button
+                                            onclick="document.getElementById('assignChairModal-{{ $department->id }}').showModal()"
+                                            variant="secondary"
+                                            class="text-sm font-medium">
+                                            <i class="bx bx-user-plus mr-1"></i>
+                                            Assign Chair
+                                        </x-button>
+                                    @else
+                                        <p class="text-xs text-emerald-600 font-medium">
+                                            No available users to assign
+                                        </p>
+                                    @endif
                                 </div>
-
-                                @if ($potentialChairs->count() > 0)
-                                    <x-button
-                                        onclick="document.getElementById('assignChairModal-{{ $department->id }}').showModal()"
-                                        variant="secondary">
-                                        Assign Chair
-                                    </x-button>
-                                @endif
                             @endif
                         </div>
 
-                        {{-- FACULTY --}}
+                        {{-- FACULTY MEMBERS --}}
                         <div>
-                            <h3
-                                class="text-xs uppercase tracking-wider text-green-800 mb-3 font-semibold flex items-center gap-1">
-                                <i class="bx bxs-group text-green-900"></i>
-                                Faculty Members
-                            </h3>
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-2">
+                                    <i class="bx bxs-group text-emerald-700 text-lg"></i>
+                                    <h3 class="text-xs uppercase tracking-wider text-emerald-800 font-semibold">
+                                        Faculty Members
+                                    </h3>
+                                </div>
+                                @if ($facultyAssignments->get($department->id)?->count() > 0)
+                                    <span class="inline-flex items-center justify-center min-w-7 h-7 rounded-full bg-amber-100 text-amber-800 text-xs font-bold">
+                                        {{ $facultyAssignments->get($department->id)->count() }}
+                                    </span>
+                                @endif
+                            </div>
 
                             @if ($facultyAssignments->get($department->id)?->count() > 0)
-                                <div class="border border-green-900 rounded-lg bg-white">
+                                <div class="border border-emerald-200 rounded-lg overflow-hidden bg-white">
 
                                     {{-- FACULTY LIST --}}
-                                    <div class="grid grid-cols-2">
+                                    <div class="grid grid-cols-1 md:grid-cols-2">
                                         @foreach ($facultyAssignments->get($department->id) as $facultyAssignment)
-                                            <div
-                                                class="flex items-center justify-between px-4 py-3 text-sm bg-green-50">
+                                            <div class="flex items-center justify-between px-4 py-3.5 border-b border-r border-emerald-100 last:border-b-0 md:last:border-r-0 md:even:border-r-0 md:odd:border-r hover:bg-emerald-50 transition-colors">
 
-                                                <div class="pr-4">
-                                                    <p class="font-medium text-green-900 leading-tight">
+                                                <div class="flex-1 min-w-0">
+                                                    <p class="font-semibold text-slate-900 text-sm leading-tight" title="{{ $facultyAssignment->user->name }}">
                                                         {{ $facultyAssignment->user->name }}
                                                     </p>
-                                                    <p class="text-xs text-green-800">
+                                                    <p class="text-xs text-slate-600 mt-1">
                                                         {{ $facultyAssignment->user->email }}
-                                                        • {{ $facultyAssignment->user->office }}
                                                     </p>
+                                                    @if ($facultyAssignment->user->office)
+                                                        <p class="text-xs text-emerald-600 mt-0.5">
+                                                            <i class="bx bx-map text-xs mr-1"></i>{{ $facultyAssignment->user->office }}
+                                                        </p>
+                                                    @endif
                                                 </div>
 
                                                 <form action="{{ route('organizational.remove-faculty') }}"
-                                                    method="POST">
+                                                    method="POST" class="shrink-0 ml-3">
                                                     @csrf
-                                                    <input type="hidden" name="department_id"
-                                                        value="{{ $department->id }}">
-                                                    <input type="hidden" name="user_id"
-                                                        value="{{ $facultyAssignment->user->id }}">
+                                                    <input type="hidden" name="department_id" value="{{ $department->id }}">
+                                                    <input type="hidden" name="user_id" value="{{ $facultyAssignment->user->id }}">
 
                                                     <button type="submit"
-                                                        class="w-7 h-7 flex items-center justify-center bg-red-600 text-white rounded hover:bg-black transition"
-                                                        title="Remove Faculty">
-                                                        <i class="bx bx-trash text-sm"></i>
+                                                        class="p-1.5 text-red-600 hover:bg-red-50 rounded transition"
+                                                        title="Remove faculty">
+                                                        <i class="bx bx-trash text-base"></i>
                                                     </button>
                                                 </form>
                                             </div>
@@ -131,9 +165,11 @@
 
                                 </div>
                             @else
-                                <div
-                                    class="border border-dashed border-green-900 rounded-lg p-4 text-center bg-green-50 max-w-xl">
-                                    <p class="text-green-900 text-sm font-medium">No faculty assigned yet</p>
+                                <div class="border border-dashed border-emerald-300 rounded-lg p-6 text-center bg-emerald-50 hover:bg-green-50 transition-colors">
+                                    <i class="bx bxs-group text-2xl text-emerald-400 mb-2 block"></i>
+                                    <p class="text-emerald-700 text-sm font-medium">
+                                        No faculty assigned yet
+                                    </p>
                                 </div>
                             @endif
                         </div>

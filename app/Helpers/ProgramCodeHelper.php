@@ -24,12 +24,13 @@ class ProgramCodeHelper
             $po->update(['po_code' => ProgramCodeHelper::numberToLetter($index + 1)]); // 1 (a), 2 (b), 3 (c), ...
         }
     }
-    
+
     public static function resequencePeoCodes(int $programId)
     {
         $peos = ProgramEducationalObjective::where('program_id', $programId)->orderBy('id')->get();
         foreach ($peos as $index => $peo) {
-            $peo->update(['peo_code' => 'PEO' . ($index + 1)]); // PEO1, PEO2, ...
+            // $peo->update(['peo_code' => 'PEO' . ($index + 1)]); // PEO1, PEO2, ...
+            $peo->update(['peo_code' => ProgramCodeHelper::numberToLetter($index + 1)]); // PEO1, PEO2, ...
         }
     }
 }

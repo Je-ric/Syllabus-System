@@ -2,15 +2,21 @@
 
 @section('content')
 
-    <x-header-with-button title="CLSU College Dean Management" description="Assign and manage deans for each college">
+    <x-header-with-button title="CLSU College Dean Management" description="Manage institutional leadership and organizational structure across all colleges">
         <x-button variant="cancel" href="{{ route('dashboard') }}">← Back to Dashboard</x-button>
     </x-header-with-button>
 
     {{-- No Colleges --}}
     @if ($colleges->isEmpty())
-        <div class="border border-green-800 rounded-lg p-10 text-center bg-green-50">
-            <p class="text-green-900 font-medium">
-                No colleges found. Please create colleges first.
+        <div class="border border-emerald-200 rounded-xl p-12 text-center bg-gradient-to-br from-emerald-50 to-green-50 shadow-sm">
+            <div class="flex justify-center mb-4">
+                <i class="bx bxs-building text-5xl text-emerald-300"></i>
+            </div>
+            <p class="text-emerald-800 font-semibold text-lg mb-2">
+                No colleges found
+            </p>
+            <p class="text-emerald-700 text-sm">
+                Please create colleges first before managing deans and departments.
             </p>
         </div>
     @else
@@ -18,25 +24,32 @@
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
             @foreach ($colleges as $college)
-                <div class="border border-green-900 rounded-xl bg-white shadow-sm overflow-hidden flex flex-col">
+                <div class="border border-emerald-200 rounded-xl bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col h-full">
 
                     {{-- College Header --}}
-                    <div class="bg-green-900 px-5 py-3 flex items-center gap-2">
-                        <i class="bx bxs-school text-yellow-400 text-xl"></i>
-                        <h2 class="text-lg font-bold text-white tracking-wide">
-                            {{ $college->name }}
-                        </h2>
+                    <div class="bg-emerald-800 px-6 py-5 flex items-center gap-4">
+                        <div class="shrink-0 w-11 h-11 rounded-lg
+                            bg-yellow-500
+                            flex items-center justify-center shadow-md">
+                            <i class="bx bxs-school text-white text-lg font-bold"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h2 class="text-base font-bold text-white truncate" title="{{ $college->name }}">
+                                {{ $college->name }}
+                            </h2>
+                        </div>
                     </div>
 
                     {{-- Card Body --}}
-                    <div class="p-5 flex flex-col gap-4 flex-1">
+                    <div class="p-6 flex flex-col gap-5 flex-1">
 
                         {{-- Current Dean --}}
                         @if ($deanAssignments->get($college->id)?->first())
-                            <div class="border border-green-800 rounded-lg p-4 bg-green-50">
-                                <p
-                                    class="text-xs uppercase tracking-wider text-green-800 font-semibold flex items-center gap-1">
-                                    <i class="bx bxs-user-badge text-green-900"></i>
+                            <div class="border border-emerald-200 rounded-lg p-4 bg-gradient-to-br from-emerald-50 to-green-50 hover:from-emerald-100 hover:to-green-100 transition-colors">
+                                <p class="text-xs uppercase tracking-wider text-emerald-800 font-semibold flex items-center gap-2 mb-3">
+                                    <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-700 text-white text-xs">
+                                        <i class="bx bxs-user-badge text-xs"></i>
+                                    </span>
                                     College Dean
                                 </p>
 
@@ -45,56 +58,61 @@
                                         $dean = $deanAssignments->get($college->id)->first()->user;
                                     @endphp
 
-                                    <div class="flex justify-between items-start mt-2 gap-4">
-                                        <div>
-                                            <p class="text-lg font-bold text-green-900 leading-tight">
+                                    <div class="flex justify-between items-start gap-4">
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-semibold text-emerald-900 leading-tight truncate" title="{{ $dean->name }}">
                                                 {{ $dean->name }}
                                             </p>
-                                            <p class="text-sm text-green-800 mb-3">
+                                            <p class="text-xs text-emerald-700 mt-1.5 truncate" title="{{ $dean->email }}">
                                                 {{ $dean->email }}
                                             </p>
                                         </div>
 
-                                        <form action="{{ route('organizational.remove-dean') }}" method="POST"
-                                            class="shrink-0">
+                                        <form action="{{ route('organizational.remove-dean') }}" method="POST" class="shrink-0">
                                             @csrf
                                             <input type="hidden" name="college_id" value="{{ $college->id }}">
                                             <input type="hidden" name="user_id" value="{{ $dean->id }}">
 
                                             <button type="submit"
-                                                class="py-2 px-4 bg-red-600 text-white rounded-md font-semibold hover:bg-red-700 transition flex items-center gap-1">
-                                                <i class="bx bx-trash"></i>
+                                                class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition flex items-center gap-1 text-sm"
+                                                title="Remove dean">
+                                                <i class="bx bx-trash text-base"></i>
                                             </button>
                                         </form>
                                     </div>
                                 @else
-                                    <p class="text-sm text-green-700 mt-2">No dean assigned yet.</p>
+                                    <p class="text-xs text-emerald-700 mt-2">No dean assigned yet.</p>
                                 @endif
                             </div>
                         @else
-                            <div class="border border-dashed border-green-800 rounded-lg p-6 text-center bg-green-50">
-                                <p class="text-green-900 text-sm font-medium">
+                            <div class="border border-dashed border-emerald-300 rounded-lg p-5 text-center bg-emerald-50 hover:bg-green-50 transition-colors">
+                                <i class="bx bx-user text-2xl text-emerald-400 mb-2 block"></i>
+                                <p class="text-emerald-700 text-sm font-medium">
                                     No dean assigned
                                 </p>
                             </div>
                         @endif
 
                         {{-- ACTIONS --}}
-                        <div class="mt-auto space-y-2">
+                        <div class="mt-auto space-y-2.5 pt-3 border-t border-slate-100">
 
                             <x-button href="{{ route('organizational.departments.index', $college->id) }}"
-                                variant="secondary" class="w-full">
-                                <i class="bx bx-building-house mr-1"></i>
-                                Manage Departments ({{ $college->departments->count() }})
+                                variant="secondary" class="w-full justify-center text-sm font-medium">
+                                <i class="bx bx-building mr-2"></i>
+                                Manage Departments  ({{ $college->departments->count() }})
                             </x-button>
 
                             @if (!$deanAssignments->get($college->id)?->first() && $potentialDeans->count() > 0)
                                 <x-button
                                     onclick="document.getElementById('assignDeanModal-{{ $college->id }}').showModal()"
-                                    variant="secondary" class="w-full">
-                                    <i class="bx bx-user-plus mr-1"></i>
+                                    variant="secondary" class="w-full justify-center text-sm font-medium">
+                                    <i class="bx bx-user-plus mr-2"></i>
                                     Assign Dean
                                 </x-button>
+                            @elseif (!$deanAssignments->get($college->id)?->first())
+                                <div class="w-full p-3 text-center text-xs text-slate-500 bg-slate-100 rounded-lg font-medium">
+                                    No available users to assign
+                                </div>
                             @endif
 
                         </div>

@@ -1,9 +1,10 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="max-w-7xl mx-auto p-6 space-y-6">
 
-        <x-header-with-button title="My Syllabi" description="Manage and continue working on your course syllabi" />
+    <x-header-with-button title="My Syllabi" description="Manage and continue working on your course syllabi" />
+
+    <div class="max-w-7xl mx-auto p-6 space-y-6">
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
 
@@ -24,7 +25,7 @@
                 <div class="flex flex-col rounded-xl bg-white border shadow-sm hover:shadow-md transition overflow-hidden">
 
                     {{-- Header --}}
-                    <div class="px-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
+                    <div class="px-4 py-3 bg-linear-to-r from-blue-50 to-indigo-50 border-b">
                         <h3 class="font-semibold text-gray-900">
                             {{ $syllabus->course->course_code }}
                         </h3>
@@ -70,9 +71,9 @@
                             {{ $syllabus->status === 'draft' ? 'Continue' : 'View' }}
                         </a>
 
-                        <a href="#"
+                        <a href="{{ route('syllabus.preview', ['syllabus' => $syllabus->id]) }}"
                             class="flex-1 text-center bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-medium py-2 rounded transition">
-                            View
+                            Preview
                         </a>
                     </div>
 

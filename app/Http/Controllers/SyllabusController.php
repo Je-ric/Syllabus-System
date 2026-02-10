@@ -197,6 +197,26 @@ class SyllabusController extends Controller
         return view('Syllabus.show', compact('syllabus'));
     }
 
+    public function preview(Syllabus $syllabus)
+    {
+        $syllabus->load([
+            'course.program.peos',
+            'course.program.outcomes',
+            'course.program.departments.college.goals',
+        ]);
+
+        $program = $syllabus->course->program;
+        $department = $program->departments->first();
+        $college = $department?->college;
+
+        $collegeName = $college?->name ?? 'College';
+        $collegeGoals = $college?->goals?->sortBy('college_goals_code') ?? collect();
+        $peos = $program->peos?->sortBy('peo_code') ?? collect();
+        $pos = $program->outcomes?->sortBy('po_code') ?? collect();
+
+        return view('Syllabus.preview', compact('syllabus', 'collegeName', 'collegeGoals', 'peos', 'pos'));
+    }
+
 
     // public function destroy(Syllabus $syllabus)
     // {
