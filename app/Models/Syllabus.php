@@ -66,6 +66,11 @@ class Syllabus extends Model
         return $this->hasMany(CourseOutcome::class);
     }
 
+    public function weeks()
+    {
+        return $this->hasMany(SyllabusWeek::class);
+    }
+
     // Helper: Get LEC component
     public function getLecComponent()
     {
@@ -125,6 +130,7 @@ class Syllabus extends Model
             'course_components' => 'Course Components',
             'course_outcomes' => 'Course Outcomes',
             'co_po_mapping' => 'CO-PO Mapping',
+            'weekly_coverage' => 'Weekly Coverage',
             'review' => 'Review',
         ];
 

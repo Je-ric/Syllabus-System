@@ -6,6 +6,7 @@ use App\Livewire\Syllabus\Concerns\HandlesAcademicCalendar;
 use App\Livewire\Syllabus\Concerns\HandlesCoPoMapping;
 use App\Livewire\Syllabus\Concerns\HandlesComponents;
 use App\Livewire\Syllabus\Concerns\HandlesCourseOutcomes;
+use App\Livewire\Syllabus\Concerns\HandlesWeeklyCoverage;
 use App\Models\AcademicCalendar;
 use App\Models\Course;
 use App\Models\Syllabus;
@@ -18,6 +19,7 @@ class SyllabusWizard extends Component
     use HandlesComponents;
     use HandlesCourseOutcomes;
     use HandlesCoPoMapping;
+    use HandlesWeeklyCoverage;
 
     public ?Syllabus $syllabus = null;
     public ?Course $course = null;
@@ -49,6 +51,7 @@ class SyllabusWizard extends Component
             $this->currentStep = $this->syllabus->current_step;
             $this->loadExistingData();
             $this->prefillLecFromUser($user);
+            $this->refreshWeeklyCoverage();
         } elseif ($courseId) {
             // Creating new syllabus
             $this->course = Course::with('program.outcomes')->findOrFail($courseId);
@@ -64,6 +67,7 @@ class SyllabusWizard extends Component
 
             $this->currentStep = 'academic_calendar';
             $this->prefillLecFromUser($user);
+            $this->refreshWeeklyCoverage();
         } else {
             abort(404);
         }
@@ -208,6 +212,10 @@ class SyllabusWizard extends Component
                 $this->saveCourseOutcomes();
                 $saved = $this->saveCoPoMappings();
                 break;
+            case 'weekly_coverage':
+                $this->refreshWeeklyCoverage();
+                $saved = true;
+                break;
         }
 
         if ($saved) {
@@ -236,6 +244,21 @@ class SyllabusWizard extends Component
     public function render()
     {
         return view('livewire.syllabus.syllabus-wizard');
+    }
+
+    public function updatedCurrentStep($value): void
+    {
+        if ($value === 'weekly_coverage') {
+            $this->refreshWeeklyCoverage();
+        }
+    }
+
+    public function setStep(string $step): void
+    {
+        $this->currentStep = $step;
+        if ($this->syllabus) {
+            $this->syllabus->update(['current_step' => $step]);
+        }
     }
 
     private function markDraftSaved(): void

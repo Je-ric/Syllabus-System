@@ -60,6 +60,9 @@
         <div x-show="localStep === 'co_po_mapping'">
             @include('livewire.syllabus.steps.co-po-mapping')
         </div>
+        <div x-show="localStep === 'weekly_coverage'">
+            @include('livewire.syllabus.steps.weekly-coverage')
+        </div>
         <div x-show="localStep === 'review'">
             @include('livewire.syllabus.steps.review')
         </div>
@@ -158,7 +161,7 @@
                 const previous = this.localStep;
                 this.localStep = target;
                 this.$wire.saveStep(previous);
-                this.$wire.set('currentStep', target);
+                this.$wire.setStep(target);
             },
 
             goNext() {

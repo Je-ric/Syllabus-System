@@ -12,6 +12,7 @@ trait HandlesAcademicCalendar
     {
         if ($this->currentStep === 'academic_calendar' && $this->syllabus) {
             $this->saveCurrentStep();
+            $this->refreshWeeklyCoverage();
         }
     }
 }
