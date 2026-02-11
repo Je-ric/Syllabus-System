@@ -17,7 +17,7 @@
 
             {{-- College Selection --}}
             <form method="GET" action="{{ route('objective.index') }}" class="space-y-2">
-                <x-form.label for="collegeSelect">Select College</x-form.label>
+                <x-form.label for="collegeSelect" variant="title">Select College</x-form.label>
                 <x-form.select
                     id="collegeSelect"
                     name="college_id"
@@ -37,7 +37,7 @@
                     <form method="GET" action="{{ route('objective.index') }}" class="space-y-2">
                         <input type="hidden" name="college_id" value="{{ $selectedCollegeId }}">
 
-                        <x-form.label for="departmentSelect">Select Department</x-form.label>
+                        <x-form.label for="departmentSelect" variant="title">Select Department</x-form.label>
                         <x-form.select
                             id="departmentSelect"
                             name="department_id"
@@ -58,7 +58,11 @@
                             <input type="hidden" name="college_id" value="{{ $selectedCollegeId }}">
                             <input type="hidden" name="department_id" value="{{ $selectedDepartmentId }}">
 
-                            <x-form.label for="objectiveText">Add Objective</x-form.label>
+                            <x-form.label for="objectiveText"
+                                        variant="description"
+                                        isRequired>
+                                        Add Objective
+                            </x-form.label>
                             <x-form.textarea
                                 as="textarea"
                                 id="objectiveText"
@@ -70,9 +74,11 @@
                                 required>
                             </x-form.textarea>
 
-                            <x-button type="submit" variant="primary">
-                                <i class="bx bx-plus"></i> Add Objective
-                            </x-button>
+                            <div class="flex justify-end">
+                                <x-button type="submit" variant="primary">
+                                    <i class="bx bx-plus"></i> Add Objective
+                                </x-button>
+                            </div>
                         </form>
                     @else
                         <p class="text-slate-500 text-sm mt-2">Select a department to add objectives.</p>
@@ -118,13 +124,13 @@
                                         </td>
 
                                         <td class="border border-slate-200 p-2">
-                                            <div class="flex flex-wrap gap-2">
+                                            <div class="flex items-center gap-2">
                                             <x-button
                                                 type="button"
                                                 variant="table-edit"
                                                 class="bg-amber-500 hover:bg-amber-600 text-white shadow-sm"
                                                 onclick="document.getElementById('updateObjectiveModal_{{ $objective->id }}').showModal()">
-                                                <i class="bx bx-edit-alt"></i> Edit
+                                                <i class="bx bx-edit-alt"></i>
                                             </x-button>
 
                                             <x-button
@@ -132,7 +138,7 @@
                                                 variant="table-danger"
                                                 class="bg-rose-600 hover:bg-rose-700 text-white shadow-sm"
                                                 onclick="document.getElementById('deleteObjectiveModal_{{ $objective->id }}').showModal()">
-                                                <i class="bx bx-trash"></i> Delete
+                                                <i class="bx bx-trash"></i>
                                             </x-button>
                                             </div>
                                         </td>

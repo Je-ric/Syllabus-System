@@ -73,13 +73,22 @@ class AcademicCalendarController extends Controller
 
         // Check if any semester has events
         $hasEvents = $semesters->flatMap->events->isNotEmpty();
+        $firstSemester = $semesters->firstWhere('semester', '1st');
+        $secondSemester = $semesters->firstWhere('semester', '2nd');
 
         // Pass semesters collection and academic year
         return view('AcademicCalendar.form', [
             'semesters' => $semesters,
             'academicYear' => $academicYear,
             'isEdit' => true,
-            'hasEvents' => $hasEvents
+            'hasEvents' => $hasEvents,
+            'originalValues' => [
+                'academic_year' => $academicYear,
+                'start_date_1' => optional($firstSemester)->start_date,
+                'end_date_1' => optional($firstSemester)->end_date,
+                'start_date_2' => optional($secondSemester)->start_date,
+                'end_date_2' => optional($secondSemester)->end_date,
+            ],
         ]);
     }
 

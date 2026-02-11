@@ -11,22 +11,28 @@
         <x-modal.body>
             <div class="space-y-4">
                 <div>
-                    <label class="block font-medium text-sm text-gray-700 mb-2">Objective Code (Auto-generated)</label>
-                    <input
+                    <x-form.label>
+                        Objective Code (Auto-generated)
+                    </x-form.label>
+                    <x-form.input
                         type="text"
                         value="{{ $objective->dept_obj_code }}"
-                        class="w-full border rounded px-3 py-2 bg-gray-100 text-gray-500"
+                        {{-- class="w-full border rounded px-3 py-2 bg-gray-100 text-gray-500" --}}
                         disabled>
+                    </x-form.input>
                 </div>
 
                 <div>
-                    <label class="block font-medium text-sm text-gray-700 mb-2">Objective Description</label>
-                    <textarea
+                    <x-form.label>
+                        Objective Description
+                    </x-form.label>
+                    <x-form.textarea
                         name="objective_text"
                         rows="6"
                         placeholder="Objective description"
-                        class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                        required>{{ $objective->objective_text }}</textarea>
+                        {{-- class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500" --}}
+                        required>{{ $objective->objective_text }}
+                    </x-form.textarea>
                 </div>
             </div>
         </x-modal.body>

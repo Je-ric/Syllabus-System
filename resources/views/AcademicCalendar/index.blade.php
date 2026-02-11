@@ -11,29 +11,44 @@
         </x-header-with-button>
 
         @if ($calendars->isEmpty())
-            <p>No academic calendars yet.</p>
+            <div class="rounded-2xl border border-slate-200 bg-white/80 p-8 text-center text-slate-500">
+                No academic calendars yet.
+            </div>
         @else
-            <div class="space-y-4">
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
                 @foreach ($calendars->groupBy('academic_year') as $year => $semesters)
                     @php
                         $totalEvents = $semesters->flatMap->events->count();
                         $hasEvents = $totalEvents > 0;
+                        $firstSem = $semesters->firstWhere('semester', '1st');
+                        $secondSem = $semesters->firstWhere('semester', '2nd');
                     @endphp
-                    <div class="border border-slate-200/80 bg-white/90 p-5 rounded-2xl shadow-sm">
+                    <div class="border border-slate-200/80 bg-white/90 p-5 rounded-2xl shadow-sm flex flex-col">
                         <div class="flex flex-wrap items-center justify-between gap-3">
                             <h2 class="text-lg font-semibold text-slate-800">Academic Year: {{ $year }}</h2>
-                            <span class="text-xs uppercase tracking-[0.2em] text-slate-400">{{ $semesters->count() }} semester(s)</span>
+                            <span class="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+                                {{ $semesters->count() }} semester(s)
+                            </span>
                         </div>
-                        <ul class="mt-3 space-y-1 text-sm text-slate-700">
-                            @foreach ($semesters as $sem)
-                                <li>
-                                    <span class="font-semibold text-emerald-700">{{ $sem->semester }} Semester:</span>
-                                    {{ \Carbon\Carbon::parse($sem->start_date)->format('F j, Y') }}
+
+                        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                                <p class="text-xs uppercase tracking-[0.2em] text-slate-500 mb-1">1st Semester</p>
+                                <p class="font-semibold text-slate-700">
+                                    {{ $firstSem ? \Carbon\Carbon::parse($firstSem->start_date)->format('M d, Y') : '-' }}
                                     -
-                                    {{ \Carbon\Carbon::parse($sem->end_date)->format('F j, Y') }}
-                                </li>
-                            @endforeach
-                        </ul>
+                                    {{ $firstSem ? \Carbon\Carbon::parse($firstSem->end_date)->format('M d, Y') : '-' }}
+                                </p>
+                            </div>
+                            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                                <p class="text-xs uppercase tracking-[0.2em] text-slate-500 mb-1">2nd Semester</p>
+                                <p class="font-semibold text-slate-700">
+                                    {{ $secondSem ? \Carbon\Carbon::parse($secondSem->start_date)->format('M d, Y') : '-' }}
+                                    -
+                                    {{ $secondSem ? \Carbon\Carbon::parse($secondSem->end_date)->format('M d, Y') : '-' }}
+                                </p>
+                            </div>
+                        </div>
 
                         @if($hasEvents)
                             <div class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">
@@ -42,31 +57,35 @@
                             </div>
                         @endif
 
-                        <div class="mt-4 flex flex-wrap gap-2">
-                            <x-button href="{{ route('academic.calendar.events.index', $sem->academic_year) }}"
+                        <div class="mt-4 flex items-center gap-2">
+                            <x-button href="{{ route('academic.calendar.events.index', $year) }}"
                                 variant="table-manage">Manage Events</x-button>
 
                             @if($hasEvents)
-                                <x-button variant="table-edit" disabled class="opacity-50 cursor-not-allowed">
-                                    <i class="bx bx-edit"></i> Edit
+                                <x-button variant="table-edit" disabled class="opacity-50 cursor-not-allowed min-w-10 px-3" title="Update">
+                                    <i class="bx bx-edit text-lg"></i>
                                 </x-button>
                             @else
                                 <x-button href="{{ route('academic.calendars.edit', $year) }}"
-                                    variant="table-edit">
-                                    <i class="bx bx-edit"></i> Edit
+                                    variant="table-edit"
+                                    class="min-w-10 px-3"
+                                    title="Update">
+                                    <i class="bx bx-edit text-lg"></i>
                                 </x-button>
                             @endif
 
                             @if($hasEvents)
-                                <x-button type="button" variant="table-danger" disabled class="opacity-50 cursor-not-allowed">
-                                    <i class="bx bx-trash"></i> Delete
+                                <x-button type="button" variant="table-danger" disabled class="opacity-50 cursor-not-allowed min-w-10 px-3" title="Delete">
+                                    <i class="bx bx-trash text-lg"></i>
                                 </x-button>
                             @else
                                 <x-button
                                     type="button"
                                     variant="table-danger"
+                                    class="min-w-10 px-3"
+                                    title="Delete"
                                     onclick="document.getElementById('deleteAYModal_{{ str_replace('-', '_', $year) }}').showModal()">
-                                    <i class="bx bx-trash"></i> Delete
+                                    <i class="bx bx-trash text-lg"></i>
                                 </x-button>
                             @endif
                         </div>

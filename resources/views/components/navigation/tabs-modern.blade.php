@@ -2,6 +2,7 @@
     'tabs' => [],
     'defaultTab' => null,
     'preserveState' => true,
+    'stateKey' => null,
     'class' => '',
 ])
 
@@ -10,8 +11,23 @@
 @endphp
 
 <div x-data="{
-    activeTab: new URLSearchParams(window.location.search).get('tab') || '{{ $defaultTab }}',
+    tabIds: @js($tabIds),
+    storageKey: '{{ $stateKey ?? 'tabs:' . request()->path() }}',
+    activeTab: '{{ $defaultTab }}',
+    init() {
+        const urlTab = new URLSearchParams(window.location.search).get('tab');
+        const storedTab = localStorage.getItem(this.storageKey);
+        const preferredTab = urlTab || storedTab || '{{ $defaultTab }}';
+        this.activeTab = this.tabIds.includes(preferredTab) ? preferredTab : (this.tabIds[0] || '{{ $defaultTab }}');
+        @if($preserveState)
+            const url = new URL(window.location);
+            url.searchParams.set('tab', this.activeTab);
+            window.history.replaceState({}, '', url);
+            localStorage.setItem(this.storageKey, this.activeTab);
+        @endif
+    },
     setTab(tab) {
+        if (!this.tabIds.includes(tab)) return;
         this.activeTab = tab;
         @if($preserveState)
             const url = new URL(window.location);
@@ -19,6 +35,7 @@
             // Reset pagination when switching tabs
             url.searchParams.delete('page');
             window.history.pushState({}, '', url);
+            localStorage.setItem(this.storageKey, tab);
         @endif
     }
 }" class="{{ $class }}">

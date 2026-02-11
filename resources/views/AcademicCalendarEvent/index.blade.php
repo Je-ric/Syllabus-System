@@ -1,18 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto p-4 text-slate-800">
 
-    <div class="flex flex-wrap items-center justify-between gap-3">
-        <div>
-            <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Academic Records</p>
-            <h1 class="text-2xl font-semibold">Manage Events - {{ $academicYear }}</h1>
-        </div>
-
+    <x-header-with-button title="Manage Events - {{ $academicYear }}"
+                    description="Add, edit, and delete events for each semester.">
         <x-button href="{{ route('academic.calendars.index') }}" variant="cancel">
             <i class="bx bx-arrow-back"></i> Back
         </x-button>
-    </div>
+    </x-header-with-button>
 
     @include('includes.session-success')
 
@@ -23,7 +18,10 @@
         ])->toArray();
     @endphp
 
-    <x-navigation.tabs-modern :tabs="$tabs" :defaultTab="$tabs[0]['id'] ?? null">
+    <x-navigation.tabs-modern
+        :tabs="$tabs"
+        :defaultTab="$tabs[0]['id'] ?? null"
+        :stateKey="'academic-calendar-events:' . $academicYear">
         @foreach($semesters as $semester)
             @slot('slot_' . $semester->semester)
             <div class="grid grid-cols-2 gap-6">
@@ -119,5 +117,4 @@
             @endslot
         @endforeach
     </x-navigation.tabs-modern>
-</div>
 @endsection

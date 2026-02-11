@@ -35,8 +35,11 @@
                         @csrf
                         <input type="hidden" name="college_id" value="{{ $selectedCollegeId }}">
 
-                        <x-form.label for="goalText" variant="description" isRequired>Add New Goal</x-form.label>
-
+                        <x-form.label for="goalText"
+                                    variant="description"
+                                    isRequired>
+                                    Add New Goal
+                        </x-form.label>
                         <x-form.textarea
                             as="textarea"
                             id="goalText"
@@ -48,9 +51,11 @@
                             required>
                         </x-form.textarea>
 
-                        <x-button variant="primary" type="submit">
-                            <i class="bx bx-plus"></i> Add Goal
-                        </x-button>
+                        <div class="flex justify-end">
+                            <x-button variant="primary" type="submit">
+                                <i class="bx bx-plus"></i> Add Goal
+                            </x-button>
+                        </div>
                     </form>
                 @else
                     <p class="text-slate-500 text-sm mt-2">Please select a college to add goals.</p>
@@ -73,7 +78,7 @@
                             <table class="w-full border-collapse text-sm">
                                 <thead class="bg-emerald-50 text-emerald-800">
                                     <tr>
-                                        <th class="border border-slate-200 p-3 text-left text-xs uppercase tracking-[0.2em] font-semibold">Goal Code</th>
+                                        <th class="border border-slate-200 p-3 text-left text-xs uppercase tracking-[0.2em] font-semibold">Code</th>
                                         <th class="border border-slate-200 p-3 text-left text-xs uppercase tracking-[0.2em] font-semibold">Goal Description</th>
                                         <th class="border border-slate-200 p-3 text-left text-xs uppercase tracking-[0.2em] font-semibold">Actions</th>
                                     </tr>
@@ -88,20 +93,20 @@
                                                 {{ $goal->goal_text }}
                                             </td>
                                             <td class="border border-slate-200 p-3">
-                                                <div class="flex flex-wrap gap-2">
+                                                <div class="flex items-center gap-2">
                                                 <x-button
                                                     type="button"
                                                     variant="table-edit"
                                                     class="bg-amber-500 hover:bg-amber-600 text-white shadow-sm"
                                                     onclick="document.getElementById('updateGoalModal_{{ $goal->id }}').showModal()">
-                                                    <i class="bx bx-edit-alt"></i> Edit
+                                                    <i class="bx bx-edit-alt"></i>
                                                 </x-button>
                                                 <x-button
                                                     type="button"
                                                     variant="table-danger"
                                                     class="bg-rose-600 hover:bg-rose-700 text-white shadow-sm"
                                                     onclick="document.getElementById('deleteGoalModal_{{ $goal->id }}').showModal()">
-                                                    <i class="bx bx-trash"></i> Delete
+                                                    <i class="bx bx-trash"></i>
                                                 </x-button>
                                                 </div>
                                             </td>

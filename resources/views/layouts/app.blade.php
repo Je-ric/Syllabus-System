@@ -147,8 +147,8 @@
                                 User Management
                             </a>
                             <a href="{{ route('organizational.colleges.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2 text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 transition">
-                                <i class="bx bxs-buildings text-lg"></i>
-                                Organizational Hierarchy
+                                <i class="bx bx-sitemap text-lg"></i>
+                                University Faculties
                             </a>
                             <a href="{{ route('academic.structure.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2 text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 transition">
                                 <i class="bx bxs-layer text-lg"></i>
@@ -176,7 +176,7 @@
 
                         @if(auth()->user()->hasRole('admin') || auth()->user()->hasRole('chair'))
                             <a href="{{ route('objective.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2 text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 transition">
-                                <i class="bxf bx-scan-detail text-lg"></i>
+                                <i class="bx bxs-list-check text-lg"></i>
                                 Department Objectives
                             </a>
                             <a href="{{ route('programs.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2 text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 transition">

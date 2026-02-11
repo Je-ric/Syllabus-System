@@ -31,6 +31,34 @@
                 @method('PUT')
             @endif
 
+            @if(isset($isEdit))
+                <div class="col-span-2 rounded-2xl border border-amber-200 bg-amber-50/80 p-4 text-sm text-amber-900">
+                    <p class="text-xs uppercase tracking-[0.2em] font-semibold text-amber-700 mb-2">Current Values</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div>
+                            <p class="font-semibold">Academic Year</p>
+                            <p>{{ $originalValues['academic_year'] ?? '-' }}</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold">1st Semester</p>
+                            <p>
+                                {{ isset($originalValues['start_date_1']) ? \Carbon\Carbon::parse($originalValues['start_date_1'])->format('M d, Y') : '-' }}
+                                -
+                                {{ isset($originalValues['end_date_1']) ? \Carbon\Carbon::parse($originalValues['end_date_1'])->format('M d, Y') : '-' }}
+                            </p>
+                        </div>
+                        <div>
+                            <p class="font-semibold">2nd Semester</p>
+                            <p>
+                                {{ isset($originalValues['start_date_2']) ? \Carbon\Carbon::parse($originalValues['start_date_2'])->format('M d, Y') : '-' }}
+                                -
+                                {{ isset($originalValues['end_date_2']) ? \Carbon\Carbon::parse($originalValues['end_date_2'])->format('M d, Y') : '-' }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <div class="col-span-2 bg-white/90 border border-slate-200/80 rounded-2xl p-5 shadow-sm">
                 <x-form.label for="academic_year" isRequired="true" variant="title">
                     Academic Year (e.g., 2025-2026)
