@@ -31,6 +31,13 @@
                         class="w-full border rounded px-3 py-2"
                         required>
 
+                    <div class="flex items-center">
+                        <input id="remember" name="remember" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600">
+                        <label for="remember" class="ml-2 block text-sm text-gray-600">
+                            Remember me
+                        </label>
+                    </div>
+
                     <button class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
                         Login
                     </button>
@@ -138,4 +145,3 @@
     </div>
 </div>
 @endsection
-

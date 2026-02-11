@@ -72,35 +72,53 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        if (Auth::attempt($credentials)) {
+        if (Auth::attempt($credentials, $request->filled('remember'))) {
             $request->session()->regenerate();
 
+            /** @var \App\Models\User $user */
             $user = Auth::user();
 
             if (!$user->email_verified_at) {
                 Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
                 return back()->withErrors([
-                    'email' => 'Please verify your email first using OTP.',
-                ]);
+                    'email' => 'Please verify your email first. You can request a new OTP if needed.',
+                ])->withInput($request->only('email'));
             }
 
-            if ($user->account_status !== 'active') {
-                Auth::logout();
-                return back()->withErrors([
-                    'email' => 'Your account is not active. Await admin approval.',
-                ]);
+            switch ($user->account_status) {
+                case 'active':
+                    return redirect()->intended('dashboard');
+                case 'pending':
+                    return redirect()->route('waiting.approval');
+                case 'rejected':
+                    Auth::logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
+                    return back()->withErrors([
+                        'email' => 'Your account registration was rejected.',
+                    ])->withInput($request->only('email'));
+                case 'disabled':
+                    Auth::logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
+                    return back()->withErrors([
+                        'email' => 'Your account has been disabled by an administrator.',
+                    ])->withInput($request->only('email'));
+                default:
+                    Auth::logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
+                    return back()->withErrors([
+                        'email' => 'Your account is in an unrecognized state. Please contact support.',
+                    ])->withInput($request->only('email'));
             }
-
-            if ($user->email_verified_at && $user->account_status !== 'active') {
-                return redirect()->route('waiting.approval');
-            }
-
-            return redirect('/dashboard'); // change as needed
         }
 
         return back()->withErrors([
             'email' => 'Invalid credentials.',
-        ]);
+        ])->withInput($request->only('email'));
     }
 
 
@@ -112,6 +130,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('auth.show');
+        return redirect()->route('login');
     }
 }

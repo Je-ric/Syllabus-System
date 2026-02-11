@@ -28,7 +28,7 @@
             You will receive a notification once your account is activated.
         </p>
 
-        <a href="{{ route('auth.show') }}" class="inline-block bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">
+        <a href="{{ route('login') }}" class="inline-block bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">
             Back to Login
         </a>
     </div>

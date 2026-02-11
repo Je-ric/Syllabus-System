@@ -2,8 +2,9 @@
 
 @section('content')
 
-    <x-header-with-button title="CLSU College Dean Management" description="Manage institutional leadership and organizational structure across all colleges">
-        <x-button variant="cancel" href="{{ route('dashboard') }}">← Back to Dashboard</x-button>
+    <x-header-with-button
+            title="CLSU College Dean Management"
+            description="Manage institutional leadership and organizational structure across all colleges">
     </x-header-with-button>
 
     {{-- No Colleges --}}

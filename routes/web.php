@@ -49,7 +49,6 @@ Route::middleware(['auth'])->group(function () {
     })->name('dashboard');
 
     Route::middleware(['role:admin'])->group(function () {
-
         Route::get('/account-approval', [AccountApprovalController::class, 'index'])->name('accounts.approval');
         Route::post('/account-approval/approve', [AccountApprovalController::class, 'approve'])->name('account-approval.approve');
         Route::post('/account-approval/reject', [AccountApprovalController::class, 'reject'])->name('account-approval.reject');
@@ -89,7 +88,9 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::middleware(['role:admin,dean,chair'])->group(function () {
-        Route::get('/organizational/hierarchy', [OrganizationalHierarchyController::class, 'hierarchyView'])->name('organizational.hierarchy');    });
+        Route::get('/organizational/hierarchy', [OrganizationalHierarchyController::class, 'hierarchyView'])->name('organizational.hierarchy');    
+    
+    });
 
     Route::middleware(['role:admin,dean'])->group(function () {
         Route::get('/college/goals', [GoalController::class, 'goal_index'])->name('goal.index');

@@ -1,11 +1,6 @@
-<style>
-select option {
-    background: white;
-    color: #334155; /* slate-700 */
-}</style>
 
 @props([
-    'name',
+    'name' => null,
 ])
 
 <select

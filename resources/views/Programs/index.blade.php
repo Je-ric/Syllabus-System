@@ -7,8 +7,6 @@
         description="Program Educational Objectives (PEO) and Program Outcomes (PO)"
     />
 
-<div class="p-6 space-y-10 text-slate-800">
-
     <div class="mt-4">
         <livewire:programs.program-selector
             :program-id="optional($program)->id"
@@ -69,5 +67,5 @@
             <p>Select a program to manage its Program Educational Objectives (PEO) and Program Outcomes (PO).</p>
         </div>
     @endif
-</div>
+
 @endsection

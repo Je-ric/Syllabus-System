@@ -51,7 +51,7 @@
             </div>
 
             <div class="mt-6 text-center">
-                <a href="{{ route('auth.show') }}" class="text-sm text-gray-600 hover:text-gray-800">
+                <a href="{{ route('login') }}" class="text-sm text-gray-600 hover:text-gray-800">
                     ← Back to Login
                 </a>
             </div>

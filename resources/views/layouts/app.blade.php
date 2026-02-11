@@ -112,7 +112,7 @@
             <div class="px-6 py-6 border-b border-slate-200 bg-linear-to-br from-slate-900 to-slate-800 text-white">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-xs uppercase tracking-[0.3em] text-amber-400">Central Luzon <br> State University</p>
+                        <p class="text-xs uppercase tracking-[0.3em] font-semibold text-amber-400">Central Luzon <br> State University</p>
                         <h1 class="brand-title text-2xl mt-1 text-green-700">Syllabus System</h1>
                     </div>
                     <button id="sidebar-close" class="lg:hidden text-white/80 hover:text-white transition">
@@ -176,7 +176,7 @@
 
                         @if(auth()->user()->hasRole('admin') || auth()->user()->hasRole('chair'))
                             <a href="{{ route('objective.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2 text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 transition">
-                                <i class="bx bxs-list-check text-lg"></i>
+                                <i class="bx bx-list-check text-lg"></i>
                                 Department Objectives
                             </a>
                             <a href="{{ route('programs.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2 text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 transition">
@@ -227,17 +227,24 @@
                             <i class="bx bx-menu text-2xl"></i>
                         </button>
                         <div>
-                            {{-- <p class="text-xs uppercase tracking-[0.35em] text-slate-400">Dashboard</p>
-                            <h2 class="text-lg font-semibold text-white">Workspace</h2> --}}
                             <div>
-                                <p class="text-xs uppercase tracking-[0.3em] font-semibold text-amber-400">Central Luzon State University</p>
-                                <h1 class="brand-title text-2xl mt-1 text-white">Syllabus System</h1>
+                                <p class="text-xs uppercase tracking-[0.3em] font-semibold text-amber-400">Management System</p>
+                                <h1 class="brand-title text-2xl mt-1 text-white">Workspace</h1>
                             </div>
                         </div>
                     </div>
-                    <div class="flex items-center gap-3 text-slate-600 text-sm">
-                        <i class="bx bxs-bell text-lg"></i>
-                        <span class="hidden sm:inline">Stay on top of updates</span>
+                    <div class="flex items-center gap-3 rounded-2xl bg-white/10 backdrop-blur px-3 py-2 hover:bg-white/20 transition cursor-pointer">
+                        <div class="h-9 w-9 rounded-full bg-amber-400 text-white flex items-center justify-center">
+                            <i class="bx bxs-user text-lg"></i>
+                        </div>
+
+                        <div class="hidden sm:block text-sm leading-tight">
+                            <p class="font-semibold text-white">
+                                {{ Auth::user()->name ?? 'User' }}
+                            </p>
+                        </div>
+
+                        <i class="bx bx-chevron-down text-white/70"></i>
                     </div>
                 </div>
             </header>
