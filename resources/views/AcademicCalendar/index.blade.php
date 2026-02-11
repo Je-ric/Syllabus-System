@@ -1,12 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container mx-auto p-4">
-        <h1 class="text-2xl font-bold mb-4">Academic Calendars</h1>
 
-        <x-button href="{{ route('academic.calendars.create') }}" variant="add-button">
-            <i class="bx bx-plus"></i>Create New Calendar
-        </x-button>
+        <x-header-with-button title="Academic Calendars"
+                        description="Academic Year and Semester Dates">
+            <x-button variant="add-button"
+                    href="{{ route('academic.calendars.create') }}">
+                    <i class="bx bx-plus"></i>Create Academic Calendar
+            </x-button>
+        </x-header-with-button>
 
         @if ($calendars->isEmpty())
             <p>No academic calendars yet.</p>
@@ -17,12 +19,15 @@
                         $totalEvents = $semesters->flatMap->events->count();
                         $hasEvents = $totalEvents > 0;
                     @endphp
-                    <div class="border p-4 rounded">
-                        <h2 class="font-semibold">Academic Year: {{ $year }}</h2>
-                        <ul class="mt-2">
+                    <div class="border border-slate-200/80 bg-white/90 p-5 rounded-2xl shadow-sm">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <h2 class="text-lg font-semibold text-slate-800">Academic Year: {{ $year }}</h2>
+                            <span class="text-xs uppercase tracking-[0.2em] text-slate-400">{{ $semesters->count() }} semester(s)</span>
+                        </div>
+                        <ul class="mt-3 space-y-1 text-sm text-slate-700">
                             @foreach ($semesters as $sem)
                                 <li>
-                                    {{ $sem->semester }} Semester:
+                                    <span class="font-semibold text-emerald-700">{{ $sem->semester }} Semester:</span>
                                     {{ \Carbon\Carbon::parse($sem->start_date)->format('F j, Y') }}
                                     -
                                     {{ \Carbon\Carbon::parse($sem->end_date)->format('F j, Y') }}
@@ -31,13 +36,13 @@
                         </ul>
 
                         @if($hasEvents)
-                            <div class="mt-3 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-700">
+                            <div class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">
                                 <i class="bx bx-info-circle"></i>
                                 This academic year has <strong>{{ $totalEvents }} event(s)</strong>. Edit and delete are disabled while events exist. Delete the events from the Manage Events page if you need to modify this calendar.
                             </div>
                         @endif
 
-                        <div class="mt-3 space-x-2">
+                        <div class="mt-4 flex flex-wrap gap-2">
                             <x-button href="{{ route('academic.calendar.events.index', $sem->academic_year) }}"
                                 variant="table-manage">Manage Events</x-button>
 
@@ -73,6 +78,4 @@
                 @endforeach
             </div>
         @endif
-    </div>
 @endsection
-

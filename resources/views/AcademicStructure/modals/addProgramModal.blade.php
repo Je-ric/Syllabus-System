@@ -12,30 +12,29 @@
         <x-modal.body>
             <div class="space-y-3">
                 <div>
-                    <label class="block font-medium text-sm text-gray-700">Program Name</label>
-                    <input
-                        type="text"
-                        name="name"
-                        placeholder="Program Name"
-                        class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-green-500"
-                        required>
+                    <x-form.label>Program Name</x-form.label>
+                    <x-form.input type="text"
+                            name="name"
+                            placeholder="Program Name"
+                            required>
+                    </x-form.input>
                 </div>
 
                 <div>
-                    <label class="block font-medium text-sm text-gray-700">BOR Approval No</label>
-                    <input type="text"
+                    <x-form.label>BOR Approval No</x-form.label>
+                    <x-form.input type="text"
                             name="bor_approval_no"
                             placeholder="BOR Resolution No."
-                            class="w-full border rounded px-3 py-2"
                             required>
+                    </x-form.input>
                 </div>
 
                 <div>
-                    <label class="block font-medium text-sm text-gray-700">BOR Approval Date</label>
-                    <input type="date"
+                    <x-form.label>BOR Approval Date</x-form.label>
+                    <x-form.input type="date"
                             name="bor_approval_date"
-                            class="w-full border rounded px-3 py-2"
                             required>
+                    </x-form.input>
                 </div>
 
                 <p class="text-gray-500 text-sm">This program will be created under the selected department.</p>

@@ -11,7 +11,7 @@
         description="Program Educational Objectives (PEO) and Program Outcomes (PO)"
     />
 
-    <div class="border rounded-lg p-6 bg-gray-50">
+    <div class="border border-slate-200/80 rounded-2xl p-6 mb-6 bg-white/90 shadow-sm">
         <livewire:programs.program-selector
             :program-id="optional($program)?->id"
             redirect-route="courses.index"
@@ -21,8 +21,8 @@
 
 
 @if ($program)
-    <div class="mb-6 flex justify-between items-center">
-        <h2 class="text-xl font-semibold">Courses in {{ $program->name }}</h2>
+    <div class="mb-6 flex flex-wrap justify-between items-center gap-3">
+        <h2 class="text-lg font-semibold text-slate-800">Courses in <span class="text-emerald-700">{{ $program->name }}</span></h2>
         <x-button href="{{ route('courses.create', ['program_id' => $program->id]) }}"
             variant="add-button">
             <i class="bx bx-plus"></i> Add Course
@@ -30,17 +30,17 @@
     </div>
 
     {{-- PO's for Reference kumbaga HAHAHAHHA --}}
-    <div class="mb-4">
-        <h3 class="text-lg font-semibold mb-2">Program Outcomes Reference</h3>
+    <div class="mb-6">
+        <h3 class="text-sm uppercase tracking-[0.25em] text-slate-500 mb-3">Program Outcomes Reference</h3>
 
         <div class="flex flex-col gap-3">
             @foreach ($program->outcomes as $outcome)
-                <div class="bg-white border rounded-lg p-3 flex items-start gap-4">
-                    <div class="shrink-0">
+                <div class="bg-white/90 border border-slate-200 rounded-2xl p-4 flex items-start gap-4 shadow-sm">
+                    <div class="shrink-0 text-emerald-700 font-semibold">
                             {{ $outcome->po_code }}.
                     </div>
                     <div class="flex-1">
-                        <p class="text-sm text-gray-800">{{ $outcome->po_text }}</p>
+                        <p class="text-sm text-slate-700">{{ $outcome->po_text }}</p>
                     </div>
                 </div>
             @endforeach
@@ -50,30 +50,30 @@
     {{-- Group courses by year --}}
     @forelse ($groupedCourses as $year => $semesters)
         <div class="mb-8">
-            <h3 class="text-lg font-semibold mb-4 border-b border-gray-300 pb-2">Year {{ $year ?? 'N/A' }}</h3>
+            <h3 class="text-sm uppercase tracking-[0.25em] text-slate-500 mb-4 border-b border-slate-200 pb-2">Year {{ $year ?? 'N/A' }}</h3>
 
             {{-- Group courses by semester --}}
             @forelse ($semesters as $semester => $courses)
-                <div class="mb-6 bg-gray-50 border rounded-lg p-4">
-                    <h4 class="font-medium text-gray-700 mb-3 border-b pb-1">
+                <div class="mb-6 bg-white/90 border border-slate-200 rounded-2xl p-4 shadow-sm">
+                    <h4 class="font-medium text-slate-700 mb-3 border-b border-slate-200 pb-1">
                         Semester {{ $semester ?? 'N/A' }}
                     </h4>
 
                     <div class="overflow-x-auto">
-                        <table class="w-full text-sm border-collapse">
-                            <thead class="bg-gray-100 border-b">
+                        <table class="w-full text-sm border-collapse border border-slate-200">
+                            <thead class="bg-emerald-50 text-emerald-800 border-b border-slate-200">
                                 <tr>
-                                    <th class="px-4 py-2 text-left font-semibold">CODE</th>
-                                    <th class="px-4 py-2 text-left font-semibold">COURSE TITLE</th>
-                                    <th class="px-4 py-2 text-center font-semibold">UNITS</th>
+                                    <th class="px-4 py-2 text-left text-xs uppercase tracking-[0.2em] font-semibold">Code</th>
+                                    <th class="px-4 py-2 text-left text-xs uppercase tracking-[0.2em] font-semibold">Course Title</th>
+                                    <th class="px-4 py-2 text-center text-xs uppercase tracking-[0.2em] font-semibold">Units</th>
 
                                     @foreach ($program->outcomes as $outcome)
-                                        <th class="px-2 py-2 text-center font-semibold text-xs">
+                                        <th class="px-2 py-2 text-center text-xs uppercase tracking-[0.2em] font-semibold">
                                             {{ $outcome->po_code }}
                                         </th>
                                     @endforeach
 
-                                    <th class="px-4 py-2 text-center font-semibold">ACTIONS</th>
+                                    <th class="px-4 py-2 text-center text-xs uppercase tracking-[0.2em] font-semibold">Actions</th>
                                 </tr>
                             </thead>
 
@@ -82,10 +82,10 @@
                                     @php
                                         $modalCourses->push($course);
                                     @endphp
-                                    <tr class="hover:bg-gray-100 border-b">
-                                        <td class="px-4 py-2 font-mono font-semibold">{{ $course->course_code }}</td>
-                                        <td class="px-4 py-2">{{ $course->course_title }}</td>
-                                        <td class="px-4 py-2 text-center">{{ $course->credit_units }}</td>
+                                    <tr class="hover:bg-emerald-50/60 border-b border-slate-200 odd:bg-white even:bg-slate-50">
+                                        <td class="px-4 py-2 font-mono font-semibold text-slate-700">{{ $course->course_code }}</td>
+                                        <td class="px-4 py-2 text-slate-700">{{ $course->course_title }}</td>
+                                        <td class="px-4 py-2 text-center text-slate-700">{{ $course->credit_units }}</td>
 
                                         @foreach ($program->outcomes as $outcome)
                                             @php
@@ -98,13 +98,13 @@
                                         @endforeach
 
                                         <td class="px-4 py-2 text-center">
-                                            <div class="flex gap-2 justify-center">
+                                            <div class="flex gap-3 justify-center">
                                                 <a href="{{ route('courses.edit', $course->id) }}"
-                                                   class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                                   class="text-emerald-700 hover:text-emerald-900 text-sm font-medium">
                                                    <i class="bx bx-edit"></i> Edit
                                                 </a>
 
-                                                <button class="text-blue-600 hover:underline text-sm"
+                                                <button class="text-slate-600 hover:text-slate-900 text-sm"
                                                         onclick="document.getElementById('viewCourseModal_{{ $course->id }}').showModal()">
                                                     <i class="bx bx-show"></i> View
                                                 </button>
@@ -130,21 +130,21 @@
                     </div>
                 </div>
             @empty
-                <p class="text-gray-500 text-sm mt-2">No courses for this semester.</p>
+                <p class="text-slate-500 text-sm mt-2">No courses for this semester.</p>
             @endforelse
         </div>
     @empty
-        <div class="text-center py-8 bg-gray-50 rounded-lg">
-            <p class="text-gray-500 mb-3">No courses found for this program</p>
+        <div class="text-center py-8 bg-slate-50 rounded-2xl border border-slate-200">
+            <p class="text-slate-500 mb-3">No courses found for this program</p>
             <a href="{{ route('courses.create', ['program_id' => $program->id]) }}"
-               class="text-blue-600 hover:underline">
+               class="text-emerald-700 hover:underline">
                Create the first course
             </a>
         </div>
     @endforelse
 @else
-    <div class="text-center py-12 bg-gray-50 rounded-lg">
-        <p class="text-gray-500">Select a program above to view and manage courses</p>
+    <div class="text-center py-12 bg-slate-50 rounded-2xl border border-slate-200">
+        <p class="text-slate-500">Select a program above to view and manage courses</p>
     </div>
 @endif
 

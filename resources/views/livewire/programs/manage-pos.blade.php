@@ -1,4 +1,4 @@
-<div x-data="posManager(@entangle('pos'), @entangle('peos'), @entangle('mapping'))" class="space-y-4">
+<div x-data="posManager(@entangle('pos'), @entangle('peos'), @entangle('mapping'))" class="space-y-4 text-slate-800">
 
     {{-- Notification stack --}}
     {{-- If both are visible → they stack neatly
@@ -8,14 +8,14 @@
 
             {{-- Loading indicator --}}
             <div x-show="isSaving"
-                class="p-2 rounded border border-yellow-300 bg-yellow-50 text-yellow-800 text-sm font-medium animate-pulse">
-                <i class='bx bx-loader bx-spin mr-2'></i> Saving POs...
+                class="px-4 py-2 rounded-full border border-amber-200 bg-amber-50 text-amber-900 text-xs font-semibold tracking-wide shadow-sm animate-pulse">
+                <i class='bx bx-loader-alt bx-spin mr-2'></i> Saving POs...
             </div>
 
             {{-- Flash message --}}
             <template x-if="flashMessage">
                 <div
-                    class="p-2 rounded border border-green-300 bg-green-50 text-green-800 text-sm font-medium"
+                    class="px-4 py-2 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-900 text-xs font-semibold tracking-wide shadow-sm"
                     x-text="flashMessage">
                 </div>
             </template>
@@ -25,11 +25,11 @@
 
     {{-- PO Inputs with PEO checkboxes --}}
     <template x-for="(po, index) in pos" :key="index">
-        <div class="space-y-2 p-3 border border-gray-200 rounded-lg">
+        <div class="space-y-2 rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm">
 
             {{-- PO Input Row --}}
             <div class="flex items-center gap-3">
-                <span class="w-16 text-center font-semibold text-gray-700"
+                <span class="w-16 text-center text-xs uppercase tracking-[0.2em] text-slate-500"
                     {{-- x-text="peo.peo_code + index" --}}
                     x-text="'PO' + (index + 1)">
                 </span>
@@ -50,7 +50,7 @@
                         @method('DELETE')
 
                         <button type="submit"
-                            class="p-2 text-red-600 hover:text-red-800 rounded-full hover:bg-red-100 transition"
+                            class="p-2 text-rose-600 hover:text-rose-800 rounded-full hover:bg-rose-100 transition"
                             title="Delete PO">
                             <i class='bx bx-trash'></i>
                         </button>
@@ -59,7 +59,7 @@
 
                 <template x-if="!po.id">
                     <button @click="pos.splice(index, 1)" type="button"
-                        class="p-2 text-red-600 hover:text-red-800 rounded-full hover:bg-red-100 transition"
+                        class="p-2 text-rose-600 hover:text-rose-800 rounded-full hover:bg-rose-100 transition"
                         title="Remove unsaved PO">
                         <i class='bx bx-trash'></i>
                     </button>
@@ -69,13 +69,13 @@
 
             {{-- PEO Mapping Checkboxes --}}
             <div class="pl-9">
-                <div class="text-xs text-gray-600 mb-1">Map to PEOs:</div>
+                <div class="text-xs uppercase tracking-[0.2em] text-slate-500 mb-2">Map to PEOs</div>
                 <div class="flex flex-wrap gap-3">
                     <template x-for="peo in peos" :key="peo.id">
-                        <label class="inline-flex items-center gap-2 text-sm">
+                        <label class="inline-flex items-center gap-2 text-sm text-slate-700">
                             <input type="checkbox" :checked="isPoMappedToPeo(po.id, peo.id)"
                                 @change="toggleMapping(po.id, peo.id, $event.target.checked)"
-                                class="rounded border-gray-300">
+                                class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-200">
                             <span x-text="peo.peo_code"></span>
                         </label>
                     </template>
@@ -89,11 +89,11 @@
         <button @click="addPo()" type="button"
             class="
                 w-full
-                border-2 border-dashed border-green-300
-                rounded-lg p-4
-                text-sm font-medium text-green-700
-                hover:border-green-600
-                hover:bg-green-50
+                border-2 border-dashed border-emerald-300
+                rounded-2xl p-4
+                text-sm font-semibold text-emerald-700
+                hover:border-emerald-500
+                hover:bg-emerald-50
                 transition
                 flex items-center justify-center gap-2
             ">
@@ -101,7 +101,7 @@
         </button>
 
         <button @click="savePos()" type="button" :disabled="isSaving"
-            class="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+            class="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition text-sm font-semibold shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
             <i class='bx bx-save'></i> Save All
         </button>
     </div>

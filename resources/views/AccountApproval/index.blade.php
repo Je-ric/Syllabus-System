@@ -7,31 +7,34 @@
         <x-button variant="cancel" href="{{ route('dashboard') }}">Back</x-button>
     </x-header-with-button>
 
-    <div class="overflow-x-auto bg-white rounded-lg shadow-sm ring-1 ring-slate-200">
-        <table class="min-w-full border-collapse">
-            <thead class="sticky top-0 z-10 bg-slate-50">
-                <tr class="text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
-                    <th class="border px-3 py-2">ID</th>
-                    <th class="border px-3 py-2">Name & Email</th>
-                    <th class="border px-3 py-2">Phone Number</th>
-                    <th class="border px-3 py-2">Office</th>
-                    <th class="border px-3 py-2">Account Status</th>
-                    <th class="border px-3 py-2">Role</th>
-                    <th class="border px-3 py-2">Actions</th>
+    <div class="overflow-x-auto rounded-2xl border border-slate-200/80 bg-white/90 shadow-sm">
+        <table class="min-w-full border-collapse text-sm">
+            <thead class="sticky top-0 z-10 bg-emerald-50 text-emerald-800">
+                <tr class="text-left text-xs font-semibold uppercase tracking-[0.2em]">
+                    <th class="border border-slate-200 px-4 py-3">ID</th>
+                    <th class="border border-slate-200 px-4 py-3">Name & Email</th>
+                    <th class="border border-slate-200 px-4 py-3">Phone Number</th>
+                    <th class="border border-slate-200 px-4 py-3">Office</th>
+                    <th class="border border-slate-200 px-4 py-3">Account Status</th>
+                    <th class="border border-slate-200 px-4 py-3">Role</th>
+                    <th class="border border-slate-200 px-4 py-3">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($users as $user)
-                    <tr class="hover:bg-slate-50 transition-colors group">
-                        <td class="px-4 py-3 border border-slate-200 align-middle">{{ $loop->iteration }}</td>
-                        <td class="px-4 py-3 border border-slate-200 font-medium text-slate-800">{{ $user->name }}<br><span class="text-sm text-slate-500">{{ $user->email }}</span></td>
-                        <td class="px-4 py-3 border border-slate-200 text-slate-600 text-sm">{{ $user->phone_number }}</td>
-                        <td class="px-4 py-3 border border-slate-200 text-slate-600 text-sm">{{ $user->office }}</td>
+                    <tr class="odd:bg-white even:bg-slate-50 hover:bg-emerald-50/60 transition-colors group">
+                        <td class="px-4 py-3 border border-slate-200 align-middle font-medium text-slate-700">{{ $loop->iteration }}</td>
+                        <td class="px-4 py-3 border border-slate-200 text-slate-800">
+                            <div class="font-semibold">{{ $user->name }}</div>
+                            <div class="text-xs text-slate-500">{{ $user->email }}</div>
+                        </td>
+                        <td class="px-4 py-3 border border-slate-200 text-slate-600">{{ $user->phone_number }}</td>
+                        <td class="px-4 py-3 border border-slate-200 text-slate-600">{{ $user->office }}</td>
                         <td class="px-4 py-3 border border-slate-200 align-middle">
                             <x-feedback-status.status-indicator status="{{ $user->account_status }}" />
                         </td>
 
-                        <td class="border px-3 py-2">
+                        <td class="border border-slate-200 px-4 py-3">
                             <div class="flex flex-wrap gap-1">
                                 @forelse ($user->roles as $role)
                                     <x-feedback-status.status-indicator
@@ -46,7 +49,8 @@
                                 @endforelse
                             </div>
                         </td>
-                        <td class="px-4 py-3 border-b border-slate-200 align-middle space-x-2">
+                        <td class="px-4 py-3 border border-slate-200 align-middle">
+                            <div class="flex flex-wrap gap-2">
                             @if ($user->account_status === 'pending')
                                 <x-button variant='table-confirm'
                                         onclick="document.getElementById('approveModal-{{ $user->id }}').showModal();">
@@ -82,6 +86,7 @@
                             @endif
 
                             {{-- <x-button>Edit </x-button> --}}
+                            </div>
                         </td>
                     </tr>
 

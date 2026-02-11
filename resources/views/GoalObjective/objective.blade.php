@@ -6,31 +6,29 @@
         title="Department Objective Management"
         description="Set and manage objectives"
     />
-<div class="clsu-shell p-6 max-w-7xl mx-auto space-y-6">
+<div class="mx-auto space-y-6 text-slate-800">
 
     @include('includes.error-lists')
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         {{-- Add Objective Section --}}
-        <div class="clsu-card space-y-4">
+        <div class="clsu-card space-y-4 rounded-2xl border border-slate-200/80 bg-white/90 p-6 shadow-sm">
 
             {{-- College Selection --}}
             <form method="GET" action="{{ route('objective.index') }}" class="space-y-2">
-                <x-form.label for="collegeSelect" variant="title">Select College</x-form.label>
-                <select
+                <x-form.label for="collegeSelect">Select College</x-form.label>
+                <x-form.select
                     id="collegeSelect"
                     name="college_id"
-                    onchange="this.form.submit()"
-                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-800 focus:outline-none focus:ring-1 focus:ring-clsu-gold focus:border-clsu-gold transition"
-                >
+                    onchange="this.form.submit()">
                     <option value="">-- Choose College --</option>
                     @foreach ($colleges as $college)
                         <option value="{{ $college->id }}" @selected($selectedCollegeId == $college->id)>
                             {{ $college->name }}
                         </option>
                     @endforeach
-                </select>
+                </x-form.select>
             </form>
 
             {{-- Department Selection --}}
@@ -39,20 +37,18 @@
                     <form method="GET" action="{{ route('objective.index') }}" class="space-y-2">
                         <input type="hidden" name="college_id" value="{{ $selectedCollegeId }}">
 
-                        <x-form.label for="departmentSelect" variant="title">Select Department</x-form.label>
-                        <select
+                        <x-form.label for="departmentSelect">Select Department</x-form.label>
+                        <x-form.select
                             id="departmentSelect"
                             name="department_id"
-                            onchange="this.form.submit()"
-                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-800 focus:outline-none focus:ring-1 focus:ring-clsu-gold focus:border-clsu-gold transition"
-                        >
+                            onchange="this.form.submit()">
                             <option value="">-- Choose Department --</option>
                             @foreach ($departments as $dept)
                                 <option value="{{ $dept->id }}" @selected($selectedDepartmentId == $dept->id)>
                                     {{ $dept->name }}
                                 </option>
                             @endforeach
-                        </select>
+                        </x-form.select>
                     </form>
 
                     {{-- Add Objective Form --}}
@@ -62,7 +58,7 @@
                             <input type="hidden" name="college_id" value="{{ $selectedCollegeId }}">
                             <input type="hidden" name="department_id" value="{{ $selectedDepartmentId }}">
 
-                            <x-form.label for="objectiveText" variant="description" isRequired>Add Objective</x-form.label>
+                            <x-form.label for="objectiveText">Add Objective</x-form.label>
                             <x-form.textarea
                                 as="textarea"
                                 id="objectiveText"
@@ -74,58 +70,59 @@
                                 required>
                             </x-form.textarea>
 
-                            <x-button type="submit" variant="primary" class="flex items-center gap-1 bg-clsu-green hover:bg-clsu-green-dark text-white">
+                            <x-button type="submit" variant="primary">
                                 <i class="bx bx-plus"></i> Add Objective
                             </x-button>
                         </form>
                     @else
-                        <p class="text-gray-600 text-sm mt-2">Select a department to add objectives.</p>
+                        <p class="text-slate-500 text-sm mt-2">Select a department to add objectives.</p>
                     @endif
                 @else
-                    <p class="text-gray-600 text-sm">No departments found for this college.</p>
+                    <p class="text-slate-500 text-sm">No departments found for this college.</p>
                 @endif
             @else
-                <p class="text-gray-600 text-sm">Select a college to view departments.</p>
+                <p class="text-slate-500 text-sm">Select a college to view departments.</p>
             @endif
         </div>
 
         {{-- Objectives List --}}
-        <div class="clsu-card">
-            <div class="flex items-center gap-2 mb-4 font-bold text-lg ">
-                <i class="bx bx-target-lock text-2xl text-clsu-green"></i>
-                <h2 class="text-clsu-green">Objectives</h2>
+        <div class="clsu-card rounded-2xl border border-slate-200/80 bg-white/90 p-6 shadow-sm">
+            <div class="flex flex-wrap items-center gap-2 mb-4 font-semibold text-lg">
+                <i class="bx bx-target-lock text-2xl text-emerald-600"></i>
+                <h2 class="text-slate-800">Objectives</h2>
                 @if($selectedDepartmentId)
-                    <span class="text-md text-gray-600 underline">of {{ $departments->firstWhere('id', $selectedDepartmentId)->name }}</span>
+                    <span class="text-sm text-slate-500">of {{ $departments->firstWhere('id', $selectedDepartmentId)->name }}</span>
                 @endif
             </div>
 
             @if($selectedCollegeId)
                 @if($objectives->count())
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto rounded-xl border border-slate-200">
                         <table class="w-full border-collapse text-sm">
-                            <thead class="bg-clsu-gold/20 text-clsu-green">
+                            <thead class="bg-emerald-50 text-emerald-800">
                                 <tr>
-                                    <th class="border p-3 text-left">Code</th>
-                                    <th class="border p-3 text-left">Objective</th>
-                                    <th class="border p-3 text-left">Actions</th>
+                                    <th class="border border-slate-200 p-3 text-left text-xs uppercase tracking-[0.2em] font-semibold">Code</th>
+                                    <th class="border border-slate-200 p-3 text-left text-xs uppercase tracking-[0.2em] font-semibold">Objective</th>
+                                    <th class="border border-slate-200 p-3 text-left text-xs uppercase tracking-[0.2em] font-semibold">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($objectives as $objective)
-                                    <tr class="odd:bg-white even:bg-gray-50 hover:bg-clsu-gold/10 transition">
-                                        <td class="border p-2 align-top font-mono text-clsu-green">
+                                    <tr class="odd:bg-white even:bg-slate-50 hover:bg-emerald-50/60 transition">
+                                        <td class="border border-slate-200 p-2 align-top font-mono text-emerald-700">
                                             {{ $objective->dept_obj_code }}
                                         </td>
 
-                                        <td class="border p-2 text-gray-800">
+                                        <td class="border border-slate-200 p-2 text-slate-700">
                                             {{ $objective->objective_text }}
                                         </td>
 
-                                        <td class="border p-2 flex gap-2">
+                                        <td class="border border-slate-200 p-2">
+                                            <div class="flex flex-wrap gap-2">
                                             <x-button
                                                 type="button"
                                                 variant="table-edit"
-                                                class="bg-clsu-gold hover:bg-clsu-gold-dark text-white"
+                                                class="bg-amber-500 hover:bg-amber-600 text-white shadow-sm"
                                                 onclick="document.getElementById('updateObjectiveModal_{{ $objective->id }}').showModal()">
                                                 <i class="bx bx-edit-alt"></i> Edit
                                             </x-button>
@@ -133,10 +130,11 @@
                                             <x-button
                                                 type="button"
                                                 variant="table-danger"
-                                                class="bg-red-500 hover:bg-red-600 text-white"
+                                                class="bg-rose-600 hover:bg-rose-700 text-white shadow-sm"
                                                 onclick="document.getElementById('deleteObjectiveModal_{{ $objective->id }}').showModal()">
                                                 <i class="bx bx-trash"></i> Delete
                                             </x-button>
+                                            </div>
                                         </td>
                                     </tr>
 
@@ -148,10 +146,10 @@
                         </table>
                     </div>
                 @else
-                    <p class="text-gray-600">No objectives found for this college.</p>
+                    <p class="text-slate-500">No objectives found for this college.</p>
                 @endif
             @else
-                <p class="text-gray-600">Select a college to view its objectives.</p>
+                <p class="text-slate-500">Select a college to view its objectives.</p>
             @endif
         </div>
 

@@ -9,15 +9,9 @@
     {{ $attributes->merge([
         'class' => '
             w-full
-            border border-green-300
-            rounded-md
-            px-4 py-2
-            text-sm text-gray-800
-            bg-green-50/40
-            focus:outline-none
-            focus:ring-1 focus:ring-green-600
-            focus:border-green-600
-            transition
+            rounded-xl border border-slate-300 bg-white/90
+            px-4 py-2.5 text-sm text-slate-700 shadow-sm
+            focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition
         '
     ]) }}
 ></textarea>

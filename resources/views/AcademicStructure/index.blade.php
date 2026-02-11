@@ -1,7 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="p-6 space-y-4">
 
     <x-header-with-button
         title="Academic Structure Management"
@@ -14,12 +13,12 @@
 
     <div id="collegeAccordions" class="space-y-3">
         @foreach ($colleges as $college)
-            <details class="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+            <details class="bg-white/90 border border-slate-200/80 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
                 <summary class="flex items-center justify-between p-4 cursor-pointer select-none">
                     <div class="flex items-center gap-3 flex-1">
-                        <i class="bx bx-chevron-down text-xl text-gray-500 chevron-icon"></i>
-                        <i class="bx bxs-school text-2xl text-green-500"></i>
-                        <span class="font-semibold text-lg text-gray-800">{{ $college->name }}</span>
+                        <i class="bx bx-chevron-down text-xl text-slate-400 chevron-icon"></i>
+                        <i class="bx bxs-school text-2xl text-emerald-600"></i>
+                        <span class="font-semibold text-lg text-slate-800">{{ $college->name }}</span>
                     </div>
                     <x-button type="button" variant="secondary" onclick="event.stopPropagation(); toggle('editCollege{{ $college->id }}')">
                         <i class="bx bx-edit"></i>
@@ -28,7 +27,7 @@
 
                 <div class="px-4 pb-4 space-y-4">
                     {{-- EDIT COLLEGE --}}
-                    <div id="editCollege{{ $college->id }}" class="hidden bg-green-50 border border-green-200 p-4 rounded-lg">
+                    <div id="editCollege{{ $college->id }}" class="hidden bg-emerald-50 border border-emerald-200 p-4 rounded-xl">
                         <form method="POST" action="{{ route('college.update', $college) }}">
                             @csrf
                             @method('PUT')
@@ -52,12 +51,12 @@
                     {{-- DEPARTMENTS --}}
                     <div class="ml-8 space-y-3">
                         @foreach ($departments->where('college_id', $college->id) as $dept)
-                            <details class="bg-gray-50 border border-gray-200 rounded-lg shadow-sm">
+                            <details class="bg-slate-50 border border-slate-200 rounded-xl shadow-sm">
                                 <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
                                     <div class="flex items-center gap-3 flex-1">
-                                        <i class="bx bx-chevron-down text-lg text-gray-500 chevron-icon"></i>
-                                        <i class="bx bx-building text-xl text-red-500"></i>
-                                        <span class="font-medium text-gray-800">{{ $dept->name }}</span>
+                                        <i class="bx bx-chevron-down text-lg text-slate-400 chevron-icon"></i>
+                                        <i class="bx bx-building text-xl text-rose-600"></i>
+                                        <span class="font-medium text-slate-800">{{ $dept->name }}</span>
                                     </div>
                                     <x-button type="button" variant="secondary" onclick="event.stopPropagation(); toggle('editDept{{ $dept->id }}')">
                                         <i class="bx bx-edit"></i>
@@ -66,7 +65,7 @@
 
                                 <div class="px-3 pb-3 space-y-4">
                                     {{-- EDIT DEPARTMENT --}}
-                                    <div id="editDept{{ $dept->id }}" class="hidden bg-red-50 border border-red-200 p-4 rounded-lg">
+                                    <div id="editDept{{ $dept->id }}" class="hidden bg-rose-50 border border-rose-200 p-4 rounded-xl">
                                         <form method="POST" action="{{ route('department.update', $dept) }}">
                                             @csrf
                                             @method('PUT')
@@ -91,13 +90,13 @@
                                     {{-- PROGRAMS --}}
                                     <div class="ml-8 space-y-2">
                                         @foreach ($dept->programs as $program)
-                                            <div class="bg-white border border-gray-200 rounded-lg shadow-sm">
+                                            <div class="bg-white/95 border border-slate-200 rounded-xl shadow-sm">
                                                 <div class="flex items-start justify-between p-3">
                                                     <div class="flex gap-3 flex-1">
-                                                        <i class="bx bx-book-open text-lg text-blue-500 mt-1"></i>
+                                                        <i class="bx bx-book-open text-lg text-sky-600 mt-1"></i>
                                                         <div class="flex-1">
-                                                            <div class="font-medium text-gray-800">{{ $program->name }}</div>
-                                                            <div class="text-sm text-gray-600 mt-1">
+                                                            <div class="font-medium text-slate-800">{{ $program->name }}</div>
+                                                            <div class="text-sm text-slate-600 mt-1">
                                                                 <span class="inline-block mr-3"><b>BOR No: </b>{{ $program->bor_approval_no }}</span><br>
                                                                 <span class="inline-block"><b>BOR Date Approval: </b>{{ \Carbon\Carbon::parse($program->bor_approval_date)->format('F d, Y') }}</span>
                                                             </div>
@@ -110,7 +109,7 @@
                                                 </div>
 
                                                 {{-- EDIT PROGRAM --}}
-                                                <div id="editProgram{{ $program->id }}" class="hidden border-t border-gray-200 bg-blue-50 p-4">
+                                                <div id="editProgram{{ $program->id }}" class="hidden border-t border-slate-200 bg-sky-50 p-4">
                                                     <form method="POST" action="{{ route('program.update', $program) }}">
                                                         @csrf
                                                         @method('PUT')
@@ -147,7 +146,6 @@
         @endforeach
     </div>
 
-</div>
 
 @include('AcademicStructure.modals.addCollegeModal')
 @include('AcademicStructure.modals.addDepartmentModal')

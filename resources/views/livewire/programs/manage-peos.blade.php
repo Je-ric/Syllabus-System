@@ -1,4 +1,4 @@
-<div x-data="peosManager(@entangle('peos'))" class="space-y-4">
+<div x-data="peosManager(@entangle('peos'))" class="space-y-4 text-slate-800">
 
     {{-- Notification stack --}}
     {{-- If both are visible → they stack neatly
@@ -8,14 +8,14 @@
 
             {{-- Loading indicator --}}
             <div x-show="isSaving"
-                class="p-2 rounded border border-yellow-300 bg-yellow-50 text-yellow-800 text-sm font-medium animate-pulse">
-                <i class='bx bx-loader bx-spin mr-2'></i> Saving PEOs...
+                class="px-4 py-2 rounded-full border border-amber-200 bg-amber-50 text-amber-900 text-xs font-semibold tracking-wide shadow-sm animate-pulse">
+                <i class='bx bx-loader-alt bx-spin mr-2'></i> Saving PEOs...
             </div>
 
             {{-- Flash message --}}
             <template x-if="flashMessage">
                 <div
-                    class="p-2 rounded border border-green-300 bg-green-50 text-green-800 text-sm font-medium"
+                    class="px-4 py-2 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-900 text-xs font-semibold tracking-wide shadow-sm"
                     x-text="flashMessage">
                 </div>
             </template>
@@ -25,8 +25,8 @@
 
     <template x-for="(peo, index) in peos"
             :key="peo.id ?? index">
-        <div class="flex items-center gap-3 p-2 border border-gray-200 rounded-lg">
-            <span class="w-16 text-center font-semibold text-gray-700"
+        <div class="flex items-center gap-3 p-3 border border-slate-200 rounded-2xl bg-white/90 shadow-sm">
+            <span class="w-16 text-center text-xs uppercase tracking-[0.2em] text-slate-500"
                 {{-- x-text="peo.peo_code + index" --}}
                 x-text="'PEO' + (index + 1)">
             </span>
@@ -47,13 +47,13 @@
                 @method('DELETE')
 
                 <button type="submit"
-                    class="p-2 text-red-600 hover:text-red-800 rounded-full hover:bg-red-100 transition">
+                    class="p-2 text-rose-600 hover:text-rose-800 rounded-full hover:bg-rose-100 transition">
                     <i class='bx bx-trash'></i>
                 </button>
             </form>
 
             <button x-show="!peo.id" @click="peos.splice(index, 1)" type="button"
-                class="p-2 text-red-600 hover:text-red-800 rounded-full hover:bg-red-100 transition">
+                class="p-2 text-rose-600 hover:text-rose-800 rounded-full hover:bg-rose-100 transition">
                 <i class='bx bx-trash'></i>
             </button>
         </div>
@@ -64,11 +64,11 @@
         <button @click="addPeo()" type="button"
             class="
                     w-full
-                    border-2 border-dashed border-green-300
-                    rounded-lg p-4
-                    text-sm font-medium text-green-700
-                    hover:border-green-600
-                    hover:bg-green-50
+                    border-2 border-dashed border-emerald-300
+                    rounded-2xl p-4
+                    text-sm font-semibold text-emerald-700
+                    hover:border-emerald-500
+                    hover:bg-emerald-50
                     transition
                     flex items-center justify-center gap-2
                 ">
@@ -76,7 +76,7 @@
         </button>
 
         <button @click="savePeos()" type="button" :disabled="isSaving"
-            class="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+            class="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition text-sm font-semibold shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
             <i class='bx bx-save'></i> Save All
         </button>
     </div>

@@ -1,12 +1,12 @@
-<x-modal.dialog id="confirmCourseModal" maxWidth="max-w-lg" width="w-11/12">
+<x-modal.dialog id="confirmEditCourseModal" maxWidth="max-w-lg" width="w-11/12">
     <x-modal.header>
-        Confirm Course Creation
-        <x-modal.x-button modalId="confirmCourseModal" />
+        Confirm Course Edit
+        <x-modal.x-button modalId="confirmEditCourseModal" />
     </x-modal.header>
 
     <x-modal.body>
         <div class="space-y-4">
-            <p class="text-gray-700 font-medium">Please review the course details and the Program Outcomes IED levels before creating:</p>
+            <p class="text-gray-700 font-medium">Please review the course details and the Program Outcomes IED levels before editing:</p>
             <div class="bg-gray-50 p-4 rounded border border-gray-200 space-y-3">
                 <div>
                     <p class="font-semibold text-sm text-gray-600">Course Name:</p>
@@ -15,7 +15,7 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <p class="font-semibold text-sm text-gray-600">Course Code:</p>
-                        <p class="text-sm" id="confirm-course-code">-</p>
+                        <p class="text-sm" id="confirm-course-code">-</p>Course
                     </div>
                 </div>
             </div>
@@ -25,7 +25,7 @@
 
     <x-modal.footer>
         <div class="w-full flex gap-2 justify-end">
-            <x-modal.close-button modalId="confirmCourseModal" text="Review Again" />
+            <x-modal.close-button modalId="confirmEditCourseModal" text="Review Again" />
 
             <x-button type="button" variant="save" onclick="document.getElementById('courseForm').submit()">
                 <i class="bx bx-check"></i>

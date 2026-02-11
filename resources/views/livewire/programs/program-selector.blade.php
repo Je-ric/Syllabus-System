@@ -1,12 +1,12 @@
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
     <div class="space-y-1">
-        <label class="text-sm font-medium text-gray-700">College</label>
+        <x-form.label>College</x-form.label>
 
         <div class="relative">
             <select
                 wire:model.live="collegeId"
-                class="w-full border rounded px-3 py-2 pr-8">
+                class="w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-2.5 pr-10 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition">
                 <option value="">Select College</option>
                 @foreach ($colleges as $college)
                     <option value="{{ $college->id }}">{{ $college->name }}</option>
@@ -15,19 +15,20 @@
 
             {{-- Loading indicator --}}
             <div wire:loading wire:target="collegeId"
-                    class="absolute right-2 top-2.5 text-gray-400">
-                <i class='bx bx-loader bx-spin'></i>
+                    class="absolute right-2 top-2 flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 shadow-sm">
+                <i class='bx bx-loader-alt bx-spin'></i>
+                Loading
             </div>
         </div>
     </div>
 
     <div class="space-y-1">
-        <label class="text-sm font-medium text-gray-700">Department</label>
+        <x-form.label>Department</x-form.label>
 
         <div class="relative">
             <select
                 wire:model.live="departmentId"
-                class="w-full border rounded px-3 py-2 pr-8"
+                class="w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-2.5 pr-10 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition disabled:bg-slate-100"
                 @disabled(!$collegeId)
             >
                 <option value="">
@@ -40,20 +41,20 @@
             </select>
 
             <div wire:loading wire:target="collegeId,departmentId"
-                    class="absolute right-2 top-2.5 text-gray-400">
-                <i class='bx bx-loader bx-spin'></i>
+                    class="absolute right-2 top-2 flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 shadow-sm">
+                <i class='bx bx-loader-alt bx-spin'></i>
+                Loading
             </div>
         </div>
     </div>
 
 
     <div class="space-y-1">
-        <label class="text-sm font-medium text-gray-700">Program</label>
-
+        <x-form.label>Program</x-form.label>
         <div class="relative">
             <select
                 wire:model.live="programId"
-                class="w-full border rounded px-3 py-2 pr-8"
+                class="w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-2.5 pr-10 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition disabled:bg-slate-100"
                 @disabled(!$departmentId)
             >
                 <option value="">
@@ -67,8 +68,9 @@
 
             {{-- Loading --}}
             <div wire:loading wire:target="departmentId,programId"
-                 class="absolute right-2 top-2.5 text-gray-400">
-                <i class='bx bx-loader bx-spin'></i>
+                 class="absolute right-2 top-2 flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 shadow-sm">
+                <i class='bx bx-loader-alt bx-spin'></i>
+                Loading
             </div>
         </div>
     </div>

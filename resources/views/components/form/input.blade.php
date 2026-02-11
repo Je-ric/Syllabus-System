@@ -7,18 +7,10 @@
     {{ $attributes->merge([
         'class' => '
             w-full
-            border border-green-300
-            rounded-md
-            px-4 py-2
-            text-sm text-gray-800
-            bg-white
-
-            placeholder-gray-400
-
-            focus:outline-none
-            focus:border-green-600
-            focus:ring-1
-            focus:ring-green-600
+            rounded-xl border border-slate-300 bg-white/90
+            px-4 py-2.5 text-sm text-slate-700
+            shadow-sm focus:border-emerald-500
+            focus:ring-2 focus:ring-emerald-200 transition
 
             disabled:bg-gray-100
             disabled:text-gray-500
@@ -28,3 +20,11 @@
         '
     ]) }}
 />
+
+{{-- Usage:
+handles: text, numbers, date
+
+<x-form.input type="text" name="name" class="mt-2" value="{{ old('name', $course->course_title ?? '') }}" required>
+
+
+--}}

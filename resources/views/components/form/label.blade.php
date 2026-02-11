@@ -21,14 +21,15 @@
 
 <label
     @if($for) for="{{ $for }}" @endif
-    class="flex items-center text-sm font-medium sm:gap-2 text-[#1a2235] mb-2 {{ $class }}"
+    {{-- class="flex items-center text-sm font-medium sm:gap-2 text-[#1a2235] mb-2 {{ $class }}" --}}
+    class="text-xs uppercase tracking-[0.25em] text-slate-500 {{ $class }}"
 >
     @if($icon)
         <i class="bx {{ $icon }} text-green-800 mr-1"></i>
     @endif
     {{ $slot }}
     @if($isRequired)
-        <span class="text-red-600">*</span>
+        <span class="text-red-600 font-extrabold text-lg">*</span>
     @endif
 </label>
 
