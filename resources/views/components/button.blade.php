@@ -118,4 +118,35 @@ Usage: <x-button variant="primary">Submit</x-button>
         <x-button variant="attendance">Clock In</x-button>
 
 
+
+<h1 class="text-2xl font-bold text-center">Button Component</h1>
+
+    <div class="space-y-4">
+        <h2 class="text-lg font-semibold">Table Action Buttons</h2>
+        <div class="flex flex-wrap gap-2">
+            <x-button variant="table-confirm">Confirm</x-button>
+            <x-button variant="table-disable">Disable</x-button>
+            <x-button variant="table-restore">Restore</x-button>
+            <x-button variant="table-danger">Danger</x-button>
+            <x-button variant="table-manage">Manage</x-button>
+            <x-button variant="table-view">View</x-button>
+            <x-button variant="table-edit">Edit</x-button>
+            <x-button variant="table-cancel">Cancel</x-button>
+
+        </div>
+    </div>
+
+    <div class="space-y-4">
+        <h2 class="text-lg font-semibold">Form / CRUD Buttons</h2>
+        <div class="flex flex-wrap gap-3">
+            <x-button variant="add-button">Add</x-button>
+            <x-button variant="cancel">Cancel</x-button>
+            <x-button variant="save">Save</x-button>
+            <x-button variant="danger">Danger</x-button>
+            <x-button variant="primary">Primary</x-button>
+            <x-button variant="secondary">Secondary</x-button>
+            <x-button variant="soft">Soft</x-button>
+            <x-button variant="outline">Outline</x-button>
+        </div>
+    </div>
 --}}

@@ -17,7 +17,7 @@ use App\Http\Controllers\OrganizationalHierarchyController;
 
 Route::get('/', function () {
     if (Auth::check()) {
-        return redirect()->route('dashboard');
+        return redirect()->route('syllabus.index');
     }
     // Keep a single source of truth for the auth view
     return redirect()->route('auth.show');

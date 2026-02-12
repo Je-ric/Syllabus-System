@@ -52,9 +52,6 @@
             font-family: "Source Sans 3", "Libre Franklin", system-ui, -apple-system, sans-serif;
             background: radial-gradient(1100px 600px at 15% -10%, #e0f2fe 0%, #f8fafc 45%, #f1f5f9 100%);
             color: var(--brand-ink);
-
-            /* scrollbar-width: thin;
-            scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track); */
         }
 
         .green-grad {
@@ -66,31 +63,46 @@
             letter-spacing: 0.04em;
         }
 
-        /* =====================
-        GOLD SCROLLBAR
-        ===================== */
-
-        /* body::-webkit-scrollbar {
-            width: 3px;
-            height: 6px;
+        aside a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem; 
+            padding: 0.5rem 0.75rem;
+            color: #374151; 
+            text-decoration: none;
+            font-weight: 500;
+            border-right: 5px solid transparent;
+            transition: all 0.3s ease;
+            background: white;
         }
 
-        body::-webkit-scrollbar-track {
-            background: var(--scrollbar-track);
-            border-radius: 3px;
+        /* Hover effect */
+        aside a:hover {
+            color: var(--clsu-green); 
+            border-right-color: var(--clsu-green);
+            transition: all 0.3s ease;
+            background: linear-gradient(
+                to left,
+                rgba(0, 150, 57, 0.25) 0%,
+                rgba(0, 150, 57, 0.12) 30%,
+                rgba(0, 150, 57, 0.05) 60%,
+                white 100%
+            );
         }
 
-        body::-webkit-scrollbar-thumb {
-            background: var(--scrollbar-thumb);
-            border-radius: 3px;
-            border: 2px solid transparent;
-            background-clip: padding-box;
+        aside a.active{
+            font-weight: 700;
+            color: var(--clsu-green);
+            border-right: 5px solid var(--clsu-green);
+            background: linear-gradient(
+                to left,
+                rgba(0, 150, 57, 0.25) 0%,
+                rgba(0, 150, 57, 0.12) 30%,
+                rgba(0, 150, 57, 0.05) 60%,
+                white 100%
+            );
         }
-
-        body::-webkit-scrollbar-thumb:hover {
-            background: var(--scrollbar-thumb-hover);
-        } */
-
+        
     </style>
 </head>
 
@@ -108,8 +120,8 @@
                     bg-white shadow-2xl border-r border-slate-200
                     transform -translate-x-full lg:translate-x-0
                     transition-transform duration-300 ease-out
-                    h-full overflow-y-auto">
-            <div class="px-6 py-6 border-b border-slate-200 bg-linear-to-br from-slate-900 to-slate-800 text-white">
+                    h-full overflow-y-auto no-scrollbar">
+            <div class="sticky top-0 z-20 px-6 py-6 border-b border-slate-200 bg-white text-white">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-xs uppercase tracking-[0.3em] font-semibold text-amber-400">Central Luzon <br> State University</p>
@@ -121,80 +133,77 @@
                 </div>
             </div>
 
-            <div class="px-5 py-6 space-y-6">
-                {{-- <div class="flex items-center gap-3 rounded-2xl bg-slate-100 px-4 py-3">
-                    <div class="h-10 w-10 rounded-full bg-amber-400 text-white flex items-center justify-center">
-                        <i class="bx bxs-user-circle text-2xl"></i>
-                    </div>
-                    <div class="text-sm">
-                        <p class="font-semibold text-slate-800">Account</p>
-                        <p class="text-slate-500 text-xs">Manage access & tools</p>
-                    </div>
-                </div> --}}
+            <div class="pl-5 py-6 space-y-6">
 
                 <nav class="space-y-2 text-sm">
                     @auth
                         <p class="text-xs uppercase tracking-[0.3em] text-slate-400 px-3">Navigation</p>
 
-                        <a href="{{ route('dashboard') }}" class="flex items-center gap-3 rounded-xl px-3 py-2 text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 transition">
-                            <i class="bx bxs-home text-lg"></i>
-                            Dashboard
-                        </a>
+                        @if(auth()->user()->hasRole('admin') || auth()->user()->hasRole('faculty'))
+                            <a href="{{ route('syllabus.index') }}"
+                                class="{{ request()->routeIs('syllabus.index') ? 'active' : '' }}">
+                                <i class="bx bxs-notepad text-lg"></i>
+                                Syllabi
+                            </a>
+                        @endif
 
                         @if(auth()->user()->hasRole('admin'))
-                            <a href="{{ route('accounts.approval') }}" class="flex items-center gap-3 rounded-xl px-3 py-2 text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 transition">
+                            <a href="{{ route('accounts.approval') }}"
+                                class="{{ request()->routeIs('accounts.approval') ? 'active' : '' }}">
                                 <i class="bx bxs-user-detail text-lg"></i>
                                 User Management
                             </a>
-                            <a href="{{ route('organizational.colleges.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2 text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 transition">
+                            <a href="{{ route('organizational.colleges.index') }} "
+                                class="{{ request()->routeIs('organizational.colleges.index') ? 'active' : '' }}">
                                 <i class="bx bx-sitemap text-lg"></i>
                                 University Faculties
                             </a>
-                            <a href="{{ route('academic.structure.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2 text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 transition">
+                            <a href="{{ route('academic.structure.index') }}"
+                                class="{{ request()->routeIs('academic.structure.index') ? 'active' : '' }}">
                                 <i class="bx bxs-layer text-lg"></i>
                                 Academic Structure
                             </a>
-                            <a href="{{ route('academic.calendars.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2 text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 transition">
+                            <a href="{{ route('academic.calendars.index') }}"
+                                class="{{ request()->routeIs('academic.calendars.index') ? 'active' : '' }}">
                                 <i class="bx bxs-calendar text-lg"></i>
                                 Academic Calendars
                             </a>
                         @endif
 
                         @if(auth()->user()->hasRole('admin') || auth()->user()->hasRole('dean'))
-                            <a href="{{ route('goal.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2 text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 transition">
+                            <a href="{{ route('goal.index') }}"
+                                class="{{ request()->routeIs('goal.index') ? 'active' : '' }}">
                                 <i class="bx bxs-bullseye text-lg"></i>
                                 College Goals
                             </a>
                         @endif
 
                         @if(auth()->user()->hasRole('dean') || auth()->user()->hasRole('chair'))
-                            <a href="{{ route('organizational.hierarchy') }}" class="flex items-center gap-3 rounded-xl px-3 py-2 text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 transition">
+                            <a href="{{ route('organizational.hierarchy') }}"
+                                class="{{ request()->routeIs('organizational.hierarchy') ? 'active' : '' }}">
                                 <i class="bx bxs-id-card text-lg"></i>
                                 Role
                             </a>
                         @endif
 
                         @if(auth()->user()->hasRole('admin') || auth()->user()->hasRole('chair'))
-                            <a href="{{ route('objective.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2 text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 transition">
+                            <a href="{{ route('objective.index') }}"
+                                class="{{ request()->routeIs('objective.index') ? 'active' : '' }}">
                                 <i class="bx bx-list-check text-lg"></i>
                                 Department Objectives
                             </a>
-                            <a href="{{ route('programs.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2 text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 transition">
+                            <a href="{{ route('programs.index') }}"
+                                    class="{{ request()->routeIs('programs.index') ? 'active' : '' }}">
                                 <i class="bx bxs-network-chart text-lg"></i>
                                 PEOs & POs
                             </a>
-                            <a href="{{ route('courses.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2 text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 transition">
+                            <a href="{{ route('courses.index') }}"
+                                class="{{ request()->routeIs('courses.index') ? 'active' : '' }}">
                                 <i class="bx bxs-book-content text-lg"></i>
                                 Manage Courses
                             </a>
                         @endif
 
-                        @if(auth()->user()->hasRole('admin') || auth()->user()->hasRole('faculty'))
-                            <a href="{{ route('syllabus.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2 text-slate-700 hover:bg-cyan-50 hover:text-cyan-800 transition">
-                                <i class="bx bxs-notepad text-lg"></i>
-                                Syllabi
-                            </a>
-                        @endif
                     @endauth
 
                     @guest
@@ -206,7 +215,7 @@
                 </nav>
 
                 @auth
-                    <div class="pt-4 border-t border-slate-200">
+                    <div class="pt-4 px-4 border-t border-slate-200">
                         <form action="{{ route('logout') }}" method="POST">
                             @csrf
                             <x-button type="submit" variant="danger" class="w-full text-center">
