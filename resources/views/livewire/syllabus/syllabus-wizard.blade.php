@@ -92,7 +92,7 @@
             @endif
 
             <button type="button"
-                    wire:click="saveCurrentStep"
+                    x-on:click="saveDraft()"
                     class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
                 <i class="bx bx-save"></i> Save Draft
             </button>
@@ -105,7 +105,7 @@
 
             <button type="button"
                     x-show="!hasNext()"
-                    wire:click="submitForReview"
+                    x-on:click="submitForReview()"
                     class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
                 <i class="bx bx-check-double"></i> Submit for Review
             </button>
@@ -166,18 +166,25 @@
                 return this.steps[this.stepIndex(this.localStep) - 1];
             },
 
-            async flushCourseOutcomeDrafts() {
-                if (this.localStep !== 'course_outcomes') return;
+            getScrollContainer() {
+                return document.querySelector('main.overflow-y-auto');
+            },
 
-                const rows = Array.from(document.querySelectorAll('textarea[data-co-rowkey]'))
-                    .map((el) => ({
-                        rowKey: el.dataset.coRowkey,
-                        description: el.value ?? '',
-                    }));
+            async preserveScroll(action) {
+                const container = this.getScrollContainer();
+                const previousTop = container ? container.scrollTop : window.scrollY;
 
-                if (rows.length > 0) {
-                    await this.$wire.syncCourseOutcomeDescriptions(rows);
-                }
+                const result = await action();
+
+                requestAnimationFrame(() => {
+                    if (container) {
+                        container.scrollTop = previousTop;
+                    } else {
+                        window.scrollTo(0, previousTop);
+                    }
+                });
+
+                return result;
             },
 
             async goToStep(target) {
@@ -185,12 +192,25 @@
                 this.isNavigating = true;
                 const previous = this.localStep;
                 try {
-                    await this.flushCourseOutcomeDrafts();
-                    await this.$wire.navigateToStep(previous, target);
+                    await this.preserveScroll(async () => {
+                        await this.$wire.navigateToStep(previous, target);
+                    });
                     this.localStep = target;
                 } finally {
                     this.isNavigating = false;
                 }
+            },
+
+            async saveDraft() {
+                await this.preserveScroll(async () => {
+                    await this.$wire.saveCurrentStep();
+                });
+            },
+
+            async submitForReview() {
+                await this.preserveScroll(async () => {
+                    await this.$wire.submitForReview();
+                });
             },
 
             goNext() {
