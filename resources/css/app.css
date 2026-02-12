@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 @import "boxicons/css/boxicons.min.css";
+@import './auth.css';
+@import './sidebar.css';
+
 @plugin "daisyui";
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -11,6 +14,70 @@
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+:root {
+    --brand-ink: #0b1220;
+    --brand-cyan: #0e7490;
+    --brand-cyan-dark: #0b556b;
+    --panel: #ffffff;
+    --panel-muted: #f1f5f9;
+
+    --scrollbar-thumb: #ffb51b;
+    --scrollbar-thumb-hover: #e6a700;
+    --scrollbar-track: #f1f1f1;
+
+    --red: #e2231a;
+    --red-100: #c01e16;
+    --blue-50: #dde5eb;
+    --blue: #008dea;
+    --orange: #f9c150;
+    --white: #ffffff;
+    --white-50: #f1f2f3;
+    --gray: #dad8d8;
+    --gray-100: #979797;
+    --black-20: #525252;
+    --black-25: #3a3a3a;
+    --black-50: #313131;
+    --yellow: #cdfb13;
+    --clsu-yellow: #ffd700;
+    --clsu-gold: #e0a70d;
+    --clsu-cobra: #1a5f30;
+    --clsu-green: #009639;
+    --green: #92d12c;
+    --green-50: #4eab18;
+    --green-100: #038303;
+    --green-150: #003a10;
+    --green-grad: linear-gradient(
+        90deg,
+        rgba(0, 129, 2, 1) 0%,
+        rgba(149, 210, 45, 1) 100%
+    );
+}
+
+body {
+    font-family:
+        "Source Sans 3",
+        "Libre Franklin",
+        system-ui,
+        -apple-system,
+        sans-serif;
+    background: radial-gradient(
+        1100px 600px at 15% -10%,
+        #e0f2fe 0%,
+        #f8fafc 45%,
+        #f1f5f9 100%
+    );
+    color: var(--brand-ink);
+}
+
+.green-grad {
+    background: var(--green-grad);
+}
+
+.brand-title {
+    font-family: "Anton", "Oswald", sans-serif;
+    letter-spacing: 0.04em;
 }
 
 .anton-regular {

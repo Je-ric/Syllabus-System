@@ -2,69 +2,7 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <title>{{ $title ?? 'Syllabus System' }}</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Libre+Franklin:ital,wght@0,100..900;1,100..900&family=Oswald:wght@200..700&family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
-    @livewireStyles
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <style>
-        :root {
-            --brand-ink: #0f172a;
-            --brand-emerald: #059669;
-            --brand-emerald-dark: #047857;
-        }
-
-        body {
-            font-family: "Source Sans 3", "Libre Franklin", system-ui, -apple-system, sans-serif;
-            background:
-                radial-gradient(900px 500px at 10% -10%, #dcfce7 0%, transparent 65%),
-                radial-gradient(900px 500px at 100% 110%, #dbeafe 0%, transparent 60%),
-                #f8fafc;
-            color: var(--brand-ink);
-        }
-
-        .auth-input {
-            width: 100%;
-            border: 1px solid #cbd5e1;
-            border-radius: 0.85rem;
-            padding: 0.65rem 0.9rem;
-            font-size: 0.95rem;
-            color: #334155;
-            background: #ffffff;
-            transition: all 0.2s ease;
-        }
-
-        .auth-input:focus {
-            outline: none;
-            border-color: #10b981;
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
-        }
-
-        .auth-primary {
-            background: linear-gradient(90deg, var(--brand-emerald-dark) 0%, var(--brand-emerald) 100%);
-        }
-
-        .auth-primary:hover {
-            background: linear-gradient(90deg, #046c66 0%, #0d9f6e 100%);
-        }
-
-        .auth-secondary {
-            background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%);
-        }
-
-        .auth-secondary:hover {
-            background: linear-gradient(90deg, #1e40af 0%, #1d4ed8 100%);
-        }
-
-        .green-grad{
-            background: linear-gradient(90deg, rgba(0, 129, 2, 1) 0%, rgba(149, 210, 45, 1) 100%);
-        }
-    </style>
+    @include('includes.head-assets')
 </head>
 
 <body>
