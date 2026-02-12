@@ -25,8 +25,8 @@ Route::get('/', function () {
 
 
 Route::get('/auth', [AuthController::class, 'show'])->name('auth.show');
-Route::post('/login', [AuthController::class, 'login'])->name('login');
-Route::post('/register', [AuthController::class, 'register'])->name('register');
+// Route::post('/login', [AuthController::class, 'login'])->name('login');
+// Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // OTP routes
@@ -88,8 +88,8 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::middleware(['role:admin,dean,chair'])->group(function () {
-        Route::get('/organizational/hierarchy', [OrganizationalHierarchyController::class, 'hierarchyView'])->name('organizational.hierarchy');    
-    
+        Route::get('/organizational/hierarchy', [OrganizationalHierarchyController::class, 'hierarchyView'])->name('organizational.hierarchy');
+
     });
 
     Route::middleware(['role:admin,dean'])->group(function () {
