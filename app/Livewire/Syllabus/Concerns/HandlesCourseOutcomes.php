@@ -64,6 +64,38 @@ trait HandlesCourseOutcomes
         $this->skipRender();
     }
 
+    public function syncCourseOutcomeDescriptions(array $rows): void
+    {
+        if ($this->currentStep !== 'course_outcomes' || !$this->syllabus) {
+            return;
+        }
+
+        $saved = false;
+
+        foreach ($rows as $row) {
+            $rowKey = (string) ($row['rowKey'] ?? '');
+            if ($rowKey === '') {
+                continue;
+            }
+
+            $index = $this->findOutcomeIndexByRowKey($rowKey);
+            if ($index === null) {
+                continue;
+            }
+
+            $description = (string) ($row['description'] ?? '');
+            $this->courseOutcomes[$index]['description'] = $description;
+
+            if ($this->saveCourseOutcomeAtIndex($index)) {
+                $saved = true;
+            }
+        }
+
+        if ($saved) {
+            $this->markDraftSaved();
+        }
+    }
+
     public function addCourseOutcome()
     {
 
@@ -139,6 +171,16 @@ trait HandlesCourseOutcomes
 
         $this->coPoMappings = $newMappings;
         $this->markDraftSaved();
+    }
+
+    public function removeCourseOutcomeByRowKey(string $rowKey): void
+    {
+        $index = $this->findOutcomeIndexByRowKey($rowKey);
+        if ($index === null) {
+            return;
+        }
+
+        $this->removeCourseOutcome($index);
     }
 
     private function saveCourseOutcomes(): bool

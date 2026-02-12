@@ -281,6 +281,17 @@ class SyllabusWizard extends Component
         }
     }
 
+    public function navigateToStep(string $fromStep, string $toStep): void
+    {
+        if ($fromStep === $toStep) {
+            return;
+        }
+
+        // Save the currently displayed step first, then switch server state once.
+        $this->saveStep($fromStep);
+        $this->setStep($toStep);
+    }
+
     private function markDraftSaved(): void
     {
         $this->lastSavedAt = now()->format('M d, Y h:i A');

@@ -27,10 +27,19 @@
                     {{-- Description --}}
                     <div class="flex-1">
                         <textarea
-                            x-data="{ desc: @js($outcome['description'] ?? '') }"
+                            x-data="{
+                                desc: @js($outcome['description'] ?? ''),
+                                lastSent: @js($outcome['description'] ?? ''),
+                                syncNow() {
+                                    if (this.desc === this.lastSent) return;
+                                    this.lastSent = this.desc;
+                                    $wire.syncCourseOutcomeDescription('{{ $rowKey }}', this.desc);
+                                }
+                            }"
                             x-model="desc"
-                            x-on:input.debounce.450ms="$wire.syncCourseOutcomeDescription('{{ $rowKey }}', desc)"
-                            x-on:blur="$wire.syncCourseOutcomeDescription('{{ $rowKey }}', desc)"
+                            data-co-rowkey="{{ $rowKey }}"
+                            x-on:input.debounce.900ms="syncNow()"
+                            x-on:blur="syncNow()"
                             rows="3"
                             placeholder="Describe what students will be able to do after completing this course..."
                             class="
@@ -48,7 +57,10 @@
                     {{-- Remove --}}
                     <button
                         type="button"
-                        wire:click="removeCourseOutcome({{ $index }})"
+                        x-on:click="
+                            const y = window.scrollY;
+                            $wire.removeCourseOutcomeByRowKey('{{ $rowKey }}').then(() => window.scrollTo(0, y));
+                        "
                         class="
                             text-red-600 hover:text-red-800
                             p-2 rounded
@@ -66,7 +78,10 @@
         {{-- Add Outcome --}}
         <button
             type="button"
-            wire:click="addCourseOutcome"
+            x-on:click="
+                const y = window.scrollY;
+                $wire.addCourseOutcome().then(() => window.scrollTo(0, y));
+            "
             class="
                 w-full
                 border-2 border-dashed border-green-300

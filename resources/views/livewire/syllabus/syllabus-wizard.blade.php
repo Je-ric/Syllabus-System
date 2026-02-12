@@ -4,7 +4,7 @@
 @endphp
 
 <div x-data="syllabusWizard(@js($stepsOrder),
-                            @js($currentStep),
+                            @entangle('currentStep').live,
                             @js($steps)
                             )"
     >
@@ -115,11 +115,12 @@
 </div>
 
 <script>
-    function syllabusWizard(steps, initialStep, labels) {
+    function syllabusWizard(steps, boundStep, labels) {
         return {
             steps,
             labels,
-            localStep: initialStep,
+            localStep: boundStep,
+            isNavigating: false,
 
             stepIndex(step) {
                 return this.steps.indexOf(step);
@@ -165,12 +166,31 @@
                 return this.steps[this.stepIndex(this.localStep) - 1];
             },
 
+            async flushCourseOutcomeDrafts() {
+                if (this.localStep !== 'course_outcomes') return;
+
+                const rows = Array.from(document.querySelectorAll('textarea[data-co-rowkey]'))
+                    .map((el) => ({
+                        rowKey: el.dataset.coRowkey,
+                        description: el.value ?? '',
+                    }));
+
+                if (rows.length > 0) {
+                    await this.$wire.syncCourseOutcomeDescriptions(rows);
+                }
+            },
+
             async goToStep(target) {
-                if (!target || target === this.localStep) return;
+                if (!target || target === this.localStep || this.isNavigating) return;
+                this.isNavigating = true;
                 const previous = this.localStep;
-                this.localStep = target;
-                await this.$wire.saveStep(previous);
-                await this.$wire.setStep(target);
+                try {
+                    await this.flushCourseOutcomeDrafts();
+                    await this.$wire.navigateToStep(previous, target);
+                    this.localStep = target;
+                } finally {
+                    this.isNavigating = false;
+                }
             },
 
             goNext() {
