@@ -44,10 +44,10 @@ Route::get('/waiting-approval', function () {
 
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-
+    if (Auth::check()) {
+            return redirect()->route('syllabus.index');
+    }
+    
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/account-approval', [AccountApprovalController::class, 'index'])->name('accounts.approval');
         Route::post('/account-approval/approve', [AccountApprovalController::class, 'approve'])->name('account-approval.approve');

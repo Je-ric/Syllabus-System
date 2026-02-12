@@ -1,27 +1,6 @@
 <div x-data="posManager(@entangle('pos'), @entangle('peos'), @entangle('mapping'))" class="space-y-4 text-slate-800">
 
-    {{-- Notification stack --}}
-    {{-- If both are visible → they stack neatly
-    If one disappears → layout auto-adjusts --}}
-    <div class="fixed top-4 inset-x-0 z-50 flex justify-center pointer-events-none">
-        <div class="flex flex-col gap-2 items-center">
-
-            {{-- Loading indicator --}}
-            <div x-show="isSaving"
-                class="px-4 py-2 rounded-full border border-amber-200 bg-amber-50 text-amber-900 text-xs font-semibold tracking-wide shadow-sm animate-pulse">
-                <i class='bx bx-loader-alt bx-spin mr-2'></i> Saving POs...
-            </div>
-
-            {{-- Flash message --}}
-            <template x-if="flashMessage">
-                <div
-                    class="px-4 py-2 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-900 text-xs font-semibold tracking-wide shadow-sm"
-                    x-text="flashMessage">
-                </div>
-            </template>
-
-        </div>
-    </div>
+    @include('livewire.programs.include.flash-message')
 
     {{-- PO Inputs with PEO checkboxes --}}
     <template x-for="(po, index) in pos" :key="index">
@@ -31,7 +10,8 @@
             <div class="flex items-center gap-3">
                 <span class="w-16 text-center text-xs uppercase tracking-[0.2em] text-slate-500"
                     {{-- x-text="peo.peo_code + index" --}}
-                    x-text="'PO' + (index + 1)">
+                    x-text="'PO' + (index + 1)"
+                    >
                 </span>
 
                 <x-form.textarea x-model="po.po_text"
@@ -77,6 +57,7 @@
                                 @change="toggleMapping(po.id, peo.id, $event.target.checked)"
                                 class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-200">
                             <span x-text="peo.peo_code"></span>
+
                         </label>
                     </template>
                 </div>

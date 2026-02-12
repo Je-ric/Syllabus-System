@@ -12,7 +12,7 @@
 
     <x-header-with-button title="{{ $syllabus->id ? 'Edit' : 'Create' }} Syllabus"
                             description="{{ $course->course_code }} - {{ $course->course_title }}">
-        <x-button variant="cancel" href="{{ route('dashboard') }}">← Back to Syllabi</x-button>
+        <x-button variant="cancel" href="{{ route('syllabus.index') }}">← Back to Syllabi</x-button>
     </x-header-with-button>
 
     {{-- Progress Steps --}}

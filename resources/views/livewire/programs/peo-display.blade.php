@@ -5,15 +5,15 @@
 
     <div class="space-y-2">
         @forelse ($peos as $peo)
-            <div class="text-sm text-slate-700 flex gap-2 rounded-lg border border-slate-200 bg-white/80 px-3 py-2 shadow-sm">
-                <span class="font-semibold text-emerald-700 whitespace-nowrap">
+            <x-text-block>
+                <span class="font-semibold text-emerald-700">
                     {{-- {{ $peo['peo_code'] }}: --}}
-                    PEO{{ $loop->iteration }}
+                    {{ 'PEO' . $loop->iteration }}:
                 </span>
                 <span>
                     {{ $peo['peo_text'] }}
                 </span>
-            </div>
+            </x-text-block>
         @empty
             <p class="text-sm text-slate-400 italic">No PEOs yet.</p>
         @endforelse
