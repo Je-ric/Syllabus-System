@@ -91,7 +91,8 @@
                 </span>
             @endif
 
-            <button wire:click="saveCurrentStep"
+            <button type="button"
+                    wire:click="saveCurrentStep"
                     class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
                 <i class="bx bx-save"></i> Save Draft
             </button>
@@ -102,7 +103,8 @@
                 Next <i class="bx bx-chevron-right"></i>
             </x-button>
 
-            <button x-show="!hasNext()"
+            <button type="button"
+                    x-show="!hasNext()"
                     wire:click="submitForReview"
                     class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
                 <i class="bx bx-check-double"></i> Submit for Review
@@ -163,12 +165,12 @@
                 return this.steps[this.stepIndex(this.localStep) - 1];
             },
 
-            goToStep(target) {
+            async goToStep(target) {
                 if (!target || target === this.localStep) return;
                 const previous = this.localStep;
                 this.localStep = target;
-                this.$wire.saveStep(previous);
-                this.$wire.setStep(target);
+                await this.$wire.saveStep(previous);
+                await this.$wire.setStep(target);
             },
 
             goNext() {

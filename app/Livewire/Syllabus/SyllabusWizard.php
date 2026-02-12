@@ -11,6 +11,7 @@ use App\Models\AcademicCalendar;
 use App\Models\Course;
 use App\Models\Syllabus;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 
 class SyllabusWizard extends Component
@@ -111,6 +112,7 @@ class SyllabusWizard extends Component
         $this->courseOutcomes = $this->syllabus->courseOutcomes->map(function ($co) {
             return [
                 'id' => $co->id,
+                'temp_key' => 'co_' . $co->id,
                 'co_code' => $co->co_code,
                 'description' => $co->description,
             ];
@@ -185,7 +187,13 @@ class SyllabusWizard extends Component
             case 'academic_calendar':
                 if ($this->academic_calendar_id) {
                     $this->validate([
-                        'academic_calendar_id' => 'required|exists:academic_calendars,id',
+                        'academic_calendar_id' => [
+                            'required',
+                            'exists:academic_calendars,id',
+                            Rule::unique('syllabi', 'academic_calendar_id')
+                                ->where(fn($query) => $query->where('course_id', $this->course->id))
+                                ->ignore($this->syllabus->id),
+                        ],
                     ]);
 
                     $this->syllabus->update([

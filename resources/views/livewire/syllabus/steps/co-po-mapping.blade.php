@@ -25,7 +25,8 @@
                     @foreach ($courseOutcomes as $index => $co)
                         @php
                             $coId = $co['id'] ?? null;
-                            $rowKey = $coId ? $coId : 'new_' . $index;
+                            $rowKey = $co['temp_key'] ?? ($coId ? 'co_' . $coId : 'new_' . $index);
+                            $mapKey = $coId ? $coId : ($co['temp_key'] ?? 'new_' . $index);
                         @endphp
                         <tr class="border-b hover:bg-slate-50" wire:key="co-row-{{ $rowKey }}">
                             <td class="px-4 py-3">
@@ -38,7 +39,7 @@
                                 <td class="px-2 py-3 text-center"
                                     wire:key="co-po-{{ $rowKey }}-{{ $po->id }}">
                                     <input type="checkbox"
-                                        wire:model.debounce.500ms="coPoMappings.{{ $rowKey }}.{{ $po->id }}"
+                                        wire:model.debounce.500ms="coPoMappings.{{ $mapKey }}.{{ $po->id }}"
                                         class="h-4 w-4 cursor-pointer rounded border-slate-300 text-green-600 focus:ring-green-500" />
                                 </td>
                             @endforeach

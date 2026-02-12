@@ -37,13 +37,12 @@ trait HandlesCoPoMapping
             // Handle both ID keys and temporary keys (new_X)
             $coId = null;
             if (is_numeric($coKey)) {
-                $coId = $coKey;
+                $coId = (int) $coKey;
             } else {
-                // Extract index from 'new_X' format
-                if (str_starts_with($coKey, 'new_')) {
-                    $index = (int) str_replace('new_', '', $coKey);
-                    if (isset($this->courseOutcomes[$index]['id'])) {
-                        $coId = $this->courseOutcomes[$index]['id'];
+                foreach ($this->courseOutcomes as $outcome) {
+                    if (($outcome['temp_key'] ?? null) === (string) $coKey && !empty($outcome['id'])) {
+                        $coId = (int) $outcome['id'];
+                        break;
                     }
                 }
             }
@@ -60,7 +59,8 @@ trait HandlesCoPoMapping
                 $syncData = [];
                 foreach ($poMappings as $poId => $isConnected) {
                     if ($isConnected) {
-                        $syncData[$poId] = [];  // No IED needed, just connect them
+                        // Keep mapping compatible whether pivot ied is required or nullable.
+                        $syncData[$poId] = ['ied' => 'I'];
                     }
                 }
                 $co->programOutcomes()->sync($syncData);

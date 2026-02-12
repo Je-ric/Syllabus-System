@@ -92,8 +92,12 @@ trait HandlesWeeklyCoverage
     private function refreshWeeklyCoverage(): void
     {
 
-        // If syllabus or academic calendar is not set, we cannot load weeks or events
+        // If syllabus or academic calendar is not set, clear state and bail
         if (!$this->syllabus || !$this->syllabus->academic_calendar_id) {
+            $this->syllabusWeeks = collect();
+            $this->weekEvents = [];
+            $this->examWeeks = [];
+            $this->activeWeekTab = null;
             return;
         }
 

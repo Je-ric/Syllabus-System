@@ -44,10 +44,6 @@ Route::get('/waiting-approval', function () {
 
 
 Route::middleware(['auth'])->group(function () {
-    if (Auth::check()) {
-            return redirect()->route('syllabus.index');
-    }
-    
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/account-approval', [AccountApprovalController::class, 'index'])->name('accounts.approval');
         Route::post('/account-approval/approve', [AccountApprovalController::class, 'approve'])->name('account-approval.approve');
@@ -134,4 +130,3 @@ Route::middleware(['auth'])->group(function () {
     });
 
 });
-

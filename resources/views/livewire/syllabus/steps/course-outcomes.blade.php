@@ -8,15 +8,18 @@
 
     <div class="space-y-4">
         @foreach($courseOutcomes as $index => $outcome)
+            @php
+                $rowKey = $outcome['temp_key'] ?? ($outcome['id'] ? 'co_' . $outcome['id'] : 'new_' . $index);
+            @endphp
             <div
                 class="border border-emerald-200 rounded-lg p-4 bg-emerald-50/40"
-                wire:key="outcome-{{ $index }}"
+                wire:key="outcome-{{ $rowKey }}"
             >
                 <div class="flex items-start gap-4">
                     {{-- CO Code --}}
                     <div class="w-24 shrink-0">
                         <span class="w-16 text-center font-semibold text-emerald-700">
-                             {{ $outcome['co_code'] }}
+                            {{ $outcome['co_code'] }}
                         </span>
 
                     </div>
@@ -24,8 +27,10 @@
                     {{-- Description --}}
                     <div class="flex-1">
                         <textarea
-                            wire:model.defer="courseOutcomes.{{ $index }}.description"
-                            wire:blur="saveCurrentStep"
+                            x-data="{ desc: @js($outcome['description'] ?? '') }"
+                            x-model="desc"
+                            x-on:input.debounce.450ms="$wire.syncCourseOutcomeDescription('{{ $rowKey }}', desc)"
+                            x-on:blur="$wire.syncCourseOutcomeDescription('{{ $rowKey }}', desc)"
                             rows="3"
                             placeholder="Describe what students will be able to do after completing this course..."
                             class="

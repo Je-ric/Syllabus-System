@@ -89,7 +89,7 @@ class AuthController extends Controller
 
             switch ($user->account_status) {
                 case 'active':
-                    return redirect()->intended('dashboard');
+                    return redirect()->intended('syllabus.index');
                 case 'pending':
                     return redirect()->route('waiting.approval');
                 case 'rejected':
