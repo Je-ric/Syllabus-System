@@ -64,11 +64,14 @@ trait HandlesCourseOutcomes
 
             if (!empty($outcome['id']) && $existingCos->has((int) $outcome['id'])) {
                 $co = $existingCos->get((int) $outcome['id']);
-                $co->update([
-                    'co_code' => $coCode,
-                    'description' => $description,
-                ]);
-                $saved = true;
+                $hasChanged = $co->co_code !== $coCode || trim((string) $co->description) !== $description;
+                if ($hasChanged) {
+                    $co->update([
+                        'co_code' => $coCode,
+                        'description' => $description,
+                    ]);
+                    $saved = true;
+                }
                 continue;
             }
 

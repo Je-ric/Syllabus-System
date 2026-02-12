@@ -1,9 +1,26 @@
-<div x-data="courseOutcomesManager(@entangle('courseOutcomes'))">
+<div x-data="courseOutcomesManager(@entangle('courseOutcomes'))"
+    x-on:co-saved.window="dirty = false">
     <div class="mb-4">
         <h3 class="text-xl font-semibold text-slate-900">Course Outcomes</h3>
         <p class="text-sm text-slate-600">
             Define what students should be able to do after completing this course.
         </p>
+        <div class="mt-2 text-xs rounded-md border border-amber-200 bg-amber-50 text-amber-800 px-3 py-2">
+            Course Outcomes are not auto-saved while typing. Click <strong>Save Draft</strong> or <strong>Next</strong> to save.
+        </div>
+        <div class="mt-2 flex items-center gap-2 text-xs">
+            <span x-show="dirty" class="inline-flex items-center rounded bg-orange-100 text-orange-700 px-2 py-1">
+                Unsaved CO changes
+            </span>
+            <span wire:loading wire:target="saveCurrentStep,navigateToStep,submitForReview"
+                class="inline-flex items-center rounded bg-blue-100 text-blue-700 px-2 py-1">
+                Saving COs...
+            </span>
+            <span x-show="!dirty" wire:loading.remove wire:target="saveCurrentStep,navigateToStep,submitForReview"
+                class="inline-flex items-center rounded bg-emerald-100 text-emerald-700 px-2 py-1">
+                COs saved
+            </span>
+        </div>
     </div>
 
     <div class="space-y-4">
@@ -17,6 +34,7 @@
                     <div class="flex-1">
                         <textarea
                             x-model="outcome.description"
+                            x-on:input="dirty = true"
                             rows="3"
                             placeholder="Describe what students will be able to do after completing this course..."
                             class="w-full border border-green-300 rounded-md px-4 py-2 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-green-600 focus:border-green-600"
@@ -78,12 +96,16 @@
                     co_code: `CO${nextIndex}`,
                     description: '',
                 });
+                this.dirty = true;
             },
 
             removeOutcome(index) {
                 this.outcomes.splice(index, 1);
                 this.ensureSequence();
+                this.dirty = true;
             },
+
+            dirty: false,
         };
     }
 </script>

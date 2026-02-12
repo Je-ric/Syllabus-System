@@ -196,6 +196,9 @@
                         await this.$wire.navigateToStep(previous, target);
                     });
                     this.localStep = target;
+                    if (previous === 'course_outcomes') {
+                        window.dispatchEvent(new CustomEvent('co-saved'));
+                    }
                 } finally {
                     this.isNavigating = false;
                 }
@@ -205,12 +208,18 @@
                 await this.preserveScroll(async () => {
                     await this.$wire.saveCurrentStep();
                 });
+                if (this.localStep === 'course_outcomes') {
+                    window.dispatchEvent(new CustomEvent('co-saved'));
+                }
             },
 
             async submitForReview() {
                 await this.preserveScroll(async () => {
                     await this.$wire.submitForReview();
                 });
+                if (this.localStep === 'course_outcomes') {
+                    window.dispatchEvent(new CustomEvent('co-saved'));
+                }
             },
 
             goNext() {
