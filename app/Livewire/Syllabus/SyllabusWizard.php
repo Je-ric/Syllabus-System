@@ -28,7 +28,6 @@ class SyllabusWizard extends Component
     public $currentStep;
     public ?string $lastSavedAt = null;
     public array $stepDirty = [];
-    public array $stepSavedAt = [];
 
     public function mount($syllabusId = null, $courseId = null)
     {
@@ -151,26 +150,6 @@ class SyllabusWizard extends Component
         }
         if (empty($this->lec_office) && !empty($user->office)) {
             $this->lec_office = $user->office;
-        }
-    }
-
-    public function saveAndNext()
-    {
-        $this->saveCurrentStep();
-        $nextStep = $this->syllabus->getNextStep();
-        if ($nextStep) {
-            $this->currentStep = $nextStep;
-            $this->syllabus->update(['current_step' => $nextStep]);
-        }
-    }
-
-    public function saveAndPrevious()
-    {
-        $this->saveCurrentStep();
-        $previousStep = $this->syllabus->getPreviousStep();
-        if ($previousStep) {
-            $this->currentStep = $previousStep;
-            $this->syllabus->update(['current_step' => $previousStep]);
         }
     }
 
@@ -302,9 +281,19 @@ class SyllabusWizard extends Component
         // Only CO step requires manual save before switching.
         if ($fromStep === 'course_outcomes') {
             $hasUnsavedCo = (bool) ($this->stepDirty['course_outcomes'] ?? false);
-            if ($hasUnsavedCo && !$this->saveStep($fromStep)) {
-                $this->dispatch('lw-toast', type: 'error', message: 'Save Course Outcomes first before proceeding.');
-                return;
+            if ($hasUnsavedCo) {
+                $hasTypedOutcome = collect($this->courseOutcomes)
+                    ->contains(fn($co) => trim((string) ($co['description'] ?? '')) !== '');
+
+                if ($hasTypedOutcome && !$this->saveStep($fromStep)) {
+                    $this->dispatch('lw-toast', type: 'error', message: 'Save Course Outcomes first before proceeding.');
+                    return;
+                }
+
+                if (!$hasTypedOutcome) {
+                    // Do not block navigation for blank CO placeholders.
+                    $this->stepDirty['course_outcomes'] = false;
+                }
             }
         }
 
@@ -343,7 +332,6 @@ class SyllabusWizard extends Component
         }
 
         $this->stepDirty[$step] = false;
-        $this->stepSavedAt[$step] = now()->format('M d, Y h:i A');
         $this->markDraftSaved();
     }
 
@@ -351,7 +339,6 @@ class SyllabusWizard extends Component
     {
         foreach (array_keys($this->syllabus->getWizardSteps()) as $step) {
             $this->stepDirty[$step] = false;
-            $this->stepSavedAt[$step] = null;
         }
     }
 

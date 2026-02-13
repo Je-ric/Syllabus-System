@@ -60,12 +60,8 @@
                     <div class="font-semibold text-slate-700">{{ $label }}</div>
                     @if($this->stepHasMissingRequired($step))
                         <div class="mt-1 text-rose-700">Required fields missing</div>
-                    @elseif(($stepDirty[$step] ?? false) === true)
-                        <div class="mt-1 text-amber-700">Unsaved changes</div>
-                    @elseif(!empty($stepSavedAt[$step] ?? null))
-                        <div class="mt-1 text-emerald-700">Saved: {{ $stepSavedAt[$step] }}</div>
                     @else
-                        <div class="mt-1 text-slate-500">Not yet saved</div>
+                        <div class="mt-1 text-emerald-700">Ready</div>
                     @endif
                 </div>
             @endforeach
@@ -240,16 +236,11 @@
             },
 
             isNextDisabled() {
-                return this.isNavigating || (this.localStep === 'course_outcomes' && this.isCourseOutcomeUnsaved());
+                return this.isNavigating;
             },
 
             isPrevDisabled() {
-                return this.isNavigating || (this.localStep === 'course_outcomes' && this.isCourseOutcomeUnsaved());
-            },
-
-            isCourseOutcomeUnsaved() {
-                const serverDirty = !!(this.stepDirty?.course_outcomes);
-                return serverDirty;
+                return this.isNavigating;
             },
 
             showToast(type, message) {
@@ -266,10 +257,6 @@
 
             async goToStep(target) {
                 if (!target || target === this.localStep || this.isNavigating) return;
-                if (this.localStep === 'course_outcomes' && this.isCourseOutcomeUnsaved()) {
-                    this.showToast('warning', 'Save Course Outcomes first before moving to another step.');
-                    return;
-                }
                 this.isNavigating = true;
                 const previous = this.localStep;
                 try {
@@ -291,7 +278,7 @@
 
                     // Livewire action return payload is not always reliable on the client.
                     // Infer save result from dirty state after the server roundtrip.
-                    const stillUnsavedCo = this.localStep === 'course_outcomes' && this.isCourseOutcomeUnsaved();
+                    const stillUnsavedCo = this.localStep === 'course_outcomes' && !!(this.stepDirty?.course_outcomes);
                     if (this.localStep === 'course_outcomes' && !stillUnsavedCo) {
                         this.showToast('success', 'Course Outcomes saved.');
                     }

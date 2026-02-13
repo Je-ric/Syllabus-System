@@ -21,11 +21,6 @@ trait HandlesWeeklyCoverage
         $this->syllabusWeeks = collect();
     }
 
-    public function markExamWeek(int $weekNo): void
-    {
-        $this->assignExamWeek('final_term', $weekNo);
-    }
-
     public function assignExamWeek(string $type, int $weekNo): void
     {
         if (!$this->syllabus) {

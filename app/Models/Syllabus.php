@@ -154,31 +154,4 @@ class Syllabus extends Model
         return $steps;
     }
 
-    // Helper: Get next step
-    // Used in: saveAndNext() - SyllabusWizard
-    public function getNextStep()
-    {
-        $steps = array_keys($this->getWizardSteps());
-        $currentIndex = array_search($this->current_step, $steps);
-
-        if ($currentIndex === false || $currentIndex >= count($steps) - 1) {
-            return null;
-        }
-
-        return $steps[$currentIndex + 1];
-    }
-
-    // Helper: Get previous step
-    // Used in: saveAndPrevious() - SyllabusWizard
-    public function getPreviousStep()
-    {
-        $steps = array_keys($this->getWizardSteps());
-        $currentIndex = array_search($this->current_step, $steps);
-
-        if ($currentIndex === false || $currentIndex <= 0) {
-            return null;
-        }
-
-        return $steps[$currentIndex - 1];
-    }
 }

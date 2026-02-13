@@ -17,6 +17,12 @@ trait HandlesCourseOutcomes
             return;
         }
 
+        if ($this->hasBlankCourseOutcome()) {
+            $this->coAddError = 'Please fill the blank CO before adding a new one.';
+        } else {
+            $this->coAddError = null;
+        }
+
         // Keep row numbering stable while typing and mark the step as dirty.
         $this->resequenceCourseOutcomes();
         $this->markStepDirty('course_outcomes');
@@ -24,6 +30,12 @@ trait HandlesCourseOutcomes
 
     public function addCourseOutcome(): void
     {
+        if ($this->hasBlankCourseOutcome()) {
+            $this->coAddError = 'Please fill the blank CO before adding a new one.';
+            return;
+        }
+
+        $this->coAddError = null;
         $nextIndex = count($this->courseOutcomes) + 1;
 
         $this->courseOutcomes[] = [
@@ -173,5 +185,16 @@ trait HandlesCourseOutcomes
                 $this->courseOutcomes[$i]['description'] = '';
             }
         }
+    }
+
+    private function hasBlankCourseOutcome(): bool
+    {
+        foreach ($this->courseOutcomes as $outcome) {
+            if (trim((string) ($outcome['description'] ?? '')) === '') {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
