@@ -12,6 +12,7 @@ use App\Models\Course;
 use App\Models\Syllabus;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 
 class SyllabusWizard extends Component
@@ -26,6 +27,8 @@ class SyllabusWizard extends Component
     public ?Course $course = null;
     public $currentStep;
     public ?string $lastSavedAt = null;
+    public array $stepDirty = [];
+    public array $stepSavedAt = [];
 
     public function mount($syllabusId = null, $courseId = null)
     {
@@ -50,9 +53,10 @@ class SyllabusWizard extends Component
 
             $this->course = $this->syllabus->course;
             $this->currentStep = $this->syllabus->current_step;
+            $this->initializeStepState();
             $this->loadExistingData();
             $this->prefillLecFromUser($user);
-            $this->refreshWeeklyCoverage();
+            $this->refreshWeeklyCoverage(false);
         } elseif ($courseId) {
             // Creating new syllabus
             $this->course = Course::with('program.outcomes')->findOrFail($courseId);
@@ -67,8 +71,9 @@ class SyllabusWizard extends Component
             ]);
 
             $this->currentStep = 'academic_calendar';
+            $this->initializeStepState();
             $this->prefillLecFromUser($user);
-            $this->refreshWeeklyCoverage();
+            $this->refreshWeeklyCoverage(false);
         } else {
             abort(404);
         }
@@ -181,6 +186,10 @@ class SyllabusWizard extends Component
 
     public function saveCurrentStep(): bool
     {
+        if (!$this->shouldSaveCurrentStep()) {
+            return false;
+        }
+
         $saved = false;
 
         switch ($this->currentStep) {
@@ -221,13 +230,16 @@ class SyllabusWizard extends Component
                 $saved = $this->saveCoPoMappings();
                 break;
             case 'weekly_coverage':
-                $this->refreshWeeklyCoverage();
+                // Weekly generation is explicit to avoid hidden heavy operations.
+                $this->refreshWeeklyCoverage(false);
                 $saved = true;
                 break;
         }
 
         if ($saved) {
-            $this->markDraftSaved();
+            $this->markStepSaved($this->currentStep);
+        } elseif ($this->currentStep === 'course_outcomes') {
+            $this->dispatch('lw-toast', type: 'error', message: 'Please save Course Outcomes first.');
         }
 
         return $saved;
@@ -257,7 +269,7 @@ class SyllabusWizard extends Component
     public function updatedCurrentStep($value): void
     {
         if ($value === 'weekly_coverage' || $value === 'review') {
-            $this->refreshWeeklyCoverage();
+            $this->refreshWeeklyCoverage(false);
         }
     }
 
@@ -277,7 +289,7 @@ class SyllabusWizard extends Component
                     ]);
                 }
             }
-            $this->refreshWeeklyCoverage();
+            $this->refreshWeeklyCoverage(false);
         }
     }
 
@@ -287,9 +299,118 @@ class SyllabusWizard extends Component
             return;
         }
 
-        // Save the currently displayed step first, then switch server state once.
-        $this->saveStep($fromStep);
+        // Only CO step requires manual save before switching.
+        if ($fromStep === 'course_outcomes') {
+            $hasUnsavedCo = (bool) ($this->stepDirty['course_outcomes'] ?? false);
+            if ($hasUnsavedCo && !$this->saveStep($fromStep)) {
+                $this->dispatch('lw-toast', type: 'error', message: 'Save Course Outcomes first before proceeding.');
+                return;
+            }
+        }
+
+        // Other steps are auto-saved via update hooks, so navigation stays fast.
         $this->setStep($toStep);
+    }
+
+    public function generateWeeklyCoverage(): void
+    {
+        if (!$this->syllabus || !$this->academic_calendar_id) {
+            $this->dispatch('lw-toast', type: 'error', message: 'Select an academic calendar before generating weeks.');
+            return;
+        }
+
+        if ($this->syllabus->academic_calendar_id !== $this->academic_calendar_id) {
+            $this->syllabus->update(['academic_calendar_id' => $this->academic_calendar_id]);
+        }
+
+        $this->refreshWeeklyCoverage(true);
+        $this->markStepSaved('weekly_coverage');
+        $this->dispatch('lw-toast', type: 'success', message: 'Weekly coverage generated.');
+    }
+
+    public function markStepDirty(string $step): void
+    {
+        if (!array_key_exists($step, $this->syllabus->getWizardSteps())) {
+            return;
+        }
+        $this->stepDirty[$step] = true;
+    }
+
+    public function markStepSaved(string $step): void
+    {
+        if (!array_key_exists($step, $this->syllabus->getWizardSteps())) {
+            return;
+        }
+
+        $this->stepDirty[$step] = false;
+        $this->stepSavedAt[$step] = now()->format('M d, Y h:i A');
+        $this->markDraftSaved();
+    }
+
+    private function initializeStepState(): void
+    {
+        foreach (array_keys($this->syllabus->getWizardSteps()) as $step) {
+            $this->stepDirty[$step] = false;
+            $this->stepSavedAt[$step] = null;
+        }
+    }
+
+    private function shouldSaveCurrentStep(): bool
+    {
+        if ($this->currentStep === 'review') {
+            return false;
+        }
+
+        if ($this->currentStep === 'weekly_coverage') {
+            return true;
+        }
+
+        return (bool) ($this->stepDirty[$this->currentStep] ?? true);
+    }
+
+    public function stepHasMissingRequired(string $step): bool
+    {
+        switch ($step) {
+            case 'academic_calendar':
+                return empty($this->academic_calendar_id);
+
+            case 'course_components':
+                $missingLec = !$this->isLecComplete();
+                $missingLab = $this->course->has_lec_lab ? !$this->isLabComplete() : false;
+                return $missingLec || $missingLab;
+
+            case 'course_outcomes':
+                $validCoCount = collect($this->courseOutcomes)
+                    ->filter(fn($co) => trim((string) ($co['description'] ?? '')) !== '')
+                    ->count();
+                return $validCoCount === 0;
+
+            case 'co_po_mapping':
+                if (empty($this->courseOutcomes)) {
+                    return true;
+                }
+                foreach ($this->coPoMappings as $poMappings) {
+                    if (!is_array($poMappings)) {
+                        continue;
+                    }
+                    if (count(array_filter($poMappings)) > 0) {
+                        return false;
+                    }
+                }
+                return true;
+
+            case 'weekly_coverage':
+                return $this->syllabusWeeks->isEmpty();
+
+            default:
+                return false;
+        }
+    }
+
+    protected function onValidationError(ValidationException $exception): void
+    {
+        $message = $exception->validator->errors()->first() ?: 'Please check your input.';
+        $this->dispatch('lw-toast', type: 'error', message: $message);
     }
 
     private function markDraftSaved(): void

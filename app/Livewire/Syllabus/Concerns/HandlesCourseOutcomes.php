@@ -11,11 +11,50 @@ trait HandlesCourseOutcomes
 
     public ?string $coAddError = null;
 
+    public function updatedCourseOutcomes($value, $key): void
+    {
+        if ($this->currentStep !== 'course_outcomes') {
+            return;
+        }
+
+        // Keep row numbering stable while typing and mark the step as dirty.
+        $this->resequenceCourseOutcomes();
+        $this->markStepDirty('course_outcomes');
+    }
+
+    public function addCourseOutcome(): void
+    {
+        $nextIndex = count($this->courseOutcomes) + 1;
+
+        $this->courseOutcomes[] = [
+            'id' => null,
+            'temp_key' => $this->newOutcomeTempKey(),
+            'co_code' => 'CO' . $nextIndex,
+            'description' => '',
+        ];
+
+        $this->resequenceCourseOutcomes();
+        $this->markStepDirty('course_outcomes');
+    }
+
+    public function removeCourseOutcome(int $index): void
+    {
+        if (!isset($this->courseOutcomes[$index])) {
+            return;
+        }
+
+        array_splice($this->courseOutcomes, $index, 1);
+        $this->resequenceCourseOutcomes();
+        $this->markStepDirty('course_outcomes');
+    }
+
     private function saveCourseOutcomes(): bool
     {
         if (!$this->syllabus) {
             return false;
         }
+
+        $this->coAddError = null;
 
         // Keep a compact sequence and assign CO codes consistently before saving.
         $this->courseOutcomes = array_values($this->courseOutcomes ?? []);
@@ -32,6 +71,16 @@ trait HandlesCourseOutcomes
         $existingCos = CourseOutcome::where('syllabus_id', $this->syllabus->id)
             ->get()
             ->keyBy('id');
+
+        $validDescriptions = collect($this->courseOutcomes)
+            ->filter(fn($co) => trim((string) ($co['description'] ?? '')) !== '')
+            ->values();
+
+        // Safety guard: prevent accidental full delete when payload is unexpectedly empty.
+        if ($existingCos->isNotEmpty() && $validDescriptions->isEmpty()) {
+            $this->coAddError = 'At least one Course Outcome description is required before saving.';
+            return false;
+        }
 
         $submittedIds = collect($this->courseOutcomes)
             ->pluck('id')
@@ -53,12 +102,15 @@ trait HandlesCourseOutcomes
         }
 
         $saved = false;
+        $hasValidOutcomes = false;
 
         foreach ($this->courseOutcomes as $index => $outcome) {
             $description = trim((string) ($outcome['description'] ?? ''));
             if ($description === '') {
                 continue;
             }
+
+            $hasValidOutcomes = true;
 
             $coCode = $this->courseOutcomes[$index]['co_code'];
 
@@ -95,11 +147,31 @@ trait HandlesCourseOutcomes
             $saved = true;
         }
 
-        return $saved;
+        // Treat no-op valid payload as successful save so UI doesn't show false errors.
+        return $saved || $hasValidOutcomes;
     }
 
     private function newOutcomeTempKey(): string
     {
         return uniqid('new_', false);
+    }
+
+    private function resequenceCourseOutcomes(): void
+    {
+        $this->courseOutcomes = array_values($this->courseOutcomes ?? []);
+
+        foreach ($this->courseOutcomes as $i => $outcome) {
+            $this->courseOutcomes[$i]['co_code'] = 'CO' . ($i + 1);
+
+            if (empty($this->courseOutcomes[$i]['temp_key'])) {
+                $this->courseOutcomes[$i]['temp_key'] = !empty($outcome['id'])
+                    ? 'co_' . $outcome['id']
+                    : $this->newOutcomeTempKey();
+            }
+
+            if (!array_key_exists('description', $this->courseOutcomes[$i])) {
+                $this->courseOutcomes[$i]['description'] = '';
+            }
+        }
     }
 }

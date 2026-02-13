@@ -192,13 +192,15 @@ class SyllabusController extends Controller
      */
     private function authorizeSyllabusAccess(Syllabus $syllabus): void
     {
+        /** @var \App\Models\User|null $user */
         $user = Auth::user();
 
         if (!$user) {
             throw new AuthorizationException('Unauthorized');
         }
 
-        if ($syllabus->prepared_by !== $user->id && !$user->hasRole('admin')) {
+        $isAdmin = $user->roles()->where('name', 'admin')->exists();
+        if ($syllabus->prepared_by !== $user->id && !$isAdmin) {
             throw new AuthorizationException('Unauthorized');
         }
     }

@@ -11,61 +11,82 @@ trait HandlesCoPoMapping
     public function updatedCoPoMappings()
     {
         if ($this->currentStep === 'co_po_mapping' && $this->syllabus) {
+            $this->markStepDirty('co_po_mapping');
             if ($this->saveCoPoMappings()) {
-                $this->markDraftSaved();
+                $this->markStepSaved('co_po_mapping');
             }
         }
     }
 
     private function saveCoPoMappings(): bool
     {
-        if (empty($this->coPoMappings)) {
+        if (empty($this->coPoMappings) || !$this->syllabus) {
             return false;
         }
-        // Loop through each CO and sync its associated POs based on the current mappings
-        // foreach mapping example:
-        // coPoMappings = [
-        //     '1' => [2 => true, 3 => true], // CO with ID 1 is mapped to PO 2 and PO 3
-        //     'new_0' => [1 => true], // A new CO (not yet saved to DB) is mapped to PO 1
-        // ]
-        $saved = false;
+
+        // Resolve temporary CO keys to database IDs once.
+        $coIdByTempKey = [];
+        foreach ($this->courseOutcomes as $outcome) {
+            $tempKey = (string) ($outcome['temp_key'] ?? '');
+            $outcomeId = (int) ($outcome['id'] ?? 0);
+            if ($tempKey !== '' && $outcomeId > 0) {
+                $coIdByTempKey[$tempKey] = $outcomeId;
+            }
+        }
+
+        // Collect all candidate CO IDs from current mapping payload.
+        $candidateCoIds = [];
         foreach ($this->coPoMappings as $coKey => $poMappings) {
             if (!is_array($poMappings)) {
                 continue;
             }
 
-            // Handle both ID keys and temporary keys (new_X)
-            $coId = null;
             if (is_numeric($coKey)) {
-                $coId = (int) $coKey;
-            } else {
-                foreach ($this->courseOutcomes as $outcome) {
-                    if (($outcome['temp_key'] ?? null) === (string) $coKey && !empty($outcome['id'])) {
-                        $coId = (int) $outcome['id'];
-                        break;
-                    }
-                }
-            }
-
-            if (!$coId) {
+                $candidateCoIds[] = (int) $coKey;
                 continue;
             }
 
-            $co = CourseOutcome::where('id', $coId)
-                ->where('syllabus_id', $this->syllabus->id)
-                ->first();
-
-            if ($co) {
-                $syncData = [];
-                foreach ($poMappings as $poId => $isConnected) {
-                    if ($isConnected) {
-                        // Keep mapping compatible whether pivot ied is required or nullable.
-                        $syncData[$poId] = ['ied' => 'I'];
-                    }
-                }
-                $co->programOutcomes()->sync($syncData);
-                $saved = true;
+            if (isset($coIdByTempKey[(string) $coKey])) {
+                $candidateCoIds[] = (int) $coIdByTempKey[(string) $coKey];
             }
+        }
+
+        $candidateCoIds = array_values(array_unique(array_filter($candidateCoIds)));
+        if (empty($candidateCoIds)) {
+            return false;
+        }
+
+        $existingCos = CourseOutcome::query()
+            ->where('syllabus_id', $this->syllabus->id)
+            ->whereIn('id', $candidateCoIds)
+            ->get()
+            ->keyBy('id');
+
+        $saved = false;
+
+        foreach ($this->coPoMappings as $coKey => $poMappings) {
+            if (!is_array($poMappings)) {
+                continue;
+            }
+
+            $coId = is_numeric($coKey)
+                ? (int) $coKey
+                : (int) ($coIdByTempKey[(string) $coKey] ?? 0);
+
+            if ($coId <= 0 || !$existingCos->has($coId)) {
+                continue;
+            }
+
+            $syncData = [];
+            foreach ($poMappings as $poId => $isConnected) {
+                if (!$isConnected || !is_numeric($poId)) {
+                    continue;
+                }
+                $syncData[(int) $poId] = ['ied' => 'I'];
+            }
+
+            $existingCos[$coId]->programOutcomes()->sync($syncData);
+            $saved = true;
         }
 
         return $saved;

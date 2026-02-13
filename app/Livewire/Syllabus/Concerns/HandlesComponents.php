@@ -107,6 +107,7 @@ trait HandlesComponents
     private function autoSaveComponents()
     {
         if ($this->currentStep === 'course_components' && $this->syllabus) {
+            $this->markStepDirty('course_components');
             $this->saveCurrentStep();
         }
     }

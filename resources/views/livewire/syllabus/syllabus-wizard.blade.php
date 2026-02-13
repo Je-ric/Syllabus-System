@@ -3,16 +3,18 @@
     $stepsOrder = array_keys($steps);
 @endphp
 
-<div x-data="syllabusWizard(@js($stepsOrder),
-                            @entangle('currentStep').live,
-                            @js($steps)
-                            )"
-    >
+<div x-data="syllabusWizard(
+        @js($stepsOrder),
+        @entangle('currentStep'),
+        @js($steps),
+        @entangle('stepDirty').live
+    )"
+    x-on:lw-toast.window="showToast($event.detail.type, $event.detail.message)">
 
 
     <x-header-with-button title="{{ $syllabus->id ? 'Edit' : 'Create' }} Syllabus"
                             description="{{ $course->course_code }} - {{ $course->course_title }}">
-        <x-button variant="cancel" href="{{ route('syllabus.index') }}">← Back to Syllabi</x-button>
+        <x-button variant="cancel" href="{{ route('syllabus.index') }}"><- Back to Syllabi</x-button>
     </x-header-with-button>
 
     {{-- Progress Steps --}}
@@ -50,6 +52,31 @@
                 </div>
             @endforeach
         </div>
+
+        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
+            @foreach($steps as $step => $label)
+                <div class="rounded-lg border px-3 py-2 text-xs
+                    {{ $currentStep === $step ? 'border-blue-300 bg-blue-50' : 'border-slate-200 bg-slate-50' }}">
+                    <div class="font-semibold text-slate-700">{{ $label }}</div>
+                    @if($this->stepHasMissingRequired($step))
+                        <div class="mt-1 text-rose-700">Required fields missing</div>
+                    @elseif(($stepDirty[$step] ?? false) === true)
+                        <div class="mt-1 text-amber-700">Unsaved changes</div>
+                    @elseif(!empty($stepSavedAt[$step] ?? null))
+                        <div class="mt-1 text-emerald-700">Saved: {{ $stepSavedAt[$step] }}</div>
+                    @else
+                        <div class="mt-1 text-slate-500">Not yet saved</div>
+                    @endif
+                </div>
+            @endforeach
+        </div>
+    </div>
+
+    {{-- Light Loading Indicator --}}
+    <div wire:loading.flex wire:target="navigateToStep,saveCurrentStep,submitForReview,generateWeeklyCoverage"
+        class="mb-4 items-center gap-2 text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+        <i class="bx bx-loader-alt bx-spin text-base"></i>
+        <span>Working on your latest action...</span>
     </div>
 
     {{-- Step Content --}}
@@ -74,12 +101,26 @@
         </div>
     </div>
 
-    {{-- Buttoness --}}
+    {{-- Realtime Toast --}}
+    <div x-show="toast.show" x-transition
+        class="fixed top-6 right-6 z-9999 px-4 py-3 rounded-lg shadow-lg text-sm font-medium"
+        :class="{
+            'bg-emerald-600 text-white': toast.type === 'success',
+            'bg-rose-600 text-white': toast.type === 'error',
+            'bg-amber-500 text-white': toast.type === 'warning',
+            'bg-slate-700 text-white': toast.type === 'info'
+        }">
+        <span x-text="toast.message"></span>
+    </div>
+
+    {{-- Buttons --}}
     <div class="mt-6 flex justify-between items-center">
         <div>
             <x-button variant="cancel"
                     x-show="hasPrevious()"
-                    @click="goPrevious()">
+                    @click.prevent="goPrevious()"
+                    x-bind:disabled="isPrevDisabled()"
+                    x-bind:class="isPrevDisabled() ? 'opacity-60 cursor-not-allowed' : ''">
                 <i class="bx bx-chevron-left"></i> Previous
             </x-button>
         </div>
@@ -93,13 +134,17 @@
 
             <button type="button"
                     x-on:click="saveDraft()"
+                    :disabled="isNavigating"
+                    :class="isNavigating ? 'opacity-60 cursor-not-allowed' : ''"
                     class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
                 <i class="bx bx-save"></i> Save Draft
             </button>
 
             <x-button variant="primary"
                     x-show="hasNext()"
-                    @click="goNext()">
+                    @click.prevent="goNext()"
+                    x-bind:disabled="isNextDisabled()"
+                    x-bind:class="isNextDisabled() ? 'opacity-60 cursor-not-allowed' : ''">
                 Next <i class="bx bx-chevron-right"></i>
             </x-button>
 
@@ -115,12 +160,19 @@
 </div>
 
 <script>
-    function syllabusWizard(steps, boundStep, labels) {
+    function syllabusWizard(steps, boundStep, labels, stepDirty) {
         return {
             steps,
             labels,
+            stepDirty,
             localStep: boundStep,
             isNavigating: false,
+            toast: {
+                show: false,
+                type: 'info',
+                message: '',
+                timeout: null,
+            },
 
             stepIndex(step) {
                 return this.steps.indexOf(step);
@@ -172,53 +224,91 @@
 
             async preserveScroll(action) {
                 const container = this.getScrollContainer();
-                const previousTop = container ? container.scrollTop : window.scrollY;
+                const previousContainerTop = container ? container.scrollTop : null;
+                const previousWindowTop = window.scrollY;
 
                 const result = await action();
 
                 requestAnimationFrame(() => {
                     if (container) {
-                        container.scrollTop = previousTop;
-                    } else {
-                        window.scrollTo(0, previousTop);
+                        container.scrollTop = previousContainerTop ?? 0;
                     }
+                    window.scrollTo(0, previousWindowTop);
                 });
 
                 return result;
             },
 
+            isNextDisabled() {
+                return this.isNavigating || (this.localStep === 'course_outcomes' && this.isCourseOutcomeUnsaved());
+            },
+
+            isPrevDisabled() {
+                return this.isNavigating || (this.localStep === 'course_outcomes' && this.isCourseOutcomeUnsaved());
+            },
+
+            isCourseOutcomeUnsaved() {
+                const serverDirty = !!(this.stepDirty?.course_outcomes);
+                return serverDirty;
+            },
+
+            showToast(type, message) {
+                if (this.toast.timeout) {
+                    clearTimeout(this.toast.timeout);
+                }
+                this.toast.type = type || 'info';
+                this.toast.message = message || '';
+                this.toast.show = true;
+                this.toast.timeout = setTimeout(() => {
+                    this.toast.show = false;
+                }, 2600);
+            },
+
             async goToStep(target) {
                 if (!target || target === this.localStep || this.isNavigating) return;
+                if (this.localStep === 'course_outcomes' && this.isCourseOutcomeUnsaved()) {
+                    this.showToast('warning', 'Save Course Outcomes first before moving to another step.');
+                    return;
+                }
                 this.isNavigating = true;
                 const previous = this.localStep;
                 try {
                     await this.preserveScroll(async () => {
                         await this.$wire.navigateToStep(previous, target);
                     });
-                    this.localStep = target;
-                    if (previous === 'course_outcomes') {
-                        window.dispatchEvent(new CustomEvent('co-saved'));
-                    }
                 } finally {
                     this.isNavigating = false;
                 }
             },
 
             async saveDraft() {
-                await this.preserveScroll(async () => {
-                    await this.$wire.saveCurrentStep();
-                });
-                if (this.localStep === 'course_outcomes') {
-                    window.dispatchEvent(new CustomEvent('co-saved'));
+                if (this.isNavigating) return;
+                this.isNavigating = true;
+                try {
+                    await this.preserveScroll(async () => {
+                        await this.$wire.saveCurrentStep();
+                    });
+
+                    // Livewire action return payload is not always reliable on the client.
+                    // Infer save result from dirty state after the server roundtrip.
+                    const stillUnsavedCo = this.localStep === 'course_outcomes' && this.isCourseOutcomeUnsaved();
+                    if (this.localStep === 'course_outcomes' && !stillUnsavedCo) {
+                        this.showToast('success', 'Course Outcomes saved.');
+                    }
+                } finally {
+                    this.isNavigating = false;
                 }
             },
 
             async submitForReview() {
-                await this.preserveScroll(async () => {
-                    await this.$wire.submitForReview();
-                });
-                if (this.localStep === 'course_outcomes') {
-                    window.dispatchEvent(new CustomEvent('co-saved'));
+                if (this.isNavigating) return;
+                this.isNavigating = true;
+                try {
+                    await this.preserveScroll(async () => {
+                        await this.$wire.submitForReview();
+                    });
+                } finally {
+                    this.isNavigating = false;
                 }
             },
 

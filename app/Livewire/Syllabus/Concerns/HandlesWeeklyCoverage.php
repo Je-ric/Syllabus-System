@@ -64,6 +64,7 @@ trait HandlesWeeklyCoverage
         $this->loadWeeks();
         $this->loadWeekEvents();
         $this->loadExamWeeks();
+        $this->markStepSaved('weekly_coverage');
     }
 
     public function clearExamWeek(string $type): void
@@ -87,9 +88,10 @@ trait HandlesWeeklyCoverage
         $this->loadWeeks();
         $this->loadWeekEvents();
         $this->loadExamWeeks();
+        $this->markStepSaved('weekly_coverage');
     }
 
-    private function refreshWeeklyCoverage(): void
+    private function refreshWeeklyCoverage(bool $generate = false): void
     {
 
         // If syllabus or academic calendar is not set, clear state and bail
@@ -103,7 +105,9 @@ trait HandlesWeeklyCoverage
 
         // Load the academic calendar with its events to ensure we have the latest data
         $this->syllabus->loadMissing('academicCalendar.events');
-        $this->ensureWeeksGenerated();
+        if ($generate) {
+            $this->ensureWeeksGenerated();
+        }
         $this->loadWeeks();
         $this->loadWeekEvents();
         $this->loadExamWeeks();

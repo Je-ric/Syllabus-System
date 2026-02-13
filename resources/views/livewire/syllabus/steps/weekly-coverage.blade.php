@@ -5,6 +5,22 @@
             <p class="text-sm text-slate-600">
                 Weeks are generated from the academic calendar. Events and dates are shown per week.
             </p>
+            <div class="mt-2 flex items-center gap-2">
+                <button type="button"
+                    wire:click="generateWeeklyCoverage"
+                    @if (!$academic_calendar_id) disabled @endif
+                    class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded border border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 disabled:cursor-not-allowed">
+                    <span wire:loading.remove wire:target="generateWeeklyCoverage">
+                        <i class="bx bx-refresh"></i> Generate Weeks
+                    </span>
+                    <span wire:loading wire:target="generateWeeklyCoverage">
+                        <i class="bx bx-loader-alt bx-spin"></i> Generating...
+                    </span>
+                </button>
+                <span class="text-xs text-slate-500">
+                    Generation is manual to keep step switching fast.
+                </span>
+            </div>
         </div>
         <div class="text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
             <div>
@@ -106,7 +122,7 @@
                                     <ul class="space-y-2 text-sm text-slate-700">
                                         @foreach ($events as $event)
                                             <li class="flex items-start gap-2">
-                                                <span class="text-slate-400">•</span>
+                                                <span class="text-slate-400">*</span>
                                                 <span>
                                                     <span class="font-medium">{{ $event->name }}</span>
                                                     <span class="text-slate-500">

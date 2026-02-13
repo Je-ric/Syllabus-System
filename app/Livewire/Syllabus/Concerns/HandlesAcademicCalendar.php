@@ -11,8 +11,9 @@ trait HandlesAcademicCalendar
     public function updatedAcademicCalendarId()
     {
         if ($this->currentStep === 'academic_calendar' && $this->syllabus) {
+            $this->markStepDirty('academic_calendar');
             $this->saveCurrentStep();
-            $this->refreshWeeklyCoverage();
+            $this->refreshWeeklyCoverage(false);
         }
     }
 }
