@@ -1,7 +1,6 @@
 <meta charset="UTF-8">
 <title>{{ $title ?? 'Syllabus System' }}</title>
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<script src="https://cdn.tailwindcss.com"></script>
 <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

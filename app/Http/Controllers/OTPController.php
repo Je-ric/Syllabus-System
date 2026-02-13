@@ -13,7 +13,7 @@ class OTPController extends Controller
     public function showOTP()
     {
         if (!session('verify_email')) {
-            return redirect()->route('login');
+            return redirect()->route('auth.show');
         }
 
         return view('Authentication.verifyOTP');
@@ -59,7 +59,7 @@ class OTPController extends Controller
         $email = $request->input('email') ?? session('verify_email');
 
         if (!$email) {
-            return redirect()->route('login')
+            return redirect()->route('auth.show')
                 ->withErrors(['email' => 'No email to verify.']);
         }
 

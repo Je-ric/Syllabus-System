@@ -41,7 +41,7 @@
                             <span class="text-xs text-slate-500">
                                 Step
                                 {{ array_search($syllabus->current_step, array_keys($syllabus->getWizardSteps())) + 1 }}
-                                / 5
+                                / {{ count($syllabus->getWizardSteps()) }}
                             </span>
 
                             <span

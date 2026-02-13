@@ -6,6 +6,7 @@ use App\Models\Program;
 use App\Models\Syllabus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class SyllabusController extends Controller
 {
@@ -142,22 +143,16 @@ class SyllabusController extends Controller
 
     public function show(Syllabus $syllabus)
     {
-        $syllabus->load([
-            'course.program',
-            'components',
-            'courseOutcomes.programOutcomes',
-            'academicCalendar',
-            'preparer',
-            'chair',
-            'dean',
-            'revisions',
-        ]);
+        $this->authorizeSyllabusAccess($syllabus);
 
-        return view('Syllabus.show', compact('syllabus'));
+        // Dedicated show page is not used; use preview as canonical view.
+        return redirect()->route('syllabus.preview', ['syllabus' => $syllabus->id]);
     }
 
     public function preview(Syllabus $syllabus)
     {
+        $this->authorizeSyllabusAccess($syllabus);
+
         $syllabus->load([
             'course.program.peos',
             'course.program.outcomes',
@@ -190,5 +185,21 @@ class SyllabusController extends Controller
             'program' => $program,
             'groupedCourses' => $groupedCourses,
         ];
+    }
+
+    /**
+     * @throws AuthorizationException
+     */
+    private function authorizeSyllabusAccess(Syllabus $syllabus): void
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            throw new AuthorizationException('Unauthorized');
+        }
+
+        if ($syllabus->prepared_by !== $user->id && !$user->hasRole('admin')) {
+            throw new AuthorizationException('Unauthorized');
+        }
     }
 }

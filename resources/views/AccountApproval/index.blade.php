@@ -4,7 +4,6 @@
 
     <x-header-with-button title="User Accounts"
                         description="Manage user access, statuses, and role assignments">
-        <x-button variant="cancel" href="{{ route('dashboard') }}">Back</x-button>
     </x-header-with-button>
 
     <div class="overflow-x-auto rounded-2xl border border-slate-200/80 bg-white/90 shadow-sm">

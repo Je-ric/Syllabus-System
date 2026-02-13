@@ -17,7 +17,7 @@
 
         <div class="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded">
             <p class="text-yellow-800 font-semibold">
-                ⏳ Pending Approval
+                Pending Approval
             </p>
             <p class="text-sm text-yellow-700 mt-2">
                 Your account is waiting for OLOI approval. You'll be able to access the system once approved.
@@ -28,7 +28,7 @@
             You will receive a notification once your account is activated.
         </p>
 
-        <a href="{{ route('login') }}" class="inline-block bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">
+        <a href="{{ route('auth.show') }}" class="inline-block bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">
             Back to Login
         </a>
     </div>

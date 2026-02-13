@@ -23,20 +23,22 @@ class AccountApprovalController extends Controller
 
     public function approve(Request $request)
     {
-        $user = User::find($request->input('user_id'));
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
 
-        if ($user) {
-            $user->account_status = 'active';
-            $user->save();
+        $user = User::findOrFail($request->input('user_id'));
 
-            $facultyRole = Role::where('name', '=', 'faculty')->first();  // Assign faculty role if not already assigned
+        $user->account_status = 'active';
+        $user->save();
 
-            if ($facultyRole && !$user->roles()->wherePivot('role_id', $facultyRole->id)->exists()) {
-                $user->roles()->attach($facultyRole->id);
-            }
+        $facultyRole = Role::where('name', '=', 'faculty')->first();  // Assign faculty role if not already assigned
 
-            Mail::to($user->email)->send(new AccountStatusUpdated($user, 'active'));
+        if ($facultyRole && !$user->roles()->wherePivot('role_id', $facultyRole->id)->exists()) {
+            $user->roles()->attach($facultyRole->id);
         }
+
+        Mail::to($user->email)->send(new AccountStatusUpdated($user, 'active'));
 
         return redirect()->route('accounts.approval')
             ->with('toast', [
@@ -47,13 +49,15 @@ class AccountApprovalController extends Controller
 
     public function reject(Request $request)
     {
-        $user = User::find($request->input('user_id'));
-        if ($user) {
-            $user->account_status = "rejected";
-            $user->save();
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
 
-            Mail::to($user->email)->send(new AccountStatusUpdated($user, 'rejected'));
-        }
+        $user = User::findOrFail($request->input('user_id'));
+        $user->account_status = "rejected";
+        $user->save();
+
+        Mail::to($user->email)->send(new AccountStatusUpdated($user, 'rejected'));
 
         return redirect()->route('accounts.approval')
             ->with('toast', [
@@ -64,11 +68,13 @@ class AccountApprovalController extends Controller
 
     public function restore(Request $request)
     {
-        $user = User::find($request->input('user_id'));
-        if ($user) {
-            $user->account_status = "pending";
-            $user->save();
-        }
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        $user = User::findOrFail($request->input('user_id'));
+        $user->account_status = "pending";
+        $user->save();
 
         return redirect()->route('accounts.approval')
             ->with('toast', [
@@ -79,14 +85,15 @@ class AccountApprovalController extends Controller
 
     public function disable(Request $request)
     {
-        $user = User::find($request->input('user_id'));
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
 
-        if ($user) {
-            $user->account_status = "disabled";
-            $user->save();
+        $user = User::findOrFail($request->input('user_id'));
+        $user->account_status = "disabled";
+        $user->save();
 
-            Mail::to($user->email)->send(new AccountStatusUpdated($user, 'disabled'));
-        }
+        Mail::to($user->email)->send(new AccountStatusUpdated($user, 'disabled'));
 
         return redirect()->route('accounts.approval')
             ->with('toast', [

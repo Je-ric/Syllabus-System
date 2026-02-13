@@ -134,8 +134,14 @@ class CourseController extends Controller
 
     public function show(Course $course)
     {
-        $course->loadMissing(['program', 'programOutcomes', 'creator']);
-        return view('Course.show', compact('course'));
+        // Course details are presented via modal in the listing.
+        // Keep this endpoint as a safe fallback redirect.
+        return redirect()
+            ->route('courses.index', ['program_id' => $course->program_id])
+            ->with('toast', [
+                'message' => 'Course details are available in the course list view modal.',
+                'type' => 'info',
+            ]);
     }
 
     public function update(Request $request, Course $course)
