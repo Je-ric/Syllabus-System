@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AcademicCalendar;
 use App\Models\AcademicCalendarEvent;
-// use Illuminate\Http\Request;
+use Illuminate\Http\Request;
 
 class AcademicCalendarEventController extends Controller
 {
@@ -24,65 +24,74 @@ class AcademicCalendarEventController extends Controller
         return view('AcademicCalendarEvent.index', compact('semesters', 'academicYear'));
     }
 
-    // public function store(Request $request, AcademicCalendar $semester)
-    // {
-    //     $request->validate([
-    //         'type' => 'required|in:holiday,exam,break,other',
-    //         'name' => 'required|string',
-    //         'date' => [
-    //             'required',
-    //             'date',
-    //             'after_or_equal:' . $semester->start_date,
-    //             'before_or_equal:' . $semester->end_date,
-    //             // Custom unique validation
-    //             function($attribute, $value, $fail) use ($semester) {
-    //                 if ($semester->events()->where('date', $value)->exists()) {
-    //                     $fail('An event for this date already exists in this semester.');
-    //                 }
-    //             }
-    //         ],
-    //     ]);
+    public function store(Request $request, AcademicCalendar $semester)
+    {
+        $request->validate([
+            'type' => 'required|in:holiday,exam,break,other',
+            'name' => 'required|string',
+            'date' => [
+                'required',
+                'date',
+                'after_or_equal:' . $semester->start_date,
+                'before_or_equal:' . $semester->end_date,
+                // Custom unique validation
+                function($attribute, $value, $fail) use ($semester) {
+                    if ($semester->events()->where('date', $value)->exists()) {
+                        $fail('An event for this date already exists in this semester.');
+                    }
+                }
+            ],
+        ]);
 
-    //     $semester->events()->create($request->all());
+        $semester->events()->create($request->all());
 
-    //     return redirect()->route('academic.calendar.events.index', $semester->academic_year)
-    //                         ->with('success', 'Event added successfully.');
-    // }
+        return redirect()->route('academic.calendar.events.index', $semester->academic_year)
+                        ->with('toast', [
+                            'message' => 'Event added successfully.',
+                            'type' => 'success'
+                        ]);
+    }
 
-    // public function update(Request $request, AcademicCalendarEvent $event)
-    // {
-    //     $semester = $event->calendar;
+    public function update(Request $request, AcademicCalendarEvent $event)
+    {
+        $semester = $event->calendar;
 
-    //     $request->validate([
-    //         'type' => 'required|in:holiday,exam,break,other',
-    //         'name' => 'required|string',
-    //         'date' => [
-    //             'required',
-    //             'date',
-    //             'after_or_equal:' . $semester->start_date,
-    //             'before_or_equal:' . $semester->end_date,
-    //             // Custom unique validation (exclude current event)
-    //             function($attribute, $value, $fail) use ($semester, $event) {
-    //                 if ($semester->events()->where('date', $value)->where('id', '!=', $event->id)->exists()) {
-    //                     $fail('An event for this date already exists in this semester.');
-    //                 }
-    //             }
-    //         ],
-    //     ]);
+        $request->validate([
+            'type' => 'required|in:holiday,exam,break,other',
+            'name' => 'required|string',
+            'date' => [
+                'required',
+                'date',
+                'after_or_equal:' . $semester->start_date,
+                'before_or_equal:' . $semester->end_date,
+                // Custom unique validation (exclude current event)
+                function($attribute, $value, $fail) use ($semester, $event) {
+                    if ($semester->events()->where('date', $value)->where('id', '!=', $event->id)->exists()) {
+                        $fail('An event for this date already exists in this semester.');
+                    }
+                }
+            ],
+        ]);
 
-    //     $event->update($request->only(['type', 'name', 'date']));
+        $event->update($request->only(['type', 'name', 'date']));
 
-    //     return redirect()->route('academic.calendar.events.index', $semester->academic_year)
-    //                         ->with('success', 'Event updated successfully.');
-    // }
+        return redirect()->route('academic.calendar.events.index', $semester->academic_year)
+                        ->with('toast', [
+                    'message' => 'Event updated succesffully.',
+                    'type' => 'success'
+                ]);
+    }
 
-    // public function destroy(AcademicCalendarEvent $event)
-    // {
-    //     $academicYear = $event->calendar->academic_year;
-    //     $event->delete();
+    public function destroy(AcademicCalendarEvent $event)
+    {
+        $academicYear = $event->calendar->academic_year;
+        $event->delete();
 
-    //     return redirect()->route('academic.calendar.events.index', $academicYear)
-    //                         ->with('success', 'Event deleted successfully.');
-    // }
+        return redirect()->route('academic.calendar.events.index', $academicYear)
+                        ->with('toast', [
+                    'message' => 'Event deleted succesffully.',
+                    'type' => 'success'
+                ]);
+    }
 
 }
