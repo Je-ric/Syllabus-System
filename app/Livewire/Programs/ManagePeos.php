@@ -37,6 +37,13 @@ class ManagePeos extends Component
 
     public function savePeos(array $peosData): void
     {
+        foreach ($peosData as $index => $peoData) {
+            if (trim((string) ($peoData['peo_text'] ?? '')) === '') {
+                $this->dispatch('lw-toast', type: 'warning', message: 'PEO row ' . ($index + 1) . ' is blank.');
+                return;
+            }
+        }
+
         $existingIds  = $this->program->peos()->pluck('id')->toArray();
         $submittedIds = [];
 
@@ -61,6 +68,7 @@ class ManagePeos extends Component
 
         $this->loadPeos();
         session()->flash('message', 'PEOs saved and re-sequenced successfully!');
+        $this->dispatch('lw-toast', type: 'success', message: 'PEOs saved.');
         $this->dispatch('peosUpdated', programId: $this->program->id);
     }
 

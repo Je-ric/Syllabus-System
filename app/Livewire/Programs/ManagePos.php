@@ -73,6 +73,13 @@ class ManagePos extends Component
     }
     public function savePos(array $posData, array $mappingData): void
     {
+        foreach ($posData as $index => $poData) {
+            if (trim((string) ($poData['po_text'] ?? '')) === '') {
+                $this->dispatch('lw-toast', type: 'warning', message: 'PO row ' . ($index + 1) . ' is blank.');
+                return;
+            }
+        }
+
         $existingIds  = $this->program->outcomes()->pluck('id')->toArray();
         $submittedIds = [];
 
@@ -101,6 +108,29 @@ class ManagePos extends Component
         $this->loadMapping();
 
         session()->flash('message', 'POs saved and re-sequenced successfully!');
+        $this->dispatch('lw-toast', type: 'success', message: 'POs saved.');
+    }
+
+    public function toggleMapping(int $poId, int $peoId, bool $checked): void
+    {
+        $po = ProgramOutcome::where('program_id', $this->program->id)->find($poId);
+        if (!$po) {
+            $this->dispatch('lw-toast', type: 'warning', message: 'Save PO row first before mapping.');
+            return;
+        }
+
+        $validPeoIds = $this->program->peos()->pluck('id')->all();
+        if (!in_array($peoId, $validPeoIds, true)) {
+            return;
+        }
+
+        if ($checked) {
+            $po->peos()->syncWithoutDetaching([$peoId]);
+        } else {
+            $po->peos()->detach($peoId);
+        }
+
+        $this->loadMapping();
     }
 
 

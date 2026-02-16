@@ -170,6 +170,15 @@
 
                 // Update mapping
                 this.mapping[poId] = currentMappings;
+
+                // Persist mapping instantly for saved PO rows.
+                if (poId) {
+                    @this.call('toggleMapping', poId, peoId, checked)
+                        .catch(() => {
+                            this.flashMessage = 'Mapping update failed.';
+                            setTimeout(() => this.flashMessage = '', 2500);
+                        });
+                }
             },
 
             // Save all POs
