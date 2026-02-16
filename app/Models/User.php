@@ -127,9 +127,11 @@ class User extends Authenticatable
     /**
      * Get the user's primary department assignment (chair or faculty)
      * Returns the first department assignment found
+     *
+     * @return \App\Models\UserAssignment|null
      */
     // Used in: objective_index() - ObjectiveController; assignChair() - OrganizationalHierarchyController; preselectFromUserAssignments() - ProgramSelector
-    public function getPrimaryDepartmentAssignment()
+    public function getPrimaryDepartmentAssignment(): ?UserAssignment
     {
         // Check for chair assignment first (most specific)
         $chairAssignment = $this->assignments()
@@ -155,9 +157,11 @@ class User extends Authenticatable
     /**
      * Get the user's primary college assignment (dean)
      * Returns the first college assignment found
+     *
+     * @return \App\Models\UserAssignment|null
      */
     // Used in: goal_index() - GoalController; assignDean() - OrganizationalHierarchyController; preselectFromUserAssignments() - ProgramSelector
-    public function getPrimaryCollegeAssignment()
+    public function getPrimaryCollegeAssignment(): ?UserAssignment
     {
         return $this->assignments()
             ->where('context', 'dean')

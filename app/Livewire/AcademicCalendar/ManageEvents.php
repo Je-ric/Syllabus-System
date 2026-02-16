@@ -26,14 +26,16 @@ class ManageEvents extends Component
 
     public function addEvent(int $semesterId): void
     {
+        // Validate semester exists
         $semester = $this->semesters->firstWhere('id', $semesterId);
         if (!$semester) {
             return;
         }
 
         $payload = $this->newEvent[$semesterId] ?? [];
-        $date = (string) ($payload['date'] ?? '');
+        $date = (string) ($payload['date'] ?? ''); // 
 
+        //
         $this->validate([
             "newEvent.$semesterId.type" => 'required|in:holiday,exam,break,other',
             "newEvent.$semesterId.name" => 'required|string|max:255',

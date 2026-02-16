@@ -10,7 +10,7 @@
     @if (session('toast'))
         <x-feedback-status.toast :message="session('toast')['message']" :type="session('toast')['type']" />
     @endif
-    <div id="realtime-toast" class="fixed top-6 right-6 z-9999 hidden px-4 py-3 rounded-lg shadow-lg text-sm font-medium"></div>
+    <x-feedback-status.toast realtime />
 
     <div class="min-h-screen">
         <div id="sidebar-overlay" class="fixed inset-0 bg-green-900/50 backdrop-blur-sm z-30 hidden lg:hidden"></div>
@@ -204,30 +204,6 @@
             }
         });
 
-        const realtimeToast = document.getElementById('realtime-toast');
-        let realtimeToastTimer = null;
-        window.addEventListener('lw-toast', (event) => {
-            if (!realtimeToast) return;
-
-            const detail = event?.detail || {};
-            const type = detail.type || 'info';
-            const message = detail.message || '';
-            const color = {
-                success: 'bg-emerald-600 text-white',
-                error: 'bg-rose-600 text-white',
-                warning: 'bg-amber-500 text-white',
-                info: 'bg-slate-700 text-white',
-            }[type] || 'bg-slate-700 text-white';
-
-            realtimeToast.className = `fixed top-6 right-6 z-[9999] px-4 py-3 rounded-lg shadow-lg text-sm font-medium ${color}`;
-            realtimeToast.textContent = message;
-            realtimeToast.classList.remove('hidden');
-
-            if (realtimeToastTimer) clearTimeout(realtimeToastTimer);
-            realtimeToastTimer = setTimeout(() => {
-                realtimeToast.classList.add('hidden');
-            }, 2400);
-        });
     </script>
 </body>
 
