@@ -47,7 +47,7 @@
                         {{-- Current Dean --}}
                         @if ($deanAssignments->get($college->id)?->first())
                             <div class="border border-emerald-200 rounded-lg p-4 bg-linear-to-br from-emerald-50 to-green-50 hover:from-emerald-100 hover:to-green-100 transition-colors">
-                                <p class="text-xs uppercase tracking-wider text-emerald-800 font-semibold flex items-center gap-2 mb-3">
+                                <p class="text-xs uppercase tracking-[0.2em] text-emerald-800 font-semibold flex items-center gap-2 mb-3">
                                     <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-700 text-white text-xs">
                                         <i class="bx bxs-user-badge text-xs"></i>
                                     </span>
@@ -75,7 +75,7 @@
                                             <input type="hidden" name="user_id" value="{{ $dean->id }}">
 
                                             <button type="submit"
-                                                class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition flex items-center gap-1 text-sm"
+                                                class="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition flex items-center gap-1 text-sm"
                                                 title="Remove dean">
                                                 <i class="bx bx-trash text-base"></i>
                                             </button>

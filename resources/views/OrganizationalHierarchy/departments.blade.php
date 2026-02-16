@@ -3,12 +3,14 @@
 @section('content')
 
     <x-header-with-button title="{{ $college->name }}" description="Manage department leadership, faculty assignments, and academic structure">
-        <x-button variant="cancel" href="{{ route('organizational.colleges.index') }}">← Back to Colleges</x-button>
+        <x-button variant="cancel" href="{{ route('organizational.colleges.index') }}">
+            <i class="bx bx-left-arrow-alt"></i> Back to Colleges
+        </x-button>
     </x-header-with-button>
 
     {{-- No Departments --}}
     @if ($college->departments->isEmpty())
-        <div class="border border-emerald-200 rounded-xl p-12 text-center bg-gradient-to-br from-emerald-50 to-green-50 shadow-sm">
+        <div class="border border-emerald-200 rounded-xl p-12 text-center bg-linear-to-br from-emerald-50 to-green-50 shadow-sm">
             <div class="flex justify-center mb-4">
                 <i class="bx bxs-building text-5xl text-emerald-300"></i>
             </div>
@@ -30,7 +32,7 @@
                     {{-- Department Header --}}
                     <div class="bg-emerald-800 px-6 py-5 flex justify-between items-center">
                         <div class="flex items-center gap-4 min-w-0 flex-1">
-                            <div class="flex-shrink-0 w-11 h-11 rounded-lg bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center shadow-md">
+                            <div class="shrink-0 w-11 h-11 rounded-lg bg-linear-to-br from-amber-400 to-yellow-500 flex items-center justify-center shadow-md">
                                 <i class="bx bxs-buildings text-white text-lg font-bold"></i>
                             </div>
                             <h2 class="text-lg font-bold text-white truncate" title="{{ $department->name }}">
@@ -54,7 +56,7 @@
                         <div>
                             <div class="flex items-center gap-2 mb-3">
                                 <i class="bx bxs-user-badge text-emerald-700 text-lg"></i>
-                                <h3 class="text-xs uppercase tracking-wider text-emerald-800 font-semibold">
+                                <h3 class="text-xs uppercase tracking-[0.2em] text-emerald-800 font-semibold">
                                     Department Chair
                                 </h3>
                             </div>
@@ -64,7 +66,7 @@
                                     $chair = $chairAssignments->get($department->id)->first()->user;
                                 @endphp
 
-                                <div class="border border-emerald-200 rounded-lg p-4 bg-gradient-to-br from-emerald-50 to-green-50 hover:from-emerald-100 hover:to-green-100 transition-colors flex justify-between items-start gap-4">
+                                <div class="border border-emerald-200 rounded-lg p-4 bg-linear-to-br from-emerald-50 to-green-50 hover:from-emerald-100 hover:to-green-100 transition-colors flex justify-between items-start gap-4">
                                     <div class="flex-1 min-w-0">
                                         <p class="font-semibold text-emerald-900 leading-tight" title="{{ $chair->name }}">
                                             {{ $chair->name }}
@@ -80,7 +82,7 @@
                                         <input type="hidden" name="user_id" value="{{ $chair->id }}">
 
                                         <button type="submit"
-                                            class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                                            class="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition"
                                             title="Remove chair">
                                             <i class="bx bx-trash text-base"></i>
                                         </button>
@@ -114,7 +116,7 @@
                             <div class="flex items-center justify-between mb-4">
                                 <div class="flex items-center gap-2">
                                     <i class="bx bxs-group text-emerald-700 text-lg"></i>
-                                    <h3 class="text-xs uppercase tracking-wider text-emerald-800 font-semibold">
+                                    <h3 class="text-xs uppercase tracking-[0.2em] text-emerald-800 font-semibold">
                                         Faculty Members
                                     </h3>
                                 </div>
@@ -154,7 +156,7 @@
                                                     <input type="hidden" name="user_id" value="{{ $facultyAssignment->user->id }}">
 
                                                     <button type="submit"
-                                                        class="p-1.5 text-red-600 hover:bg-red-50 rounded transition"
+                                                        class="p-1.5 text-rose-600 hover:bg-rose-50 rounded transition"
                                                         title="Remove faculty">
                                                         <i class="bx bx-trash text-base"></i>
                                                     </button>

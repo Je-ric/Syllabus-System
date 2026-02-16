@@ -25,11 +25,11 @@
     class="text-xs uppercase tracking-[0.25em] text-slate-500 {{ $class }}"
 >
     @if($icon)
-        <i class="bx {{ $icon }} text-green-800 mr-1"></i>
+        <i class="bx {{ $icon }} text-emerald-700 mr-1"></i>
     @endif
     {{ $slot }}
     @if($isRequired)
-        <span class="text-red-600 font-extrabold text-lg">*</span>
+        <span class="text-rose-600 font-bold text-sm">*</span>
     @endif
 </label>
 

@@ -9,15 +9,15 @@
         @csrf
         <input type="hidden" name="college_id" value="{{ $collegeId }}">
 
-        <x-modal.header class="bg-blue-50">
+        <x-modal.header>
             <h3 class="text-lg font-semibold text-slate-900">Assign Dean</h3>
             <p class="text-sm text-slate-600 mt-1">{{ $collegeName }}</p>
         </x-modal.header>
 
-        <div class="p-6 space-y-4">
+        <x-modal.body>
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-2">Select Dean</label>
-                <select name="user_id" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <x-form.label for="assignDeanUser{{ $collegeId }}" variant="user">Select Dean</x-form.label>
+                <select id="assignDeanUser{{ $collegeId }}" name="user_id" class="mt-2 w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-2.5 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200" required>
                     <option value="">-- Choose a user --</option>
                     @foreach ($potentialDeans as $user)
                         <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
@@ -27,13 +27,13 @@
                     <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
-        </div>
+        </x-modal.body>
 
         <x-modal.footer>
             <x-modal.close-button variant="cancel" :modalId="'assignDeanModal-' . $collegeId" text="Cancel" />
-            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
+            <x-button type="submit" variant="save">
                 Assign Dean
-            </button>
+            </x-button>
         </x-modal.footer>
     </form>
 </x-modal.dialog>

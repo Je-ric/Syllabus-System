@@ -29,11 +29,29 @@ $variant = [
     'lec_lab' => 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200',
 ];
 
+$icons = [
+    'success' => 'bx bx-check-circle',
+    'neutral' => 'bx bx-minus-circle',
+    'info' => 'bx bx-info-circle',
+    'warning' => 'bx bx-error-circle',
+    'danger' => 'bx bx-x-circle',
+    'active' => 'bx bx-check-shield',
+    'pending' => 'bx bx-time-five',
+    'rejected' => 'bx bx-block',
+    'disabled' => 'bx bx-pause-circle',
+    'admin' => 'bx bx-crown',
+    'dean' => 'bx bx-medal',
+    'chair' => 'bx bx-user-pin',
+    'faculty' => 'bx bx-user',
+    'lec' => 'bx bx-book',
+    'lec_lab' => 'bx bx-flask',
+];
+
 $style = $variant[$status] ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-300';
 $iconClass = $icon ?? ($icons[$status] ?? '');
 @endphp
 
-<span class="inline-flex items-center gap-1 px-3 py-1 text-xs rounded-full font-medium {{ $style }}">
+<span class="inline-flex items-center gap-1 px-3 py-1 text-xs rounded-full font-semibold {{ $style }}">
     @if($iconClass)
         <i class="{{ $iconClass }}"></i>
     @endif
@@ -42,6 +60,6 @@ $iconClass = $icon ?? ($icons[$status] ?? '');
 
 {{--
 Usage: <x-feedback-status.status-indicator status="success" />
-       <x-feedback-status.status-indicator status="pending" label="Awaiting Approval" />
-       <x-feedback-status.status-indicator status="published" icon="bx-check-circle" />
+        <x-feedback-status.status-indicator status="pending" label="Awaiting Approval" />
+        <x-feedback-status.status-indicator status="published" icon="bx-check-circle" />
 --}}
