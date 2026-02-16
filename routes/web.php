@@ -75,17 +75,16 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/organizational/colleges', [OrganizationalHierarchyController::class, 'collegesIndex'])->name('organizational.colleges.index');
         Route::post('/organizational/assign-dean', [OrganizationalHierarchyController::class, 'assignDean'])->name('organizational.assign-dean');
         Route::post('/organizational/remove-dean', [OrganizationalHierarchyController::class, 'removeDean'])->name('organizational.remove-dean');
-        Route::get('/organizational/college/{collegeId}/departments', [OrganizationalHierarchyController::class, 'departmentsIndex'])->name('organizational.departments.index');
-        Route::post('/organizational/assign-chair', [OrganizationalHierarchyController::class, 'assignChair'])->name('organizational.assign-chair');
-        Route::post('/organizational/remove-chair', [OrganizationalHierarchyController::class, 'removeChair'])->name('organizational.remove-chair');
-        Route::post('/organizational/assign-faculty', [OrganizationalHierarchyController::class, 'assignFaculty'])->name('organizational.assign-faculty');
-        Route::post('/organizational/remove-faculty', [OrganizationalHierarchyController::class, 'removeFaculty'])->name('organizational.remove-faculty');
 
     });
 
     Route::middleware(['role:admin,dean,chair'])->group(function () {
         Route::get('/organizational/hierarchy', [OrganizationalHierarchyController::class, 'hierarchyView'])->name('organizational.hierarchy');
-
+        Route::get('/organizational/college/{collegeId}/departments', [OrganizationalHierarchyController::class, 'departmentsIndex'])->name('organizational.departments.index');
+        Route::post('/organizational/assign-chair', [OrganizationalHierarchyController::class, 'assignChair'])->name('organizational.assign-chair');
+        Route::post('/organizational/remove-chair', [OrganizationalHierarchyController::class, 'removeChair'])->name('organizational.remove-chair');
+        Route::post('/organizational/assign-faculty', [OrganizationalHierarchyController::class, 'assignFaculty'])->name('organizational.assign-faculty');
+        Route::post('/organizational/remove-faculty', [OrganizationalHierarchyController::class, 'removeFaculty'])->name('organizational.remove-faculty');
     });
 
     Route::middleware(['role:admin,dean'])->group(function () {

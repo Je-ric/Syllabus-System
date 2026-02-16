@@ -1,6 +1,10 @@
 @extends('layouts.app')
 
 @section('content')
+    @php
+        $canManageChair = $canManageChair ?? false;
+        $canManageFaculty = $canManageFaculty ?? false;
+    @endphp
 
     <x-header-with-button title="{{ $college->name }}" description="Manage department leadership, faculty assignments, and academic structure">
         <x-button variant="cancel" href="{{ route('organizational.colleges.index') }}">
@@ -40,13 +44,15 @@
                             </h2>
                         </div>
 
-                        <x-button
-                            onclick="document.getElementById('assignFacultyModal-{{ $department->id }}').showModal()"
-                            variant="secondary"
-                            class="ml-4 text-sm font-medium flex items-center gap-2">
-                            <i class="bx bx-user-plus"></i>
-                            Add Faculty
-                        </x-button>
+                        @if($canManageFaculty)
+                            <x-button
+                                onclick="document.getElementById('assignFacultyModal-{{ $department->id }}').showModal()"
+                                variant="secondary"
+                                class="ml-4 text-sm font-medium flex items-center gap-2">
+                                <i class="bx bx-user-plus"></i>
+                                Add Faculty
+                            </x-button>
+                        @endif
                     </div>
 
                     {{-- CARD BODY --}}
@@ -76,17 +82,19 @@
                                         </p>
                                     </div>
 
-                                    <form action="{{ route('organizational.remove-chair') }}" method="POST" class="shrink-0">
-                                        @csrf
-                                        <input type="hidden" name="department_id" value="{{ $department->id }}">
-                                        <input type="hidden" name="user_id" value="{{ $chair->id }}">
+                                    @if($canManageChair)
+                                        <form action="{{ route('organizational.remove-chair') }}" method="POST" class="shrink-0">
+                                            @csrf
+                                            <input type="hidden" name="department_id" value="{{ $department->id }}">
+                                            <input type="hidden" name="user_id" value="{{ $chair->id }}">
 
-                                        <button type="submit"
-                                            class="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition"
-                                            title="Remove chair">
-                                            <i class="bx bx-trash text-base"></i>
-                                        </button>
-                                    </form>
+                                            <button type="submit"
+                                                class="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                                                title="Remove chair">
+                                                <i class="bx bx-trash text-base"></i>
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             @else
                                 <div class="border border-dashed border-emerald-300 rounded-lg p-5 text-center bg-emerald-50 hover:bg-green-50 transition-colors">
@@ -94,7 +102,7 @@
                                     <p class="text-emerald-700 text-sm font-medium mb-3">
                                         No chair assigned
                                     </p>
-                                    @if ($potentialChairs->count() > 0)
+                                    @if ($canManageChair && $potentialChairs->count() > 0)
                                         <x-button
                                             onclick="document.getElementById('assignChairModal-{{ $department->id }}').showModal()"
                                             variant="secondary"
@@ -102,7 +110,7 @@
                                             <i class="bx bx-user-plus mr-1"></i>
                                             Assign Chair
                                         </x-button>
-                                    @else
+                                    @elseif($canManageChair)
                                         <p class="text-xs text-emerald-600 font-medium">
                                             No available users to assign
                                         </p>
@@ -149,18 +157,20 @@
                                                     @endif
                                                 </div>
 
-                                                <form action="{{ route('organizational.remove-faculty') }}"
-                                                    method="POST" class="shrink-0 ml-3">
-                                                    @csrf
-                                                    <input type="hidden" name="department_id" value="{{ $department->id }}">
-                                                    <input type="hidden" name="user_id" value="{{ $facultyAssignment->user->id }}">
+                                                @if($canManageFaculty)
+                                                    <form action="{{ route('organizational.remove-faculty') }}"
+                                                        method="POST" class="shrink-0 ml-3">
+                                                        @csrf
+                                                        <input type="hidden" name="department_id" value="{{ $department->id }}">
+                                                        <input type="hidden" name="user_id" value="{{ $facultyAssignment->user->id }}">
 
-                                                    <button type="submit"
-                                                        class="p-1.5 text-rose-600 hover:bg-rose-50 rounded transition"
-                                                        title="Remove faculty">
-                                                        <i class="bx bx-trash text-base"></i>
-                                                    </button>
-                                                </form>
+                                                        <button type="submit"
+                                                            class="p-1.5 text-rose-600 hover:bg-rose-50 rounded transition"
+                                                            title="Remove faculty">
+                                                            <i class="bx bx-trash text-base"></i>
+                                                        </button>
+                                                    </form>
+                                                @endif
                                             </div>
                                         @endforeach
                                     </div>
@@ -179,19 +189,23 @@
                     </div>
 
                     {{-- MODALS --}}
-                    @include('OrganizationalHierarchy.modals.assignChairModal', [
-                        'departmentId' => $department->id,
-                        'departmentName' => $department->name,
-                        'potentialChairs' => $potentialChairs,
-                    ])
+                    @if($canManageChair)
+                        @include('OrganizationalHierarchy.modals.assignChairModal', [
+                            'departmentId' => $department->id,
+                            'departmentName' => $department->name,
+                            'potentialChairs' => $potentialChairs,
+                        ])
+                    @endif
 
-                    @include('OrganizationalHierarchy.modals.assignFacultyModal', [
-                        'departmentId' => $department->id,
-                        'departmentName' => $department->name,
-                        'potentialFaculty' => $potentialFaculty,
-                        'assignedFacultyIds' =>
-                            $facultyAssignments->get($department->id)?->pluck('user_id')->toArray() ?? [],
-                    ])
+                    @if($canManageFaculty)
+                        @include('OrganizationalHierarchy.modals.assignFacultyModal', [
+                            'departmentId' => $department->id,
+                            'departmentName' => $department->name,
+                            'potentialFaculty' => $potentialFaculty,
+                            'assignedFacultyIds' =>
+                                $facultyAssignments->get($department->id)?->pluck('user_id')->toArray() ?? [],
+                        ])
+                    @endif
 
                 </div>
             @endforeach

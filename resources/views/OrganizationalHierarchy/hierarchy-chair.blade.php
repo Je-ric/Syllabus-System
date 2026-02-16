@@ -3,9 +3,6 @@
 @section('content')
 
     <x-header-with-button title="{{ $department->name }}" description="Department Chair Overview">
-        <x-button variant="cancel" href="{{ route('dashboard') }}">
-            <i class="bx bx-left-arrow-alt"></i> Back to Dashboard
-        </x-button>
     </x-header-with-button>
 
     <div class="rounded-2xl border border-emerald-200 bg-linear-to-r from-emerald-700 to-emerald-600 p-6 mb-8 shadow-md">
@@ -13,6 +10,11 @@
             <div>
                 <p class="text-sm text-emerald-100 font-medium">Your Role</p>
                 <p class="text-2xl font-bold text-white mt-1">Chair of {{ $department->name }}</p>
+                <div class="mt-3">
+                    <x-button href="{{ route('organizational.departments.index', $department->college_id) }}" variant="secondary">
+                        <i class="bx bx-user-plus mr-1"></i> Manage Faculty
+                    </x-button>
+                </div>
             </div>
             <div class="text-left md:text-right">
                 <p class="text-sm text-emerald-100 font-medium">Faculty Members</p>

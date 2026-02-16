@@ -6,10 +6,14 @@ use App\Models\College;
 use App\Models\Department;
 use App\Models\User;
 use App\Models\UserAssignment;
-use App\Models\Role;
+// use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Throwable;
 
+
+// MOSTLY: this controller should be just small, pero naging mahaba siya because of if conditions checker.
 class OrganizationalHierarchyController extends Controller
 {
 
@@ -85,15 +89,27 @@ class OrganizationalHierarchyController extends Controller
             ]);
         }
 
-        // Create dean assignment
-        UserAssignment::create([
-            'user_id' => $user->id,
-            'college_id' => $college->id,
-            'department_id' => null,
-            'context' => 'dean',
-        ]);
+        try {
+            DB::beginTransaction();
 
-        $user->ensureFacultyRoleAndAssignment($college->id, null); // User.php
+            // Create dean assignment
+            UserAssignment::create([
+                'user_id' => $user->id,
+                'college_id' => $college->id,
+                'department_id' => null,
+                'context' => 'dean',
+            ]);
+
+            $user->ensureFacultyRoleAndAssignment($college->id, null); // User.php
+
+            DB::commit();
+        } catch (Throwable $e) {
+            DB::rollBack();
+            return back()->with('toast', [
+                'message' => 'Failed to assign dean. Please try again.',
+                'type' => 'error'
+            ]);
+        }
 
         return back()->with('toast', [
             'message' => "{$user->name} is now dean of {$college->name}.",
@@ -109,10 +125,22 @@ class OrganizationalHierarchyController extends Controller
             'user_id' => 'required|exists:users,id',
         ]);
 
-        UserAssignment::where('college_id', $request->college_id)
-            ->where('user_id', $request->user_id)
-            ->where('context', 'dean')
-            ->delete();
+        try {
+            DB::beginTransaction();
+
+            UserAssignment::where('college_id', $request->college_id)
+                ->where('user_id', $request->user_id)
+                ->where('context', 'dean')
+                ->delete();
+
+            DB::commit();
+        } catch (Throwable $e) {
+            DB::rollBack();
+            return back()->with('toast', [
+                'message' => 'Failed to remove dean assignment. Please try again.',
+                'type' => 'error'
+            ]);
+        }
 
         return back()->with('toast', [
             'message' => 'Dean assignment removed.',
@@ -127,15 +155,48 @@ class OrganizationalHierarchyController extends Controller
     // Display departments with chair assignments for a college
     public function departmentsIndex($collegeId)
     {
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
         $college = College::with('departments')->findOrFail($collegeId);
+
+        $isAdmin = $user?->hasRole('admin') ?? false;
+        $isDean = $user?->isDean() ?? false;
+        $chairAssignment = $user?->assignments()->where('context', 'chair')->with('department')->first();
+        $isChair = (bool) $chairAssignment;
+
+        // Scope access:
+        // - admin: full access
+        // - dean: only their college
+        // - chair: only their own department within this college
+        if ($isDean && !$isAdmin) {
+            $deanAssignment = $user?->getPrimaryCollegeAssignment();
+            if (!$deanAssignment || (int) $deanAssignment->college_id !== (int) $college->id) {
+                abort(403, 'Unauthorized college access.');
+            }
+        }
+
+        if ($isChair && !$isAdmin && !$isDean) {
+            $chairDepartmentId = (int) ($chairAssignment->department_id ?? 0);
+            if ($chairDepartmentId === 0 || !$college->departments->contains('id', $chairDepartmentId)) {
+                abort(403, 'Unauthorized department access.');
+            }
+            $college->setRelation('departments', $college->departments->where('id', $chairDepartmentId)->values());
+        }
+
+        $canManageChair = $isAdmin || $isDean;
+        $canManageFaculty = $isAdmin || $isDean || $isChair;
 
         // Get users who could be chairs (active with admin/chair role)
         // EXCLUDE users already assigned as chairs of ANY department
-        $potentialChairs = $this->getPotentialUsers(['admin', 'chair'], 'chair');
+        $potentialChairs = $canManageChair
+            ? $this->getPotentialUsers(['admin', 'chair'], 'chair')
+            : collect();
 
         // Get potential faculty (users with faculty role, not already assigned to this department)
         $departmentIds = $college->departments->pluck('id')->toArray();
-        $potentialFaculty = $this->getPotentialUsers(['admin', 'faculty']);
+        $potentialFaculty = $canManageFaculty
+            ? $this->getPotentialUsers(['admin', 'faculty'])
+            : collect();
 
         // Get all chair assignments
         $chairAssignments = UserAssignment::whereIn('department_id', $departmentIds)
@@ -151,7 +212,15 @@ class OrganizationalHierarchyController extends Controller
             ->get()
             ->groupBy('department_id');
 
-        return view('OrganizationalHierarchy.departments', compact('college', 'potentialChairs', 'chairAssignments', 'potentialFaculty', 'facultyAssignments'));
+        return view('OrganizationalHierarchy.departments', compact(
+            'college',
+            'potentialChairs',
+            'chairAssignments',
+            'potentialFaculty',
+            'facultyAssignments',
+            'canManageChair',
+            'canManageFaculty'
+        ));
     }
 
     // Assign chair to a department (one chair per department, one department per chair)
@@ -164,6 +233,26 @@ class OrganizationalHierarchyController extends Controller
 
         $department = Department::findOrFail($request->department_id);
         $user = User::findOrFail($request->user_id);
+        /** @var \App\Models\User|null $actor */
+        $actor = Auth::user();
+
+        $actorIsAdmin = $actor?->hasRole('admin') ?? false;
+        $actorIsDean = $actor?->isDean() ?? false;
+        if (!$actorIsAdmin && !$actorIsDean) {
+            return back()->with('toast', [
+                'message' => 'Only admin or dean can assign chairs.',
+                'type' => 'error'
+            ]);
+        }
+        if ($actorIsDean && !$actorIsAdmin) {
+            $deanAssignment = $actor?->getPrimaryCollegeAssignment();
+            if (!$deanAssignment || (int) $deanAssignment->college_id !== (int) $department->college_id) {
+                return back()->with('toast', [
+                    'message' => 'Dean can only assign chairs within their college.',
+                    'type' => 'error'
+                ]);
+            }
+        }
 
         // Check if user has chair role
         if (!$user->hasRole('chair') && !$user->hasRole('admin')) {
@@ -201,15 +290,27 @@ class OrganizationalHierarchyController extends Controller
             ]);
         }
 
-        // Create chair assignment
-        UserAssignment::create([
-            'user_id' => $user->id,
-            'college_id' => null,
-            'department_id' => $department->id,
-            'context' => 'chair',
-        ]);
+        try {
+            DB::beginTransaction();
 
-        $user->ensureFacultyRoleAndAssignment(null, $department->id);
+            // Create chair assignment
+            UserAssignment::create([
+                'user_id' => $user->id,
+                'college_id' => null,
+                'department_id' => $department->id,
+                'context' => 'chair',
+            ]);
+
+            $user->ensureFacultyRoleAndAssignment(null, $department->id);
+
+            DB::commit();
+        } catch (Throwable $e) {
+            DB::rollBack();
+            return back()->with('toast', [
+                'message' => 'Failed to assign chair. Please try again.',
+                'type' => 'error'
+            ]);
+        }
 
         return back()->with('toast', [
             'message' => "{$user->name} is now chair of {$department->name}.",
@@ -225,10 +326,44 @@ class OrganizationalHierarchyController extends Controller
             'user_id' => 'required|exists:users,id',
         ]);
 
-        UserAssignment::where('department_id', $request->department_id)
-            ->where('user_id', $request->user_id)
-            ->where('context', 'chair')
-            ->delete();
+        $department = Department::findOrFail($request->department_id);
+        /** @var \App\Models\User|null $actor */
+        $actor = Auth::user();
+        $actorIsAdmin = $actor?->hasRole('admin') ?? false;
+        $actorIsDean = $actor?->isDean() ?? false;
+
+        if (!$actorIsAdmin && !$actorIsDean) {
+            return back()->with('toast', [
+                'message' => 'Only admin or dean can remove chairs.',
+                'type' => 'error'
+            ]);
+        }
+        if ($actorIsDean && !$actorIsAdmin) {
+            $deanAssignment = $actor?->getPrimaryCollegeAssignment();
+            if (!$deanAssignment || (int) $deanAssignment->college_id !== (int) $department->college_id) {
+                return back()->with('toast', [
+                    'message' => 'Dean can only remove chairs within their college.',
+                    'type' => 'error'
+                ]);
+            }
+        }
+
+        try {
+            DB::beginTransaction();
+
+            UserAssignment::where('department_id', $request->department_id)
+                ->where('user_id', $request->user_id)
+                ->where('context', 'chair')
+                ->delete();
+
+            DB::commit();
+        } catch (Throwable $e) {
+            DB::rollBack();
+            return back()->with('toast', [
+                'message' => 'Failed to remove chair assignment. Please try again.',
+                'type' => 'error'
+            ]);
+        }
 
         return back()->with('toast', [
             'message' => 'Chair assignment removed.',
@@ -249,6 +384,30 @@ class OrganizationalHierarchyController extends Controller
 
         $department = Department::findOrFail($request->department_id);
         $user = User::findOrFail($request->user_id);
+        /** @var \App\Models\User|null $actor */
+        $actor = Auth::user();
+
+        $actorIsAdmin = $actor?->hasRole('admin') ?? false;
+        $actorIsDean = $actor?->isDean() ?? false;
+        $actorChairAssignment = $actor?->assignments()->where('context', 'chair')->first();
+        $actorIsChairOfDepartment = $actorChairAssignment && (int) $actorChairAssignment->department_id === (int) $department->id;
+
+        if (!$actorIsAdmin && !$actorIsDean && !$actorIsChairOfDepartment) {
+            return back()->with('toast', [
+                'message' => 'Unauthorized faculty assignment action.',
+                'type' => 'error'
+            ]);
+        }
+
+        if ($actorIsDean && !$actorIsAdmin) {
+            $deanAssignment = $actor?->getPrimaryCollegeAssignment();
+            if (!$deanAssignment || (int) $deanAssignment->college_id !== (int) $department->college_id) {
+                return back()->with('toast', [
+                    'message' => 'Dean can only assign faculty within their college.',
+                    'type' => 'error'
+                ]);
+            }
+        }
 
         // Check if user has faculty role
         if (!$user->hasRole('faculty') && !$user->hasRole('admin')) {
@@ -269,13 +428,25 @@ class OrganizationalHierarchyController extends Controller
             ]);
         }
 
-        // Create faculty assignment
-        UserAssignment::create([
-            'user_id' => $user->id,
-            'college_id' => null,
-            'department_id' => $department->id,
-            'context' => 'faculty',
-        ]);
+        try {
+            DB::beginTransaction();
+
+            // Create faculty assignment
+            UserAssignment::create([
+                'user_id' => $user->id,
+                'college_id' => null,
+                'department_id' => $department->id,
+                'context' => 'faculty',
+            ]);
+
+            DB::commit();
+        } catch (Throwable $e) {
+            DB::rollBack();
+            return back()->with('toast', [
+                'message' => 'Failed to assign faculty. Please try again.',
+                'type' => 'error'
+            ]);
+        }
 
         return back()->with('toast', [
             'message' => "{$user->name} assigned as faculty to {$department->name}.",
@@ -291,10 +462,48 @@ class OrganizationalHierarchyController extends Controller
             'user_id' => 'required|exists:users,id',
         ]);
 
-        UserAssignment::where('department_id', $request->department_id)
-            ->where('user_id', $request->user_id)
-            ->where('context', 'faculty')
-            ->delete();
+        $department = Department::findOrFail($request->department_id);
+        /** @var \App\Models\User|null $actor */
+        $actor = Auth::user();
+
+        $actorIsAdmin = $actor?->hasRole('admin') ?? false;
+        $actorIsDean = $actor?->isDean() ?? false;
+        $actorChairAssignment = $actor?->assignments()->where('context', 'chair')->first();
+        $actorIsChairOfDepartment = $actorChairAssignment && (int) $actorChairAssignment->department_id === (int) $department->id;
+
+        if (!$actorIsAdmin && !$actorIsDean && !$actorIsChairOfDepartment) {
+            return back()->with('toast', [
+                'message' => 'Unauthorized faculty removal action.',
+                'type' => 'error'
+            ]);
+        }
+
+        if ($actorIsDean && !$actorIsAdmin) {
+            $deanAssignment = $actor?->getPrimaryCollegeAssignment();
+            if (!$deanAssignment || (int) $deanAssignment->college_id !== (int) $department->college_id) {
+                return back()->with('toast', [
+                    'message' => 'Dean can only remove faculty within their college.',
+                    'type' => 'error'
+                ]);
+            }
+        }
+
+        try {
+            DB::beginTransaction();
+
+            UserAssignment::where('department_id', $request->department_id)
+                ->where('user_id', $request->user_id)
+                ->where('context', 'faculty')
+                ->delete();
+
+            DB::commit();
+        } catch (Throwable $e) {
+            DB::rollBack();
+            return back()->with('toast', [
+                'message' => 'Failed to remove faculty assignment. Please try again.',
+                'type' => 'error'
+            ]);
+        }
 
         return back()->with('toast', [
             'message' => 'Faculty assignment removed.',

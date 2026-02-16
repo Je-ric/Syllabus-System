@@ -3,15 +3,17 @@
 @section('content')
 
     <x-header-with-button title="{{ $college->name }}" description="Dean Overview & Organization Structure">
-        <x-button variant="cancel" href="{{ route('dashboard') }}">
-            <i class="bx bx-left-arrow-alt"></i> Back to Dashboard
-        </x-button>
     </x-header-with-button>
 
     <div class="rounded-2xl border border-emerald-200 bg-linear-to-r from-emerald-700 to-emerald-600 p-5 md:p-6 mb-6 shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
             <p class="text-sm text-emerald-100 font-medium">Your Role</p>
             <p class="text-xl md:text-2xl font-bold text-white mt-1">Dean of {{ $college->name }}</p>
+            <div class="mt-3">
+                <x-button href="{{ route('organizational.departments.index', $college->id) }}" variant="secondary">
+                    <i class="bx bx-cog mr-1"></i> Manage Chair and Faculty
+                </x-button>
+            </div>
         </div>
         <div class="text-left md:text-right">
             <p class="text-sm text-emerald-100 font-medium">Total Departments</p>
