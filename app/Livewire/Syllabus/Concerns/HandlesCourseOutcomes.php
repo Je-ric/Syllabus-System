@@ -26,12 +26,14 @@ trait HandlesCourseOutcomes
         // Keep row numbering stable while typing and mark the step as dirty.
         $this->resequenceCourseOutcomes();
         $this->markStepDirty('course_outcomes');
+
     }
 
     public function addCourseOutcome(): void
     {
         if ($this->hasBlankCourseOutcome()) {
             $this->coAddError = 'Please fill the blank CO before adding a new one.';
+            $this->dispatch('lw-toast', type: 'warning', message: $this->coAddError);
             return;
         }
 
@@ -91,6 +93,7 @@ trait HandlesCourseOutcomes
         // Safety guard: prevent accidental full delete when payload is unexpectedly empty.
         if ($existingCos->isNotEmpty() && $validDescriptions->isEmpty()) {
             $this->coAddError = 'At least one Course Outcome description is required before saving.';
+            $this->dispatch('lw-toast', type: 'error', message: $this->coAddError);
             return false;
         }
 

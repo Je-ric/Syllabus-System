@@ -278,22 +278,12 @@ class SyllabusWizard extends Component
             return;
         }
 
-        // Only CO step requires manual save before switching.
+        // Only CO step requires explicit manual save before switching.
         if ($fromStep === 'course_outcomes') {
             $hasUnsavedCo = (bool) ($this->stepDirty['course_outcomes'] ?? false);
             if ($hasUnsavedCo) {
-                $hasTypedOutcome = collect($this->courseOutcomes)
-                    ->contains(fn($co) => trim((string) ($co['description'] ?? '')) !== '');
-
-                if ($hasTypedOutcome && !$this->saveStep($fromStep)) {
-                    $this->dispatch('lw-toast', type: 'error', message: 'Save Course Outcomes first before proceeding.');
-                    return;
-                }
-
-                if (!$hasTypedOutcome) {
-                    // Do not block navigation for blank CO placeholders.
-                    $this->stepDirty['course_outcomes'] = false;
-                }
+                $this->dispatch('lw-toast', type: 'warning', message: 'Save Course Outcomes first before proceeding.');
+                return;
             }
         }
 

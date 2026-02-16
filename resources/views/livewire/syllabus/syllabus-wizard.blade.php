@@ -68,12 +68,13 @@
         </div>
     </div>
 
-    {{-- Light Loading Indicator --}}
+    {{--
     <div wire:loading.flex wire:target="navigateToStep,saveCurrentStep,submitForReview,generateWeeklyCoverage"
         class="mb-4 items-center gap-2 text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
         <i class="bx bx-loader-alt bx-spin text-base"></i>
         <span>Working on your latest action...</span>
     </div>
+    --}}
 
     {{-- Step Content --}}
     <div class="bg-white border border-slate-200 rounded-xl p-6">
@@ -257,12 +258,20 @@
 
             async goToStep(target) {
                 if (!target || target === this.localStep || this.isNavigating) return;
+                if (this.localStep === 'course_outcomes' && !!(this.stepDirty?.course_outcomes)) {
+                    this.showToast('warning', 'Save Course Outcomes first before proceeding.');
+                    return;
+                }
                 this.isNavigating = true;
                 const previous = this.localStep;
+                this.localStep = target; // Optimistic UI switch for faster navigation feel.
                 try {
                     await this.preserveScroll(async () => {
                         await this.$wire.navigateToStep(previous, target);
                     });
+                } catch (error) {
+                    this.localStep = previous;
+                    throw error;
                 } finally {
                     this.isNavigating = false;
                 }
