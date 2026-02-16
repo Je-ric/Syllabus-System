@@ -1,6 +1,10 @@
 <div class="space-y-6 text-slate-800">
     @php
-        $tabs = $semesters->map(fn($s) => ['id' => (string) $s->id, 'label' => $s->semester . ' Semester'])->toArray();
+        $tabs = $semesters->map(fn($s) => [
+                            'id' => (string) $s->id,
+                            'label' => $s->semester .
+                            ' Semester']
+                        )->toArray();
     @endphp
 
     <x-navigation.tabs-modern :tabs="$tabs" :defaultTab="$tabs[0]['id'] ?? null" :stateKey="'academic-calendar-events-livewire:' . $academicYear">
@@ -31,10 +35,10 @@
                             <div>
                                 <label class="text-xs uppercase tracking-[0.2em] text-slate-500">Date</label>
                                 <input type="date"
-                                       wire:model.live="newEvent.{{ $semester->id }}.date"
-                                       min="{{ $semester->start_date->toDateString() }}"
-                                       max="{{ $semester->end_date->toDateString() }}"
-                                       class="mt-2 w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-2.5 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200">
+                                        wire:model.live="newEvent.{{ $semester->id }}.date"
+                                        min="{{ $semester->start_date->toDateString() }}"
+                                        max="{{ $semester->end_date->toDateString() }}"
+                                        class="mt-2 w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-2.5 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200">
                             </div>
                         </div>
 
@@ -45,8 +49,8 @@
                         <div>
                             <label class="text-xs uppercase tracking-[0.2em] text-slate-500">Name</label>
                             <input type="text"
-                                   wire:model.live.debounce.250ms="newEvent.{{ $semester->id }}.name"
-                                   class="mt-2 w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-2.5 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200">
+                                    wire:model.live.debounce.250ms="newEvent.{{ $semester->id }}.name"
+                                    class="mt-2 w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-2.5 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200">
                         </div>
 
                         <button type="button"
@@ -79,10 +83,10 @@
                                         <td class="border border-slate-200 px-3 py-2">
                                             @if($isEditing)
                                                 <input type="date"
-                                                       wire:model.live="editing.{{ $event->id }}.date"
-                                                       min="{{ $semester->start_date->toDateString() }}"
-                                                       max="{{ $semester->end_date->toDateString() }}"
-                                                       class="w-full rounded-lg border border-slate-300 px-2 py-1 text-xs">
+                                                        wire:model.live="editing.{{ $event->id }}.date"
+                                                        min="{{ $semester->start_date->toDateString() }}"
+                                                        max="{{ $semester->end_date->toDateString() }}"
+                                                        class="w-full rounded-lg border border-slate-300 px-2 py-1 text-xs">
                                             @else
                                                 {{ \Carbon\Carbon::parse($event->date)->format('F j, Y') }}
                                             @endif
@@ -103,8 +107,8 @@
                                         <td class="border border-slate-200 px-3 py-2">
                                             @if($isEditing)
                                                 <input type="text"
-                                                       wire:model.live.debounce.250ms="editing.{{ $event->id }}.name"
-                                                       class="w-full rounded-lg border border-slate-300 px-2 py-1 text-xs">
+                                                        wire:model.live.debounce.250ms="editing.{{ $event->id }}.name"
+                                                        class="w-full rounded-lg border border-slate-300 px-2 py-1 text-xs">
                                             @else
                                                 {{ $event->name }}
                                             @endif

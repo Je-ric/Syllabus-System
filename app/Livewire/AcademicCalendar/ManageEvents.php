@@ -32,14 +32,16 @@ class ManageEvents extends Component
             return;
         }
 
-        $payload = $this->newEvent[$semesterId] ?? [];
-        $date = (string) ($payload['date'] ?? ''); // 
+        $semester->start_date = $semester->start_date ? Carbon::parse($semester->start_date) : null;
+        $semester->end_date = $semester->end_date ? Carbon::parse($semester->end_date) : null;
 
-        //
+        $payload = $this->newEvent[$semesterId] ?? [];
+        $date = (string) ($payload['date'] ?? '');
+
         $this->validate([
             "newEvent.$semesterId.type" => 'required|in:holiday,exam,break,other',
             "newEvent.$semesterId.name" => 'required|string|max:255',
-            "newEvent.$semesterId.date" => 'required|date|after_or_equal:' . $semester->start_date->toDateString() . '|before_or_equal:' . $semester->end_date->toDateString(),
+            "newEvent.$semesterId.date" => 'required|date|after_or_equal:' . optional($semester->start_date)->toDateString() . '|before_or_equal:' . optional($semester->end_date)->toDateString(),
         ]);
 
         if ($this->hasDateConflict($semesterId, $date)) {
@@ -87,16 +89,21 @@ class ManageEvents extends Component
         }
 
         $semester = $event->calendar;
+        $semester->start_date = $semester->start_date ? Carbon::parse($semester->start_date) : null;
+        $semester->end_date = $semester->end_date ? Carbon::parse($semester->end_date) : null;
+
         $date = (string) ($this->editing[$eventId]['date'] ?? '');
 
         $this->validate([
             "editing.$eventId.type" => 'required|in:holiday,exam,break,other',
             "editing.$eventId.name" => 'required|string|max:255',
-            "editing.$eventId.date" => 'required|date|after_or_equal:' . $semester->start_date->toDateString() . '|before_or_equal:' . $semester->end_date->toDateString(),
+            "editing.$eventId.date" => 'required|date|after_or_equal:' . optional($semester->start_date)->toDateString() . '|before_or_equal:' . optional($semester->end_date)->toDateString(),
         ]);
 
         if ($this->hasDateConflict((int) $semester->id, $date, $eventId)) {
-            $this->dispatch('lw-toast', type: 'warning', message: 'Date conflict: an event already exists on that date.');
+            $this->dispatch('lw-toast',
+                                type: 'warning',
+                                message: 'Date conflict: an event already exists on that date.');
             return;
         }
 
@@ -156,10 +163,14 @@ class ManageEvents extends Component
 
     private function reloadSemesters(): void
     {
-        $this->semesters = AcademicCalendar::with(['events' => fn($q) => $q->orderBy('date')])
+        $this->semesters = AcademicCalendar::with('events')
             ->where('academic_year', $this->academicYear)
-            ->orderBy('semester')
-            ->get();
+            ->get()
+            ->map(function ($semester) {
+                $semester->start_date = $semester->start_date ? Carbon::parse($semester->start_date) : null;
+                $semester->end_date = $semester->end_date ? Carbon::parse($semester->end_date) : null;
+                return $semester;
+            });
 
         foreach ($this->semesters as $semester) {
             $this->newEvent[(int) $semester->id] = $this->newEvent[(int) $semester->id] ?? [

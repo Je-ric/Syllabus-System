@@ -159,7 +159,7 @@
             </header>
 
             <main class="flex-1 mx-auto w-full px-4 py-4 overflow-y-auto">
-                <div class="bg-white shadow-lg rounded-3xl border border-slate-100 p-6 sm:p-8">
+                <div class="bg-white shadow-lg rounded-xl border border-slate-100 p-6 sm:p-8">
                     @yield('content')
                 </div>
             </main>
