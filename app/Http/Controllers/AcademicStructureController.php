@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\College;
 use App\Models\Department;
 use App\Models\Program;
+use Illuminate\Support\Facades\DB;
 
 class AcademicStructureController extends Controller
 {
@@ -109,14 +110,26 @@ class AcademicStructureController extends Controller
             'bor_approval_date' => 'nullable|date',
         ]);
 
-        $program = Program::create([
-            'name' => $request->name,
-            'bor_approval_no' => $request->bor_approval_no,
-            'bor_approval_date' => $request->bor_approval_date,
-        ]);
+        DB::beginTransaction();
 
-        // Insert into program_departments junction table
-        $program->departments()->attach($request->department_id, ['role' => 'primary']);
+        try {
+            $program = Program::create([
+                'name' => $request->name,
+                'bor_approval_no' => $request->bor_approval_no,
+                'bor_approval_date' => $request->bor_approval_date,
+            ]);
+
+            // Insert into program_departments junction table
+            $program->departments()->attach($request->department_id, ['role' => 'primary']);
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return back()->withErrors([
+                'error' => 'Failed to add program. Please try again.',
+            ])->withInput();
+        }
 
         return back()->with('toast', [
             'message' => 'Program added successfully.',
@@ -134,14 +147,26 @@ class AcademicStructureController extends Controller
             'bor_approval_date' => 'nullable|date',
         ]);
 
-        $program->update([
-            'name' => $request->name,
-            'bor_approval_no' => $request->bor_approval_no,
-            'bor_approval_date' => $request->bor_approval_date,
-        ]);
+        DB::beginTransaction();
 
-        // Update program_departments junction table
-        $program->departments()->sync([$request->department_id => ['role' => 'primary']]);
+        try {
+            $program->update([
+                'name' => $request->name,
+                'bor_approval_no' => $request->bor_approval_no,
+                'bor_approval_date' => $request->bor_approval_date,
+            ]);
+
+            // Update program_departments junction table
+            $program->departments()->sync([$request->department_id => ['role' => 'primary']]);
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return back()->withErrors([
+                'error' => 'Failed to update program. Please try again.',
+            ])->withInput();
+        }
 
         return back()->with('toast', [
             'message' => 'Program updated successfully.',

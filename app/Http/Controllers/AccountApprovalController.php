@@ -8,6 +8,8 @@ use App\Models\Role;
 use App\Models\UserAssignment;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\AccountStatusUpdated;
+use Illuminate\Support\Facades\DB;
+
 
 class AccountApprovalController extends Controller
 {
@@ -27,24 +29,34 @@ class AccountApprovalController extends Controller
             'user_id' => 'required|exists:users,id',
         ]);
 
-        $user = User::findOrFail($request->input('user_id'));
+        DB::beginTransaction();
 
-        $user->account_status = 'active';
-        $user->save();
+        try {
+            $user = User::findOrFail($request->input('user_id'));
+            $user->account_status = 'active';       
+            $user->save();
 
-        $facultyRole = Role::where('name', '=', 'faculty')->first();  // Assign faculty role if not already assigned
+            $facultyRole = Role::where('name', '=', 'faculty')->first();
 
-        if ($facultyRole && !$user->roles()->wherePivot('role_id', $facultyRole->id)->exists()) {
-            $user->roles()->attach($facultyRole->id);
-        }
+            if ($facultyRole && !$user->roles()->wherePivot('role_id', $facultyRole->id)->exists()) {
+                $user->roles()->attach($facultyRole->id);
+            }
 
-        Mail::to($user->email)->send(new AccountStatusUpdated($user, 'active'));
+            Mail::to($user->email)->send(new AccountStatusUpdated($user, 'active'));
 
-        return redirect()->route('accounts.approval')
-            ->with('toast', [
-                'message' => 'User approved and assigned as Faculty.',
-                'type' => 'success'
+            DB::commit();
+
+            return redirect()->route('accounts.approval')->with('toast', [
+                'message' => 'User approved successfully.',
+                'type' => 'success',
             ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()->route('accounts.approval')->withErrors([
+                'error' => 'An error occurred while approving the user. Please try again.',
+            ]);
+        }
     }
 
     public function reject(Request $request)
@@ -53,17 +65,28 @@ class AccountApprovalController extends Controller
             'user_id' => 'required|exists:users,id',
         ]);
 
-        $user = User::findOrFail($request->input('user_id'));
-        $user->account_status = "rejected";
-        $user->save();
+        DB::beginTransaction();
 
-        Mail::to($user->email)->send(new AccountStatusUpdated($user, 'rejected'));
+        try {
+            $user = User::findOrFail($request->input('user_id'));
+            $user->account_status = 'rejected';
+            $user->save();
 
-        return redirect()->route('accounts.approval')
-            ->with('toast', [
-                'message' => 'User account rejected.',
-                'type' => 'success'
+            Mail::to($user->email)->send(new AccountStatusUpdated($user, 'rejected'));
+
+            DB::commit();
+
+            return redirect()->route('accounts.approval')->with('toast', [
+                'message' => 'User rejected successfully.',
+                'type' => 'success',
             ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()->route('accounts.approval')->withErrors([
+                'error' => 'An error occurred while rejecting the user. Please try again.',
+            ]);
+        }
     }
 
     public function restore(Request $request)
@@ -130,37 +153,50 @@ class AccountApprovalController extends Controller
             abort(403, 'Roles can only be assigned to active accounts.');
         }
 
-        // Get old roles before modification (for comparison)
-        $oldRoleNames = $user->roles->pluck('name')->toArray();
+        DB::beginTransaction();
 
-        $roles = collect($request->roles)
-            ->push('faculty') // always include faculty
-            ->unique();
+        try {
+            // Get old roles before modification (for comparison)
+            $oldRoleNames = $user->roles->pluck('name')->toArray();
 
-        $roleIds = $roles->map(function ($roleName) { // ensure roles exist in database
-            return Role::firstOrCreate(
-                ['name' => $roleName]
-            )->id;
-        });
+            $roles = collect($request->roles)
+                ->push('faculty') // always include faculty
+                ->unique();
 
-        // Handle role removal: clean up UserAssignments when dean/chair roles are removed
-        $newRoleNames = $roles->toArray();
-        
-        // If dean role is being removed, delete all dean assignments for this user
-        if (in_array('dean', $oldRoleNames) && !in_array('dean', $newRoleNames)) {
-            UserAssignment::where('user_id', $user->id)
-                ->where('context', 'dean')
-                ->delete();
+            $roleIds = $roles->map(function ($roleName) { // ensure roles exist in database
+                return Role::firstOrCreate(
+                    ['name' => $roleName]
+                )->id;
+            });
+
+            // Handle role removal: clean up UserAssignments when dean/chair roles are removed
+            $newRoleNames = $roles->toArray();
+
+            // If dean role is being removed, delete all dean assignments for this user
+            if (in_array('dean', $oldRoleNames) && !in_array('dean', $newRoleNames)) {
+                UserAssignment::where('user_id', $user->id)
+                    ->where('context', 'dean')
+                    ->delete();
+            }
+
+            // If chair role is being removed, delete all chair assignments for this user
+            if (in_array('chair', $oldRoleNames) && !in_array('chair', $newRoleNames)) {
+                UserAssignment::where('user_id', $user->id)
+                    ->where('context', 'chair')
+                    ->delete();
+            }
+
+            $user->roles()->sync($roleIds); // Sync roles
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return redirect()
+                ->route('accounts.approval')
+                ->withErrors([
+                    'error' => 'Failed to assign roles. Please try again.',
+                ]);
         }
-
-        // If chair role is being removed, delete all chair assignments for this user
-        if (in_array('chair', $oldRoleNames) && !in_array('chair', $newRoleNames)) {
-            UserAssignment::where('user_id', $user->id)
-                ->where('context', 'chair')
-                ->delete();
-        }
-
-        $user->roles()->sync($roleIds); // Sync roles
         // means any roles not in the list will be removed
 
         return redirect()

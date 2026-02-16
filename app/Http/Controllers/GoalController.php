@@ -4,11 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\College;
-use App\Models\Department;
 use App\Models\CollegeGoal;
-use App\Models\DepartmentObjective;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class GoalController extends Controller
 {
@@ -82,10 +80,20 @@ class GoalController extends Controller
 
     public function goal_destroy(Request $request, CollegeGoal $goal)
     {
-        $college = $goal->college;
-        $goal->delete();
+        DB::beginTransaction();
 
-        $college->resequenceGoalCodes(); // College.php
+        try {
+            $college = $goal->college;
+            $goal->delete();
+            $college->resequenceGoalCodes(); // College.php
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return redirect()->back()->withErrors([
+                'error' => 'Failed to delete goal. Please try again.',
+            ]);
+        }
 
         return redirect()
             ->route('goal.index', ['college_id' => $college->id])

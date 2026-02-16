@@ -6,7 +6,8 @@ use App\Models\Program;
 use App\Models\ProgramEducationalObjective;
 use App\Models\ProgramOutcome;
 use App\Helpers\ProgramCodeHelper;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+// use Illuminate\Http\Request;
 
 class ProgramController extends Controller
 {
@@ -31,13 +32,25 @@ class ProgramController extends Controller
 
     public function deletePeo(int $peoId)
     {
-        $peo = ProgramEducationalObjective::findOrFail($peoId);
-        $programId = $peo->program_id;
+        DB::beginTransaction();
 
-        $peo->delete();
+        try {
+            $peo = ProgramEducationalObjective::findOrFail($peoId);
+            $programId = $peo->program_id;
 
-        // Use helper instead of repeating resequence logic
-        ProgramCodeHelper::resequencePeoCodes($programId);
+            $peo->delete();
+
+            // Use helper instead of repeating resequence logic
+            ProgramCodeHelper::resequencePeoCodes($programId);
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return redirect()->back()->withErrors([
+                'error' => 'Failed to delete PEO. Please try again.',
+            ]);
+        }
 
         return redirect()->route('programs.show', ['program' => $programId])
             ->with('toast', [
@@ -48,13 +61,25 @@ class ProgramController extends Controller
 
     public function deletePo(int $poId)
     {
-        $po = ProgramOutcome::findOrFail($poId);
-        $programId = $po->program_id;
+        DB::beginTransaction();
 
-        $po->delete();
+        try {
+            $po = ProgramOutcome::findOrFail($poId);
+            $programId = $po->program_id;
 
-        // Use helper instead of repeating resequence logic
-        ProgramCodeHelper::resequencePoCodes($programId);
+            $po->delete();
+
+            // Use helper instead of repeating resequence logic
+            ProgramCodeHelper::resequencePoCodes($programId);
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return redirect()->back()->withErrors([
+                'error' => 'Failed to delete PO. Please try again.',
+            ]);
+        }
 
         return redirect()->route('programs.show', ['program' => $programId])
             ->with('toast', [

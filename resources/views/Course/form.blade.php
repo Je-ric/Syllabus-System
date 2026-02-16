@@ -23,6 +23,7 @@
     @endif
 
     <input type="hidden" name="program_id" value="{{ $program?->id ?? '' }}">
+    <input type="hidden" name="confirmed_submission" id="confirmedSubmission" value="0">
 
     @if($program)
         <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-6">
@@ -114,7 +115,7 @@
             </div>
         @else
             <div class="border border-slate-200 rounded-2xl overflow-hidden">
-                <table class="w-full">
+                <table class="w-full" id="courseFormMapping">
                     <thead class="bg-emerald-50 border-b border-slate-200 text-emerald-800">
                         <tr>
                             <th class="px-4 py-3 text-left text-xs uppercase tracking-[0.2em] font-semibold">PO Code</th>
@@ -154,19 +155,61 @@
                     </tbody>
                 </table>
             </div>
+
             <p class="text-sm text-slate-500 mt-2">Select IED level for each outcome that applies to this course (leave blank if not applicable)</p>
         @endif
     @endif
 
-    <div class="flex justify-end gap-2 mt-6">
+    <div class="flex justify-between gap-2 mt-6">
         <x-button href="{{ route('courses.index') }}"
                 variant="cancel">
                 Cancel
         </x-button>
-        <x-button type="button" variant="save" onclick="showConfirmCourseModal()">
-            <i class="bx bx-save"></i> {{ $submitLabel }}
-        </x-button>
+        <div>
+            <x-button variant="cancel" type="button" onclick="resetRadioButtons()">Reset IED Levels</x-button>
+            <x-button type="button" variant="save" onclick="openCourseConfirmModal()">
+                <i class="bx bx-save"></i> {{ $submitLabel }}
+            </x-button>
+        </div>
     </div>
 </form>
 
+@if($formMethod === 'POST')
+    @include('Course.modals.confirmCourseModal')
+@else
+    @include('Course.modals.confirmEditCourseModal')
+@endif
+
+<script>
+    const isCreateCourseForm = @json($formMethod === 'POST');
+    const confirmModalId = isCreateCourseForm ? 'confirmCourseModal' : 'confirmEditCourseModal';
+
+    function resetRadioButtons(){
+        const radios = document.querySelectorAll('#courseForm #courseFormMapping input[type="radio"]');
+        radios.forEach(radio => radio.checked = false);
+    }
+
+    function openCourseConfirmModal() {
+        const modal = document.getElementById(confirmModalId);
+        if (modal) {
+            modal.showModal();
+        }
+    }
+
+    function confirmCourseSubmit() {
+        const flag = document.getElementById('confirmedSubmission');
+        if (flag) {
+            flag.value = '1';
+        }
+        document.getElementById('courseForm').submit();
+    }
+
+    document.getElementById('courseForm').addEventListener('submit', function (event) {
+        const flag = document.getElementById('confirmedSubmission');
+        if (!flag || flag.value !== '1') {
+            event.preventDefault();
+            openCourseConfirmModal();
+        }
+    });
+</script>
 @endsection

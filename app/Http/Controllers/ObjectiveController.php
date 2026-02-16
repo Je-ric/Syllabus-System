@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\College;
 use App\Models\Department;
-use App\Models\CollegeGoal;
 use App\Models\DepartmentObjective;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ObjectiveController extends Controller
 {
@@ -113,10 +113,20 @@ class ObjectiveController extends Controller
 
     public function objective_destroy(DepartmentObjective $objective)
     {
-        $department = $objective->department;
-        $objective->delete();
+        DB::beginTransaction();
 
-        $department->resequenceObjectiveCodes(); // Department.php
+        try {
+            $department = $objective->department;
+            $objective->delete();
+            $department->resequenceObjectiveCodes(); // Department.php
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return redirect()->back()->withErrors([
+                'error' => 'Failed to delete objective. Please try again.',
+            ]);
+        }
 
         return redirect()
             ->route('objective.index', [

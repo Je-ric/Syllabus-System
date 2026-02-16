@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AcademicCalendar;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 // use App\Models\AcademicCalendarEvent;
 
 class AcademicCalendarController extends Controller
@@ -32,21 +33,33 @@ class AcademicCalendarController extends Controller
             'end_date_2' => 'required|date|after_or_equal:start_date_2',
         ]);
 
-        // Create 1st semester
-        $sem1 = AcademicCalendar::create([
-            'academic_year' => $request->academic_year,
-            'semester' => '1st',
-            'start_date' => $request->start_date_1,
-            'end_date' => $request->end_date_1,
-        ]);
+        DB::beginTransaction();
 
-        // Create 2nd semester
-        $sem2 = AcademicCalendar::create([
-            'academic_year' => $request->academic_year,
-            'semester' => '2nd',
-            'start_date' => $request->start_date_2,
-            'end_date' => $request->end_date_2,
-        ]);
+        try {
+            // Create 1st semester
+            $sem1 = AcademicCalendar::create([
+                'academic_year' => $request->academic_year,
+                'semester' => '1st',
+                'start_date' => $request->start_date_1,
+                'end_date' => $request->end_date_1,
+            ]);
+
+            // Create 2nd semester
+            AcademicCalendar::create([
+                'academic_year' => $request->academic_year,
+                'semester' => '2nd',
+                'start_date' => $request->start_date_2,
+                'end_date' => $request->end_date_2,
+            ]);
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return redirect()->back()
+                ->withErrors(['error' => 'Failed to create academic year. Please try again.'])
+                ->withInput();
+        }
 
         //
         return redirect()->route('academic.calendar.events.index', $sem1->academic_year)
@@ -126,21 +139,33 @@ class AcademicCalendarController extends Controller
             'end_date_2' => 'required|date|after_or_equal:start_date_2',
         ]);
 
-        // Update 1st semester
-        $sem1 = $semesters->where('semester', '1st')->first();
-        $sem1->update([
-            'academic_year' => $request->academic_year,
-            'start_date' => $request->start_date_1,
-            'end_date' => $request->end_date_1,
-        ]);
+        DB::beginTransaction();
 
-        // Update 2nd semester
-        $sem2 = $semesters->where('semester', '2nd')->first();
-        $sem2->update([
-            'academic_year' => $request->academic_year,
-            'start_date' => $request->start_date_2,
-            'end_date' => $request->end_date_2,
-        ]);
+        try {
+            // Update 1st semester
+            $sem1 = $semesters->where('semester', '1st')->first();
+            $sem1->update([
+                'academic_year' => $request->academic_year,
+                'start_date' => $request->start_date_1,
+                'end_date' => $request->end_date_1,
+            ]);
+
+            // Update 2nd semester
+            $sem2 = $semesters->where('semester', '2nd')->first();
+            $sem2->update([
+                'academic_year' => $request->academic_year,
+                'start_date' => $request->start_date_2,
+                'end_date' => $request->end_date_2,
+            ]);
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return redirect()->back()
+                ->withErrors(['error' => 'Failed to update academic year. Please try again.'])
+                ->withInput();
+        }
 
         return redirect()->route('academic.calendars.index')
             ->with('toast', [
@@ -152,7 +177,20 @@ class AcademicCalendarController extends Controller
 
     public function destroy($academic_year)
     {
-        AcademicCalendar::where('academic_year', $academic_year)->delete();
+        DB::beginTransaction();
+
+        try {
+            AcademicCalendar::where('academic_year', $academic_year)->delete();
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return redirect()->route('academic.calendars.index')
+                ->with('toast', [
+                    'message' => 'Failed to delete academic year.',
+                    'type' => 'error'
+                ]);
+        }
 
         return redirect()->route('academic.calendars.index')
             ->with('toast', [
