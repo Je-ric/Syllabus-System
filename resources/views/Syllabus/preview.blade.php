@@ -100,6 +100,7 @@
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
             overflow: hidden;
             position: relative;
+            break-inside: auto;
         }
 
         .a4-title {
@@ -142,6 +143,7 @@
 
         .a4-section {
             margin-top: 10px;
+            break-inside: auto;
         }
 
         .a4-section h3 {
@@ -155,6 +157,7 @@
         .a4-list {
             display: grid;
             gap: 4px;
+            break-inside: auto;
         }
 
         .a4-row {
@@ -181,7 +184,7 @@
         p,
         ul li,
         strong{
-            font-size: 14px;
+            font-size: 11pt;
             text-align: justify;
         }
 
@@ -191,6 +194,7 @@
         }
 
         table {
+            break-inside: auto;
             width: 100%;
             border-collapse: collapse;
             border: 1px solid #000;
@@ -234,11 +238,16 @@
                 box-shadow: none;
                 page-break-after: always;
                 break-after: page;
+                page-break-inside: avoid; /* Prevent breaking within the group */
             }
 
-            .a4-page:last-child {
-                page-break-after: avoid;
+            table {
+                page-break-inside: auto; /* Allow tables to split across pages */
             }
+
+            /* .a4-page:last-child {
+                page-break-after: avoid;
+            } */
         }
     </style>
 </head>
@@ -277,40 +286,37 @@
                 development.</p>
         </div>
 
-        <div class="a4-section">
-            <strong class="indent-level-1">3. Educational Philosophy</strong>
-            <p class="indent-level-2">The Central Luzon State University is committed and dedicated to provide a
-                holistic transformative education anchored on its mission statement and its institutional core values.
-                As stated on its mission, the University shall develop globally competitive, work-ready,
-                socially-responsible and empowered human resources who value life-long learning; and shall generate,
-                disseminate, and apply knowledge and technologies for poverty alleviation, environmental protection and
-                sustainable development.</p>
-            <p class="indent-level-2">Along with the curricular programs, the academic journey of learners revolves on
-                three value-laden dimensions: creativeness and innovativeness, hard work and integrity, and
-                inclusiveness and transformativeness.</p>
-            <div>
+            <div class="a4-section">
+                <strong class="indent-level-1">3. Educational Philosophy</strong>
+                <p class="indent-level-2">The Central Luzon State University is committed and dedicated to provide a
+                    holistic transformative education anchored on its mission statement and its institutional core values.
+                    As stated on its mission, the University shall develop globally competitive, work-ready,
+                    socially-responsible and empowered human resources who value life-long learning; and shall generate,
+                    disseminate, and apply knowledge and technologies for poverty alleviation, environmental protection and
+                    sustainable development.</p>
+                <p class="indent-level-2">Along with the curricular programs, the academic journey of learners revolves on
+                    three value-laden dimensions: creativeness and innovativeness, hard work and integrity, and
+                    inclusiveness and transformativeness.</p>
                 <p class="indent-level-1-5-text">With these, the university shall:</p>
-                <ul>
-                    <li>Provide a teaching and learning environment which harness creativity and innovativeness among
-                        learners. It advocates the development of individuals to become agents of change, innovators and
-                        leaders, imbued with an outward and forward-thinking perspective in their respective fields. It
-                        further ensures the vital role of research in promoting quality and excellence. Thus, regular
-                        updating of curricular programs, empowerment of human capital, modernizing instructional and
-                        pedagogical resources, and equal opportunity for all, are always observed.</li>
-                    <li>Adopt experiential learning on its programs along with the dynamic and continuous engagement
-                        between the faculty, the staff, the students and the community. The shared values of hard work
-                        and integrity puts forth in the discovery of new knowledge and in its application in real-life
-                        contexts. Thus, enabling and preparing the learners to be effective and efficient navigators of
-                        the future.</li>
-                    <li>Provide experiences that enable learners to discover the fulfillment of embracing diversity in
-                        the form of various academic collaborations at the local, regional and international levels.
-                        Students are guided to acknowledge and respect peoples and their cultures for inclusive societal
-                        transformation.</li>
-                </ul>
+                    <ul>
+                        <li>Provide a teaching and learning environment which harness creativity and innovativeness among
+                            learners. It advocates the development of individuals to become agents of change, innovators and
+                            leaders, imbued with an outward and forward-thinking perspective in their respective fields. It
+                            further ensures the vital role of research in promoting quality and excellence. Thus, regular
+                            updating of curricular programs, empowerment of human capital, modernizing instructional and
+                            pedagogical resources, and equal opportunity for all, are always observed.</li>
+                        <li>Adopt experiential learning on its programs along with the dynamic and continuous engagement
+                            between the faculty, the staff, the students and the community. The shared values of hard work
+                            and integrity puts forth in the discovery of new knowledge and in its application in real-life
+                            contexts. Thus, enabling and preparing the learners to be effective and efficient navigators of
+                            the future.</li>
+                        <li>Provide experiences that enable learners to discover the fulfillment of embracing diversity in
+                            the form of various academic collaborations at the local, regional and international levels.
+                            Students are guided to acknowledge and respect peoples and their cultures for inclusive societal
+                            transformation.</li>
+                    </ul>
             </div>
-        </div>
 
-        <div class="a4-section">
             <strong class="indent-level-1">4. Quality Policy Statement</strong>
             <div class="a4-list">
                 <div class="a4-row indent-level-1-5">
@@ -333,7 +339,6 @@
                     <div>Mahalaga ang inyong tinig upang higit na mapahusay ang kalidad ng aming paglilingkod.</div>
                 </div>
             </div>
-        </div>
 
         <div class="a4-section">
             <strong class="indent-level-1">5. Goals of the {{ $collegeName }}</strong>
@@ -619,6 +624,9 @@
             }
         });
     </script>
+
+
+
 </body>
 
 </html>
