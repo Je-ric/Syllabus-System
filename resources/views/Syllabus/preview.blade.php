@@ -97,6 +97,23 @@
             padding-left: 8px;
         }
 
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #000;
+        }
+
+        table td {
+            border: 1px solid #000;
+            padding: 4px;
+    }
+
+        table th {
+            border: 1px solid #000;
+            padding: 4px;
+        }
+
+
         @media print {
             body {
                 background: #fff !important;
@@ -119,6 +136,22 @@
 
     <div class="a4-wrap">
         <div class="a4-page">
+            @php
+                $lecLabValue = function ($lecValue, $labValue) {
+                    $lines = [];
+
+                    if (!blank($lecValue)) {
+                        $lines[] = 'LEC: ' . e($lecValue);
+                    }
+
+                    if (!blank($labValue)) {
+                        $lines[] = 'LAB: ' . e($labValue);
+                    }
+
+                    return count($lines) ? implode('<br>', $lines) : 'N/A';
+                };
+            @endphp
+
             <div class="a4-subtitle">Republic of the Philippines</div>
             <div class="a4-title">CENTRAL LUZON STATE UNIVERSITY</div>
             <div class="a4-subtitle">Science City of Muñoz, Nueva Ecija</div>
@@ -223,32 +256,172 @@
                 </div>
 
                 <div class="a4-section">
-                    <strong class="title-indent">6. Program Educational Objectives (PEOs)</strong>
+                    <strong class="one-indent">6. Objectives of the {{ $departmentName }}</strong>
                     <div class="a4-list">
-                        @forelse ($peos as $peo)
+                        @forelse ($departmentObjectives as $objective)
                             <div class="a4-row">
-                                <div>{{ $peo->peo_code }}.</div>
-                                <div>{{ $peo->peo_text }}</div>
+                                <div>{{ $objective->dept_obj_code }}.</div>
+                                <div>{{ $objective->objective_text }}</div>
                             </div>
                         @empty
-                            <div>No PEOs found.</div>
+                            <div>No department objectives found.</div>
                         @endforelse
                     </div>
                 </div>
 
+                <h3>B. Program Information</h3>
+                <table>
+                    <tr>
+                        <td>1. Name of Program</td>
+                        <td><strong>{{ $program->name }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td>2. BOR Approval</td>
+                        <td>{{ $program->bor_approval_no ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>3. Date of Approval</td>
+                        <td>{{ $program->bor_approval_date ?? '' }}</td>
+                    </tr>
+                </table>
+
+
                 <div class="a4-section">
-                    <strong>7. Program Outcomes (POs)</strong>
-                    <div class="a4-list">
-                        @forelse ($pos as $po)
-                            <div class="a4-row">
-                                <div class="a4-code">{{ $po->po_code }}</div>
-                                <div>{{ $po->po_text }}</div>
-                            </div>
+                    <strong class="title-indent">1. Program Educational Objectives (PEOs)</strong>
+
+                    <table>
+                        <tr>
+                            <th>
+                                <b>Program Educational Objectives</b><br>
+                                Three to five years after graduation, the BSIT graduates are:
+                            </th>
+                            <th>Mission</th>
+                        </tr>
+
+                        @forelse ($peos as $peo)
+                            <tr>
+                                <td>{{ $peo->peo_code }}. {{ $peo->peo_text }}</td>
+                                <td><i class="bx bx-check"></i></td>
+                            </tr>
                         @empty
-                            <div>No POs found.</div>
+                            <tr>
+                                <td colspan="2">No PEOs found.</td>
+                            </tr>
                         @endforelse
-                    </div>
+                    </table>
                 </div>
+
+
+                <div class="a4-section">
+                    <strong class="title-indent">
+                        Program Outcomes and its Relationship to the Program Educational Objectives
+                    </strong>
+
+                    <table>
+                        <tr>
+                            <th colspan="2">Program Outcomes</th>
+                            <th colspan="{{ max($peos->count(), 1) }}">
+                                Program Educational Objectives
+                            </th>
+                        </tr>
+
+                        <tr>
+                            <th colspan="2">
+                                By the time of graduation, students of the program have the ability to:
+                            </th>
+
+                            @forelse ($peos as $peo)
+                                <th>{{ $peo->peo_code }}</th>
+                            @empty
+                                <th>-</th>
+                            @endforelse
+                        </tr>
+
+                        @forelse ($pos as $po)
+                            <tr>
+                                <td>({{ $po->po_code }})</td>
+                                <td>{{ $po->po_text }}</td>
+
+                                @forelse ($peos as $peo)
+                                    <td>
+                                        {!! $po->peos->contains('id', $peo->id) ? '&#10003;' : '' !!}
+                                    </td>
+                                @empty
+                                    <td>-</td>
+                                @endforelse
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="{{ $peos->count() + 1 }}">
+                                    No POs found.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </table>
+                </div>
+
+
+
+                <h3>C. Instructor Information</h3>
+                <table>
+                    <tr>
+                        <td>1. Name of Instructor/Professor</td>
+                        <td>{!! $lecLabValue($lecComponent?->instructor_name, $labComponent?->instructor_name) !!}</td>
+                    </tr>
+                    <tr>
+                        <td>2. Office</td>
+                        <td>{!! $lecLabValue($lecComponent?->office, $labComponent?->office) !!}</td>
+                    </tr>
+                    <tr>
+                        <td>3.Phone No. (Optional)</td>
+                        <td>{!! $lecLabValue($lecComponent?->phone, $labComponent?->phone) !!}</td>
+                    </tr>
+                    <tr>
+                        <td>4. Email Address</td>
+                        <td>{!! $lecLabValue($lecComponent?->instructor_email, $labComponent?->instructor_email) !!}</td>
+                    </tr>
+                    <tr>
+                        <td>5. Consultation Hours</td>
+                        <td>{!! $lecLabValue($lecComponent?->consultation_hours, $labComponent?->consultation_hours) !!}</td>
+                    </tr>
+                </table>
+
+
+                <h3>D. Course Information</h3>
+                <table>
+                    <tr>
+                        <td>1. Course Code</td>
+                        <td><strong>{{ $syllabus->course->course_code }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td>2. Course Title</td>
+                        <td>{{ $syllabus->course->course_title ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>3. Course Description</td>
+                        <td>{{ $syllabus->course->course_description ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>4. Pre-requisite </td>
+                        <td>{{ $syllabus->course->prerequisite ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>5. Co-requisite</td>
+                        <td>{{ $syllabus->course->corequisite ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>6. Credit Units</td>
+                        <td>{!! $lecLabValue($lecComponent?->units ?? $syllabus->course->credit_units, $labComponent?->units) !!}</td>
+                    </tr>
+                    <tr>
+                        <td>7. Class Hours</td>
+                        <td>{!! $lecLabValue($lecComponent?->class_hours, $labComponent?->class_hours) !!}</td>
+                    </tr>
+                    <tr>
+                        <td>8. Class Schedule</td>
+                        <td>{!! $lecLabValue($lecComponent?->schedule, $labComponent?->schedule) !!}</td>
+                    </tr>
+                </table>
             </div>
         </div>
     </div>

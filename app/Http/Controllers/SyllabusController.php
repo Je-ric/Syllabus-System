@@ -155,8 +155,10 @@ class SyllabusController extends Controller
 
         $syllabus->load([
             'course.program.peos',
-            'course.program.outcomes',
+            'course.program.outcomes.peos',
+            'course.program.departments.objectives',
             'course.program.departments.college.goals',
+            'components',
         ]);
 
         $program = $syllabus->course->program;
@@ -164,11 +166,26 @@ class SyllabusController extends Controller
         $college = $department?->college;
 
         $collegeName = $college?->name ?? 'College';
+        $departmentName = $department?->name ?? 'Department';
         $collegeGoals = $college?->goals?->sortBy('college_goals_code') ?? collect();
+        $departmentObjectives = $department?->objectives?->sortBy('dept_obj_code') ?? collect();
         $peos = $program->peos?->sortBy('peo_code') ?? collect();
         $pos = $program->outcomes?->sortBy('po_code') ?? collect();
+        $lecComponent = $syllabus->components->firstWhere('type', 'LEC');
+        $labComponent = $syllabus->components->firstWhere('type', 'LAB');
 
-        return view('Syllabus.preview', compact('syllabus', 'collegeName', 'collegeGoals', 'peos', 'pos'));
+        return view('Syllabus.preview', compact(
+            'syllabus',
+            'program',
+            'collegeName',
+            'collegeGoals',
+            'departmentName',
+            'departmentObjectives',
+            'peos',
+            'pos',
+            'lecComponent',
+            'labComponent'
+        ));
     }
 
     private function buildProgramSelectionData($programId = null): array
