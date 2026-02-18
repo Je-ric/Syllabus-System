@@ -111,6 +111,7 @@
         table th {
             border: 1px solid #000;
             padding: 4px;
+            background: #d9d9d9;
         }
 
 
@@ -273,7 +274,7 @@
                 <table>
                     <tr>
                         <td>1. Name of Program</td>
-                        <td><strong>{{ $program->name }}</strong></td>
+                        <td>{{ $program->name }}</td>
                     </tr>
                     <tr>
                         <td>2. BOR Approval</td>
@@ -345,6 +346,7 @@
                                 @forelse ($peos as $peo)
                                     <td>
                                         {!! $po->peos->contains('id', $peo->id) ? '&#10003;' : '' !!}
+                                        {{-- means if that PO has that PEO, then checkmark. --}}
                                     </td>
                                 @empty
                                     <td>-</td>
@@ -391,7 +393,7 @@
                 <table>
                     <tr>
                         <td>1. Course Code</td>
-                        <td><strong>{{ $syllabus->course->course_code }}</strong></td>
+                        <td>{{ $syllabus->course->course_code }}</td>
                     </tr>
                     <tr>
                         <td>2. Course Title</td>
@@ -403,15 +405,15 @@
                     </tr>
                     <tr>
                         <td>4. Pre-requisite </td>
-                        <td>{{ $syllabus->course->prerequisite ?? '' }}</td>
+                        <td>{{ $syllabus->course->prerequisite ?? 'None' }}</td>
                     </tr>
                     <tr>
                         <td>5. Co-requisite</td>
-                        <td>{{ $syllabus->course->corequisite ?? '' }}</td>
+                        <td>{{ $syllabus->course->corequisite ?? 'None' }}</td>
                     </tr>
                     <tr>
                         <td>6. Credit Units</td>
-                        <td>{!! $lecLabValue($lecComponent?->units ?? $syllabus->course->credit_units, $labComponent?->units) !!}</td>
+                        <td>{{ $syllabus->course->credit_units }}</td>
                     </tr>
                     <tr>
                         <td>7. Class Hours</td>
@@ -423,6 +425,7 @@
                     </tr>
                 </table>
             </div>
+
         </div>
     </div>
     </div>

@@ -12,7 +12,6 @@ class CourseComponent extends Model
     protected $fillable = [
         'syllabus_id',
         'type',
-        'units',
         'class_hours',
         'schedule',
         'instructor_name',
@@ -21,10 +20,6 @@ class CourseComponent extends Model
         'office',
         'consultation_hours',
         'performance_standard',
-    ];
-
-    protected $casts = [
-        'units' => 'integer',
     ];
 
     // Used in:

@@ -150,7 +150,6 @@ trait HandlesComponents
                 'type' => 'LEC',
             ],
             [
-                'units' => $this->course->credit_units,
                 'instructor_name' => $this->lec_instructor_name,
                 'instructor_email' => $this->lec_instructor_email,
                 'phone' => $this->lec_phone,
@@ -174,7 +173,6 @@ trait HandlesComponents
                     'type' => 'LAB',
                 ],
                 [
-                    'units' => $this->course->credit_units,
                     'instructor_name' => $this->lab_instructor_name,
                     'instructor_email' => $this->lab_instructor_email,
                     'phone' => $this->lab_phone,
