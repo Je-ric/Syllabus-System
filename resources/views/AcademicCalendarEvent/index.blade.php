@@ -81,23 +81,23 @@
                         {{ \Carbon\Carbon::parse($semester->end_date)->format('F j, Y') }}
                     </p>
 
-                    <table class="w-full border-collapse border border-slate-200 text-sm">
-                        <thead>
+                    <x-table.table class="border border-slate-200">
+                        <x-table.head>
                             <tr class="bg-emerald-50 text-emerald-800">
-                                <th class="border border-slate-200 px-3 py-2 text-left text-xs uppercase tracking-[0.2em]">Date</th>
-                                <th class="border border-slate-200 px-3 py-2 text-left text-xs uppercase tracking-[0.2em]">Type</th>
-                                <th class="border border-slate-200 px-3 py-2 text-left text-xs uppercase tracking-[0.2em]">Name</th>
-                                <th class="border border-slate-200 px-3 py-2 text-left text-xs uppercase tracking-[0.2em]">Action</th>
+                                <x-table.th class="px-3 py-2">Date</x-table.th>
+                                <x-table.th class="px-3 py-2">Type</x-table.th>
+                                <x-table.th class="px-3 py-2">Name</x-table.th>
+                                <x-table.th class="px-3 py-2">Action</x-table.th>
                             </tr>
-                        </thead>
-                        <tbody>
+                        </x-table.head>
+                        <x-table.body>
                             @forelse($semester->events->sortBy('date') as $event)
-                                <tr class="odd:bg-white even:bg-slate-50 hover:bg-emerald-50/60 transition">
-                                    <td class="border border-slate-200 px-3 py-2">{{ \Carbon\Carbon::parse($event->date)->format('F j, Y') }}</td>
-                                    <td class="border border-slate-200 px-3 py-2">{{ ucfirst($event->type) }}</td>
-                                    <td class="border border-slate-200 px-3 py-2">{{ $event->name }}</td>
+                                <x-table.row striped hover>
+                                    <x-table.td class="px-3 py-2">{{ \Carbon\Carbon::parse($event->date)->format('F j, Y') }}</x-table.td>
+                                    <x-table.td class="px-3 py-2">{{ ucfirst($event->type) }}</x-table.td>
+                                    <x-table.td class="px-3 py-2">{{ $event->name }}</x-table.td>
 
-                                    <td class="border border-slate-200 px-3 py-2">
+                                    <x-table.td class="px-3 py-2">
                                         <div class="flex gap-2">
                                         <button
                                             type="button"
@@ -112,17 +112,15 @@
                                             <i class="bx bx-trash"></i>
                                         </button>
                                         </div>
-                                    </td>
-                                </tr>
+                                    </x-table.td>
+                                </x-table.row>
                                 @include('AcademicCalendarEvent.modals.updateEventModal', ['event' => $event])
                                 @include('AcademicCalendarEvent.modals.deleteEventModal', ['event' => $event])
                             @empty
-                                <tr>
-                                    <td class="border border-slate-200 px-3 py-2 text-center text-slate-500" colspan="4">No events yet.</td>
-                                </tr>
+                                <x-table.empty :colspan="4" message="No events yet." class="px-3 py-2" />
                             @endforelse
-                        </tbody>
-                    </table>
+                        </x-table.body>
+                    </x-table.table>
                 </div>
 
             </div>

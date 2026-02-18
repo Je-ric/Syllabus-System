@@ -59,45 +59,45 @@
                         Semester {{ $semester ?? 'N/A' }}
                     </h4>
 
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm border-collapse border border-slate-200">
-                            <thead class="bg-emerald-50 text-emerald-800 border-b border-slate-200">
+                    <x-table.container>
+                        <x-table.table class="border border-slate-200">
+                            <x-table.head>
                                 <tr>
-                                    <th class="px-4 py-2 text-left text-xs uppercase tracking-[0.2em] font-semibold">Code</th>
-                                    <th class="px-4 py-2 text-left text-xs uppercase tracking-[0.2em] font-semibold">Course Title</th>
-                                    <th class="px-4 py-2 text-center text-xs uppercase tracking-[0.2em] font-semibold">Units</th>
+                                    <x-table.th class="px-4 py-2">Code</x-table.th>
+                                    <x-table.th class="px-4 py-2">Course Title</x-table.th>
+                                    <x-table.th align="center" class="px-4 py-2">Units</x-table.th>
 
                                     @foreach ($program->outcomes as $outcome)
-                                        <th class="px-2 py-2 text-center text-xs uppercase tracking-[0.2em] font-semibold">
+                                        <x-table.th align="center" class="px-2 py-2">
                                             {{ $outcome->po_code }}
-                                        </th>
+                                        </x-table.th>
                                     @endforeach
 
-                                    <th class="px-4 py-2 text-center text-xs uppercase tracking-[0.2em] font-semibold">Actions</th>
+                                    <x-table.th align="center" class="px-4 py-2">Actions</x-table.th>
                                 </tr>
-                            </thead>
+                            </x-table.head>
 
-                            <tbody>
+                            <x-table.body>
                                 @foreach ($courses as $course)
                                     @php
                                         $modalCourses->push($course);
                                     @endphp
-                                    <tr class="hover:bg-emerald-50/60 border-b border-slate-200 odd:bg-white even:bg-slate-50">
-                                        <td class="px-4 py-2 font-mono font-semibold text-slate-700">{{ $course->course_code }}</td>
-                                        <td class="px-4 py-2 text-slate-700">{{ $course->course_title }}</td>
-                                        <td class="px-4 py-2 text-center text-slate-700">{{ $course->credit_units }}</td>
+                                    <x-table.row striped hover class="border-b border-slate-200">
+                                        <x-table.td class="px-4 py-2 font-mono font-semibold text-slate-700">{{ $course->course_code }}</x-table.td>
+                                        <x-table.td class="px-4 py-2 text-slate-700">{{ $course->course_title }}</x-table.td>
+                                        <x-table.td align="center" class="px-4 py-2 text-slate-700">{{ $course->credit_units }}</x-table.td>
 
                                         @foreach ($program->outcomes as $outcome)
                                             @php
                                                 $mapping = $course->programOutcomes->firstWhere('id', $outcome->id);
                                                 $ied = $mapping?->pivot->ied ?? '-';
                                             @endphp
-                                            <td class="px-2 py-2 text-center font-medium">
+                                            <x-table.td align="center" class="px-2 py-2 font-medium">
                                                 <x-feedback-status.ied-badge :level="$ied" />
-                                            </td>
+                                            </x-table.td>
                                         @endforeach
 
-                                        <td class="px-4 py-2 text-center">
+                                        <x-table.td align="center" class="px-4 py-2">
                                             <div class="flex gap-3 justify-center">
                                                 <a href="{{ route('courses.edit', $course->id) }}"
                                                    class="text-emerald-700 hover:text-emerald-900 text-sm font-medium">
@@ -122,12 +122,12 @@
                                                     </form>
                                                 --}}
                                             </div>
-                                        </td>
-                                    </tr>
+                                        </x-table.td>
+                                    </x-table.row>
                                 @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                            </x-table.body>
+                        </x-table.table>
+                    </x-table.container>
                 </div>
             @empty
                 <p class="text-slate-500 text-sm mt-2">No courses for this semester.</p>
@@ -137,7 +137,7 @@
         <div class="text-center py-8 bg-slate-50 rounded-2xl border border-slate-200">
             <p class="text-slate-500 mb-3">No courses found for this program</p>
             <a href="{{ route('courses.create', ['program_id' => $program->id]) }}"
-               class="text-emerald-700 hover:underline">
+                class="text-emerald-700 hover:underline">
                Create the first course
             </a>
         </div>

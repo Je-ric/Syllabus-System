@@ -6,34 +6,34 @@
                         description="Manage user access, statuses, and role assignments">
     </x-header-with-button>
 
-    <div class="overflow-x-auto rounded-2xl border border-slate-200/80 bg-white/90 shadow-sm">
-        <table class="min-w-full border-collapse text-sm">
-            <thead class="sticky top-0 z-10 bg-emerald-50 text-emerald-800">
+    <x-table.container>
+        <x-table.table>
+            <x-table.head :sticky="true">
                 <tr class="text-left text-xs font-semibold uppercase tracking-[0.2em]">
-                    <th class="border border-slate-200 px-4 py-3">ID</th>
-                    <th class="border border-slate-200 px-4 py-3">Name & Email</th>
-                    <th class="border border-slate-200 px-4 py-3">Phone Number</th>
-                    <th class="border border-slate-200 px-4 py-3">Office</th>
-                    <th class="border border-slate-200 px-4 py-3">Account Status</th>
-                    <th class="border border-slate-200 px-4 py-3">Role</th>
-                    <th class="border border-slate-200 px-4 py-3">Actions</th>
+                    <x-table.th>ID</x-table.th>
+                    <x-table.th>Name & Email</x-table.th>
+                    <x-table.th>Phone Number</x-table.th>
+                    <x-table.th>Office</x-table.th>
+                    <x-table.th>Account Status</x-table.th>
+                    <x-table.th>Role</x-table.th>
+                    <x-table.th>Actions</x-table.th>
                 </tr>
-            </thead>
-            <tbody>
+            </x-table.head>
+            <x-table.body>
                 @foreach ($users as $user)
-                    <tr class="odd:bg-white even:bg-slate-50 hover:bg-emerald-50/60 transition-colors group">
-                        <td class="px-4 py-3 border border-slate-200 align-middle font-medium text-slate-700">{{ $loop->iteration }}</td>
-                        <td class="px-4 py-3 border border-slate-200 text-slate-800">
+                    <x-table.row striped hover class="group">
+                        <x-table.td class="align-middle font-medium text-slate-700">{{ $loop->iteration }}</x-table.td>
+                        <x-table.td class="text-slate-800">
                             <div class="font-semibold">{{ $user->name }}</div>
                             <div class="text-xs text-slate-500">{{ $user->email }}</div>
-                        </td>
-                        <td class="px-4 py-3 border border-slate-200 text-slate-600">{{ $user->phone_number }}</td>
-                        <td class="px-4 py-3 border border-slate-200 text-slate-600">{{ $user->office }}</td>
-                        <td class="px-4 py-3 border border-slate-200 align-middle">
+                        </x-table.td>
+                        <x-table.td class="text-slate-600">{{ $user->phone_number }}</x-table.td>
+                        <x-table.td class="text-slate-600">{{ $user->office }}</x-table.td>
+                        <x-table.td class="align-middle">
                             <x-feedback-status.status-indicator status="{{ $user->account_status }}" />
-                        </td>
+                        </x-table.td>
 
-                        <td class="border border-slate-200 px-4 py-3">
+                        <x-table.td>
                             <div class="flex flex-wrap gap-1">
                                 @forelse ($user->roles as $role)
                                     <x-feedback-status.status-indicator
@@ -47,8 +47,8 @@
                                     />
                                 @endforelse
                             </div>
-                        </td>
-                        <td class="px-4 py-3 border border-slate-200 align-middle">
+                        </x-table.td>
+                        <x-table.td class="align-middle">
                             <div class="flex flex-wrap gap-2">
                             @if ($user->account_status === 'pending')
                                 <x-button variant='table-confirm'
@@ -86,8 +86,8 @@
 
                             {{-- <x-button>Edit </x-button> --}}
                             </div>
-                        </td>
-                    </tr>
+                        </x-table.td>
+                    </x-table.row>
 
                     {{-- Render modals for each user --}}
                     @if ($user->account_status === 'pending')
@@ -128,7 +128,7 @@
                         ])
                     @endif
                 @endforeach
-            </tbody>
-        </table>
-    </div>
+            </x-table.body>
+        </x-table.table>
+    </x-table.container>
 @endsection

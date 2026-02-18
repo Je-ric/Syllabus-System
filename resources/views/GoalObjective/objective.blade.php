@@ -103,27 +103,27 @@
 
             @if($selectedCollegeId)
                 @if($objectives->count())
-                    <div class="overflow-x-auto rounded-xl border border-slate-200">
-                        <table class="w-full border-collapse text-sm">
-                            <thead class="bg-emerald-50 text-emerald-800">
+                    <x-table.container class="rounded-xl">
+                        <x-table.table>
+                            <x-table.head>
                                 <tr>
-                                    <th class="border border-slate-200 p-3 text-left text-xs uppercase tracking-[0.2em] font-semibold">Code</th>
-                                    <th class="border border-slate-200 p-3 text-left text-xs uppercase tracking-[0.2em] font-semibold">Objective</th>
-                                    <th class="border border-slate-200 p-3 text-left text-xs uppercase tracking-[0.2em] font-semibold">Actions</th>
+                                    <x-table.th class="p-3">Code</x-table.th>
+                                    <x-table.th class="p-3">Objective</x-table.th>
+                                    <x-table.th class="p-3">Actions</x-table.th>
                                 </tr>
-                            </thead>
-                            <tbody>
+                            </x-table.head>
+                            <x-table.body>
                                 @foreach ($objectives as $objective)
-                                    <tr class="odd:bg-white even:bg-slate-50 hover:bg-emerald-50/60 transition">
-                                        <td class="border border-slate-200 p-2 align-top font-mono text-emerald-700">
+                                    <x-table.row striped hover>
+                                        <x-table.td class="p-2 align-top font-mono text-emerald-700">
                                             {{ $objective->dept_obj_code }}
-                                        </td>
+                                        </x-table.td>
 
-                                        <td class="border border-slate-200 p-2 text-slate-700">
+                                        <x-table.td class="p-2 text-slate-700">
                                             {{ $objective->objective_text }}
-                                        </td>
+                                        </x-table.td>
 
-                                        <td class="border border-slate-200 p-2">
+                                        <x-table.td class="p-2">
                                             <div class="flex items-center gap-2">
                                             <x-button
                                                 type="button"
@@ -141,16 +141,16 @@
                                                 <i class="bx bx-trash"></i>
                                             </x-button>
                                             </div>
-                                        </td>
-                                    </tr>
+                                        </x-table.td>
+                                    </x-table.row>
 
                                     {{-- Modals --}}
                                     @include('GoalObjective.modals.updateObjectiveModal', ['objective' => $objective])
                                     @include('GoalObjective.modals.deleteObjectiveModal', ['objective' => $objective])
                                 @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                            </x-table.body>
+                        </x-table.table>
+                    </x-table.container>
                 @else
                     <p class="text-slate-500">No objectives found for this college.</p>
                 @endif

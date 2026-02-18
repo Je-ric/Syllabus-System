@@ -74,25 +74,25 @@
 
                 @if($selectedCollegeId)
                     @if($goals->count())
-                        <div class="overflow-x-auto rounded-xl border border-slate-200">
-                            <table class="w-full border-collapse text-sm">
-                                <thead class="bg-emerald-50 text-emerald-800">
+                        <x-table.container class="rounded-xl">
+                            <x-table.table>
+                                <x-table.head>
                                     <tr>
-                                        <th class="border border-slate-200 p-3 text-left text-xs uppercase tracking-[0.2em] font-semibold">Code</th>
-                                        <th class="border border-slate-200 p-3 text-left text-xs uppercase tracking-[0.2em] font-semibold">Goal Description</th>
-                                        <th class="border border-slate-200 p-3 text-left text-xs uppercase tracking-[0.2em] font-semibold">Actions</th>
+                                        <x-table.th class="p-3">Code</x-table.th>
+                                        <x-table.th class="p-3">Goal Description</x-table.th>
+                                        <x-table.th class="p-3">Actions</x-table.th>
                                     </tr>
-                                </thead>
-                                <tbody>
+                                </x-table.head>
+                                <x-table.body>
                                     @foreach ($goals as $goal)
-                                        <tr class="odd:bg-white even:bg-slate-50 hover:bg-emerald-50/60 transition">
-                                            <td class="border border-slate-200 p-3 align-top font-mono text-emerald-700">
+                                        <x-table.row striped hover>
+                                            <x-table.td class="p-3 align-top font-mono text-emerald-700">
                                                 {{ $goal->college_goals_code }}
-                                            </td>
-                                            <td class="border border-slate-200 p-3 text-slate-700 max-w-md">
+                                            </x-table.td>
+                                            <x-table.td class="p-3 text-slate-700 max-w-md">
                                                 {{ $goal->goal_text }}
-                                            </td>
-                                            <td class="border border-slate-200 p-3">
+                                            </x-table.td>
+                                            <x-table.td class="p-3">
                                                 <div class="flex items-center gap-2">
                                                 <x-button
                                                     type="button"
@@ -109,14 +109,14 @@
                                                     <i class="bx bx-trash"></i>
                                                 </x-button>
                                                 </div>
-                                            </td>
-                                        </tr>
+                                            </x-table.td>
+                                        </x-table.row>
                                         @include('GoalObjective.modals.updateGoalModal', ['goal' => $goal])
                                         @include('GoalObjective.modals.deleteGoalModal', ['goal' => $goal])
                                     @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+                                </x-table.body>
+                            </x-table.table>
+                        </x-table.container>
                     @else
                         <p class="text-slate-500 text-center py-8">No goals have been set for this college yet.</p>
                     @endif
