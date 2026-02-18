@@ -104,3 +104,4 @@ composer require blade-ui-kit/blade-heroicons
 php artisan vendor:publish --tag=heroicons
 npm install -D daisyui
 npm i -D daisyui@latest
+composer require barryvdh/laravel-dompdf

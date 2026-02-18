@@ -1,27 +1,53 @@
-@extends('layouts.app')
-
-@section('content')
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Syllabus - {{ $syllabus->course->course_code }}</title>
     <style>
         @page {
             size: A4;
-            margin: 12mm;
+            margin: 12mm 12mm 16mm 12mm;
+        }
+
+        body {
+            margin: 0;
+            font-family: Tahoma;
+            color: #111827;
+            font-size: 12px;
+            line-height: 1.55;
+            background: #f2f4f7;
+        }
+
+        .screen-toolbar {
+            width: 210mm;
+            margin: 12px auto 0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .screen-btn {
+            border: 1px solid #111827;
+            background: #fff;
+            color: #111827;
+            padding: 6px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
         }
 
         .a4-wrap {
-            background: #f2f4f7;
-            padding: 20px 0;
+            padding: 12px 0 20px;
         }
 
         .a4-page {
             width: 210mm;
             min-height: 297mm;
-            margin: 0 auto 16px;
-            background: #fff;
-            color: #111827;
-            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
+            margin: 0 auto;
             padding: 18mm 16mm;
-            font-size: 12px;
-            line-height: 1.55;
+            background: #fff;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
         }
 
         .a4-title {
@@ -30,24 +56,27 @@
             letter-spacing: 0.04em;
         }
 
-        .one-indent {
+        .indent-level-1,
+        .indent-level-1-5,
+        .indent-level-1-5-text,
+        .indent-level-2 {
             display: block;
+        }
+
+        .indent-level-1 {
             padding-left: 40px;
         }
 
-        .one1-indent {
-            display: block;
+        .indent-level-1-5 {
             padding-left: 55px;
         }
 
-        .between-indent {
-            display: block;
+        .indent-level-1-5-text {
             padding-left: 40px;
             text-indent: 20px;
         }
 
-        .two-indent {
-            display: block;
+        .indent-level-2 {
             padding-left: 60px;
             text-indent: 40px;
         }
@@ -60,26 +89,26 @@
         }
 
         .a4-section {
-            margin-top: 14px;
+            margin-top: 10px;
         }
 
         .a4-section h3 {
             font-size: 12px;
             font-weight: 700;
-            margin-bottom: 6px;
+            margin: 0 0 6px;
             text-transform: uppercase;
             text-align: justify;
         }
 
         .a4-list {
             display: grid;
-            gap: 6px;
+            gap: 4px;
         }
 
         .a4-row {
             display: grid;
-            grid-template-columns: 40px 1fr;
-            gap: 8px;
+            grid-template-columns: 20px 1fr;
+            gap: 6px;
         }
 
         .a4-code {
@@ -97,16 +126,21 @@
             padding-left: 8px;
         }
 
+        p {
+            margin: 4px 0;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
             border: 1px solid #000;
+            margin-top: 4px;
         }
 
         table td {
             border: 1px solid #000;
             padding: 4px;
-    }
+        }
 
         table th {
             border: 1px solid #000;
@@ -114,26 +148,67 @@
             background: #d9d9d9;
         }
 
+        .kv-table td:first-child {
+            width: 5%;
+            white-space: nowrap;
+            vertical-align: top;
+        }
+
+        .print-block {
+            break-inside: avoid-page;
+            page-break-inside: avoid;
+        }
+
+        .print-break-before {
+            break-before: page;
+            page-break-before: always;
+        }
+
+        .print-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            border-top: 1px solid #000;
+            padding-top: 2mm;
+            text-align: right;
+            font-size: 10px;
+            color: #111827;
+            background: #fff;
+        }
+
+        .print-footer .page-number::after {
+            content: counter(page);
+        }
 
         @media print {
             body {
-                background: #fff !important;
+                background: #fff;
+            }
+
+            .screen-toolbar {
+                display: none !important;
             }
 
             .a4-wrap {
                 padding: 0;
-                background: #fff;
             }
 
             .a4-page {
-                box-shadow: none;
-                margin: 0;
                 width: auto;
                 min-height: auto;
+                margin: 0;
                 padding: 0;
+                box-shadow: none;
+                background: transparent;
             }
         }
     </style>
+</head>
+<body>
+    <div class="screen-toolbar">
+        <button type="button" class="screen-btn" onclick="window.print()">Print</button>
+    </div>
 
     <div class="a4-wrap">
         <div class="a4-page">
@@ -167,15 +242,15 @@
                 <h3>A. University Information</h3>
 
                 <div class="a4-section">
-                    <strong class="one-indent">1. Vision of the University</strong>
-                    <p class="two-indent">Central Luzon State University (CLSU) as a world-class National University
+                    <strong class="indent-level-1">1. Vision of the University</strong>
+                    <p class="indent-level-2">Central Luzon State University (CLSU) as a world-class National University
                         for science and technology in
                         agriculture and allied fields.</p>
                 </div>
 
                 <div class="a4-section">
-                    <strong class="one-indent">2. Mission of the University</strong>
-                    <p class="two-indent">CLSU shall develop globally competitive, work-ready, socially-responsible
+                    <strong class="indent-level-1">2. Mission of the University</strong>
+                    <p class="indent-level-2">CLSU shall develop globally competitive, work-ready, socially-responsible
                         and empowered human resources who
                         value life-long learning; and to generate, disseminate, and apply knowledge and technologies for
                         poverty
@@ -183,8 +258,8 @@
                 </div>
 
                 <div class="a4-section">
-                    <strong class="one-indent">3. Educational Philosophy</strong>
-                    <p class="two-indent">The Central Luzon State University is committed and dedicated to provide a
+                    <strong class="indent-level-1">3. Educational Philosophy</strong>
+                    <p class="indent-level-2">The Central Luzon State University is committed and dedicated to provide a
                         holistic transformative education anchored on
                         its mission statement and its institutional core values. As stated on its mission, the University
                         shall develop globally competitive, work-ready,
@@ -193,14 +268,14 @@
                         for poverty alleviation, environmental protection and sustainable development.
                         In consonance, the educational philosophy of the University is reflective of its teaching and
                         learning environment.</p>
-                    <p class="two-indent">Along with the curricular programs, the academic journey of learners
+                    <p class="indent-level-2">Along with the curricular programs, the academic journey of learners
                         revolves on three value-laden dimensions:
                         creativeness and innovativeness, hard work and integrity, and inclusiveness and transformativeness.
                     </p>
                     <br>
 
                     <div>
-                        <div class="between-indent">With these, the university shall:</div>
+                        <div class="indent-level-1-5-text">With these, the university shall:</div>
                         <ul>
                             <li>Provide a teaching and learning environment which harness creativity and innovativeness among
                                 learners.
@@ -226,75 +301,87 @@
                                 transformation.
                             </li>
                         </ul>
-                    </p>
+                    </div>
                 </div>
 
                 <div class="a4-section">
-                    <strong class="one-indent">4. Quality Policy Statement</strong>
-                    <p class="one1-indent">a.  Excellent service to humanity is our commitment.</p>
-                    <p class="one1-indent">b.  We are committed to develop globally-competent and empowered human
-                        resources, and to generate knowledge
-                        and technologies for inclusive societal development.</p>
-                    <p class="one1-indent">c.  We are dedicated to uphold CLSU’s core values and principles, comply with
-                        statutory and regulatory
-                        standards and continuously improve the effectiveness of our quality management systems.</p>
-                    <p class="one1-indent">d.  Mahalaga ang inyong tinig upang higit na mapahusay ang kalidad ng aming
-                        paglilingkod.</p>
+                    <strong class="indent-level-1">4. Quality Policy Statement</strong>
+                    <div class="a4-list">
+                        <div class="a4-row indent-level-1-5">
+                            <div>a.</div>
+                            <div>Excellent service to humanity is our commitment.</div>
+                        </div>
+                        <div class="a4-row indent-level-1-5">
+                            <div>b.</div>
+                            <div>We are committed to develop globally-competent and empowered human resources, and to generate knowledge and technologies for inclusive societal development.</div>
+                        </div>
+                        <div class="a4-row indent-level-1-5">
+                            <div>c.</div>
+                            <div>We are dedicated to uphold CLSU’s core values and principles, comply with statutory and regulatory standards and continuously improve the effectiveness of our quality management systems.</div>
+                        </div>
+                        <div class="a4-row indent-level-1-5">
+                            <div>d.</div>
+                            <div>Mahalaga ang inyong tinig upang higit na mapahusay ang kalidad ng aming paglilingkod.</div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="a4-section">
-                    <strong class="one-indent">5. Goals of the {{ $collegeName }}</strong>
+                    <strong class="indent-level-1">5. Goals of the {{ $collegeName }}</strong>
                     <div class="a4-list">
                         @forelse ($collegeGoals as $goal)
-                            <div class="a4-row">
+                            <div class="a4-row indent-level-1-5">
                                 <div>{{ $goal->college_goals_code }}.</div>
                                 <div>{{ $goal->goal_text }}</div>
                             </div>
                         @empty
-                            <div>No college goals found.</div>
+                            <div class="indent-level-1-5">No college goals found.</div>
                         @endforelse
                     </div>
                 </div>
 
                 <div class="a4-section">
-                    <strong class="one-indent">6. Objectives of the {{ $departmentName }}</strong>
+                    <strong class="indent-level-1">6. Objectives of the {{ $departmentName }}</strong>
                     <div class="a4-list">
                         @forelse ($departmentObjectives as $objective)
-                            <div class="a4-row">
+                            <div class="a4-row indent-level-1-5">
                                 <div>{{ $objective->dept_obj_code }}.</div>
                                 <div>{{ $objective->objective_text }}</div>
                             </div>
                         @empty
-                            <div>No department objectives found.</div>
+                            <div class="indent-level-1-5">No department objectives found.</div>
                         @endforelse
                     </div>
                 </div>
 
                 <h3>B. Program Information</h3>
-                <table>
-                    <tr>
-                        <td>1. Name of Program</td>
-                        <td>{{ $program->name }}</td>
-                    </tr>
-                    <tr>
-                        <td>2. BOR Approval</td>
-                        <td>{{ $program->bor_approval_no ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td>3. Date of Approval</td>
-                        <td>{{ $program->bor_approval_date ?? '' }}</td>
-                    </tr>
-                </table>
+                <div class="indent-level-1 print-block">
+                    <table class="kv-table">
+                        <tr>
+                            <td>1. Name of Program</td>
+                            <td>{{ $program->name }}</td>
+                        </tr>
+                        <tr>
+                            <td>2. BOR Approval</td>
+                            <td>{{ $program->bor_approval_no ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td>3. Date of Approval</td>
+                            <td>{{ $program->bor_approval_date ?? '' }}</td>
+                        </tr>
+                    </table>
+                </div>
 
 
-                <div class="a4-section">
-                    <strong class="title-indent">1. Program Educational Objectives (PEOs)</strong>
+                <div class="a4-section indent-level-1 print-block">
+                    <strong>1. Program Educational Objectives (PEOs)</strong>
 
                     <table>
                         <tr>
                             <th>
-                                <b>Program Educational Objectives</b><br>
-                                Three to five years after graduation, the BSIT graduates are:
+                                <b>Program Educational Objectives</b>
+                                <br>
+                                <p>Three to five years after graduation, the BSIT graduates are:</p>
                             </th>
                             <th>Mission</th>
                         </tr>
@@ -313,9 +400,9 @@
                 </div>
 
 
-                <div class="a4-section">
-                    <strong class="title-indent">
-                        Program Outcomes and its Relationship to the Program Educational Objectives
+                <div class="a4-section indent-level-1 print-block">
+                    <strong>
+                        2. Program Outcomes (POs) and its Relationship to the Program Educational Objectives (PEOs)
                     </strong>
 
                     <table>
@@ -362,71 +449,77 @@
                     </table>
                 </div>
 
-
-
-                <h3>C. Instructor Information</h3>
-                <table>
-                    <tr>
-                        <td>1. Name of Instructor/Professor</td>
-                        <td>{!! $lecLabValue($lecComponent?->instructor_name, $labComponent?->instructor_name) !!}</td>
-                    </tr>
-                    <tr>
-                        <td>2. Office</td>
-                        <td>{!! $lecLabValue($lecComponent?->office, $labComponent?->office) !!}</td>
-                    </tr>
-                    <tr>
-                        <td>3.Phone No. (Optional)</td>
-                        <td>{!! $lecLabValue($lecComponent?->phone, $labComponent?->phone) !!}</td>
-                    </tr>
-                    <tr>
-                        <td>4. Email Address</td>
-                        <td>{!! $lecLabValue($lecComponent?->instructor_email, $labComponent?->instructor_email) !!}</td>
-                    </tr>
-                    <tr>
-                        <td>5. Consultation Hours</td>
-                        <td>{!! $lecLabValue($lecComponent?->consultation_hours, $labComponent?->consultation_hours) !!}</td>
-                    </tr>
-                </table>
+                <h3 class="print-break-before">C. Instructor Information</h3>
+                <div class="indent-level-1 print-block">
+                    <table class="kv-table">
+                        <tr>
+                            <td>1. Name of Instructor/Professor</td>
+                            <td>{!! $lecLabValue($lecComponent?->instructor_name, $labComponent?->instructor_name) !!}</td>
+                        </tr>
+                        <tr>
+                            <td>2. Office</td>
+                            <td>{!! $lecLabValue($lecComponent?->office, $labComponent?->office) !!}</td>
+                        </tr>
+                        <tr>
+                            <td>3.Phone No. (Optional)</td>
+                            <td>{!! $lecLabValue($lecComponent?->phone, $labComponent?->phone) !!}</td>
+                        </tr>
+                        <tr>
+                            <td>4. Email Address</td>
+                            <td>{!! $lecLabValue($lecComponent?->instructor_email, $labComponent?->instructor_email) !!}</td>
+                        </tr>
+                        <tr>
+                            <td>5. Consultation Hours</td>
+                            <td>{!! $lecLabValue($lecComponent?->consultation_hours, $labComponent?->consultation_hours) !!}</td>
+                        </tr>
+                    </table>
+                </div>
 
 
                 <h3>D. Course Information</h3>
-                <table>
-                    <tr>
-                        <td>1. Course Code</td>
-                        <td>{{ $syllabus->course->course_code }}</td>
-                    </tr>
-                    <tr>
-                        <td>2. Course Title</td>
-                        <td>{{ $syllabus->course->course_title ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td>3. Course Description</td>
-                        <td>{{ $syllabus->course->course_description ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td>4. Pre-requisite </td>
-                        <td>{{ $syllabus->course->prerequisite ?? 'None' }}</td>
-                    </tr>
-                    <tr>
-                        <td>5. Co-requisite</td>
-                        <td>{{ $syllabus->course->corequisite ?? 'None' }}</td>
-                    </tr>
-                    <tr>
-                        <td>6. Credit Units</td>
-                        <td>{{ $syllabus->course->credit_units }}</td>
-                    </tr>
-                    <tr>
-                        <td>7. Class Hours</td>
-                        <td>{!! $lecLabValue($lecComponent?->class_hours, $labComponent?->class_hours) !!}</td>
-                    </tr>
-                    <tr>
-                        <td>8. Class Schedule</td>
-                        <td>{!! $lecLabValue($lecComponent?->schedule, $labComponent?->schedule) !!}</td>
-                    </tr>
-                </table>
+                <div class="indent-level-1 print-block">
+                    <table class="kv-table">
+                        <tr>
+                            <td>1. Course Code</td>
+                            <td>{{ $syllabus->course->course_code }}</td>
+                        </tr>
+                        <tr>
+                            <td>2. Course Title</td>
+                            <td>{{ $syllabus->course->course_title ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td>3. Course Description</td>
+                            <td>{{ $syllabus->course->course_description ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td>4. Pre-requisite </td>
+                            <td>{{ $syllabus->course->prerequisite ?? 'None' }}</td>
+                        </tr>
+                        <tr>
+                            <td>5. Co-requisite</td>
+                            <td>{{ $syllabus->course->corequisite ?? 'None' }}</td>
+                        </tr>
+                        <tr>
+                            <td>6. Credit Units</td>
+                            <td>{{ $syllabus->course->credit_units }}</td>
+                        </tr>
+                        <tr>
+                            <td>7. Class Hours</td>
+                            <td>{!! $lecLabValue($lecComponent?->class_hours, $labComponent?->class_hours) !!}</td>
+                        </tr>
+                        <tr>
+                            <td>8. Class Schedule</td>
+                            <td>{!! $lecLabValue($lecComponent?->schedule, $labComponent?->schedule) !!}</td>
+                        </tr>
+                    </table>
+                </div>
             </div>
 
         </div>
     </div>
+
+    <div class="print-footer">
+        Course Syllabus: {{ $syllabus->course->course_code }} | Page <span class="page-number"></span>
     </div>
-@endsection
+</body>
+</html>

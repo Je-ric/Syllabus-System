@@ -153,6 +153,11 @@ class SyllabusController extends Controller
     {
         $this->authorizeSyllabusAccess($syllabus);
 
+        return view('Syllabus.preview', $this->buildPreviewData($syllabus));
+    }
+
+    private function buildPreviewData(Syllabus $syllabus): array
+    {
         $syllabus->load([
             'course.program.peos',
             'course.program.outcomes.peos',
@@ -174,7 +179,7 @@ class SyllabusController extends Controller
         $lecComponent = $syllabus->components->firstWhere('type', 'LEC');
         $labComponent = $syllabus->components->firstWhere('type', 'LAB');
 
-        return view('Syllabus.preview', compact(
+        return compact(
             'syllabus',
             'program',
             'collegeName',
@@ -185,7 +190,7 @@ class SyllabusController extends Controller
             'pos',
             'lecComponent',
             'labComponent'
-        ));
+        );
     }
 
     private function buildProgramSelectionData($programId = null): array
