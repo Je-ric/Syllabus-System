@@ -174,6 +174,7 @@
             list-style-type: disc;
             list-style-position: outside;
             padding-left: 8px;
+            line-height: 1;
         }
 
         h3{
@@ -190,7 +191,7 @@
 
         p {
             margin: 4px 0;
-            line-height: 1.55;
+            line-height: 1.2;
         }
 
         table {
@@ -238,11 +239,11 @@
                 box-shadow: none;
                 page-break-after: always;
                 break-after: page;
-                page-break-inside: avoid; /* Prevent breaking within the group */
+                page-break-inside: avoid; 
             }
 
             table {
-                page-break-inside: auto; /* Allow tables to split across pages */
+                page-break-inside: auto; 
             }
 
             /* .a4-page:last-child {
@@ -304,39 +305,44 @@
                             leaders, imbued with an outward and forward-thinking perspective in their respective fields. It
                             further ensures the vital role of research in promoting quality and excellence. Thus, regular
                             updating of curricular programs, empowerment of human capital, modernizing instructional and
-                            pedagogical resources, and equal opportunity for all, are always observed.</li>
+                            pedagogical resources, and equal opportunity for all, are always observed.
+                        </li>
                         <li>Adopt experiential learning on its programs along with the dynamic and continuous engagement
                             between the faculty, the staff, the students and the community. The shared values of hard work
                             and integrity puts forth in the discovery of new knowledge and in its application in real-life
                             contexts. Thus, enabling and preparing the learners to be effective and efficient navigators of
-                            the future.</li>
+                            the future.
+                        </li>
                         <li>Provide experiences that enable learners to discover the fulfillment of embracing diversity in
                             the form of various academic collaborations at the local, regional and international levels.
                             Students are guided to acknowledge and respect peoples and their cultures for inclusive societal
-                            transformation.</li>
+                            transformation.
+                        </li>
                     </ul>
             </div>
 
-            <strong class="indent-level-1">4. Quality Policy Statement</strong>
-            <div class="a4-list">
-                <div class="a4-row indent-level-1-5">
-                    <div>a.</div>
-                    <div>Excellent service to humanity is our commitment.</div>
-                </div>
-                <div class="a4-row indent-level-1-5">
-                    <div>b.</div>
-                    <div>We are committed to develop globally-competent and empowered human resources, and to generate
-                        knowledge and technologies for inclusive societal development.</div>
-                </div>
-                <div class="a4-row indent-level-1-5">
-                    <div>c.</div>
-                    <div>We are dedicated to uphold CLSU's core values and principles, comply with statutory and
-                        regulatory standards and continuously improve the effectiveness of our quality management
-                        systems.</div>
-                </div>
-                <div class="a4-row indent-level-1-5">
-                    <div>d.</div>
-                    <div>Mahalaga ang inyong tinig upang higit na mapahusay ang kalidad ng aming paglilingkod.</div>
+            <div class="a4-section">
+                <strong class="indent-level-1">4. Quality Policy Statement</strong>
+                <div class="a4-list">
+                    <div class="a4-row indent-level-1-5">
+                        <div>a.</div>
+                        <div>Excellent service to humanity is our commitment.</div>
+                    </div>
+                    <div class="a4-row indent-level-1-5">
+                        <div>b.</div>
+                        <div>We are committed to develop globally-competent and empowered human resources, and to generate
+                            knowledge and technologies for inclusive societal development.</div>
+                    </div>
+                    <div class="a4-row indent-level-1-5">
+                        <div>c.</div>
+                        <div>We are dedicated to uphold CLSU's core values and principles, comply with statutory and
+                            regulatory standards and continuously improve the effectiveness of our quality management
+                            systems.</div>
+                    </div>
+                    <div class="a4-row indent-level-1-5">
+                        <div>d.</div>
+                        <div>Mahalaga ang inyong tinig upang higit na mapahusay ang kalidad ng aming paglilingkod.</div>
+                    </div>
                 </div>
             </div>
 
@@ -542,10 +548,63 @@
 
                 if (page.scrollHeight > A4_HEIGHT) {
                     page.removeChild(el);
-                    page = createNewPage();
-                    container.appendChild(page);
-                    page.appendChild(el);
+
+                    if (['DIV', 'UL', 'OL', 'LI'].includes(el.tagName) && el.children.length > 0) {
+                        splitContainer(el);
+                    } else {
+                        page = createNewPage();
+                        container.appendChild(page);
+                        page.appendChild(el);
+                    }
                 }
+            }
+
+            function splitContainer(el) {
+                if (!el.hasAttribute('data-split-id')) {
+                    el.setAttribute('data-split-id', Math.random().toString(36).substr(2, 9));
+                }
+
+                function ensureWrapperPath(path) {
+                    let current = page;
+                    path.forEach(node => {
+                        let wrapper = current.lastElementChild;
+                        if (!wrapper || wrapper.getAttribute('data-split-id') !== node.getAttribute('data-split-id')) {
+                            wrapper = node.cloneNode(false);
+                            wrapper.removeAttribute('id');
+                            wrapper.setAttribute('data-split-id', node.getAttribute('data-split-id'));
+                            current.appendChild(wrapper);
+                        }
+                        current = wrapper;
+                    });
+                    return current;
+                }
+
+                function appendNodes(nodes, parentPath) {
+                    nodes.forEach(child => {
+                        let currentWrapper = ensureWrapperPath(parentPath);
+                        currentWrapper.appendChild(child);
+
+                        if (page.scrollHeight > A4_HEIGHT) {
+                            currentWrapper.removeChild(child);
+                            if (!currentWrapper.hasChildNodes()) currentWrapper.parentNode.removeChild(currentWrapper);
+
+                            if (child.nodeType === Node.ELEMENT_NODE && ['DIV', 'UL', 'OL', 'LI'].includes(child.tagName) && child.childNodes.length > 0) {
+                                if (!child.hasAttribute('data-split-id')) {
+                                    child.setAttribute('data-split-id', Math.random().toString(36).substr(2, 9));
+                                }
+                                appendNodes(Array.from(child.childNodes), [...parentPath, child]);
+                            } else {
+                                page = createNewPage();
+                                container.appendChild(page);
+                                currentWrapper = ensureWrapperPath(parentPath);
+                                currentWrapper.appendChild(child);
+                            }
+                        }
+                    });
+                }
+
+                appendNodes(Array.from(el.childNodes), [el]);
+                document.querySelectorAll('[data-split-id]').forEach(e => e.removeAttribute('data-split-id'));
             }
 
             function splitTable(table) {
