@@ -141,7 +141,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="flex items-center gap-3 rounded-2xl bg-white/10 backdrop-blur px-3 py-2 hover:bg-white/20 transition cursor-pointer">
+                    <a href="{{ route('profile.index') }}" class="flex items-center gap-3 rounded-2xl bg-white/10 backdrop-blur px-3 py-2 hover:bg-white/20 transition cursor-pointer">
                         <div class="h-9 w-9 rounded-full bg-amber-400 text-white flex items-center justify-center">
                             <i class="bx bxs-user text-lg"></i>
                         </div>
@@ -151,9 +151,7 @@
                                 {{ Auth::user()->name ?? 'User' }}
                             </p>
                         </div>
-
-                        <i class="bx bx-chevron-down text-white/70"></i>
-                    </div>
+                    </a>
                 </div>
             </header>
 

@@ -14,6 +14,7 @@ use App\Http\Controllers\AcademicCalendarEventController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\SyllabusController;
 use App\Http\Controllers\OrganizationalHierarchyController;
+use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 
 Route::get('/', function () {
@@ -131,6 +132,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/syllabus/{syllabus}/edit', [SyllabusController::class, 'edit'])->name('syllabus.edit');
         Route::put('/syllabus/{syllabus}', [SyllabusController::class, 'update'])->name('syllabus.update');
         Route::delete('/syllabus/{syllabus}', [SyllabusController::class, 'destroy'])->name('syllabus.destroy');
+
+        Route::get('/profile', [UserController::class,'index'])->name('profile.index');
     });
 
 });
