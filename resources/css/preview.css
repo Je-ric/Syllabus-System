@@ -47,8 +47,7 @@
 
 body {
     background: #f0f0f0;
-    /* font-family: Tahoma; */
-    font-family: "Libre Franklin", Tahoma;
+    font-family: 'Tahoma', sans-serif;
     color: #111827;
     min-height: 100vh;
     padding: 56px 0 72px;
@@ -107,8 +106,6 @@ body {
 }
 
 .a4-page {
-    width: 794px;
-    height: 1122px;
     padding: 96px;
     margin: 0 auto 20px;
     background: #fff;
@@ -116,6 +113,17 @@ body {
     overflow: hidden;
     position: relative;
     break-inside: auto;
+}
+
+.a4-page.portrait {
+    width: 794px;
+    height: 1122px;
+}
+
+.a4-page.landscape {
+    width: 1122px;
+    height: 794px;
+    padding: 72px;
 }
 
 .a4-title {
@@ -163,11 +171,14 @@ body {
 }
 
 .a4-section h3 {
-    font-size: 12px;
+    font-size: 11pt;
     font-weight: 700;
     margin: 0 0 6px;
-    text-transform: uppercase;
     text-align: justify;
+}
+
+h3.a4-section {
+    margin: 10px 0 6px;
 }
 
 .a4-list {
@@ -193,9 +204,18 @@ ul li {
     line-height: 1;
 }
 
-h3 {
-    text-transform: uppercase;
+.title-numbered,
+.title-lettered {
+    font-size: 11pt;
     font-weight: 700;
+}
+
+.title-numbered {
+    text-transform: none;
+}
+
+.title-lettered {
+    text-transform: uppercase;
 }
 
 p,
@@ -240,6 +260,16 @@ table th {
 }
 
 @media print {
+    @page portrait {
+        size: A4 portrait;
+        margin: 0;
+    }
+
+    @page landscape {
+        size: A4 landscape;
+        margin: 0;
+    }
+
     body {
         background: none;
         padding: 0;
@@ -262,11 +292,15 @@ table th {
         page-break-inside: avoid;
     }
 
+    .a4-page.portrait {
+        page: portrait;
+    }
+
+    .a4-page.landscape {
+        page: landscape;
+    }
+
     table {
         page-break-inside: auto;
     }
-
-    /* .a4-page:last-child {
-                page-break-after: avoid;
-            } */
 }

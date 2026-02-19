@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tahoma&display=swap" rel="stylesheet">
 
     <title>Course Syllabus - {{ $syllabus->course->course_code }}</title>
 
@@ -46,16 +47,16 @@
         <div class="a4-section a4-title">COURSE SYLLABUS</div>
         <div class="a4-subtitle">{{ $syllabus->course->course_code }} - {{ $syllabus->course->course_title }}</div>
 
-        <h3 class="a4-section">A. University Information</h3>
+        <h3 class="a4-section title-lettered">A. University Information</h3>
 
         <div class="a4-section">
-            <strong class="indent-level-1">1. Vision of the University</strong>
+            <strong class="indent-level-1 title-numbered">1. Vision of the University</strong>
             <p class="indent-level-2">Central Luzon State University (CLSU) as a world-class National University for
                 science and technology in agriculture and allied fields.</p>
         </div>
 
         <div class="a4-section">
-            <strong class="indent-level-1">2. Mission of the University</strong>
+            <strong class="indent-level-1 title-numbered">2. Mission of the University</strong>
             <p class="indent-level-2">CLSU shall develop globally competitive, work-ready, socially-responsible and
                 empowered human resources who value life-long learning; and to generate, disseminate, and apply
                 knowledge and technologies for poverty alleviation, environmental protection, and sustainable
@@ -63,7 +64,7 @@
         </div>
 
         <div class="a4-section">
-            <strong class="indent-level-1">3. Educational Philosophy</strong>
+            <strong class="indent-level-1 title-numbered">3. Educational Philosophy</strong>
             <p class="indent-level-2">The Central Luzon State University is committed and dedicated to provide a
                 holistic transformative education anchored on its mission statement and its institutional core values.
                 As stated on its mission, the University shall develop globally competitive, work-ready,
@@ -97,7 +98,7 @@
         </div>
 
         <div class="a4-section">
-            <strong class="indent-level-1">4. Quality Policy Statement</strong>
+            <strong class="indent-level-1 title-numbered">4. Quality Policy Statement</strong>
             <div class="a4-list">
                 <div class="indent-level-1-5">
                     {{-- <div>a.</div> --}}
@@ -122,7 +123,7 @@
         </div>
 
         <div class="a4-section">
-            <strong class="indent-level-1">5. Goals of the {{ $collegeName }}</strong>
+            <strong class="indent-level-1 title-numbered">5. Goals of the {{ $collegeName }}</strong>
             <div class="a4-list">
                 @forelse ($collegeGoals as $goal)
                     <div class="indent-level-1-5">
@@ -136,7 +137,7 @@
         </div>
 
         <div class="a4-section">
-            <strong class="indent-level-1">6. Objectives of the {{ $departmentName }}</strong>
+            <strong class="indent-level-1 title-numbered">6. Objectives of the {{ $departmentName }}</strong>
             <div class="a4-list">
                 @forelse ($departmentObjectives as $objective)
                     <div class="indent-level-1-5">
@@ -150,7 +151,7 @@
         </div>
 
         <div class="a4-section">
-            <h3>B. Program Information</h3>
+            <h3 class="a4-section title-lettered">B. Program Information</h3>
             <table class="kv-table">
                 <tbody>
                     <tr>
@@ -169,7 +170,7 @@
             </table>
         </div>
 
-            <strong>1. Program Educational Objectives (PEOs)</strong>
+            <strong class="title-numbered">1. Program Educational Objectives (PEOs)</strong>
             <table>
                 <thead>
                     <tr>
@@ -193,7 +194,7 @@
                 </tbody>
             </table>
 
-            <strong>2. Program Outcomes (POs) and its Relationship to the Program Educational Objectives (PEOs)</strong>
+            <strong class="title-numbered">2. Program Outcomes (POs) and its Relationship to the Program Educational Objectives (PEOs)</strong>
             <table>
                 <thead>
                     <tr>
@@ -228,7 +229,7 @@
                 </tbody>
             </table>
 
-            <h3 class="a4-section">C. Instructor Information</h3>
+            <h3 class="a4-section title-lettered">C. Instructor Information</h3>
             <table class="kv-table">
                 <tbody>
                     <tr>
@@ -254,7 +255,7 @@
                 </tbody>
             </table>
 
-        <h3 class="a4-section">D. Course Information</h3>
+        <h3 class="a4-section title-lettered">D. Course Information</h3>
         <table class="kv-table">
             <tbody>
                 <tr>
@@ -291,6 +292,90 @@
                 </tr>
             </tbody>
         </table>
+
+        <div class="landscape">
+            <h3 class="a4-section title-numbered">9. Course Outcomes (COs) and Relationship to Program Outcomes</h3>
+
+            @php
+                $addressedPoIds = $courseOutcomes
+                    ->flatMap(fn($co) => $co->programOutcomes->pluck('id'))
+                    ->unique()
+                    ->values();
+            @endphp
+
+            <table>
+                <thead>
+                    <tr>
+                        <th rowspan="2" style="text-align:left;">Program Outcomes addressed by the course</th>
+                        <th colspan="{{ max($pos->count(), 1) }}">PO Code</th>
+                    </tr>
+                    <tr>
+                        @forelse ($pos as $po)
+                            <th>{{ $po->po_code }}</th>
+                        @empty
+                            <th>-</th>
+                        @endforelse
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td></td>
+                        @forelse ($pos as $po)
+                            <td style="text-align:center;">
+                                {!! $addressedPoIds->contains($po->id) ? '&#10003;' : '' !!}
+                            </td>
+                        @empty
+                            <td>-</td>
+                        @endforelse
+                    </tr>
+                </tbody>
+            </table>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th rowspan="2" style="text-align:left;">Program Outcomes addressed by the course</th>
+                        <th colspan="{{ max($pos->count(), 1) }}">PO Code</th>
+                    </tr>
+                    <tr>
+                        @forelse ($pos as $po)
+                            <th>{{ $po->po_code }}</th>
+                        @empty
+                            <th>-</th>
+                        @endforelse
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($courseOutcomes as $co)
+                        <tr>
+                            <td>{{ $co->co_code }}: {{ $co->description }}</td>
+                            @forelse ($pos as $po)
+                                @php
+                                    $mapping = $co->programOutcomes->firstWhere('id', $po->id);
+                                    $ied = $mapping?->pivot?->ied ?? '';
+                                @endphp
+                                <td style="text-align:center;">{{ $ied }}</td>
+                            @empty
+                                <td>-</td>
+                            @endforelse
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="{{ $pos->count() + 1 }}" style="text-align:center;">No CO-PO mappings found.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+
+            <p style="font-size:11px; margin-top:6px;">
+                <strong>Level:</strong> I - Introductory, E - Enabling, D - Demonstrative
+            </p>
+        </div>
+
+        <div class="portrait">
+            <h3 class="a4-section title-numbered">Testing if portrait is working</h3>
+        </div>
+
     </div>
 
     <div id="a4-container"></div>
@@ -300,12 +385,35 @@
             const source = document.getElementById("syllabus-content");
             const container = document.getElementById("a4-container");
             const pageCount = document.getElementById("page-count");
-            const A4_HEIGHT = 1122;
-
-            let page = createNewPage();
+            const PAGE_HEIGHT = {
+                portrait: 1122,
+                landscape: 794
+            };
+            let currentOrientation = "portrait";
+            let page = createNewPage(currentOrientation);
             container.appendChild(page);
 
             Array.from(source.children).forEach(element => {
+                const hasLandscapeClass = element.classList?.contains("landscape");
+                const hasPortraitClass = element.classList?.contains("portrait");
+                const explicitOrientation = hasLandscapeClass ? "landscape" : (hasPortraitClass ? "portrait" : null);
+                const targetOrientation = explicitOrientation ?? (currentOrientation === "landscape" ? "portrait" : "portrait");
+
+                if (targetOrientation !== currentOrientation) {
+                    if (page.children.length > 0) {
+                        page = createNewPage(targetOrientation);
+                        container.appendChild(page);
+                    } else {
+                        page.classList.remove("portrait", "landscape");
+                        page.classList.add(targetOrientation);
+                    }
+                    currentOrientation = targetOrientation;
+                }
+
+                if (explicitOrientation) {
+                    element.classList.remove("landscape", "portrait");
+                }
+
                 if (element.tagName === "TABLE") {
                     splitTable(element);
                 } else {
@@ -319,13 +427,13 @@
             function appendElement(el) {
                 page.appendChild(el);
 
-                if (page.scrollHeight > A4_HEIGHT) {
+                if (page.scrollHeight > getCurrentPageMaxHeight()) {
                     page.removeChild(el);
 
                     if (['DIV', 'UL', 'OL', 'LI'].includes(el.tagName) && el.children.length > 0) {
                         splitContainer(el);
                     } else {
-                        page = createNewPage();
+                        page = createNewPage(currentOrientation);
                         container.appendChild(page);
                         page.appendChild(el);
                     }
@@ -357,7 +465,7 @@
                         let currentWrapper = ensureWrapperPath(parentPath);
                         currentWrapper.appendChild(child);
 
-                        if (page.scrollHeight > A4_HEIGHT) {
+                        if (page.scrollHeight > getCurrentPageMaxHeight()) {
                             currentWrapper.removeChild(child);
                             if (!currentWrapper.hasChildNodes()) currentWrapper.parentNode.removeChild(currentWrapper);
 
@@ -367,7 +475,7 @@
                                 }
                                 appendNodes(Array.from(child.childNodes), [...parentPath, child]);
                             } else {
-                                page = createNewPage();
+                                page = createNewPage(currentOrientation);
                                 container.appendChild(page);
                                 currentWrapper = ensureWrapperPath(parentPath);
                                 currentWrapper.appendChild(child);
@@ -396,13 +504,13 @@
                 rows.forEach(row => {
                     newTable.querySelector("tbody").appendChild(row);
 
-                    if (page.scrollHeight > A4_HEIGHT) {
+                    if (page.scrollHeight > getCurrentPageMaxHeight()) {
                         newTable.querySelector("tbody").removeChild(row);
 
-                        page = createNewPage();
+                        page = createNewPage(currentOrientation);
                         container.appendChild(page);
 
-                        newTable = createTableWithHeader(table, null); // Exclude header on subsequent pages
+                        newTable = createTableWithHeader(table, thead); // Repeat header on each continued page
                         page.appendChild(newTable);
 
                         newTable.querySelector("tbody").appendChild(row);
@@ -426,9 +534,13 @@
                 return table;
             }
 
-            function createNewPage() {
+            function getCurrentPageMaxHeight() {
+                return PAGE_HEIGHT[currentOrientation] ?? PAGE_HEIGHT.portrait;
+            }
+
+            function createNewPage(orientation = "portrait") {
                 const div = document.createElement("div");
-                div.className = "a4-page";
+                div.className = "a4-page " + orientation;
                 return div;
             }
 
@@ -441,10 +553,11 @@
                     footer.style.bottom = "20px";
                     footer.style.left = "60px";
                     footer.style.right = "60px";
-                    footer.style.borderTop = "1px solid #000";
-                    footer.style.paddingTop = "4px";
+                    footer.style.borderTop = "1px solid #808080";
+                    footer.style.paddingTop = "10px";
                     footer.style.textAlign = "right";
-                    footer.style.fontSize = "10px";
+                    footer.style.fontSize = "10pt";
+                    footer.style.color = "#808080";
                     footer.innerText = "Course Syllabus: {{ $syllabus->course->course_code }} | Page " + (
                         index + 1) + " of " + pages.length;
                     p.appendChild(footer);

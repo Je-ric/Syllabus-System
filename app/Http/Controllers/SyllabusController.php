@@ -164,6 +164,7 @@ class SyllabusController extends Controller
             'course.program.departments.objectives',
             'course.program.departments.college.goals',
             'components',
+            'courseOutcomes.programOutcomes',
         ]);
 
         $program = $syllabus->course->program;
@@ -176,6 +177,7 @@ class SyllabusController extends Controller
         $departmentObjectives = $department?->objectives?->sortBy('dept_obj_code') ?? collect();
         $peos = $program->peos?->sortBy('peo_code') ?? collect();
         $pos = $program->outcomes?->sortBy('po_code') ?? collect();
+        $courseOutcomes = $syllabus->courseOutcomes?->sortBy('co_code') ?? collect();
         $lecComponent = $syllabus->components->firstWhere('type', 'LEC');
         $labComponent = $syllabus->components->firstWhere('type', 'LAB');
 
@@ -188,6 +190,7 @@ class SyllabusController extends Controller
             'departmentObjectives',
             'peos',
             'pos',
+            'courseOutcomes',
             'lecComponent',
             'labComponent'
         );
