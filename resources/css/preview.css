@@ -1,0 +1,272 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --brand-ink: #0b1220;
+    --brand-cyan: #0e7490;
+    --brand-cyan-dark: #0b556b;
+    --panel: #ffffff;
+    --panel-muted: #f1f5f9;
+
+    --scrollbar-thumb: #ffb51b;
+    --scrollbar-thumb-hover: #e6a700;
+    --scrollbar-track: #f1f1f1;
+
+    --red: #e2231a;
+    --red-100: #c01e16;
+    --blue-50: #dde5eb;
+    --blue: #008dea;
+    --orange: #f9c150;
+    --white: #ffffff;
+    --white-50: #f1f2f3;
+    --gray: #dad8d8;
+    --gray-100: #979797;
+    --black-20: #525252;
+    --black-25: #3a3a3a;
+    --black-50: #313131;
+    --yellow: #cdfb13;
+    --clsu-yellow: #ffd700;
+    --clsu-gold: #e0a70d;
+    --clsu-cobra: #1a5f30;
+    --clsu-green: #009639;
+    --green: #92d12c;
+    --green-50: #4eab18;
+    --green-100: #038303;
+    --green-150: #003a10;
+    --green-grad: linear-gradient(
+        90deg,
+        rgba(0, 129, 2, 1) 0%,
+        rgba(149, 210, 45, 1) 100%
+    );
+}
+
+body {
+    background: #f0f0f0;
+    /* font-family: Tahoma; */
+    font-family: "Libre Franklin", Tahoma;
+    color: #111827;
+    min-height: 100vh;
+    padding: 56px 0 72px;
+}
+
+#toolbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--green-grad);
+    padding: 0 24px;
+    z-index: 9999;
+    font-size: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+#toolbar .t-left {
+    color: #ccc;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+#toolbar .t-title {
+    color: #e0e0e0;
+    font-weight: 600;
+}
+
+#toolbar .t-pages {
+    color: #888;
+}
+
+#toolbar button {
+    background: #1b3d6e;
+    color: #fff;
+    border: none;
+    padding: 7px 20px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+}
+
+#a4-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 22px;
+    padding-top: 52px;
+}
+
+.a4-page {
+    width: 794px;
+    height: 1122px;
+    padding: 96px;
+    margin: 0 auto 20px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+    position: relative;
+    break-inside: auto;
+}
+
+.a4-title {
+    text-align: center;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.indent-level-1,
+.indent-level-1-5,
+.indent-level-1-5-text,
+.indent-level-2 {
+    display: block;
+}
+
+.indent-level-1 {
+    padding-left: 40px;
+}
+
+.indent-level-1-5 {
+    padding-left: 55px;
+}
+
+.indent-level-1-5-text {
+    padding-left: 40px;
+    text-indent: 20px;
+}
+
+.indent-level-2 {
+    padding-left: 60px;
+    text-indent: 40px;
+}
+
+.a4-subtitle {
+    text-align: center;
+    font-size: 12px;
+    color: #4b5563;
+    margin-top: 2px;
+}
+
+.a4-section {
+    margin-top: 10px;
+    break-inside: auto;
+    page-break-inside: auto;
+}
+
+.a4-section h3 {
+    font-size: 12px;
+    font-weight: 700;
+    margin: 0 0 6px;
+    text-transform: uppercase;
+    text-align: justify;
+}
+
+.a4-list {
+    display: grid;
+    /* gap: 4px; */
+    break-inside: auto;
+}
+
+.a4-row {
+    display: grid;
+    grid-template-columns: 20px 1fr;
+    gap: 6px;
+}
+
+ul {
+    padding-left: 80px;
+}
+
+ul li {
+    list-style-type: disc;
+    list-style-position: outside;
+    padding-left: 8px;
+    line-height: 1;
+}
+
+h3 {
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+p,
+ul li,
+strong,
+.a4-list,
+.a4-row {
+    font-size: 11pt;
+    text-align: justify;
+    letter-spacing: 0.04em; /* Match spacing */
+    line-height: 1.2; /* Match line-height */
+}
+
+p {
+    margin: 4px 0;
+    line-height: 1.2;
+}
+
+table {
+    break-inside: auto;
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #000;
+    margin-top: 4px;
+    font-size: 12px;
+}
+
+table td,
+table th {
+    border: 1px solid #000;
+    padding: 4px;
+    vertical-align: top;
+}
+
+table th {
+    background: #d9d9d9;
+}
+
+.kv-table td:first-child {
+    width: 5%;
+    white-space: nowrap;
+}
+
+@media print {
+    body {
+        background: none;
+        padding: 0;
+    }
+
+    #toolbar {
+        display: none !important;
+    }
+
+    #a4-container {
+        gap: 0;
+        padding-top: 0;
+    }
+
+    .a4-page {
+        margin: 0;
+        box-shadow: none;
+        page-break-after: always;
+        break-after: page;
+        page-break-inside: avoid;
+    }
+
+    table {
+        page-break-inside: auto;
+    }
+
+    /* .a4-page:last-child {
+                page-break-after: avoid;
+            } */
+}
