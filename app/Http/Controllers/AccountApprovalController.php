@@ -15,12 +15,14 @@ class AccountApprovalController extends Controller
 {
     public function index()
     {
-        $users = User::with('roles')->get();
+        // $users = User::with('roles')->get();
 
-        return view(
-            'AccountApproval.index',
-            compact('users')
-        );
+        // return view(
+        //     'AccountApproval.index',
+        //     compact('users')
+        // );
+
+        return view('AccountApproval.index');
     }
 
     public function approve(Request $request)
@@ -33,7 +35,7 @@ class AccountApprovalController extends Controller
 
         try {
             $user = User::findOrFail($request->input('user_id'));
-            $user->account_status = 'active';       
+            $user->account_status = 'active';
             $user->save();
 
             $facultyRole = Role::where('name', '=', 'faculty')->first();

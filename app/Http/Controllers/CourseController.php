@@ -225,6 +225,7 @@ class CourseController extends Controller
     // public function destroy(Course $course)
     // {
     //     $programId = $course->program_id;
+    //     $user = Auth();
 
     //     $course->programOutcomes()->detach();
     //     $course->delete();
