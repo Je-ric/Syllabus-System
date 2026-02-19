@@ -95,21 +95,19 @@
                     />
                 </div>
 
-                <div>
-                    <x-form.label isRequired>
-                        Performance Standard
-                    </x-form.label>
-                    <select
-                        wire:model.blur="lec_performance_standard"
-                        required
-                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm
-                                focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                    >
-                        <option value="50%">50%</option>
-                        <option value="60%">60%</option>
-                        <option value="75%">75%</option>
-                    </select>
-                </div>
+                    <div>
+                        <x-form.label isRequired>
+                            Performance Standard
+                        </x-form.label>
+                        <x-form.select
+                            wire:model.blur="lec_performance_standard"
+                            required
+                        >
+                            <option value="50%">50%</option>
+                            <option value="60%">60%</option>
+                            <option value="75%">75%</option>
+                        </x-form.select>
+                    </div>
             </div>
 
         </div>
@@ -210,16 +208,14 @@
                         <x-form.label isRequired>
                             Performance Standard
                         </x-form.label>
-                        <select
+                        <x-form.select
                             wire:model.blur="lab_performance_standard"
                             required
-                            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm
-                                focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                         >
                             <option value="50%">50%</option>
                             <option value="60%">60%</option>
                             <option value="75%">75%</option>
-                        </select>
+                        </x-form.select>
                     </div>
                 </div>
 

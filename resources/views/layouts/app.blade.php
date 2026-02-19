@@ -10,7 +10,6 @@
     @if (session('toast'))
         <x-feedback-status.toast :message="session('toast')['message']" :type="session('toast')['type']" />
     @endif
-    <x-feedback-status.toast realtime />
 
     <div class="min-h-screen">
         <div id="sidebar-overlay" class="fixed inset-0 bg-green-900/50 backdrop-blur-sm z-30 hidden lg:hidden"></div>
@@ -100,7 +99,7 @@
                             <a href="{{ route('courses.index') }}"
                                 class="{{ request()->routeIs('courses.index') ? 'active' : '' }}">
                                 <i class="bx bxs-book-content text-lg"></i>
-                                Manage Courses
+                                Courses
                             </a>
                         @endif
 

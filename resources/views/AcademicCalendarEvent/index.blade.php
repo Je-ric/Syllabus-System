@@ -47,22 +47,26 @@
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="text-xs uppercase tracking-[0.2em] text-slate-500">Type</label>
-                                <select name="type" class="mt-2 w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-2.5 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200">
+                                <x-form.select name="type" class="mt-2">
                                     <option value="holiday">Holiday</option>
                                     <option value="exam">Exam</option>
                                     <option value="break">Break</option>
                                     <option value="other">Other</option>
-                                </select>
+                                </x-form.select>
                             </div>
                             <div>
                                 <label class="text-xs uppercase tracking-[0.2em] text-slate-500">Date</label>
-                                <input type="date" name="date" class="mt-2 w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-2.5 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
-                                        min="{{ $semester->start_date }}" max="{{ $semester->end_date }}">
+                                <x-form.date-picker
+                                    name="date"
+                                    class="mt-2"
+                                    min="{{ $semester->start_date }}"
+                                    max="{{ $semester->end_date }}"
+                                />
                             </div>
                         </div>
                         <div>
                             <label class="text-xs uppercase tracking-[0.2em] text-slate-500">Name</label>
-                            <input type="text" name="name" class="mt-2 w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-2.5 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200">
+                            <x-form.input type="text" name="name" class="mt-2" />
                         </div>
 
                         <button type="submit" class="mt-2 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">

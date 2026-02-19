@@ -11,9 +11,11 @@
 </x-header-with-button>
 
 @if(!$program)
-    <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 text-amber-800">
-        <p>Please select a program from the courses page before creating a course.</p>
-    </div>
+    <x-feedback-status.alert
+        type="warning"
+        message="Please select a program from the courses page before creating a course."
+        class="mb-6"
+    />
 @endif
 
 <form action="{{ $formAction }}" method="POST" id="courseForm">
@@ -26,22 +28,25 @@
     <input type="hidden" name="confirmed_submission" id="confirmedSubmission" value="0">
 
     @if($program)
-        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-6">
-            <p class="text-slate-700"><span class="font-semibold">Program:</span> {{ $program->name }}</p>
-        </div>
+        <x-feedback-status.alert
+            type="success"
+            title="Program"
+            :message="$program->name"
+            class="mb-6"
+        />
     @endif
 
     <div class="grid grid-cols-2 gap-4 mb-4 text-slate-800">
         <div>
             <x-form.label class="block">Course Code</x-form.label>
-            <input type="text" name="code" class="mt-2 w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-2.5 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200" value="{{ old('code', $course->course_code ?? '') }}" required>
+            <x-form.input type="text" name="code" class="mt-2" value="{{ old('code', $course->course_code ?? '') }}" required />
             @error('code')
                 <span class="text-red-600 text-sm">{{ $message }}</span>
             @enderror
         </div>
         <div>
             <x-form.label class="block">Course Title</x-form.label>
-            <input type="text" name="name" class="mt-2 w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-2.5 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200" value="{{ old('name', $course->course_title ?? '') }}" required>
+            <x-form.input type="text" name="name" class="mt-2" value="{{ old('name', $course->course_title ?? '') }}" required />
             @error('name')
                 <span class="text-red-600 text-sm">{{ $message }}</span>
             @enderror
@@ -50,7 +55,7 @@
 
     <div class="mb-4">
         <x-form.label class="block">Course Description</x-form.label>
-        <textarea name="description" class="mt-2 w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-2.5 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200" rows="3">{{ old('description', $course->course_description ?? '') }}</textarea>
+        <x-form.textarea name="description" class="mt-2" rows="3">{{ old('description', $course->course_description ?? '') }}</x-form.textarea>
         @error('description')
             <span class="text-red-600 text-sm">{{ $message }}</span>
         @enderror
@@ -59,46 +64,47 @@
     <div class="grid grid-cols-4 gap-4 mb-4 text-slate-800">
         <div>
             <x-form.label class="block">Credit Units</x-form.label>
-            <input type="number" name="credits" class="mt-2 w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-2.5 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200" value="{{ old('credits', $course->credit_units ?? '') }}" min="0" required>
+            <x-form.input type="number" name="credits" class="mt-2" value="{{ old('credits', $course->credit_units ?? '') }}" min="0" required />
             @error('credits')
                 <span class="text-red-600 text-sm">{{ $message }}</span>
             @enderror
         </div>
         <div>
             <x-form.label class="block">Has Laboratory</x-form.label>
-            <div class="flex gap-4 mt-2 text-sm text-slate-700">
-                @php $labValue = old('has_lec_lab', isset($course) ? ($course->has_lec_lab ? '1' : '0') : ''); @endphp
-                <label><input type="radio" name="has_lec_lab" value="1" {{ $labValue === '1' ? 'checked' : '' }}> Yes</label>
-                <label><input type="radio" name="has_lec_lab" value="0" {{ $labValue === '0' ? 'checked' : '' }}> No</label>
-            </div>
+            @php $labValue = old('has_lec_lab', isset($course) ? ($course->has_lec_lab ? '1' : '0') : ''); @endphp
+            <x-form.radio
+                name="has_lec_lab"
+                :options="['1' => 'Yes', '0' => 'No']"
+                :value="$labValue"
+            />
         </div>
         <div>
             <x-form.label class="block">Year Level</x-form.label>
-            <select name="year_level" class="mt-2 w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-2.5 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200">
+            <x-form.select name="year_level" class="mt-2">
                 <option value="">Select Year</option>
                 @for ($i = 1; $i <= 5; $i++)
                     <option value="{{ $i }}" {{ old('year_level', $course->year_level ?? '') == $i ? 'selected' : '' }}>Year {{ $i }}</option>
                 @endfor
-            </select>
+            </x-form.select>
         </div>
         <div>
             <x-form.label class="block">Semester</x-form.label>
-            <select name="semester" class="mt-2 w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-2.5 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200">
+            <x-form.select name="semester" class="mt-2">
                 <option value="">Select Semester</option>
                 <option value="1" {{ old('semester', $course->semester ?? '') == '1' ? 'selected' : '' }}>1st Semester</option>
                 <option value="2" {{ old('semester', $course->semester ?? '') == '2' ? 'selected' : '' }}>2nd Semester</option>
-            </select>
+            </x-form.select>
         </div>
     </div>
 
     <div class="grid grid-cols-2 gap-4 mb-4 text-slate-800">
         <div>
             <x-form.label class="block">Prerequisite</x-form.label>
-            <input type="text" name="prerequisite" class="mt-2 w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-2.5 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200" value="{{ old('prerequisite', $course->prerequisite ?? '') }}">
+            <x-form.input type="text" name="prerequisite" class="mt-2" value="{{ old('prerequisite', $course->prerequisite ?? '') }}" />
         </div>
         <div>
             <x-form.label class="block">Corequisite</x-form.label>
-            <input type="text" name="corequisite" class="mt-2 w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-2.5 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200" value="{{ old('corequisite', $course->corequisite ?? '') }}">
+            <x-form.input type="text" name="corequisite" class="mt-2" value="{{ old('corequisite', $course->corequisite ?? '') }}" />
         </div>
     </div>
 
@@ -110,9 +116,12 @@
         </div>
 
         @if($programOutcomes->isEmpty())
-            <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4 text-amber-800">
-                <p>No program outcomes defined for {{ $program->name }}. Please define outcomes first.</p>
-            </div>
+            <x-empty-state
+                icon="bx-notepad"
+                title="No program outcomes yet"
+                :message="'No program outcomes defined for ' . $program->name . '. Please define outcomes first.'"
+                class="mb-4"
+            />
         @else
             <div class="border border-slate-200 rounded-2xl overflow-hidden">
                 <table class="w-full" id="courseFormMapping">
@@ -135,20 +144,12 @@
                                 </td>
                                 <td class="px-4 py-3">
                                     @php $selected = $poSelections[$outcome->id] ?? null; @endphp
-                                    <div class="flex gap-4">
-                                        <label class="flex items-center cursor-pointer">
-                                            <input type="radio" name="po_mapping[{{ $outcome->id }}]" value="I" class="mr-1" {{ $selected === 'I' ? 'checked' : '' }}>
-                                            <span class="text-xs text-slate-600">I</span>
-                                        </label>
-                                        <label class="flex items-center cursor-pointer">
-                                            <input type="radio" name="po_mapping[{{ $outcome->id }}]" value="E" class="mr-1" {{ $selected === 'E' ? 'checked' : '' }}>
-                                            <span class="text-xs text-slate-600">E</span>
-                                        </label>
-                                        <label class="flex items-center cursor-pointer">
-                                            <input type="radio" name="po_mapping[{{ $outcome->id }}]" value="D" class="mr-1" {{ $selected === 'D' ? 'checked' : '' }}>
-                                            <span class="text-xs text-slate-600">D</span>
-                                        </label>
-                                    </div>
+                                    <x-form.radio
+                                        :name="'po_mapping[' . $outcome->id . ']'"
+                                        :options="['I' => 'I', 'E' => 'E', 'D' => 'D']"
+                                        :value="$selected"
+                                        class="mt-0 gap-3"
+                                    />
                                 </td>
                             </tr>
                         @endforeach

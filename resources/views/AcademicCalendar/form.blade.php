@@ -13,10 +13,12 @@
         @include('includes.error-lists')
 
         @if(isset($hasEvents) && $hasEvents)
-            <div class="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">
-                <i class="bx bx-alert-circle"></i>
-                <strong>Note:</strong> This academic calendar has events associated with it. You can only edit the dates. To delete this calendar, please remove all events from the Manage Events page first.
-            </div>
+            <x-feedback-status.alert
+                type="warning"
+                title="Note"
+                message="This academic calendar has events associated with it. You can only edit the dates. To delete this calendar, please remove all events from the Manage Events page first."
+                class="mb-4"
+            />
         @endif
 
         <form id="academicCalendarForm"
@@ -63,11 +65,11 @@
                 <x-form.label for="academic_year" isRequired="true" variant="title">
                     Academic Year (e.g., 2025-2026)
                 </x-form.label>
-                <input type="text"
-                        name="academic_year"
-                        value="{{ old('academic_year', $academicYear ?? '') }}"
-                        placeholder="e.g., 2025-2026"
-                        class="mt-2 w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-2.5 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200">
+                <x-form.input type="text"
+                    name="academic_year"
+                    value="{{ old('academic_year', $academicYear ?? '') }}"
+                    placeholder="e.g., 2025-2026"
+                    class="mt-2" />
             </div>
 
             <div class="border border-slate-200/80 bg-white/90 p-5 rounded-2xl shadow-sm">
@@ -76,18 +78,21 @@
                 <x-form.label for="start_date_1" isRequired="true" variant="date">
                     Start Date
                 </x-form.label>
-                <input type="date"
-                        name="start_date_1"
-                        value="{{ old('start_date_1', isset($semesters) ? $semesters->where('semester', '1st')->first()->start_date : '') }}"
-                        class="mt-2 w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-2.5 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200">
+                <x-form.date-picker
+                    name="start_date_1"
+                    value="{{ old('start_date_1', isset($semesters) ? $semesters->where('semester', '1st')->first()->start_date : '') }}"
+                    class="mt-2"
+                />
 
                 <x-form.label for="end_date_1" isRequired="true" variant="date">
                     End Date
                 </x-form.label>
-                <x-form.input type="date"
-                        name="end_date_1"
-                        value="{{ old('end_date_1', isset($semesters) ? $semesters->where('semester', '1st')->first()->end_date : '') }}">
-                </x-form.input></div>
+                <x-form.date-picker
+                    name="end_date_1"
+                    value="{{ old('end_date_1', isset($semesters) ? $semesters->where('semester', '1st')->first()->end_date : '') }}"
+                    class="mt-2"
+                />
+            </div>
 
             <div class="border border-slate-200/80 bg-white/90 p-5 rounded-2xl shadow-sm">
                 <h2 class="font-semibold text-slate-800 mb-3">2nd Semester</h2>
@@ -95,18 +100,20 @@
                 <x-form.label for="start_date_2" isRequired="true" variant="date">
                     Start Date
                 </x-form.label>
-                <input type="date"
-                        name="start_date_2"
-                        value="{{ old('start_date_2', isset($semesters) ? $semesters->where('semester', '2nd')->first()->start_date : '') }}"
-                        class="mt-2 w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-2.5 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200">
+                <x-form.date-picker
+                    name="start_date_2"
+                    value="{{ old('start_date_2', isset($semesters) ? $semesters->where('semester', '2nd')->first()->start_date : '') }}"
+                    class="mt-2"
+                />
 
                 <x-form.label for="end_date_2" isRequired="true" variant="date">
                     End Date
                 </x-form.label>
-                <input type="date"
-                        name="end_date_2"
-                        value="{{ old('end_date_2', isset($semesters) ? $semesters->where('semester', '2nd')->first()->end_date : '') }}"
-                        class="mt-2 w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-2.5 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200">
+                <x-form.date-picker
+                    name="end_date_2"
+                    value="{{ old('end_date_2', isset($semesters) ? $semesters->where('semester', '2nd')->first()->end_date : '') }}"
+                    class="mt-2"
+                />
             </div>
 
             <div class="col-span-2 flex flex-wrap gap-2">

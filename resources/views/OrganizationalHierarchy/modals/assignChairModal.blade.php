@@ -17,12 +17,12 @@
         <x-modal.body>
             <div>
                 <x-form.label for="assignChairUser{{ $departmentId }}" variant="user">Select Chair</x-form.label>
-                <select id="assignChairUser{{ $departmentId }}" name="user_id" class="mt-2 w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-2.5 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200" required>
+                <x-form.select id="assignChairUser{{ $departmentId }}" name="user_id" class="mt-2" required>
                     <option value="">-- Choose a user --</option>
                     @foreach ($potentialChairs as $user)
                         <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
                     @endforeach
-                </select>
+                </x-form.select>
                 @error('user_id')
                     <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                 @enderror

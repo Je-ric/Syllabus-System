@@ -12,24 +12,23 @@
             <div class="space-y-4">
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block font-medium text-sm text-gray-700 mb-1">Type</label>
-                        <select name="type" class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-500">
+                        <x-form.label class="block mb-1">Type</x-form.label>
+                        <x-form.select name="type">
                             <option value="holiday" {{ $event->type === 'holiday' ? 'selected' : '' }}>Holiday</option>
                             <option value="exam" {{ $event->type === 'exam' ? 'selected' : '' }}>Exam</option>
                             <option value="break" {{ $event->type === 'break' ? 'selected' : '' }}>Break</option>
                             <option value="other" {{ $event->type === 'other' ? 'selected' : '' }}>Other</option>
-                        </select>
+                        </x-form.select>
                     </div>
                     <div>
-                        <label class="block font-medium text-sm text-gray-700 mb-1">Date</label>
-                        <input
-                            type="date"
+                        <x-form.label class="block mb-1">Date</x-form.label>
+                        <x-form.date-picker
                             name="date"
                             value="{{ $event->date }}"
-                            class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-500"
                             min="{{ $event->calendar->start_date }}"
                             max="{{ $event->calendar->end_date }}"
-                            required>
+                            required
+                        />
                         <p class="text-xs text-gray-500 mt-1">
                             Range: {{ \Carbon\Carbon::parse($event->calendar->start_date)->format('M j, Y') }}
                             - {{ \Carbon\Carbon::parse($event->calendar->end_date)->format('M j, Y') }}
@@ -38,13 +37,13 @@
                 </div>
 
                 <div>
-                    <label class="block font-medium text-sm text-gray-700 mb-1">Name</label>
-                    <input
+                    <x-form.label class="block mb-1">Name</x-form.label>
+                    <x-form.input
                         type="text"
                         name="name"
                         value="{{ $event->name }}"
-                        class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-500"
-                        required>
+                        required
+                    />
                 </div>
 
 

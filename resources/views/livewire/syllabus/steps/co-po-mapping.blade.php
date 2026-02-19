@@ -5,49 +5,55 @@
     </div>
 
     @if (count($courseOutcomes) === 0)
-        <div class="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed">
-            <p class="text-gray-500">Please define Course Outcomes in the previous step first.</p>
-        </div>
+        <x-empty-state
+            icon="bx-list-check"
+            title="No course outcomes yet"
+            message="Please define Course Outcomes in the previous step first."
+            class="py-10"
+        />
     @else
-        <div class="overflow-x-auto border border-slate-200 rounded-xl">
-            <table class="w-full border-collapse text-sm">
-                <thead class="bg-slate-100 border-b sticky top-0 z-10">
+        <x-table.container>
+            <x-table.table>
+                <x-table.head sticky>
                     <tr>
-                        <th class="px-4 py-3 text-left font-semibold text-slate-700 w-64">Course Outcome</th>
+                        <x-table.th>Course Outcome</x-table.th>
                         @foreach ($course->program->outcomes as $po)
-                            <th class="px-2 py-3 text-center font-semibold text-slate-700 text-xs">
+                            <x-table.th align="center" class="normal-case tracking-normal text-xs px-2">
                                 {{ $po->po_code }}
-                            </th>
+                            </x-table.th>
                         @endforeach
                     </tr>
-                </thead>
-                <tbody>
+                </x-table.head>
+                <x-table.body>
                     @foreach ($courseOutcomes as $index => $co)
                         @php
                             $coId = $co['id'] ?? null;
                             $rowKey = $co['temp_key'] ?? ($coId ? 'co_' . $coId : 'new_' . $index);
                             $mapKey = $coId ? $coId : ($co['temp_key'] ?? 'new_' . $index);
                         @endphp
-                        <tr class="border-b hover:bg-slate-50" wire:key="co-row-{{ $rowKey }}">
-                            <td class="px-4 py-3">
+                        <x-table.row hover wire:key="co-row-{{ $rowKey }}">
+                            <x-table.td>
                                 <div class="flex items-start gap-2">
                                     <span class="font-semibold text-green-700">{{ $co['co_code'] }}</span>
                                     <span class="text-xs text-slate-600">{{ Str::limit($co['description'], 60) }}</span>
                                 </div>
-                            </td>
+                            </x-table.td>
                             @foreach ($course->program->outcomes as $po)
-                                <td class="px-2 py-3 text-center"
+                                <x-table.td align="center" class="px-2"
                                     wire:key="co-po-{{ $rowKey }}-{{ $po->id }}">
-                                    <input type="checkbox"
+                                    <x-form.checkbox
                                         wire:model.debounce.500ms="coPoMappings.{{ $mapKey }}.{{ $po->id }}"
-                                        class="h-4 w-4 cursor-pointer rounded border-slate-300 text-green-600 focus:ring-green-500" />
-                                </td>
+                                        :checked="(bool) data_get($coPoMappings, $mapKey . '.' . $po->id, false)"
+                                        aria-label="Map {{ $co['co_code'] }} to {{ $po->po_code }}"
+                                        class="justify-center"
+                                    />
+                                </x-table.td>
                             @endforeach
-                        </tr>
+                        </x-table.row>
                     @endforeach
-                </tbody>
-            </table>
-        </div>
+                </x-table.body>
+            </x-table.table>
+        </x-table.container>
 
         {{-- PO Reference --}}
         <div class="mt-6 border border-green-200 rounded-xl p-4 shadow-sm">
