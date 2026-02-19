@@ -96,6 +96,20 @@ php artisan make:component Toast
 ----------------------------------
 
 
+----------------------------------
+REQUEST
+----------------------------------
+php artisan make:request SaveAcademicCalendarRequest
+php artisan make:request SaveCourseRequest
+php artisan make:request SaveDepartmentRequest
+php artisan make:request SaveProgramRequest
+php artisan make:request 
+----------------------------------
+
+
+
+
+
 php artisan migrate
 php artisan migrate:fresh
 

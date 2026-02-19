@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\SaveCollegeRequest;
+use App\Http\Requests\SaveDepartmentRequest;
+use App\Http\Requests\SaveProgramRequest;
 use App\Models\College;
 use App\Models\Department;
 use App\Models\Program;
@@ -23,14 +25,12 @@ class AcademicStructureController extends Controller
     //  COLLEGE
     // =======================
 
-    public function storeCollege(Request $request)
+    public function storeCollege(SaveCollegeRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|unique:colleges,name',
-        ]);
+        $validated = $request->validated();
 
         College::create([
-            'name' => $request->name,
+            'name' => $validated['name'],
         ]);
 
         return back()->with('toast', [
@@ -39,15 +39,12 @@ class AcademicStructureController extends Controller
         ]);
     }
 
-    public function updateCollege(Request $request, College $college)
+    public function updateCollege(SaveCollegeRequest $request, College $college)
     {
-        $college = College::findOrFail($college->id);
-        $request->validate([
-            'name' => 'required|string|unique:colleges,name,' . $college->id,
-        ]);
+        $validated = $request->validated();
 
         $college->update([
-            'name' => $request->name,
+            'name' => $validated['name'],
         ]);
 
         return back()->with('toast', [
@@ -60,16 +57,13 @@ class AcademicStructureController extends Controller
     //  DEPARTMENT
     // =======================
 
-    public function storeDepartment(Request $request)
+    public function storeDepartment(SaveDepartmentRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string',
-            'college_id' => 'required|exists:colleges,id',
-        ]);
+        $validated = $request->validated();
 
         Department::create([
-            'name' => $request->name,
-            'college_id' => $request->college_id,
+            'name' => $validated['name'],
+            'college_id' => $validated['college_id'],
         ]);
 
         return back()->with('toast', [
@@ -78,17 +72,13 @@ class AcademicStructureController extends Controller
         ]);
     }
 
-    public function updateDepartment(Request $request, Department $department)
+    public function updateDepartment(SaveDepartmentRequest $request, Department $department)
     {
-        $department = Department::findOrFail($department->id);
-        $request->validate([
-            'name' => 'required|string',
-            'college_id' => 'required|exists:colleges,id',
-        ]);
+        $validated = $request->validated();
 
         $department->update([
-            'name' => $request->name,
-            'college_id' => $request->college_id,
+            'name' => $validated['name'],
+            'college_id' => $validated['college_id'],
         ]);
 
         return back()->with('toast', [
@@ -101,26 +91,21 @@ class AcademicStructureController extends Controller
     //  PROGRAM
     // =======================
 
-    public function storeProgram(Request $request)
+    public function storeProgram(SaveProgramRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|unique:programs,name',
-            'department_id' => 'required|exists:departments,id',
-            'bor_approval_no' => 'nullable|string',
-            'bor_approval_date' => 'nullable|date',
-        ]);
+        $validated = $request->validated();
 
         DB::beginTransaction();
 
         try {
             $program = Program::create([
-                'name' => $request->name,
-                'bor_approval_no' => $request->bor_approval_no,
-                'bor_approval_date' => $request->bor_approval_date,
+                'name' => $validated['name'],
+                'bor_approval_no' => $validated['bor_approval_no'] ?? null,
+                'bor_approval_date' => $validated['bor_approval_date'] ?? null,
             ]);
 
             // Insert into program_departments junction table
-            $program->departments()->attach($request->department_id, ['role' => 'primary']);
+            $program->departments()->attach($validated['department_id'], ['role' => 'primary']);
 
             DB::commit();
         } catch (\Throwable $e) {
@@ -137,27 +122,21 @@ class AcademicStructureController extends Controller
         ]);
     }
 
-    public function updateProgram(Request $request, Program $program)
+    public function updateProgram(SaveProgramRequest $request, Program $program)
     {
-        $program = Program::findOrFail($program->id);
-        $request->validate([
-            'name' => 'required|string|unique:programs,name,' . $program->id,
-            'department_id' => 'required|exists:departments,id',
-            'bor_approval_no' => 'nullable|string',
-            'bor_approval_date' => 'nullable|date',
-        ]);
+        $validated = $request->validated();
 
         DB::beginTransaction();
 
         try {
             $program->update([
-                'name' => $request->name,
-                'bor_approval_no' => $request->bor_approval_no,
-                'bor_approval_date' => $request->bor_approval_date,
+                'name' => $validated['name'],
+                'bor_approval_no' => $validated['bor_approval_no'] ?? null,
+                'bor_approval_date' => $validated['bor_approval_date'] ?? null,
             ]);
 
             // Update program_departments junction table
-            $program->departments()->sync([$request->department_id => ['role' => 'primary']]);
+            $program->departments()->sync([$validated['department_id'] => ['role' => 'primary']]);
 
             DB::commit();
         } catch (\Throwable $e) {
