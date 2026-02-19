@@ -26,6 +26,7 @@
 handles: text, numbers, date
 
 <x-form.input type="text" name="name" class="mt-2" value="{{ old('name', $course->course_title ?? '') }}" required>
+<x-form.input type="date" name="start_date" class="mt-2" />
 
 
 --}}
