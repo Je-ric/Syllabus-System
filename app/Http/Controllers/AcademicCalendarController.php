@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SaveAcademicCalendarRequest;
 use App\Models\AcademicCalendar;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 // use App\Models\AcademicCalendarEvent;
 
@@ -23,33 +23,31 @@ class AcademicCalendarController extends Controller
     }
 
     // create 2 semesters for a new academic year
-    public function store(Request $request)
+    public function store(SaveAcademicCalendarRequest $request)
     {
-        $request->validate([
-            'academic_year' => 'required|string|unique:academic_calendars,academic_year',
-            'start_date_1' => 'required|date',
-            'end_date_1' => 'required|date|after_or_equal:start_date_1',
-            'start_date_2' => 'required|date',
-            'end_date_2' => 'required|date|after_or_equal:start_date_2',
-        ]);
+        if ($request->isPrecognitive()) {
+            return response()->noContent();
+        }
 
         DB::beginTransaction();
 
         try {
+            $validated = $request->validated();
+
             // Create 1st semester
             $sem1 = AcademicCalendar::create([
-                'academic_year' => $request->academic_year,
+                'academic_year' => $validated['academic_year'],
                 'semester' => '1st',
-                'start_date' => $request->start_date_1,
-                'end_date' => $request->end_date_1,
+                'start_date' => $validated['start_date_1'],
+                'end_date' => $validated['end_date_1'],
             ]);
 
             // Create 2nd semester
             AcademicCalendar::create([
-                'academic_year' => $request->academic_year,
+                'academic_year' => $validated['academic_year'],
                 'semester' => '2nd',
-                'start_date' => $request->start_date_2,
-                'end_date' => $request->end_date_2,
+                'start_date' => $validated['start_date_2'],
+                'end_date' => $validated['end_date_2'],
             ]);
 
             DB::commit();
@@ -106,7 +104,7 @@ class AcademicCalendarController extends Controller
     }
 
 
-    public function update(Request $request, string $academicYear)
+    public function update(SaveAcademicCalendarRequest $request, string $academicYear)
     {
         $semesters = AcademicCalendar::where('academic_year', $academicYear)->get();
 
@@ -118,44 +116,29 @@ class AcademicCalendarController extends Controller
                 ]);
         }
 
-        if ( $academicYear !== $request->academic_year ) {
-            $existing = AcademicCalendar::where('academic_year', $request->academic_year)->first();
-            if ($existing) {
-                return redirect()->back()
-                    ->withErrors(['academic_year' => 'The academic year has already been taken.'])
-                    ->with('toast', [
-                        'message' => 'The academic year has already been taken.',
-                        'type' => 'error'
-                    ])
-                    ->withInput();
-            }
+        if ($request->isPrecognitive()) {
+            return response()->noContent();
         }
-
-        $request->validate([
-            'academic_year' => 'required|string|unique:academic_calendars,academic_year,' . $academicYear . ',academic_year',
-            'start_date_1' => 'required|date',
-            'end_date_1' => 'required|date|after_or_equal:start_date_1',
-            'start_date_2' => 'required|date',
-            'end_date_2' => 'required|date|after_or_equal:start_date_2',
-        ]);
 
         DB::beginTransaction();
 
         try {
+            $validated = $request->validated();
+
             // Update 1st semester
             $sem1 = $semesters->where('semester', '1st')->first();
             $sem1->update([
-                'academic_year' => $request->academic_year,
-                'start_date' => $request->start_date_1,
-                'end_date' => $request->end_date_1,
+                'academic_year' => $validated['academic_year'],
+                'start_date' => $validated['start_date_1'],
+                'end_date' => $validated['end_date_1'],
             ]);
 
             // Update 2nd semester
             $sem2 = $semesters->where('semester', '2nd')->first();
             $sem2->update([
-                'academic_year' => $request->academic_year,
-                'start_date' => $request->start_date_2,
-                'end_date' => $request->end_date_2,
+                'academic_year' => $validated['academic_year'],
+                'start_date' => $validated['start_date_2'],
+                'end_date' => $validated['end_date_2'],
             ]);
 
             DB::commit();

@@ -17,6 +17,7 @@
         "vite": "^6.0.11"
     },
     "dependencies": {
-        "boxicons": "^2.1.4"
+        "boxicons": "^2.1.4",
+        "laravel-precognition-alpine": "^1.0.2"
     }
 }

@@ -6,7 +6,7 @@ import daisyui from 'daisyui'
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/css/preview,css', 'resources/js/app.js'],
+            input: ['resources/css/app.css', 'resources/css/preview.css', 'resources/js/app.js'],
             refresh: true,
         }),
         tailwindcss({

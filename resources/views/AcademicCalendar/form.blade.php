@@ -16,7 +16,8 @@
             <x-feedback-status.alert
                 type="warning"
                 title="Note"
-                message="This academic calendar has events associated with it. You can only edit the dates. To delete this calendar, please remove all events from the Manage Events page first."
+                message="This academic calendar has events associated with it. You can only edit the dates. 
+                        To delete this calendar, please remove all events from the Manage Events page first."
                 class="mb-4"
             />
         @endif
@@ -27,6 +28,19 @@
                 : route('academic.calendars.store') }}"
                 method="POST"
                 class="grid grid-cols-2 gap-6"
+                x-data="{
+                    form: $form(
+                        '{{ isset($isEdit) ? 'put' : 'post' }}',
+                        '{{ isset($isEdit) ? route('academic.calendars.update', $academicYear) : route('academic.calendars.store') }}',
+                        {
+                            academic_year: @js(old('academic_year', $academicYear ?? '')),
+                            start_date_1: @js(old('start_date_1', isset($semesters) ? $semesters->where('semester', '1st')->first()->start_date : '')),
+                            end_date_1: @js(old('end_date_1', isset($semesters) ? $semesters->where('semester', '1st')->first()->end_date : '')),
+                            start_date_2: @js(old('start_date_2', isset($semesters) ? $semesters->where('semester', '2nd')->first()->start_date : '')),
+                            end_date_2: @js(old('end_date_2', isset($semesters) ? $semesters->where('semester', '2nd')->first()->end_date : '')),
+                        }
+                    )
+                }"
                 @if(!isset($isEdit)) onsubmit="return false;" @endif>
             @csrf
             @if (isset($isEdit))
@@ -69,7 +83,10 @@
                     name="academic_year"
                     value="{{ old('academic_year', $academicYear ?? '') }}"
                     placeholder="e.g., 2025-2026"
+                    x-model="form.academic_year"
+                    @blur="form.validate('academic_year')"
                     class="mt-2" />
+                <p x-show="form.errors.academic_year" x-text="form.errors.academic_year" class="mt-1 text-sm text-rose-600"></p>
             </div>
 
             <div class="border border-slate-200/80 bg-white/90 p-5 rounded-2xl shadow-sm">
@@ -81,8 +98,11 @@
                 <x-form.date-picker
                     name="start_date_1"
                     value="{{ old('start_date_1', isset($semesters) ? $semesters->where('semester', '1st')->first()->start_date : '') }}"
+                    x-model="form.start_date_1"
+                    @change="form.validate('start_date_1')"
                     class="mt-2"
                 />
+                <p x-show="form.errors.start_date_1" x-text="form.errors.start_date_1" class="mt-1 text-sm text-rose-600"></p>
 
                 <x-form.label for="end_date_1" isRequired="true" variant="date">
                     End Date
@@ -90,8 +110,11 @@
                 <x-form.date-picker
                     name="end_date_1"
                     value="{{ old('end_date_1', isset($semesters) ? $semesters->where('semester', '1st')->first()->end_date : '') }}"
+                    x-model="form.end_date_1"
+                    @change="form.validate('end_date_1')"
                     class="mt-2"
                 />
+                <p x-show="form.errors.end_date_1" x-text="form.errors.end_date_1" class="mt-1 text-sm text-rose-600"></p>
             </div>
 
             <div class="border border-slate-200/80 bg-white/90 p-5 rounded-2xl shadow-sm">
@@ -103,8 +126,11 @@
                 <x-form.date-picker
                     name="start_date_2"
                     value="{{ old('start_date_2', isset($semesters) ? $semesters->where('semester', '2nd')->first()->start_date : '') }}"
+                    x-model="form.start_date_2"
+                    @change="form.validate('start_date_2')"
                     class="mt-2"
                 />
+                <p x-show="form.errors.start_date_2" x-text="form.errors.start_date_2" class="mt-1 text-sm text-rose-600"></p>
 
                 <x-form.label for="end_date_2" isRequired="true" variant="date">
                     End Date
@@ -112,8 +138,11 @@
                 <x-form.date-picker
                     name="end_date_2"
                     value="{{ old('end_date_2', isset($semesters) ? $semesters->where('semester', '2nd')->first()->end_date : '') }}"
+                    x-model="form.end_date_2"
+                    @change="form.validate('end_date_2')"
                     class="mt-2"
                 />
+                <p x-show="form.errors.end_date_2" x-text="form.errors.end_date_2" class="mt-1 text-sm text-rose-600"></p>
             </div>
 
             <div class="col-span-2 flex flex-wrap gap-2">
@@ -148,10 +177,10 @@
         </form>
 
         {{-- Modals --}}
-        @if(!isset($isEdit))
-            @include('AcademicCalendar.modals.confirmAYModal')
-        @else
-            @include('AcademicCalendar.modals.cancelEditModal')
-        @endif
+@if(!isset($isEdit))
+    @include('AcademicCalendar.modals.confirmAYModal')
+@else
+    @include('AcademicCalendar.modals.cancelEditModal')
+@endif
 
 @endsection

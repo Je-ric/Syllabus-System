@@ -166,6 +166,7 @@
     </div>
 
     @livewireScripts
+    @stack('scripts')
     <script>
         const sidebar = document.getElementById('app-sidebar');
         const overlay = document.getElementById('sidebar-overlay');

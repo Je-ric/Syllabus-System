@@ -14,6 +14,7 @@ use App\Http\Controllers\AcademicCalendarEventController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\SyllabusController;
 use App\Http\Controllers\OrganizationalHierarchyController;
+use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -62,9 +63,13 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/academic-calendars', [AcademicCalendarController::class, 'index'])->name('academic.calendars.index');
         Route::get('/academic-calendars/create', [AcademicCalendarController::class, 'create'])->name('academic.calendars.create');
-        Route::post('/academic-calendars', [AcademicCalendarController::class, 'store'])->name('academic.calendars.store');
+        Route::post('/academic-calendars', [AcademicCalendarController::class, 'store'])
+            ->middleware(HandlePrecognitiveRequests::class)
+            ->name('academic.calendars.store');
         Route::get('/academic-calendars/{academicYear}/edit', [AcademicCalendarController::class, 'edit'])->name('academic.calendars.edit');
-        Route::put('/academic-calendars/{academicYear}', [AcademicCalendarController::class, 'update'])->name('academic.calendars.update');
+        Route::put('/academic-calendars/{academicYear}', [AcademicCalendarController::class, 'update'])
+            ->middleware(HandlePrecognitiveRequests::class)
+            ->name('academic.calendars.update');
         Route::delete('/academic-calendars/{academicYear}', [AcademicCalendarController::class, 'destroy'])->name('academic.calendars.destroy');
 
         Route::get('/academic-calendars/{academicYear}/events', [AcademicCalendarEventController::class, 'index'])->name('academic.calendar.events.index');
