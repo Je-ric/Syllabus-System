@@ -1,84 +1,94 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container mx-auto p-6">
+    <x-header-with-button
+        title="Create Syllabus"
+        description="Step 1: Select program, Step 2: Choose course, Step 3: Fill details"
+    />
 
-        <div class="mb-6">
-            <h1 class="text-2xl font-bold">Create Syllabus</h1>
-            <p class="text-gray-600 mt-2">Step 1: Select program → Step 2: Choose course → Step 3: Fill details</p>
-        </div>
-
-        <div class="mb-6 bg-gray-50 border rounded-lg p-6">
-            <h2 class="text-lg font-semibold mb-4">Select Program</h2>
-            <livewire:programs.program-selector :program-id="optional($program)?->id" redirect-route="syllabus.create" :autoRedirect="true" />
+    <div class="p-6 space-y-8 text-slate-800">
+        <div class="border border-slate-200/80 rounded-2xl p-6 bg-white/90 shadow-sm">
+            <h2 class="text-sm uppercase tracking-[0.25em] text-slate-500 mb-4">Select Program</h2>
+            <livewire:programs.program-selector
+                :program-id="optional($program)?->id"
+                redirect-route="syllabus.create"
+                :autoRedirect="true"
+            />
         </div>
 
         @if ($program)
             <div class="mb-6 flex justify-between items-center">
-                <h2 class="text-xl font-semibold">Courses in {{ $program->name }}</h2>
+                <h2 class="text-lg font-semibold text-slate-800">
+                    Courses in <span class="text-emerald-700">{{ $program->name }}</span>
+                </h2>
             </div>
 
-            {{-- Group courses by year --}}
             @forelse ($groupedCourses as $year => $semesters)
                 <div class="mb-8">
-                    <h3 class="text-lg font-semibold mb-4 border-b border-gray-300 pb-2">Year {{ $year ?? 'N/A' }}</h3>
+                    <h3 class="text-sm uppercase tracking-[0.25em] text-slate-500 mb-4 border-b border-slate-200 pb-2">
+                        Year {{ $year ?? 'N/A' }}
+                    </h3>
 
-                    {{-- Group courses by semester --}}
                     @forelse ($semesters as $semester => $courses)
-                        <div class="mb-6 bg-gray-50 border rounded-lg p-4">
-                            <h4 class="font-medium text-gray-700 mb-3 border-b pb-1">
+                        <div class="mb-6 bg-white/90 border border-slate-200 rounded-2xl p-4 shadow-sm">
+                            <h4 class="font-medium text-slate-700 mb-3 border-b border-slate-200 pb-1">
                                 Semester {{ $semester ?? 'N/A' }}
                             </h4>
 
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-sm border-collapse">
-                                    <thead class="bg-gray-100 border-b">
+                            <x-table.container>
+                                <x-table.table>
+                                    <x-table.head>
                                         <tr>
-                                            <th class="px-4 py-2 text-left font-semibold">CODE</th>
-                                            <th class="px-4 py-2 text-left font-semibold">COURSE TITLE</th>
-                                            <th class="px-4 py-2 text-center font-semibold">UNITS</th>
-                                            <th class="px-4 py-2 text-center font-semibold">TYPE</th>
-                                            <th class="px-4 py-2 text-center font-semibold">ACTION</th>
+                                            <x-table.th class="px-4 py-2">Code</x-table.th>
+                                            <x-table.th class="px-4 py-2">Course Title</x-table.th>
+                                            <x-table.th align="center" class="px-4 py-2">Units</x-table.th>
+                                            <x-table.th align="center" class="px-4 py-2">Type</x-table.th>
+                                            <x-table.th align="center" class="px-4 py-2">Action</x-table.th>
                                         </tr>
-                                    </thead>
+                                    </x-table.head>
 
-                                    <tbody>
+                                    <x-table.body>
                                         @foreach ($courses as $course)
-                                            <tr class="hover:bg-gray-100 border-b">
-                                                <td class="px-4 py-2 font-medium text-gray-900">{{ $course->course_code }}</td>
-                                                <td class="px-4 py-2 text-gray-700">{{ $course->course_title }}</td>
-                                                <td class="px-4 py-2 text-center">{{ $course->credit_units }}</td>
-                                                <td class="px-4 py-2 text-center">
+                                            <x-table.row striped hover class="border-b border-slate-200">
+                                                <x-table.td class="px-4 py-2 font-mono font-semibold text-slate-700">
+                                                    {{ $course->course_code }}
+                                                </x-table.td>
+                                                <x-table.td class="px-4 py-2 text-slate-700">
+                                                    {{ $course->course_title }}
+                                                </x-table.td>
+                                                <x-table.td align="center" class="px-4 py-2 text-slate-700">
+                                                    {{ $course->credit_units }}
+                                                </x-table.td>
+                                                <x-table.td align="center" class="px-4 py-2">
                                                     @if ($course->has_lec_lab)
-                                                        <x-feedback-status.status-indicator status="lec_lab" label="LEC+LAB"></x-feedback-status.status-indicator>
+                                                        <x-feedback-status.status-indicator status="lec_lab" label="LEC+LAB" />
                                                     @else
-                                                        <x-feedback-status.status-indicator status="lec" label="LEC"></x-feedback-status.status-indicator>
+                                                        <x-feedback-status.status-indicator status="lec" label="LEC" />
                                                     @endif
-                                                </td>
-                                                <td class="px-4 py-2 text-center">
-                                                    <x-button href="{{ route('syllabus.form', $course->id) }}"
-                                                            variant="table-confirm">
+                                                </x-table.td>
+                                                <x-table.td align="center" class="px-4 py-2">
+                                                    <x-button href="{{ route('syllabus.form', $course->id) }}" variant="table-confirm">
                                                         Create Syllabus
                                                     </x-button>
-                                                </td>
-                                            </tr>
+                                                </x-table.td>
+                                            </x-table.row>
                                         @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
+                                    </x-table.body>
+                                </x-table.table>
+                            </x-table.container>
                         </div>
                     @empty
-                        <p class="text-gray-500 text-sm mt-2">No courses for this semester.</p>
+                        <p class="text-slate-500 text-sm mt-2">No courses for this semester.</p>
                     @endforelse
                 </div>
             @empty
-                <div class="text-center py-8 bg-gray-50 rounded-lg">
-                    <p class="text-gray-500 mb-3">No courses found for this program</p>
+                <div class="text-center py-8 bg-slate-50 rounded-2xl border border-slate-200">
+                    <p class="text-slate-500 mb-3">No courses found for this program</p>
                 </div>
             @endforelse
         @else
-            <div class="text-center py-12 bg-gray-50 rounded-lg">
-                <p class="text-gray-500">Select a program above to view and manage courses</p>
+            <div class="text-center py-12 bg-slate-50 rounded-2xl border border-slate-200">
+                <p class="text-slate-500">Select a program above to view and manage courses</p>
             </div>
         @endif
     </div>

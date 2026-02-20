@@ -11,10 +11,10 @@
             {{-- Create Syllabus Card --}}
             <a href="{{ route('syllabus.create') }}"
                 class="group flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300
-                  h-56 bg-white hover:bg-slate-50 hover:border-blue-400 transition shadow-sm">
+                    h-56 bg-white hover:bg-slate-50 hover:border-emerald-400 transition shadow-sm">
                 <div class="flex flex-col items-center text-center">
-                    <span class="text-5xl text-gray-400 group-hover:text-blue-500 transition">+</span>
-                    <span class="mt-3 text-sm font-semibold text-slate-600 group-hover:text-blue-600">
+                    <span class="text-5xl text-gray-400 group-hover:text-emerald-500 transition">+</span>
+                    <span class="mt-3 text-sm font-semibold text-slate-600 group-hover:text-emerald-600">
                         Create Syllabus
                     </span>
                 </div>
@@ -25,7 +25,7 @@
                 <div class="flex flex-col rounded-xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition overflow-hidden">
 
                     {{-- Header --}}
-                    <div class="px-4 py-3 bg-linear-to-r from-blue-50 to-indigo-50 border-b border-slate-200">
+                    <div class="px-4 py-3 bg-linear-to-r from-green-50 to-emerald-50 border-b border-slate-200">
                         <h3 class="font-semibold text-gray-900">
                             {{ $syllabus->course->course_code }}
                         </h3>
@@ -67,7 +67,7 @@
                     {{-- Actions --}}
                     <div class="p-4 border-t border-slate-200 flex gap-2">
                         <a href="{{ route('syllabus.wizard', ['syllabusId' => $syllabus->id]) }}"
-                            class="flex-1 text-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 rounded transition">
+                            class="flex-1 text-center bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium py-2 rounded transition">
                             {{ $syllabus->status === 'draft' ? 'Continue' : 'View' }}
                         </a>
 
@@ -80,11 +80,10 @@
                 </div>
             @empty
                 {{-- Empty State --}}
-                <div class="col-span-full text-center py-16 bg-slate-50 rounded-xl border-2 border-dashed">
-                    <p class="text-slate-500 mb-3">No syllabi created yet</p>
-                    <a href="{{ route('syllabus.create') }}" class="text-blue-600 hover:underline font-semibold">
-                        Create your first syllabus
-                    </a>
+                <div class="col-span-full">
+                    <x-feedback-status.alert :type="'info'" 
+                                        :title="'No Syllabi'" 
+                                        :message="'You have not created any syllabi yet. Start by creating a new syllabus.'" />
                 </div>
             @endforelse
 
