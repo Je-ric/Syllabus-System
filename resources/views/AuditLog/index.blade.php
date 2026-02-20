@@ -6,7 +6,7 @@
         description="Track system actions, changes, and approvals"
     />
 
-    <form method="GET" action="{{ route('audit.logs.index') }}" class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+    {{-- <form method="GET" action="{{ route('audit.logs.index') }}" class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
         <div>
             <x-form.label for="user_id" variant="title">User</x-form.label>
             <x-form.select id="user_id" name="user_id">
@@ -65,40 +65,37 @@
                 Clear
             </x-button>
         </div>
-    </form>
+    </form> --}}
 
-    <div class="mt-6 rounded-2xl border border-slate-200 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead class="bg-slate-100 text-slate-700">
-                    <tr>
-                        <th class="px-4 py-3 text-left">Time</th>
-                        <th class="px-4 py-3 text-left">User</th>
-                        <th class="px-4 py-3 text-left">Module</th>
-                        <th class="px-4 py-3 text-left">Action</th>
-                        <th class="px-4 py-3 text-left">Ref</th>
-                        <th class="px-4 py-3 text-left">Description</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($logs as $log)
-                        <tr class="border-t border-slate-200">
-                            <td class="px-4 py-3 whitespace-nowrap">{{ optional($log->timestamp)->format('Y-m-d H:i:s') }}</td>
-                            <td class="px-4 py-3">{{ $log->user?->name ?? 'System' }}</td>
-                            <td class="px-4 py-3">{{ $log->module }}</td>
-                            <td class="px-4 py-3">{{ $log->action }}</td>
-                            <td class="px-4 py-3">{{ $log->reference_id ?? '-' }}</td>
-                            <td class="px-4 py-3">{{ $log->description ?? '-' }}</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6" class="px-4 py-6 text-center text-slate-500">No audit logs found for the selected filters.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <x-table.container class="mt-6">
+        <x-table.table>
+            <x-table.head>
+                <x-table.row>
+                    <x-table.th>Time</x-table.th>
+                    <x-table.th>User</x-table.th>
+                    <x-table.th>Module</x-table.th>
+                    <x-table.th>Action</x-table.th>
+                    <x-table.th>Ref</x-table.th>
+                    <x-table.th>Description</x-table.th>
+                </x-table.row>
+            </x-table.head>
+
+            <x-table.body>
+                @forelse ($logs as $log)
+                    <x-table.row striped hover>
+                        <x-table.td class="whitespace-nowrap">{{ optional($log->timestamp)->format('Y-m-d H:i:s') }}</x-table.td>
+                        <x-table.td>{{ $log->user?->name ?? 'System' }}</x-table.td>
+                        <x-table.td>{{ $log->module }}</x-table.td>
+                        <x-table.td>{{ $log->action }}</x-table.td>
+                        <x-table.td>{{ $log->reference_id ?? '-' }}</x-table.td>
+                        <x-table.td>{{ $log->description ?? '-' }}</x-table.td>
+                    </x-table.row>
+                @empty
+                    <x-table.empty :colspan="6" message="No audit logs found for the selected filters." />
+                @endforelse
+            </x-table.body>
+        </x-table.table>
+    </x-table.container>
 
     <div class="mt-4">
         {{ $logs->links() }}

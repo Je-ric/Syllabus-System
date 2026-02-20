@@ -1,8 +1,16 @@
 @extends('layouts.app')
 
 @section('content')
-    <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium mb-6">
-        ← Back to Dashboard
+    @php
+        $isAdmin = auth()->user()?->hasRole('admin');
+    @endphp
+
+    <a
+        href="{{ $isAdmin ? route('organizational.colleges.index') : route('profile.index') }}"
+        class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium mb-6"
+    >
+        <i class="bx bx-arrow-back"></i>
+        {{ $isAdmin ? 'Back to University Faculties' : 'Back to Profile' }}
     </a>
 
     <div class="flex items-center justify-center min-h-96">
@@ -13,7 +21,7 @@
 
             <h2 class="text-2xl font-bold text-slate-900 mb-2">No Assignment Found</h2>
             <p class="text-slate-600 max-w-md mx-auto">
-                You haven't been assigned as a dean or chair yet.
+                You have not been assigned as a dean or chair yet.
                 Please contact your administrator to receive an assignment.
             </p>
         </div>

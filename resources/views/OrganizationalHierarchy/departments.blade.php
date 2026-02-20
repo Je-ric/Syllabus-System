@@ -7,9 +7,11 @@
     @endphp
 
     <x-header-with-button title="{{ $college->name }}" description="Manage department leadership, faculty assignments, and academic structure">
-        <x-button variant="cancel" href="{{ route('organizational.colleges.index') }}">
-            <i class="bx bx-left-arrow-alt"></i> Back to Colleges
-        </x-button>
+        @if ($canManageChair)
+            <x-button variant="cancel" href="{{ route('organizational.colleges.index') }}">
+                <i class="bx bx-left-arrow-alt"></i> Back to Colleges
+            </x-button>
+        @endif
     </x-header-with-button>
 
     {{-- No Departments --}}

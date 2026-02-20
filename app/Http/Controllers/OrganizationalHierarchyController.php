@@ -566,73 +566,35 @@ class OrganizationalHierarchyController extends Controller
     }
 
 
-    // If user is dean, show their college with departments, chairs, and faculty.
-    // If chair, show their department with faculty.
-    // Otherwise, show no assignment message.
-    // Display hierarchy view: Dean sees their college, departments, chairs, and faculty
+    // Redirect role entry point directly to management pages.
     public function hierarchyView()
     {
         /** @var \App\Models\User|null $user */ // this is just for IDE type hinting, can be removed without affecting functionality (linted)
         $user = Auth::user();
 
-        if ($user->isDean()) { // Get dean's college
-            $deanAssignment = UserAssignment::where('user_id', $user->id)
-                ->where('context', 'dean')
-                ->first();
-
-            if (!$deanAssignment) {
-                return view('OrganizationalHierarchy.no-assignment');
-            }
-
-            $college = College::with('departments')->findOrFail($deanAssignment->college_id);
-
-            // Get all department chairs and their faculty for this college
-            $chairsWithFaculty = [];
-            foreach ($college->departments as $department) {
-                $chairAssignment = UserAssignment::where('department_id', $department->id)
-                    ->where('context', 'chair')
-                    ->with('user')
-                    ->first();
-
-                $faculty = UserAssignment::where('department_id', $department->id)
-                    ->where('context', 'faculty')
-                    ->with('user')
-                    ->orderBy('created_at', 'desc')
-                    ->get();
-
-                $chairsWithFaculty[] = [
-                    'department' => $department,
-                    'chair' => $chairAssignment,
-                    'faculty' => $faculty,
-                ];
-            }
-
-            return view('OrganizationalHierarchy.hierarchy-dean',
-                    compact('college',
-                    'chairsWithFaculty')
-                    );
+        if (!$user) {
+            abort(403, 'Unauthorized');
         }
 
-        // Check if user is a chair
+        if ($user->hasRole('admin')) {
+            return redirect()->route('organizational.colleges.index');
+        }
+
+        $deanAssignment = UserAssignment::where('user_id', $user->id)
+            ->where('context', 'dean')
+            ->first();
+
+        if ($deanAssignment) {
+            return redirect()->route('organizational.departments.index', $deanAssignment->college_id);
+        }
+
         $chairAssignment = UserAssignment::where('user_id', $user->id)
             ->where('context', 'chair')
             ->with('department')
             ->first();
 
-        if ($chairAssignment) { // Get chair's department
-            $department = $chairAssignment->department;
-
-            // Get all faculty in this department
-            $faculty = UserAssignment::where('department_id', $department->id)
-                ->where('context', 'faculty')
-                ->with('user')
-                ->orderBy('created_at', 'desc')
-                ->get();
-
-            return view('OrganizationalHierarchy.hierarchy-chair',
-                    compact('department',
-                    'faculty')
-                            );
+        if ($chairAssignment && $chairAssignment->department) {
+            return redirect()->route('organizational.departments.index', $chairAssignment->department->college_id);
         }
 
         return view('OrganizationalHierarchy.no-assignment');
