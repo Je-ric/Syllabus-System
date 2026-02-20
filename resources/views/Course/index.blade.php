@@ -12,6 +12,7 @@
     />
 
     <div class="border border-slate-200/80 rounded-2xl p-6 mb-6 bg-white/90 shadow-sm">
+        <h2 class="text-sm uppercase tracking-[0.25em] text-slate-500 mb-4">Select Program</h2>
         <livewire:programs.program-selector
             :program-id="optional($program)?->id"
             redirect-route="courses.index"
