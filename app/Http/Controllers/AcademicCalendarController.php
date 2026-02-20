@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\SaveAcademicCalendarRequest;
 use App\Models\AcademicCalendar;
+use App\Models\AuditLog;
 use Illuminate\Support\Facades\DB;
 // use App\Models\AcademicCalendarEvent;
 
@@ -49,6 +50,14 @@ class AcademicCalendarController extends Controller
                 'start_date' => $validated['start_date_2'],
                 'end_date' => $validated['end_date_2'],
             ]);
+
+            // LOGS
+            AuditLog::record(
+                action: 'created',
+                module: 'Academic Calendar',
+                referenceId: $sem1->id,
+                description: "Created academic calendar for {$validated['academic_year']}."
+            );
 
             DB::commit();
         } catch (\Throwable $e) {
@@ -141,6 +150,14 @@ class AcademicCalendarController extends Controller
                 'end_date' => $validated['end_date_2'],
             ]);
 
+            // LOGS
+            AuditLog::record(
+                action: 'updated',
+                module: 'Academic Calendar',
+                referenceId: $sem1->id,
+                description: "Updated academic calendar from {$academicYear} to {$validated['academic_year']}."
+            );
+
             DB::commit();
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -164,6 +181,15 @@ class AcademicCalendarController extends Controller
 
         try {
             AcademicCalendar::where('academic_year', $academic_year)->delete();
+
+            // LOGS
+            AuditLog::record(
+                action: 'deleted',
+                module: 'Academic Calendar',
+                referenceId: null,
+                description: "Deleted academic calendar for {$academic_year}."
+            );
+
             DB::commit();
         } catch (\Throwable $e) {
             DB::rollBack();

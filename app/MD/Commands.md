@@ -108,7 +108,8 @@ php artisan make:request
 
 
 
-
+php artisan make:migration create_audit_logs_table
+php artisan make:model AuditLog
 
 php artisan migrate
 php artisan migrate:fresh

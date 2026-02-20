@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\College;
 use App\Models\Department;
 use App\Models\DepartmentObjective;
+use App\Models\AuditLog;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -73,11 +74,21 @@ class ObjectiveController extends Controller
 
         $department = Department::findOrFail($request->department_id);
 
-        DepartmentObjective::create([
+        $objective = DepartmentObjective::create([
             'department_id' => $request->department_id,
             'dept_obj_code' => $department->getNextObjectiveCode(), // use model helper (Department.php)
             'objective_text' => $request->objective_text,
         ]);
+
+        $collegeName = $department->college?->name ?? 'N/A';
+
+        // LOGS
+        AuditLog::record(
+            action: 'created',
+            module: 'Objective',
+            referenceId: $objective->id,
+            description: "Created objective {$objective->dept_obj_code} for department {$department->name}, college {$collegeName}."
+        );
 
         return redirect()
             ->route('objective.index', [
@@ -100,6 +111,16 @@ class ObjectiveController extends Controller
             'objective_text' => $request->objective_text,
         ]);
 
+        $department = $objective->department;
+        $collegeName = $department?->college?->name ?? 'N/A';
+
+        AuditLog::record(
+            action: 'updated',
+            module: 'Objective',
+            referenceId: $objective->id,
+            description: "Updated objective {$objective->dept_obj_code} for department {$department?->name}, college {$collegeName}."
+        );
+
         return redirect()
             ->route('objective.index', [
                 'college_id' => $objective->department->college_id,
@@ -117,8 +138,18 @@ class ObjectiveController extends Controller
 
         try {
             $department = $objective->department;
+            $objectiveCode = $objective->dept_obj_code;
             $objective->delete();
             $department->resequenceObjectiveCodes(); // Department.php
+
+            // LOGS
+            AuditLog::record(
+                action: 'deleted',
+                module: 'Objective',
+                referenceId: $objective->id,
+                description: "Deleted objective {$objectiveCode} for department {$department->name}, college {$department->college?->name}."
+            );
+
             DB::commit();
         } catch (\Throwable $e) {
             DB::rollBack();

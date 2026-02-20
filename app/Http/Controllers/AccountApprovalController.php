@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Role;
 use App\Models\UserAssignment;
+use App\Models\AuditLog;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\AccountStatusUpdated;
 use Illuminate\Support\Facades\DB;
@@ -44,7 +45,16 @@ class AccountApprovalController extends Controller
                 $user->roles()->attach($facultyRole->id);
             }
 
+            // EMAIL
             Mail::to($user->email)->send(new AccountStatusUpdated($user, 'active'));
+
+            // LOGS
+            AuditLog::record(
+                action: 'approved',
+                module: 'Account Approval',
+                referenceId: $user->id,
+                description: "Approved user {$user->name} ({$user->email})."
+            );
 
             DB::commit();
 
@@ -74,7 +84,16 @@ class AccountApprovalController extends Controller
             $user->account_status = 'rejected';
             $user->save();
 
+            // EMAIL
             Mail::to($user->email)->send(new AccountStatusUpdated($user, 'rejected'));
+
+            // LOGS
+            AuditLog::record(
+                action: 'rejected',
+                module: 'Account Approval',
+                referenceId: $user->id,
+                description: "Rejected user {$user->name} ({$user->email})."
+            );
 
             DB::commit();
 
@@ -101,6 +120,14 @@ class AccountApprovalController extends Controller
         $user->account_status = "pending";
         $user->save();
 
+        // LOGS
+        AuditLog::record(
+            action: 'restored',
+            module: 'Account Approval',
+            referenceId: $user->id,
+            description: "Restored user {$user->name} ({$user->email}) to pending."
+        );
+
         return redirect()->route('accounts.approval')
             ->with('toast', [
                 'message' => 'User account restored to pending.',
@@ -118,7 +145,16 @@ class AccountApprovalController extends Controller
         $user->account_status = "disabled";
         $user->save();
 
+        // EMAIL
         Mail::to($user->email)->send(new AccountStatusUpdated($user, 'disabled'));
+
+        // LOGS
+        AuditLog::record(
+            action: 'disabled',
+            module: 'Account Approval',
+            referenceId: $user->id,
+            description: "Disabled user {$user->name} ({$user->email})."
+        );
 
         return redirect()->route('accounts.approval')
             ->with('toast', [
@@ -189,6 +225,15 @@ class AccountApprovalController extends Controller
             }
 
             $user->roles()->sync($roleIds); // Sync roles
+
+            // LOGS
+            AuditLog::record(
+                action: 'roles_updated',
+                module: 'Account Approval',
+                referenceId: $user->id,
+                description: 'Updated roles for ' . $user->name . '. New roles: ' . implode(', ', $newRoleNames) . '.'
+            );
+
             DB::commit();
         } catch (\Throwable $e) {
             DB::rollBack();

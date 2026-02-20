@@ -15,6 +15,7 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\SyllabusController;
 use App\Http\Controllers\OrganizationalHierarchyController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\AuditLogController;
 use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 
 Route::get('/', function () {
@@ -81,6 +82,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/organizational/colleges', [OrganizationalHierarchyController::class, 'collegesIndex'])->name('organizational.colleges.index');
         Route::post('/organizational/assign-dean', [OrganizationalHierarchyController::class, 'assignDean'])->name('organizational.assign-dean');
         Route::post('/organizational/remove-dean', [OrganizationalHierarchyController::class, 'removeDean'])->name('organizational.remove-dean');
+
+        Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit.logs.index');
 
     });
 

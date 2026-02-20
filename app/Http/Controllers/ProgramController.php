@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Program;
 use App\Models\ProgramEducationalObjective;
 use App\Models\ProgramOutcome;
+use App\Models\AuditLog;
 use App\Helpers\ProgramCodeHelper;
 use Illuminate\Support\Facades\DB;
 // use Illuminate\Http\Request;
@@ -37,11 +38,21 @@ class ProgramController extends Controller
         try {
             $peo = ProgramEducationalObjective::findOrFail($peoId);
             $programId = $peo->program_id;
+            $programName = $peo->program?->name ?? 'Unknown Program';
+            $peoCode = $peo->peo_code;
 
             $peo->delete();
 
             // Use helper instead of repeating resequence logic
             ProgramCodeHelper::resequencePeoCodes($programId);
+
+            // LOGS
+            AuditLog::record(
+                action: 'deleted',
+                module: 'PEO',
+                referenceId: $peoId,
+                description: "Deleted {$peoCode} from {$programName} and re-sequenced PEO codes."
+            );
 
             DB::commit();
         } catch (\Throwable $e) {
@@ -66,11 +77,21 @@ class ProgramController extends Controller
         try {
             $po = ProgramOutcome::findOrFail($poId);
             $programId = $po->program_id;
+            $programName = $po->program?->name ?? 'Unknown Program';
+            $poCode = $po->po_code;
 
             $po->delete();
 
             // Use helper instead of repeating resequence logic
             ProgramCodeHelper::resequencePoCodes($programId);
+
+            // LOGS
+            AuditLog::record(
+                action: 'deleted',
+                module: 'PO',
+                referenceId: $poId,
+                description: "Deleted {$poCode} from {$programName} and re-sequenced PO codes."
+            );
 
             DB::commit();
         } catch (\Throwable $e) {

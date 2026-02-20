@@ -4,6 +4,7 @@ namespace App\Livewire\Programs;
 
 use App\Models\Program;
 use App\Models\ProgramEducationalObjective;
+use App\Models\AuditLog;
 use Livewire\Component;
 use App\Helpers\ProgramCodeHelper;
 
@@ -65,6 +66,18 @@ class ManagePeos extends Component
 
         // Use helper
         ProgramCodeHelper::resequencePeoCodes($this->program->id);
+
+        $primaryDepartment = $this->program->departments()->with('college')->first();
+        $collegeName = $primaryDepartment?->college?->name ?? 'N/A';
+        $departmentName = $primaryDepartment?->name ?? 'N/A';
+
+        // LOGS
+        AuditLog::record(
+            action: 'saved',
+            module: 'PEO',
+            referenceId: $this->program->id,
+            description: "Saved PEOs for {$this->program->name}; college: {$collegeName}; department: {$departmentName}."
+        );
 
         $this->loadPeos();
         session()->flash('message', 'PEOs saved and re-sequenced successfully!');

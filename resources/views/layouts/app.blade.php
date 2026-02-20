@@ -67,6 +67,11 @@
                                 <i class="bx bxs-calendar text-lg"></i>
                                 Academic Calendars
                             </a>
+                            <a href="{{ route('audit.logs.index') }}"
+                                class="{{ request()->routeIs('audit.logs.index') ? 'active' : '' }}">
+                                <i class="bx bx-history text-lg"></i>
+                                Audit Logs
+                            </a>
                         @endif
 
                         @if(auth()->user()->hasRole('admin') || auth()->user()->hasRole('dean'))

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\SaveCourseRequest;
 use App\Models\Course;
 use App\Models\Program;
+use App\Models\AuditLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -114,6 +115,19 @@ class CourseController extends Controller
                 );
             }
 
+            $program = Program::with('departments.college')->find($course->program_id);
+            $primaryDepartment = $program?->departments->first();
+            $collegeName = $primaryDepartment?->college?->name ?? 'N/A';
+            $departmentName = $primaryDepartment?->name ?? 'N/A';
+
+            // LOGS
+            AuditLog::record(
+                action: 'created',
+                module: 'Course',
+                referenceId: $course->id,
+                description: "Created course {$course->course_code} ({$course->course_title}) for program {$program?->name}; college: {$collegeName}; department: {$departmentName}."
+            );
+
             DB::commit();
 
             return redirect()
@@ -177,6 +191,20 @@ class CourseController extends Controller
             }
 
             $course->programOutcomes()->sync($syncData);
+
+            $program = Program::with('departments.college')->find($course->program_id);
+            $primaryDepartment = $program?->departments->first();
+            $collegeName = $primaryDepartment?->college?->name ?? 'N/A';
+            $departmentName = $primaryDepartment?->name ?? 'N/A';
+
+            // LOGS
+            AuditLog::record(
+                action: 'updated',
+                module: 'Course',
+                referenceId: $course->id,
+                description: "Updated course {$course->course_code} ({$course->course_title}); program {$program?->name}; college: {$collegeName}; department: {$departmentName}."
+            );
+
             DB::commit();
         } catch (\Throwable $e) {
             DB::rollBack();

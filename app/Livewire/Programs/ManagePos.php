@@ -4,6 +4,7 @@ namespace App\Livewire\Programs;
 
 use App\Models\Program;
 use App\Models\ProgramOutcome;
+use App\Models\AuditLog;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Helpers\ProgramCodeHelper;
@@ -104,6 +105,18 @@ class ManagePos extends Component
         // Use helper
         ProgramCodeHelper::resequencePoCodes($this->program->id);
 
+        $primaryDepartment = $this->program->departments()->with('college')->first();
+        $collegeName = $primaryDepartment?->college?->name ?? 'N/A';
+        $departmentName = $primaryDepartment?->name ?? 'N/A';
+
+        // LOGS
+        AuditLog::record(
+            action: 'saved',
+            module: 'PO',
+            referenceId: $this->program->id,
+            description: "Saved POs for {$this->program->name}; college: {$collegeName}; department: {$departmentName}."
+        );
+
         $this->loadPos();
         $this->loadMapping();
 
@@ -129,6 +142,13 @@ class ManagePos extends Component
         } else {
             $po->peos()->detach($peoId);
         }
+
+        AuditLog::record(
+            action: $checked ? 'mapped' : 'unmapped',
+            module: 'PO-PEO Mapping',
+            referenceId: $po->id,
+            description: ($checked ? 'Mapped' : 'Unmapped') . " PEO #{$peoId} " . ($checked ? 'to' : 'from') . " PO #{$po->id} in {$this->program->name}."
+        );
 
         $this->loadMapping();
     }

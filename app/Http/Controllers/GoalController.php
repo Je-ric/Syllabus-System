@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\College;
 use App\Models\CollegeGoal;
+use App\Models\AuditLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -45,11 +46,19 @@ class GoalController extends Controller
 
         $college = College::findOrFail($request->college_id);
 
-        CollegeGoal::create([
+        $goal = CollegeGoal::create([
             'college_id' => $request->college_id,
             'college_goals_code' => $college->getNextGoalCode(), // use model helper (College.php)
             'goal_text' => $request->goal_text,
         ]);
+
+        // LOGS
+        AuditLog::record(
+            action: 'created',
+            module: 'Goal',
+            referenceId: $goal->id,
+            description: "Created goal {$goal->college_goals_code} for college {$college->name}."
+        );
 
         return redirect()
             ->route('goal.index', ['college_id' => $request->college_id])
@@ -70,6 +79,16 @@ class GoalController extends Controller
             'goal_text' => $request->goal_text,
         ]);
 
+        $college = $goal->college;
+
+        // LOGS
+        AuditLog::record(
+            action: 'updated',
+            module: 'Goal',
+            referenceId: $goal->id,
+            description: "Updated goal {$goal->college_goals_code} for college {$college?->name}."
+        );
+
         return redirect()
             ->route('goal.index', ['college_id' => $goal->college_id])
             ->with('toast', [
@@ -84,8 +103,18 @@ class GoalController extends Controller
 
         try {
             $college = $goal->college;
+            $goalCode = $goal->college_goals_code;
             $goal->delete();
             $college->resequenceGoalCodes(); // College.php
+
+            // LOGS
+            AuditLog::record(
+                action: 'deleted',
+                module: 'Goal',
+                referenceId: $goal->id,
+                description: "Deleted goal {$goalCode} for college {$college->name}."
+            );
+
             DB::commit();
         } catch (\Throwable $e) {
             DB::rollBack();

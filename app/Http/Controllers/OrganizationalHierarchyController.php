@@ -6,6 +6,7 @@ use App\Models\College;
 use App\Models\Department;
 use App\Models\User;
 use App\Models\UserAssignment;
+use App\Models\AuditLog;
 // use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -102,6 +103,14 @@ class OrganizationalHierarchyController extends Controller
 
             $user->ensureFacultyRoleAndAssignment($college->id, null); // User.php
 
+            // LOGS
+            AuditLog::record(
+                action: 'assigned',
+                module: 'Organizational Hierarchy',
+                referenceId: $college->id,
+                description: "Assigned {$user->name} as dean of {$college->name}."
+            );
+
             DB::commit();
         } catch (Throwable $e) {
             DB::rollBack();
@@ -125,6 +134,9 @@ class OrganizationalHierarchyController extends Controller
             'user_id' => 'required|exists:users,id',
         ]);
 
+        $college = College::findOrFail($request->college_id);
+        $user = User::findOrFail($request->user_id);
+
         try {
             DB::beginTransaction();
 
@@ -132,6 +144,14 @@ class OrganizationalHierarchyController extends Controller
                 ->where('user_id', $request->user_id)
                 ->where('context', 'dean')
                 ->delete();
+
+            // LOGS
+            AuditLog::record(
+                action: 'removed',
+                module: 'Organizational Hierarchy',
+                referenceId: $college->id,
+                description: "Removed {$user->name} as dean of {$college->name}."
+            );
 
             DB::commit();
         } catch (Throwable $e) {
@@ -303,6 +323,14 @@ class OrganizationalHierarchyController extends Controller
 
             $user->ensureFacultyRoleAndAssignment(null, $department->id);
 
+            // LOGS
+            AuditLog::record(
+                action: 'assigned',
+                module: 'Organizational Hierarchy',
+                referenceId: $department->id,
+                description: "Assigned {$user->name} as chair of {$department->name}."
+            );
+
             DB::commit();
         } catch (Throwable $e) {
             DB::rollBack();
@@ -327,6 +355,7 @@ class OrganizationalHierarchyController extends Controller
         ]);
 
         $department = Department::findOrFail($request->department_id);
+        $user = User::findOrFail($request->user_id);
         /** @var \App\Models\User|null $actor */
         $actor = Auth::user();
         $actorIsAdmin = $actor?->hasRole('admin') ?? false;
@@ -355,6 +384,14 @@ class OrganizationalHierarchyController extends Controller
                 ->where('user_id', $request->user_id)
                 ->where('context', 'chair')
                 ->delete();
+
+            // LOGS
+            AuditLog::record(
+                action: 'removed',
+                module: 'Organizational Hierarchy',
+                referenceId: $department->id,
+                description: "Removed {$user->name} as chair of {$department->name}."
+            );
 
             DB::commit();
         } catch (Throwable $e) {
@@ -439,6 +476,14 @@ class OrganizationalHierarchyController extends Controller
                 'context' => 'faculty',
             ]);
 
+            // LOGS
+            AuditLog::record(
+                action: 'assigned',
+                module: 'Organizational Hierarchy',
+                referenceId: $department->id,
+                description: "Assigned {$user->name} as faculty in {$department->name}."
+            );
+
             DB::commit();
         } catch (Throwable $e) {
             DB::rollBack();
@@ -463,6 +508,7 @@ class OrganizationalHierarchyController extends Controller
         ]);
 
         $department = Department::findOrFail($request->department_id);
+        $user = User::findOrFail($request->user_id);
         /** @var \App\Models\User|null $actor */
         $actor = Auth::user();
 
@@ -495,6 +541,14 @@ class OrganizationalHierarchyController extends Controller
                 ->where('user_id', $request->user_id)
                 ->where('context', 'faculty')
                 ->delete();
+
+            // LOGS
+            AuditLog::record(
+                action: 'removed',
+                module: 'Organizational Hierarchy',
+                referenceId: $department->id,
+                description: "Removed {$user->name} as faculty from {$department->name}."
+            );
 
             DB::commit();
         } catch (Throwable $e) {

@@ -8,6 +8,7 @@ use App\Http\Requests\SaveProgramRequest;
 use App\Models\College;
 use App\Models\Department;
 use App\Models\Program;
+use App\Models\AuditLog;
 use Illuminate\Support\Facades\DB;
 
 class AcademicStructureController extends Controller
@@ -16,7 +17,7 @@ class AcademicStructureController extends Controller
     {
         return view('AcademicStructure.index', [
             'colleges' => College::orderBy('name')->get(),
-            'departments' => Department::withRelations()->orderBy('name')->get(), 
+            'departments' => Department::withRelations()->orderBy('name')->get(),
             'programs' => Program::all()->sortBy('name'),
         ]);
     }
@@ -29,9 +30,17 @@ class AcademicStructureController extends Controller
     {
         $validated = $request->validated();
 
-        College::create([
+        $college = College::create([
             'name' => $validated['name'],
         ]);
+
+        // LOGS
+        AuditLog::record(
+            action: 'created',
+            module: 'Academic Structure',
+            referenceId: $college->id,
+            description: "Created college {$college->name}."
+        );
 
         return back()->with('toast', [
             'message' => 'College added successfully.',
@@ -47,6 +56,14 @@ class AcademicStructureController extends Controller
             'name' => $validated['name'],
         ]);
 
+        // LOGS
+        AuditLog::record(
+            action: 'updated',
+            module: 'Academic Structure',
+            referenceId: $college->id,
+            description: "Updated college to {$college->name}."
+        );
+
         return back()->with('toast', [
             'message' => 'College updated successfully.',
             'type' => 'success'
@@ -61,10 +78,18 @@ class AcademicStructureController extends Controller
     {
         $validated = $request->validated();
 
-        Department::create([
+        $department = Department::create([
             'name' => $validated['name'],
             'college_id' => $validated['college_id'],
         ]);
+
+        // LOGS
+        AuditLog::record(
+            action: 'created',
+            module: 'Academic Structure',
+            referenceId: $department->id,
+            description: "Created department {$department->name} under college #{$department->college_id}."
+        );
 
         return back()->with('toast', [
             'message' => 'Department added successfully.',
@@ -80,6 +105,14 @@ class AcademicStructureController extends Controller
             'name' => $validated['name'],
             'college_id' => $validated['college_id'],
         ]);
+
+        // LOGS
+        AuditLog::record(
+            action: 'updated',
+            module: 'Academic Structure',
+            referenceId: $department->id,
+            description: "Updated department {$department->name} under college #{$department->college_id}."
+        );
 
         return back()->with('toast', [
             'message' => 'Department updated successfully.',
@@ -106,6 +139,13 @@ class AcademicStructureController extends Controller
 
             // Insert into program_departments junction table
             $program->departments()->attach($validated['department_id'], ['role' => 'primary']);
+
+            AuditLog::record(
+                action: 'created',
+                module: 'Academic Structure',
+                referenceId: $program->id,
+                description: "Created program {$program->name} under department #{$validated['department_id']}."
+            );
 
             DB::commit();
         } catch (\Throwable $e) {
@@ -137,6 +177,13 @@ class AcademicStructureController extends Controller
 
             // Update program_departments junction table
             $program->departments()->sync([$validated['department_id'] => ['role' => 'primary']]);
+
+            AuditLog::record(
+                action: 'updated',
+                module: 'Academic Structure',
+                referenceId: $program->id,
+                description: "Updated program {$program->name} and set department #{$validated['department_id']}."
+            );
 
             DB::commit();
         } catch (\Throwable $e) {
