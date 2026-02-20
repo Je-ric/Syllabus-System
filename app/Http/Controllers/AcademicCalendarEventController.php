@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AcademicCalendar;
 use App\Models\AcademicCalendarEvent;
+use App\Models\AuditLog;
 use Illuminate\Http\Request;
 
 class AcademicCalendarEventController extends Controller
@@ -43,7 +44,15 @@ class AcademicCalendarEventController extends Controller
             ],
         ]);
 
-        $semester->events()->create($request->all());
+        $event = $semester->events()->create($request->all());
+
+        // LOGS
+        AuditLog::record(
+            action: 'created',
+            module: 'Academic Calendar Event',
+            referenceId: $event->id,
+            description: "Created {$event->type} event '{$event->name}' on {$event->date} for {$semester->academic_year} {$semester->semester} semester."
+        );
 
         return redirect()->route('academic.calendar.events.index', $semester->academic_year)
                         ->with('toast', [
@@ -75,6 +84,14 @@ class AcademicCalendarEventController extends Controller
 
         $event->update($request->only(['type', 'name', 'date']));
 
+        // LOGS
+        AuditLog::record(
+            action: 'updated',
+            module: 'Academic Calendar Event',
+            referenceId: $event->id,
+            description: "Updated {$event->type} event '{$event->name}' on {$event->date} for {$semester->academic_year} {$semester->semester} semester."
+        );
+
         return redirect()->route('academic.calendar.events.index', $semester->academic_year)
                         ->with('toast', [
                     'message' => 'Event updated succesffully.',
@@ -85,7 +102,20 @@ class AcademicCalendarEventController extends Controller
     public function destroy(AcademicCalendarEvent $event)
     {
         $academicYear = $event->calendar->academic_year;
+        $semester = $event->calendar->semester;
+        $eventId = $event->id;
+        $eventType = $event->type;
+        $eventName = $event->name;
+        $eventDate = $event->date;
         $event->delete();
+
+        // LOGS
+        AuditLog::record(
+            action: 'deleted',
+            module: 'Academic Calendar Event',
+            referenceId: $eventId,
+            description: "Deleted {$eventType} event '{$eventName}' on {$eventDate} for {$academicYear} {$semester} semester."
+        );
 
         return redirect()->route('academic.calendar.events.index', $academicYear)
                         ->with('toast', [
