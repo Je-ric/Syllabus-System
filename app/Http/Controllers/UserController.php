@@ -3,14 +3,26 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\OtpService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
+    private const PASSWORD_CHANGE_OTP_SESSION_KEY = 'password_change_otp';
+
+    public function __construct(private OtpService $otpService)
+    {
+    }
+
     public function index()
     {
-        $user = User::with('roles')->findOrFail(Auth::id());
+        $user = User::with([
+            'roles',
+            'assignments.department.college',
+            'assignments.college',
+        ])->findOrFail(Auth::id());
 
         return view('Authentication.viewDetails', compact('user'));
     }
@@ -18,6 +30,15 @@ class UserController extends Controller
     public function update(Request $request)
     {
         $user = User::findOrFail(Auth::id());
+
+        if ($user->hasRole('admin')) {
+            return redirect()
+                ->route('profile.index')
+                ->with('toast', [
+                    'message' => 'Admin profile details cannot be edited here.',
+                    'type' => 'warning',
+                ]);
+        }
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -36,8 +57,117 @@ class UserController extends Controller
             ]);
     }
 
-    public function changePassword()
+    public function changePassword(Request $request)
     {
+        $user = User::findOrFail(Auth::id());
 
+        if ($user->hasRole('admin')) {
+            return redirect()
+                ->route('profile.index')
+                ->with('toast', [
+                    'message' => 'Admin password cannot be changed from this page.',
+                    'type' => 'warning',
+                ]);
+        }
+
+        $validated = $request->validate([
+            'current_password' => ['required', 'string'],
+            'password' => ['required', 'string', 'min:8', 'confirmed', 'different:current_password'],
+        ]);
+
+        if (!Hash::check($validated['current_password'], $user->password)) {
+            return back()->withErrors([
+                'current_password' => 'Current password is incorrect.',
+            ]);
+        }
+
+        $this->otpService->issueForUser($user, OtpService::PURPOSE_PASSWORD_CHANGE);
+
+        $request->session()->put(self::PASSWORD_CHANGE_OTP_SESSION_KEY, [
+            'user_id' => $user->id,
+            'password_hash' => Hash::make($validated['password']),
+        ]);
+
+        return redirect()
+            ->route('profile.index')
+            ->with('toast', [
+                'message' => 'OTP sent to your email. Enter it below to confirm password change.',
+                'type' => 'info',
+            ]);
+    }
+
+    public function verifyPasswordOtp(Request $request)
+    {
+        $user = User::findOrFail(Auth::id());
+        $pending = $request->session()->get(self::PASSWORD_CHANGE_OTP_SESSION_KEY);
+
+        if (!$pending || (int) ($pending['user_id'] ?? 0) !== (int) $user->id) {
+            return redirect()
+                ->route('profile.index')
+                ->with('toast', [
+                    'message' => 'No pending password change request found.',
+                    'type' => 'warning',
+                ]);
+        }
+
+        $this->otpService->migrateLegacyOtp($user, OtpService::PURPOSE_PASSWORD_CHANGE);
+
+        $validated = $request->validate([
+            'otp' => ['required', 'digits:6'],
+        ]);
+
+        $otpError = $this->otpService->validate($user, $validated['otp'], OtpService::PURPOSE_PASSWORD_CHANGE);
+        if ($otpError) {
+            return back()->withErrors([
+                'otp' => $otpError,
+            ]);
+        }
+
+        $user->forceFill([
+            'password' => $pending['password_hash'],
+        ])->save();
+        $this->otpService->clear($user, OtpService::PURPOSE_PASSWORD_CHANGE);
+
+        $request->session()->forget(self::PASSWORD_CHANGE_OTP_SESSION_KEY);
+
+        return redirect()
+            ->route('profile.index')
+            ->with('toast', [
+                'message' => 'Password changed successfully.',
+                'type' => 'success',
+            ]);
+    }
+
+    public function resendPasswordOtp(Request $request)
+    {
+        $user = User::findOrFail(Auth::id());
+        $pending = $request->session()->get(self::PASSWORD_CHANGE_OTP_SESSION_KEY);
+
+        if ($user->hasRole('admin')) {
+            return redirect()
+                ->route('profile.index')
+                ->with('toast', [
+                    'message' => 'Admin password cannot be changed from this page.',
+                    'type' => 'warning',
+                ]);
+        }
+
+        if (!$pending || (int) ($pending['user_id'] ?? 0) !== (int) $user->id) {
+            return redirect()
+                ->route('profile.index')
+                ->with('toast', [
+                    'message' => 'No pending password change request found.',
+                    'type' => 'warning',
+                ]);
+        }
+
+        $this->otpService->issueForUser($user, OtpService::PURPOSE_PASSWORD_CHANGE);
+
+        return redirect()
+            ->route('profile.index')
+            ->with('toast', [
+                'message' => 'A new OTP has been sent to your email.',
+                'type' => 'success',
+            ]);
     }
 }

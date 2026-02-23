@@ -60,6 +60,11 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Role::class, 'user_roles');
     }
+
+    public function otps()
+    {
+        return $this->hasMany(UserOtp::class);
+    }
     // Used in: assignDean() - OrganizationalHierarchyController; assignChair() - OrganizationalHierarchyController; assignFaculty() - OrganizationalHierarchyController
     public function hasRole(string $role): bool
     {

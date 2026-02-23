@@ -3,13 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\OtpService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\OtpMail;
 
 class OTPController extends Controller
 {
+    public function __construct(private OtpService $otpService)
+    {
+    }
+
     public function showOTP()
     {
         if (!session('verify_email')) {
@@ -40,7 +42,7 @@ class OTPController extends Controller
             ]);
         }
 
-        $this->generateAndSendOtp($user);
+        $this->otpService->issueForUser($user, OtpService::PURPOSE_EMAIL_VERIFICATION);
 
         return redirect()
             ->route('otp.show')
@@ -52,7 +54,7 @@ class OTPController extends Controller
     // Verify OTP
     public function verifyOTP(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'otp' => 'required|digits:6',
         ]);
 
@@ -64,34 +66,20 @@ class OTPController extends Controller
         }
 
         $user = User::where('email', $email)->firstOrFail();
-
-        // Null OTP safety
-        if (!$user->otp) {
+        $this->otpService->migrateLegacyOtp($user, OtpService::PURPOSE_EMAIL_VERIFICATION);
+        
+        $otpError = $this->otpService->validate($user, $validated['otp'], OtpService::PURPOSE_EMAIL_VERIFICATION);
+        if ($otpError) {
             return back()->withErrors([
-                'otp' => 'OTP is invalid or has already been used.',
+                'otp' => $otpError,
             ]);
         }
 
-        // OTP expiration check
-        if ($user->otp_expires_at && now()->greaterThan($user->otp_expires_at)) {
-            return back()->withErrors([
-                'otp' => 'OTP has expired. Please request a new one.',
-            ]);
-        }
-
-        //  OTP match check
-        if (!Hash::check($request->otp, $user->otp)) {
-            return back()->withErrors([
-                'otp' => 'Invalid OTP.',
-            ]);
-        }
-
-        // After the OTP insert, mark email as verified, the otp and expiry as null
+        // Mark email verified and clear OTP values
         $user->update([
             'email_verified_at' => now(),
-            'otp' => null,
-            'otp_expires_at' => null,
         ]);
+        $this->otpService->clear($user, OtpService::PURPOSE_EMAIL_VERIFICATION);
 
         // Clear session
         $request->session()->forget('verify_email');
@@ -101,16 +89,4 @@ class OTPController extends Controller
             ->with('success', 'Email verified! Await admin approval.');
     }
 
-    // Generate and send OTP (DRY)
-    private function generateAndSendOtp(User $user)
-    {
-        $otp = rand(100000, 999999);
-
-        $user->update([
-            'otp' => Hash::make($otp),
-            'otp_expires_at' => now()->addMinutes(10),
-        ]);
-
-        Mail::to($user->email)->send(new OtpMail($otp));
-    }
 }

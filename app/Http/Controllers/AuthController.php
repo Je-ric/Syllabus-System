@@ -3,14 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\OtpService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\OtpMail;
 
 class AuthController extends Controller
 {
+    public function __construct(private OtpService $otpService)
+    {
+    }
+
     // Show login/register page
     public function show()
     {
@@ -40,22 +43,16 @@ class AuthController extends Controller
             'password' => 'required|min:6|confirmed',
         ]);
 
-        // Generate OTP
-        $otp = rand(100000, 999999);
-
         $user = User::create([
             'name'           => $request->name,
             'email'          => $request->email,
             'password'       => Hash::make($request->password),
             'account_status' => 'pending',
-            'otp'            => Hash::make($otp),
-            'otp_expires_at' => now()->addMinutes(10),
             'phone_number'   => $request->phone_number,
             'office'         => $request->office,
         ]);
 
-        // Send OTP email
-        Mail::to($user->email)->send(new OtpMail($otp));
+        $this->otpService->issueForUser($user, OtpService::PURPOSE_EMAIL_VERIFICATION);
 
         // Store email in session for OTP verification form
         return redirect()

@@ -49,6 +49,9 @@ Route::get('/waiting-approval', function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [UserController::class,'index'])->name('profile.index');
     Route::put('/profile', [UserController::class,'update'])->name('profile.update');
+    Route::post('/profile/password', [UserController::class,'changePassword'])->name('profile.password.change');
+    Route::post('/profile/password/verify-otp', [UserController::class,'verifyPasswordOtp'])->name('profile.password.verify-otp');
+    Route::post('/profile/password/resend-otp', [UserController::class,'resendPasswordOtp'])->name('profile.password.resend-otp');
 
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/account-approval', [AccountApprovalController::class, 'index'])->name('accounts.approval');
