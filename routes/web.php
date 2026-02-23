@@ -47,6 +47,9 @@ Route::get('/waiting-approval', function () {
 
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('/profile', [UserController::class,'index'])->name('profile.index');
+    Route::put('/profile', [UserController::class,'update'])->name('profile.update');
+
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/account-approval', [AccountApprovalController::class, 'index'])->name('accounts.approval');
         Route::post('/account-approval/approve', [AccountApprovalController::class, 'approve'])->name('account-approval.approve');
@@ -136,7 +139,6 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/syllabus/{syllabus}', [SyllabusController::class, 'update'])->name('syllabus.update');
         Route::delete('/syllabus/{syllabus}', [SyllabusController::class, 'destroy'])->name('syllabus.destroy');
 
-        Route::get('/profile', [UserController::class,'index'])->name('profile.index');
     });
 
 });

@@ -82,13 +82,13 @@
                             </a>
                         @endif
 
-                        @if(auth()->user()->hasRole('dean') || auth()->user()->hasRole('chair'))
+                        {{-- @if(auth()->user()->hasRole('dean') || auth()->user()->hasRole('chair'))
                             <a href="{{ route('organizational.hierarchy') }}"
                                 class="{{ request()->routeIs('organizational.hierarchy') ? 'active' : '' }}">
                                 <i class="bx bxs-id-card text-lg"></i>
                                 Role
                             </a>
-                        @endif
+                        @endif --}}
 
                         @if(auth()->user()->hasRole('admin') || auth()->user()->hasRole('chair'))
                             <a href="{{ route('objective.index') }}"
