@@ -53,4 +53,27 @@
             <div class="text-xs text-rose-600 mt-1">{{ $coAddError }}</div>
         @endif
     </div>
+
+    <div class="mt-6 border border-green-200 rounded-xl p-4 shadow-sm">
+        <h4 class="font-semibold text-sm text-green-800 mb-3">
+            Program Outcomes Reference
+        </h4>
+
+        @if (count($programOutcomes) === 0)
+            <p class="text-sm text-slate-500">No program outcomes found for this course.</p>
+        @else
+            <div class="grid grid-cols-1 gap-3">
+                @foreach ($programOutcomes as $po)
+                    <div class="bg-white border border-green-400 rounded-lg p-3 shadow-sm flex items-start gap-2">
+                        <span class="font-semibold text-green-700 text-sm shrink-0">
+                            {{ $po['po_code'] }}.
+                        </span>
+                        <p class="text-slate-700 text-sm">
+                            {{ $po['po_text'] }}
+                        </p>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+    </div>
 </div>

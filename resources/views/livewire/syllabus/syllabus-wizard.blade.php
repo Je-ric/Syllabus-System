@@ -57,9 +57,6 @@
         @elseif($currentStep === 'course_outcomes')
             <livewire:syllabus.steps.course-outcomes-step :syllabus-id="$syllabus->id"
                 :key="'course-outcomes-step-' . $syllabus->id . '-' . $currentStep" />
-        @elseif($currentStep === 'co_po_mapping')
-            <livewire:syllabus.steps.co-po-mapping-step :syllabus-id="$syllabus->id"
-                :key="'co-po-mapping-step-' . $syllabus->id . '-' . $currentStep" />
         @elseif($currentStep === 'weekly_coverage')
             <livewire:syllabus.steps.weekly-coverage-step :syllabus-id="$syllabus->id"
                 :key="'weekly-coverage-step-' . $syllabus->id . '-' . $currentStep" />

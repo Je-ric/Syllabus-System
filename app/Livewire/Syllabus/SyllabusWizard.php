@@ -7,7 +7,6 @@ use App\Models\CourseOutcome;
 use App\Models\Course;
 use App\Models\Syllabus;
 use App\Models\SyllabusWeek;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -89,7 +88,6 @@ class SyllabusWizard extends Component
         if ($this->stepHasMissingRequired('academic_calendar')
             || $this->stepHasMissingRequired('course_components')
             || $this->stepHasMissingRequired('course_outcomes')
-            || $this->stepHasMissingRequired('co_po_mapping')
             || $this->stepHasMissingRequired('weekly_coverage')) {
             $this->dispatch('lw-toast', type: 'error', message: 'Complete all required fields before submitting.');
             return null;
@@ -218,15 +216,6 @@ class SyllabusWizard extends Component
                 return !CourseOutcome::query()
                     ->where('syllabus_id', $syllabusId)
                     ->whereRaw("TRIM(description) <> ''")
-                    ->exists();
-
-            case 'co_po_mapping':
-                if (!CourseOutcome::query()->where('syllabus_id', $syllabusId)->exists()) {
-                    return true;
-                }
-                return !DB::table('course_outcome_po')
-                    ->join('course_outcomes', 'course_outcome_po.course_outcome_id', '=', 'course_outcomes.id')
-                    ->where('course_outcomes.syllabus_id', $syllabusId)
                     ->exists();
 
             case 'weekly_coverage':

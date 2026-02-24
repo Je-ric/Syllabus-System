@@ -164,7 +164,7 @@ class SyllabusController extends Controller
             'course.program.departments.objectives',
             'course.program.departments.college.goals',
             'components',
-            'courseOutcomes.programOutcomes',
+            'courseOutcomes',
         ]);
 
         $program = $syllabus->course->program;

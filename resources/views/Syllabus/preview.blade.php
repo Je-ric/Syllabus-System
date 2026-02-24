@@ -296,80 +296,43 @@
         <div class="landscape">
             <h3 class="a4-section title-numbered">9. Course Outcomes (COs) and Relationship to Program Outcomes</h3>
 
-            @php
-                $addressedPoIds = $courseOutcomes
-                    ->flatMap(fn($co) => $co->programOutcomes->pluck('id'))
-                    ->unique()
-                    ->values();
-            @endphp
-
             <table>
                 <thead>
                     <tr>
-                        <th rowspan="2" style="text-align:left;">Program Outcomes addressed by the course</th>
-                        <th colspan="{{ max($pos->count(), 1) }}">PO Code</th>
-                    </tr>
-                    <tr>
-                        @forelse ($pos as $po)
-                            <th>{{ $po->po_code }}</th>
-                        @empty
-                            <th>-</th>
-                        @endforelse
+                        <th style="text-align:left;">Program Outcomes (Reference)</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td></td>
-                        @forelse ($pos as $po)
-                            <td style="text-align:center;">
-                                {!! $addressedPoIds->contains($po->id) ? '&#10003;' : '' !!}
-                            </td>
-                        @empty
-                            <td>-</td>
-                        @endforelse
-                    </tr>
+                    @forelse ($pos as $po)
+                        <tr>
+                            <td>{{ $po->po_code }} - {{ $po->po_text }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td style="text-align:center;">No program outcomes found.</td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
 
             <table>
                 <thead>
                     <tr>
-                        <th rowspan="2" style="text-align:left;">Program Outcomes addressed by the course</th>
-                        <th colspan="{{ max($pos->count(), 1) }}">PO Code</th>
-                    </tr>
-                    <tr>
-                        @forelse ($pos as $po)
-                            <th>{{ $po->po_code }}</th>
-                        @empty
-                            <th>-</th>
-                        @endforelse
+                        <th style="text-align:left;">Course Outcomes</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($courseOutcomes as $co)
                         <tr>
                             <td>{{ $co->co_code }}: {{ $co->description }}</td>
-                            @forelse ($pos as $po)
-                                @php
-                                    $mapping = $co->programOutcomes->firstWhere('id', $po->id);
-                                    $ied = $mapping?->pivot?->ied ?? '';
-                                @endphp
-                                <td style="text-align:center;">{{ $ied }}</td>
-                            @empty
-                                <td>-</td>
-                            @endforelse
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="{{ $pos->count() + 1 }}" style="text-align:center;">No CO-PO mappings found.</td>
+                            <td style="text-align:center;">No course outcomes found.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
-
-            <p style="font-size:11px; margin-top:6px;">
-                <strong>Level:</strong> I - Introductory, E - Enabling, D - Demonstrative
-            </p>
         </div>
 
         <div class="portrait">

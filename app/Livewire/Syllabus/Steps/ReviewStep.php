@@ -15,7 +15,6 @@ class ReviewStep extends Component
     public $academicCalendars;
     public ?int $academic_calendar_id = null;
     public array $courseOutcomes = [];
-    public array $coPoMappings = [];
     public array $examWeeks = [];
     public $syllabusWeeks;
     public $course;
@@ -65,7 +64,6 @@ class ReviewStep extends Component
             'course.program.outcomes',
             'course.programOutcomes',
             'components',
-            'courseOutcomes.programOutcomes',
             'weeks',
         ])->findOrFail($this->syllabusId);
 
@@ -81,15 +79,6 @@ class ReviewStep extends Component
             'co_code' => $co->co_code,
             'description' => $co->description,
         ])->values()->all();
-
-        $mappings = [];
-        foreach ($this->syllabus->courseOutcomes as $co) {
-            $mappings[$co->id] = [];
-            foreach ($co->programOutcomes as $po) {
-                $mappings[$co->id][$po->id] = true;
-            }
-        }
-        $this->coPoMappings = $mappings;
 
         $this->syllabusWeeks = $this->syllabus->weeks->sortBy('week_no')->values();
         $examWeeks = [];

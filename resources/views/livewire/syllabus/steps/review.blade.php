@@ -77,23 +77,6 @@
         </div>
 
         <div class="border border-slate-200 rounded-xl p-4 bg-slate-50">
-            <h4 class="font-semibold text-slate-700 mb-3">CO-PO Mapping</h4>
-            @if(count($coPoMappings) > 0)
-                <div class="text-sm text-slate-700">
-                    @php
-                        $totalMappings = 0;
-                        foreach ($coPoMappings as $poMappings) {
-                            $totalMappings += count(array_filter($poMappings ?? []));
-                        }
-                    @endphp
-                    <p>Total mappings: <span class="font-semibold">{{ $totalMappings }}</span></p>
-                </div>
-            @else
-                <p class="text-sm text-slate-500">No CO-PO mappings defined yet.</p>
-            @endif
-        </div>
-
-        <div class="border border-slate-200 rounded-xl p-4 bg-slate-50">
             <h4 class="font-semibold text-slate-700 mb-3">Weekly Coverage</h4>
             @if(isset($syllabusWeeks) && $syllabusWeeks->count() > 0)
                 <div class="text-sm text-slate-700">

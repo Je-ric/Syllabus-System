@@ -3,6 +3,7 @@
 namespace App\Livewire\Syllabus\Steps;
 
 use App\Models\CourseOutcome;
+use App\Models\Syllabus;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -11,6 +12,7 @@ class CourseOutcomesStep extends Component
     public int $syllabusId;
     public bool $isLoaded = false;
     public array $courseOutcomes = [];
+    public array $programOutcomes = [];
     public ?string $coAddError = null;
 
     public function mount(int $syllabusId): void
@@ -110,6 +112,16 @@ class CourseOutcomesStep extends Component
                 'co_code' => $co->co_code,
                 'description' => $co->description,
             ])->values()->all();
+
+        $syllabus = Syllabus::query()
+            ->with('course.program.outcomes')
+            ->findOrFail($this->syllabusId);
+
+        $this->programOutcomes = $syllabus->course?->program?->outcomes
+            ?->map(fn($po) => [
+                'po_code' => $po->po_code,
+                'po_text' => $po->po_text,
+            ])->values()->all() ?? [];
 
         $this->resequenceCourseOutcomes();
         $this->isLoaded = true;

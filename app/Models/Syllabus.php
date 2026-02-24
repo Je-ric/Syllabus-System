@@ -108,7 +108,7 @@ class Syllabus extends Model
         return $query->with([
             'course.program',
             'components',
-            'courseOutcomes.programOutcomes',
+            'courseOutcomes',
             'academicCalendar',
             'preparer',
             'chair',
@@ -146,7 +146,6 @@ class Syllabus extends Model
             'academic_calendar' => 'Academic Calendar',
             'course_components' => 'Course Components',
             'course_outcomes' => 'Course Outcomes',
-            'co_po_mapping' => 'CO-PO Mapping',
             'weekly_coverage' => 'Weekly Coverage',
             'review' => 'Review',
         ];
