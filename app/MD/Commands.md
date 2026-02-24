@@ -28,6 +28,8 @@ php artisan make:migration create_user_assignments_table
 php artisan make:migration create_syllabus_weeks_table
 php artisan make:migration create_co_assessment_plans_table
 php artisan make:migration create_week_contents_table
+php artisan make:migration create_syllabus_references_table
+php artisan make:migration create_syllabus_materials_table
 
 
 ----------------------------------
@@ -55,6 +57,8 @@ php artisan make:model UserAssigment
 php artisan make:model SyllabusWeek
 php artisan make:model COAssessmentPlan
 php artisan make:model WeekContent
+php artisan make:model Reference
+php artisan make:model OnlineMaterial
 
 
 ----------------------------------

@@ -68,8 +68,11 @@
                         <span class="font-semibold text-green-700 text-sm shrink-0">
                             {{ $po['po_code'] }}.
                         </span>
-                        <p class="text-slate-700 text-sm">
+                        <p class="text-slate-700 text-sm flex items-center gap-2">
                             {{ $po['po_text'] }}
+                            @if (!empty($po['ied']))
+                                <x-feedback-status.ied-badge :level="$po['ied']" />
+                            @endif
                         </p>
                     </div>
                 @endforeach

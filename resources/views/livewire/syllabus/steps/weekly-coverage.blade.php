@@ -187,6 +187,36 @@
                                 @endif
                             </div>
                         </div>
+
+                        <x-form.label class="label">Course Outcomes</x-form.label>
+                        <select name="course_outcome_{{ $week->week_no }}" id="course_outcome_{{ $week->week_no }}">
+                            <option value="">Select Course Outcome</option>
+                            @foreach ($courseOutcomes as $outcome)
+                                <option value="{{ $outcome['id'] }}">{{ $outcome['co_code'] }}</option>
+                            @endforeach
+                        </select>
+
+                        <label for="">Unit Learning Outcomes</label>
+                        <input type="text" name="" id="">
+
+                        <label for="">Assessment Task</label>
+                        <input type="text">
+
+                        <label for="">Topics</label>
+                        <input type="text">
+
+
+                        <label for="">Teaching and Learning Activities</label>
+                        <input type="text">
+
+                        <hr>
+
+                        <label for="">References</label>
+                        <input type="text">
+
+                        <label for="">Online Materials</label>
+                        <input type="text">
+
                     </div>
                 @endforeach
             </div>
