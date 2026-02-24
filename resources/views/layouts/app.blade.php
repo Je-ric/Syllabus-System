@@ -6,20 +6,24 @@
 </head>
 
 <body class="min-h-screen">
+    @php
+        $isWizardRoute = request()->routeIs('syllabus.wizard');
+    @endphp
 
     @if (session('toast'))
         <x-feedback-status.toast :message="session('toast')['message']" :type="session('toast')['type']" />
     @endif
 
     <div class="min-h-screen">
-        <div id="sidebar-overlay" class="fixed inset-0 bg-green-900/50 backdrop-blur-sm z-30 hidden lg:hidden"></div>
+        <div id="sidebar-overlay" class="fixed inset-0 bg-green-900/50 backdrop-blur-sm z-30 hidden lg:hidden {{ $isWizardRoute ? 'hidden' : '' }}"></div>
 
         <aside id="app-sidebar"
                 class="fixed inset-y-0 left-0 z-40 w-72
                     bg-white shadow-2xl border-r border-slate-200
                     transform -translate-x-full lg:translate-x-0
                     transition-transform duration-300 ease-out
-                    h-full overflow-y-auto no-scrollbar">
+                    h-full overflow-y-auto no-scrollbar
+                    {{ $isWizardRoute ? 'hidden lg:hidden' : '' }}">
             <div class="sticky top-0 z-20 px-6 py-6 border-b border-slate-200 bg-white text-white">
                 <div class="flex items-center justify-between">
                     <div>
@@ -132,11 +136,11 @@
             </div>
         </aside>
 
-        <div class="flex flex-col min-h-screen lg:ml-72">
+        <div class="flex flex-col min-h-screen {{ $isWizardRoute ? '' : 'lg:ml-72' }}">
             <header class="sticky top-0 z-20 green-grad backdrop-blur border-b border-slate-200">
                 <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <button id="sidebar-open" class="lg:hidden inline-flex items-center justify-center h-10 w-10 rounded-full border border-slate-200 text-slate-700 hover:bg-slate-100 transition">
+                        <button id="sidebar-open" class="lg:hidden {{ $isWizardRoute ? 'hidden' : 'inline-flex' }} items-center justify-center h-10 w-10 rounded-full border border-slate-200 text-slate-700 hover:bg-slate-100 transition">
                             <i class="bx bx-menu text-2xl"></i>
                         </button>
                         <div>
@@ -177,11 +181,13 @@
         const closeBtn = document.getElementById('sidebar-close');
 
         const openSidebar = () => {
+            if (!sidebar || !overlay) return;
             sidebar.classList.remove('-translate-x-full');
             overlay.classList.remove('hidden');
         };
 
         const closeSidebar = () => {
+            if (!sidebar || !overlay) return;
             sidebar.classList.add('-translate-x-full');
             overlay.classList.add('hidden');
         };
@@ -199,6 +205,10 @@
         }
 
         window.addEventListener('resize', () => {
+            if (!sidebar || !overlay) {
+                return;
+            }
+
             if (window.innerWidth >= 1024) {
                 overlay.classList.add('hidden');
                 sidebar.classList.remove('-translate-x-full');
