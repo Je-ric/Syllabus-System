@@ -7,21 +7,6 @@
         <div class="mt-2 text-xs rounded-md border border-amber-200 bg-amber-50 text-amber-800 px-3 py-2">
             Course Outcomes are manual-save only. Click <strong>Save Draft</strong> to apply changes.
         </div>
-        <div class="mt-2 flex items-center gap-2 text-xs text-slate-600">
-            <span @class([
-                    'inline-flex items-center rounded bg-orange-100 text-orange-700 px-2 py-1',
-                    'hidden' => !($stepDirty['course_outcomes'] ?? false),
-                ])>
-                Unsaved CO changes
-            </span>
-            <span @class([
-                    'inline-flex items-center rounded bg-emerald-100 text-emerald-700 px-2 py-1',
-                    'hidden' => ($stepDirty['course_outcomes'] ?? false),
-                ])
-                >
-                COs saved
-            </span>
-        </div>
     </div>
 
     <div class="space-y-3">

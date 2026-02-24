@@ -4,7 +4,11 @@
         <p class="text-sm text-slate-600">Select which Program Outcomes each Course Outcome supports.</p>
     </div>
 
-    @if (count($courseOutcomes) === 0)
+    @if (!$course)
+        <div class="text-sm text-slate-500 bg-slate-50 border border-slate-200 rounded-lg p-4">
+            Open this step to load CO-PO mapping data.
+        </div>
+    @elseif (count($courseOutcomes) === 0)
         <x-empty-state
             icon="bx-list-check"
             title="No course outcomes yet"

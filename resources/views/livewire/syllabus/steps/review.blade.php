@@ -4,9 +4,7 @@
         <p class="text-sm text-slate-600">Review all details before submitting for approval.</p>
     </div>
 
-    {{-- Summary Sections --}}
     <div class="space-y-6">
-        {{-- Academic Calendar --}}
         <div class="border border-slate-200 rounded-xl p-4 bg-slate-50">
             <h4 class="font-semibold text-slate-700 mb-2">Academic Calendar</h4>
             @php
@@ -24,42 +22,44 @@
             </p>
         </div>
 
-        {{-- Course Components --}}
         <div class="border border-slate-200 rounded-xl p-4 bg-slate-50">
             <h4 class="font-semibold text-slate-700 mb-3">Course Components</h4>
+            @php
+                $lec = $syllabus?->components?->firstWhere('type', 'LEC');
+                $lab = $syllabus?->components?->firstWhere('type', 'LAB');
+            @endphp
 
             <div class="mb-4">
                 <h5 class="text-sm font-semibold text-blue-700 mb-2">Lecture</h5>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                    <div><span class="text-slate-600">Instructor:</span> {{ $lec_instructor_name ?: '—' }}</div>
-                    <div><span class="text-slate-600">Email:</span> {{ $lec_instructor_email ?: '—' }}</div>
-                    <div><span class="text-slate-600">Phone:</span> {{ $lec_phone ?: '—' }}</div>
-                    <div><span class="text-slate-600">Office:</span> {{ $lec_office ?: '—' }}</div>
-                    <div><span class="text-slate-600">Class Hours:</span> {{ $lec_class_hours ?: '—' }}</div>
-                    <div><span class="text-slate-600">Schedule:</span> {{ $lec_schedule ?: '—' }}</div>
-                    <div><span class="text-slate-600">Consultation:</span> {{ $lec_consultation_hours ?: '—' }}</div>
-                    <div><span class="text-slate-600">Performance:</span> {{ $lec_performance_standard ?: '—' }}</div>
+                    <div><span class="text-slate-600">Instructor:</span> {{ $lec?->instructor_name ?: '-' }}</div>
+                    <div><span class="text-slate-600">Email:</span> {{ $lec?->instructor_email ?: '-' }}</div>
+                    <div><span class="text-slate-600">Phone:</span> {{ $lec?->phone ?: '-' }}</div>
+                    <div><span class="text-slate-600">Office:</span> {{ $lec?->office ?: '-' }}</div>
+                    <div><span class="text-slate-600">Class Hours:</span> {{ $lec?->class_hours ?: '-' }}</div>
+                    <div><span class="text-slate-600">Schedule:</span> {{ $lec?->schedule ?: '-' }}</div>
+                    <div><span class="text-slate-600">Consultation:</span> {{ $lec?->consultation_hours ?: '-' }}</div>
+                    <div><span class="text-slate-600">Performance:</span> {{ $lec?->performance_standard ?: '-' }}</div>
                 </div>
             </div>
 
-            @if($course->has_lec_lab)
+            @if($course && $course->has_lec_lab)
                 <div>
                     <h5 class="text-sm font-semibold text-purple-700 mb-2">Laboratory</h5>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                        <div><span class="text-slate-600">Instructor:</span> {{ $lab_instructor_name ?: '—' }}</div>
-                        <div><span class="text-slate-600">Email:</span> {{ $lab_instructor_email ?: '—' }}</div>
-                        <div><span class="text-slate-600">Phone:</span> {{ $lab_phone ?: '—' }}</div>
-                        <div><span class="text-slate-600">Office:</span> {{ $lab_office ?: '—' }}</div>
-                        <div><span class="text-slate-600">Class Hours:</span> {{ $lab_class_hours ?: '—' }}</div>
-                        <div><span class="text-slate-600">Schedule:</span> {{ $lab_schedule ?: '—' }}</div>
-                        <div><span class="text-slate-600">Consultation:</span> {{ $lab_consultation_hours ?: '—' }}</div>
-                        <div><span class="text-slate-600">Performance:</span> {{ $lab_performance_standard ?: '—' }}</div>
+                        <div><span class="text-slate-600">Instructor:</span> {{ $lab?->instructor_name ?: '-' }}</div>
+                        <div><span class="text-slate-600">Email:</span> {{ $lab?->instructor_email ?: '-' }}</div>
+                        <div><span class="text-slate-600">Phone:</span> {{ $lab?->phone ?: '-' }}</div>
+                        <div><span class="text-slate-600">Office:</span> {{ $lab?->office ?: '-' }}</div>
+                        <div><span class="text-slate-600">Class Hours:</span> {{ $lab?->class_hours ?: '-' }}</div>
+                        <div><span class="text-slate-600">Schedule:</span> {{ $lab?->schedule ?: '-' }}</div>
+                        <div><span class="text-slate-600">Consultation:</span> {{ $lab?->consultation_hours ?: '-' }}</div>
+                        <div><span class="text-slate-600">Performance:</span> {{ $lab?->performance_standard ?: '-' }}</div>
                     </div>
                 </div>
             @endif
         </div>
 
-        {{-- Course Outcomes --}}
         <div class="border border-slate-200 rounded-xl p-4 bg-slate-50">
             <h4 class="font-semibold text-slate-700 mb-3">Course Outcomes ({{ count($courseOutcomes) }})</h4>
             @if(count($courseOutcomes) > 0)
@@ -76,15 +76,14 @@
             @endif
         </div>
 
-        {{-- CO-PO Mapping Summary --}}
         <div class="border border-slate-200 rounded-xl p-4 bg-slate-50">
             <h4 class="font-semibold text-slate-700 mb-3">CO-PO Mapping</h4>
             @if(count($coPoMappings) > 0)
                 <div class="text-sm text-slate-700">
                     @php
                         $totalMappings = 0;
-                        foreach ($coPoMappings as $coId => $poMappings) {
-                            $totalMappings += count(array_filter($poMappings));
+                        foreach ($coPoMappings as $poMappings) {
+                            $totalMappings += count(array_filter($poMappings ?? []));
                         }
                     @endphp
                     <p>Total mappings: <span class="font-semibold">{{ $totalMappings }}</span></p>
@@ -94,7 +93,6 @@
             @endif
         </div>
 
-        {{-- Weekly Coverage Summary --}}
         <div class="border border-slate-200 rounded-xl p-4 bg-slate-50">
             <h4 class="font-semibold text-slate-700 mb-3">Weekly Coverage</h4>
             @if(isset($syllabusWeeks) && $syllabusWeeks->count() > 0)

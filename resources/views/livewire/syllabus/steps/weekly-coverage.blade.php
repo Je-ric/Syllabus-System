@@ -8,10 +8,10 @@
             <div class="mt-2 flex items-center gap-2">
                 <button type="button"
                     wire:click="generateWeeklyCoverage"
-                    @if (!$academic_calendar_id) disabled @endif
+                    @if (!$academic_calendar_id || $weeksGenerated) disabled @endif
                     class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded border border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 disabled:cursor-not-allowed">
                     <span wire:loading.remove wire:target="generateWeeklyCoverage">
-                        <i class="bx bx-refresh"></i> Generate Weeks
+                        <i class="bx bx-refresh"></i> {{ $weeksGenerated ? 'Weeks Generated' : 'Generate Weeks' }}
                     </span>
                     <span wire:loading wire:target="generateWeeklyCoverage">
                         <i class="bx bx-loader-alt bx-spin"></i> Generating...
@@ -58,7 +58,7 @@
                 ->toArray();
         @endphp
 
-        <div x-data="{ activeWeek: @entangle('activeWeekTab') }" class="border border-slate-200 rounded-xl bg-white">
+        <div x-data="{ activeWeek: '{{ $activeWeekTab ?? ($weekTabs[0]['id'] ?? '') }}' }" class="border border-slate-200 rounded-xl bg-white">
             <div class="border-b border-slate-200">
                 <nav class="flex flex-wrap px-2 sm:px-4 gap-x-2 md:gap-x-4" aria-label="Weeks">
                     @foreach ($weekTabs as $tab)
@@ -88,13 +88,26 @@
                                 <div class="text-xs font-semibold text-slate-800">
                                     Class Schedule:
                                 </div>
-                                {{-- <div class="font-semibold text-slate-800">
-                                    Week {{ $week->week_no }}
-                                </div> --}}
-                                {{-- <div class="text-xs text-slate-500">
-                                    {{ $start->format('M d, Y') }} - {{ $end->format('M d, Y') }}
-                                </div> --}}
                             </div>
+
+                            @if ($courseComponents)
+                                <div class="bg-slate-50 border border-slate-200 rounded p-3 space-y-2 mb-4">
+                                    @if (isset($courseComponents['LEC']))
+                                        <div>
+                                            <div class="font-semibold text-emerald-700 text-xs">Lecture (LEC)</div>
+                                            <p class="text-xs">Class Schedule</p><div class="text-slate-700 text-xs">{{ $courseComponents['LEC']['schedule'] ?? 'N/A' }}</div>
+                                            <p class="text-xs">Class Hours</p><div class="text-slate-500 text-xs">{{ $courseComponents['LEC']['class_hours'] ?? '' }}</div>
+                                        </div>
+                                    @endif
+                                    @if (isset($courseComponents['LAB']))
+                                        <div class="border-t border-slate-300 pt-2">
+                                            <div class="font-semibold text-blue-700 text-xs">Laboratory (LAB)</div>
+                                            <p class="text-xs">Class Schedule</p><div class="text-slate-700 text-xs">{{ $courseComponents['LAB']['schedule'] ?? 'N/A' }}</div>
+                                            <p class="text-xs">Class Hours</p><div class="text-slate-500 text-xs">{{ $courseComponents['LAB']['class_hours'] ?? '' }}</div>
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
 
                             <div>
                                 <div class="text-xs font-semibold text-slate-600 mb-2">Weekdays</div>
