@@ -114,13 +114,17 @@ class CourseOutcomesStep extends Component
             ])->values()->all();
 
         $syllabus = Syllabus::query()
-            ->with('course.program.outcomes')
+            ->with(['course.program.outcomes', 'course.programOutcomes'])
             ->findOrFail($this->syllabusId);
+
+        $coursePoIedById = $syllabus->course?->programOutcomes
+            ?->mapWithKeys(fn($po) => [(int) $po->id => (string) ($po->pivot?->ied ?? '')]) ?? collect();
 
         $this->programOutcomes = $syllabus->course?->program?->outcomes
             ?->map(fn($po) => [
                 'po_code' => $po->po_code,
                 'po_text' => $po->po_text,
+                'ied' => $coursePoIedById->get((int) $po->id, ''),
             ])->values()->all() ?? [];
 
         $this->resequenceCourseOutcomes();

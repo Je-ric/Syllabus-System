@@ -80,6 +80,16 @@ class Syllabus extends Model
         return $this->hasMany(SyllabusWeek::class);
     }
 
+    public function references()
+    {
+        return $this->hasMany(Reference::class);
+    }
+
+    public function onlineMaterials()
+    {
+        return $this->hasMany(OnlineMaterial::class);
+    }
+
     // Helper: Get LEC component
     // Used in: loadExistingData() - SyllabusWizard
     public function getLecComponent()

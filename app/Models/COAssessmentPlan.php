@@ -14,7 +14,8 @@ class COAssessmentPlan extends Model
         'assessment_name',
         'assessment_desc',
         'tla',
-        'raw_score',
+        'learning_outcomes',
+        'topic',
     ];
 
     // Used in:

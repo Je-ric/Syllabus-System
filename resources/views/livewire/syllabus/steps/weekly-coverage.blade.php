@@ -6,8 +6,7 @@
                 Weeks are generated from the academic calendar. Events and dates are shown per week.
             </p>
             <div class="mt-2 flex items-center gap-2">
-                <button type="button"
-                    wire:click="generateWeeklyCoverage"
+                <button type="button" wire:click="generateWeeklyCoverage"
                     @if (!$academic_calendar_id || $weeksGenerated) disabled @endif
                     class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded border border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 disabled:cursor-not-allowed">
                     <span wire:loading.remove wire:target="generateWeeklyCoverage">
@@ -84,68 +83,63 @@
                     @endphp
                     <div x-show="activeWeek === '{{ $panelId }}'" x-cloak class="space-y-4">
                         <div class="bg-white border border-slate-200 rounded-lg p-4 space-y-4">
-                            <div class="flex flex-wrap items-center justify-between gap-2">
-                                <div class="text-xs font-semibold text-slate-800">
-                                    Class Schedule:
+                            <div class="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                                <div class="flex flex-wrap items-center justify-between gap-2">
+                                    <div class="text-xs font-semibold text-slate-800"> Class Schedule: </div>
                                 </div>
-                            </div>
-
-                            @if ($courseComponents)
-                                <div class="bg-slate-50 border border-slate-200 rounded p-3 space-y-2 mb-4">
-                                    @if (isset($courseComponents['LEC']))
-                                        <div>
-                                            <div class="font-semibold text-emerald-700 text-xs">Lecture (LEC)</div>
-                                            <p class="text-xs">Class Schedule</p><div class="text-slate-700 text-xs">{{ $courseComponents['LEC']['schedule'] ?? 'N/A' }}</div>
-                                            <p class="text-xs">Class Hours</p><div class="text-slate-500 text-xs">{{ $courseComponents['LEC']['class_hours'] ?? '' }}</div>
+                                @if ($courseComponents)
+                                    <div class="bg-slate-50 border border-slate-200 rounded p-3 space-y-2 mb-4">
+                                        @if (isset($courseComponents['LEC']))
+                                            <div>
+                                                <div class="font-semibold text-emerald-700 text-xs">Lecture (LEC)</div>
+                                                <p class="text-xs">Class Schedule</p>
+                                                <div class="text-slate-700 text-xs">
+                                                    {{ $courseComponents['LEC']['schedule'] ?? 'N/A' }}</div>
+                                                <p class="text-xs">Class Hours</p>
+                                                <div class="text-slate-500 text-xs">
+                                                    {{ $courseComponents['LEC']['class_hours'] ?? '' }}</div>
+                                            </div>
+                                            @endif @if (isset($courseComponents['LAB']))
+                                                <div class="border-t border-slate-300 pt-2">
+                                                    <div class="font-semibold text-blue-700 text-xs">Laboratory (LAB)
+                                                    </div>
+                                                    <p class="text-xs">Class Schedule</p>
+                                                    <div class="text-slate-700 text-xs">
+                                                        {{ $courseComponents['LAB']['schedule'] ?? 'N/A' }}</div>
+                                                    <p class="text-xs">Class Hours</p>
+                                                    <div class="text-slate-500 text-xs">
+                                                        {{ $courseComponents['LAB']['class_hours'] ?? '' }}</div>
+                                                </div>
+                                            @endif
+                                    </div>
+                                    @endif <div>
+                                        <div class="text-xs font-semibold text-slate-600 mb-2">Weekdays</div>
+                                        <div class="text-xs text-slate-700 mb-2"> {{ $start->format('M d') }} -
+                                            {{ $end->format('M d, Y') }} </div>
+                                        <div class="flex flex-wrap gap-2 text-xs text-slate-700">
+                                            @while ($day->lte($end))
+                                                <span class="px-2 py-1 rounded bg-slate-100 border border-slate-200">
+                                                    {{ $day->format('D, M d') }} </span> @php $day->addDay(); @endphp
+                                                @endwhile
                                         </div>
-                                    @endif
-                                    @if (isset($courseComponents['LAB']))
-                                        <div class="border-t border-slate-300 pt-2">
-                                            <div class="font-semibold text-blue-700 text-xs">Laboratory (LAB)</div>
-                                            <p class="text-xs">Class Schedule</p><div class="text-slate-700 text-xs">{{ $courseComponents['LAB']['schedule'] ?? 'N/A' }}</div>
-                                            <p class="text-xs">Class Hours</p><div class="text-slate-500 text-xs">{{ $courseComponents['LAB']['class_hours'] ?? '' }}</div>
-                                        </div>
-                                    @endif
-                                </div>
-                            @endif
-
-                            <div>
-                                <div class="text-xs font-semibold text-slate-600 mb-2">Weekdays</div>
-                                <div class="text-xs text-slate-700 mb-2">
-                                    {{ $start->format('M d') }} - {{ $end->format('M d, Y') }}
-                                </div>
-                                <div class="flex flex-wrap gap-2 text-xs text-slate-700">
-                                    @while ($day->lte($end))
-                                        <span class="px-2 py-1 rounded bg-slate-100 border border-slate-200">
-                                            {{ $day->format('D, M d') }}
-                                        </span>
-                                        @php $day->addDay(); @endphp
-                                    @endwhile
-                                </div>
-                            </div>
-
-                            <div>
-                                <div class="text-xs font-semibold text-slate-600 mb-2">Events</div>
-                                @php
-                                    $events = $weekEvents[$week->week_no] ?? collect();
-                                @endphp
-                                @if ($events->isEmpty())
-                                    <div class="text-sm text-slate-500">No events for this week.</div>
-                                @else
-                                    <ul class="space-y-2 text-sm text-slate-700">
-                                        @foreach ($events as $event)
-                                            <li class="flex items-start gap-2">
-                                                <span class="text-slate-400">*</span>
-                                                <span>
-                                                    <span class="font-medium">{{ $event->name }}</span>
-                                                    <span class="text-slate-500">
-                                                        ({{ \Carbon\Carbon::parse($event->date)->format('M d, Y') }})
-                                                    </span>
-                                                </span>
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                @endif
+                                    </div>
+                                    <div>
+                                        <div class="text-xs font-semibold text-slate-600 mb-2">Events</div>
+                                        @php $events = $weekEvents[$week->week_no] ?? collect(); @endphp @if ($events->isEmpty())
+                                            <div class="text-sm text-slate-500">No events for this week.</div>
+                                        @else
+                                            <ul class="space-y-2 text-sm text-slate-700">
+                                                @foreach ($events as $event)
+                                                    <li class="flex items-start gap-2"> <span
+                                                            class="text-slate-400">*</span> <span> <span
+                                                                class="font-medium">{{ $event->name }}</span> <span
+                                                                class="text-slate-500">
+                                                                ({{ \Carbon\Carbon::parse($event->date)->format('M d, Y') }})
+                                                            </span> </span> </li>
+                                                @endforeach
+                                            </ul>
+                                        @endif
+                                    </div>
                             </div>
 
                             <div>
@@ -188,34 +182,64 @@
                             </div>
                         </div>
 
-                        <x-form.label class="label">Course Outcomes</x-form.label>
-                        <select name="course_outcome_{{ $week->week_no }}" id="course_outcome_{{ $week->week_no }}">
-                            <option value="">Select Course Outcome</option>
-                            @foreach ($courseOutcomes as $outcome)
-                                <option value="{{ $outcome['id'] }}">{{ $outcome['co_code'] }}</option>
-                            @endforeach
-                        </select>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="md:col-span-2">
+                                <x-form.label>Course Outcomes</x-form.label>
+                                <x-form.select wire:model.defer="weekInputs.{{ $week->week_no }}.course_outcome_id">
+                                    <option value="">Select Course Outcome</option>
+                                    @foreach ($courseOutcomes as $outcome)
+                                        <option value="{{ $outcome['id'] }}">{{ $outcome['co_code'] }} -
+                                            {{ \Illuminate\Support\Str::limit($outcome['description'], 50) }}
+                                        </option>
+                                    @endforeach
+                                </x-form.select>
+                            </div>
 
-                        <label for="">Unit Learning Outcomes</label>
-                        <input type="text" name="" id="">
+                            <div>
+                                <x-form.label>Unit Learning Outcomes</x-form.label>
+                                <x-form.textarea rows="3"
+                                    wire:model.defer="weekInputs.{{ $week->week_no }}.learning_outcomes" />
+                            </div>
 
-                        <label for="">Assessment Task</label>
-                        <input type="text">
+                            <div>
+                                <x-form.label>Assessment Task</x-form.label>
+                                <x-form.textarea rows="3"
+                                    wire:model.defer="weekInputs.{{ $week->week_no }}.assessment_task" />
+                            </div>
 
-                        <label for="">Topics</label>
-                        <input type="text">
+                            <div>
+                                <x-form.label>Topics</x-form.label>
+                                <x-form.textarea rows="3"
+                                    wire:model.defer="weekInputs.{{ $week->week_no }}.topic" />
+                            </div>
 
-
-                        <label for="">Teaching and Learning Activities</label>
-                        <input type="text">
+                            <div>
+                                <x-form.label>Teaching and Learning Activities</x-form.label>
+                                <x-form.textarea rows="3"
+                                    wire:model.defer="weekInputs.{{ $week->week_no }}.teaching_activities" />
+                            </div>
+                        </div>
 
                         <hr>
 
-                        <label for="">References</label>
-                        <input type="text">
+                        <div class="flex flex-wrap gap-4">
+                            <div class="w-full md:w-[48%]">
+                                <x-form.label>References</x-form.label>
+                                <x-form.input type="text"
+                                    wire:model.defer="weekInputs.{{ $week->week_no }}.reference_text" />
+                            </div>
 
-                        <label for="">Online Materials</label>
-                        <input type="text">
+                            <div class="w-full md:w-[48%]">
+                                <x-form.label>Online Material Name</x-form.label>
+                                <x-form.input type="text"
+                                    wire:model.defer="weekInputs.{{ $week->week_no }}.material_name" />
+                                <x-form.label class="mt-2">Online Material URL</x-form.label>
+                                <x-form.input type="text"
+                                    wire:model.defer="weekInputs.{{ $week->week_no }}.material_url" />
+                            </div>
+                        </div>
+
+                        <x-button variant="primary">+ Add </x-button>
 
                     </div>
                 @endforeach
