@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Syllabus\Steps;
 
-use App\Models\COAssessmentPlan;
 use App\Models\AcademicCalendarEvent;
 use App\Models\OnlineMaterial;
 use App\Models\Reference;
@@ -206,7 +205,7 @@ class WeeklyCoverageStep extends Component
             ])->all();
 
         $this->refreshWeeklyCoverage(false);
-        $this->hydrateWeekInputs();
+        $this->populateWeekInputs();
         $this->isLoaded = true;
     }
 
@@ -335,7 +334,7 @@ class WeeklyCoverageStep extends Component
         $this->weekEvents = $weekEvents;
     }
 
-    private function hydrateWeekInputs(): void
+    private function populateWeekInputs(): void
     {
         if ($this->syllabusWeeks->isEmpty()) {
             $this->weekInputs = [];
@@ -347,32 +346,36 @@ class WeeklyCoverageStep extends Component
         $weekContents = WeekContent::query()
             ->whereIn('syllabus_week_id', $weekIds)
             ->where('component_type', 'LEC')
-            ->with('assessmentPlan')
             ->get()
             ->keyBy('syllabus_week_id');
 
-        $referenceText = Reference::query()
+        $references = Reference::query()
             ->where('syllabus_id', $this->syllabusId)
-            ->value('reference_text') ?? '';
+            ->whereIn('syllabus_week_id', $weekIds)
+            ->get()
+            ->keyBy('syllabus_week_id');
 
-        $material = OnlineMaterial::query()
+        $materials = OnlineMaterial::query()
             ->where('syllabus_id', $this->syllabusId)
-            ->first();
+            ->whereIn('syllabus_week_id', $weekIds)
+            ->get()
+            ->keyBy('syllabus_week_id');
 
         $inputs = [];
         foreach ($this->syllabusWeeks as $week) {
-            $content = $weekContents->get($week->id);
-            $plan = $content?->assessmentPlan;
+            $content  = $weekContents->get($week->id);
+            $reference = $references->get($week->id);
+            $material  = $materials->get($week->id);
 
             $inputs[$week->week_no] = [
-                'course_outcome_id' => $plan?->course_outcome_id,
-                'learning_outcomes' => (string) ($content?->learning_outcomes ?? $plan?->learning_outcomes ?? ''),
-                'assessment_task' => (string) ($plan?->assessment_name ?? ''),
-                'topic' => (string) ($content?->topics ?? $plan?->topic ?? ''),
-                'tla' => (string) ($plan?->tla ?? ''),
-                'reference_text' => (string) $referenceText,
-                'material_name' => (string) ($material?->material_name ?? ''),
-                'material_url' => (string) ($material?->url ?? ''),
+                'course_outcome_id'  => $content?->course_outcome_id,
+                'learning_outcomes'  => (string) ($content?->learning_outcomes ?? ''),
+                'assessment_task'    => (string) ($content?->assessment_task ?? ''),
+                'topic'              => (string) ($content?->topics ?? ''),
+                'teaching_activities'=> (string) ($content?->tla ?? ''),
+                'reference_text'     => (string) ($reference?->reference_text ?? ''),
+                'material_name'      => (string) ($material?->material_name ?? ''),
+                'material_url'       => (string) ($material?->url ?? ''),
             ];
         }
 
@@ -385,94 +388,61 @@ class WeeklyCoverageStep extends Component
             return;
         }
 
-        $referenceValues = [];
-        $materials = [];
-
         foreach ($this->syllabusWeeks as $week) {
-            $weekNo = (int) $week->week_no;
+            $weekNo  = (int) $week->week_no;
             $payload = $this->weekInputs[$weekNo] ?? [];
 
-            $courseOutcomeId = !empty($payload['course_outcome_id']) ? (int) $payload['course_outcome_id'] : null;
+            $courseOutcomeId  = !empty($payload['course_outcome_id']) ? (int) $payload['course_outcome_id'] : null;
             $learningOutcomes = trim((string) ($payload['learning_outcomes'] ?? ''));
-            $assessmentTask = trim((string) ($payload['assessment_task'] ?? ''));
-            $topic = trim((string) ($payload['topic'] ?? ''));
-            $tla = trim((string) ($payload['tla'] ?? ''));
+            $assessmentTask   = trim((string) ($payload['assessment_task'] ?? ''));
+            $topic            = trim((string) ($payload['topic'] ?? ''));
+            $tla              = trim((string) ($payload['teaching_activities'] ?? $payload['tla'] ?? ''));
 
-            if ($courseOutcomeId && ($learningOutcomes !== '' || $assessmentTask !== '' || $topic !== '' || $tla !== '')) {
-                $weekContent = WeekContent::query()
-                    ->where('syllabus_week_id', $week->id)
-                    ->where('component_type', 'LEC')
-                    ->first();
-
-                $plan = $weekContent?->assessmentPlan;
-                if (!$plan) {
-                    $plan = COAssessmentPlan::create([
-                        'course_outcome_id' => $courseOutcomeId,
-                        'assessment_name' => $assessmentTask !== '' ? $assessmentTask : 'Assessment',
-                        'assessment_desc' => null,
-                        'tla' => $tla !== '' ? $tla : 'N/A',
-                        'learning_outcomes' => $learningOutcomes !== '' ? $learningOutcomes : 'N/A',
-                        'topic' => $topic !== '' ? $topic : 'N/A',
-                    ]);
-                } else {
-                    $plan->update([
-                        'course_outcome_id' => $courseOutcomeId,
-                        'assessment_name' => $assessmentTask !== '' ? $assessmentTask : $plan->assessment_name,
-                        'tla' => $tla !== '' ? $tla : $plan->tla,
-                        'learning_outcomes' => $learningOutcomes !== '' ? $learningOutcomes : $plan->learning_outcomes,
-                        'topic' => $topic !== '' ? $topic : $plan->topic,
-                    ]);
-                }
-
+            if ($learningOutcomes !== '' || $assessmentTask !== '' || $topic !== '' || $tla !== '') {
                 WeekContent::query()->updateOrCreate(
                     [
                         'syllabus_week_id' => $week->id,
-                        'component_type' => 'LEC',
+                        'component_type'   => 'LEC',
                     ],
                     [
-                        'co_assessment_plan_id' => $plan->id,
+                        'course_outcome_id' => $courseOutcomeId,
                         'learning_outcomes' => $learningOutcomes !== '' ? $learningOutcomes : 'N/A',
-                        'topics' => $topic !== '' ? $topic : 'N/A',
+                        'assessment_task'   => $assessmentTask   !== '' ? $assessmentTask   : 'N/A',
+                        'topics'            => $topic            !== '' ? $topic            : 'N/A',
+                        'tla'               => $tla              !== '' ? $tla              : 'N/A',
                     ]
                 );
             }
 
+            // Per-week reference
             $referenceText = trim((string) ($payload['reference_text'] ?? ''));
+            Reference::query()
+                ->where('syllabus_id', $this->syllabusId)
+                ->where('syllabus_week_id', $week->id)
+                ->delete();
             if ($referenceText !== '') {
-                $referenceValues[] = $referenceText;
+                Reference::create([
+                    'syllabus_id'      => $this->syllabusId,
+                    'syllabus_week_id' => $week->id,
+                    'reference_text'   => $referenceText,
+                ]);
             }
 
+            // Per-week material
             $materialName = trim((string) ($payload['material_name'] ?? ''));
-            $materialUrl = trim((string) ($payload['material_url'] ?? ''));
+            $materialUrl  = trim((string) ($payload['material_url']  ?? ''));
+            OnlineMaterial::query()
+                ->where('syllabus_id', $this->syllabusId)
+                ->where('syllabus_week_id', $week->id)
+                ->delete();
             if ($materialName !== '' || $materialUrl !== '') {
-                $materials[] = [
-                    'material_name' => $materialName !== '' ? $materialName : 'Online Material',
-                    'url' => $materialUrl,
-                ];
+                OnlineMaterial::create([
+                    'syllabus_id'      => $this->syllabusId,
+                    'syllabus_week_id' => $week->id,
+                    'material_name'    => $materialName !== '' ? $materialName : 'Online Material',
+                    'url'              => $materialUrl,
+                ]);
             }
-        }
-
-        $referenceValues = array_values(array_unique($referenceValues));
-        Reference::query()->where('syllabus_id', $this->syllabusId)->delete();
-        foreach ($referenceValues as $refText) {
-            Reference::create([
-                'syllabus_id' => $this->syllabusId,
-                'reference_text' => $refText,
-            ]);
-        }
-
-        $materials = collect($materials)
-            ->unique(fn($item) => strtolower(($item['material_name'] ?? '') . '|' . ($item['url'] ?? '')))
-            ->values()
-            ->all();
-
-        OnlineMaterial::query()->where('syllabus_id', $this->syllabusId)->delete();
-        foreach ($materials as $material) {
-            OnlineMaterial::create([
-                'syllabus_id' => $this->syllabusId,
-                'material_name' => $material['material_name'],
-                'url' => $material['url'],
-            ]);
         }
     }
 }

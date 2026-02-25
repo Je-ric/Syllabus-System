@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\COAssessmentPlan;
 
 class WeekContent extends Model
 {
@@ -13,9 +12,11 @@ class WeekContent extends Model
     protected $fillable = [
         'syllabus_week_id',
         'component_type',
-        'co_assessment_plan_id',
+        'course_outcome_id',
         'learning_outcomes',
+        'assessment_task',
         'topics',
+        'tla',
     ];
 
     // Used in:
@@ -25,8 +26,8 @@ class WeekContent extends Model
     }
 
     // Used in:
-    public function assessmentPlan()
+    public function courseOutcome()
     {
-        return $this->belongsTo(COAssessmentPlan::class, 'co_assessment_plan_id');
+        return $this->belongsTo(CourseOutcome::class, 'course_outcome_id');
     }
 }

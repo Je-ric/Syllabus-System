@@ -10,6 +10,7 @@ class Reference extends Model
 
     protected $fillable = [
         'syllabus_id',
+        'syllabus_week_id',
         'reference_text',
     ];
 
