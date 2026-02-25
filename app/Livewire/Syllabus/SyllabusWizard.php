@@ -18,8 +18,6 @@ class SyllabusWizard extends Component
     public ?Course $course = null;
     // Which step of the wizard the user is currently on
     public string $currentStep = 'academic_calendar';
-    // When the last save happened (for user feedback)
-    public ?string $lastSavedAt = null;
     // Keeps track of which steps have unsaved changes
     public array $stepDirty = [];
 
@@ -33,14 +31,14 @@ class SyllabusWizard extends Component
         $syllabusId = $syllabusId ? (int) $syllabusId : null;
         $courseId = $courseId ? (int) $courseId : null;
 
-        if ($syllabusId) { 
+        if ($syllabusId) {
             // Editing an existing syllabus
             $this->syllabus = Syllabus::with('course.program')->findOrFail($syllabusId);
             // Only the user who prepared the syllabus can edit it
             if ($this->syllabus->prepared_by !== Auth::id()) {
                 abort(403, 'Unauthorized');
             }
-            
+
             $this->course = $this->syllabus->course;
             $steps = array_keys($this->syllabus->getWizardSteps());
             $persistedStep = (string) ($this->syllabus->current_step ?? '');
@@ -91,7 +89,6 @@ class SyllabusWizard extends Component
         }
 
         $this->stepDirty[$step] = false; // Mark step as clean
-        $this->lastSavedAt = now()->format('M d, Y h:i A'); // Update last saved time
         if ($message) {
             $this->dispatch('lw-toast', type: 'success', message: $message);
         }
@@ -166,6 +163,14 @@ class SyllabusWizard extends Component
     }
 
 
+    // Handles a tab click: saves the current step then navigates (respects dirty checks)
+    public function clickTab(string $step): void
+    {
+        $this->saveCurrentStep();
+        $this->navigateToStep($this->currentStep, $step);
+    }
+
+
     // Moves to the next step in the wizard, if possible
     public function goNextStep(): void
     {
@@ -175,6 +180,8 @@ class SyllabusWizard extends Component
             return;
         }
 
+        // Save current step before navigating to next
+        $this->saveCurrentStep();
         $this->navigateToStep($this->currentStep, $steps[$index + 1]);
     }
 
@@ -188,6 +195,8 @@ class SyllabusWizard extends Component
             return;
         }
 
+        // Save current step before navigating to previous
+        $this->saveCurrentStep();
         $this->navigateToStep($this->currentStep, $steps[$index - 1]);
     }
 

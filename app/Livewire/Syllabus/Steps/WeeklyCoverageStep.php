@@ -382,13 +382,16 @@ class WeeklyCoverageStep extends Component
         $this->weekInputs = $inputs;
     }
 
-    private function saveWeeklyEntries(): void
+    private function saveWeeklyEntries(?int $onlyWeekNo = null): void
     {
         if ($this->syllabusWeeks->isEmpty()) {
             return;
         }
 
         foreach ($this->syllabusWeeks as $week) {
+            if ($onlyWeekNo !== null && (int) $week->week_no !== $onlyWeekNo) {
+                continue;
+            }
             $weekNo  = (int) $week->week_no;
             $payload = $this->weekInputs[$weekNo] ?? [];
 
@@ -445,4 +448,26 @@ class WeeklyCoverageStep extends Component
             }
         }
     }
+
+    // Autosave disabled - saving now happens when switching steps via onSaveRequested
+    // public function updatedWeekInputs($value, $key): void
+    // {
+    //     if (!$this->isLoaded) {
+    //         return;
+    //     }
+
+    //     // $key format: "weekInputs.{weekNo}.field"
+    //     $parts = explode('.', (string) $key);
+    //     if (count($parts) < 3) {
+    //         return;
+    //     }
+
+    //     $weekNo = (int) $parts[1];
+    //     if ($weekNo <= 0) {
+    //         return;
+    //     }
+
+    //     $this->saveWeeklyEntries($weekNo);
+    //     $this->dispatch('syllabus-step-saved', step: 'weekly_coverage');
+    // }
 }
