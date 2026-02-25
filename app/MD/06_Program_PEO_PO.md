@@ -18,7 +18,7 @@ This document summarizes conditions for program-level PEO/PO management and code
 
 ## PEO Rules (Livewire)
 
-- Empty `peo_text` entries are ignored during save.
+- If any `peo_text` is blank, save is blocked with warning toast.
 - Existing PEOs are updated via `updateOrCreate`.
 - Removed PEOs are deleted (diff between existing and submitted ids).
 - PEO codes are resequenced after save using:
@@ -27,7 +27,7 @@ This document summarizes conditions for program-level PEO/PO management and code
 
 ## PO Rules (Livewire)
 
-- Empty `po_text` entries are ignored during save.
+- If any `po_text` is blank, save is blocked with warning toast.
 - Existing POs are updated via `updateOrCreate`.
 - Removed POs are deleted (diff between existing and submitted ids).
 - PO codes are resequenced after save using:
@@ -40,6 +40,9 @@ This document summarizes conditions for program-level PEO/PO management and code
 - Mapping is applied per saved PO id.
 - If PEOs are updated, PO mapping is refreshed.
 - Mapping cleanup removes references to deleted PEO ids.
+- `toggleMapping()` checks:
+- PO must already exist for the selected program.
+- PEO id must belong to the same program.
 
 ## UI Conditions in Program Views
 
@@ -48,4 +51,3 @@ This document summarizes conditions for program-level PEO/PO management and code
 - Saved rows use delete routes:
 - `/programs/peo/{id}`
 - `/programs/po/{id}`
-

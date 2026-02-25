@@ -1,89 +1,93 @@
 # Authentication, OTP, and Account Status Rules
 
-This document summarizes the implemented conditions for authentication and OTP verification.
+Beginner-friendly summary of what currently happens in login, registration, verification, and admin approval.
 
-## Source Controllers
+## Source of Truth
 
 - `app/Http/Controllers/AuthController.php`
 - `app/Http/Controllers/OTPController.php`
 - `app/Http/Controllers/AccountApprovalController.php`
+- `app/Services/OtpService.php`
+- `app/Models/UserOtp.php`
 
-## Registration Conditions
+## Registration: Conditions
 
-- Name is required.
-- Phone number is required.
-- Office is required.
-- Email is required, must be valid format, and must be unique.
-- Allowed email domains:
-- `@clsu.edu.ph`
-- `@clsu2.edu.ph`
-- Password is required, minimum 6 chars, and must match confirmation.
+- `name` is required.
+- `phone_number` is required.
+- `office` is required.
+- `email` is required, valid, and unique in `users`.
+- Email must end with `@clsu.edu.ph` or `@clsu2.edu.ph`.
+- `password` is required, minimum 6 chars, and must match confirmation.
 
-## Registration Behavior
+## Registration: Behavior
 
-- New users are created with:
+- A new user is created with:
 - `account_status = pending`
 - `email_verified_at = null`
-- OTP hash stored in `users.otp`
-- OTP expiry set to `now + 10 minutes`
-- OTP is sent by email (`OtpMail`).
-- Verification email is stored in session (`verify_email`) for OTP flow.
+- OTP is issued using `OtpService` for purpose `email_verification`.
+- OTP is stored in `user_otps` (hashed), not as plain text.
+- OTP expiry defaults to `10 minutes`.
+- Verification context is saved in session key `verify_email`.
+- User is redirected to `otp.show`.
 
-## Login Conditions and Flow
+## Login: Conditional Flow
 
-- Credentials must be valid email + password.
-- Session is regenerated after successful credentials.
-- If email is not verified:
+- If credentials are invalid, login is rejected.
+- If credentials are valid, session is regenerated.
+- If `email_verified_at` is empty:
 - User is logged out immediately.
-- Session is invalidated and token regenerated.
-- Login is blocked with verification message.
+- Session is invalidated + token regenerated.
+- Login is blocked with verification error.
+- If email is verified, account status is checked:
+- If `active`, redirect to `syllabus.index`.
+- If `pending`, redirect to `waiting.approval`.
+- If `rejected`, logout and block login.
+- If `disabled`, logout and block login.
+- If unknown status, logout and block login.
 
-## Account Status Gate on Login
+## OTP Screen Access Rule
 
-- `active`: user can proceed to syllabus area.
-- `pending`: redirected to waiting approval page.
-- `rejected`: login blocked, user logged out.
-- `disabled`: login blocked, user logged out.
-- Any unknown status: login blocked, user logged out.
+- `otp.show` requires `session('verify_email')`.
+- If missing, user is redirected to `auth.show`.
 
-## OTP Verification Conditions
+## OTP Verification: Conditions
 
-- OTP input must be exactly 6 digits.
-- Email to verify comes from request email or session `verify_email`.
-- If no email context, user is redirected back to login.
-- OTP must exist (not null).
+- `otp` must be exactly 6 digits.
+- Email source is `request('email')` or `session('verify_email')`.
+- If no email is available, redirect to login with error.
+- User must exist for the selected email.
+- `OtpService::migrateLegacyOtp()` is called first (for backward compatibility from old `users.otp` data).
+- OTP record must exist in `user_otps`.
 - OTP must not be expired.
-- OTP must match hash (`Hash::check`).
+- OTP hash must match the entered OTP.
 
-## OTP Success Behavior
+## OTP Verification: Success Behavior
 
-- `email_verified_at` is set to current timestamp.
-- `otp` and `otp_expires_at` are cleared.
+- `email_verified_at` is set to `now()`.
+- OTP record for `email_verification` purpose is deleted.
 - Session key `verify_email` is removed.
-- User is redirected to waiting approval page.
+- User is redirected to `waiting.approval`.
 
-## OTP Resend Conditions
+## OTP Resend: Conditions and Behavior
 
 - Email is required and must be valid.
-- Email must exist in users table.
+- User with that email must exist.
 - Email must not already be verified.
-- New OTP is generated and expires in 10 minutes.
+- If all checks pass, a fresh OTP is issued via `OtpService`.
+- Session `verify_email` is set and user is redirected to `otp.show`.
 
-## Admin Account Status Operations
+## Admin Account Status Actions
 
-From `AccountApprovalController`:
+- `approve`: sets user to `active`, ensures `faculty` role exists, sends status email.
+- `reject`: sets user to `rejected`, sends status email.
+- `restore`: sets user to `pending`.
+- `disable`: sets user to `disabled`, sends status email.
 
-- Approve: sets `account_status = active`.
-- Reject: sets `account_status = rejected`.
-- Restore: sets `account_status = pending`.
-- Disable: sets `account_status = disabled`.
-- Status update emails are sent for approve/reject/disable.
+## Role Assignment Rules (Admin)
 
-## Role Assignment Conditions (Account Approval)
-
-- Roles can be assigned only if account status is `active`.
-- Allowed input roles: `admin`, `chair`, `dean`, `faculty`.
-- `faculty` is always forced into assigned roles.
-- If `dean` role is removed, all dean assignments are deleted.
-- If `chair` role is removed, all chair assignments are deleted.
-
+- Roles can be assigned only when account is `active`.
+- Allowed roles: `admin`, `chair`, `dean`, `faculty`.
+- `faculty` is always forced into role set.
+- Roles are synced (unselected roles are removed).
+- If `dean` removed, dean assignments are deleted.
+- If `chair` removed, chair assignments are deleted.

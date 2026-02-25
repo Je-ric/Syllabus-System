@@ -48,9 +48,16 @@ This document summarizes conditions for course creation, update, and PO mapping.
 - Course fields are updated.
 - PO mappings are rebuilt using `sync` with only valid IED entries.
 
+## Course Delete Status (Important)
+
+- Route `DELETE /courses/{course}` exists in `routes/web.php`.
+- Current `CourseController::destroy()` is commented out.
+- Practical effect:
+- Delete action is not currently implemented in controller logic.
+- If delete UI is present, it should be treated as not active until controller method is restored.
+
 ## PO Mapping Rules
 
 - Only `I`, `E`, and `D` are persisted.
 - Empty/invalid mapping values are ignored.
 - Existing mapping not present in submitted data is removed by `sync`.
-

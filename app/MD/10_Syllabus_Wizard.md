@@ -1,19 +1,27 @@
-# Syllabus Wizard (Current Flow)
+# Syllabus Wizard (Beginner-Friendly Guide)
 
-This document reflects the current syllabus wizard behavior.
+This guide explains what the syllabus wizard does now, using simple terms for both technical and non-technical readers.
 
-## Scope
+## Source of Truth
 
-Source of truth:
 - `app/Livewire/Syllabus/SyllabusWizard.php`
-- `app/Livewire/Syllabus/Concerns/*`
-- `resources/views/livewire/syllabus/syllabus-wizard.blade.php`
-- `resources/views/livewire/syllabus/steps/*`
-- `app/Http/Controllers/SyllabusController.php`
+- `app/Livewire/Syllabus/Steps/AcademicCalendarStep.php`
+- `app/Livewire/Syllabus/Steps/ComponentsStep.php`
+- `app/Livewire/Syllabus/Steps/CourseOutcomesStep.php`
+- `app/Livewire/Syllabus/Steps/WeeklyCoverageStep.php`
+- `app/Livewire/Syllabus/Steps/ReviewStep.php`
 
-## Wizard Steps
+## Big Picture
 
-Defined in `Syllabus::getWizardSteps()`:
+- The wizard is a multi-step form for building one syllabus.
+- A syllabus is saved as a `draft` first.
+- Users move step-by-step until they submit for review.
+- Saving is event-driven between parent component and step components.
+
+## Step Order
+
+From `Syllabus::getWizardSteps()`:
+
 1. `academic_calendar`
 2. `course_components`
 3. `course_outcomes`
@@ -21,88 +29,121 @@ Defined in `Syllabus::getWizardSteps()`:
 5. `weekly_coverage`
 6. `review`
 
-## Entry Flow
+## Start Flow (Conditional)
 
-## New syllabus
-- Route: `/syllabus/wizard?courseId={id}`
-- `SyllabusWizard::mount()` creates draft syllabus with:
-  - `status = draft`
-  - `current_step = academic_calendar`
-  - `academic_calendar_id = null`
+- If URL has `syllabusId`:
+- Existing syllabus is loaded.
+- If current user is not the preparer, access is denied (`403`).
+- Current step is restored from DB if valid.
+- If URL has `courseId` (and no `syllabusId`):
+- New draft syllabus is created with:
+- `status = draft`
+- `current_step = academic_calendar`
+- `academic_calendar_id = null`
+- If neither is given:
+- Request is rejected (`404`).
 
-## Existing syllabus
-- Route: `/syllabus/wizard?syllabusId={id}`
-- Wizard loads syllabus, checks preparer ownership, loads existing data.
+## Navigation Rules
 
-## Step Save Behavior
+- `setStep()` changes current step and persists it.
+- `goNextStep()` and `goPreviousStep()` compute step sequence from wizard definitions.
+- `navigateToStep(from, to)` guards against invalid transitions.
+- Important condition:
+- If leaving `course_outcomes` while it has unsaved changes, step change is blocked.
 
-All saving is routed through `saveCurrentStep()` and invoked by:
-- `Next/Previous` navigation (`navigateToStep(...)`)
-- `Save Draft`
-- `Submit for Review` (final call before status update)
+## Save Flow (How Components Talk)
 
-## Step-specific save logic
-- `academic_calendar`: validates and saves `academic_calendar_id` with uniqueness guard per course.
-- `course_components`: saves LEC/LAB via `saveComponents()`.
-- `course_outcomes`: saves CO records via `saveCourseOutcomes()`.
-- `co_po_mapping`: ensures COs are saved first, then syncs mappings.
-- `weekly_coverage`: refreshes/generated week data.
+- Parent wizard broadcasts: `syllabus-save-step`.
+- Active step listens and saves itself.
+- On success, step emits: `syllabus-step-saved`.
+- Parent marks that step as clean (`stepDirty[step] = false`).
 
-## Course Outcomes (current behavior)
+## Required-Field Checks Before Submit
 
-Important: CO input is now local-first and not auto-saved on each keystroke.
+When user clicks submit:
 
-- Step view uses Alpine manager bound to `@entangle('courseOutcomes')`.
-- Add/remove of CO rows is client-local (fast UI updates).
-- Actual DB persistence happens when user triggers save flow:
-  - Next
-  - Save Draft
-  - Submit for Review
+- If `academic_calendar` missing, submission is blocked.
+- If required lecture/lab component fields are incomplete, blocked.
+- If no non-empty course outcome exists, blocked.
+- If no week records exist, blocked.
+- If Course Outcomes step is still dirty, blocked.
+- If all checks pass:
+- Syllabus is updated to `status = under_review`.
+- `current_step = review`.
 
-### CO persistence details (`HandlesCourseOutcomes`)
-- Reindexes outcomes and resequences `CO1..CON` before saving.
-- Bulk-loads existing outcomes once for lower query count.
-- Deletes removed rows in bulk.
-- Updates existing rows with non-empty descriptions.
-- Creates new rows with non-empty descriptions.
-- Remaps CO-PO mapping keys from temp keys to DB IDs after create.
+## Per-Step Behavior (Simple)
 
-## CO-PO Mapping behavior
+## 1) Academic Calendar
 
-- Mapping data stored in `coPoMappings`.
-- Saves via `saveCoPoMappings()`.
-- Supports numeric CO IDs and temp-key CO rows (resolved to ID when available).
-- Sync payload sets default pivot `ied = 'I'` for checked relationships.
+- User selects an academic calendar entry.
+- Validation checks:
+- Must exist.
+- Must be unique per course in `syllabi.academic_calendar_id` (excluding current syllabus).
+- On valid save, syllabus `academic_calendar_id` is updated.
 
-## Navigation and UI state
+## 2) Course Components
 
-- Wizard uses Alpine + Livewire.
-- `currentStep` is entangled (`@entangle('currentStep').live`) for consistent progress indicator.
-- Navigation uses single method `navigateToStep(from, to)` to avoid step bounce/race.
+- LEC fields are required before save.
+- LAB fields are required only if course has lab (`has_lec_lab = true`).
+- Fields auto-save on change when complete.
+- If no LEC row yet, component pre-fills from logged-in user profile (`name`, `email`, `phone`, `office`).
 
-## Scroll behavior
+## 3) Course Outcomes
 
-- Wizard script uses `preserveScroll(action)` and restores scroll within `main.overflow-y-auto`.
-- Applied to:
-  - step navigation
-  - save draft
-  - submit
+- Outcomes are edited in Livewire state first (fast typing, fewer DB writes).
+- Codes are resequenced as `CO1`, `CO2`, `CO3`, ... in current order.
+- Blank row rule:
+- You cannot add another new row while an existing row is blank.
+- Save rule:
+- If existing outcomes are all removed/blank, save is blocked (at least one description required).
+- Save behavior:
+- Deleted rows are removed from DB.
+- Existing rows are updated only if changed.
+- New non-empty rows are inserted.
 
-## Weekly Coverage
+## 4) CO-PO Mapping
 
-- Weeks are generated once per syllabus if missing.
-- Generated range is based on selected academic calendar start/end.
-- Exam assignment supports: `first_term`, `second_term`, `final_term`.
+- Mapping is tied to saved CO rows.
+- If COs are newly created, mapping references are resolved during save flow.
 
-## Controller Integration
+## 5) Weekly Coverage
 
-From `SyllabusController`:
-- `create()` and `showCourses()` both feed `Syllabus.selectCourse` using shared helper.
-- `showForm()` redirects to wizard route.
-- `wizard()` creates draft if needed or routes to existing one.
+- Weeks are generated only when needed (or when user explicitly generates).
+- Week generation uses academic calendar start/end dates.
+- Exam assignment supports:
+- `first_term`
+- `second_term`
+- `final_term`
+- Re-assigning one exam type clears previous week for that same type.
+- Week content can save:
+- course outcome link
+- learning outcomes
+- assessment task
+- topic
+- TLA
+- references
+- online materials
 
-## Current Practical Notes
+## 6) Review
 
-- CO typing does not hit DB until save action.
-- This is intentional for speed and reduced request noise.
-- To avoid data loss, users should use Next/Save Draft after CO edits.
+- Aggregates saved data from earlier steps.
+- Reloads when step changes to review or when any step confirms save.
+
+## Events Used (Technical Quick List)
+
+- `syllabus-step-dirty`
+- `syllabus-step-saved`
+- `syllabus-save-step`
+- `syllabus-step-changed`
+- `syllabus-calendar-updated`
+- `syllabus-course-outcomes-updated`
+
+## Non-Technical Mental Model
+
+- Think of it like a guided checklist.
+- Green path:
+- Fill required fields.
+- Save each part.
+- Fix warnings if shown.
+- Submit only when all sections are complete.
+- The system protects against submitting incomplete or unsaved critical sections.

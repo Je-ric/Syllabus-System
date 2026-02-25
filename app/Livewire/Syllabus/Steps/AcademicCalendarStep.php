@@ -49,7 +49,8 @@ class AcademicCalendarStep extends Component
             return;
         }
 
-        if ($this->saveAcademicCalendar()) {
+        if ($this->saveAcademicCalendar()) { // if save is successful, dispatch the saved event
+            // dispatch means
             $this->dispatch('syllabus-step-saved', step: 'academic_calendar');
         }
     }
