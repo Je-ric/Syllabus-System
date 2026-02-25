@@ -27,6 +27,20 @@
                     </span>
                 </button>
 
+                @if ($weeksGenerated)
+                    <button type="button" wire:click="saveAllWeeklyEntries"
+                        class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded border border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100">
+                        <span wire:loading.remove wire:target="saveAllWeeklyEntries">
+                            <i class="bx bx-save"></i>
+                            Save All
+                        </span>
+                        <span wire:loading wire:target="saveAllWeeklyEntries">
+                            <i class="bx bx-loader-alt bx-spin"></i>
+                            Saving...
+                        </span>
+                    </button>
+                @endif
+
                 <span class="text-xs text-slate-500">
                     Generation is manual to keep step switching fast.
                 </span>
@@ -248,7 +262,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="md:col-span-2">
                                 <x-form.label>Course Outcomes</x-form.label>
-                                <x-form.select wire:model.defer="weekInputs.{{ $week->week_no }}.course_outcome_id">
+                                <x-form.select wire:model="weekInputs.{{ $week->week_no }}.course_outcome_id">
                                     <option value="">Select Course Outcome</option>
                                     @foreach ($courseOutcomes as $outcome)
                                         <option value="{{ $outcome['id'] }}">{{ $outcome['co_code'] }} -
@@ -261,25 +275,25 @@
                             <div>
                                 <x-form.label>Unit Learning Outcomes</x-form.label>
                                 <x-form.textarea rows="3"
-                                    wire:model.defer="weekInputs.{{ $week->week_no }}.learning_outcomes" />
+                                    wire:model="weekInputs.{{ $week->week_no }}.learning_outcomes" />
                             </div>
 
                             <div>
                                 <x-form.label>Assessment Task</x-form.label>
                                 <x-form.textarea rows="3"
-                                    wire:model.defer="weekInputs.{{ $week->week_no }}.assessment_task" />
+                                    wire:model="weekInputs.{{ $week->week_no }}.assessment_task" />
                             </div>
 
                             <div>
                                 <x-form.label>Topics</x-form.label>
                                 <x-form.textarea rows="3"
-                                    wire:model.defer="weekInputs.{{ $week->week_no }}.topic" />
+                                    wire:model="weekInputs.{{ $week->week_no }}.topic" />
                             </div>
 
                             <div>
                                 <x-form.label>Teaching and Learning Activities</x-form.label>
                                 <x-form.textarea rows="3"
-                                    wire:model.defer="weekInputs.{{ $week->week_no }}.teaching_activities" />
+                                    wire:model="weekInputs.{{ $week->week_no }}.teaching_activities" />
                             </div>
                         </div>
 
@@ -289,16 +303,16 @@
                             <div class="w-full md:w-[48%]">
                                 <x-form.label>References</x-form.label>
                                 <x-form.input type="text"
-                                    wire:model.defer="weekInputs.{{ $week->week_no }}.reference_text" />
+                                    wire:model="weekInputs.{{ $week->week_no }}.reference_text" />
                             </div>
 
                             <div class="w-full md:w-[48%]">
                                 <x-form.label>Online Material Name</x-form.label>
                                 <x-form.input type="text"
-                                    wire:model.defer="weekInputs.{{ $week->week_no }}.material_name" />
+                                    wire:model="weekInputs.{{ $week->week_no }}.material_name" />
                                 <x-form.label class="mt-2">Online Material URL</x-form.label>
                                 <x-form.input type="text"
-                                    wire:model.defer="weekInputs.{{ $week->week_no }}.material_url" />
+                                    wire:model="weekInputs.{{ $week->week_no }}.material_url" />
                             </div>
                         </div>
 

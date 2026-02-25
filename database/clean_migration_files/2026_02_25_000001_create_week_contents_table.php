@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('week_contents', function (Blueprint $table) {
             $table->id();
+
             $table->foreignId('syllabus_week_id')
                 ->constrained('syllabus_weeks')
                 ->cascadeOnDelete();
@@ -17,15 +18,19 @@ return new class extends Migration
             // 'LEC' or 'LAB'; lecture-only courses always use 'LEC'
             $table->enum('component_type', ['LEC', 'LAB']);
 
+            // Course outcome linked to this week's content
             $table->foreignId('course_outcome_id')
                 ->nullable()
                 ->constrained('course_outcomes')
                 ->nullOnDelete();
 
-            $table->text('learning_outcomes');
-            $table->text('topics');
-            $table->text('assessment_task')->nullable();
-            $table->text('tla')->nullable(); // teaching-learning activity
+            // Required fields – saved as 'N/A' when user leaves blank
+            $table->text('learning_outcomes');   // Unit Learning Outcomes
+            $table->text('topics');               // Topics
+
+            // Optional fields
+            $table->text('assessment_task')->nullable(); // Assessment Task
+            $table->text('tla')->nullable();             // Teaching & Learning Activities
 
             $table->timestamps();
         });

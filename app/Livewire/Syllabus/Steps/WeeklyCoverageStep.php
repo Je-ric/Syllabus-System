@@ -11,6 +11,7 @@ use App\Models\WeekContent;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\On;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
 class WeeklyCoverageStep extends Component
@@ -184,11 +185,41 @@ class WeeklyCoverageStep extends Component
      */
     public function saveWeek(int $weekNo): void
     {
+        Log::info('[WeeklyCoverageStep] saveWeek called', [
+            'syllabusId' => $this->syllabusId,
+            'weekNo' => $weekNo,
+            'syllabusWeeksCount' => $this->syllabusWeeks->count(),
+            'weekInputs' => $this->weekInputs[$weekNo] ?? null,
+        ]);
         if ($weekNo <= 0 || $this->syllabusWeeks->isEmpty()) {
+            Log::warning('[WeeklyCoverageStep] saveWeek aborted: invalid week or empty collection', [
+                'syllabusId' => $this->syllabusId,
+                'weekNo' => $weekNo,
+            ]);
             return;
         }
 
         $this->saveWeeklyEntries($weekNo);
+    }
+
+    /**
+     * Manual save button - saves all weekly entries at once.
+     */
+    public function saveAllWeeklyEntries(): void
+    {
+        $this->loadData();
+        Log::info('[WeeklyCoverageStep] saveAllWeeklyEntries called', [
+            'syllabusId' => $this->syllabusId,
+            'weekInputs' => $this->weekInputs,
+        ]);
+        // First save all the weekly entries
+        $this->saveWeeklyEntries();
+
+        // Then refresh the data to ensure UI stays in sync
+        $this->refreshWeeklyCoverage(false);
+        $this->populateWeekInputs();
+
+        $this->dispatch('syllabus-step-saved', step: 'weekly_coverage', message: 'All weekly entries saved successfully.');
     }
 
     public function render()
@@ -198,7 +229,12 @@ class WeeklyCoverageStep extends Component
 
     private function loadData(bool $force = false): void
     {
+        Log::info('[WeeklyCoverageStep] loadData called', [
+            'syllabusId' => $this->syllabusId,
+            'force' => $force,
+        ]);
         if ($this->isLoaded && !$force) {
+            Log::info('[WeeklyCoverageStep] loadData skipped (already loaded)');
             return;
         }
 
@@ -227,6 +263,10 @@ class WeeklyCoverageStep extends Component
         $this->refreshWeeklyCoverage(false);
         $this->populateWeekInputs();
         $this->isLoaded = true;
+        Log::info('[WeeklyCoverageStep] loadData finished', [
+            'syllabusWeeksCount' => $this->syllabusWeeks->count(),
+            'weekInputsCount' => count($this->weekInputs),
+        ]);
     }
 
     private function refreshWeeklyCoverage(bool $generate = false): void
@@ -383,19 +423,19 @@ class WeeklyCoverageStep extends Component
 
         $inputs = [];
         foreach ($this->syllabusWeeks as $week) {
-            $content  = $weekContents->get($week->id);
+            $content = $week->content; // or however you get WeekContent
+
             $reference = $references->get($week->id);
             $material  = $materials->get($week->id);
-
-            $inputs[$week->week_no] = [
-                'course_outcome_id'  => $content?->course_outcome_id,
-                'learning_outcomes'  => (string) ($content?->learning_outcomes ?? ''),
-                'assessment_task'    => (string) ($content?->assessment_task ?? ''),
-                'topic'              => (string) ($content?->topics ?? ''),
-                'teaching_activities'=> (string) ($content?->tla ?? ''),
-                'reference_text'     => (string) ($reference?->reference_text ?? ''),
-                'material_name'      => (string) ($material?->material_name ?? ''),
-                'material_url'       => (string) ($material?->url ?? ''),
+            $inputs[(string)$week->week_no] = [
+                'course_outcome_id' => $content?->course_outcome_id,
+                'learning_outcomes' => $content?->learning_outcomes ?? '',
+                'assessment_task'   => $content?->assessment_task ?? '',
+                'topic'             => $content?->topics ?? '',
+                'teaching_activities' => $content?->tla ?? '',
+                'reference_text'    => $reference?->reference_text ?? '',
+                'material_name'     => $material?->material_name ?? '',
+                'material_url'      => $material?->url ?? '',
             ];
         }
 
@@ -404,16 +444,28 @@ class WeeklyCoverageStep extends Component
 
     private function saveWeeklyEntries(?int $onlyWeekNo = null): void
     {
+        Log::info('[WeeklyCoverageStep] saveWeeklyEntries called', [
+            'syllabusId' => $this->syllabusId,
+            'onlyWeekNo' => $onlyWeekNo,
+            'syllabusWeeksCount' => $this->syllabusWeeks->count(),
+        ]);
         if ($this->syllabusWeeks->isEmpty()) {
             return;
         }
 
         foreach ($this->syllabusWeeks as $week) {
-            if ($onlyWeekNo !== null && (int) $week->week_no !== $onlyWeekNo) {
+            if ($onlyWeekNo && $week->week_no != $onlyWeekNo) continue;
+            $payload = $this->weekInputs[(string) $week->week_no] ?? [];
+            if (empty(array_filter($payload))) {
+                Log::info("Skipping week {$week->week_no}, all fields empty");
                 continue;
             }
-            $weekNo  = (int) $week->week_no;
-            $payload = $this->weekInputs[$weekNo] ?? [];
+            // if ($onlyWeekNo !== null && (int) $week->week_no !== $onlyWeekNo) {
+            //     continue;
+            // }
+            // $weekNo  = (int) $week->week_no;
+            // $payload = $this->weekInputs[$weekNo] ?? [];
+            // $payload = $this->weekInputs[(string) $weekNo] ?? [];
 
             $courseOutcomeId  = !empty($payload['course_outcome_id']) ? (int) $payload['course_outcome_id'] : null;
             $learningOutcomes = trim((string) ($payload['learning_outcomes'] ?? ''));
@@ -429,10 +481,10 @@ class WeeklyCoverageStep extends Component
                     ],
                     [
                         'course_outcome_id' => $courseOutcomeId,
-                        'learning_outcomes' => $learningOutcomes !== '' ? $learningOutcomes : 'N/A',
-                        'assessment_task'   => $assessmentTask   !== '' ? $assessmentTask   : 'N/A',
-                        'topics'            => $topic            !== '' ? $topic            : 'N/A',
-                        'tla'               => $tla              !== '' ? $tla              : 'N/A',
+                        'learning_outcomes' => $learningOutcomes ?: 'N/A',
+                        'assessment_task'   => $assessmentTask   ?: 'N/A',
+                        'topics'            => $topic            ?: 'N/A',
+                        'tla'               => $tla              ?: 'N/A',
                     ]
                 );
             }
