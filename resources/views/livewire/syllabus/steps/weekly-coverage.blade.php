@@ -146,6 +146,35 @@
             </p>
         </div>
     @else
+        @php
+            $hasLEC = isset($courseComponents['LEC']);
+            $hasLAB = isset($courseComponents['LAB']);
+        @endphp
+
+        @if ($hasLEC || $hasLAB)
+            <div class="mb-3 border-b border-slate-200">
+                <nav class="flex gap-2 text-xs">
+                    @if ($hasLEC)
+                        <button type="button"
+                            wire:click="setComponentType('LEC')"
+                            class="px-3 py-1.5 rounded-t-md border-b-2
+                                {{ $activeComponent === 'LEC' ? 'border-emerald-500 bg-emerald-50 text-emerald-700 font-semibold' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50' }}">
+                            Lecture
+                        </button>
+                    @endif
+
+                    @if ($hasLAB)
+                        <button type="button"
+                            wire:click="setComponentType('LAB')"
+                            class="px-3 py-1.5 rounded-t-md border-b-2
+                                {{ $activeComponent === 'LAB' ? 'border-blue-500 bg-blue-50 text-blue-700 font-semibold' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50' }}">
+                            Laboratory
+                        </button>
+                    @endif
+                </nav>
+            </div>
+        @endif
+
         <div x-data="{
             openWeek: {{ $syllabusWeeks->first()?->week_no ?? 1 }},
             init() {

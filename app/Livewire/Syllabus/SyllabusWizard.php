@@ -13,6 +13,12 @@ use Livewire\Component;
 
 class SyllabusWizard extends Component
 {
+    /**
+     * Holds the next step to navigate to after save completes.
+     *
+     * @var string
+     */
+    public string $pendingStepChange = '';
     // The syllabus being worked on (can be null at first)
     public ?Syllabus $syllabus = null;
     public ?Course $course = null;
@@ -93,6 +99,13 @@ class SyllabusWizard extends Component
             $this->dispatch('lw-toast', type: 'success', message: $message);
         }
         $this->syllabus->refresh(); // Refresh the syllabus from the database
+
+        // If a step change is pending, perform it now
+        if ($this->pendingStepChange) {
+            $toStep = $this->pendingStepChange;
+            $this->pendingStepChange = '';
+            $this->navigateToStep($this->currentStep, $toStep);
+        }
     }
 
 
@@ -166,8 +179,8 @@ class SyllabusWizard extends Component
     // Handles a tab click: saves the current step then navigates (respects dirty checks)
     public function clickTab(string $step): void
     {
-        $this->saveCurrentStep();
-        $this->navigateToStep($this->currentStep, $step);
+        $this->pendingStepChange = $step;
+        $this->dispatch('syllabus-save-step', step: $this->currentStep);
     }
 
 
@@ -181,8 +194,8 @@ class SyllabusWizard extends Component
         }
 
         // Save current step before navigating to next
-        $this->saveCurrentStep();
-        $this->navigateToStep($this->currentStep, $steps[$index + 1]);
+        $this->pendingStepChange = $steps[$index + 1];
+        $this->dispatch('syllabus-save-step', step: $this->currentStep);
     }
 
 
@@ -196,8 +209,8 @@ class SyllabusWizard extends Component
         }
 
         // Save current step before navigating to previous
-        $this->saveCurrentStep();
-        $this->navigateToStep($this->currentStep, $steps[$index - 1]);
+        $this->pendingStepChange = $steps[$index - 1];
+        $this->dispatch('syllabus-save-step', step: $this->currentStep);
     }
 
 

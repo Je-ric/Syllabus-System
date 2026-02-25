@@ -28,6 +28,7 @@ class WeeklyCoverageStep extends Component
     public ?string $activeWeekTab = null;
     public bool $weeksGenerated = false;
     public array $courseComponents = [];
+    public string $activeComponent = 'LEC'; // LEC or LAB
     public array $courseOutcomes = [];
     public array $weekInputs = [];
 
@@ -207,7 +208,6 @@ class WeeklyCoverageStep extends Component
      */
     public function saveAllWeeklyEntries(): void
     {
-        $this->loadData();
         Log::info('[WeeklyCoverageStep] saveAllWeeklyEntries called', [
             'syllabusId' => $this->syllabusId,
             'weekInputs' => $this->weekInputs,
@@ -233,10 +233,7 @@ class WeeklyCoverageStep extends Component
             'syllabusId' => $this->syllabusId,
             'force' => $force,
         ]);
-        if ($this->isLoaded && !$force) {
-            Log::info('[WeeklyCoverageStep] loadData skipped (already loaded)');
-            return;
-        }
+        // Always reload collections for stateless Livewire requests
 
         $this->syllabus = Syllabus::query()
             ->with('academicCalendar')
@@ -250,6 +247,15 @@ class WeeklyCoverageStep extends Component
             ->keyBy('type')
             ->toArray();
         $this->courseComponents = $components;
+
+        // Decide which component tab should be active
+        if (isset($this->courseComponents['LEC'])) {
+            $this->activeComponent = 'LEC';
+        } elseif (isset($this->courseComponents['LAB'])) {
+            $this->activeComponent = 'LAB';
+        } else {
+            $this->activeComponent = 'LEC';
+        }
 
         $this->courseOutcomes = $this->syllabus->courseOutcomes()
             ->orderBy('co_code')
@@ -301,6 +307,9 @@ class WeeklyCoverageStep extends Component
             return;
         }
 
+        $hasLEC = isset($this->courseComponents['LEC']);
+        $hasLAB = isset($this->courseComponents['LAB']);
+
         $start = Carbon::parse($calendar->start_date)->startOfDay();
         $end = Carbon::parse($calendar->end_date)->startOfDay();
 
@@ -313,13 +322,35 @@ class WeeklyCoverageStep extends Component
                 $weekEnd = $end->copy();
             }
 
-            SyllabusWeek::create([
+            $syllabusWeek = SyllabusWeek::create([
                 'syllabus_id' => $this->syllabus->id,
                 'week_no' => $weekNo,
                 'start_date' => $weekStart->toDateString(),
                 'end_date' => $weekEnd->toDateString(),
                 'is_exam_week' => false,
             ]);
+
+            // Create WeekContent for both LEC and LAB if present
+            if ($hasLEC) {
+                WeekContent::create([
+                    'syllabus_week_id' => $syllabusWeek->id,
+                    'component_type' => 'LEC',
+                    'learning_outcomes' => 'N/A',
+                    'assessment_task' => 'N/A',
+                    'topics' => 'N/A',
+                    'tla' => 'N/A',
+                ]);
+            }
+            if ($hasLAB) {
+                WeekContent::create([
+                    'syllabus_week_id' => $syllabusWeek->id,
+                    'component_type' => 'LAB',
+                    'learning_outcomes' => 'N/A',
+                    'assessment_task' => 'N/A',
+                    'topics' => 'N/A',
+                    'tla' => 'N/A',
+                ]);
+            }
 
             $weekNo++;
             $cursor = $weekEnd->copy()->addDay();
@@ -394,6 +425,25 @@ class WeeklyCoverageStep extends Component
         $this->weekEvents = $weekEvents;
     }
 
+    public function setComponentType(string $type): void
+    {
+        $type = strtoupper($type);
+        if (!in_array($type, ['LEC', 'LAB'], true)) {
+            return;
+        }
+
+        // If LAB doesn't exist for this course, do nothing
+        if ($type === 'LAB' && !isset($this->courseComponents['LAB'])) {
+            return;
+        }
+
+        // Save current tab data before switching component type
+        $this->saveWeeklyEntries();
+
+        $this->activeComponent = $type;
+        $this->populateWeekInputs();
+    }
+
     private function populateWeekInputs(): void
     {
         if ($this->syllabusWeeks->isEmpty()) {
@@ -403,9 +453,10 @@ class WeeklyCoverageStep extends Component
 
         $weekIds = $this->syllabusWeeks->pluck('id')->all();
 
+        // Load week contents for the currently active component (LEC/LAB)
         $weekContents = WeekContent::query()
             ->whereIn('syllabus_week_id', $weekIds)
-            ->where('component_type', 'LEC')
+            ->where('component_type', $this->activeComponent)
             ->get()
             ->keyBy('syllabus_week_id');
 
@@ -423,11 +474,11 @@ class WeeklyCoverageStep extends Component
 
         $inputs = [];
         foreach ($this->syllabusWeeks as $week) {
-            $content = $week->content; // or however you get WeekContent
+            $content = $weekContents->get($week->id);
 
             $reference = $references->get($week->id);
             $material  = $materials->get($week->id);
-            $inputs[(string)$week->week_no] = [
+            $inputs[(string) $week->week_no] = [
                 'course_outcome_id' => $content?->course_outcome_id,
                 'learning_outcomes' => $content?->learning_outcomes ?? '',
                 'assessment_task'   => $content?->assessment_task ?? '',
@@ -444,11 +495,14 @@ class WeeklyCoverageStep extends Component
 
     private function saveWeeklyEntries(?int $onlyWeekNo = null): void
     {
+        // Always reload weeks before saving
+        $this->loadWeeks();
         Log::info('[WeeklyCoverageStep] saveWeeklyEntries called', [
             'syllabusId' => $this->syllabusId,
             'onlyWeekNo' => $onlyWeekNo,
             'syllabusWeeksCount' => $this->syllabusWeeks->count(),
         ]);
+
         if ($this->syllabusWeeks->isEmpty()) {
             return;
         }
@@ -456,38 +510,29 @@ class WeeklyCoverageStep extends Component
         foreach ($this->syllabusWeeks as $week) {
             if ($onlyWeekNo && $week->week_no != $onlyWeekNo) continue;
             $payload = $this->weekInputs[(string) $week->week_no] ?? [];
-            if (empty(array_filter($payload))) {
-                Log::info("Skipping week {$week->week_no}, all fields empty");
-                continue;
+            // Always save a WeekContent row for each week/component
+            $courseOutcomeId = null;
+            if (isset($payload['course_outcome_id']) && $payload['course_outcome_id'] !== '' && $payload['course_outcome_id'] !== null) {
+                $courseOutcomeId = (int) $payload['course_outcome_id'];
             }
-            // if ($onlyWeekNo !== null && (int) $week->week_no !== $onlyWeekNo) {
-            //     continue;
-            // }
-            // $weekNo  = (int) $week->week_no;
-            // $payload = $this->weekInputs[$weekNo] ?? [];
-            // $payload = $this->weekInputs[(string) $weekNo] ?? [];
-
-            $courseOutcomeId  = !empty($payload['course_outcome_id']) ? (int) $payload['course_outcome_id'] : null;
             $learningOutcomes = trim((string) ($payload['learning_outcomes'] ?? ''));
             $assessmentTask   = trim((string) ($payload['assessment_task'] ?? ''));
             $topic            = trim((string) ($payload['topic'] ?? ''));
             $tla              = trim((string) ($payload['teaching_activities'] ?? $payload['tla'] ?? ''));
 
-            if ($learningOutcomes !== '' || $assessmentTask !== '' || $topic !== '' || $tla !== '') {
-                WeekContent::query()->updateOrCreate(
-                    [
-                        'syllabus_week_id' => $week->id,
-                        'component_type'   => 'LEC',
-                    ],
-                    [
-                        'course_outcome_id' => $courseOutcomeId,
-                        'learning_outcomes' => $learningOutcomes ?: 'N/A',
-                        'assessment_task'   => $assessmentTask   ?: 'N/A',
-                        'topics'            => $topic            ?: 'N/A',
-                        'tla'               => $tla              ?: 'N/A',
-                    ]
-                );
-            }
+            WeekContent::query()->updateOrCreate(
+                [
+                    'syllabus_week_id' => $week->id,
+                    'component_type'   => $this->activeComponent,
+                ],
+                [
+                    'course_outcome_id' => $courseOutcomeId,
+                    'learning_outcomes' => $learningOutcomes ?: 'N/A',
+                    'assessment_task'   => $assessmentTask   ?: 'N/A',
+                    'topics'            => $topic            ?: 'N/A',
+                    'tla'               => $tla              ?: 'N/A',
+                ]
+            );
 
             // Per-week reference
             $referenceText = trim((string) ($payload['reference_text'] ?? ''));
