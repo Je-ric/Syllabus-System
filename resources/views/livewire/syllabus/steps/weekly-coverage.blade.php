@@ -132,7 +132,16 @@
             </p>
         </div>
     @else
-        <div x-data="{ openWeek: {{ $syllabusWeeks->first()?->week_no ?? 1 }} }" class="border border-slate-200 rounded-xl bg-white divide-y divide-slate-200">
+        <div x-data="{
+            openWeek: {{ $syllabusWeeks->first()?->week_no ?? 1 }},
+            init() {
+                this.$watch('openWeek', (newVal, oldVal) => {
+                    if (oldVal !== null && oldVal !== newVal) {
+                        $wire.saveWeek(oldVal);
+                    }
+                });
+            }
+        }" class="border border-slate-200 rounded-xl bg-white divide-y divide-slate-200">
             @foreach ($syllabusWeeks as $week)
                 @php
                     $start = \Carbon\Carbon::parse($week->start_date);

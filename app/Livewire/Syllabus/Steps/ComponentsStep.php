@@ -62,14 +62,11 @@ class ComponentsStep extends Component
 
     public function updated($property): void
     {
-        if (!$this->isLoaded || !str_starts_with($property, 'lec_') && !str_starts_with($property, 'lab_')) {
+        if (!$this->isLoaded || (!str_starts_with($property, 'lec_') && !str_starts_with($property, 'lab_'))) {
             return;
         }
-
+        // Only mark as dirty, do not auto-save.
         $this->dispatch('syllabus-step-dirty', step: 'course_components', dirty: true);
-        if ($this->saveComponents()) {
-            $this->dispatch('syllabus-step-saved', step: 'course_components');
-        }
     }
 
     public function render()

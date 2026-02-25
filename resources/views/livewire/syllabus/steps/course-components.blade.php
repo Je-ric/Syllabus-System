@@ -19,7 +19,7 @@
                         Instructor Name
                     </x-form.label>
                     <x-form.input
-                        wire:model.blur="lec_instructor_name"
+                        wire:model.defer="lec_instructor_name"
                         placeholder="Enter instructor name"
                         required
                     />
@@ -31,7 +31,7 @@
                     </x-form.label>
                     <x-form.input
                         type="email"
-                        wire:model.blur="lec_instructor_email"
+                        wire:model.defer="lec_instructor_email"
                         placeholder="instructor@clsu.edu.ph"
                         required
                     />
@@ -42,7 +42,7 @@
                         Phone
                     </x-form.label>
                     <x-form.input
-                        wire:model.blur="lec_phone"
+                        wire:model.defer="lec_phone"
                         placeholder="09XX XXX XXXX"
                         required
                     />
@@ -53,7 +53,7 @@
                         Office
                     </x-form.label>
                     <x-form.input
-                        wire:model.blur="lec_office"
+                        wire:model.defer="lec_office"
                         placeholder="Building / Room"
                         required
                     />
@@ -67,7 +67,7 @@
                         Class Hours
                     </x-form.label>
                     <x-form.input
-                        wire:model.blur="lec_class_hours"
+                        wire:model.defer="lec_class_hours"
                         placeholder="e.g., 3 hours/week"
                         required
                     />
@@ -78,7 +78,7 @@
                         Schedule (Days / Times)
                     </x-form.label>
                     <x-form.input
-                        wire:model.blur="lec_schedule"
+                        wire:model.defer="lec_schedule"
                         placeholder="e.g., MWF 9:00–10:00"
                         required
                     />
@@ -89,7 +89,7 @@
                         Consultation Hours
                     </x-form.label>
                     <x-form.input
-                        wire:model.blur="lec_consultation_hours"
+                        wire:model.defer="lec_consultation_hours"
                         placeholder="e.g., MW 2:00–4:00 PM"
                         required
                     />
@@ -100,7 +100,7 @@
                             Performance Standard
                         </x-form.label>
                         <x-form.select
-                            wire:model.blur="lec_performance_standard"
+                            wire:model.defer="lec_performance_standard"
                             required
                         >
                             <option value="50%">50%</option>
@@ -128,7 +128,7 @@
                             Instructor Name
                         </x-form.label>
                         <x-form.input
-                            wire:model.blur="lab_instructor_name"
+                            wire:model.defer="lab_instructor_name"
                             placeholder="Enter instructor name"
                             required
                         />
@@ -140,7 +140,7 @@
                         </x-form.label>
                         <x-form.input
                             type="email"
-                            wire:model.blur="lab_instructor_email"
+                            wire:model.defer="lab_instructor_email"
                             placeholder="instructor@clsu.edu.ph"
                             required
                         />
@@ -151,7 +151,7 @@
                             Phone
                         </x-form.label>
                         <x-form.input
-                            wire:model.blur="lab_phone"
+                            wire:model.defer="lab_phone"
                             placeholder="09XX XXX XXXX"
                             required
                         />
@@ -162,7 +162,7 @@
                             Office
                         </x-form.label>
                         <x-form.input
-                            wire:model.blur="lab_office"
+                            wire:model.defer="lab_office"
                             placeholder="Building / Room"
                             required
                         />
@@ -176,7 +176,7 @@
                             Class Hours
                         </x-form.label>
                         <x-form.input
-                            wire:model.blur="lab_class_hours"
+                            wire:model.defer="lab_class_hours"
                             placeholder="e.g., 3 hours/week"
                             required
                         />
@@ -187,7 +187,7 @@
                             Schedule (Days / Times)
                         </x-form.label>
                         <x-form.input
-                            wire:model.blur="lab_schedule"
+                            wire:model.defer="lab_schedule"
                             placeholder="e.g., T 1:00–4:00 PM"
                             required
                         />
@@ -198,7 +198,7 @@
                             Consultation Hours
                         </x-form.label>
                         <x-form.input
-                            wire:model.blur="lab_consultation_hours"
+                            wire:model.defer="lab_consultation_hours"
                             placeholder="e.g., MW 2:00–4:00 PM"
                             required
                         />
@@ -209,7 +209,7 @@
                             Performance Standard
                         </x-form.label>
                         <x-form.select
-                            wire:model.blur="lab_performance_standard"
+                            wire:model.defer="lab_performance_standard"
                             required
                         >
                             <option value="50%">50%</option>

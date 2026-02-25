@@ -228,15 +228,8 @@ class SyllabusWizard extends Component
             return;
         }
 
-        // Only the course outcomes step requires explicit manual save before switching.
-        if ($fromStep === 'course_outcomes') {
-            $hasUnsavedCo = (bool) ($this->stepDirty['course_outcomes'] ?? false);
-            if ($hasUnsavedCo) {
-                $this->dispatch('lw-toast', type: 'warning', message: 'Save Course Outcomes first before proceeding.');
-                return;
-            }
-        }
-
+        // saveCurrentStep() is always called before navigateToStep(), so the save
+        // event is already dispatched. Let navigation proceed; the save runs in the background.
         $this->setStep($toStep);
     }
 

@@ -168,7 +168,27 @@ class WeeklyCoverageStep extends Component
             return;
         }
 
+        // Save previous week before switching
+        if ($this->activeWeekTab) {
+            $prevWeekNo = (int) str_replace('week_', '', (string) $this->activeWeekTab);
+            $this->saveWeeklyEntries($prevWeekNo);
+        }
+
         $this->activeWeekTab = $tab;
+        $this->dispatch('syllabus-step-saved', step: 'weekly_coverage', message: 'Week saved.');
+    }
+
+    /**
+     * Called from Alpine when switching accordion weeks.
+     * Receives all pending wire:model.defer values and saves only the specified week.
+     */
+    public function saveWeek(int $weekNo): void
+    {
+        if ($weekNo <= 0 || $this->syllabusWeeks->isEmpty()) {
+            return;
+        }
+
+        $this->saveWeeklyEntries($weekNo);
     }
 
     public function render()

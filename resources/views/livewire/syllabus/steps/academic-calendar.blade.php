@@ -8,7 +8,7 @@
         <x-form.label class="block mb-2">
             Academic Calendar <span class="text-red-600">*</span>
         </x-form.label>
-        <x-form.select wire:model.blur="academic_calendar_id"
+        <x-form.select wire:model.defer="academic_calendar_id"
             class="@error('academic_calendar_id') border-red-500 focus:border-red-500 focus:ring-red-200 @enderror"
             required>
             <option value="">-- Choose Academic Calendar --</option>

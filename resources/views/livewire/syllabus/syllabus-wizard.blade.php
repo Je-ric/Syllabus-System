@@ -65,6 +65,9 @@
         <div>
             @if($this->hasPreviousStep())
                 <x-button variant="cancel" wire:click="goPreviousStep" wire:loading.attr="disabled" wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview">
+                    <span wire:loading wire:target="goPreviousStep">
+                        <i class="bx bx-loader-alt bx-spin"></i> Saving...
+                    </span>
                     <i class="bx bx-chevron-left"></i> Previous
                 </x-button>
             @endif
@@ -73,6 +76,9 @@
         <div class="flex items-center gap-4">
             @if($this->hasNextStep())
                 <x-button variant="primary" wire:click="goNextStep" wire:loading.attr="disabled" wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview">
+                    <span wire:loading wire:target="goNextStep">
+                        <i class="bx bx-loader-alt bx-spin"></i> Saving...
+                    </span>
                     Next <i class="bx bx-chevron-right"></i>
                 </x-button>
             @else
