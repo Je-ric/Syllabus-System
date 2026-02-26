@@ -155,8 +155,7 @@
             <div class="mb-3 border-b border-slate-200">
                 <nav class="flex gap-2 text-xs">
                     @if ($hasLEC)
-                        <button type="button"
-                            wire:click="setComponentType('LEC')"
+                        <button type="button" wire:click="setComponentType('LEC')"
                             class="px-3 py-1.5 rounded-t-md border-b-2
                                 {{ $activeComponent === 'LEC' ? 'border-emerald-500 bg-emerald-50 text-emerald-700 font-semibold' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50' }}">
                             Lecture
@@ -164,8 +163,7 @@
                     @endif
 
                     @if ($hasLAB)
-                        <button type="button"
-                            wire:click="setComponentType('LAB')"
+                        <button type="button" wire:click="setComponentType('LAB')"
                             class="px-3 py-1.5 rounded-t-md border-b-2
                                 {{ $activeComponent === 'LAB' ? 'border-blue-500 bg-blue-50 text-blue-700 font-semibold' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50' }}">
                             Laboratory
@@ -290,58 +288,81 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="md:col-span-2">
-                                <x-form.label>Course Outcomes</x-form.label>
-                                <x-form.select wire:model="weekInputs.{{ $week->week_no }}.course_outcome_id">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Course Outcomes
+                                </label>
+                                <select
+                                    class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                                    wire:model.lazy="weekInputs.{{ $week->week_no }}.course_outcome_id">
                                     <option value="">Select Course Outcome</option>
                                     @foreach ($courseOutcomes as $outcome)
-                                        <option value="{{ $outcome['id'] }}">{{ $outcome['co_code'] }} -
+                                        <option value="{{ $outcome['id'] }}">
+                                            {{ $outcome['co_code'] }} -
                                             {{ \Illuminate\Support\Str::limit($outcome['description'], 50) }}
                                         </option>
                                     @endforeach
-                                </x-form.select>
+                                </select>
                             </div>
 
                             <div>
-                                <x-form.label>Unit Learning Outcomes</x-form.label>
-                                <x-form.textarea rows="3"
-                                    wire:model="weekInputs.{{ $week->week_no }}.learning_outcomes" />
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Unit Learning Outcomes
+                                </label>
+                                <textarea rows="3" class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                                    wire:model.lazy="weekInputs.{{ $week->week_no }}.learning_outcomes"></textarea>
                             </div>
 
                             <div>
-                                <x-form.label>Assessment Task</x-form.label>
-                                <x-form.textarea rows="3"
-                                    wire:model="weekInputs.{{ $week->week_no }}.assessment_task" />
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Assessment Task
+                                </label>
+                                <textarea rows="3" class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                                    wire:model.lazy="weekInputs.{{ $week->week_no }}.assessment_task"></textarea>
                             </div>
 
                             <div>
-                                <x-form.label>Topics</x-form.label>
-                                <x-form.textarea rows="3"
-                                    wire:model="weekInputs.{{ $week->week_no }}.topic" />
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Topics
+                                </label>
+                                <textarea rows="3" class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                                    wire:model.lazy="weekInputs.{{ $week->week_no }}.topic"></textarea>
                             </div>
 
                             <div>
-                                <x-form.label>Teaching and Learning Activities</x-form.label>
-                                <x-form.textarea rows="3"
-                                    wire:model="weekInputs.{{ $week->week_no }}.teaching_activities" />
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Teaching and Learning Activities
+                                </label>
+                                <textarea rows="3" class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                                    wire:model.lazy="weekInputs.{{ $week->week_no }}.teaching_activities"></textarea>
                             </div>
                         </div>
 
-                        <hr>
+                        <hr class="my-4">
 
                         <div class="flex flex-wrap gap-4">
                             <div class="w-full md:w-[48%]">
-                                <x-form.label>References</x-form.label>
-                                <x-form.input type="text"
-                                    wire:model="weekInputs.{{ $week->week_no }}.reference_text" />
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    References
+                                </label>
+                                <input type="text"
+                                    class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                                    wire:model.lazy="weekInputs.{{ $week->week_no }}.reference_text" />
                             </div>
 
                             <div class="w-full md:w-[48%]">
-                                <x-form.label>Online Material Name</x-form.label>
-                                <x-form.input type="text"
-                                    wire:model="weekInputs.{{ $week->week_no }}.material_name" />
-                                <x-form.label class="mt-2">Online Material URL</x-form.label>
-                                <x-form.input type="text"
-                                    wire:model="weekInputs.{{ $week->week_no }}.material_url" />
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Online Material Name
+                                </label>
+                                <input type="text"
+                                    class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                                    wire:model.lazy="weekInputs.{{ $week->week_no }}.material_name" />
+
+                                <label class="block text-sm font-medium text-gray-700 mt-3 mb-1">
+                                    Online Material URL
+                                </label>
+                                <input type="text"
+                                    class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                                    wire:model.lazy="weekInputs.{{ $week->week_no }}.material_url" />
                             </div>
                         </div>
 

@@ -21,8 +21,8 @@ class WeeklyCoverageStep extends Component
     public ?Syllabus $syllabus = null;
     public ?int $academic_calendar_id = null;
 
-    /** @var Collection<int, SyllabusWeek> */
-    public Collection $syllabusWeeks;
+    /** @var Collection<int, SyllabusWeek> NOT a public Livewire property — reloaded fresh each request */
+    protected Collection $syllabusWeeks;
     public array $weekEvents = [];
     public array $examWeeks = [];
     public ?string $activeWeekTab = null;
@@ -37,10 +37,42 @@ class WeeklyCoverageStep extends Component
         $this->syllabusWeeks = collect();
     }
 
-    public function mount(int $syllabusId): void
+    /**
+     * Always returns a fresh Collection from DB — never relies on Livewire rehydration.
+     */
+    private function getWeeks(): Collection
+    {
+        if ($this->syllabusWeeks->isEmpty()) {
+            $this->syllabusWeeks = SyllabusWeek::query()
+                ->where('syllabus_id', $this->syllabusId)
+                ->orderBy('week_no')
+                ->get();
+        }
+        return $this->syllabusWeeks;
+    }
+
+
+    public function mount(int $syllabusId)
     {
         $this->syllabusId = $syllabusId;
-        $this->loadData();
+
+        foreach ($this->syllabusWeeks as $week) {
+            // Get the existing LEC or LAB entry for the week
+            $content = $week->weekContents()
+                ->where('component_type', $this->activeComponent ?? 'LEC')
+                ->first();
+
+            $this->weekInputs[$week->week_no] = [
+                'course_outcome_id' => $content->course_outcome_id ?? null,
+                'learning_outcomes' => $content->learning_outcomes ?? '',
+                'assessment_task' => $content->assessment_task ?? '',
+                'topic' => $content->topics ?? '',
+                'teaching_activities' => $content->tla ?? '',
+                'reference_text' => $week->reference?->reference_text ?? '',
+                'material_name' => $week->onlineMaterial?->material_name ?? '',
+                'material_url' => $week->onlineMaterial?->material_url ?? '',
+            ];
+        }
     }
 
     #[On('syllabus-step-changed')]
@@ -186,20 +218,17 @@ class WeeklyCoverageStep extends Component
      */
     public function saveWeek(int $weekNo): void
     {
-        Log::info('[WeeklyCoverageStep] saveWeek called', [
-            'syllabusId' => $this->syllabusId,
-            'weekNo' => $weekNo,
-            'syllabusWeeksCount' => $this->syllabusWeeks->count(),
-            'weekInputs' => $this->weekInputs[$weekNo] ?? null,
-        ]);
-        if ($weekNo <= 0 || $this->syllabusWeeks->isEmpty()) {
-            Log::warning('[WeeklyCoverageStep] saveWeek aborted: invalid week or empty collection', [
-                'syllabusId' => $this->syllabusId,
-                'weekNo' => $weekNo,
-            ]);
+        if ($weekNo <= 0) {
+            Log::debug('[WeeklyCoverageStep] saveWeek: invalid weekNo', ['weekNo' => $weekNo]);
             return;
         }
 
+        Log::debug('[WeeklyCoverageStep] saveWeek: called', [
+            'weekNo' => $weekNo,
+            'payload' => $this->weekInputs[(string)$weekNo] ?? null,
+        ]);
+
+        // saveWeeklyEntries() always reloads weeks from DB — no pre-check needed here
         $this->saveWeeklyEntries($weekNo);
     }
 
@@ -208,14 +237,13 @@ class WeeklyCoverageStep extends Component
      */
     public function saveAllWeeklyEntries(): void
     {
-        Log::info('[WeeklyCoverageStep] saveAllWeeklyEntries called', [
-            'syllabusId' => $this->syllabusId,
-            'weekInputs' => $this->weekInputs,
-        ]);
-        // First save all the weekly entries
-        $this->saveWeeklyEntries();
+        dd($this->weekInputs);
+        // Ensure syllabus is loaded
+        // if (!$this->syllabus) {
+        //     $this->syllabus = Syllabus::with('academicCalendar')->findOrFail($this->syllabusId);
+        // }
 
-        // Then refresh the data to ensure UI stays in sync
+        $this->saveWeeklyEntries();
         $this->refreshWeeklyCoverage(false);
         $this->populateWeekInputs();
 
@@ -224,7 +252,16 @@ class WeeklyCoverageStep extends Component
 
     public function render()
     {
-        return view('livewire.syllabus.steps.weekly-coverage');
+        // Always fetch fresh — protected Collection is not persisted across Livewire requests
+        $this->syllabusWeeks = SyllabusWeek::query()
+            ->where('syllabus_id', $this->syllabusId)
+            ->orderBy('week_no')
+            ->get();
+        $this->weeksGenerated = $this->syllabusWeeks->isNotEmpty();
+
+        return view('livewire.syllabus.steps.weekly-coverage', [
+            'syllabusWeeks' => $this->syllabusWeeks,
+        ]);
     }
 
     private function loadData(bool $force = false): void
@@ -267,7 +304,9 @@ class WeeklyCoverageStep extends Component
             ])->all();
 
         $this->refreshWeeklyCoverage(false);
-        $this->populateWeekInputs();
+        if ($force || empty($this->weekInputs)) {
+            $this->populateWeekInputs();
+        }
         $this->isLoaded = true;
         Log::info('[WeeklyCoverageStep] loadData finished', [
             'syllabusWeeksCount' => $this->syllabusWeeks->count(),
@@ -442,6 +481,25 @@ class WeeklyCoverageStep extends Component
 
         $this->activeComponent = $type;
         $this->populateWeekInputs();
+
+        $this->activeComponent = $type;
+
+        foreach ($this->syllabusWeeks as $week) {
+            $content = $week->weekContents()
+                ->where('component_type', $type)
+                ->first();
+
+            $this->weekInputs[$week->week_no] = [
+                'course_outcome_id' => $content->course_outcome_id ?? null,
+                'learning_outcomes' => $content->learning_outcomes ?? '',
+                'assessment_task' => $content->assessment_task ?? '',
+                'topic' => $content->topics ?? '',
+                'teaching_activities' => $content->tla ?? '',
+                'reference_text' => $week->reference?->reference_text ?? '',
+                'material_name' => $week->onlineMaterial?->material_name ?? '',
+                'material_url' => $week->onlineMaterial?->material_url ?? '',
+            ];
+        }
     }
 
     private function populateWeekInputs(): void
@@ -495,21 +553,37 @@ class WeeklyCoverageStep extends Component
 
     private function saveWeeklyEntries(?int $onlyWeekNo = null): void
     {
-        // Always reload weeks before saving
-        $this->loadWeeks();
+        if (!$this->syllabus) {
+            $this->syllabus = Syllabus::findOrFail($this->syllabusId);
+        }
+
+        // Always reload fresh from DB — Collection is NOT rehydrated by Livewire across requests
+        $this->syllabusWeeks = SyllabusWeek::query()
+            ->where('syllabus_id', $this->syllabusId)
+            ->orderBy('week_no')
+            ->get();
+
         Log::info('[WeeklyCoverageStep] saveWeeklyEntries called', [
-            'syllabusId' => $this->syllabusId,
-            'onlyWeekNo' => $onlyWeekNo,
+            'syllabusId'        => $this->syllabusId,
+            'onlyWeekNo'        => $onlyWeekNo,
             'syllabusWeeksCount' => $this->syllabusWeeks->count(),
+            'weekInputs'        => $this->weekInputs,
         ]);
 
         if ($this->syllabusWeeks->isEmpty()) {
+            Log::warning('[WeeklyCoverageStep] saveWeeklyEntries: no weeks found in DB', [
+                'syllabusId' => $this->syllabusId,
+            ]);
             return;
         }
 
         foreach ($this->syllabusWeeks as $week) {
             if ($onlyWeekNo && $week->week_no != $onlyWeekNo) continue;
             $payload = $this->weekInputs[(string) $week->week_no] ?? [];
+            Log::debug('[WeeklyCoverageStep] saveWeeklyEntries: processing week', [
+                'week_no' => $week->week_no,
+                'payload' => $payload,
+            ]);
             // Always save a WeekContent row for each week/component
             $courseOutcomeId = null;
             if (isset($payload['course_outcome_id']) && $payload['course_outcome_id'] !== '' && $payload['course_outcome_id'] !== null) {
@@ -519,6 +593,16 @@ class WeeklyCoverageStep extends Component
             $assessmentTask   = trim((string) ($payload['assessment_task'] ?? ''));
             $topic            = trim((string) ($payload['topic'] ?? ''));
             $tla              = trim((string) ($payload['teaching_activities'] ?? $payload['tla'] ?? ''));
+
+            Log::debug('[WeeklyCoverageStep] saveWeeklyEntries: upserting WeekContent', [
+                'syllabus_week_id' => $week->id,
+                'component_type' => $this->activeComponent,
+                'course_outcome_id' => $courseOutcomeId,
+                'learning_outcomes' => $learningOutcomes,
+                'assessment_task' => $assessmentTask,
+                'topics' => $topic,
+                'tla' => $tla,
+            ]);
 
             WeekContent::query()->updateOrCreate(
                 [
@@ -536,6 +620,10 @@ class WeeklyCoverageStep extends Component
 
             // Per-week reference
             $referenceText = trim((string) ($payload['reference_text'] ?? ''));
+            Log::debug('[WeeklyCoverageStep] saveWeeklyEntries: upserting Reference', [
+                'syllabus_week_id' => $week->id,
+                'reference_text' => $referenceText,
+            ]);
             Reference::query()
                 ->where('syllabus_id', $this->syllabusId)
                 ->where('syllabus_week_id', $week->id)
@@ -551,6 +639,11 @@ class WeeklyCoverageStep extends Component
             // Per-week material
             $materialName = trim((string) ($payload['material_name'] ?? ''));
             $materialUrl  = trim((string) ($payload['material_url']  ?? ''));
+            Log::debug('[WeeklyCoverageStep] saveWeeklyEntries: upserting OnlineMaterial', [
+                'syllabus_week_id' => $week->id,
+                'material_name' => $materialName,
+                'material_url' => $materialUrl,
+            ]);
             OnlineMaterial::query()
                 ->where('syllabus_id', $this->syllabusId)
                 ->where('syllabus_week_id', $week->id)
@@ -567,24 +660,16 @@ class WeeklyCoverageStep extends Component
     }
 
     // Autosave disabled - saving now happens when switching steps via onSaveRequested
-    // public function updatedWeekInputs($value, $key): void
-    // {
-    //     if (!$this->isLoaded) {
-    //         return;
-    //     }
+    public function updatedWeekInputs($value, $key): void
+    {
+        if (!$this->isLoaded) return;
 
-    //     // $key format: "weekInputs.{weekNo}.field"
-    //     $parts = explode('.', (string) $key);
-    //     if (count($parts) < 3) {
-    //         return;
-    //     }
+        $parts = explode('.', $key); // weekInputs.{weekNo}.field
+        if (count($parts) < 3) return;
 
-    //     $weekNo = (int) $parts[1];
-    //     if ($weekNo <= 0) {
-    //         return;
-    //     }
+        $weekNo = (int) $parts[1];
+        if ($weekNo <= 0) return;
 
-    //     $this->saveWeeklyEntries($weekNo);
-    //     $this->dispatch('syllabus-step-saved', step: 'weekly_coverage');
-    // }
+        $this->saveWeeklyEntries($weekNo);
+    }
 }
