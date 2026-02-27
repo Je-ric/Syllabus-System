@@ -6,6 +6,9 @@
 </head>
 
 <body class="min-h-screen">
+    
+    {{-- <x-screen-loader /> --}}
+
     @php
         $isWizardRoute = request()->routeIs('syllabus.wizard');
     @endphp

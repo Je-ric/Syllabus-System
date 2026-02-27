@@ -15,8 +15,8 @@
                         @if (! $academic_calendar_id) disabled @endif
                         wire:loading.attr="disabled" wire:target="generateWeeklyCoverage"
                         class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg
-                               border border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100
-                               disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 disabled:cursor-not-allowed">
+                                border border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100
+                                disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 disabled:cursor-not-allowed">
                         <span wire:loading.remove wire:target="generateWeeklyCoverage">
                             <i class="bx bx-calendar-plus"></i> Generate Weeks
                         </span>
@@ -29,8 +29,8 @@
                         wire:loading.attr="disabled" wire:target="regenerateWeeks"
                         wire:confirm="This will delete all existing weeks and recreate them. All content will be lost. Continue?"
                         class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg
-                               border border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100
-                               disabled:opacity-60 disabled:cursor-not-allowed">
+                                border border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100
+                                disabled:opacity-60 disabled:cursor-not-allowed">
                         <span wire:loading.remove wire:target="regenerateWeeks">
                             <i class="bx bx-refresh"></i> Regenerate Weeks
                         </span>
@@ -42,8 +42,8 @@
                     <button type="button" wire:click="saveAllWeeklyEntries"
                         wire:loading.attr="disabled" wire:target="saveAllWeeklyEntries"
                         class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg
-                               border border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100
-                               disabled:opacity-60 disabled:cursor-not-allowed">
+                                border border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100
+                                disabled:opacity-60 disabled:cursor-not-allowed">
                         <span wire:loading.remove wire:target="saveAllWeeklyEntries">
                             <i class="bx bx-save"></i> Save All
                         </span>
@@ -151,8 +151,8 @@
                         @if ($activeComponent === 'LEC')
                             <span wire:loading wire:target="setComponentType('LAB')"
                                 class="absolute -top-1.5 -right-1.5 flex items-center gap-0.5
-                                       bg-amber-100 text-amber-700 text-[10px] font-semibold
-                                       px-1.5 py-0.5 rounded-full border border-amber-200">
+                                        bg-amber-100 text-amber-700 text-[10px] font-semibold
+                                        px-1.5 py-0.5 rounded-full border border-amber-200">
                                 <i class="bx bx-loader-alt bx-spin text-[10px]"></i> saving
                             </span>
                         @endif
@@ -177,8 +177,8 @@
                         @if ($activeComponent === 'LAB')
                             <span wire:loading wire:target="setComponentType('LEC')"
                                 class="absolute -top-1.5 -right-1.5 flex items-center gap-0.5
-                                       bg-amber-100 text-amber-700 text-[10px] font-semibold
-                                       px-1.5 py-0.5 rounded-full border border-amber-200">
+                                        bg-amber-100 text-amber-700 text-[10px] font-semibold
+                                        px-1.5 py-0.5 rounded-full border border-amber-200">
                                 <i class="bx bx-loader-alt bx-spin text-[10px]"></i> saving
                             </span>
                         @endif
@@ -187,7 +187,7 @@
 
                 {{-- Inline status bar shown during any setComponentType request --}}
                 <div wire:loading wire:target="setComponentType"
-                     class="mt-2 flex items-center gap-1.5 text-xs text-slate-400">
+                    class="mt-2 flex items-center gap-1.5 text-xs text-slate-400">
                     <i class="bx bx-loader-alt bx-spin"></i>
                     Saving current data and loading {{ $activeComponent === 'LEC' ? 'Laboratory' : 'Lecture' }} content…
                 </div>
@@ -223,8 +223,8 @@
                         }
                     });
                 }
-             }"
-             class="rounded-xl border border-slate-200 bg-white shadow-sm divide-y divide-slate-100">
+            }"
+            class="rounded-xl border border-slate-200 bg-white shadow-sm divide-y divide-slate-100">
 
             @foreach ($syllabusWeeks as $week)
                 @php

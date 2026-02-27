@@ -9,11 +9,11 @@ use Livewire\Component;
 
 class CourseOutcomesStep extends Component
 {
-    public int $syllabusId;
-    public bool $isLoaded = false;
-    public array $courseOutcomes = [];
-    public array $programOutcomes = [];
-    public ?string $coAddError = null;
+    public int    $syllabusId;
+    public bool   $isLoaded       = false;
+    public array  $courseOutcomes  = [];
+    public array  $programOutcomes = [];
+    public ?string $coAddError    = null;
 
     public function mount(int $syllabusId): void
     {
@@ -27,7 +27,6 @@ class CourseOutcomesStep extends Component
         if ($step !== 'course_outcomes') {
             return;
         }
-
         $this->loadData();
     }
 
@@ -44,9 +43,14 @@ class CourseOutcomesStep extends Component
         }
     }
 
+    /**
+     * Called by the Alpine blur handler via $wire.set().
+     * Livewire calls updatedCourseOutcomes() after any $wire.set() on the array.
+     * We only need to mark the step dirty — no save, no rerender cascade.
+     */
     public function updatedCourseOutcomes(): void
     {
-        if (!$this->isLoaded) {
+        if (! $this->isLoaded) {
             return;
         }
 
@@ -69,9 +73,9 @@ class CourseOutcomesStep extends Component
         }
 
         $this->courseOutcomes[] = [
-            'id' => null,
+            'id'       => null,
             'temp_key' => $this->newOutcomeTempKey(),
-            'co_code' => 'CO' . (count($this->courseOutcomes) + 1),
+            'co_code'  => 'CO' . (count($this->courseOutcomes) + 1),
             'description' => '',
         ];
 
@@ -82,7 +86,7 @@ class CourseOutcomesStep extends Component
     public function removeCourseOutcome(int $index): void
     {
         $this->loadData();
-        if (!isset($this->courseOutcomes[$index])) {
+        if (! isset($this->courseOutcomes[$index])) {
             return;
         }
 
@@ -96,6 +100,8 @@ class CourseOutcomesStep extends Component
         return view('livewire.syllabus.steps.course-outcomes');
     }
 
+    // ── Private ───────────────────────────────────────────────────────────────
+
     private function loadData(): void
     {
         if ($this->isLoaded) {
@@ -106,10 +112,10 @@ class CourseOutcomesStep extends Component
             ->where('syllabus_id', $this->syllabusId)
             ->orderBy('co_code')
             ->get()
-            ->map(fn($co) => [
-                'id' => $co->id,
-                'temp_key' => 'co_' . $co->id,
-                'co_code' => $co->co_code,
+            ->map(fn ($co) => [
+                'id'          => $co->id,
+                'temp_key'    => 'co_' . $co->id,
+                'co_code'     => $co->co_code,
                 'description' => $co->description,
             ])->values()->all();
 
@@ -118,13 +124,13 @@ class CourseOutcomesStep extends Component
             ->findOrFail($this->syllabusId);
 
         $coursePoIedById = $syllabus->course?->programOutcomes
-            ?->mapWithKeys(fn($po) => [(int) $po->id => (string) ($po->pivot?->ied ?? '')]) ?? collect();
+            ?->mapWithKeys(fn ($po) => [(int) $po->id => (string) ($po->pivot?->ied ?? '')]) ?? collect();
 
         $this->programOutcomes = $syllabus->course?->program?->outcomes
-            ?->map(fn($po) => [
+            ?->map(fn ($po) => [
                 'po_code' => $po->po_code,
                 'po_text' => $po->po_text,
-                'ied' => $coursePoIedById->get((int) $po->id, ''),
+                'ied'     => $coursePoIedById->get((int) $po->id, ''),
             ])->values()->all() ?? [];
 
         $this->resequenceCourseOutcomes();
@@ -139,7 +145,7 @@ class CourseOutcomesStep extends Component
         foreach ($this->courseOutcomes as $i => $outcome) {
             $this->courseOutcomes[$i]['co_code'] = 'CO' . ($i + 1);
             if (empty($this->courseOutcomes[$i]['temp_key'])) {
-                $this->courseOutcomes[$i]['temp_key'] = !empty($outcome['id'])
+                $this->courseOutcomes[$i]['temp_key'] = ! empty($outcome['id'])
                     ? 'co_' . $outcome['id']
                     : $this->newOutcomeTempKey();
             }
@@ -151,7 +157,7 @@ class CourseOutcomesStep extends Component
             ->keyBy('id');
 
         $validDescriptions = collect($this->courseOutcomes)
-            ->filter(fn($co) => trim((string) ($co['description'] ?? '')) !== '')
+            ->filter(fn ($co) => trim((string) ($co['description'] ?? '')) !== '')
             ->values();
 
         if ($existingCos->isNotEmpty() && $validDescriptions->isEmpty()) {
@@ -163,7 +169,7 @@ class CourseOutcomesStep extends Component
         $submittedIds = collect($this->courseOutcomes)
             ->pluck('id')
             ->filter()
-            ->map(fn($id) => (int) $id)
+            ->map(fn ($id) => (int) $id)
             ->values()
             ->all();
 
@@ -175,8 +181,9 @@ class CourseOutcomesStep extends Component
                 ->delete();
         }
 
-        $saved = false;
+        $saved            = false;
         $hasValidOutcomes = false;
+
         foreach ($this->courseOutcomes as $index => $outcome) {
             $description = trim((string) ($outcome['description'] ?? ''));
             if ($description === '') {
@@ -184,16 +191,13 @@ class CourseOutcomesStep extends Component
             }
 
             $hasValidOutcomes = true;
-            $coCode = $this->courseOutcomes[$index]['co_code'];
+            $coCode           = $this->courseOutcomes[$index]['co_code'];
 
-            if (!empty($outcome['id']) && $existingCos->has((int) $outcome['id'])) {
-                $co = $existingCos[(int) $outcome['id']];
+            if (! empty($outcome['id']) && $existingCos->has((int) $outcome['id'])) {
+                $co         = $existingCos[(int) $outcome['id']];
                 $hasChanged = $co->co_code !== $coCode || trim((string) $co->description) !== $description;
                 if ($hasChanged) {
-                    $co->update([
-                        'co_code' => $coCode,
-                        'description' => $description,
-                    ]);
+                    $co->update(['co_code' => $coCode, 'description' => $description]);
                     $saved = true;
                 }
                 continue;
@@ -201,11 +205,11 @@ class CourseOutcomesStep extends Component
 
             $created = CourseOutcome::create([
                 'syllabus_id' => $this->syllabusId,
-                'co_code' => $coCode,
+                'co_code'     => $coCode,
                 'description' => $description,
             ]);
 
-            $this->courseOutcomes[$index]['id'] = $created->id;
+            $this->courseOutcomes[$index]['id']       = $created->id;
             $this->courseOutcomes[$index]['temp_key'] = 'co_' . $created->id;
             $saved = true;
         }
@@ -228,11 +232,11 @@ class CourseOutcomesStep extends Component
         foreach ($this->courseOutcomes as $i => $outcome) {
             $this->courseOutcomes[$i]['co_code'] = 'CO' . ($i + 1);
             if (empty($this->courseOutcomes[$i]['temp_key'])) {
-                $this->courseOutcomes[$i]['temp_key'] = !empty($outcome['id'])
+                $this->courseOutcomes[$i]['temp_key'] = ! empty($outcome['id'])
                     ? 'co_' . $outcome['id']
                     : $this->newOutcomeTempKey();
             }
-            if (!array_key_exists('description', $this->courseOutcomes[$i])) {
+            if (! array_key_exists('description', $this->courseOutcomes[$i])) {
                 $this->courseOutcomes[$i]['description'] = '';
             }
         }
@@ -245,7 +249,6 @@ class CourseOutcomesStep extends Component
                 return true;
             }
         }
-
         return false;
     }
 }
