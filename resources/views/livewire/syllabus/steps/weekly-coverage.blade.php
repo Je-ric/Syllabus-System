@@ -67,14 +67,14 @@
                                 <div>
                                     <div class="font-semibold text-emerald-700 mb-0.5">Lecture (LEC)</div>
                                     <div class="text-slate-600">{{ $courseComponents['LEC']['schedule'] ?? 'N/A' }}</div>
-                                    <div class="text-slate-500">{{ $courseComponents['LEC']['class_hours'] ?? '—' }} hrs/week</div>
+                                    <div class="text-slate-500">{{ $courseComponents['LEC']['class_hours'] ?? '—' }} hours</div>
                                 </div>
                             @endif
                             @if ($hasLAB)
                                 <div>
                                     <div class="font-semibold text-blue-700 mb-0.5">Laboratory (LAB)</div>
                                     <div class="text-slate-600">{{ $courseComponents['LAB']['schedule'] ?? 'N/A' }}</div>
-                                    <div class="text-slate-500">{{ $courseComponents['LAB']['class_hours'] ?? '—' }} hrs/week</div>
+                                    <div class="text-slate-500">{{ $courseComponents['LAB']['class_hours'] ?? '—' }} hours</div>
                                 </div>
                             @endif
                         </div>
@@ -254,30 +254,32 @@
                             hover:bg-slate-50 transition-colors duration-100 focus:outline-none">
 
                         {{-- LEFT SIDE --}}
-                        <div class="flex items-center gap-3 min-w-0">
+                        <div class="flex items-center justify-between gap-4 min-w-0">
+                            <div class="flex items-center gap-3 min-w-0">
+                                {{-- Week number badge --}}
+                                <span @class([
+                                    'inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold shrink-0',
+                                    'bg-red-100 text-red-700 ring-1 ring-red-200' => $week->is_exam_week,
+                                    'bg-slate-100 text-slate-600' => ! $week->is_exam_week,
+                                ])>
+                                    {{ $week->week_no }}
+                                </span>
 
-                            {{-- Week number badge --}}
-                            <span @class([
-                                'inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold shrink-0',
-                                'bg-red-100 text-red-700 ring-1 ring-red-200' => $week->is_exam_week,
-                                'bg-slate-100 text-slate-600'                 => ! $week->is_exam_week,
-                            ])>
-                                {{ $week->week_no }}
-                            </span>
+                                <div class="flex items-center gap-2 min-w-0">
+                                    <span class="font-semibold text-sm text-slate-800 shrink-0">
+                                        Week {{ $week->week_no }}
+                                    </span>
 
-                            <div class="min-w-0">
-                                <div class="font-semibold text-sm text-slate-800">
-                                    Week {{ $week->week_no }}
-                                    <span class="text-xs text-slate-400">
+                                    <span class="text-xs text-slate-400 shrink-0">
                                         ({{ $start->format('M d') }} – {{ $end->format('M d, Y') }})
                                     </span>
-                                </div>
 
-                                @if ($savedTopic)
-                                    <div class="text-xs text-slate-400 truncate max-w-xs hidden md:block">
-                                        {{ \Illuminate\Support\Str::limit($savedTopic, 55) }}
-                                    </div>
-                                @endif
+                                    @if ($savedTopic)
+                                        <span class="text-xs text-slate-400 truncate max-w-xs hidden md:block">
+                                            — {{ \Illuminate\Support\Str::limit($savedTopic, 55) }}
+                                        </span>
+                                    @endif
+                                </div>
                             </div>
                         </div>
 

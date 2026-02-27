@@ -11,26 +11,16 @@ use Livewire\Component;
 
 class AcademicCalendarStep extends Component
 {
-    public int $syllabusId;
-    public ?int $academic_calendar_id = null;
-    public $academicCalendars = [];
-    public bool $isLoaded = false;
-
-    // public function mount(int $syllabusId, bool $isActive = false): void
-    // {
-    //     $this->syllabusId = $syllabusId;
-
-    //     if ($isActive) {
-    //         $this->loadData();
-    //     }
-    // }
+    public int    $syllabusId;
+    public ?int   $academic_calendar_id = null;
+    public array  $academicCalendars    = [];   // plain arrays, not Eloquent models
+    public bool   $isLoaded             = false;
 
     public function mount(int $syllabusId): void
     {
         $this->syllabusId = $syllabusId;
         $this->loadData();
     }
-
 
     #[On('syllabus-step-changed')]
     public function onStepChanged(string $step): void
@@ -57,7 +47,7 @@ class AcademicCalendarStep extends Component
 
     public function updatedAcademicCalendarId(): void
     {
-        if (!$this->isLoaded) {
+        if (! $this->isLoaded) {
             return;
         }
 
@@ -79,12 +69,24 @@ class AcademicCalendarStep extends Component
         }
 
         $syllabus = Syllabus::query()->findOrFail($this->syllabusId);
-        $this->academic_calendar_id = $syllabus->academic_calendar_id ? (int) $syllabus->academic_calendar_id : null;
 
+        $this->academic_calendar_id = $syllabus->academic_calendar_id
+            ? (int) $syllabus->academic_calendar_id
+            : null;
+
+        // Store as plain arrays — Livewire serialises these cheaply.
+        // Storing Eloquent model collections bloats the snapshot JSON
+        // and slows every subsequent request for this component.
         $this->academicCalendars = AcademicCalendar::query()
             ->orderBy('academic_year', 'desc')
             ->orderBy('semester', 'desc')
-            ->get();
+            ->get()
+            ->map(fn ($c) => [
+                'id'               => $c->id,
+                'academic_year'    => $c->academic_year,
+                'formatted_semester' => $c->getFormattedSemester(),
+            ])
+            ->all();
 
         $this->isLoaded = true;
     }
@@ -99,18 +101,16 @@ class AcademicCalendarStep extends Component
                     'required',
                     'exists:academic_calendars,id',
                     Rule::unique('syllabi', 'academic_calendar_id')
-                        ->where(fn($query) => $query->where('course_id', $syllabus->course_id))
+                        ->where(fn ($q) => $q->where('course_id', $syllabus->course_id))
                         ->ignore($syllabus->id),
                 ],
             ]);
-        } catch (ValidationException $exception) {
-            $this->dispatch('lw-toast', type: 'error', message: $exception->validator->errors()->first());
+        } catch (ValidationException $e) {
+            $this->dispatch('lw-toast', type: 'error', message: $e->validator->errors()->first());
             return false;
         }
 
-        $syllabus->update([
-            'academic_calendar_id' => $this->academic_calendar_id,
-        ]);
+        $syllabus->update(['academic_calendar_id' => $this->academic_calendar_id]);
 
         return true;
     }

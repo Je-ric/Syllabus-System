@@ -11,29 +11,27 @@
     </x-header-with-button>
 
     {{-- ══ Full-screen saving overlay ══════════════════════════════════════════
-        Shown during ANY navigation action (next / prev / tab click).
-        Uses a backdrop blur so the page content is still visible but clearly
-        "locked" while the save + step transition runs.
+        Shown only during goNextStep / goPreviousStep / clickTab.
+        Disappears the instant Livewire delivers the re-render — which is now
+        fast because no child component is remounted.
     ──────────────────────────────────────────────────────────────────────────── --}}
-    <div wire:loading
+    <div
+        wire:loading.flex
         wire:target="goNextStep,goPreviousStep,clickTab"
-        class="fixed inset-0 z-50 flex flex-col items-center justify-center
-                bg-white/70 backdrop-blur-sm">
+        class="fixed inset-0 z-9999 hidden items-center justify-center bg-white/70 backdrop-blur-sm">
         <div class="flex flex-col items-center gap-4 px-8 py-6 bg-white rounded-2xl shadow-2xl border border-slate-100">
             <div class="relative w-12 h-12">
-                {{-- Spinning ring --}}
                 <svg class="absolute inset-0 animate-spin text-blue-500" viewBox="0 0 48 48" fill="none">
-                    <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="4" stroke-linecap="round"
-                            stroke-dasharray="100" stroke-dashoffset="60" />
+                    <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="4"
+                            stroke-linecap="round" stroke-dasharray="100" stroke-dashoffset="60" />
                 </svg>
-                {{-- Inner dot --}}
                 <span class="absolute inset-0 flex items-center justify-center">
                     <span class="w-3 h-3 rounded-full bg-blue-600 animate-pulse"></span>
                 </span>
             </div>
             <div class="text-center">
-                <p class="text-sm font-semibold text-slate-700">Saving &amp; navigating…</p>
-                <p class="text-xs text-slate-400 mt-0.5">Please wait a moment</p>
+                <p class="text-sm font-semibold text-slate-700">Saving &amp; switching…</p>
+                <p class="text-xs text-slate-400 mt-0.5">Just a moment</p>
             </div>
         </div>
     </div>
@@ -60,11 +58,7 @@
                                     : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50') }}
                             disabled:opacity-50 disabled:cursor-not-allowed">
                     <span class="w-7 h-7 rounded-full flex items-center justify-center font-semibold text-xs shrink-0
-                        {{ $isCurrent
-                            ? 'bg-blue-600 text-white'
-                            : ($isCompleted
-                                ? 'bg-green-500 text-white'
-                                : 'bg-slate-200 text-slate-600') }}">
+                                {{ $isCurrent ? 'bg-blue-600 text-white' : ($isCompleted ? 'bg-green-500 text-white' : 'bg-slate-200 text-slate-600') }}">
                         @if($isCompleted)
                             <i class="bx bx-check text-sm"></i>
                         @else
@@ -77,24 +71,42 @@
         </nav>
     </div>
 
-    {{-- ══ Step content ════════════════════════════════════════════════════════ --}}
-    <div class="bg-white border border-slate-200 rounded-xl p-5 sm:p-6 shadow-sm">
-        @if($currentStep === 'academic_calendar')
-            <livewire:syllabus.steps.academic-calendar-step :syllabus-id="$syllabus->id"
-                :key="'academic-calendar-step-' . $syllabus->id . '-' . $currentStep" />
-        @elseif($currentStep === 'course_components')
-            <livewire:syllabus.steps.components-step :syllabus-id="$syllabus->id"
-                :key="'components-step-' . $syllabus->id . '-' . $currentStep" />
-        @elseif($currentStep === 'course_outcomes')
-            <livewire:syllabus.steps.course-outcomes-step :syllabus-id="$syllabus->id"
-                :key="'course-outcomes-step-' . $syllabus->id . '-' . $currentStep" />
-        @elseif($currentStep === 'weekly_coverage')
-            <livewire:syllabus.steps.weekly-coverage-step :syllabus-id="$syllabus->id"
-                :key="'weekly-coverage-step-' . $syllabus->id . '-' . $currentStep" />
-        @elseif($currentStep === 'review')
-            <livewire:syllabus.steps.review-step :syllabus-id="$syllabus->id"
-                :key="'review-step-' . $syllabus->id . '-' . $currentStep" />
-        @endif
+    {{-- ══ Step content ════════════════════════════════════════════════════════
+        CRITICAL: No :key attribute on any child component.
+        Without :key, Livewire keeps the component mounted in memory for the
+        entire page session. Switching steps just shows/hides the wrapper div —
+        zero remount, zero cold-boot DB queries, instant perceived transition.
+
+        Each child listens to 'syllabus-save-step' and only acts on its own step.
+        The wizard's saveAndNavigate() dispatches the save event + changes
+        $currentStep in ONE round trip, so the UI updates immediately.
+    ──────────────────────────────────────────────────────────────────────────── --}}
+    <div class="bg-white border border-slate-200 rounded-xl shadow-sm">
+
+        {{-- Academic Calendar --}}
+        <div class="{{ $currentStep === 'academic_calendar' ? 'block' : 'hidden' }} p-5 sm:p-6">
+            <livewire:syllabus.steps.academic-calendar-step :syllabus-id="$syllabus->id" />
+        </div>
+
+        {{-- Course Components --}}
+        <div class="{{ $currentStep === 'course_components' ? 'block' : 'hidden' }} p-5 sm:p-6">
+            <livewire:syllabus.steps.components-step :syllabus-id="$syllabus->id" />
+        </div>
+
+        {{-- Course Outcomes --}}
+        <div class="{{ $currentStep === 'course_outcomes' ? 'block' : 'hidden' }} p-5 sm:p-6">
+            <livewire:syllabus.steps.course-outcomes-step :syllabus-id="$syllabus->id" />
+        </div>
+
+        {{-- Weekly Coverage --}}
+        <div class="{{ $currentStep === 'weekly_coverage' ? 'block' : 'hidden' }} p-5 sm:p-6">
+            <livewire:syllabus.steps.weekly-coverage-step :syllabus-id="$syllabus->id" />
+        </div>
+
+        {{-- Review --}}
+        <div class="{{ $currentStep === 'review' ? 'block' : 'hidden' }} p-5 sm:p-6">
+            <livewire:syllabus.steps.review-step :syllabus-id="$syllabus->id" />
+        </div>
     </div>
 
     {{-- ══ Bottom navigation ════════════════════════════════════════════════════ --}}
