@@ -250,68 +250,81 @@
                     {{-- ── Accordion Header ──────────────────────────────────── --}}
                     <button type="button"
                         @click="openWeek = openWeek === {{ $week->week_no }} ? null : {{ $week->week_no }}"
-                        class="w-full flex items-center justify-between px-5 py-3.5 text-left
-                               hover:bg-slate-50 transition-colors duration-100 focus:outline-none">
+                        class="w-full flex items-center px-5 py-3.5
+                            hover:bg-slate-50 transition-colors duration-100 focus:outline-none">
 
+                        {{-- LEFT SIDE --}}
                         <div class="flex items-center gap-3 min-w-0">
+
                             {{-- Week number badge --}}
                             <span @class([
                                 'inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold shrink-0',
                                 'bg-red-100 text-red-700 ring-1 ring-red-200' => $week->is_exam_week,
                                 'bg-slate-100 text-slate-600'                 => ! $week->is_exam_week,
-                            ])>{{ $week->week_no }}</span>
+                            ])>
+                                {{ $week->week_no }}
+                            </span>
 
                             <div class="min-w-0">
-                                {{-- Title row --}}
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <span class="font-semibold text-sm text-slate-800">Week {{ $week->week_no }}</span>
+                                <div class="font-semibold text-sm text-slate-800">
+                                    Week {{ $week->week_no }}
                                     <span class="text-xs text-slate-400">
-                                        {{ $start->format('M d') }} – {{ $end->format('M d, Y') }}
+                                        ({{ $start->format('M d') }} – {{ $end->format('M d, Y') }})
                                     </span>
-                                    @if ($week->exam_type)
-                                        <span class="px-2 py-0.5 text-[11px] font-semibold rounded-full bg-red-100 text-red-700 border border-red-200">
-                                            {{ str_replace('_', ' ', ucfirst($week->exam_type)) }}
-                                        </span>
-                                    @endif
-                                    @if ($savedTopic)
-                                        <span class="text-xs text-slate-400 truncate max-w-xs hidden md:inline">
-                                            — {{ \Illuminate\Support\Str::limit($savedTopic, 55) }}
-                                        </span>
-                                    @endif
                                 </div>
 
-                                {{-- Mini pill badges row --}}
-                                @if (count($events) > 0 || $refCount > 0 || $matCount > 0)
-                                    <div class="flex items-center gap-1.5 mt-1">
-                                        @if (count($events) > 0)
-                                            <span class="text-[10px] font-medium px-2 py-0.5 rounded-full
-                                                         bg-amber-50 text-amber-700 border border-amber-200">
-                                                {{ count($events) }} event{{ count($events) !== 1 ? 's' : '' }}
-                                            </span>
-                                        @endif
-                                        @if ($refCount > 0)
-                                            <span class="text-[10px] font-medium px-2 py-0.5 rounded-full
-                                                         bg-violet-50 text-violet-700 border border-violet-200">
-                                                {{ $refCount }} ref{{ $refCount !== 1 ? 's' : '' }}
-                                            </span>
-                                        @endif
-                                        @if ($matCount > 0)
-                                            <span class="text-[10px] font-medium px-2 py-0.5 rounded-full
-                                                         bg-sky-50 text-sky-700 border border-sky-200">
-                                                {{ $matCount }} material{{ $matCount !== 1 ? 's' : '' }}
-                                            </span>
-                                        @endif
+                                @if ($savedTopic)
+                                    <div class="text-xs text-slate-400 truncate max-w-xs hidden md:block">
+                                        {{ \Illuminate\Support\Str::limit($savedTopic, 55) }}
                                     </div>
                                 @endif
                             </div>
                         </div>
 
-                        <i class="bx text-slate-400 text-lg shrink-0 ml-3 transition-transform duration-200"
-                           :class="openWeek === {{ $week->week_no }} ? 'bx-chevron-up' : 'bx-chevron-down'"></i>
+                        {{-- SPACER --}}
+                        <div class="flex-1"></div>
+
+                        {{-- RIGHT SIDE --}}
+                        <div class="flex items-center gap-3 shrink-0">
+
+                            {{-- Pills --}}
+                            @if (count($events) > 0 || $refCount > 0 || $matCount > 0)
+                                <div class="flex items-center gap-1.5">
+
+                                    @if (count($events) > 0)
+                                        <span class="text-[10px] font-medium px-2 py-0.5 rounded-full
+                                                    bg-amber-50 text-amber-700 border border-amber-200">
+                                            {{ count($events) }} event{{ count($events) !== 1 ? 's' : '' }}
+                                        </span>
+                                    @endif
+
+                                    @if ($refCount > 0)
+                                        <span class="text-[10px] font-medium px-2 py-0.5 rounded-full
+                                                    bg-violet-50 text-violet-700 border border-violet-200">
+                                            {{ $refCount }} ref{{ $refCount !== 1 ? 's' : '' }}
+                                        </span>
+                                    @endif
+
+                                    @if ($matCount > 0)
+                                        <span class="text-[10px] font-medium px-2 py-0.5 rounded-full
+                                                    bg-sky-50 text-sky-700 border border-sky-200">
+                                            {{ $matCount }} material{{ $matCount !== 1 ? 's' : '' }}
+                                        </span>
+                                    @endif
+
+                                </div>
+                            @endif
+
+                            {{-- Chevron --}}
+                            <i class="bx text-slate-400 text-lg transition-transform duration-200"
+                                :class="openWeek === {{ $week->week_no }} ? 'bx-chevron-up' : 'bx-chevron-down'">
+                            </i>
+                        </div>
+
                     </button>
 
                     {{-- ── Accordion Body ────────────────────────────────────── --}}
-                    <div x-show="openWeek === {{ $week->week_no }}" x-cloak class="px-5 pb-5 pt-1">
+                    <div x-show="openWeek === {{ $week->week_no }}" x-cloak class="px-5 pb-5 pt-1 bg-emerald-50">
 
                         {{-- Events + Exam row --}}
                         <div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-3
@@ -441,8 +454,8 @@
                                     <button type="button"
                                         wire:click="addReference({{ $week->week_no }})"
                                         class="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-semibold rounded-md
-                                               border border-violet-200 bg-white text-violet-700
-                                               hover:bg-violet-50 hover:border-violet-300 transition-colors">
+                                                border border-violet-200 bg-white text-violet-700
+                                                hover:bg-violet-50 hover:border-violet-300 transition-colors">
                                         <i class="bx bx-plus text-sm leading-none"></i> Add
                                     </button>
                                 </div>
@@ -454,13 +467,13 @@
                                                 wire:model.lazy="weekInputs.{{ $wKey }}.references.{{ $rIdx }}.text"
                                                 placeholder="e.g. Author (Year). Title. Publisher."
                                                 class="flex-1 text-sm rounded-lg border border-slate-300 bg-white px-3 py-1.5
-                                                       focus:border-violet-400 focus:ring-1 focus:ring-violet-300 focus:outline-none
-                                                       placeholder:text-slate-300">
+                                                        focus:border-violet-400 focus:ring-1 focus:ring-violet-300 focus:outline-none
+                                                        placeholder:text-slate-300">
                                             @if (count($weekInputs[$wKey]['references'] ?? []) > 1)
                                                 <button type="button"
                                                     wire:click="removeReference({{ $week->week_no }}, {{ $rIdx }})"
                                                     class="shrink-0 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50
-                                                           rounded-md transition-colors"
+                                                            rounded-md transition-colors"
                                                     title="Remove">
                                                     <i class="bx bx-trash text-sm leading-none"></i>
                                                 </button>
@@ -482,8 +495,8 @@
                                     <button type="button"
                                         wire:click="addMaterial({{ $week->week_no }})"
                                         class="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-semibold rounded-md
-                                               border border-sky-200 bg-white text-sky-700
-                                               hover:bg-sky-50 hover:border-sky-300 transition-colors">
+                                                border border-sky-200 bg-white text-sky-700
+                                                hover:bg-sky-50 hover:border-sky-300 transition-colors">
                                         <i class="bx bx-plus text-sm leading-none"></i> Add
                                     </button>
                                 </div>
@@ -496,20 +509,20 @@
                                                     wire:model.lazy="weekInputs.{{ $wKey }}.materials.{{ $mIdx }}.name"
                                                     placeholder="Name (e.g. Week {{ $week->week_no }} Slides)"
                                                     class="w-full text-sm rounded-lg border border-slate-300 bg-white px-3 py-1.5
-                                                           focus:border-sky-400 focus:ring-1 focus:ring-sky-300 focus:outline-none
-                                                           placeholder:text-slate-300">
+                                                            focus:border-sky-400 focus:ring-1 focus:ring-sky-300 focus:outline-none
+                                                            placeholder:text-slate-300">
                                                 <input type="url"
                                                     wire:model.lazy="weekInputs.{{ $wKey }}.materials.{{ $mIdx }}.url"
                                                     placeholder="https://…"
                                                     class="w-full text-sm rounded-lg border border-slate-300 bg-white px-3 py-1.5
-                                                           focus:border-sky-400 focus:ring-1 focus:ring-sky-300 focus:outline-none
+                                                            focus:border-sky-400 focus:ring-1 focus:ring-sky-300 focus:outline-none
 -                                                           placeholder:text-slate-300">
                                             </div>
                                             @if (count($weekInputs[$wKey]['materials'] ?? []) > 1)
                                                 <button type="button"
                                                     wire:click="removeMaterial({{ $week->week_no }}, {{ $mIdx }})"
                                                     class="shrink-0 mt-1 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50
-                                                           rounded-md transition-colors"
+                                                            rounded-md transition-colors"
                                                     title="Remove">
                                                     <i class="bx bx-trash text-sm leading-none"></i>
                                                 </button>
@@ -533,8 +546,8 @@
                                 wire:loading.attr="disabled"
                                 wire:target="saveWeek({{ $week->week_no }})"
                                 class="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold rounded-lg
-                                       border border-green-300 bg-green-50 text-green-700 hover:bg-green-100
-                                       disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
+                                        border border-green-300 bg-green-50 text-green-700 hover:bg-green-100
+                                        disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
                                 <span wire:loading.remove wire:target="saveWeek({{ $week->week_no }})">
                                     <i class="bx bx-save"></i> Save Week {{ $week->week_no }}
                                 </span>
