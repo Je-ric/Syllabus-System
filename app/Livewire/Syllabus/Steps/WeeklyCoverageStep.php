@@ -17,25 +17,39 @@ use Livewire\Component;
 class WeeklyCoverageStep extends Component
 {
     // ── Persisted public state ────────────────────────────────────────────────
-    public int    $syllabusId;
-    public ?int   $academic_calendar_id = null;
-    public bool   $weeksGenerated       = false;
-    public array  $examWeeks            = [];
-    public ?string $activeWeekTab       = null;
-    public array  $courseComponents     = [];
-    public string $activeComponent      = 'LEC';
-    public array  $courseOutcomes       = [];
+    public int     $syllabusId;
+    public ?int    $academic_calendar_id = null;
+    public bool    $weeksGenerated       = false;
+    public array   $examWeeks            = [];
+    public ?string $activeWeekTab        = null;
+    public array   $courseComponents     = [];
+    public string  $activeComponent      = 'LEC';
+    public array   $courseOutcomes       = [];
 
     /**
      * FORM DATA — Livewire snapshots and restores this between requests.
      *
      * KEY FORMAT: 'w{week_no}' e.g. 'w1', 'w2', 'w8'
      *
+     *
      * WHY NOT plain integers or (string) cast?
      * PHP silently casts ANY numeric string key to int: $arr[(string)'1'] === $arr[1]
      * Livewire's JSON round-trip does json_decode which produces STRING keys: {"w1":{...}}
      * With 'w' prefix, keys are never numeric → PHP never coerces → consistent across
      * mount (PHP array), snapshot (JSON), and re-hydration (PHP array from json_decode).
+     * The 'w' prefix prevents PHP's silent numeric-string → int key coercion
+     * which breaks the Livewire JSON snapshot round-trip.
+     *
+     * Per-week structure:
+     * [
+     *   'course_outcome_id'   => int|null,
+     *   'learning_outcomes'   => string,
+     *   'assessment_task'     => string,
+     *   'topic'               => string,
+     *   'teaching_activities' => string,
+     *   'references'          => [['text' => string], ...],              // MULTIPLE
+     *   'materials'           => [['name' => string, 'url' => string], ...], // MULTIPLE
+     * ]
      *
      * CRITICAL RULE: loadData() / populateWeekInputs() must ONLY run on mount()
      * and explicit generate/regenerate/component-switch operations.
@@ -45,7 +59,7 @@ class WeeklyCoverageStep extends Component
      */
     public array $weekInputs = [];
 
-    /** Events are stored as plain arrays — no Eloquent models in public properties. */
+    /** Events stored as plain arrays — no Eloquent models in public properties. */
     public array $weekEvents = [];
 
     /** Rebuilt every request from DB. Never serialised by Livewire. */
@@ -168,10 +182,8 @@ class WeeklyCoverageStep extends Component
         $weekIds = SyllabusWeek::where('syllabus_id', $syllabus->id)->pluck('id')->all();
         if ($weekIds) {
             WeekContent::whereIn('syllabus_week_id', $weekIds)->delete();
-            Reference::where('syllabus_id', $this->syllabusId)
-                ->whereIn('syllabus_week_id', $weekIds)->delete();
-            OnlineMaterial::where('syllabus_id', $this->syllabusId)
-                ->whereIn('syllabus_week_id', $weekIds)->delete();
+            Reference::where('syllabus_id', $this->syllabusId)->whereIn('syllabus_week_id', $weekIds)->delete();
+            OnlineMaterial::where('syllabus_id', $this->syllabusId)->whereIn('syllabus_week_id', $weekIds)->delete();
             SyllabusWeek::whereIn('id', $weekIds)->delete();
         }
 
@@ -219,6 +231,49 @@ class WeeklyCoverageStep extends Component
         $this->dispatch('lw-toast', type: 'success', message: 'All weeks saved.');
     }
 
+    // ── Reference row management ──────────────────────────────────────────────
+
+    public function addReference(int $weekNo): void
+    {
+        $wKey = 'w' . $weekNo;
+        $this->weekInputs[$wKey]['references'][] = ['text' => ''];
+    }
+
+    public function removeReference(int $weekNo, int $index): void
+    {
+        $wKey = 'w' . $weekNo;
+        if (! isset($this->weekInputs[$wKey]['references'][$index])) {
+            return;
+        }
+        array_splice($this->weekInputs[$wKey]['references'], $index, 1);
+        // Always keep at least one blank row so the section never disappears
+        if (empty($this->weekInputs[$wKey]['references'])) {
+            $this->weekInputs[$wKey]['references'] = [['text' => '']];
+        }
+    }
+
+    // ── Material row management ───────────────────────────────────────────────
+
+    public function addMaterial(int $weekNo): void
+    {
+        $wKey = 'w' . $weekNo;
+        $this->weekInputs[$wKey]['materials'][] = ['name' => '', 'url' => ''];
+    }
+
+    public function removeMaterial(int $weekNo, int $index): void
+    {
+        $wKey = 'w' . $weekNo;
+        if (! isset($this->weekInputs[$wKey]['materials'][$index])) {
+            return;
+        }
+        array_splice($this->weekInputs[$wKey]['materials'], $index, 1);
+        if (empty($this->weekInputs[$wKey]['materials'])) {
+            $this->weekInputs[$wKey]['materials'] = [['name' => '', 'url' => '']];
+        }
+    }
+
+    // ── Exam assignment ───────────────────────────────────────────────────────
+
     public function assignExamWeek(string $type, int $weekNo): void
     {
         if (! in_array($type, ['first_term', 'second_term', 'final_term'], true)) {
@@ -230,14 +285,10 @@ class WeeklyCoverageStep extends Component
             return;
         }
 
-        SyllabusWeek::query()
-            ->where('syllabus_id', $syllabus->id)
-            ->where('exam_type', $type)
+        SyllabusWeek::where('syllabus_id', $syllabus->id)->where('exam_type', $type)
             ->update(['exam_type' => null, 'is_exam_week' => false]);
 
-        SyllabusWeek::query()
-            ->where('syllabus_id', $syllabus->id)
-            ->where('week_no', $weekNo)
+        SyllabusWeek::where('syllabus_id', $syllabus->id)->where('week_no', $weekNo)
             ->update(['exam_type' => $type, 'is_exam_week' => true]);
 
         // Only reload metadata — DO NOT touch $weekInputs
@@ -256,9 +307,7 @@ class WeeklyCoverageStep extends Component
             return;
         }
 
-        SyllabusWeek::query()
-            ->where('syllabus_id', $syllabus->id)
-            ->where('exam_type', $type)
+        SyllabusWeek::where('syllabus_id', $syllabus->id)->where('exam_type', $type)
             ->update(['exam_type' => null, 'is_exam_week' => false]);
 
         // Only reload metadata — DO NOT touch $weekInputs
@@ -368,7 +417,7 @@ class WeeklyCoverageStep extends Component
             ->values()
             ->all();
 
-        $this->syllabusWeeks = SyllabusWeek::query()
+        $this->syllabusWeeks  = SyllabusWeek::query()
             ->where('syllabus_id', $this->syllabusId)
             ->orderBy('week_no')
             ->get();
@@ -465,44 +514,61 @@ class WeeklyCoverageStep extends Component
 
         $weekIds = $this->syllabusWeeks->pluck('id')->all();
 
+        // WeekContent: one row per (week_id, component_type) — keyBy is fine
         $weekContents = WeekContent::query()
             ->whereIn('syllabus_week_id', $weekIds)
             ->where('component_type', $this->activeComponent)
             ->get()
             ->keyBy('syllabus_week_id');
 
-        $references = Reference::query()
+        // References: MULTIPLE per week — groupBy so we don't lose rows
+        $allRefs = Reference::query()
             ->where('syllabus_id', $this->syllabusId)
             ->whereIn('syllabus_week_id', $weekIds)
+            ->orderBy('id')
             ->get()
-            ->keyBy('syllabus_week_id');
+            ->groupBy('syllabus_week_id');
 
-        $materials = OnlineMaterial::query()
+        // Materials: MULTIPLE per week — groupBy so we don't lose rows
+        $allMats = OnlineMaterial::query()
             ->where('syllabus_id', $this->syllabusId)
             ->whereIn('syllabus_week_id', $weekIds)
+            ->orderBy('id')
             ->get()
-            ->keyBy('syllabus_week_id');
+            ->groupBy('syllabus_week_id');
 
-        // Strip 'N/A' sentinel for display, keep real content as-is
         $clean = static fn (?string $v): string =>
             ($v === null || $v === 'N/A') ? '' : $v;
 
         $inputs = [];
         foreach ($this->syllabusWeeks as $week) {
-            $content   = $weekContents->get($week->id);
-            $reference = $references->get($week->id);
-            $material  = $materials->get($week->id);
+            $content = $weekContents->get($week->id);
 
-            // 'w' prefix prevents PHP's numeric-string-to-int key coercion
+            // Map saved refs to array rows; fall back to one blank row
+            $refs = $allRefs->has($week->id)
+                ? $allRefs->get($week->id)
+                    ->map(fn ($r) => ['text' => $clean($r->reference_text)])
+                    ->values()
+                    ->all()
+                : [['text' => '']];
+
+            // Map saved materials to array rows; fall back to one blank row
+            $mats = $allMats->has($week->id)
+                ? $allMats->get($week->id)
+                    ->map(fn ($m) => ['name' => $clean($m->material_name), 'url' => $m->url ?? ''])
+                    ->values()
+                    ->all()
+                : [['name' => '', 'url' => '']];
+
+            // 'w' prefix prevents PHP's numeric-string → int key coercion
             $inputs['w' . $week->week_no] = [
                 'course_outcome_id'   => $content?->course_outcome_id ?? null,
                 'learning_outcomes'   => $clean($content?->learning_outcomes),
                 'assessment_task'     => $clean($content?->assessment_task),
                 'topic'               => $clean($content?->topics),
                 'teaching_activities' => $clean($content?->tla),
-                'reference_text'      => $clean($reference?->reference_text),
-                'material_name'       => $clean($material?->material_name),
-                'material_url'        => $material?->url ?? '',
+                'references'          => $refs,
+                'materials'           => $mats,
             ];
         }
 
@@ -627,23 +693,12 @@ class WeeklyCoverageStep extends Component
                 continue;
             }
 
-            Log::debug('[WeeklyCoverageStep] saveWeeklyEntries: saving', [
-                'week_no'   => $week->week_no,
-                'payload'   => $payload,
-                'component' => $this->activeComponent,
-            ]);
-
             // ── WeekContent ───────────────────────────────────────────────────
             $courseOutcomeId = (isset($payload['course_outcome_id'])
                 && $payload['course_outcome_id'] !== ''
                 && $payload['course_outcome_id'] !== null)
                 ? (int) $payload['course_outcome_id']
                 : null;
-
-            $lo  = trim((string) ($payload['learning_outcomes']   ?? ''));
-            $at  = trim((string) ($payload['assessment_task']     ?? ''));
-            $tp  = trim((string) ($payload['topic']               ?? ''));
-            $tla = trim((string) ($payload['teaching_activities'] ?? ''));
 
             WeekContent::query()->updateOrCreate(
                 [
@@ -652,45 +707,48 @@ class WeeklyCoverageStep extends Component
                 ],
                 [
                     'course_outcome_id' => $courseOutcomeId,
-                    'learning_outcomes' => $lo,
-                    'assessment_task'   => $at,
-                    'topics'            => $tp,
-                    'tla'               => $tla,
+                    'learning_outcomes' => trim((string) ($payload['learning_outcomes']   ?? '')),
+                    'assessment_task'   => trim((string) ($payload['assessment_task']     ?? '')),
+                    'topics'            => trim((string) ($payload['topic']               ?? '')),
+                    'tla'               => trim((string) ($payload['teaching_activities'] ?? '')),
                 ]
             );
 
-            // ── Reference ─────────────────────────────────────────────────────
-            $refText = trim((string) ($payload['reference_text'] ?? ''));
-
+            // ── References (multiple rows) ────────────────────────────────────
+            // Delete everything for this week, re-insert non-empty rows only.
             Reference::query()
                 ->where('syllabus_id', $this->syllabusId)
                 ->where('syllabus_week_id', $week->id)
                 ->delete();
 
-            if ($refText !== '') {
-                Reference::create([
-                    'syllabus_id'      => $this->syllabusId,
-                    'syllabus_week_id' => $week->id,
-                    'reference_text'   => $refText,
-                ]);
+            foreach ((array) ($payload['references'] ?? []) as $ref) {
+                $text = trim((string) ($ref['text'] ?? ''));
+                if ($text !== '') {
+                    Reference::create([
+                        'syllabus_id'      => $this->syllabusId,
+                        'syllabus_week_id' => $week->id,
+                        'reference_text'   => $text,
+                    ]);
+                }
             }
 
-            // ── Online Material ───────────────────────────────────────────────
-            $matName = trim((string) ($payload['material_name'] ?? ''));
-            $matUrl  = trim((string) ($payload['material_url']  ?? ''));
-
+            // ── Online Materials (multiple rows) ──────────────────────────────
             OnlineMaterial::query()
                 ->where('syllabus_id', $this->syllabusId)
                 ->where('syllabus_week_id', $week->id)
                 ->delete();
 
-            if ($matName !== '' || $matUrl !== '') {
-                OnlineMaterial::create([
-                    'syllabus_id'      => $this->syllabusId,
-                    'syllabus_week_id' => $week->id,
-                    'material_name'    => $matName ?: 'Online Material',
-                    'url'              => $matUrl,
-                ]);
+            foreach ((array) ($payload['materials'] ?? []) as $mat) {
+                $name = trim((string) ($mat['name'] ?? ''));
+                $url  = trim((string) ($mat['url']  ?? ''));
+                if ($name !== '' || $url !== '') {
+                    OnlineMaterial::create([
+                        'syllabus_id'      => $this->syllabusId,
+                        'syllabus_week_id' => $week->id,
+                        'material_name'    => $name ?: 'Online Material',
+                        'url'              => $url,
+                    ]);
+                }
             }
         }
     }
