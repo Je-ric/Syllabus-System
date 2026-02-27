@@ -266,6 +266,17 @@ class WeeklyCoverageStep extends Component
         $this->dispatch('syllabus-step-saved', step: 'weekly_coverage');
     }
 
+    /**
+     * Switch LEC ↔ LAB.
+     *
+     * Everything happens in ONE Livewire request:
+     *  1. Persist current component's $weekInputs to DB (silent, no toast)
+     *  2. Switch $activeComponent
+     *  3. Repopulate $weekInputs from DB for the new component
+     *
+     * The blade re-renders with the new data immediately — no extra round-trip,
+     * no loading state, no perceptible delay beyond a normal Livewire request.
+     */
     public function setComponentType(string $type): void
     {
         $type = strtoupper($type);
@@ -275,13 +286,18 @@ class WeeklyCoverageStep extends Component
         if ($type === 'LAB' && ! isset($this->courseComponents['LAB'])) {
             return;
         }
+        if ($type === $this->activeComponent) {
+            return;   // already on this tab — no work needed
+        }
 
-        // Save current component's unsaved edits first
+        // 1. Save current unsaved edits silently
         $this->saveWeeklyEntries();
 
-        // Switch and reload form inputs for the new component
+        // 2. Switch
         $this->activeComponent = $type;
-        $this->syllabusWeeks   = SyllabusWeek::where('syllabus_id', $this->syllabusId)
+
+        // 3. Reload form inputs for the new component from DB
+        $this->syllabusWeeks = SyllabusWeek::where('syllabus_id', $this->syllabusId)
             ->orderBy('week_no')->get();
         $this->populateWeekInputs();
     }
