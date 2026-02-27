@@ -7,6 +7,8 @@
             <p class="text-sm text-slate-500 mt-0.5">
                 Define what students should be able to do after completing this course.
             </p>
+            Create Course Outcomes aligned with relevant Program Outcomes. 
+            Not every CO needs to map to all POs — focus on the most relevant ones.
         </div>
 
         {{-- ══ CO list ════════════════════════════════════════════════════════ --}}
@@ -24,8 +26,8 @@
 
                     {{-- CO badge --}}
                     <span class="mt-1.5 inline-flex items-center justify-center min-w-11 h-7
-                                 rounded-full bg-emerald-100 text-emerald-800
-                                 text-xs font-bold tracking-widest uppercase shrink-0">
+                                rounded-full bg-emerald-100 text-emerald-800
+                                text-xs font-bold tracking-widest uppercase shrink-0">
                         {{ $outcome['co_code'] ?? ('CO' . ($index + 1)) }}
                     </span>
 

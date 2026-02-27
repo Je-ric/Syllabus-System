@@ -1,149 +1,275 @@
-# Syllabus Wizard (Beginner-Friendly Guide)
+# Syllabus Wizard (Complete Functional Memory Guide)
 
-This guide explains what the syllabus wizard does now, using simple terms for both technical and non-technical readers.
+This file is the practical reference for how the Syllabus Wizard works today.
+Use this when changing logic, debugging behavior, or explaining flow to non-technical users.
 
-## Source of Truth
+## Scope and Source of Truth
 
+- Parent wizard:
 - `app/Livewire/Syllabus/SyllabusWizard.php`
+- `resources/views/livewire/syllabus/syllabus-wizard.blade.php`
+- Step components:
 - `app/Livewire/Syllabus/Steps/AcademicCalendarStep.php`
 - `app/Livewire/Syllabus/Steps/ComponentsStep.php`
 - `app/Livewire/Syllabus/Steps/CourseOutcomesStep.php`
 - `app/Livewire/Syllabus/Steps/WeeklyCoverageStep.php`
 - `app/Livewire/Syllabus/Steps/ReviewStep.php`
+- Step views:
+- `resources/views/livewire/syllabus/steps/academic-calendar.blade.php`
+- `resources/views/livewire/syllabus/steps/course-components.blade.php`
+- `resources/views/livewire/syllabus/steps/course-outcomes.blade.php`
+- `resources/views/livewire/syllabus/steps/weekly-coverage.blade.php`
+- `resources/views/livewire/syllabus/steps/review.blade.php`
 
-## Big Picture
+Related docs:
+- `app/MD/02_Academic_Calendar_and_Events.md`
+- `app/MD/04_Course_Management.md`
+- `app/MD/13_Livewire_Beginner_Guide.md`
 
-- The wizard is a multi-step form for building one syllabus.
-- A syllabus is saved as a `draft` first.
-- Users move step-by-step until they submit for review.
-- Saving is event-driven between parent component and step components.
+## What It Is
 
-## Step Order
+- A guided multi-step process to create or edit one syllabus.
+- The syllabus starts as `draft`.
+- Users fill required sections and submit to chair review.
+- Saving is event-driven between parent wizard and child step components.
+- Step components stay mounted in the page and are shown/hidden for faster switching.
 
-From `Syllabus::getWizardSteps()`:
+## Step Order (Current)
 
+The UI renders these steps:
 1. `academic_calendar`
 2. `course_components`
 3. `course_outcomes`
-4. `co_po_mapping`
-5. `weekly_coverage`
-6. `review`
+4. `weekly_coverage`
+5. `review`
 
-## Start Flow (Conditional)
+Note:
+- Any legacy mention of `co_po_mapping` is outdated for this wizard screen and should not be treated as an active tab here.
 
-- If URL has `syllabusId`:
-- Existing syllabus is loaded.
-- If current user is not the preparer, access is denied (`403`).
-- Current step is restored from DB if valid.
-- If URL has `courseId` (and no `syllabusId`):
-- New draft syllabus is created with:
+## Start Conditions (If / Then)
+
+- If `syllabusId` is present:
+- Then load existing syllabus.
+- If logged-in user is not the preparer:
+- Then stop with `403 Unauthorized`.
+- If saved `current_step` in DB is valid:
+- Then use it.
+- If saved `current_step` is invalid:
+- Then force `academic_calendar` and update DB.
+
+- If `syllabusId` is missing but `courseId` is present:
+- Then create a new syllabus row immediately:
 - `status = draft`
 - `current_step = academic_calendar`
+- `prepared_by = current user`
 - `academic_calendar_id = null`
-- If neither is given:
-- Request is rejected (`404`).
 
-## Navigation Rules
+- If neither `syllabusId` nor `courseId` is provided:
+- Then stop with `404`.
 
-- `setStep()` changes current step and persists it.
-- `goNextStep()` and `goPreviousStep()` compute step sequence from wizard definitions.
-- `navigateToStep(from, to)` guards against invalid transitions.
-- Important condition:
-- If leaving `course_outcomes` while it has unsaved changes, step change is blocked.
+## Navigation Sequence (Actual Runtime)
 
-## Save Flow (How Components Talk)
+When user clicks `Next`, `Previous`, or a tab:
+1. Parent dispatches `syllabus-save-step` for the current step.
+2. Parent immediately changes `$currentStep` to target step in same request.
+3. Parent persists `syllabi.current_step`.
+4. Parent dispatches `syllabus-step-changed` to notify newly active step.
+5. Child step (the old one) saves itself when it hears `syllabus-save-step`.
+6. Child emits `syllabus-step-saved`.
+7. Parent receives `syllabus-step-saved`, clears dirty flag, refreshes syllabus model.
 
-- Parent wizard broadcasts: `syllabus-save-step`.
-- Active step listens and saves itself.
-- On success, step emits: `syllabus-step-saved`.
-- Parent marks that step as clean (`stepDirty[step] = false`).
+Practical meaning:
+- Switching step and saving happen in one round trip for better speed.
+- Wizard does not wait for a second request just to switch tabs.
 
-## Required-Field Checks Before Submit
+## Submit Conditions (If / Then)
 
-When user clicks submit:
+When `Submit for Review` is clicked:
 
-- If `academic_calendar` missing, submission is blocked.
-- If required lecture/lab component fields are incomplete, blocked.
-- If no non-empty course outcome exists, blocked.
-- If no week records exist, blocked.
-- If Course Outcomes step is still dirty, blocked.
-- If all checks pass:
-- Syllabus is updated to `status = under_review`.
-- `current_step = review`.
+- If academic calendar is missing:
+- Then block submit and show error toast.
 
-## Per-Step Behavior (Simple)
+- If required Course Component fields are incomplete:
+- Then block submit and show error toast.
 
-## 1) Academic Calendar
+- If there is no non-empty Course Outcome in DB:
+- Then block submit and show error toast.
 
-- User selects an academic calendar entry.
-- Validation checks:
-- Must exist.
-- Must be unique per course in `syllabi.academic_calendar_id` (excluding current syllabus).
-- On valid save, syllabus `academic_calendar_id` is updated.
+- If no syllabus week exists:
+- Then block submit and show error toast.
 
-## 2) Course Components
+- If `course_outcomes` step is marked dirty:
+- Then block submit and show warning toast to save course outcomes first.
 
-- LEC fields are required before save.
-- LAB fields are required only if course has lab (`has_lec_lab = true`).
-- Fields auto-save on change when complete.
-- If no LEC row yet, component pre-fills from logged-in user profile (`name`, `email`, `phone`, `office`).
+- If all required checks pass:
+- Then set syllabus `status = under_review`
+- Then set `current_step = review`
+- Then redirect to syllabus show page with success toast.
 
-## 3) Course Outcomes
+## Step-by-Step Rules
 
-- Outcomes are edited in Livewire state first (fast typing, fewer DB writes).
-- Codes are resequenced as `CO1`, `CO2`, `CO3`, ... in current order.
-- Blank row rule:
-- You cannot add another new row while an existing row is blank.
-- Save rule:
-- If existing outcomes are all removed/blank, save is blocked (at least one description required).
-- Save behavior:
-- Deleted rows are removed from DB.
-- Existing rows are updated only if changed.
-- New non-empty rows are inserted.
+## 1) Academic Calendar Step
 
-## 4) CO-PO Mapping
+Purpose:
+- Select one academic calendar for this syllabus.
 
-- Mapping is tied to saved CO rows.
-- If COs are newly created, mapping references are resolved during save flow.
+If / Then:
+- If user changes dropdown:
+- Then `updatedAcademicCalendarId()` runs.
+- If validation passes:
+- Then save `academic_calendar_id` to syllabus.
+- Then emit `syllabus-step-saved`.
+- Then emit `syllabus-calendar-updated` (weekly coverage listens and reloads).
 
-## 5) Weekly Coverage
+Validation:
+- Required.
+- Must exist in `academic_calendars`.
+- Must be unique for same course in `syllabi.academic_calendar_id` (excluding current syllabus).
 
-- Weeks are generated only when needed (or when user explicitly generates).
-- Week generation uses academic calendar start/end dates.
-- Exam assignment supports:
-- `first_term`
-- `second_term`
-- `final_term`
-- Re-assigning one exam type clears previous week for that same type.
-- Week content can save:
-- course outcome link
-- learning outcomes
-- assessment task
-- topic
-- TLA
-- references
-- online materials
+## 2) Course Components Step
 
-## 6) Review
+Purpose:
+- Capture lecture and laboratory teaching details.
 
-- Aggregates saved data from earlier steps.
-- Reloads when step changes to review or when any step confirms save.
+If / Then:
+- If first load and no LEC row exists:
+- Then prefill LEC name/email/phone/office from logged-in user profile (if available).
 
-## Events Used (Technical Quick List)
+- If course has lab (`has_lec_lab = true`):
+- Then LAB section is shown and required.
+- If course has no lab:
+- Then LAB is not required.
 
-- `syllabus-step-dirty`
-- `syllabus-step-saved`
+- If any LEC/LAB field changes:
+- Then mark step dirty.
+- Then do not auto-save immediately.
+
+Save behavior:
+- On `syllabus-save-step`, validate completeness and save with `updateOrCreate`.
+- Save LEC always.
+- Save LAB only when course has lab.
+
+## 3) Course Outcomes Step
+
+Purpose:
+- Create and maintain CO list for the syllabus.
+
+If / Then:
+- If user types in description:
+- Then local Alpine value updates first.
+- If textarea loses focus:
+- Then Livewire receives one update (`$wire.set(...)`) and marks step dirty.
+
+- If user clicks Add CO while any CO description is blank:
+- Then block add and show warning.
+
+- If user removes a CO row:
+- Then resequence CO codes (`CO1`, `CO2`, ...), mark dirty.
+
+Save behavior:
+- Recompute sequential `co_code` before save.
+- Delete DB rows removed in UI.
+- Update changed existing rows.
+- Insert new non-empty rows.
+
+Critical condition:
+- If DB already has CO rows and all submitted descriptions are blank:
+- Then block save with error.
+
+Step is marked clean when successful save confirms at least one valid CO still exists.
+
+## 4) Weekly Coverage Step
+
+Purpose:
+- Generate weekly records and per-week teaching content for LEC/LAB.
+
+Generation rules:
+- If no academic calendar selected:
+- Then block generation.
+
+- If no LEC and no LAB component exists:
+- Then block generation and tell user to complete Course Components first.
+
+- If weeks already exist:
+- Then `ensureWeeksGenerated()` skips creating duplicates.
+
+- If weeks do not exist:
+- Then create sequential week records from calendar start/end date in 7-day blocks.
+- Then create default `WeekContent` rows for available components (LEC/LAB).
+
+Locking rules (current implementation):
+- Weeks are locked dynamically if that week contains event type `exam` or `non_teaching`.
+- Locked week is visible but not editable.
+- Locked week blocks:
+- `saveWeek`
+- `add/remove reference`
+- `add/remove material`
+- `saveWeeklyEntries` write path
+
+Important note:
+- Event type `non_teaching` is currently referenced in weekly coverage logic.
+- Calendar event validation in events controller currently allows only:
+- `holiday`, `exam`, `break`, `other`
+- So `non_teaching` lock path may never trigger unless event rules are expanded.
+
+Editing rules:
+- Uses `weekInputs['w{week_no}']` key format to avoid PHP numeric key coercion issues.
+- Collapsing one accordion week triggers save of previous week.
+- Save All persists all unlocked weeks.
+- `loadData()` is intentionally not called in save paths to avoid overwriting in-progress user edits.
+
+LEC/LAB switching:
+- If both components exist, user can switch tab.
+- On switch:
+- Save current component data silently.
+- Change active component.
+- Reload inputs for new component.
+
+## 5) Review Step
+
+Purpose:
+- Show final summary before submit.
+
+If / Then:
+- If step changes to `review`:
+- Then force reload all summary data.
+
+- If any step emits `syllabus-step-saved` while review is loaded:
+- Then force reload summary so review reflects latest saved state.
+
+Summary includes:
+- Selected academic calendar
+- Lecture/Lab component details
+- Course outcomes list
+- Weekly coverage count and exam-type mapping summary
+
+## Event Contract (Parent <-> Child)
+
+Used events:
 - `syllabus-save-step`
+- `syllabus-step-saved`
 - `syllabus-step-changed`
+- `syllabus-step-dirty`
 - `syllabus-calendar-updated`
 - `syllabus-course-outcomes-updated`
 
-## Non-Technical Mental Model
+Intent:
+- Parent controls navigation.
+- Child owns save logic for its step.
+- Dirty state is used for safety checks (especially course outcomes before submit).
 
-- Think of it like a guided checklist.
-- Green path:
-- Fill required fields.
-- Save each part.
-- Fix warnings if shown.
-- Submit only when all sections are complete.
-- The system protects against submitting incomplete or unsaved critical sections.
+## Non-Technical Flow (Plain English)
+
+1. Open syllabus wizard.
+2. Pick the academic calendar.
+3. Fill lecture/lab details.
+4. Add course outcomes and save them.
+5. Generate weeks and fill weekly coverage for editable weeks.
+6. Review everything.
+7. Submit for review.
+
+If something required is missing:
+- The system blocks submit and tells the user what to fix.
+
+If a week has an exam event:
+- The week appears but is locked so faculty cannot encode coverage there.

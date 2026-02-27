@@ -1,12 +1,11 @@
 <div>
     {{-- ══ Header ══════════════════════════════════════════════════════════════ --}}
     <div class="mb-5 grid grid-cols-1 lg:grid-cols-2 gap-4">
-
-        {{-- LEFT: Title + Actions --}}
         <div>
             <h3 class="text-xl font-semibold text-slate-900">Weekly Coverage</h3>
             <p class="mt-0.5 text-sm text-slate-500">
-                Weeks are auto-generated from the academic calendar. Fill in coverage details per week.
+                Weeks are auto-generated from the academic calendar. Fill in coverage details per week. <br
+                Weeks containing <strong>Exam</strong> or <strong>Non-Teaching</strong> calendar events are locked automatically.
             </p>
 
             <div class="mt-3 flex items-center gap-2 flex-wrap">
@@ -55,7 +54,7 @@
             </div>
         </div>
 
-        {{-- RIGHT: Info card --}}
+        {{-- Info card --}}
         <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs text-slate-600">
             <div class="grid grid-cols-2 gap-4">
                 @if ($courseComponents)
@@ -80,7 +79,6 @@
                         </div>
                     </div>
                 @endif
-
                 <div>
                     <div class="font-semibold text-slate-700 mb-2">Academic Calendar</div>
                     @if ($syllabus?->academicCalendar)
@@ -95,8 +93,15 @@
 
                     @if ($weeksGenerated)
                         <div class="mt-3 pt-2.5 border-t border-slate-200 space-y-1">
-                            <div><span class="font-semibold text-slate-700">{{ $syllabusWeeks->count() }}</span> weeks generated</div>
+                            <div><span class="font-semibold text-slate-700">{{ $syllabusWeeks->count() }}</span> weeks</div>
                             <div><span class="font-semibold text-slate-700">{{ collect($weekEvents)->flatten(1)->count() }}</span> calendar events</div>
+                            @if (count($lockedWeeks) > 0)
+                                <div>
+                                    <span class="font-semibold text-red-600">{{ count($lockedWeeks) }}</span>
+                                    <span class="text-red-500"> locked</span>
+                                    <span class="text-slate-400">(exam/non-teaching)</span>
+                                </div>
+                            @endif
                         </div>
                     @endif
                 </div>
@@ -232,159 +237,168 @@
                     $start      = \Carbon\Carbon::parse($week->start_date);
                     $end        = \Carbon\Carbon::parse($week->end_date);
                     $events     = $weekEvents[$week->week_no] ?? [];
+                    $isLocked   = isset($lockedWeeks[$week->week_no]);
+                    $lockType   = $lockedWeeks[$week->week_no] ?? null;
                     $savedTopic = $weekInputs[$wKey]['topic'] ?? '';
+                    $refCount   = count(array_filter($weekInputs[$wKey]['references'] ?? [], fn ($r) => trim($r['text'] ?? '') !== ''));
+                    $matCount   = count(array_filter($weekInputs[$wKey]['materials'] ?? [], fn ($m) => trim($m['name'] ?? '') !== '' || trim($m['url'] ?? '') !== ''));
 
-                    // Count non-empty rows for badge indicators
-                    $refCount = count(array_filter(
-                        $weekInputs[$wKey]['references'] ?? [],
-                        fn ($r) => trim($r['text'] ?? '') !== ''
-                    ));
-                    $matCount = count(array_filter(
-                        $weekInputs[$wKey]['materials'] ?? [],
-                        fn ($m) => trim($m['name'] ?? '') !== '' || trim($m['url'] ?? '') !== ''
-                    ));
+                    $lockLabel = match($lockType) {
+                        'exam'         => 'Exam Week',
+                        'non_teaching' => 'Non-Teaching Week',
+                        default        => 'Locked',
+                    };
                 @endphp
 
                 <div wire:key="week-{{ $week->week_no }}-{{ $activeComponent }}">
 
-                    {{-- ── Accordion Header ──────────────────────────────────── --}}
+                    {{-- Accordion Header --}}
                     <button type="button"
                         @click="openWeek = openWeek === {{ $week->week_no }} ? null : {{ $week->week_no }}"
-                        class="w-full flex items-center px-5 py-3.5
-                            hover:bg-slate-50 transition-colors duration-100 focus:outline-none">
+                        @class([
+                            'w-full flex items-center px-5 py-3.5 transition-colors duration-100 focus:outline-none',
+                            'hover:bg-red-50/40 bg-red-50/20' => $isLocked,
+                            'hover:bg-slate-50'               => ! $isLocked,
+                        ])>
 
-                        {{-- LEFT SIDE --}}
-                        <div class="flex items-center justify-between gap-4 min-w-0">
-                            <div class="flex items-center gap-3 min-w-0">
-                                {{-- Week number badge --}}
-                                <span @class([
-                                    'inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold shrink-0',
-                                    'bg-red-100 text-red-700 ring-1 ring-red-200' => $week->is_exam_week,
-                                    'bg-slate-100 text-slate-600' => ! $week->is_exam_week,
-                                ])>
-                                    {{ $week->week_no }}
+                        {{-- Left --}}
+                        <div class="flex items-center gap-3 min-w-0">
+                            {{-- Week badge --}}
+                            <span @class([
+                                'inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold shrink-0',
+                                'bg-red-100 text-red-700 ring-1 ring-red-300'   => $isLocked,
+                                'bg-slate-100 text-slate-600'                   => ! $isLocked,
+                            ])>
+                                {{ $week->week_no }}
+                            </span>
+
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span class="font-semibold text-sm {{ $isLocked ? 'text-red-700' : 'text-slate-800' }} shrink-0">
+                                    Week {{ $week->week_no }}
                                 </span>
-
-                                <div class="flex items-center gap-2 min-w-0">
-                                    <span class="font-semibold text-sm text-slate-800 shrink-0">
-                                        Week {{ $week->week_no }}
+                                <span class="text-xs text-slate-400 shrink-0">
+                                    ({{ $start->format('M d') }} – {{ $end->format('M d, Y') }})
+                                </span>
+                                @if ($isLocked)
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold
+                                                rounded-full bg-red-100 text-red-700 border border-red-200 shrink-0">
+                                        <i class="bx bx-lock-alt text-xs"></i> {{ $lockLabel }}
                                     </span>
-
-                                    <span class="text-xs text-slate-400 shrink-0">
-                                        ({{ $start->format('M d') }} – {{ $end->format('M d, Y') }})
+                                @elseif ($savedTopic)
+                                    <span class="text-xs text-slate-400 truncate max-w-xs hidden md:block">
+                                        — {{ \Illuminate\Support\Str::limit($savedTopic, 55) }}
                                     </span>
-
-                                    @if ($savedTopic)
-                                        <span class="text-xs text-slate-400 truncate max-w-xs hidden md:block">
-                                            — {{ \Illuminate\Support\Str::limit($savedTopic, 55) }}
-                                        </span>
-                                    @endif
-                                </div>
+                                @endif
                             </div>
                         </div>
 
-                        {{-- SPACER --}}
                         <div class="flex-1"></div>
 
-                        {{-- RIGHT SIDE --}}
+                        {{-- Right: pills + chevron --}}
                         <div class="flex items-center gap-3 shrink-0">
-
-                            {{-- Pills --}}
-                            @if (count($events) > 0 || $refCount > 0 || $matCount > 0)
+                            @if (! $isLocked && (count($events) > 0 || $refCount > 0 || $matCount > 0))
                                 <div class="flex items-center gap-1.5">
-
                                     @if (count($events) > 0)
-                                        <span class="text-[10px] font-medium px-2 py-0.5 rounded-full
-                                                    bg-amber-50 text-amber-700 border border-amber-200">
+                                        <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
                                             {{ count($events) }} event{{ count($events) !== 1 ? 's' : '' }}
                                         </span>
                                     @endif
-
                                     @if ($refCount > 0)
-                                        <span class="text-[10px] font-medium px-2 py-0.5 rounded-full
-                                                    bg-violet-50 text-violet-700 border border-violet-200">
+                                        <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 border border-violet-200">
                                             {{ $refCount }} ref{{ $refCount !== 1 ? 's' : '' }}
                                         </span>
                                     @endif
-
                                     @if ($matCount > 0)
-                                        <span class="text-[10px] font-medium px-2 py-0.5 rounded-full
-                                                    bg-sky-50 text-sky-700 border border-sky-200">
+                                        <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200">
                                             {{ $matCount }} material{{ $matCount !== 1 ? 's' : '' }}
                                         </span>
                                     @endif
-
                                 </div>
                             @endif
-
-                            {{-- Chevron --}}
                             <i class="bx text-slate-400 text-lg transition-transform duration-200"
-                                :class="openWeek === {{ $week->week_no }} ? 'bx-chevron-up' : 'bx-chevron-down'">
-                            </i>
+                                :class="openWeek === {{ $week->week_no }} ? 'bx-chevron-up' : 'bx-chevron-down'"></i>
                         </div>
-
                     </button>
 
-                    {{-- ── Accordion Body ────────────────────────────────────── --}}
-                    <div x-show="openWeek === {{ $week->week_no }}" x-cloak class="px-5 pb-5 pt-1 bg-emerald-50">
+                    {{-- Accordion Body --}}
+                    <div x-show="openWeek === {{ $week->week_no }}" x-cloak
+                        class="px-5 pb-5 pt-1 {{ $isLocked ? 'bg-red-50/30' : 'bg-emerald-50' }}">
 
-                        {{-- Events + Exam row --}}
-                        <div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-3
-                                    bg-slate-50 border border-slate-200 rounded-lg p-3">
-
-                            {{-- Events --}}
-                            <div>
-                                <div class="text-xs font-semibold text-slate-600 mb-1.5">
-                                    <i class="bx bx-calendar-event"></i> Events this week
+                        {{-- ── LOCKED BANNER ───────────────────────────────── --}}
+                        @if ($isLocked)
+                            <div class="mb-4 flex items-start gap-3 rounded-lg border border-red-200
+                                        bg-red-50 px-4 py-3 text-sm text-red-700">
+                                <i class="bx bx-lock-alt text-xl shrink-0 mt-0.5"></i>
+                                <div>
+                                    <div class="font-semibold">{{ $lockLabel }}</div>
+                                    <div class="mt-0.5 text-xs text-red-600">
+                                        This week contains a
+                                        <strong>{{ $lockType === 'exam' ? 'scheduled exam' : 'non-teaching class' }}</strong>
+                                        in the academic calendar. Coverage details cannot be entered for this week.
+                                    </div>
+                                    {{-- Show which events triggered the lock --}}
+                                    @if (count($events) > 0)
+                                        <ul class="mt-2 space-y-0.5 text-xs text-red-600">
+                                            @foreach ($events as $ev)
+                                                @if (in_array($ev['type'], ['exam', 'non_teaching']))
+                                                    <li class="flex items-center gap-1.5">
+                                                        <i class="bx bx-calendar-event text-xs"></i>
+                                                        {{ $ev['name'] }} — {{ $ev['date_display'] }}
+                                                    </li>
+                                                @endif
+                                            @endforeach
+                                        </ul>
+                                    @endif
                                 </div>
-                                @if (empty($events))
-                                    <div class="text-xs text-slate-400 italic">No events this week</div>
-                                @else
+                            </div>
+
+                            {{-- Show other (non-locking) events if any --}}
+                            @php $otherEvents = array_filter($events, fn ($ev) => ! in_array($ev['type'], ['exam', 'non_teaching'])); @endphp
+                            @if (count($otherEvents) > 0)
+                                <div class="mb-3 rounded-lg border border-slate-200 bg-white p-3 text-xs">
+                                    <div class="font-semibold text-slate-600 mb-1">Other events this week</div>
                                     <ul class="space-y-1">
-                                        @foreach ($events as $event)
-                                            <li class="flex items-center gap-1.5 text-xs text-slate-600">
+                                        @foreach ($otherEvents as $ev)
+                                            <li class="flex items-center gap-1.5 text-slate-600">
                                                 <span class="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"></span>
-                                                <span class="font-medium">{{ $event['name'] }}</span>
-                                                <span class="text-slate-400">({{ $event['date_display'] }})</span>
+                                                {{ $ev['name'] }} <span class="text-slate-400">({{ $ev['date_display'] }})</span>
                                             </li>
                                         @endforeach
                                     </ul>
-                                @endif
-                            </div>
+                                </div>
+                            @endif
 
-                            {{-- Exam assignment --}}
-                            <div>
-                                <div class="text-xs font-semibold text-slate-600 mb-1.5">
-                                    <i class="bx bx-notepad"></i> Mark as Exam Week
+                        {{-- ── EDITABLE BODY ───────────────────────────────── --}}
+                        @else
+
+                            {{-- Events row (non-locking events only shown here since locked weeks show their own block) --}}
+                            @if (count($events) > 0)
+                                <div class="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
+                                    <div class="text-xs font-semibold text-slate-600 mb-1.5">
+                                        <i class="bx bx-calendar-event"></i> Events this week
+                                    </div>
+                                    <ul class="space-y-1">
+                                        @foreach ($events as $ev)
+                                            @php
+                                                $evColor = match($ev['type']) {
+                                                    'holiday' => 'bg-green-400',
+                                                    'break'   => 'bg-blue-400',
+                                                    'other'   => 'bg-slate-400',
+                                                    default   => 'bg-amber-400',
+                                                };
+                                            @endphp
+                                            <li class="flex items-center gap-1.5 text-xs text-slate-600">
+                                                <span class="w-1.5 h-1.5 rounded-full {{ $evColor }} shrink-0"></span>
+                                                <span class="font-medium">{{ $ev['name'] }}</span>
+                                                <span class="text-slate-400">({{ $ev['date_display'] }})</span>
+                                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 capitalize">
+                                                    {{ str_replace('_', ' ', $ev['type']) }}
+                                                </span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
                                 </div>
-                                <div class="flex flex-wrap gap-1.5">
-                                    @foreach (['first_term' => '1st Term', 'second_term' => '2nd Term', 'final_term' => 'Final Term'] as $type => $label)
-                                        @php
-                                            $assignedWeek        = $examWeeks[$type] ?? null;
-                                            $isAssignedHere      = $assignedWeek === $week->week_no;
-                                            $isAssignedElsewhere = $assignedWeek !== null && ! $isAssignedHere;
-                                        @endphp
-                                        @if ($isAssignedHere)
-                                            <button type="button" wire:click="clearExamWeek('{{ $type }}')"
-                                                class="px-2.5 py-1 text-xs font-medium rounded-lg
-                                                       bg-red-50 text-red-700 border border-red-200 hover:bg-red-100">
-                                                ✕ {{ $label }}
-                                            </button>
-                                        @else
-                                            <button type="button"
-                                                wire:click="assignExamWeek('{{ $type }}', {{ $week->week_no }})"
-                                                @if ($isAssignedElsewhere) disabled @endif
-                                                class="px-2.5 py-1 text-xs font-medium rounded-lg border
-                                                       {{ $isAssignedElsewhere
-                                                            ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
-                                                            : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-100' }}">
-                                                {{ $label }}
-                                            </button>
-                                        @endif
-                                    @endforeach
-                                </div>
-                            </div>
-                        </div>
+                            @endif
 
                             {{--
                                 EDITABLE FORM FIELDS
@@ -399,174 +413,172 @@
 
                                 NEVER add loadData() to save/blur paths — it would overwrite
                                 what the user is actively typing with stale DB values.
-                        --}}
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            --}}
 
-                            <div class="md:col-span-2">
-                                <x-form.label for="co_{{ $wKey }}">Course Outcome</x-form.label>
-                                <x-form.select id="co_{{ $wKey }}"
-                                    wire:model.lazy="weekInputs.{{ $wKey }}.course_outcome_id">
-                                    <option value="">— Select Course Outcome —</option>
-                                    @foreach ($courseOutcomes as $outcome)
-                                        <option value="{{ $outcome['id'] }}">
-                                            {{ $outcome['co_code'] }} – {{ \Illuminate\Support\Str::limit($outcome['description'], 70) }}
-                                        </option>
-                                    @endforeach
-                                </x-form.select>
-                            </div>
-
-                            <div>
-                                <x-form.label for="lo_{{ $wKey }}">Unit Learning Outcomes</x-form.label>
-                                <x-form.textarea id="lo_{{ $wKey }}" rows="4"
-                                    placeholder="Enter learning outcomes…"
-                                    wire:model.lazy="weekInputs.{{ $wKey }}.learning_outcomes" />
-                            </div>
-
-                            <div>
-                                <x-form.label for="at_{{ $wKey }}">Assessment Task</x-form.label>
-                                <x-form.textarea id="at_{{ $wKey }}" rows="4"
-                                    placeholder="Enter assessment task…"
-                                    wire:model.lazy="weekInputs.{{ $wKey }}.assessment_task" />
-                            </div>
-
-                            <div>
-                                <x-form.label for="tp_{{ $wKey }}">Topics</x-form.label>
-                                <x-form.textarea id="tp_{{ $wKey }}" rows="4"
-                                    placeholder="Enter topics covered…"
-                                    wire:model.lazy="weekInputs.{{ $wKey }}.topic" />
-                            </div>
-
-                            <div>
-                                <x-form.label for="tla_{{ $wKey }}">Teaching &amp; Learning Activities</x-form.label>
-                                <x-form.textarea id="tla_{{ $wKey }}" rows="4"
-                                    placeholder="Enter teaching activities…"
-                                    wire:model.lazy="weekInputs.{{ $wKey }}.teaching_activities" />
-                            </div>
-                        </div>
-
-                        {{-- ── References & Materials ────────────────────────── --}}
-                        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                            {{-- ── References ─────────────────────────────────── --}}
-                            <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                                <div class="flex items-center justify-between mb-2.5">
-                                    <span class="text-xs font-semibold text-slate-700">
-                                        <i class="bx bx-book-open text-slate-500 mr-0.5"></i> References
-                                    </span>
-                                    <button type="button"
-                                        wire:click="addReference({{ $week->week_no }})"
-                                        class="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-semibold rounded-md
-                                                border border-violet-200 bg-white text-violet-700
-                                                hover:bg-violet-50 hover:border-violet-300 transition-colors">
-                                        <i class="bx bx-plus text-sm leading-none"></i> Add
-                                    </button>
+                            {{-- Form fields --}}
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="md:col-span-2">
+                                    <x-form.label for="co_{{ $wKey }}">Course Outcome</x-form.label>
+                                    <x-form.select id="co_{{ $wKey }}"
+                                        wire:model.lazy="weekInputs.{{ $wKey }}.course_outcome_id">
+                                        <option value="">— Select Course Outcome —</option>
+                                        @foreach ($courseOutcomes as $outcome)
+                                            <option value="{{ $outcome['id'] }}">
+                                                {{ $outcome['co_code'] }} – {{ \Illuminate\Support\Str::limit($outcome['description'], 70) }}
+                                            </option>
+                                        @endforeach
+                                    </x-form.select>
                                 </div>
 
-                                <div class="space-y-2">
-                                    @foreach ($weekInputs[$wKey]['references'] ?? [['text' => '']] as $rIdx => $ref)
-                                        <div class="flex items-center gap-2" wire:key="ref-{{ $wKey }}-{{ $rIdx }}">
-                                            <input type="text"
-                                                wire:model.lazy="weekInputs.{{ $wKey }}.references.{{ $rIdx }}.text"
-                                                placeholder="e.g. Author (Year). Title. Publisher."
-                                                class="flex-1 text-sm rounded-lg border border-slate-300 bg-white px-3 py-1.5
-                                                        focus:border-violet-400 focus:ring-1 focus:ring-violet-300 focus:outline-none
-                                                        placeholder:text-slate-300">
-                                            @if (count($weekInputs[$wKey]['references'] ?? []) > 1)
-                                                <button type="button"
-                                                    wire:click="removeReference({{ $week->week_no }}, {{ $rIdx }})"
-                                                    class="shrink-0 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50
-                                                            rounded-md transition-colors"
-                                                    title="Remove">
-                                                    <i class="bx bx-trash text-sm leading-none"></i>
-                                                </button>
-                                            @else
-                                                {{-- Placeholder to keep alignment when trash is hidden --}}
-                                                <span class="w-7.5 shrink-0"></span>
-                                            @endif
-                                        </div>
-                                    @endforeach
+                                <div>
+                                    <x-form.label for="lo_{{ $wKey }}">Unit Learning Outcomes</x-form.label>
+                                    <x-form.textarea id="lo_{{ $wKey }}" rows="4"
+                                        placeholder="Enter learning outcomes…"
+                                        wire:model.lazy="weekInputs.{{ $wKey }}.learning_outcomes" />
+                                </div>
+
+                                <div>
+                                    <x-form.label for="at_{{ $wKey }}">Assessment Task</x-form.label>
+                                    <x-form.textarea id="at_{{ $wKey }}" rows="4"
+                                        placeholder="Enter assessment task…"
+                                        wire:model.lazy="weekInputs.{{ $wKey }}.assessment_task" />
+                                </div>
+
+                                <div>
+                                    <x-form.label for="tp_{{ $wKey }}">Topics</x-form.label>
+                                    <x-form.textarea id="tp_{{ $wKey }}" rows="4"
+                                        placeholder="Enter topics covered…"
+                                        wire:model.lazy="weekInputs.{{ $wKey }}.topic" />
+                                </div>
+
+                                <div>
+                                    <x-form.label for="tla_{{ $wKey }}">Teaching &amp; Learning Activities</x-form.label>
+                                    <x-form.textarea id="tla_{{ $wKey }}" rows="4"
+                                        placeholder="Enter teaching activities…"
+                                        wire:model.lazy="weekInputs.{{ $wKey }}.teaching_activities" />
                                 </div>
                             </div>
 
-                            {{-- ── Online Materials ─────────────────────────────── --}}
-                            <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                                <div class="flex items-center justify-between mb-2.5">
-                                    <span class="text-xs font-semibold text-slate-700">
-                                        <i class="bx bx-link text-slate-500 mr-0.5"></i> Online Materials
-                                    </span>
-                                    <button type="button"
-                                        wire:click="addMaterial({{ $week->week_no }})"
-                                        class="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-semibold rounded-md
-                                                border border-sky-200 bg-white text-sky-700
-                                                hover:bg-sky-50 hover:border-sky-300 transition-colors">
-                                        <i class="bx bx-plus text-sm leading-none"></i> Add
-                                    </button>
-                                </div>
+                            {{-- References & Materials --}}
+                            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                                <div class="space-y-3">
-                                    @foreach ($weekInputs[$wKey]['materials'] ?? [['name' => '', 'url' => '']] as $mIdx => $mat)
-                                        <div class="flex items-start gap-2" wire:key="mat-{{ $wKey }}-{{ $mIdx }}">
-                                            <div class="flex-1 space-y-1.5">
+                                {{-- References --}}
+                                <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                                    <div class="flex items-center justify-between mb-2.5">
+                                        <span class="text-xs font-semibold text-slate-700">
+                                            <i class="bx bx-book-open text-slate-500 mr-0.5"></i> References
+                                        </span>
+                                        <button type="button"
+                                            wire:click="addReference({{ $week->week_no }})"
+                                            class="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-semibold rounded-md
+                                                    border border-violet-200 bg-white text-violet-700
+                                                    hover:bg-violet-50 hover:border-violet-300 transition-colors">
+                                            <i class="bx bx-plus text-sm leading-none"></i> Add
+                                        </button>
+                                    </div>
+                                    <div class="space-y-2">
+                                        @foreach ($weekInputs[$wKey]['references'] ?? [['text' => '']] as $rIdx => $ref)
+                                            <div class="flex items-center gap-2" wire:key="ref-{{ $wKey }}-{{ $rIdx }}">
                                                 <input type="text"
-                                                    wire:model.lazy="weekInputs.{{ $wKey }}.materials.{{ $mIdx }}.name"
-                                                    placeholder="Name (e.g. Week {{ $week->week_no }} Slides)"
-                                                    class="w-full text-sm rounded-lg border border-slate-300 bg-white px-3 py-1.5
-                                                            focus:border-sky-400 focus:ring-1 focus:ring-sky-300 focus:outline-none
+                                                    wire:model.lazy="weekInputs.{{ $wKey }}.references.{{ $rIdx }}.text"
+                                                    placeholder="e.g. Author (Year). Title. Publisher."
+                                                    class="flex-1 text-sm rounded-lg border border-slate-300 bg-white px-3 py-1.5
+                                                            focus:border-violet-400 focus:ring-1 focus:ring-violet-300 focus:outline-none
                                                             placeholder:text-slate-300">
-                                                <input type="url"
-                                                    wire:model.lazy="weekInputs.{{ $wKey }}.materials.{{ $mIdx }}.url"
-                                                    placeholder="https://…"
-                                                    class="w-full text-sm rounded-lg border border-slate-300 bg-white px-3 py-1.5
-                                                            focus:border-sky-400 focus:ring-1 focus:ring-sky-300 focus:outline-none
--                                                           placeholder:text-slate-300">
+                                                @if (count($weekInputs[$wKey]['references'] ?? []) > 1)
+                                                    <button type="button"
+                                                        wire:click="removeReference({{ $week->week_no }}, {{ $rIdx }})"
+                                                        class="shrink-0 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
+                                                        title="Remove">
+                                                        <i class="bx bx-trash text-sm leading-none"></i>
+                                                    </button>
+                                                @else
+                                                    <span class="w-7.5 shrink-0"></span>
+                                                @endif
                                             </div>
-                                            @if (count($weekInputs[$wKey]['materials'] ?? []) > 1)
-                                                <button type="button"
-                                                    wire:click="removeMaterial({{ $week->week_no }}, {{ $mIdx }})"
-                                                    class="shrink-0 mt-1 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50
-                                                            rounded-md transition-colors"
-                                                    title="Remove">
-                                                    <i class="bx bx-trash text-sm leading-none"></i>
-                                                </button>
-                                            @else
-                                                <span class="w-7.5 shrink-0 mt-1"></span>
-                                            @endif
-                                        </div>
-                                    @endforeach
+                                        @endforeach
+                                    </div>
+                                </div>
+
+                                {{-- Online Materials --}}
+                                <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                                    <div class="flex items-center justify-between mb-2.5">
+                                        <span class="text-xs font-semibold text-slate-700">
+                                            <i class="bx bx-link text-slate-500 mr-0.5"></i> Online Materials
+                                        </span>
+                                        <button type="button"
+                                            wire:click="addMaterial({{ $week->week_no }})"
+                                            class="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-semibold rounded-md
+                                                    border border-sky-200 bg-white text-sky-700
+                                                    hover:bg-sky-50 hover:border-sky-300 transition-colors">
+                                            <i class="bx bx-plus text-sm leading-none"></i> Add
+                                        </button>
+                                    </div>
+                                    <div class="space-y-3">
+                                        @foreach ($weekInputs[$wKey]['materials'] ?? [['name' => '', 'url' => '']] as $mIdx => $mat)
+                                            <div class="flex items-start gap-2" wire:key="mat-{{ $wKey }}-{{ $mIdx }}">
+                                                <div class="flex-1 space-y-1.5">
+                                                    <input type="text"
+                                                        wire:model.lazy="weekInputs.{{ $wKey }}.materials.{{ $mIdx }}.name"
+                                                        placeholder="Name (e.g. Week {{ $week->week_no }} Slides)"
+                                                        class="w-full text-sm rounded-lg border border-slate-300 bg-white px-3 py-1.5
+                                                                focus:border-sky-400 focus:ring-1 focus:ring-sky-300 focus:outline-none
+                                                                placeholder:text-slate-300">
+                                                    <input type="url"
+                                                        wire:model.lazy="weekInputs.{{ $wKey }}.materials.{{ $mIdx }}.url"
+                                                        placeholder="https://…"
+                                                        class="w-full text-sm rounded-lg border border-slate-300 bg-white px-3 py-1.5
+                                                                focus:border-sky-400 focus:ring-1 focus:ring-sky-300 focus:outline-none
+                                                                placeholder:text-slate-300">
+                                                </div>
+                                                @if (count($weekInputs[$wKey]['materials'] ?? []) > 1)
+                                                    <button type="button"
+                                                        wire:click="removeMaterial({{ $week->week_no }}, {{ $mIdx }})"
+                                                        class="shrink-0 mt-1 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
+                                                        title="Remove">
+                                                        <i class="bx bx-trash text-sm leading-none"></i>
+                                                    </button>
+                                                @else
+                                                    <span class="w-7.5 shrink-0 mt-1"></span>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {{-- ── Per-week save ─────────────────────────────────── --}}
-                        <div class="flex items-center justify-between mt-5 pt-3 border-t border-slate-100">
-                            <p class="text-xs text-slate-400">
-                                <i class="bx bx-info-circle"></i>
-                                Auto-saves when you collapse this week or use Save All.
-                            </p>
-                            <button type="button"
-                                wire:click="saveWeek({{ $week->week_no }})"
-                                wire:loading.attr="disabled"
-                                wire:target="saveWeek({{ $week->week_no }})"
-                                class="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold rounded-lg
-                                        border border-green-300 bg-green-50 text-green-700 hover:bg-green-100
-                                        disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
-                                <span wire:loading.remove wire:target="saveWeek({{ $week->week_no }})">
-                                    <i class="bx bx-save"></i> Save Week {{ $week->week_no }}
-                                </span>
-                                <span wire:loading wire:target="saveWeek({{ $week->week_no }})">
-                                    <i class="bx bx-loader-alt bx-spin"></i> Saving…
-                                </span>
-                            </button>
-                        </div>
+                            {{-- Per-week save --}}
+                            <div class="flex items-center justify-between mt-5 pt-3 border-t border-slate-100">
+                                <p class="text-xs text-slate-400">
+                                    <i class="bx bx-info-circle"></i>
+                                    Auto-saves when you collapse this week or use Save All.
+                                </p>
+                                <button type="button"
+                                    wire:click="saveWeek({{ $week->week_no }})"
+                                    wire:loading.attr="disabled"
+                                    wire:target="saveWeek({{ $week->week_no }})"
+                                    class="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold rounded-lg
+                                            border border-green-300 bg-green-50 text-green-700 hover:bg-green-100
+                                            disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
+                                    <span wire:loading.remove wire:target="saveWeek({{ $week->week_no }})">
+                                        <i class="bx bx-save"></i> Save Week {{ $week->week_no }}
+                                    </span>
+                                    <span wire:loading wire:target="saveWeek({{ $week->week_no }})">
+                                        <i class="bx bx-loader-alt bx-spin"></i> Saving…
+                                    </span>
+                                </button>
+                            </div>
 
+                        @endif {{-- end locked / editable --}}
                     </div>{{-- /body --}}
                 </div>{{-- /wire:key --}}
             @endforeach
         </div>{{-- /accordion --}}
 
         <p class="text-xs text-slate-400 mt-5">
-            <i class="bx bx-bulb"></i> Use <strong>Save Week N</strong> per section or <strong>Save All</strong> to persist everything at once.
-            Navigating to another step (Next / Previous) also auto-saves.
-        </p>{{-- /accordion --}}
+            <i class="bx bx-bulb"></i>
+            Use <strong>Save Week N</strong> per section or <strong>Save All</strong> to persist everything at once.
+            Navigating steps (Next / Previous) also auto-saves.
+        </p>
     @endif
 </div>
