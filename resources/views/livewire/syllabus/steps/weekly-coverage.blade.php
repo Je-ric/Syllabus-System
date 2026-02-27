@@ -113,7 +113,7 @@
                     @endif
                 </div>
             </div>
-            <div class="flex justify-between mt-3 text-slate-700">
+            <div class="mt-3 text-slate-700">
                 <div><span class="font-semibold">{{ $syllabusWeeks->count() }}</span> weeks</div>
                 <div><span class="font-semibold">{{ collect($weekEvents)->flatten(1)->count() }}</span> events</div>
             </div>
@@ -194,10 +194,10 @@
                     <button type="button"
                         @click="openWeek = openWeek === {{ $week->week_no }} ? null : {{ $week->week_no }}"
                         class="w-full flex items-center justify-between px-4 py-3 text-left
-                               hover:bg-slate-50 transition-colors focus:outline-none">
+                            hover:bg-slate-50 transition-colors focus:outline-none">
                         <div class="flex items-center gap-3 min-w-0">
                             <span class="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold shrink-0
-                                         {{ $week->is_exam_week ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-600' }}">
+                                        {{ $week->is_exam_week ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-600' }}">
                                 {{ $week->week_no }}
                             </span>
                             <div class="min-w-0">
@@ -218,9 +218,15 @@
                                     @endif
                                 </div>
                             </div>
+                            @if (count($events) > 0)
+                                <span class="text-xs bg-amber-50 border border-amber-200 text-amber-700
+                                            rounded-full px-2 py-0.5 hidden sm:inline">
+                                    {{ count($events) }} event{{ count($events) > 1 ? 's' : '' }}
+                                </span>
+                            @endif
                         </div>
                         <i class="bx text-slate-400 transition-transform duration-200 shrink-0 ml-2"
-                           :class="openWeek === {{ $week->week_no }} ? 'bx-chevron-up' : 'bx-chevron-down'"></i>
+                            :class="openWeek === {{ $week->week_no }} ? 'bx-chevron-up' : 'bx-chevron-down'"></i>
                     </button>
 
                     {{-- Accordion Body --}}
@@ -292,79 +298,100 @@
                                 what the user is actively typing with stale DB values.
                             --}}
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="md:col-span-2">
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Course Outcome</label>
-                                    <select
-                                        wire:model.lazy="weekInputs.{{ $wKey }}.course_outcome_id"
-                                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
-                                        <option value="">— Select Course Outcome —</option>
-                                        @foreach ($courseOutcomes as $outcome)
-                                            <option value="{{ $outcome['id'] }}">
-                                                {{ $outcome['co_code'] }} – {{ \Illuminate\Support\Str::limit($outcome['description'], 60) }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Unit Learning Outcomes</label>
-                                    <textarea rows="4"
-                                        name="weekInputs[{{ $wKey }}][learning_outcomes]"
-                                        wire:model.lazy="weekInputs.{{ $wKey }}.learning_outcomes"
-                                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
-                                        placeholder="Enter learning outcomes…"></textarea>
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Assessment Task</label>
-                                    <textarea rows="4"
-                                        wire:model.lazy="weekInputs.{{ $wKey }}.assessment_task"
-                                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
-                                        placeholder="Enter assessment task…"></textarea>
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Topics</label>
-                                    <textarea rows="4"
-                                        wire:model.lazy="weekInputs.{{ $wKey }}.topic"
-                                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
-                                        placeholder="Enter topics covered…"></textarea>
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Teaching &amp; Learning Activities</label>
-                                    <textarea rows="4"
-                                        wire:model.lazy="weekInputs.{{ $wKey }}.teaching_activities"
-                                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
-                                        placeholder="Enter teaching activities…"></textarea>
-                                </div>
+                            {{-- Course Outcome --}}
+                            <div class="md:col-span-2">
+                                <x-form.label for="course_outcome_{{ $wKey }}">Course Outcome</x-form.label>
+                                <x-form.select
+                                    id="course_outcome_{{ $wKey }}"
+                                    wire:model.lazy="weekInputs.{{ $wKey }}.course_outcome_id"
+                                >
+                                    <option value="">— Select Course Outcome —</option>
+                                    @foreach ($courseOutcomes as $outcome)
+                                        <option value="{{ $outcome['id'] }}">
+                                            {{ $outcome['co_code'] }} – {{ \Illuminate\Support\Str::limit($outcome['description'], 60) }}
+                                        </option>
+                                    @endforeach
+                                </x-form.select>
                             </div>
 
-                            <hr class="border-slate-100">
-
-                            <div class="flex flex-wrap gap-4">
-                                <div class="w-full md:w-[48%]">
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">References</label>
-                                    <input type="text"
-                                        wire:model.lazy="weekInputs.{{ $wKey }}.reference_text"
-                                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
-                                        placeholder="Book / chapter / article…">
-                                </div>
-
-                                <div class="w-full md:w-[48%]">
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Online Material Name</label>
-                                    <input type="text"
-                                        wire:model.lazy="weekInputs.{{ $wKey }}.material_name"
-                                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
-                                        placeholder="Lecture slides, video, etc.">
-
-                                    <label class="block text-sm font-medium text-gray-700 mt-3 mb-1">Online Material URL</label>
-                                    <input type="url"
-                                        wire:model.lazy="weekInputs.{{ $wKey }}.material_url"
-                                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
-                                        placeholder="https://…">
-                                </div>
+                            {{-- Unit Learning Outcomes --}}
+                            <div>
+                                <x-form.label for="learning_outcomes_{{ $wKey }}">Unit Learning Outcomes</x-form.label>
+                                <x-form.textarea
+                                    id="learning_outcomes_{{ $wKey }}"
+                                    rows="4"
+                                    placeholder="Enter learning outcomes…"
+                                    wire:model.lazy="weekInputs.{{ $wKey }}.learning_outcomes"
+                                />
                             </div>
+
+                            {{-- Assessment Task --}}
+                            <div>
+                                <x-form.label for="assessment_task_{{ $wKey }}">Assessment Task</x-form.label>
+                                <x-form.textarea
+                                    id="assessment_task_{{ $wKey }}"
+                                    rows="4"
+                                    placeholder="Enter assessment task…"
+                                    wire:model.lazy="weekInputs.{{ $wKey }}.assessment_task"
+                                />
+                            </div>
+
+                            {{-- Topics --}}
+                            <div>
+                                <x-form.label for="topics_{{ $wKey }}">Topics</x-form.label>
+                                <x-form.textarea
+                                    id="topics_{{ $wKey }}"
+                                    rows="4"
+                                    placeholder="Enter topics covered…"
+                                    wire:model.lazy="weekInputs.{{ $wKey }}.topic"
+                                />
+                            </div>
+
+                            {{-- Teaching & Learning Activities --}}
+                            <div>
+                                <x-form.label for="tla_{{ $wKey }}">Teaching &amp; Learning Activities</x-form.label>
+                                <x-form.textarea
+                                    id="tla_{{ $wKey }}"
+                                    rows="4"
+                                    placeholder="Enter teaching activities…"
+                                    wire:model.lazy="weekInputs.{{ $wKey }}.teaching_activities"
+                                />
+                            </div>
+                        </div>
+
+                        <hr class="border-slate-100 my-4">
+
+                        <div class="flex flex-wrap gap-4">
+                            {{-- References --}}
+                            <div class="w-full md:w-[48%]">
+                                <x-form.label for="reference_{{ $wKey }}">References</x-form.label>
+                                <x-form.input
+                                    id="reference_{{ $wKey }}"
+                                    type="text"
+                                    placeholder="Book / chapter / article…"
+                                    wire:model.lazy="weekInputs.{{ $wKey }}.reference_text"
+                                />
+                            </div>
+
+                            {{-- Online Materials --}}
+                            <div class="w-full md:w-[48%]">
+                                <x-form.label for="material_name_{{ $wKey }}">Online Material Name</x-form.label>
+                                <x-form.input
+                                    id="material_name_{{ $wKey }}"
+                                    type="text"
+                                    placeholder="Lecture slides, video, etc."
+                                    wire:model.lazy="weekInputs.{{ $wKey }}.material_name"
+                                />
+
+                                <x-form.label for="material_url_{{ $wKey }}" class="mt-3">Online Material URL</x-form.label>
+                                <x-form.input
+                                    id="material_url_{{ $wKey }}"
+                                    type="url"
+                                    placeholder="https://…"
+                                    wire:model.lazy="weekInputs.{{ $wKey }}.material_url"
+                                />
+                            </div>
+                        </div>
 
                             {{-- Per-week save button --}}
                             <div class="flex justify-end pt-2 border-t border-slate-100">
@@ -373,7 +400,7 @@
                                     wire:loading.attr="disabled"
                                     wire:target="saveWeek({{ $week->week_no }})"
                                     class="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-semibold rounded
-                                            border border-indigo-300 bg-indigo-50 text-indigo-700 hover:bg-indigo-100
+                                            border border-green-300 bg-green-50 text-green-700 hover:bg-green-100
                                             disabled:opacity-60 disabled:cursor-not-allowed">
                                     <span wire:loading.remove wire:target="saveWeek({{ $week->week_no }})">
                                         <i class="bx bx-save"></i> Save Week {{ $week->week_no }}
@@ -388,6 +415,11 @@
                     </div>{{-- /x-show --}}
                 </div>{{-- /wire:key --}}
             @endforeach
-        </div>{{-- /accordion --}}
+        </div>
+
+        <p class="text-xs text-slate-400 mt-5">
+            <i class="bx bx-bulb"></i> Use <strong>Save Week N</strong> per section or <strong>Save All</strong> to persist everything at once.
+            Navigating to another step (Next / Previous) also auto-saves.
+        </p>{{-- /accordion --}}
     @endif
 </div>
