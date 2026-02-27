@@ -17,6 +17,9 @@
                             <option value="holiday" {{ $event->type === 'holiday' ? 'selected' : '' }}>Holiday</option>
                             <option value="exam" {{ $event->type === 'exam' ? 'selected' : '' }}>Exam</option>
                             <option value="break" {{ $event->type === 'break' ? 'selected' : '' }}>Break</option>
+                            <option value="non_teaching" {{ $event->type === 'non_teaching' ? 'selected' : '' }}>
+                                Non-Teaching
+                            </option>
                             <option value="other" {{ $event->type === 'other' ? 'selected' : '' }}>Other</option>
                         </x-form.select>
                     </div>

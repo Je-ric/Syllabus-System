@@ -18,9 +18,9 @@
                     a round-trip on every keystroke — no more lag while typing.
                 --}}
                 <div wire:key="co-row-{{ $outcome['temp_key'] ?? ($outcome['id'] ?? $index) }}"
-                     class="flex items-start gap-3 px-4 py-3 border border-slate-200 rounded-xl
-                            bg-white shadow-sm transition-shadow hover:shadow-md"
-                     x-data="{ text: @js($outcome['description'] ?? '') }">
+                        class="flex items-start gap-3 px-4 py-3 border border-slate-200 rounded-xl
+                                bg-white shadow-sm transition-shadow hover:shadow-md"
+                        x-data="{ text: @js($outcome['description'] ?? '') }">
 
                     {{-- CO badge --}}
                     <span class="mt-1.5 inline-flex items-center justify-center min-w-11 h-7
@@ -41,15 +41,15 @@
                         rows="2"
                         placeholder="Enter course outcome description…"
                         class="flex-1 resize-none rounded-lg border border-slate-200 bg-slate-50 px-3 py-2
-                               text-sm text-slate-800 placeholder:text-slate-300
-                               focus:bg-white focus:border-emerald-400 focus:ring-1 focus:ring-emerald-300
-                               focus:outline-none transition-colors"></textarea>
+                                text-sm text-slate-800 placeholder:text-slate-300
+                                focus:bg-white focus:border-emerald-400 focus:ring-1 focus:ring-emerald-300
+                                focus:outline-none transition-colors"></textarea>
 
                     {{-- Remove button --}}
                     <button type="button"
                         wire:click="removeCourseOutcome({{ $index }})"
                         class="mt-1.5 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50
-                               rounded-lg transition-colors"
+                                rounded-lg transition-colors"
                         title="Remove outcome">
                         <i class="bx bx-trash text-base leading-none"></i>
                     </button>

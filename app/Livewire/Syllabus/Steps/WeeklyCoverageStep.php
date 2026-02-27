@@ -156,6 +156,9 @@ class WeeklyCoverageStep extends Component
             return;
         }
 
+        // if academic calendar events type == exam or non-teaching, disabled the weeks in weekly coverage, 
+        // it means it will create a week but the users/faculty cant input in that week
+
         // Reload components fresh — needed by ensureWeeksGenerated()
         $this->reloadCourseComponents();
         $this->academic_calendar_id = (int) $syllabus->academic_calendar_id;

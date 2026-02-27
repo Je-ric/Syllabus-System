@@ -13,7 +13,13 @@ return new class extends Migration
             $table->foreignId('academic_calendar_id')
                 ->constrained('academic_calendars')
                 ->cascadeOnDelete();
-            $table->enum('type', ['holiday', 'exam', 'break', 'other']);
+            $table->enum('type', [
+                'holiday',
+                'exam', // disable week
+                'break',
+                'non_teaching', // disable week
+                'other'
+            ]);
             $table->string('name');
             $table->date('date');
             $table->timestamps();

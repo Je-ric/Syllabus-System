@@ -6,6 +6,7 @@ use App\Models\AcademicCalendar;
 use App\Models\AcademicCalendarEvent;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class AcademicCalendarEventController extends Controller
 {
@@ -28,7 +29,7 @@ class AcademicCalendarEventController extends Controller
     public function store(Request $request, AcademicCalendar $semester)
     {
         $request->validate([
-            'type' => 'required|in:holiday,exam,break,other',
+            'type' => ['required', Rule::in(AcademicCalendarEvent::TYPES)],
             'name' => 'required|string',
             'date' => [
                 'required',
@@ -66,7 +67,7 @@ class AcademicCalendarEventController extends Controller
         $semester = $event->calendar;
 
         $request->validate([
-            'type' => 'required|in:holiday,exam,break,other',
+            'type' => ['required', Rule::in(AcademicCalendarEvent::TYPES)],
             'name' => 'required|string',
             'date' => [
                 'required',
@@ -94,7 +95,7 @@ class AcademicCalendarEventController extends Controller
 
         return redirect()->route('academic.calendar.events.index', $semester->academic_year)
                         ->with('toast', [
-                    'message' => 'Event updated succesffully.',
+                    'message' => 'Event updated successfully.',
                     'type' => 'success'
                 ]);
     }
@@ -119,7 +120,7 @@ class AcademicCalendarEventController extends Controller
 
         return redirect()->route('academic.calendar.events.index', $academicYear)
                         ->with('toast', [
-                    'message' => 'Event deleted succesffully.',
+                    'message' => 'Event deleted successfully.',
                     'type' => 'success'
                 ]);
     }

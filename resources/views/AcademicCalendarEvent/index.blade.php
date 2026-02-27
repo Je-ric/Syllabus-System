@@ -30,6 +30,12 @@
         ])->toArray();
     @endphp
 
+    <p>
+        Note: If type is <span>exam</span> and <span>Non-Teaching Week</span>,
+        the weekly coverage will automatically mark that date / week as
+        unavailable for scheduling classes and setting details.
+    </p>
+
     <x-navigation.tabs-modern
         :tabs="$tabs"
         :defaultTab="$tabs[0]['id'] ?? null"
@@ -52,6 +58,7 @@
                                     <option value="exam">Exam</option>
                                     <option value="break">Break</option>
                                     <option value="other">Other</option>
+                                    <option value="non_teaching">Non-Teaching</option>
                                 </x-form.select>
                             </div>
                             <div>

@@ -16,6 +16,14 @@ class AcademicCalendarEvent extends Model
         'date',
     ];
 
+    public const TYPES = [
+        'holiday',
+        'exam',
+        'break',
+        'non_teaching',
+        'other',
+    ];
+
     // many events to one calendar (per sem)
     // Used in:
     public function calendar()
