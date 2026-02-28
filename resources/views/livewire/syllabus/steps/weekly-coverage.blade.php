@@ -322,7 +322,7 @@
 
                     {{-- Accordion Body --}}
                     <div x-show="openWeek === {{ $week->week_no }}" x-cloak
-                        class="px-5 pb-5 pt-1 {{ $isLocked ? 'bg-red-50/30' : 'bg-emerald-50' }}">
+                        class="px-5 pb-5 pt-1 {{ $isLocked ? 'bg-red-50/30' : 'bg-white' }}">
 
                         {{-- ── LOCKED BANNER ───────────────────────────────── --}}
                         @if ($isLocked)

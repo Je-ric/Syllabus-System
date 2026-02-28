@@ -2,12 +2,16 @@
 
 @section('content')
 
-<x-header-with-button
+    <x-header-with-button
         title="Program Management"
-        description="Program Educational Objectives (PEO) and Program Outcomes (PO)"
+        description="Manage Program Educational Objectives (PEOs) and Program Outcomes (POs)."
     />
 
-    <div class="mt-4">
+    {{-- Program selector — same card style as courses.index and syllabus.create --}}
+    <div class="mt-5 border border-slate-200/80 rounded-2xl p-6 bg-white/90 shadow-sm">
+        <h2 class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500 mb-4">
+            Select Program
+        </h2>
         <livewire:programs.program-selector
             :program-id="optional($program)->id"
             redirect-route="programs.show"
@@ -15,9 +19,12 @@
         />
     </div>
 
-    <div class="mt-6">
-        <h2 class="text-xs uppercase tracking-[0.3em] text-slate-500 mb-2">Mission</h2>
-        <p class="text-slate-600 leading-relaxed">
+    {{-- University mission — static contextual blurb --}}
+    <div class="mt-5 rounded-2xl border border-slate-100 bg-slate-50 px-5 py-4">
+        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400 mb-1">
+            University Mission
+        </p>
+        <p class="text-sm text-slate-600 leading-relaxed">
             CLSU shall develop globally competitive, work-ready, socially-responsible
             and empowered human resources who value life-long learning; and to generate,
             disseminate, and apply knowledge and technologies for poverty alleviation,
@@ -25,36 +32,62 @@
         </p>
     </div>
 
-    {{-- When a program is selected --}}
+    {{-- ── Program selected ─────────────────────────────────────────────── --}}
     @if ($program)
+
         <div class="mt-6 border-t border-slate-200 pt-6">
-            <h2 class="text-lg font-semibold text-slate-800 mb-4">
-                Program: <span class="text-emerald-700">{{ $program->name }}</span>
-            </h2>
 
-            <x-navigation.tabs-modern :tabs="[
-                ['id' => 'peo', 'label' => 'PEOs', 'icon' => 'bx-graduation'],
-                ['id' => 'po', 'label' => 'POs', 'icon' => 'bx-target']
-            ]" defaultTab="peo">
+            {{-- Program name breadcrumb --}}
+            <div class="flex items-center gap-2 mb-4">
+                <i class="bx bx-network-chart text-emerald-500 text-lg"></i>
+                <h2 class="text-base font-semibold text-slate-800">
+                    {{ $program->name }}
+                </h2>
+            </div>
 
+            <x-navigation.tabs-modern
+                :tabs="[
+                    ['id' => 'peo', 'label' => 'Program Educational Objectives (PEOs)', 'icon' => 'bx-graduation'],
+                    ['id' => 'po',  'label' => 'Program Outcomes (POs)',                'icon' => 'bx-target'],
+                ]"
+                defaultTab="peo"
+                stateKey="programs-{{ $program->id }}-tabs">
+
+                {{-- ── PEO Tab ────────────────────────────────────────────────── --}}
                 <x-slot name="slot_peo">
-                    <div class="bg-white/90 border border-slate-200 rounded-2xl p-5 shadow-sm">
-                        <h2 class="text-sm font-semibold text-slate-800 mb-3">Program Educational Objectives (PEOs)</h2>
-
-                        <p class="text-sm text-slate-600 mb-4">Three to five years after graduation, the BSIT graduates are:</p>
+                    <div class="rounded-2xl border border-slate-200 bg-white/90 shadow-sm p-5">
+                        <div class="mb-4">
+                            <h3 class="text-sm font-semibold text-slate-800">
+                                Program Educational Objectives
+                            </h3>
+                            <p class="mt-0.5 text-xs text-slate-500">
+                                Three to five years after graduation, graduates of
+                                <strong>{{ $program->name }}</strong> are expected to be:
+                            </p>
+                        </div>
                         <livewire:programs.manage-peos :program="$program" />
                     </div>
                 </x-slot>
 
+                {{-- ── PO Tab ─────────────────────────────────────────────────── --}}
                 <x-slot name="slot_po">
-                    <div class="bg-white/90 border border-slate-200 rounded-2xl p-5 shadow-sm">
-                        <h2 class="text-sm font-semibold text-slate-800 mb-3">Program Outcomes (POs) and its Relationship to the Program Educational Objectives</h2>
 
-                        {{-- Show PEOs of the selected program for reference --}}
+                    {{-- Reference panel: read-only PEOs shown at the top of the PO tab --}}
+                    <div class="rounded-2xl border border-slate-100 bg-slate-50 p-5">
                         <livewire:programs.peo-display :program="$program" />
+                    </div>
 
-                        <p class="text-sm text-slate-600 mb-4">By the time of graduation, students of the program have the ability to:</p>
-                        {{-- Manage POs and map to PEOs --}}
+                    {{-- Editable PO section below the reference --}}
+                    <div class="rounded-2xl border border-slate-200 bg-white/90 shadow-sm p-5">
+                        <div class="mb-4">
+                            <h3 class="text-sm font-semibold text-slate-800">
+                                Program Outcomes
+                            </h3>
+                            <p class="mt-0.5 text-xs text-slate-500">
+                                By the time of graduation, students of
+                                <strong>{{ $program->name }}</strong> have the ability to:
+                            </p>
+                        </div>
                         <livewire:programs.manage-pos :program="$program" />
                     </div>
 
@@ -62,10 +95,18 @@
 
             </x-navigation.tabs-modern>
         </div>
+
     @else
-        <div class="text-center text-slate-500 mt-8">
-            <p>Select a program to manage its Program Educational Objectives (PEO) and Program Outcomes (PO).</p>
+
+        {{-- Empty state when no program is selected --}}
+        <div class="mt-8 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 py-14 text-center">
+            <i class="bx bx-network-chart text-5xl text-slate-300"></i>
+            <p class="mt-3 text-sm font-medium text-slate-500">No program selected</p>
+            <p class="mt-1 text-xs text-slate-400">
+                Choose a college, department, and program above to manage its PEOs and POs.
+            </p>
         </div>
+
     @endif
 
 @endsection
