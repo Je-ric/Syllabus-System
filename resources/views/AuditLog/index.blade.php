@@ -6,7 +6,7 @@
         description="Track system actions, changes, and approvals"
     />
 
-    {{-- <form method="GET" action="{{ route('audit.logs.index') }}" class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+    <form method="GET" action="{{ route('audit.logs.index') }}" class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
         <div>
             <x-form.label for="user_id" variant="title">User</x-form.label>
             <x-form.select id="user_id" name="user_id">
@@ -65,7 +65,7 @@
                 Clear
             </x-button>
         </div>
-    </form> --}}
+    </form>
 
     <x-table.container class="mt-6">
         <x-table.table>

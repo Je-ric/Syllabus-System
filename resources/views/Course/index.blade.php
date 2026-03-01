@@ -2,75 +2,97 @@
 
 @section('content')
 
-@php
-    $modalCourses = collect();
-@endphp
+@php $modalCourses = collect(); @endphp
 
     <x-header-with-button
         title="Manage Courses"
-        description="Program Educational Objectives (PEO) and Program Outcomes (PO)"
-    />
+        description="View and manage courses by program, year level, and semester">
+        @if ($program)
+            <x-button
+                href="{{ route('courses.create', ['program_id' => $program->id]) }}"
+                variant="add-button">
+                <i class="bx bx-plus"></i> Add Course
+            </x-button>
+        @endif
+    </x-header-with-button>
 
-    <div class="border border-slate-200/80 rounded-2xl p-6 mb-6 bg-white/90 shadow-sm">
-        <h2 class="text-sm uppercase tracking-[0.25em] text-slate-500 mb-4">Select Program</h2>
+    {{-- Program selector card --}}
+    <div class="border border-slate-200/80 rounded-2xl p-5 mb-6 bg-white/90 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 mb-3">
+            Select Program
+        </p>
         <livewire:programs.program-selector
             :program-id="optional($program)?->id"
             redirect-route="courses.index"
-            :autoRedirect="true"
-        />
+            :autoRedirect="true" />
     </div>
-
 
 @if ($program)
-    <div class="mb-6 flex flex-wrap justify-between items-center gap-3">
-        <h2 class="text-lg font-semibold text-slate-800">Courses in <span class="text-emerald-700">{{ $program->name }}</span></h2>
-        <x-button href="{{ route('courses.create', ['program_id' => $program->id]) }}"
-            variant="add-button">
-            <i class="bx bx-plus"></i> Add Course
-        </x-button>
-    </div>
 
-    {{-- PO's for Reference kumbaga HAHAHAHHA --}}
-    <div class="mb-6">
-        <h3 class="text-sm uppercase tracking-[0.25em] text-slate-500 mb-3">Program Outcomes Reference</h3>
+    {{-- ── Program Outcomes reference — compact scrollable table ──────────── --}}
+    @if ($program->outcomes->isNotEmpty())
+        <div class="mb-6">
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 mb-2">
+                Program Outcomes Reference
+                <span class="ml-2 font-normal normal-case tracking-normal text-slate-400">
+                    — {{ $program->outcomes->count() }} outcome(s)
+                </span>
+            </p>
 
-        <div class="flex flex-col gap-3">
-            @foreach ($program->outcomes as $outcome)
-                <div class="bg-white/90 border border-slate-200 rounded-2xl p-4 flex items-start gap-4 shadow-sm">
-                    <div class="shrink-0 text-emerald-700 font-semibold">
-                            {{ $outcome->po_code }}.
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-sm text-slate-700">{{ $outcome->po_text }}</p>
-                    </div>
+            {{-- Compact horizontal-scroll table — avoids stacking many full cards --}}
+            <div class="rounded-2xl border border-slate-200/80 bg-white/90 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <tbody class="divide-y divide-slate-100">
+                            @foreach ($program->outcomes as $outcome)
+                                <tr class="hover:bg-slate-50/60 transition-colors">
+                                    <td class="px-4 py-2.5 whitespace-nowrap w-px font-mono text-xs font-bold text-emerald-700">
+                                        {{ $outcome->po_code }}
+                                    </td>
+                                    <td class="px-4 py-2.5 text-slate-600 leading-relaxed">
+                                        {{ $outcome->po_text }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
-            @endforeach
+            </div>
         </div>
-    </div>
+    @endif
 
-    {{-- Group courses by year --}}
+    {{-- ── Courses grouped by year → semester ─────────────────────────────── --}}
     @forelse ($groupedCourses as $year => $semesters)
         <div class="mb-8">
-            <h3 class="text-sm uppercase tracking-[0.25em] text-slate-500 mb-4 border-b border-slate-200 pb-2">Year {{ $year ?? 'N/A' }}</h3>
+            <h3 class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500
+                        border-b border-slate-200 pb-2 mb-4">
+                Year {{ $year ?? 'N/A' }}
+            </h3>
 
-            {{-- Group courses by semester --}}
             @forelse ($semesters as $semester => $courses)
-                <div class="mb-6 bg-white/90 border border-slate-200 rounded-2xl p-4 shadow-sm">
-                    <h4 class="font-medium text-slate-700 mb-3 border-b border-slate-200 pb-1">
-                        Semester {{ $semester ?? 'N/A' }}
-                    </h4>
+                <div class="mb-5 rounded-2xl border border-slate-200/80 bg-white/90 shadow-sm overflow-hidden">
 
-                    <x-table.container>
-                        <x-table.table class="border border-slate-200">
+                    <div class="px-4 py-2.5 border-b border-slate-100 bg-slate-50/60">
+                        <h4 class="text-xs font-semibold text-slate-600 uppercase tracking-[0.15em]">
+                            Semester {{ $semester ?? 'N/A' }}
+                            <span class="ml-2 font-normal normal-case tracking-normal text-slate-400">
+                                — {{ count($courses) }} course(s)
+                            </span>
+                        </h4>
+                    </div>
+
+                    <x-table.container class="rounded-none border-0 shadow-none bg-transparent">
+                        <x-table.table class="border-0">
                             <x-table.head>
                                 <tr>
                                     <x-table.th class="px-4 py-2">Code</x-table.th>
                                     <x-table.th class="px-4 py-2">Course Title</x-table.th>
                                     <x-table.th align="center" class="px-4 py-2">Units</x-table.th>
 
+                                    {{-- PO columns — one per outcome --}}
                                     @foreach ($program->outcomes as $outcome)
-                                        <x-table.th align="center" class="px-2 py-2">
-                                            {{ $outcome->po_code }}
+                                        <x-table.th align="center" class="px-2 py-2 whitespace-nowrap">
+                                            <span class="text-[10px] font-bold">{{ $outcome->po_code }}</span>
                                         </x-table.th>
                                     @endforeach
 
@@ -80,48 +102,44 @@
 
                             <x-table.body>
                                 @foreach ($courses as $course)
-                                    @php
-                                        $modalCourses->push($course);
-                                    @endphp
-                                    <x-table.row striped hover class="border-b border-slate-200">
-                                        <x-table.td class="px-4 py-2 font-mono font-semibold text-slate-700">{{ $course->course_code }}</x-table.td>
-                                        <x-table.td class="px-4 py-2 text-slate-700">{{ $course->course_title }}</x-table.td>
-                                        <x-table.td align="center" class="px-4 py-2 text-slate-700">{{ $course->credit_units }}</x-table.td>
+                                    @php $modalCourses->push($course); @endphp
+
+                                    <x-table.row striped hover>
+                                        <x-table.td class="px-4 py-2 font-mono text-xs font-semibold text-slate-700 whitespace-nowrap">
+                                            {{ $course->course_code }}
+                                        </x-table.td>
+                                        <x-table.td class="px-4 py-2 text-sm text-slate-700">
+                                            {{ $course->course_title }}
+                                        </x-table.td>
+                                        <x-table.td align="center" class="px-4 py-2 text-sm text-slate-600">
+                                            {{ $course->credit_units }}
+                                        </x-table.td>
 
                                         @foreach ($program->outcomes as $outcome)
                                             @php
                                                 $mapping = $course->programOutcomes->firstWhere('id', $outcome->id);
-                                                $ied = $mapping?->pivot->ied ?? '-';
+                                                $ied     = $mapping?->pivot->ied ?? '–';
                                             @endphp
-                                            <x-table.td align="center" class="px-2 py-2 font-medium">
+                                            <x-table.td align="center" class="px-2 py-2">
                                                 <x-feedback-status.ied-badge :level="$ied" />
                                             </x-table.td>
                                         @endforeach
 
                                         <x-table.td align="center" class="px-4 py-2">
-                                            <div class="flex gap-3 justify-center">
-                                                <a href="{{ route('courses.edit', $course->id) }}"
-                                                   class="text-emerald-700 hover:text-emerald-900 text-sm font-medium">
-                                                   <i class="bx bx-edit"></i> Edit
-                                                </a>
-
-                                                <button class="text-slate-600 hover:text-slate-900 text-sm"
-                                                        onclick="document.getElementById('viewCourseModal_{{ $course->id }}').showModal()">
+                                            <div class="inline-flex items-center gap-1.5">
+                                                <x-button
+                                                    href="{{ route('courses.edit', $course->id) }}"
+                                                    variant="table-edit"
+                                                    title="Edit course">
+                                                    <i class="bx bx-edit"></i> Edit
+                                                </x-button>
+                                                <x-button
+                                                    type="button"
+                                                    variant="table-view"
+                                                    onclick="document.getElementById('viewCourseModal_{{ $course->id }}').showModal()"
+                                                    title="View details">
                                                     <i class="bx bx-show"></i> View
-                                                </button>
-
-                                                {{--
-                                                    <button
-                                                        onclick="confirm('Delete this course?') && document.getElementById('delete-form-{{ $course->id }}').submit()"
-                                                        class="text-red-600 hover:text-red-800 text-sm font-medium"
-                                                    >
-                                                        <i class="bx bx-trash"></i> Delete
-                                                    </button>
-                                                    <form id="delete-form-{{ $course->id }}" action="{{ route('courses.destroy', $course->id) }}" method="POST" style="display:none;">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                    </form>
-                                                --}}
+                                                </x-button>
                                             </div>
                                         </x-table.td>
                                     </x-table.row>
@@ -131,25 +149,33 @@
                     </x-table.container>
                 </div>
             @empty
-                <p class="text-slate-500 text-sm mt-2">No courses for this semester.</p>
+                <x-empty-state
+                    icon="bx-book"
+                    title="No courses this semester"
+                    message="No courses have been added for this semester yet." />
             @endforelse
         </div>
     @empty
-        <div class="text-center py-8 bg-slate-50 rounded-2xl border border-slate-200">
-            <p class="text-slate-500 mb-3">No courses found for this program</p>
-            <a href="{{ route('courses.create', ['program_id' => $program->id]) }}"
-                class="text-emerald-700 hover:underline">
-               Create the first course
-            </a>
-        </div>
+        <x-empty-state
+            icon="bx-book-open"
+            title="No courses found"
+            message="This program has no courses yet. Add the first one to get started.">
+            <x-button
+                href="{{ route('courses.create', ['program_id' => $program->id]) }}"
+                variant="add-button">
+                <i class="bx bx-plus"></i> Add First Course
+            </x-button>
+        </x-empty-state>
     @endforelse
+
 @else
-    <div class="text-center py-12 bg-slate-50 rounded-2xl border border-slate-200">
-        <p class="text-slate-500">Select a program above to view and manage courses</p>
-    </div>
+    <x-empty-state
+        icon="bx-book-open"
+        title="No program selected"
+        message="Select a program above to view and manage its courses." />
 @endif
 
-{{-- Include modals for viewing courses --}}
+{{-- View modals — collected while rendering rows to avoid duplicate loops --}}
 @foreach ($modalCourses as $course)
     @include('Course.modals.viewCourseModal', ['course' => $course])
 @endforeach

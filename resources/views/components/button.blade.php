@@ -1,152 +1,117 @@
-{{-- Available for anchor links --}}
-
 @props([
-    'href' => null,
-    'type' => 'button',
+    'href'    => null,
+    'type'    => 'button',
     'variant' => 'primary',
 ])
 
 @php
-    $tableBtn = 'inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md
-                active:scale-95 transition-transform duration-200 '; //remember dapat may space sa dulo, concatenation kase, it's either dito or sa isa.
-    $formBtn = 'inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg
-                shadow-sm transition-all duration-200 hover:shadow-md active:scale-95 focus:ring-2 focus:outline-none ';
+    // Table buttons: compact, no scale animation (jarring on small targets), disabled support
+    $tableBtn = 'inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg
+                transition-colors duration-150
+                disabled:opacity-50 disabled:pointer-events-none ';
 
-    $variant = strval($variant);
+    // Form / CRUD buttons: larger, scale animation is fine on full-size buttons
+    $formBtn  = 'inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl
+                shadow-sm transition-all duration-150 active:scale-95
+                focus:ring-2 focus:outline-none
+                disabled:opacity-50 disabled:pointer-events-none ';
+
     $styles = [
-
-        // ================================
-        // TABLE BUTTONS
-        // ================================
-        // restore, undo, recover
-        'table-restore' => $tableBtn . 'text-white bg-indigo-600 hover:bg-indigo-700', // or dito
-        // active, save, approve, confirm
+        // ── Table buttons ──────────────────────────────────────────────────────
+        'table-restore' => $tableBtn . 'text-white bg-indigo-600 hover:bg-indigo-700',
         'table-confirm' => $tableBtn . 'text-white bg-emerald-600 hover:bg-emerald-700',
-        // neutral, disable, inactive
         'table-disable' => $tableBtn . 'text-white bg-slate-500 hover:bg-slate-600',
-        // reject, delete, remove (destructive)
-        'table-danger' => $tableBtn . 'text-white bg-rose-600 hover:bg-rose-700',
-        // assign role, permissions, manage access
-        'table-manage' => $tableBtn . 'text-white bg-slate-600 hover:bg-slate-700',
-        // edit, update, modify
-        'table-edit' => $tableBtn . 'text-white bg-blue-600 hover:bg-blue-700',
-        // view, preview, inspect
-        'table-view' => $tableBtn . 'text-white bg-cyan-600 hover:bg-cyan-700',
-        // cancel, abort, back
-        'table-cancel' => $tableBtn . 'bg-white text-gray-700  border border-gray-300',
+        'table-danger'  => $tableBtn . 'text-white bg-rose-600 hover:bg-rose-700',
+        'table-manage'  => $tableBtn . 'text-white bg-slate-600 hover:bg-slate-700',
+        'table-edit'    => $tableBtn . 'text-white bg-blue-600 hover:bg-blue-700',
+        'table-view'    => $tableBtn . 'text-white bg-cyan-600 hover:bg-cyan-700',
+        // slate, not gray
+        'table-cancel'  => $tableBtn . 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 hover:border-slate-400',
 
+        // ── Form / CRUD buttons ────────────────────────────────────────────────
+        // slate, not gray
+        'cancel' => $formBtn . 'bg-white text-slate-700 border border-slate-300
+                                hover:bg-slate-50 hover:border-slate-400
+                                focus:ring-slate-400/30',
 
-
-        // ================================
-        // FORM BUTTONS
-        // ================================
-        // 'add-button' => $formBtn . 'bg-black text-white hover:bg-slate-800 focus:ring-black/30',
-        'cancel' => $formBtn . 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 focus:ring-gray-400/30',
-        // 'save' => $formBtn . 'bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-600/30',
         'danger' => $formBtn . 'bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-600/30',
 
+        // ── CLSU-branded buttons ───────────────────────────────────────────────
         'add-button' => $formBtn . '
             bg-[linear-gradient(90deg,#003a10_0%,#009639_100%)]
-            text-white font-semibold
-            hover:bg-[linear-gradient(90deg,#002b0c_0%,#007a2e_100%)]
-            focus:ring-[#009639]/30
-        ',
+            text-white
+            hover:brightness-110
+            focus:ring-[#009639]/30',
 
         'save' => $formBtn . '
             bg-[linear-gradient(90deg,#009639_0%,#92d12c_100%)]
-            text-white font-semibold
-            hover:bg-[linear-gradient(90deg,#007a2e_0%,#7fbf26_100%)]
-            focus:ring-[#009639]/30
-        ',
+            text-white
+            hover:brightness-110
+            focus:ring-[#009639]/30',
 
-        // =================================
-        // CLSU THEMED
-        // =================================
         'primary' => $formBtn . '
             bg-[linear-gradient(90deg,#003a10_0%,#009639_100%)]
-            text-white font-semibold
-            hover:bg-[linear-gradient(90deg,#002b0c_0%,#007a2e_100%)]
-            focus:ring-[#009639]/30
-        ',
+            text-white
+            hover:brightness-110
+            focus:ring-[#009639]/30',
 
         'secondary' => $formBtn . '
             bg-[linear-gradient(90deg,#ffd700_0%,#e0a70d_100%)]
-            text-[#1a5f30] font-semibold
-            hover:bg-[linear-gradient(90deg,#e0a70d_0%,#ffd700_100%)]
-            focus:ring-[#e0a70d]/30
-        ',
+            text-[#1a5f30]
+            hover:brightness-105
+            focus:ring-[#e0a70d]/30',
 
         'soft' => $formBtn . '
             bg-[linear-gradient(90deg,#92d12c_0%,#cdfb13_100%)]
-            text-[#003a10] font-medium
-            hover:bg-[linear-gradient(90deg,#7fbf26_0%,#b8e911_100%)]
-            focus:ring-[#92d12c]/30
-        ',
+            text-[#003a10]
+            hover:brightness-105
+            focus:ring-[#92d12c]/30',
 
         'outline' => $formBtn . '
-            bg-white
-            text-[#1a5f30] font-semibold
+            bg-white text-[#1a5f30]
             border-2 border-[#1a5f30]
             hover:bg-[#1a5f30] hover:text-white
-            focus:ring-[#1a5f30]/30
-        ',
-
-
+            focus:ring-[#1a5f30]/30',
     ];
 
-    $class = $styles[$variant] ?? $styles['primary'];
+    $class = $styles[strval($variant)] ?? $styles['primary'];
 @endphp
 
-{{-- So, it allows button to work as clickable link if provided a href, but mag-aact as regular button if none --}}
 @if ($href)
-    <a href="{{ $href }}" {{ $attributes->merge(['class' => $class]) }}>
-        {{ $slot }}
-    </a>
+    <a href="{{ $href }}" {{ $attributes->merge(['class' => $class]) }}>{{ $slot }}</a>
 @else
-    <button type="{{ $type }}" {{ $attributes->merge(['class' => $class]) }}>
-        {{ $slot }}
-    </button>
+    <button type="{{ $type }}" {{ $attributes->merge(['class' => $class]) }}>{{ $slot }}</button>
 @endif
 
 {{--
-Usage: <x-button variant="primary">Submit</x-button>
-        <x-button href="/dashboard" variant="secondary">Go to Dashboard</x-button>
-        <x-button variant="attendance-dark">Attendance on Dark</x-button>
-        <x-button variant="disabled-dark" disabled>Disabled on Dark</x-button>
-        <x-button variant="table-action-view" class="tooltip" data-tip="View Details"><i class="bx bx-show"></i></x-button>
-        <x-button variant="save-entry" type="submit">Save Entry</x-button>
-        <x-button variant="attendance">Clock In</x-button>
+VARIANTS
+────────────────────────────────────────────────────────────────────
+Table (compact, no scale):
+  table-confirm  table-edit    table-view    table-manage
+  table-danger   table-disable table-restore table-cancel
 
+Form (larger, scales on click):
+  primary    save    add-button    cancel    danger
+  secondary  soft    outline
 
+USAGE
+────────────────────────────────────────────────────────────────────
+<x-button variant="primary" type="submit">
+    <i class="bx bx-save"></i> Save
+</x-button>
 
-<h1 class="text-2xl font-bold text-center">Button Component</h1>
+<x-button href="{{ route('users.create') }}" variant="add-button">
+    <i class="bx bx-plus"></i> Add User
+</x-button>
 
-    <div class="space-y-4">
-        <h2 class="text-lg font-semibold">Table Action Buttons</h2>
-        <div class="flex flex-wrap gap-2">
-            <x-button variant="table-confirm">Confirm</x-button>
-            <x-button variant="table-disable">Disable</x-button>
-            <x-button variant="table-restore">Restore</x-button>
-            <x-button variant="table-danger">Danger</x-button>
-            <x-button variant="table-manage">Manage</x-button>
-            <x-button variant="table-view">View</x-button>
-            <x-button variant="table-edit">Edit</x-button>
-            <x-button variant="table-cancel">Cancel</x-button>
+<x-button variant="cancel" onclick="modal.close()">Cancel</x-button>
 
-        </div>
-    </div>
+<x-button variant="table-edit"
+    onclick="document.getElementById('editModal').showModal()">
+    <i class="bx bx-edit"></i> Edit
+</x-button>
 
-    <div class="space-y-4">
-        <h2 class="text-lg font-semibold">Form / CRUD Buttons</h2>
-        <div class="flex flex-wrap gap-3">
-            <x-button variant="add-button">Add</x-button>
-            <x-button variant="cancel">Cancel</x-button>
-            <x-button variant="save">Save</x-button>
-            <x-button variant="danger">Danger</x-button>
-            <x-button variant="primary">Primary</x-button>
-            <x-button variant="secondary">Secondary</x-button>
-            <x-button variant="soft">Soft</x-button>
-            <x-button variant="outline">Outline</x-button>
-        </div>
-    </div>
+<x-button variant="table-danger" disabled title="Cannot delete">
+    <i class="bx bx-trash"></i>
+</x-button>
 --}}
