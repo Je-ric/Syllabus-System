@@ -1,33 +1,55 @@
-<x-modal.dialog id="deleteObjectiveModal_{{ $objective->id }}" maxWidth="max-w-xl" width="w-11/12">
-    <x-modal.header>
-        Confirm Delete Objective
-        <x-modal.x-button :modalId="'deleteObjectiveModal_' . $objective->id" />
+<x-modal.dialog id="deleteObjectiveModal_{{ $objective->id }}" maxWidth="max-w-lg" width="w-11/12">
+
+    <x-modal.header modalId="deleteObjectiveModal_{{ $objective->id }}">
+        <div class="flex items-center gap-2 text-rose-700">
+            <i class="bx bx-trash"></i>
+            Delete Objective
+        </div>
     </x-modal.header>
 
     <x-modal.body>
-        <div class="space-y-3">
-            <p class="text-gray-700">Are you sure you want to delete this objective?</p>
-            <div class="bg-gray-50 p-3 rounded border border-gray-200">
-                <p class="font-semibold text-sm">Objective Details:</p>
-                <ul class="text-sm mt-2 space-y-1">
-                    <li><span class="font-medium">Code:</span> {{ $objective->dept_obj_code }}</li>
-                    <li><span class="font-medium">Text:</span> {{ $objective->objective_text }}</li>
-                </ul>
+        <div class="space-y-4">
+
+            <p class="text-sm text-slate-700">
+                Are you sure you want to delete this objective? This action cannot be undone.
+            </p>
+
+            {{-- Objective details card --}}
+            <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 space-y-1.5">
+                <p class="text-xs font-semibold uppercase tracking-[0.15em] text-slate-500 mb-2">
+                    Objective Details
+                </p>
+                <div class="flex items-start gap-2 text-sm">
+                    <span class="shrink-0 font-semibold text-slate-600 w-12">Code</span>
+                    <span class="font-mono text-emerald-700 font-semibold">{{ $objective->dept_obj_code }}</span>
+                </div>
+                <div class="flex items-start gap-2 text-sm">
+                    <span class="shrink-0 font-semibold text-slate-600 w-12">Text</span>
+                    <span class="text-slate-700">{{ $objective->objective_text }}</span>
+                </div>
             </div>
-            <p class="text-red-600 text-sm font-medium"><i class="bx bx-error"></i> This action cannot be undone. Objective codes will be automatically reindexed.</p>
+
+            <x-feedback-status.alert
+                type="warning"
+                title="Codes will be re-indexed"
+                message="Remaining objectives will be automatically re-sequenced after deletion." />
+
         </div>
     </x-modal.body>
 
     <x-modal.footer>
-        <x-modal.close-button :modalId="'deleteObjectiveModal_' . $objective->id" text="Cancel" />
+        <x-modal.close-button
+            :modalId="'deleteObjectiveModal_' . $objective->id"
+            text="Cancel"
+            variant="cancel" />
 
         <form action="{{ route('objective.destroy', $objective->id) }}" method="POST" class="inline">
             @csrf
             @method('DELETE')
             <x-button type="submit" variant="table-danger">
-                <i class="bx bx-trash"></i>
-                Delete Objective
+                <i class="bx bx-trash"></i> Delete Objective
             </x-button>
         </form>
     </x-modal.footer>
+
 </x-modal.dialog>

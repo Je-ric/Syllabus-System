@@ -28,7 +28,7 @@
                 <div class="border border-emerald-200 rounded-xl bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col h-full">
 
                     {{-- College Header --}}
-                    <div class="bg-emerald-800 px-6 py-5 flex items-center gap-4">
+                    <div class="green-grad px-6 py-5 flex items-center gap-4">
                         <div class="shrink-0 w-11 h-11 rounded-lg
                             bg-yellow-500
                             flex items-center justify-center shadow-md">

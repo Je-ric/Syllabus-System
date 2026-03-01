@@ -36,7 +36,7 @@
                 <div class="border border-emerald-200 rounded-xl bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden">
 
                     {{-- Department Header --}}
-                    <div class="bg-emerald-800 px-6 py-5 flex justify-between items-center">
+                    <div class="green-grad px-6 py-5 flex justify-between items-center">
                         <div class="flex items-center gap-4 min-w-0 flex-1">
                             <div class="shrink-0 w-11 h-11 rounded-lg bg-linear-to-br from-amber-400 to-yellow-500 flex items-center justify-center shadow-md">
                                 <i class="bx bxs-buildings text-white text-lg font-bold"></i>
