@@ -10,7 +10,7 @@
     name="{{ $name }}"
     {{ $attributes->merge([
         'class' => '
-            w-full appearance-none rounded-xl border border-slate-300 bg-gray-100
+            w-full appearance-none rounded-md border border-slate-300 bg-gray-50
             px-4 py-2.5 pr-10 text-sm text-slate-700 shadow-sm
             hover:border-slate-400
             focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none

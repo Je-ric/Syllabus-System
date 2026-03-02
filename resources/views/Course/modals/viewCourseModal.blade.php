@@ -1,138 +1,143 @@
-<x-modal.dialog id="viewCourseModal_{{ $course->id }}" maxWidth="max-w-6xl" width="w-11/12">
-    <x-modal.header class="bg-gray-50">
-        <h3 class="text-xl font-semibold text-gray-800">Course Details</h3>
+<x-modal.dialog id="viewCourseModal_{{ $course->id }}" maxWidth="max-w-5xl" width="w-11/12">
+
+    <x-modal.header modalId="viewCourseModal_{{ $course->id }}">
+        <div class="flex items-center gap-3 min-w-0">
+            <div class="min-w-0">
+                <p class="font-semibold text-slate-800 truncate">{{ $course->course_title }}</p>
+                <span class="inline-flex items-center rounded-lg bg-slate-100 px-2 py-0.5
+                            text-xs font-mono font-bold text-slate-600 ring-1 ring-slate-200">
+                    {{ $course->course_code }}
+                </span>
+            </div>
+        </div>
     </x-modal.header>
 
     <x-modal.body>
-        <div class="space-y-6">
+        <div class="space-y-5">
 
-            {{-- Basic Course Info --}}
-            <div class="border border-slate-200 rounded-2xl p-6 bg-white/90 shadow-sm">
-                <h1 class="text-2xl font-semibold text-slate-900">
-                    {{ $course->course_title }}
-                </h1>
-                <p class="text-sm text-slate-500 mt-1">
-                    {{ $course->course_code }}
-                </p>
+            {{-- ── Course info grid ──────────────────────────────────────── --}}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
 
-                <div class="border-t border-slate-200 my-4"></div>
-
-                {{-- Details Grid --}}
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div>
-                        <p class="text-slate-500 font-medium">Program</p>
-                        <p class="text-slate-800">{{ $course->program->program_name ?? 'N/A' }}</p>
-                    </div>
-
-                    <div>
-                        <p class="text-slate-500 font-medium">Credit Units</p>
-                        <p class="text-slate-800">{{ $course->credit_units }}</p>
-                    </div>
-
-                    @if ($course->year_level)
-                        <div>
-                            <p class="text-slate-500 font-medium">Year Level</p>
-                            <p class="text-slate-800">Year {{ $course->year_level }}</p>
-                        </div>
-                    @endif
-
-                    @if ($course->semester)
-                        <div>
-                            <p class="text-slate-500 font-medium">Semester</p>
-                            <p class="text-slate-800">Semester {{ $course->semester }}</p>
-                        </div>
-                    @endif
-
-                    <div>
-                        <p class="text-slate-500 font-medium">Lecture / Laboratory</p>
-                        <p class="inline-flex px-2 py-0.5 rounded text-xs font-medium
-                            {{ $course->has_lec_lab ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600' }}">
-                            {{ $course->has_lec_lab ? 'Yes' : 'No' }}
-                        </p>
-                    </div>
-
-                    @if ($course->prerequisite)
-                        <div>
-                            <p class="text-slate-500 font-medium">Prerequisite</p>
-                            <p class="text-slate-800">{{ $course->prerequisite }}</p>
-                        </div>
-                    @endif
-
-                    @if ($course->corequisite)
-                        <div>
-                            <p class="text-slate-500 font-medium">Corequisite</p>
-                            <p class="text-slate-800">{{ $course->corequisite }}</p>
-                        </div>
-                    @endif
-
-                    @if ($course->creator)
-                        <div>
-                            <p class="text-slate-500 font-medium">Created By</p>
-                            <p class="text-slate-800">{{ $course->creator->name ?? 'N/A' }}</p>
-                        </div>
-                    @endif
+                <div class="rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+                    <p class="text-xs font-semibold uppercase tracking-[0.15em] text-slate-400 mb-0.5">Program</p>
+                    <p class="font-medium text-slate-800">{{ $course->program->name ?? 'N/A' }}</p>
                 </div>
 
-                @if ($course->course_description)
-                    <div class="mt-5">
-                        <p class="text-slate-500 font-medium mb-1">Course Description</p>
-                        <p class="text-sm text-slate-700 leading-relaxed">
-                            {{ $course->course_description }}
-                        </p>
+                <div class="rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+                    <p class="text-xs font-semibold uppercase tracking-[0.15em] text-slate-400 mb-0.5">Credit Units</p>
+                    <p class="font-medium text-slate-800">{{ $course->credit_units }}</p>
+                </div>
+
+                @if ($course->year_level)
+                    <div class="rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+                        <p class="text-xs font-semibold uppercase tracking-[0.15em] text-slate-400 mb-0.5">Year Level</p>
+                        <p class="font-medium text-slate-800">Year {{ $course->year_level }}</p>
+                    </div>
+                @endif
+
+                @if ($course->semester)
+                    <div class="rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+                        <p class="text-xs font-semibold uppercase tracking-[0.15em] text-slate-400 mb-0.5">Semester</p>
+                        <p class="font-medium text-slate-800">Semester {{ $course->semester }}</p>
+                    </div>
+                @endif
+
+                <div class="rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+                    <p class="text-xs font-semibold uppercase tracking-[0.15em] text-slate-400 mb-1.5">Lecture / Laboratory</p>
+                    {{-- status-indicator instead of inline badge classes --}}
+                    <x-feedback-status.status-indicator
+                        :status="$course->has_lec_lab ? 'success' : 'neutral'"
+                        :label="$course->has_lec_lab ? 'Has Lab' : 'Lecture Only'" />
+                </div>
+
+                @if ($course->prerequisite)
+                    <div class="rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+                        <p class="text-xs font-semibold uppercase tracking-[0.15em] text-slate-400 mb-0.5">Prerequisite</p>
+                        <p class="font-medium text-slate-800 font-mono text-sm">{{ $course->prerequisite }}</p>
+                    </div>
+                @endif
+
+                @if ($course->corequisite)
+                    <div class="rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+                        <p class="text-xs font-semibold uppercase tracking-[0.15em] text-slate-400 mb-0.5">Corequisite</p>
+                        <p class="font-medium text-slate-800 font-mono text-sm">{{ $course->corequisite }}</p>
+                    </div>
+                @endif
+
+                @if ($course->creator)
+                    <div class="rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+                        <p class="text-xs font-semibold uppercase tracking-[0.15em] text-slate-400 mb-0.5">Created By</p>
+                        <p class="font-medium text-slate-800">{{ $course->creator->name ?? 'N/A' }}</p>
                     </div>
                 @endif
             </div>
 
-            {{-- Program Outcomes Mapping --}}
-            <div class="border border-slate-200 rounded-2xl bg-white/90 shadow-sm">
-                <div class="px-6 py-4 border-b border-slate-200 bg-emerald-50/70">
-                    <h2 class="text-lg font-semibold text-slate-800">
+            {{-- Course description --}}
+            @if ($course->course_description)
+                <div class="rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+                    <p class="text-xs font-semibold uppercase tracking-[0.15em] text-slate-400 mb-1.5">Course Description</p>
+                    <p class="text-sm text-slate-700 leading-relaxed">{{ $course->course_description }}</p>
+                </div>
+            @endif
+
+            {{-- ── PO Mapping table ──────────────────────────────────────── --}}
+            <div class="rounded-2xl border border-slate-200 overflow-hidden">
+
+                <div class="px-5 py-3.5 border-b border-slate-200 bg-emerald-50/70 flex items-center justify-between gap-3">
+                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-800">
                         Program Outcomes Mapping (IED)
-                    </h2>
+                    </p>
+                    <span class="flex items-center gap-2 text-xs text-slate-400 whitespace-nowrap shrink-0">
+                        I&nbsp;– Introductory &nbsp;·&nbsp; E&nbsp;– Enabling &nbsp;·&nbsp; D&nbsp;– Demonstrating
+                    </span>
                 </div>
 
                 @if ($course->programOutcomes->isEmpty())
-                    <div class="px-6 py-4 text-sm text-slate-600">
-                        No program outcomes mapped to this course.
+                    <div class="p-5">
+                        <x-empty-state
+                            icon="bx-notepad"
+                            title="No outcomes mapped"
+                            message="No program outcomes have been mapped to this course yet." />
                     </div>
                 @else
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
-                            <thead class="bg-emerald-50 border-b border-slate-200 text-emerald-800">
-                                <tr>
-                                    <th class="px-4 py-2 text-left text-xs uppercase tracking-[0.2em] font-semibold">PO</th>
-                                    <th class="px-4 py-2 text-left text-xs uppercase tracking-[0.2em] font-semibold">Program Outcome</th>
-                                    <th class="px-4 py-2 text-center text-xs uppercase tracking-[0.2em] font-semibold">IED</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                    <x-table.container class="rounded-none border-0 bg-transparent shadow-none">
+                        <x-table.table class="w-full text-sm">
+                            <x-table.head class="border-b border-slate-200">
+                                <x-table.row>
+                                    <x-table.th class="border-0 w-20">PO</x-table.th>
+                                    <x-table.th class="border-0">Program Outcome</x-table.th>
+                                    <x-table.th align="center" class="border-0 w-20">IED</x-table.th>
+                                </x-table.row>
+                            </x-table.head>
+                            <x-table.body class="divide-y divide-slate-100">
                                 @foreach ($course->programOutcomes as $outcome)
-                                    <tr class="border-b border-slate-200 last:border-b-0">
-                                        <td class="px-4 py-2 font-mono font-semibold text-slate-700">
+                                    <x-table.row class="hover:bg-slate-50/60 transition-colors">
+                                        <x-table.td class="border-0 font-mono font-bold text-xs text-slate-700">
                                             {{ $outcome->po_code }}
-                                        </td>
-                                        <td class="px-4 py-2 text-slate-700">
+                                        </x-table.td>
+                                        <x-table.td class="border-0 text-slate-700 leading-relaxed">
                                             {{ $outcome->po_text }}
-                                        </td>
-                                        <td class="px-4 py-2 text-center">
+                                        </x-table.td>
+                                        <x-table.td align="center" class="border-0">
                                             <x-feedback-status.ied-badge :level="$outcome->pivot->ied" />
-                                        </td>
-                                    </tr>
+                                        </x-table.td>
+                                    </x-table.row>
                                 @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                            </x-table.body>
+                        </x-table.table>
+                    </x-table.container>
                 @endif
-            </div>
 
+            </div>
         </div>
     </x-modal.body>
 
-    <x-modal.footer class="bg-gray-50">
+    <x-modal.footer>
+        {{-- "cancel" variant is the correct choice for a close/dismiss button --}}
         <x-modal.close-button
-            modalId="viewCourseModal_{{ $course->id }}"
+            :modalId="'viewCourseModal_' . $course->id"
             text="Close"
-            variant="close"
-        />
+            variant="cancel" />
     </x-modal.footer>
+
 </x-modal.dialog>

@@ -1,29 +1,27 @@
 <x-modal.dialog id="confirmCourseModal" maxWidth="max-w-lg" width="w-11/12">
-    <x-modal.header>
-        Confirm Course Creation
-        <x-modal.x-button modalId="confirmCourseModal" />
+
+    <x-modal.header modalId="confirmCourseModal"
+        class="bg-emerald-100">
+        <h2 class="text-xl font-semibold text-emerald-900 tracking-tight">Confirm Course Creation</h2>
     </x-modal.header>
 
     <x-modal.body>
         <div class="space-y-4">
-            <p class="text-gray-700 font-medium">
-                Please review the course details and Program Outcomes IED levels before creating this course.
+            <p class="rounded-xl text-md border border-slate-200 bg-slate-50 px-4 py-3 space-y-1.5">
+                Please review all course details and Program Outcomes IED levels before creating this course.
+                Once created, the course will be added to the program.
             </p>
-            <p class="text-blue-600 text-sm">
-                Make sure all course details are correct before proceeding.
-            </p>
+            <x-feedback-status.alert type="info">
+                Make sure all field values and IED level selections are correct before proceeding.
+            </x-feedback-status.alert>
         </div>
     </x-modal.body>
 
-    <x-modal.footer>
-        <div class="w-full flex gap-2 justify-end">
-            <x-modal.close-button modalId="confirmCourseModal" text="Review Again" />
-
-            <x-button type="button" variant="save" onclick="confirmCourseSubmit()">
-                <i class="bx bx-check"></i>
-                Confirm & Create
-            </x-button>
-        </div>
+    <x-modal.footer class="bg-emerald-100">
+        <x-modal.close-button modalId="confirmCourseModal" text="Review Again" variant="cancel" />
+        <x-button type="button" variant="save" onclick="confirmCourseSubmit()">
+            <i class="bx bx-check"></i> Confirm &amp; Create
+        </x-button>
     </x-modal.footer>
-</x-modal.dialog>
 
+</x-modal.dialog>

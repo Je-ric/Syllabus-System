@@ -11,7 +11,7 @@
     type="{{ $type }}"
     {{ $attributes->merge([
         'class' => '
-            w-full rounded-xl border border-slate-300 bg-gray-100
+            w-full rounded-md border border-slate-300 bg-gray-50
             px-4 py-2.5 text-sm text-slate-700 shadow-sm
             placeholder:text-slate-400
             hover:border-slate-400
