@@ -9,8 +9,11 @@
 
     Notifications: lw-toast only (no flash-message include — avoids double toasts)
 --}}
+
 <div x-data="peosManager(@entangle('peos'))" class="space-y-3">
 
+    @include('livewire.programs.include.flash-message')
+    
     {{-- ── PEO rows ────────────────────────────────────────────────────────── --}}
     <template x-for="(peo, index) in peos" :key="peo.id ?? ('new-' + index)">
 
@@ -27,8 +30,8 @@
                             ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200'
                             : 'bg-amber-100 text-amber-700 ring-1 ring-amber-200'"
                         class="inline-flex items-center justify-center
-                               w-10 h-10 rounded-xl text-xs font-bold uppercase
-                               transition-colors duration-200">
+                                w-10 h-10 rounded-xl text-xs font-bold uppercase
+                                transition-colors duration-200">
                         {{-- Shows PEO1, PEO2 … matches the display in peo-display.blade --}}
                         <span x-text="'PEO' + (index + 1)"></span>
                     </span>
@@ -108,10 +111,10 @@
 
         <button @click="savePeos()" type="button" :disabled="isSaving"
             class="inline-flex items-center gap-2 px-5 py-3 rounded-xl
-                   bg-emerald-600 text-white text-sm font-semibold shadow-sm
-                   hover:bg-emerald-700 active:bg-emerald-800
-                   disabled:opacity-50 disabled:cursor-not-allowed
-                   transition-colors duration-150">
+                    bg-emerald-600 text-white text-sm font-semibold shadow-sm
+                    hover:bg-emerald-700 active:bg-emerald-800
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                    transition-colors duration-150">
             <span x-show="!isSaving" class="inline-flex items-center gap-2">
                 <i class="bx bx-save text-base"></i> Save All
             </span>

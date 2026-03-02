@@ -1,7 +1,7 @@
 {{-- Notification stack --}}
 {{-- If both are visible → they stack neatly
     If one disappears → layout auto-adjusts --}}
-<div class="fixed top-4 inset-x-0 z-50 flex justify-center pointer-events-none">
+<div class="fixed top-30 inset-x-0 z-50 flex justify-center pointer-events-none">
     <div class="flex flex-col gap-2 items-center">
 
         {{-- Loading indicator --}}

@@ -21,6 +21,8 @@
 <div x-data="posManager(@entangle('pos'), @entangle('peos'), @entangle('mapping'))"
     class="space-y-3">
 
+    @include('livewire.programs.include.flash-message')
+    
     {{-- ── PO rows ─────────────────────────────────────────────────────────── --}}
     <template x-for="(po, index) in pos" :key="po.id ?? ('new-' + index)">
 

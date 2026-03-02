@@ -6,16 +6,22 @@
 </head>
 
 <body class="min-h-screen">
-    
+
     {{-- <x-screen-loader /> --}}
 
+    {{-- Hide sidebar when the route is syllabus.wizard--}}
     @php
         $isWizardRoute = request()->routeIs('syllabus.wizard');
     @endphp
 
+    {{-- Controller --}}
     @if (session('toast'))
-        <x-feedback-status.toast :message="session('toast')['message']" :type="session('toast')['type']" />
+        <x-feedback-status.toast
+            :message="session('toast')['message']"
+            :type="session('toast')['type']" />
     @endif
+    {{-- Livewire --}}
+    <x-feedback-status.toast />
 
     <div class="min-h-screen">
         <div id="sidebar-overlay" class="fixed inset-0 bg-green-900/50 backdrop-blur-sm z-30 hidden lg:hidden {{ $isWizardRoute ? 'hidden' : '' }}"></div>

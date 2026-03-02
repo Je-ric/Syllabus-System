@@ -51,7 +51,7 @@
         x-transition:leave="transition ease-in duration-200"
         x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0 translate-x-3"
-        class="fixed bottom-5 right-3 sm:right-5 z-[9999]
+        class="fixed top-5 right-3 sm:right-5 z-9999
                w-[calc(100vw-1.5rem)] sm:w-96 max-w-sm
                rounded-xl border p-3 shadow-xl backdrop-blur-sm {{ $toast['container'] }}"
         role="status"
@@ -63,7 +63,7 @@
             </span>
             <div class="min-w-0 flex-1">
                 <p class="font-semibold leading-5">{{ $toast['title'] }}</p>
-                <p class="mt-1 text-sm leading-relaxed break-words">{{ $message }}</p>
+                <p class="mt-1 text-sm leading-relaxed wrap-break-words">{{ $message }}</p>
             </div>
             <button
                 @click="show = false"
@@ -112,7 +112,7 @@
     x-transition:leave-start="opacity-100"
     x-transition:leave-end="opacity-0 translate-x-3"
     :class="style.container"
-    class="fixed bottom-5 right-3 sm:right-5 z-[9999]
+    class="fixed top-5 right-3 sm:right-5 z-9999
            w-[calc(100vw-1.5rem)] sm:w-96 max-w-sm
            rounded-xl border p-3 shadow-xl backdrop-blur-sm"
     role="status"
@@ -125,7 +125,7 @@
         </span>
         <div class="min-w-0 flex-1">
             <p class="font-semibold leading-5" x-text="style.title"></p>
-            <p class="mt-1 text-sm leading-relaxed break-words" x-text="message"></p>
+            <p class="mt-1 text-sm leading-relaxed wrap-break-words" x-text="message"></p>
         </div>
         <button
             @click="show = false"

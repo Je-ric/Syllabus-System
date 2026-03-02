@@ -19,8 +19,8 @@
         />
     </div>
 
-    {{-- University mission — static contextual blurb --}}
-    <div class="mt-5 rounded-2xl border border-slate-100 bg-slate-50 px-5 py-4">
+    {{-- University mission --}}
+    <div class="mt-5 rounded-2xl border border-slate-300 bg-slate-50 px-5 py-4">
         <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400 mb-1">
             University Mission
         </p>
@@ -97,16 +97,12 @@
         </div>
 
     @else
-
-        {{-- Empty state when no program is selected --}}
-        <div class="mt-8 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 py-14 text-center">
-            <i class="bx bx-network-chart text-5xl text-slate-300"></i>
-            <p class="mt-3 text-sm font-medium text-slate-500">No program selected</p>
-            <p class="mt-1 text-xs text-slate-400">
-                Choose a college, department, and program above to manage its PEOs and POs.
-            </p>
-        </div>
-
+        <x-empty-state
+            icon="bx-network-chart"
+            title="No program selected"
+            description="Choose a college, department, and program above to manage its PEOs and POs."
+            class="mt-8"
+        />
     @endif
 
 @endsection
