@@ -39,6 +39,9 @@
                         <p class="text-xs text-slate-500">Default role (Always assigned)</p>
                     </div>
                 </div>
+
+                <x-feedback-status.alert type="info"
+                    title="Role changes will be notified to the user via email." />
             </div>
         </x-modal.body>
 

@@ -11,7 +11,7 @@
                 disabled:opacity-50 disabled:pointer-events-none ';
 
     // Form / CRUD buttons: larger, scale animation is fine on full-size buttons
-    $formBtn  = 'inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl
+    $formBtn  = 'inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg
                 shadow-sm transition-all duration-150 active:scale-95
                 focus:ring-2 focus:outline-none
                 disabled:opacity-50 disabled:pointer-events-none ';

@@ -30,8 +30,12 @@ Usage: <x-modal.header>Modal Title</x-modal.header>
 ])
 
 @php
-    $baseClasses = 'px-6 py-4 border-b border-slate-200 flex-shrink-0 bg-white';
-    $finalClasses = $class ? "{$baseClasses} {$class}" : $baseClasses;
+    $baseClasses = 'px-6 py-4 border-b border-slate-200 flex-shrink-0';
+    $defaultBg = 'bg-white';
+
+    $finalClasses = $class
+        ? "{$baseClasses} {$class}"
+        : "{$baseClasses} {$defaultBg}";
 @endphp
 
 <header {{ $attributes->merge(['class' => $finalClasses]) }}>

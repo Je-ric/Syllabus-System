@@ -62,10 +62,10 @@
                         </form>
                     </div>
                 @else
-                    <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 py-8 text-center">
-                        <i class="bx bx-buildings text-3xl text-slate-300"></i>
-                        <p class="mt-2 text-sm text-slate-400">Select a college above to add goals.</p>
-                    </div>
+                    <x-empty-state
+                        icon="bx-target-lock"
+                        title="No college selected"
+                        message="Please select a college from the dropdown to add goals." />
                 @endif
             </div>
 
@@ -88,17 +88,17 @@
                 </div>
 
                 @if (!$selectedCollegeId)
-                    <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 py-10 text-center">
-                        <i class="bx bx-target-lock text-4xl text-slate-300"></i>
-                        <p class="mt-2 text-sm text-slate-400">Select a college to view its goals.</p>
-                    </div>
+                    <x-empty-state
+                        icon="bx-target-lock"
+                        title="No college selected"
+                        message="Please select a college from the dropdown to view its goals." />
 
                 @elseif ($goals->isEmpty())
-                    <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 py-10 text-center">
-                        <i class="bx bx-target-lock text-4xl text-slate-300"></i>
-                        <p class="mt-2 text-sm text-slate-400">No goals have been set for this college yet.</p>
-                    </div>
-
+                    <x-empty-state
+                        icon="bx-target-lock"
+                        title="No goals set"
+                        message="Use the form on the left to add goals for this college." />
+                        
                 @else
                     <x-table.container class="rounded-xl">
                         <x-table.table>

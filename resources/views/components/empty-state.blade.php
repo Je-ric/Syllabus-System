@@ -50,12 +50,11 @@ USAGE:
 <div {{ $attributes->class([
     'rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/80 p-8 sm:p-10 text-center'
 ]) }}>
-    <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full
-                bg-white border border-slate-200 text-slate-400 shadow-sm">
-        <i class="bx {{ $icon }} text-2xl leading-none"></i>
+    <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full text-slate-300">
+        <i class="bx {{ $icon }} text-4xl leading-none"></i>
     </div>
 
-    <h3 class="text-sm sm:text-base font-semibold text-slate-700">{{ $title }}</h3>
+    <h3 class="text-sm sm:text-base font-semibold text-slate-500">{{ $title }}</h3>
     <p class="mt-1.5 text-sm text-slate-400 max-w-sm mx-auto leading-relaxed">{{ $message }}</p>
 
     {{-- Only renders the slot wrapper when slot content is provided --}}

@@ -1,18 +1,16 @@
-<x-modal.dialog id="deleteGoalModal_{{ $goal->id }}" maxWidth="max-w-lg" width="w-11/12">
+<x-modal.dialog id="deleteGoalModal_{{ $goal->id }}" maxWidth="max-w-xl" width="w-11/12">
 
-    <x-modal.header modalId="deleteGoalModal_{{ $goal->id }}">
-        <div class="flex items-center gap-2 text-rose-700">
-            <i class="bx bx-trash"></i>
-            Delete Goal
-        </div>
+    <x-modal.header modalId="deleteGoalModal_{{ $goal->id }}"
+        class="bg-rose-50">
+        <h2 class="text-xl font-semibold text-rose-900 tracking-tight">Delete Goal</h2>
     </x-modal.header>
 
     <x-modal.body>
         <div class="space-y-4">
 
-            <p class="text-sm text-slate-700">
-                Are you sure you want to delete this goal? This action cannot be undone.
-            </p>
+            <x-feedback-status.alert
+                type="warning"
+                message="Are you sure you want to delete this goal? This action cannot be undone." />
 
             {{-- Goal details card --}}
             <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 space-y-1.5">
@@ -30,14 +28,14 @@
             </div>
 
             <x-feedback-status.alert
-                type="warning"
+                type="info"
                 title="Codes will be re-indexed"
                 message="Remaining goals will be automatically re-sequenced after deletion." />
 
         </div>
     </x-modal.body>
 
-    <x-modal.footer>
+    <x-modal.footer class="bg-rose-50">
         <x-modal.close-button
             :modalId="'deleteGoalModal_' . $goal->id"
             text="Cancel"
@@ -46,7 +44,7 @@
         <form action="{{ route('goal.destroy', $goal->id) }}" method="POST" class="inline">
             @csrf
             @method('DELETE')
-            <x-button type="submit" variant="table-danger">
+            <x-button type="submit" variant="danger">
                 <i class="bx bx-trash"></i> Delete Goal
             </x-button>
         </form>

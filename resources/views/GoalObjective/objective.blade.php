@@ -81,9 +81,10 @@
                                 </form>
                             </div>
                         @else
-                            <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 py-6 text-center">
-                                <p class="text-sm text-slate-400">Select a department above to add objectives.</p>
-                            </div>
+                            <x-empty-state
+                                icon="bx-target-lock"
+                                title="No department selected"
+                                message="Please select a department from the dropdown to add objectives." />
                         @endif
 
                     @else
@@ -92,10 +93,10 @@
                     @endif
 
                 @else
-                    <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 py-8 text-center">
-                        <i class="bx bx-sitemap text-3xl text-slate-300"></i>
-                        <p class="mt-2 text-sm text-slate-400">Select a college to view its departments.</p>
-                    </div>
+                    <x-empty-state
+                        icon="bx-sitemap"
+                        title="No college selected"
+                        message="Please select a college from the dropdown to view its departments." />
                 @endif
             </div>
 
@@ -118,22 +119,22 @@
                 </div>
 
                 @if (!$selectedCollegeId)
-                    <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 py-10 text-center">
-                        <i class="bx bx-list-check text-4xl text-slate-300"></i>
-                        <p class="mt-2 text-sm text-slate-400">Select a college to view objectives.</p>
-                    </div>
+                    <x-empty-state
+                        icon="bx-list-check"
+                        title="No college selected"
+                        message="Select a college from the dropdown to view its objectives." />
 
                 @elseif (!$selectedDepartmentId)
-                    <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 py-10 text-center">
-                        <i class="bx bx-list-check text-4xl text-slate-300"></i>
-                        <p class="mt-2 text-sm text-slate-400">Select a department to view its objectives.</p>
-                    </div>
+                    <x-empty-state
+                        icon="bx-list-check"
+                        title="No department selected"
+                        message="Select a department from the dropdown to view its objectives." />
 
                 @elseif ($objectives->isEmpty())
-                    <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 py-10 text-center">
-                        <i class="bx bx-list-check text-4xl text-slate-300"></i>
-                        <p class="mt-2 text-sm text-slate-400">No objectives set for this department yet.</p>
-                    </div>
+                    <x-empty-state
+                        icon="bx-list-check"
+                        title="No objectives set"
+                        message="No objectives have been set for this department yet." /    >
 
                 @else
                     <x-table.container class="rounded-xl">

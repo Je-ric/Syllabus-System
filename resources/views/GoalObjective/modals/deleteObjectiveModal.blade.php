@@ -1,18 +1,16 @@
-<x-modal.dialog id="deleteObjectiveModal_{{ $objective->id }}" maxWidth="max-w-lg" width="w-11/12">
+<x-modal.dialog id="deleteObjectiveModal_{{ $objective->id }}" maxWidth="max-w-xl" width="w-11/12">
 
-    <x-modal.header modalId="deleteObjectiveModal_{{ $objective->id }}">
-        <div class="flex items-center gap-2 text-rose-700">
-            <i class="bx bx-trash"></i>
-            Delete Objective
-        </div>
+    <x-modal.header modalId="deleteObjectiveModal_{{ $objective->id }}"
+        class="bg-rose-50">
+        <h2 class="text-xl font-semibold text-rose-900 tracking-tight">Delete Objective</h2>
     </x-modal.header>
 
     <x-modal.body>
         <div class="space-y-4">
 
-            <p class="text-sm text-slate-700">
-                Are you sure you want to delete this objective? This action cannot be undone.
-            </p>
+            <x-feedback-status.alert
+                type="warning"
+                message="Are you sure you want to delete this objective? This action cannot be undone." />
 
             {{-- Objective details card --}}
             <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 space-y-1.5">
@@ -37,7 +35,7 @@
         </div>
     </x-modal.body>
 
-    <x-modal.footer>
+    <x-modal.footer class="bg-rose-50">
         <x-modal.close-button
             :modalId="'deleteObjectiveModal_' . $objective->id"
             text="Cancel"
@@ -46,7 +44,7 @@
         <form action="{{ route('objective.destroy', $objective->id) }}" method="POST" class="inline">
             @csrf
             @method('DELETE')
-            <x-button type="submit" variant="table-danger">
+            <x-button type="submit" variant="danger">
                 <i class="bx bx-trash"></i> Delete Objective
             </x-button>
         </form>

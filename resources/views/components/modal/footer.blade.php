@@ -1,6 +1,5 @@
 @props([
-    'align' => 'end', // start, center, end
-    'class' => '',
+    'align' => 'end',
 ])
 
 @php
@@ -10,11 +9,13 @@
         'end' => 'justify-end',
     ];
 
-    $baseClasses = 'border-t border-slate-200 px-6 py-4 flex gap-3 flex-shrink-0';
     $alignmentClass = $alignmentClasses[$align] ?? $alignmentClasses['end'];
 @endphp
 
-<footer {{ $attributes->merge(['class' => "{$baseClasses} {$alignmentClass} {$class}"]) }}>
+<footer {{ $attributes->class([
+    'border-t border-slate-200 px-6 py-4 flex gap-3 flex-shrink-0',
+    $alignmentClass,
+]) }}>
     {{ $slot }}
 </footer>
 

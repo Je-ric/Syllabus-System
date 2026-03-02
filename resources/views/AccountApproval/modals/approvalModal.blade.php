@@ -13,6 +13,15 @@
             <span class="font-semibold text-gray-800">{{ $user->name }}</span>
             <span class="text-gray-600 text-sm block">{{ $user->email }}</span>
         </div>
+
+        @if ($action === 'reject') || ($action === 'disable')
+            <x-feedback-status.alert type="warning"
+                    title="This will send an email notification to the user." />
+        @elseif ($action === 'approve')
+            <x-feedback-status.alert type="success"
+                    title="This will send an email notification to the user." />
+        @endif
+
     </x-modal.body>
 
     <x-modal.footer>
