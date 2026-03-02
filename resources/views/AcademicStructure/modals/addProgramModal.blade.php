@@ -1,6 +1,6 @@
 <x-modal.dialog id="addProgramModal" maxWidth="max-w-xl" width="w-11/12">
-    <x-modal.header>
-        Add New Program
+    <x-modal.header class="bg-emerald-50">
+        <h2 class="text-xl font-semibold text-emerald-900 tracking-tight">Add New Program</h2>
         <x-modal.x-button :modalId="'addProgramModal'" />
     </x-modal.header>
 
@@ -41,7 +41,7 @@
             </div>
         </x-modal.body>
 
-        <x-modal.footer>
+        <x-modal.footer class="bg-emerald-50">
             <x-modal.close-button :modalId="'addProgramModal'" text="Cancel" variant="close" />
             <x-button type="submit" variant="save">
                 <i class="bx bx-save"></i>

@@ -4,198 +4,295 @@
 
     <x-header-with-button
         title="Academic Structure Management"
-        description="Manage colleges, departments, and academic programs across the institution"
-    >
+        description="Manage colleges, departments, and academic programs across the institution">
         <x-button variant="add-button" onclick="document.getElementById('addCollegeModal').showModal()">
-            <i class="bx bx-plus mr-1"></i> Add College
+            <i class="bx bx-plus"></i> Add College
         </x-button>
     </x-header-with-button>
 
     <div id="collegeAccordions" class="space-y-3">
-        @foreach ($colleges as $college)
+        @forelse ($colleges as $college)
             <details class="bg-white/90 border border-slate-200/80 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
-                <summary class="flex items-center justify-between p-4 cursor-pointer select-none">
-                    <div class="flex items-center gap-3 flex-1">
-                        <i class="bx bx-chevron-down text-xl text-slate-400 chevron-icon"></i>
-                        <i class="bx bxs-school text-2xl text-emerald-600"></i>
-                        <span class="font-semibold text-lg text-slate-800">{{ $college->name }}</span>
+                <summary class="flex items-center justify-between p-4 cursor-pointer select-none list-none">
+                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                        <i class="bx bx-chevron-right text-xl text-slate-400 chevron-icon transition-transform duration-200"></i>
+                        <i class="bx bxs-school text-xl text-emerald-600 shrink-0"></i>
+                        <span class="font-semibold text-slate-800 truncate">{{ $college->name }}</span>
                     </div>
-                    <x-button type="button" variant="secondary" onclick="event.stopPropagation(); toggle('editCollege{{ $college->id }}')">
+                    {{-- table-edit: compact blue button — correct for an inline edit toggle --}}
+                    <x-button type="button" variant="table-confirm" class="shrink-0 ml-3"
+                        onclick="event.stopPropagation(); toggle('editCollege{{ $college->id }}')"
+                        title="Edit college">
                         <i class="bx bx-edit"></i>
                     </x-button>
                 </summary>
 
                 <div class="px-4 pb-4 space-y-4">
-                    {{-- EDIT COLLEGE --}}
-                    <div id="editCollege{{ $college->id }}" class="hidden bg-emerald-50 border border-emerald-200 p-4 rounded-xl">
-                        <form method="POST" action="{{ route('college.update', $college) }}">
+
+                    {{-- Edit college form — amber "editing" cue (same across all levels) --}}
+                    <div id="editCollege{{ $college->id }}"
+                        class="hidden rounded-xl border border-amber-200 bg-amber-50/80 p-4">
+                        <p class="text-xs font-semibold uppercase tracking-[0.15em] text-amber-700 mb-3">
+                            Edit College
+                        </p>
+                        <form method="POST" action="{{ route('college.update', $college) }}" class="space-y-3">
                             @csrf
                             @method('PUT')
-                            <div class="space-y-3">
-                                <x-form.label for="collegeName{{ $college->id }}" variant="title" isRequired>College Name</x-form.label>
-                                <x-form.input id="collegeName{{ $college->id }}" name="name" value="{{ $college->name }}" required />
-
-                                <div class="flex gap-2 mt-2">
-                                    <x-button type="submit" variant="save">Save</x-button>
-                                    <x-button type="button" variant="cancel" onclick="toggle('editCollege{{ $college->id }}')">Cancel</x-button>
-                                </div>
+                            <div>
+                                <x-form.label for="collegeName{{ $college->id }}" variant="title" isRequired>
+                                    College Name
+                                </x-form.label>
+                                <x-form.input
+                                    id="collegeName{{ $college->id }}"
+                                    name="name"
+                                    value="{{ $college->name }}"
+                                    class="mt-1"
+                                    required />
+                            </div>
+                            <div class="flex gap-2">
+                                <x-button type="submit" variant="save">
+                                    <i class="bx bx-save"></i> Save
+                                </x-button>
+                                <x-button type="button" variant="cancel"
+                                    onclick="toggle('editCollege{{ $college->id }}')">
+                                    Cancel
+                                </x-button>
                             </div>
                         </form>
                     </div>
 
-                    {{-- ADD DEPARTMENT --}}
-                    <x-button variant="add-button" onclick="openAddDepartmentModal({{ $college->id }})">
+                    {{-- Add department — outline variant: lighter than add-button, appropriate inside an accordion --}}
+                    <x-button variant="outline" onclick="openAddDepartmentModal({{ $college->id }})">
                         <i class="bx bx-plus"></i> Add Department
                     </x-button>
 
-                    {{-- DEPARTMENTS --}}
-                    <div class="ml-8 space-y-3">
-                        @foreach ($departments->where('college_id', $college->id) as $dept)
-                            <details class="bg-slate-50 border border-slate-200 rounded-xl shadow-sm">
-                                <summary class="flex items-center justify-between p-3 cursor-pointer select-none">
-                                    <div class="flex items-center gap-3 flex-1">
-                                        <i class="bx bx-chevron-down text-lg text-slate-400 chevron-icon"></i>
-                                        <i class="bx bx-building text-xl text-rose-600"></i>
-                                        <span class="font-medium text-slate-800">{{ $dept->name }}</span>
+                    {{-- Departments --}}
+                    <div class="ml-6 space-y-3">
+                        @forelse ($departments->where('college_id', $college->id) as $dept)
+                            <details class="bg-slate-50/80 border border-slate-200 rounded-xl shadow-sm">
+                                <summary class="flex items-center justify-between p-3 cursor-pointer select-none list-none">
+                                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                                        <i class="bx bx-chevron-right text-lg text-slate-400 chevron-icon transition-transform duration-200"></i>
+                                        {{-- Consistent icon color: slate-600 (neutral, not rose) --}}
+                                        <i class="bx bx-building text-lg text-slate-600 shrink-0"></i>
+                                        <span class="font-medium text-slate-700 truncate">{{ $dept->name }}</span>
                                     </div>
-                                    <x-button type="button" variant="secondary" onclick="event.stopPropagation(); toggle('editDept{{ $dept->id }}')">
+                                    <x-button type="button" variant="table-confirm" class="shrink-0 ml-3"
+                                        onclick="event.stopPropagation(); toggle('editDept{{ $dept->id }}')"
+                                        title="Edit department">
                                         <i class="bx bx-edit"></i>
                                     </x-button>
                                 </summary>
 
                                 <div class="px-3 pb-3 space-y-4">
-                                    {{-- EDIT DEPARTMENT --}}
-                                    <div id="editDept{{ $dept->id }}" class="hidden bg-rose-50 border border-rose-200 p-4 rounded-xl">
-                                        <form method="POST" action="{{ route('department.update', $dept) }}">
+
+                                    {{-- Edit department form — same amber cue as college --}}
+                                    <div id="editDept{{ $dept->id }}"
+                                        class="hidden rounded-xl border border-amber-200 bg-amber-50/80 p-4">
+                                        <p class="text-xs font-semibold uppercase tracking-[0.15em] text-amber-700 mb-3">
+                                            Edit Department
+                                        </p>
+                                        <form method="POST" action="{{ route('department.update', $dept) }}" class="space-y-3">
                                             @csrf
                                             @method('PUT')
                                             <input type="hidden" name="college_id" value="{{ $college->id }}">
-                                            <div class="space-y-3">
-                                                <x-form.label for="deptName{{ $dept->id }}" variant="title" isRequired>Department Name</x-form.label>
-                                                <x-form.input id="deptName{{ $dept->id }}" name="name" value="{{ $dept->name }}" required />
-
-                                                <div class="flex gap-2 mt-2">
-                                                    <x-button type="submit" variant="save">Save</x-button>
-                                                    <x-button type="button" variant="cancel" onclick="toggle('editDept{{ $dept->id }}')">Cancel</x-button>
-                                                </div>
+                                            <div>
+                                                <x-form.label for="deptName{{ $dept->id }}" variant="title" isRequired>
+                                                    Department Name
+                                                </x-form.label>
+                                                <x-form.input
+                                                    id="deptName{{ $dept->id }}"
+                                                    name="name"
+                                                    value="{{ $dept->name }}"
+                                                    class="mt-1"
+                                                    required />
+                                            </div>
+                                            <div class="flex gap-2">
+                                                <x-button type="submit" variant="save">
+                                                    <i class="bx bx-save"></i> Save
+                                                </x-button>
+                                                <x-button type="button" variant="cancel"
+                                                    onclick="toggle('editDept{{ $dept->id }}')">
+                                                    Cancel
+                                                </x-button>
                                             </div>
                                         </form>
                                     </div>
 
-                                    {{-- ADD PROGRAM --}}
-                                    <x-button variant="add-button" onclick="openAddProgramModal({{ $dept->id }})">
+                                    {{-- Add program --}}
+                                    <x-button variant="outline" onclick="openAddProgramModal({{ $dept->id }})">
                                         <i class="bx bx-plus"></i> Add Program
                                     </x-button>
 
-                                    {{-- PROGRAMS --}}
-                                    <div class="ml-8 space-y-2">
-                                        @foreach ($dept->programs as $program)
-                                            <div class="bg-white/95 border border-slate-200 rounded-xl shadow-sm">
-                                                <div class="flex items-start justify-between p-3">
-                                                    <div class="flex gap-3 flex-1">
-                                                        <i class="bx bx-book-open text-lg text-sky-600 mt-1"></i>
-                                                        <div class="flex-1">
-                                                            <div class="font-medium text-slate-800">{{ $program->name }}</div>
-                                                            <div class="text-sm text-slate-600 mt-1">
-                                                                <span class="inline-block mr-3"><b>BOR No: </b>{{ $program->bor_approval_no }}</span><br>
-                                                                <span class="inline-block"><b>BOR Date Approval: </b>{{ \Carbon\Carbon::parse($program->bor_approval_date)->format('F d, Y') }}</span>
+                                    {{-- Programs --}}
+                                    <div class="ml-6 space-y-2">
+                                        @forelse ($dept->programs as $program)
+                                            <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+
+                                                <div class="flex items-start justify-between p-3 gap-3">
+                                                    <div class="flex gap-3 flex-1 min-w-0">
+                                                        <i class="bx bx-book-open text-lg text-sky-600 mt-0.5 shrink-0"></i>
+                                                        <div class="min-w-0">
+                                                            <p class="font-medium text-slate-800 truncate">
+                                                                {{ $program->name }}
+                                                            </p>
+                                                            <div class="mt-1.5 flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-slate-500">
+                                                                <span>
+                                                                    <span class="font-medium text-slate-600">BOR No:</span>
+                                                                    {{ $program->bor_approval_no }}
+                                                                </span>
+                                                                <span>
+                                                                    <span class="font-medium text-slate-600">Approved:</span>
+                                                                    {{ \Carbon\Carbon::parse($program->bor_approval_date)->format('M d, Y') }}
+                                                                </span>
                                                             </div>
                                                         </div>
                                                     </div>
-
-                                                    <x-button type="button" variant="secondary" onclick="toggle('editProgram{{ $program->id }}')">
+                                                    <x-button type="button" variant="table-confirm" class="shrink-0"
+                                                        onclick="toggle('editProgram{{ $program->id }}')"
+                                                        title="Edit program">
                                                         <i class="bx bx-edit"></i>
                                                     </x-button>
                                                 </div>
 
-                                                {{-- EDIT PROGRAM --}}
-                                                <div id="editProgram{{ $program->id }}" class="hidden border-t border-slate-200 bg-sky-50 p-4">
-                                                    <form method="POST" action="{{ route('program.update', $program) }}">
+                                                {{-- Edit program form — same amber cue --}}
+                                                <div id="editProgram{{ $program->id }}"
+                                                    class="hidden border-t border-amber-200 bg-amber-50/80 p-4">
+                                                    <p class="text-xs font-semibold uppercase tracking-[0.15em] text-amber-700 mb-3">
+                                                        Edit Program
+                                                    </p>
+                                                    <form method="POST" action="{{ route('program.update', $program) }}" class="space-y-3">
                                                         @csrf
                                                         @method('PUT')
                                                         <input type="hidden" name="department_id" value="{{ $dept->id }}">
-                                                        <div class="space-y-3">
-                                                            <x-form.label for="programName{{ $program->id }}" variant="title" isRequired>Program Name</x-form.label>
-                                                            <x-form.input id="programName{{ $program->id }}" name="name" value="{{ $program->name }}" required />
-
-                                                            <x-form.label for="borNo{{ $program->id }}" variant="title" isRequired>BOR Approval No</x-form.label>
-                                                            <x-form.input id="borNo{{ $program->id }}" name="bor_approval_no" value="{{ $program->bor_approval_no }}" required />
-
-                                                            <x-form.label for="borDate{{ $program->id }}" variant="date" isRequired>BOR Date Approval</x-form.label>
-                                                            <x-form.input id="borDate{{ $program->id }}" type="date" name="bor_approval_date" value="{{ $program->bor_approval_date }}" required />
-
-                                                            <div class="flex gap-2 mt-2">
-                                                                <x-button type="submit" variant="save">Save</x-button>
-                                                                <x-button type="button" variant="cancel" onclick="toggle('editProgram{{ $program->id }}')">Cancel</x-button>
-                                                            </div>
+                                                        <div>
+                                                            <x-form.label for="programName{{ $program->id }}" variant="title" isRequired>
+                                                                Program Name
+                                                            </x-form.label>
+                                                            <x-form.input
+                                                                id="programName{{ $program->id }}"
+                                                                name="name"
+                                                                value="{{ $program->name }}"
+                                                                class="mt-1"
+                                                                required />
+                                                        </div>
+                                                        <div>
+                                                            <x-form.label for="borNo{{ $program->id }}" variant="title" isRequired>
+                                                                BOR Approval No.
+                                                            </x-form.label>
+                                                            <x-form.input
+                                                                id="borNo{{ $program->id }}"
+                                                                name="bor_approval_no"
+                                                                value="{{ $program->bor_approval_no }}"
+                                                                class="mt-1"
+                                                                required />
+                                                        </div>
+                                                        <div>
+                                                            <x-form.label for="borDate{{ $program->id }}" variant="date" isRequired>
+                                                                BOR Date Approval
+                                                            </x-form.label>
+                                                            <x-form.input
+                                                                id="borDate{{ $program->id }}"
+                                                                type="date"
+                                                                name="bor_approval_date"
+                                                                value="{{ $program->bor_approval_date }}"
+                                                                class="mt-1"
+                                                                required />
+                                                        </div>
+                                                        <div class="flex gap-2">
+                                                            <x-button type="submit" variant="save">
+                                                                <i class="bx bx-save"></i> Save
+                                                            </x-button>
+                                                            <x-button type="button" variant="cancel"
+                                                                onclick="toggle('editProgram{{ $program->id }}')">
+                                                                Cancel
+                                                            </x-button>
                                                         </div>
                                                     </form>
                                                 </div>
 
                                             </div>
-                                        @endforeach
+                                        @empty
+                                            <p class="text-xs text-slate-400 italic py-1 pl-1">
+                                                No programs yet — add one above.
+                                            </p>
+                                        @endforelse
                                     </div>
 
                                 </div>
                             </details>
-                        @endforeach
+                        @empty
+                            <p class="text-xs text-slate-400 italic py-1 pl-1">
+                                No departments yet — add one above.
+                            </p>
+                        @endforelse
                     </div>
 
                 </div>
             </details>
-        @endforeach
+        @empty
+            <x-empty-state
+                icon="bxs-school"
+                title="No colleges yet"
+                message="Start by adding the first college using the button above.">
+                <x-button variant="add-button" onclick="document.getElementById('addCollegeModal').showModal()">
+                    <i class="bx bx-plus"></i> Add College
+                </x-button>
+            </x-empty-state>
+        @endforelse
     </div>
 
+    @include('AcademicStructure.modals.addCollegeModal')
+    @include('AcademicStructure.modals.addDepartmentModal')
+    @include('AcademicStructure.modals.addProgramModal')
 
-@include('AcademicStructure.modals.addCollegeModal')
-@include('AcademicStructure.modals.addDepartmentModal')
-@include('AcademicStructure.modals.addProgramModal')
 @endsection
 
+@push('scripts')
 <script>
 function toggle(id) {
-    const element = document.getElementById(id);
-    if (!element) return;
-    element.classList.toggle('hidden');
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('hidden');
 }
 
-function closeAllForms(parent = document) {
+function closeAllForms(parent) {
     parent.querySelectorAll('div[id^="edit"]').forEach(el => el.classList.add('hidden'));
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
     const collegeAccordions = document.querySelectorAll('#collegeAccordions > details');
 
     collegeAccordions.forEach(details => {
-        details.addEventListener('toggle', function() {
+        // Rotate chevron on open/close
+        const chevron = details.querySelector(':scope > summary .chevron-icon');
+
+        details.addEventListener('toggle', function () {
+            if (chevron) chevron.style.transform = this.open ? 'rotate(90deg)' : '';
+
             if (!this.open) {
-                // Close all edit forms within this accordion
                 closeAllForms(this);
             } else {
-                // Close other college accordions
+                // Collapse sibling college accordions
                 collegeAccordions.forEach(other => {
                     if (other !== this && other.open) {
                         other.open = false;
                         closeAllForms(other);
                     }
                 });
-            }
 
-            // Close all child department forms if this college closes
-            const departmentAccordions = details.querySelectorAll('div > details');
-            departmentAccordions.forEach(dept => {
-                dept.addEventListener('toggle', function() {
-                    if (!this.open) closeAllForms(this);
-                    else {
-                        departmentAccordions.forEach(other => {
-                            if (other !== this && other.open) {
-                                other.open = false;
-                                closeAllForms(other);
-                            }
-                        });
-                    }
+                // Attach department accordion toggle listeners (lazy — runs once per open)
+                this.querySelectorAll(':scope > div > div > details').forEach(deptDetails => {
+                    if (deptDetails._listenerAttached) return;
+                    deptDetails._listenerAttached = true;
+
+                    const deptChevron = deptDetails.querySelector(':scope > summary .chevron-icon');
+
+                    deptDetails.addEventListener('toggle', function () {
+                        if (deptChevron) deptChevron.style.transform = this.open ? 'rotate(90deg)' : '';
+                        if (!this.open) closeAllForms(this);
+                    });
                 });
-            });
+            }
         });
     });
 });
@@ -212,3 +309,4 @@ function openAddProgramModal(departmentId) {
     document.getElementById('addProgramModal').showModal();
 }
 </script>
+@endpush

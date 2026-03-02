@@ -2,91 +2,109 @@
 
 @section('content')
 
-    <x-header-with-button title="My Syllabi" description="Manage and continue working on your course syllabi" />
+    <x-header-with-button
+        title="My Syllabi"
+        description="Manage and continue working on your course syllabi" />
 
-    <div class="max-w-7xl mx-auto p-6 space-y-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-
-            {{-- Create Syllabus Card --}}
-            <a href="{{ route('syllabus.create') }}"
-                class="group flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300
-                    h-56 bg-white hover:bg-slate-50 hover:border-emerald-400 transition shadow-sm">
-                <div class="flex flex-col items-center text-center">
-                    <span class="text-5xl text-gray-400 group-hover:text-emerald-500 transition">+</span>
-                    <span class="mt-3 text-sm font-semibold text-slate-600 group-hover:text-emerald-600">
-                        Create Syllabus
-                    </span>
+        {{-- Create Syllabus card --}}
+        <a href="{{ route('syllabus.create') }}"
+            class="group flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300
+                   min-h-56 bg-white hover:bg-emerald-50/50 hover:border-emerald-400 transition-colors shadow-sm">
+            <div class="flex flex-col items-center text-center px-4">
+                <div class="w-12 h-12 rounded-full bg-slate-100 group-hover:bg-emerald-100 flex items-center justify-center transition-colors mb-3">
+                    <i class="bx bx-plus text-2xl text-slate-400 group-hover:text-emerald-600 transition-colors"></i>
                 </div>
-            </a>
+                <span class="text-sm font-semibold text-slate-500 group-hover:text-emerald-600 transition-colors">
+                    Create Syllabus
+                </span>
+            </div>
+        </a>
 
-            {{-- Existing Syllabi --}}
-            @forelse ($syllabi as $syllabus)
-                <div class="flex flex-col rounded-xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition overflow-hidden">
+        {{-- Existing syllabi --}}
+        @forelse ($syllabi as $syllabus)
+            <div class="flex flex-col rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
 
-                    {{-- Header --}}
-                    <div class="px-4 py-3 bg-linear-to-r from-green-50 to-emerald-50 border-b border-slate-200">
-                        <h3 class="font-semibold text-gray-900">
-                            {{ $syllabus->course->course_code }}
-                        </h3>
-                        <p class="text-xs text-slate-600 mt-1">
-                            {{ Str::limit($syllabus->course->course_title, 55) }}
-                        </p>
+                {{-- Card header — bg-gradient-to-r (was bg-linear-to-r, invalid Tailwind) --}}
+                <div class="px-4 py-3 bg-gradient-to-r from-slate-50 to-emerald-50/60 border-b border-slate-200">
+                    <h3 class="font-bold text-slate-800 font-mono">
+                        {{ $syllabus->course->course_code }}
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">
+                        {{ Str::limit($syllabus->course->course_title, 55) }}
+                    </p>
+                </div>
+
+                {{-- Card body --}}
+                <div class="flex-1 p-4 space-y-2.5 text-sm text-slate-600">
+
+                    {{-- Step progress + status --}}
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-xs text-slate-400">
+                            Step
+                            {{ array_search($syllabus->current_step, array_keys($syllabus->getWizardSteps())) + 1 }}
+                            / {{ count($syllabus->getWizardSteps()) }}
+                        </span>
+
+                        {{--
+                            Status badge — amber for draft, emerald for published.
+                            Was: yellow-*/green-* (wrong app tokens)
+                            Now: amber-*/emerald-* (consistent with status-indicator component)
+                        --}}
+                        <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[0.65rem] font-semibold ring-1
+                            {{ $syllabus->status === 'draft'
+                                ? 'bg-amber-50 text-amber-700 ring-amber-200'
+                                : 'bg-emerald-50 text-emerald-700 ring-emerald-200' }}">
+                            {{ ucfirst($syllabus->status) }}
+                        </span>
                     </div>
 
-                    {{-- Body --}}
-                    <div class="flex-1 p-4 space-y-3 text-sm text-slate-600">
-
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs text-slate-500">
-                                Step
-                                {{ array_search($syllabus->current_step, array_keys($syllabus->getWizardSteps())) + 1 }}
-                                / {{ count($syllabus->getWizardSteps()) }}
-                            </span>
-
-                            <span
-                                class="text-xs px-2 py-0.5 rounded-full
-                            {{ $syllabus->status === 'draft' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700' }}">
-                                {{ ucfirst($syllabus->status) }}
-                            </span>
+                    @if ($syllabus->academic_calendar)
+                        <div class="flex items-center gap-1.5 text-xs text-slate-500">
+                            <i class="bx bx-calendar text-slate-400"></i>
+                            {{ $syllabus->academic_calendar->academic_year }}
                         </div>
+                    @endif
 
-                        @if ($syllabus->academic_calendar)
-                            <p>
-                                <span class="font-medium text-gray-700">Calendar:</span>
-                                {{ $syllabus->academic_calendar->academic_year }}
-                            </p>
-                        @endif
-
-                        <p>
-                            <span class="font-medium text-slate-700">Program:</span>
-                            {{ $syllabus->course->program->name }}
-                        </p>
+                    <div class="flex items-start gap-1.5 text-xs text-slate-500">
+                        <i class="bx bx-book text-slate-400 mt-0.5 shrink-0"></i>
+                        <span class="leading-relaxed">{{ $syllabus->course->program->name }}</span>
                     </div>
-
-                    {{-- Actions --}}
-                    <div class="p-4 border-t border-slate-200 flex gap-2">
-                        <a href="{{ route('syllabus.wizard', ['syllabusId' => $syllabus->id]) }}"
-                            class="flex-1 text-center bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium py-2 rounded transition">
-                            {{ $syllabus->status === 'draft' ? 'Continue' : 'View' }}
-                        </a>
-
-                        <a href="{{ route('syllabus.preview', ['syllabus' => $syllabus->id]) }}"
-                            class="flex-1 text-center bg-slate-100 hover:bg-slate-200 text-slate-800 text-sm font-medium py-2 rounded transition">
-                            Preview
-                        </a>
-                    </div>
-
                 </div>
-            @empty
-                {{-- Empty State --}}
-                <div class="col-span-full">
-                    <x-feedback-status.alert :type="'info'" 
-                                        :title="'No Syllabi'" 
-                                        :message="'You have not created any syllabi yet. Start by creating a new syllabus.'" />
-                </div>
-            @endforelse
 
-        </div>
+                {{-- Card actions — x-button instead of bare <a> tags --}}
+                <div class="p-3 pt-0 flex gap-2">
+                    <x-button
+                        href="{{ route('syllabus.wizard', ['syllabusId' => $syllabus->id]) }}"
+                        variant="primary"
+                        class="flex-1 justify-center">
+                        {{ $syllabus->status === 'draft' ? 'Continue' : 'View' }}
+                    </x-button>
+
+                    <x-button
+                        href="{{ route('syllabus.preview', ['syllabus' => $syllabus->id]) }}"
+                        variant="cancel"
+                        class="flex-1 justify-center">
+                        Preview
+                    </x-button>
+                </div>
+
+            </div>
+        @empty
+            {{-- Spans all columns in the grid --}}
+            <div class="col-span-full">
+                <x-empty-state
+                    icon="bx-file-blank"
+                    title="No syllabi yet"
+                    message="You haven't created any syllabi yet. Start by creating a new one.">
+                    <x-button href="{{ route('syllabus.create') }}" variant="add-button">
+                        <i class="bx bx-plus"></i> Create Syllabus
+                    </x-button>
+                </x-empty-state>
+            </div>
+        @endforelse
+
     </div>
+
 @endsection
