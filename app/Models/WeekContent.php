@@ -30,4 +30,9 @@ class WeekContent extends Model
     {
         return $this->belongsTo(CourseOutcome::class, 'course_outcome_id');
     }
+
+    public function evaluation()
+    {
+        return $this->hasOne(SyllabusEvaluationItem::class);
+    }
 }

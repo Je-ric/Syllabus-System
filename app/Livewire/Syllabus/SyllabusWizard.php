@@ -7,6 +7,8 @@ use App\Models\CourseOutcome;
 use App\Models\Course;
 use App\Models\Syllabus;
 use App\Models\SyllabusWeek;
+use App\Models\WeekContent;
+use App\Models\SyllabusEvaluationItem;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -169,7 +171,8 @@ class SyllabusWizard extends Component
         if ($this->stepHasMissingRequired('academic_calendar')
             || $this->stepHasMissingRequired('course_components')
             || $this->stepHasMissingRequired('course_outcomes')
-            || $this->stepHasMissingRequired('weekly_coverage')) {
+            || $this->stepHasMissingRequired('weekly_coverage')
+            || $this->stepHasMissingRequired('course_evaluation')) {
             $this->dispatch('lw-toast', type: 'error', message: 'Complete all required fields before submitting.');
             return null;
         }
@@ -234,6 +237,28 @@ class SyllabusWizard extends Component
 
             case 'weekly_coverage':
                 return ! SyllabusWeek::where('syllabus_id', $syllabusId)->exists();
+
+            case 'course_evaluation':
+                // Require weights for all week contents that have an assessment task or belong to an exam week.
+                $weekContentIds = WeekContent::query()
+                    ->join('syllabus_weeks', 'syllabus_weeks.id', '=', 'week_contents.syllabus_week_id')
+                    ->where('syllabus_weeks.syllabus_id', $syllabusId)
+                    ->where(function ($q) {
+                        $q->whereNotNull('syllabus_weeks.exam_type')
+                            ->orWhereRaw("TRIM(COALESCE(week_contents.assessment_task, '')) <> ''");
+                    })
+                    ->pluck('week_contents.id');
+
+                if ($weekContentIds->isEmpty()) {
+                    return true;
+                }
+
+                $evaluatedCount = SyllabusEvaluationItem::query()
+                    ->whereIn('week_content_id', $weekContentIds)
+                    ->whereNotNull('weight')
+                    ->count();
+
+                return $evaluatedCount !== $weekContentIds->count();
 
             default:
                 return false;

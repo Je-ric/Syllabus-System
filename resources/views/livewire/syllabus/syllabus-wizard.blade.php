@@ -103,6 +103,11 @@
             <livewire:syllabus.steps.weekly-coverage-step :syllabus-id="$syllabus->id" />
         </div>
 
+        {{-- Course Evaluation --}}
+        <div class="{{ $currentStep === 'course_evaluation' ? 'block' : 'hidden' }} p-5 sm:p-6">
+            <livewire:syllabus.steps.course-evaluation-step :syllabus-id="$syllabus->id" />
+        </div>
+
         {{-- Review --}}
         <div class="{{ $currentStep === 'review' ? 'block' : 'hidden' }} p-5 sm:p-6">
             <livewire:syllabus.steps.review-step :syllabus-id="$syllabus->id" />

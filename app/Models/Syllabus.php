@@ -157,6 +157,7 @@ class Syllabus extends Model
             'course_components' => 'Course Components',
             'course_outcomes' => 'Course Outcomes',
             'weekly_coverage' => 'Weekly Coverage',
+            'course_evaluation' => 'Course Evaluation',
             'review' => 'Review',
         ];
 
