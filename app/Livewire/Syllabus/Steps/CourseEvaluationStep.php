@@ -15,48 +15,43 @@ class CourseEvaluationStep extends Component
 
     public int  $syllabusId;
 
-    /** Whether this course has both LEC and LAB (determines if LAB columns show). */
+    // True when the course has both LEC and LAB components.
+    // Controls whether the LAB column group is rendered in the table.
     public bool $courseHasLab = false;
 
-    /**
-     * The rows to display in the evaluation table.
-     *
-     * Each entry represents ONE week that has either an exam or an assessment task.
-     * The row contains both LEC and LAB data side by side.
-     *
-     * Example structure:
-     * [
-     *   [
-     *     'week_no'        => 4,
-     *     'is_exam'        => true,
-     *     'term_label'     => '1st Term',        // '1st Term', '2nd Term', 'Final Term'
-     *     'lec' => [
-     *       'week_content_id' => 12,
-     *       'co_code'         => 'CO1',           // null if no CO mapped
-     *       'task_label'      => '1st Term Exam', // auto-generated label
-     *     ],
-     *     'lab' => [                              // null if no LAB component
-     *       'week_content_id' => 13,
-     *       'co_code'         => 'CO1',
-     *       'task_label'      => '1st Term Practical Exam',
-     *     ],
-     *   ],
-     *   ...
-     * ]
-     */
+    // Rows shown in the evaluation table.
+    // Each entry is one week that has at least one side (LEC or LAB) with a real task.
+    //
+    // Shape:
+    // [
+    //   'week_no'    => 4,
+    //   'is_exam'    => true,
+    //   'term_label' => '1st Term',   // null for regular activity rows
+    //   'lec' => [                    // NULL if LEC has no assessment task this week
+    //     'week_content_id' => 12,
+    //     'co_code'         => 'CO1', // null if no CO is mapped on this WeekContent
+    //     'task_label'      => '1st Term Exam',
+    //   ],
+    //   'lab' => [                    // NULL if LAB has no task, or course has no LAB
+    //     'week_content_id' => 13,
+    //     'co_code'         => 'CO1',
+    //     'task_label'      => '1st Term Practical Exam',
+    //   ],
+    // ]
+    //
+    // When 'lec' is null the blade renders the LEC columns as greyed-out / disabled.
+    // When 'lab' is null the blade renders the LAB columns as greyed-out / disabled.
+    // This handles the case where LEC and LAB have different numbers of tasks.
     public array $rows = [];
 
-    /**
-     * The weight inputs, keyed by week_content_id.
-     *
-     * wire:model binds directly to these in the blade.
-     *
-     * Example: [ 12 => '10', 13 => '10', 7 => '4', 8 => '4' ]
-     *
-     * We also store outcome_label here (for rows with no CO, like MVGO tasks).
-     *
-     * Example: [ 7 => ['weight' => '4', 'outcome_label' => 'MVGO', 'kind' => 'activity'] ]
-     */
+    // Weight (and optional outcome label) inputs keyed by week_content_id.
+    // wire:model.lazy in the blade binds directly to this array.
+    //
+    // Shape: [ week_content_id => ['weight' => '10', 'outcome_label' => 'MVGO'] ]
+    //
+    // Only rows where 'lec' / 'lab' is non-null get an entry here.
+    // If a side is null (no task) there is no input entry, so the blade cannot
+    // accidentally bind a wire:model to a non-existent slot.
     public array $inputs = [];
 
     // ── Mount ─────────────────────────────────────────────────────────────────
@@ -76,7 +71,7 @@ class CourseEvaluationStep extends Component
 
     // ── Event listeners ───────────────────────────────────────────────────────
 
-    /** Fired by the wizard when the user navigates TO this step. */
+    // Wizard dispatches this when the user navigates TO this step.
     #[On('syllabus-step-changed')]
     public function onStepChanged(string $step): void
     {
@@ -85,20 +80,20 @@ class CourseEvaluationStep extends Component
         }
     }
 
-    /** Fired by the wizard just before navigating AWAY from this step. */
+    // Wizard dispatches this just before navigating AWAY from this step.
     #[On('syllabus-save-step')]
     public function onSaveRequested(string $step): void
     {
         if ($step !== 'course_evaluation') {
             return;
         }
-        $this->save();
+        $this->persistEvaluation();
         $this->dispatch('syllabus-step-saved', step: 'course_evaluation');
     }
 
     // ── Public actions ────────────────────────────────────────────────────────
 
-    /** Manual save button. */
+    // Manual "Save Evaluation" button handler.
     public function save(): void
     {
         $this->persistEvaluation();
@@ -108,21 +103,24 @@ class CourseEvaluationStep extends Component
 
     // ── Private: load data ────────────────────────────────────────────────────
 
-    /**
-     * Build the $rows and $inputs arrays from the database.
-     *
-     * Strategy:
-     * 1. Load all SyllabusWeeks for this syllabus, ordered by week_no.
-     * 2. For each week, load the LEC WeekContent row (and LAB if applicable).
-     * 3. Keep only weeks that have something worth evaluating:
-     *    - Exam weeks (assessment_task contains "Exam", auto-written by WeeklyCoverageStep)
-     *    - OR weeks where the faculty entered an assessment task in Weekly Coverage
-     * 4. For exam weeks, assign the term label (1st / 2nd / Final) by counting them.
-     * 5. Build the $inputs array pre-filled from any previously saved evaluation data.
-     */
+    // Build $rows and $inputs from the database.
+    //
+    // Row inclusion rules (all logic lives here, blade just renders):
+    //   INCLUDE  — LEC side is included when LEC WeekContent.assessment_task is non-empty.
+    //   INCLUDE  — LAB side is included when LAB WeekContent.assessment_task is non-empty
+    //              AND the course has a LAB component.
+    //   SKIP row — when BOTH sides have an empty assessment_task.
+    //   SKIP row — when the task is exactly "Non-Teaching Week" (written by WeeklyCoverageStep
+    //              for non_teaching calendar events; not a real assessable task).
+    //   SKIP row — 'break' calendar event weeks that the faculty left blank naturally
+    //              fall through the "both sides empty" rule above and are never shown.
+    //
+    // When one side has a task and the other does not:
+    //   The side without a task is represented as null ('lec' => null or 'lab' => null).
+    //   The blade reads this and renders greyed-out disabled placeholder columns for
+    //   that side, ensuring the table stays aligned regardless of asymmetric tasks.
     private function loadData(): void
     {
-        // Load the syllabus to check if this course has LAB
         $syllabus = Syllabus::with('course')->find($this->syllabusId);
         if (! $syllabus) {
             return;
@@ -130,7 +128,6 @@ class CourseEvaluationStep extends Component
 
         $this->courseHasLab = (bool) $syllabus->course?->has_lec_lab;
 
-        // Load all weeks for this syllabus
         $weeks = SyllabusWeek::where('syllabus_id', $this->syllabusId)
             ->orderBy('week_no')
             ->get();
@@ -141,31 +138,28 @@ class CourseEvaluationStep extends Component
             return;
         }
 
-        // Load ALL WeekContent rows for these weeks in one query
         $weekIds = $weeks->pluck('id')->all();
 
+        // Load all WeekContent rows in one query, eager-load the CO relation
         $allContents = WeekContent::whereIn('syllabus_week_id', $weekIds)
-            ->with('courseOutcome') // load the CO so we can show co_code
+            ->with('courseOutcome')
             ->get();
 
-        // Group contents by [week_id][component_type] for easy lookup
-        // e.g. $contentMap[5]['LEC'] = WeekContent model
+        // Index as $contentMap[week_id][component_type] for O(1) lookup
         $contentMap = [];
         foreach ($allContents as $content) {
             $contentMap[$content->syllabus_week_id][$content->component_type] = $content;
         }
 
-        // Load any previously saved evaluation items for pre-filling weights
-        $allEvalItems = SyllabusEvaluationItem::where('syllabus_id', $this->syllabusId)->get();
+        // Load any previously saved evaluation items to pre-fill weight inputs
+        $evalMap = SyllabusEvaluationItem::where('syllabus_id', $this->syllabusId)
+            ->get()
+            ->keyBy('week_content_id');
 
-        // Index evaluation items by week_content_id for quick lookup
-        $evalMap = $allEvalItems->keyBy('week_content_id');
-
-        // Build the rows
         $rows   = [];
         $inputs = [];
 
-        // Count exam rows as we encounter them so we can label them 1st, 2nd, Final
+        // Count exam rows in order to assign sequential term labels: 1st, 2nd, Final
         $examTermLabels = ['1st Term', '2nd Term', 'Final Term'];
         $examCount      = 0;
 
@@ -173,65 +167,66 @@ class CourseEvaluationStep extends Component
             $lecContent = $contentMap[$week->id]['LEC'] ?? null;
             $labContent = $contentMap[$week->id]['LAB'] ?? null;
 
-            // Determine if this week is an exam week by checking the LEC task label
-            // (WeeklyCoverageStep auto-writes "1st Term Exam" etc. into assessment_task)
-            $isExam = $lecContent && str_contains(strtolower($lecContent->assessment_task ?? ''), 'exam');
+            // Trim tasks once — used multiple times below
+            $lecTask = trim($lecContent->assessment_task ?? '');
+            $labTask = trim($labContent->assessment_task ?? '');
 
-            // Also check LAB in case only LAB has an assessment task
-            if (! $isExam && $labContent) {
-                $isExam = str_contains(strtolower($labContent->assessment_task ?? ''), 'exam');
-            }
-
-            // Check if this week has any assessment task at all
-            $lecHasTask = $lecContent && trim($lecContent->assessment_task ?? '') !== '';
-            $labHasTask = $labContent && trim($labContent->assessment_task ?? '') !== '';
-
-            // Skip weeks with nothing to evaluate
-            if (! $lecHasTask && ! $labHasTask) {
+            // Skip weeks where both sides have nothing to evaluate
+            if ($lecTask === '' && $labTask === '') {
                 continue;
             }
 
-            // Assign term label for exam weeks
+            // Skip non-teaching weeks — they are locked placeholder rows written
+            // by WeeklyCoverageStep, not real assessable tasks.
+            // A week is non-teaching if either side carries that label
+            // (both sides get the same label from computeLockedWeeks).
+            if ($lecTask === 'Non-Teaching Week' || $labTask === 'Non-Teaching Week') {
+                continue;
+            }
+
+            // Detect exam rows: WeeklyCoverageStep writes "Exam" into the task label
+            // for both LEC ("1st Term Exam") and LAB ("1st Term Practical Exam").
+            $isExam = str_contains(strtolower($lecTask), 'exam')
+                   || str_contains(strtolower($labTask), 'exam');
+
+            // Assign a sequential term label only for exam rows
             $termLabel = null;
             if ($isExam) {
                 $termLabel = $examTermLabels[min($examCount, 2)];
                 $examCount++;
             }
 
-            // Build the LEC side of the row
+            // ── LEC side ──────────────────────────────────────────────────────
+            // Only build a LEC slot when LEC actually has an assessment task.
+            // If $lecTask is empty the LEC columns are disabled in the blade.
             $lecRow = null;
-            if ($lecContent) {
+            if ($lecTask !== '') {
                 $lecEval = $evalMap->get($lecContent->id);
-
-                $lecRow = [
+                $lecRow  = [
                     'week_content_id' => $lecContent->id,
                     'co_code'         => $lecContent->courseOutcome?->co_code,
-                    'task_label'      => $lecContent->assessment_task ?? '',
+                    'task_label'      => $lecTask,
                 ];
-
-                // Pre-fill the inputs from saved data, or leave blank
                 $inputs[$lecContent->id] = [
                     'weight'        => $lecEval?->weight !== null ? (string) $lecEval->weight : '',
                     'outcome_label' => $lecEval?->outcome_label ?? '',
-                    'kind'          => $lecEval?->kind ?? 'activity',
                 ];
             }
 
-            // Build the LAB side of the row (only if course has LAB)
+            // ── LAB side ──────────────────────────────────────────────────────
+            // Only build a LAB slot when the course has LAB AND LAB has a task.
+            // If $labTask is empty the LAB columns are disabled in the blade.
             $labRow = null;
-            if ($this->courseHasLab && $labContent) {
+            if ($this->courseHasLab && $labTask !== '') {
                 $labEval = $evalMap->get($labContent->id);
-
-                $labRow = [
+                $labRow  = [
                     'week_content_id' => $labContent->id,
                     'co_code'         => $labContent->courseOutcome?->co_code,
-                    'task_label'      => $labContent->assessment_task ?? '',
+                    'task_label'      => $labTask,
                 ];
-
                 $inputs[$labContent->id] = [
                     'weight'        => $labEval?->weight !== null ? (string) $labEval->weight : '',
                     'outcome_label' => $labEval?->outcome_label ?? '',
-                    'kind'          => $labEval?->kind ?? 'activity',
                 ];
             }
 
@@ -239,8 +234,8 @@ class CourseEvaluationStep extends Component
                 'week_no'    => $week->week_no,
                 'is_exam'    => $isExam,
                 'term_label' => $termLabel,
-                'lec'        => $lecRow,
-                'lab'        => $labRow,
+                'lec'        => $lecRow,  // null = no LEC task → blade shows disabled placeholder
+                'lab'        => $labRow,  // null = no LAB task → blade shows disabled placeholder
             ];
         }
 
@@ -250,15 +245,10 @@ class CourseEvaluationStep extends Component
 
     // ── Private: save to DB ───────────────────────────────────────────────────
 
-    /**
-     * Write the $inputs data to the syllabus_evaluation_items table.
-     *
-     * For each row, we upsert one SyllabusEvaluationItem per WeekContent
-     * (LEC and LAB are separate rows).
-     */
+    // Write $inputs to the syllabus_evaluation_items table.
+    // One SyllabusEvaluationItem per WeekContent row (LEC and LAB are separate DB rows).
     private function persistEvaluation(): void
     {
-        // Load the course_id once (needed for the evaluation item)
         $syllabus = Syllabus::with('course')->find($this->syllabusId);
         if (! $syllabus) {
             return;
@@ -266,61 +256,46 @@ class CourseEvaluationStep extends Component
         $courseId = (int) $syllabus->course?->id;
 
         foreach ($this->rows as $row) {
-            // Save LEC evaluation item
+            // Save LEC item — only when this row actually has a LEC task
             if (isset($row['lec']['week_content_id'])) {
                 $this->saveOneItem(
                     weekContentId: (int) $row['lec']['week_content_id'],
-                    syllabusId:    $this->syllabusId,
                     courseId:      $courseId,
                     isExam:        $row['is_exam'],
                     termLabel:     $row['term_label'],
-                    component:     'LEC',
                 );
             }
 
-            // Save LAB evaluation item
+            // Save LAB item — only when this row actually has a LAB task
             if ($this->courseHasLab && isset($row['lab']['week_content_id'])) {
                 $this->saveOneItem(
                     weekContentId: (int) $row['lab']['week_content_id'],
-                    syllabusId:    $this->syllabusId,
                     courseId:      $courseId,
                     isExam:        $row['is_exam'],
                     termLabel:     $row['term_label'],
-                    component:     'LAB',
                 );
             }
         }
     }
 
-    /**
-     * Save or update a single SyllabusEvaluationItem.
-     *
-     * @param int    $weekContentId  The WeekContent row this item belongs to
-     * @param int    $syllabusId
-     * @param int    $courseId
-     * @param bool   $isExam         True if this is an exam week
-     * @param string|null $termLabel '1st Term', '2nd Term', 'Final Term', or null
-     * @param string $component      'LEC' or 'LAB'
-     */
+    // Upsert a single SyllabusEvaluationItem for the given WeekContent row.
     private function saveOneItem(
         int $weekContentId,
-        int $syllabusId,
         int $courseId,
         bool $isExam,
         ?string $termLabel,
-        string $component,
     ): void {
-        $inputData = $this->inputs[$weekContentId] ?? [];
+        $data = $this->inputs[$weekContentId] ?? [];
 
-        // Convert weight to integer, or null if blank
-        $weightRaw = trim((string) ($inputData['weight'] ?? ''));
+        // Convert weight to int, or null if the field was left blank
+        $weightRaw = trim((string) ($data['weight'] ?? ''));
         $weight    = $weightRaw !== '' ? (int) $weightRaw : null;
 
-        // Outcome label (for tasks not mapped to a specific CO, e.g. "MVGO")
-        $outcomeLabel = trim((string) ($inputData['outcome_label'] ?? ''));
+        // Outcome label for rows not mapped to a specific CO (e.g. "MVGO")
+        $outcomeLabel = trim((string) ($data['outcome_label'] ?? ''));
         $outcomeLabel = $outcomeLabel !== '' ? $outcomeLabel : null;
 
-        // Determine kind and exam_type
+        // kind and exam_type derived from whether this is an exam row
         if ($isExam) {
             $kind     = 'exam';
             $examType = match ($termLabel) {
@@ -330,17 +305,14 @@ class CourseEvaluationStep extends Component
                 default      => null,
             };
         } else {
-            $kindRaw  = trim((string) ($inputData['kind'] ?? 'activity'));
-            $kind     = in_array($kindRaw, ['activity', 'quiz'], true) ? $kindRaw : 'activity';
+            $kind     = 'activity';
             $examType = null;
         }
 
         SyllabusEvaluationItem::updateOrCreate(
-            // Find by this unique key
             ['week_content_id' => $weekContentId],
-            // Update these fields
             [
-                'syllabus_id'   => $syllabusId,
+                'syllabus_id'   => $this->syllabusId,
                 'course_id'     => $courseId,
                 'outcome_label' => $outcomeLabel,
                 'kind'          => $kind,

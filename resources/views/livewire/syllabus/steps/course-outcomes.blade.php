@@ -1,116 +1,197 @@
-<div>
-    <div class="space-y-4 text-slate-800">
+{{--
+    course-outcomes.blade.php
+    Editable CO list for a syllabus step.
+    Livewire: CourseOutcomesStep  |  Alpine: courseOutcomesManager()
 
-        {{-- Header --}}
-        <div class="mb-5">
-            <h3 class="text-xl font-semibold text-slate-900">Course Outcomes</h3>
-            <p class="text-sm text-slate-500 mt-0.5">
-                Define what students should be able to do after completing this course.
-            </p>
-            Create Course Outcomes aligned with relevant Program Outcomes. 
-            Not every CO needs to map to all POs — focus on the most relevant ones.
-        </div>
+    Row states:
+      Saved   (co.id truthy) → emerald badge, trash calls $wire.call('removeSavedOutcome', co.id)
+      Unsaved (co.id null)   → amber border + badge + "unsaved" hint, × splices from array
 
-        {{-- ══ CO list ════════════════════════════════════════════════════════ --}}
-        <div class="space-y-2.5">
-            @foreach($courseOutcomes as $index => $outcome)
-                {{--
-                    Each row is purely Alpine-driven for text input.
-                    We only sync to Livewire on blur (x-on:blur) to avoid
-                    a round-trip on every keystroke — no more lag while typing.
-                --}}
-                <div wire:key="co-row-{{ $outcome['temp_key'] ?? ($outcome['id'] ?? $index) }}"
-                        class="flex items-start gap-3 px-4 py-3 border border-slate-200 rounded-xl
-                                bg-white shadow-sm transition-shadow hover:shadow-md"
-                        x-data="{ text: @js($outcome['description'] ?? '') }">
+    Save flow:
+      "Save All" → saveCos() in Alpine → $wire.call('saveCourseOutcomes', this.cos)
+      Step navigation → onSaveRequested() in Livewire reads $this->courseOutcomes (@entangle)
 
-                    {{-- CO badge --}}
-                    <span class="mt-1.5 inline-flex items-center justify-center min-w-11 h-7
-                                rounded-full bg-emerald-100 text-emerald-800
-                                text-xs font-bold tracking-widest uppercase shrink-0">
-                        {{ $outcome['co_code'] ?? ('CO' . ($index + 1)) }}
+    No auto-save on blur. No $wire.set() on blur. Pure Alpine x-model on textareas.
+--}}
+
+<div x-data="courseOutcomesManager(@entangle('courseOutcomes'))" class="space-y-4 text-slate-800">
+
+    {{-- ── Header ──────────────────────────────────────────────────────────── --}}
+    <div class="mb-5">
+        <h3 class="text-xl font-semibold text-slate-900">Course Outcomes</h3>
+        <p class="mt-0.5 text-sm text-slate-500">
+            Define what students should be able to do after completing this course.
+            Align each outcome with the most relevant Program Outcomes — not every CO needs to cover all POs.
+        </p>
+    </div>
+
+    {{-- ── CO rows ─────────────────────────────────────────────────────────── --}}
+    <template x-for="(co, index) in cos" :key="co.id ?? ('new-' + index)">
+
+        <div :class="co.id
+                ? 'border-slate-200 bg-white/90'
+                : 'border-amber-200 bg-amber-50/40'"
+            class="rounded-2xl border shadow-sm p-4 transition-colors duration-200">
+
+            <div class="flex items-start gap-3">
+
+                {{-- CO badge --}}
+                <div class="shrink-0 pt-0.5">
+                    <span :class="co.id
+                            ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200'
+                            : 'bg-amber-100 text-amber-700 ring-1 ring-amber-200'"
+                        class="inline-flex items-center justify-center
+                                min-w-11 h-8 px-2 rounded-xl text-xs font-bold uppercase
+                                transition-colors duration-200">
+                        <span x-text="'CO' + (index + 1)"></span>
                     </span>
+                </div>
 
-                    {{--
-                        Textarea is Alpine-local (x-model="text") while typing — zero Livewire requests.
-                        On blur, we push the value into Livewire's $weekInputs via $wire.set().
-                        This is the same pattern used by wire:model.lazy but without the Livewire
-                        DOM attribute so Alpine controls the element natively.
-                    --}}
+                {{-- Textarea — pure Alpine, no blur sync --}}
+                <div class="flex-1 min-w-0">
                     <textarea
-                        x-model="text"
-                        x-on:blur="$wire.set('courseOutcomes.{{ $index }}.description', text)"
+                        x-model="co.description"
                         rows="2"
-                        placeholder="Enter course outcome description…"
-                        class="flex-1 resize-none rounded-lg border border-slate-200 bg-slate-50 px-3 py-2
+                        placeholder="Describe what students will be able to do after completing this course…"
+                        class="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-3 py-2
                                 text-sm text-slate-800 placeholder:text-slate-300
                                 focus:bg-white focus:border-emerald-400 focus:ring-1 focus:ring-emerald-300
                                 focus:outline-none transition-colors"></textarea>
 
-                    {{-- Remove button --}}
-                    <button type="button"
-                        wire:click="removeCourseOutcome({{ $index }})"
-                        class="mt-1.5 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50
-                                rounded-lg transition-colors"
-                        title="Remove outcome">
-                        <i class="bx bx-trash text-base leading-none"></i>
-                    </button>
+                    {{-- Unsaved hint --}}
+                    <p x-show="!co.id"
+                        x-cloak
+                        class="mt-1.5 flex items-center gap-1.5 text-xs text-amber-600">
+                        <i class="bx bx-error-circle text-sm shrink-0"></i>
+                        Unsaved — click <strong>Save All</strong> to persist this row.
+                    </p>
                 </div>
-            @endforeach
 
-            {{-- Add CO button --}}
-            <button type="button"
-                wire:click="addCourseOutcome"
-                wire:loading.attr="disabled"
-                wire:target="addCourseOutcome,removeCourseOutcome"
-                class="w-full flex items-center justify-center gap-2 px-4 py-3
-                        border-2 border-dashed border-emerald-300 rounded-xl
-                        text-sm font-semibold text-emerald-700
-                        hover:border-emerald-400 hover:bg-emerald-50
-                        disabled:opacity-60 disabled:cursor-not-allowed
-                        transition-colors">
-                <span wire:loading.remove wire:target="addCourseOutcome">
-                    <i class="bx bx-plus text-base"></i> Add Course Outcome
-                </span>
-                <span wire:loading wire:target="addCourseOutcome">
-                    <i class="bx bx-loader-alt bx-spin"></i> Adding…
-                </span>
-            </button>
+                {{-- DELETE saved row — calls Livewire with confirmation --}}
+                <button x-show="co.id"
+                    @click="
+                        if (confirm('Remove this Course Outcome? CO codes will be re-sequenced.')) {
+                            $wire.call('removeSavedOutcome', co.id);
+                        }
+                    "
+                    type="button"
+                    class="mt-0.5 p-2 text-slate-400 hover:text-rose-600
+                            hover:bg-rose-50 rounded-lg transition-colors"
+                    title="Delete saved CO">
+                    <i class="bx bx-trash text-base"></i>
+                </button>
 
-            @if($coAddError)
-                <p class="text-xs text-red-600 flex items-center gap-1">
-                    <i class="bx bx-error-circle"></i> {{ $coAddError }}
-                </p>
-            @endif
+                {{-- REMOVE unsaved row — splice from Alpine array only --}}
+                <button x-show="!co.id"
+                    x-cloak
+                    @click="cos.splice(index, 1)"
+                    type="button"
+                    class="mt-0.5 p-2 text-slate-400 hover:text-rose-600
+                            hover:bg-rose-50 rounded-lg transition-colors"
+                    title="Remove unsaved CO">
+                    <i class="bx bx-x text-base"></i>
+                </button>
+
+            </div>
         </div>
+    </template>
 
-        {{-- ══ Program Outcomes reference ══════════════════════════════════════ --}}
-        <div class="mt-6 rounded-xl border border-emerald-200 bg-emerald-50/40 p-4">
-            <h4 class="text-sm font-semibold text-emerald-800 mb-3 flex items-center gap-1.5">
-                <i class="bx bx-list-check text-emerald-600"></i>
-                Program Outcomes Reference
-            </h4>
-
-            @if (count($programOutcomes) === 0)
-                <p class="text-sm text-slate-500 italic">No program outcomes found for this course.</p>
-            @else
-                <div class="space-y-2">
-                    @foreach ($programOutcomes as $po)
-                        <div class="flex items-start gap-2.5 bg-white border border-emerald-200
-                                    rounded-lg px-3 py-2.5 shadow-sm">
-                            <span class="shrink-0 font-bold text-emerald-700 text-sm mt-0.5">
-                                {{ $po['po_code'] }}.
-                            </span>
-                            <p class="text-slate-700 text-sm flex-1">
-                                {{ $po['po_text'] }}
-                            </p>
-                            @if (!empty($po['ied']))
-                                <x-feedback-status.ied-badge :level="$po['ied']" />
-                            @endif
-                        </div>
-                    @endforeach
-                </div>
-            @endif
+    {{-- Empty state --}}
+    <template x-if="cos.length === 0">
+        <div class="rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50
+                    py-10 text-center">
+            <i class="bx bx-book-open text-4xl text-slate-300"></i>
+            <p class="mt-2 text-sm text-slate-400">No Course Outcomes yet. Add the first one below.</p>
         </div>
+    </template>
+
+    {{-- Validation hint --}}
+    @if ($coAddError)
+        <p class="text-xs text-red-600 flex items-center gap-1">
+            <i class="bx bx-error-circle"></i> {{ $coAddError }}
+        </p>
+    @endif
+
+    {{-- ── Action buttons ──────────────────────────────────────────────────── --}}
+    <div class="flex items-center gap-2 pt-1">
+
+        <button @click="addCo()" type="button"
+            class="flex-1 inline-flex items-center justify-center gap-2
+                    border-2 border-dashed border-emerald-300 rounded-2xl p-3
+                    text-sm font-semibold text-emerald-700
+                    hover:border-emerald-500 hover:bg-emerald-50
+                    transition-colors duration-150">
+            <i class="bx bx-plus text-base"></i>
+            Add Course Outcome
+        </button>
+
+        <button @click="saveCos()" type="button" :disabled="isSaving"
+            class="inline-flex items-center gap-2 px-5 py-3 rounded-xl
+                    bg-emerald-600 text-white text-sm font-semibold shadow-sm
+                    hover:bg-emerald-700 active:bg-emerald-800
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                    transition-colors duration-150">
+            <span x-show="!isSaving" class="inline-flex items-center gap-2">
+                <i class="bx bx-save text-base"></i> Save All
+            </span>
+            <span x-show="isSaving" x-cloak class="inline-flex items-center gap-2">
+                <i class="bx bx-loader-alt bx-spin text-base"></i> Saving…
+            </span>
+        </button>
     </div>
+
+    {{-- ── Program Outcomes reference ───────────────────────────────────────── --}}
+    <div class="mt-6 rounded-xl border border-emerald-200 bg-emerald-50/40 p-4">
+        <h4 class="text-sm font-semibold text-emerald-800 mb-3 flex items-center gap-1.5">
+            <i class="bx bx-list-check text-emerald-600"></i>
+            Program Outcomes Reference
+        </h4>
+
+        @if (count($programOutcomes) === 0)
+            <p class="text-sm text-slate-500 italic">No program outcomes found for this course.</p>
+        @else
+            <div class="space-y-2">
+                @foreach ($programOutcomes as $po)
+                    <div class="flex items-start gap-2.5 bg-white border border-emerald-200
+                                rounded-lg px-3 py-2.5 shadow-sm">
+                        <span class="shrink-0 font-bold text-emerald-700 text-sm mt-0.5">
+                            {{ $po['po_code'] }}.
+                        </span>
+                        <p class="text-slate-700 text-sm flex-1">{{ $po['po_text'] }}</p>
+                        @if (!empty($po['ied']))
+                            <x-feedback-status.ied-badge :level="$po['ied']" />
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        @endif
+    </div>
+
 </div>
+
+<script>
+function courseOutcomesManager(initialCos) {
+    return {
+        cos:      initialCos,
+        isSaving: false,
+
+        addCo() {
+            // Block if any existing row has a blank description
+            const hasBlank = this.cos.some(co => !co.description || !co.description.trim());
+            if (hasBlank) {
+                window.dispatchEvent(new CustomEvent('lw-toast', {
+                    detail: { type: 'warning', message: 'Fill in the blank CO before adding another.' }
+                }));
+                return;
+            }
+            this.cos.push({ id: null, temp_key: 'new_' + Date.now(), co_code: '', description: '' });
+        },
+
+        saveCos() {
+            this.isSaving = true;
+            @this.call('saveCourseOutcomes', this.cos)
+                .finally(() => { this.isSaving = false; });
+        },
+    };
+}
+</script>

@@ -9,11 +9,25 @@ use Livewire\Component;
 
 class CourseOutcomesStep extends Component
 {
+    // ── Public state ──────────────────────────────────────────────────────────
+
     public int    $syllabusId;
-    public bool   $isLoaded       = false;
+
+    // This array is @entangle'd in the blade, so Alpine owns it during editing.
+    // Shape per entry:
+    // [
+    //   'id'          => int|null,  // null = unsaved row
+    //   'temp_key'    => string,    // stable key for x-for :key
+    //   'co_code'     => 'CO1',     // display badge; resequenced on save
+    //   'description' => string,
+    // ]
     public array  $courseOutcomes  = [];
     public array  $programOutcomes = [];
-    public ?string $coAddError    = null;
+
+    // Shown below the "Add CO" button when the user tries to add while a row is blank
+    public ?string $coAddError = null;
+
+    // ── Mount ─────────────────────────────────────────────────────────────────
 
     public function mount(int $syllabusId): void
     {
@@ -21,6 +35,17 @@ class CourseOutcomesStep extends Component
         $this->loadData();
     }
 
+    // ── Render ────────────────────────────────────────────────────────────────
+
+    public function render()
+    {
+        return view('livewire.syllabus.steps.course-outcomes');
+    }
+
+    // ── Event listeners ───────────────────────────────────────────────────────
+
+    // Wizard dispatches this when the user navigates TO this step.
+    // Reload so the list reflects any changes made since last visit.
     #[On('syllabus-step-changed')]
     public function onStepChanged(string $step): void
     {
@@ -30,6 +55,9 @@ class CourseOutcomesStep extends Component
         $this->loadData();
     }
 
+    // Wizard dispatches this just before navigating AWAY from this step.
+    // Alpine pushes its current state back to Livewire via @entangle before
+    // any $wire call fires, so $this->courseOutcomes already has the latest data.
     #[On('syllabus-save-step')]
     public function onSaveRequested(string $step): void
     {
@@ -37,90 +65,107 @@ class CourseOutcomesStep extends Component
             return;
         }
 
-        if ($this->saveCourseOutcomes()) {
-            $this->dispatch('syllabus-step-saved', step: 'course_outcomes', message: 'Course Outcomes saved.');
+        // Pass $this->courseOutcomes directly — @entangle keeps it in sync
+        if ($this->saveCourseOutcomes($this->courseOutcomes)) {
+            $this->dispatch('syllabus-step-saved', step: 'course_outcomes');
             $this->dispatch('syllabus-course-outcomes-updated');
         }
     }
 
-    /**
-     * Called by the Alpine blur handler via $wire.set().
-     * Livewire calls updatedCourseOutcomes() after any $wire.set() on the array.
-     * We only need to mark the step dirty — no save, no rerender cascade.
-     */
-    public function updatedCourseOutcomes(): void
+    // ── Public actions ────────────────────────────────────────────────────────
+
+    // Called from Alpine's saveCos() via $wire.call('saveCourseOutcomes', this.cos).
+    // Receives the full array from Alpine (including any unsaved rows the user added).
+    public function saveCourseOutcomes(array $cosData): bool
     {
-        if (! $this->isLoaded) {
-            return;
+        // Reject if any description is blank
+        foreach ($cosData as $index => $co) {
+            if (trim((string) ($co['description'] ?? '')) === '') {
+                $this->dispatch('lw-toast', type: 'warning',
+                    message: 'CO row ' . ($index + 1) . ' is blank — fill it in before saving.');
+                return false;
+            }
         }
 
-        $this->resequenceCourseOutcomes();
-        $this->coAddError = $this->hasBlankCourseOutcome()
-            ? 'Please fill the blank CO before adding a new one.'
-            : null;
+        $existingCos = CourseOutcome::where('syllabus_id', $this->syllabusId)
+            ->get()
+            ->keyBy('id');
 
-        $this->dispatch('syllabus-step-dirty', step: 'course_outcomes', dirty: true);
-    }
+        // IDs present in the submitted data; everything else gets deleted
+        $submittedIds = collect($cosData)
+            ->pluck('id')
+            ->filter()
+            ->map(fn ($id) => (int) $id)
+            ->values()
+            ->all();
 
-    public function addCourseOutcome(): void
-    {
-        $this->loadData();
-
-        if ($this->hasBlankCourseOutcome()) {
-            $this->coAddError = 'Please fill the blank CO before adding a new one.';
-            $this->dispatch('lw-toast', type: 'warning', message: $this->coAddError);
-            return;
+        // Delete outcomes the user removed
+        $idsToDelete = $existingCos->keys()->diff($submittedIds);
+        if ($idsToDelete->isNotEmpty()) {
+            CourseOutcome::where('syllabus_id', $this->syllabusId)
+                ->whereIn('id', $idsToDelete->all())
+                ->delete();
         }
 
-        $this->courseOutcomes[] = [
-            'id'       => null,
-            'temp_key' => $this->newOutcomeTempKey(),
-            'co_code'  => 'CO' . (count($this->courseOutcomes) + 1),
-            'description' => '',
-        ];
+        // Upsert remaining outcomes with resequenced codes
+        foreach ($cosData as $index => $co) {
+            $description = trim((string) ($co['description'] ?? ''));
+            if ($description === '') {
+                continue;
+            }
 
-        $this->resequenceCourseOutcomes();
-        $this->dispatch('syllabus-step-dirty', step: 'course_outcomes', dirty: true);
-    }
+            $coCode = 'CO' . ($index + 1);
 
-    public function removeCourseOutcome(int $index): void
-    {
-        $this->loadData();
-        if (! isset($this->courseOutcomes[$index])) {
-            return;
+            if (! empty($co['id']) && $existingCos->has((int) $co['id'])) {
+                // Update existing
+                $existingCos[(int) $co['id']]->update([
+                    'co_code'     => $coCode,
+                    'description' => $description,
+                ]);
+            } else {
+                // Create new
+                CourseOutcome::create([
+                    'syllabus_id' => $this->syllabusId,
+                    'co_code'     => $coCode,
+                    'description' => $description,
+                ]);
+            }
         }
 
-        array_splice($this->courseOutcomes, $index, 1);
-        $this->resequenceCourseOutcomes();
-        $this->dispatch('syllabus-step-dirty', step: 'course_outcomes', dirty: true);
+        // Reload so the blade reflects real IDs and correct co_codes
+        $this->reloadCourseOutcomes();
+        $this->coAddError = null;
+
+        $this->dispatch('lw-toast', type: 'success', message: 'Course Outcomes saved.');
+        $this->dispatch('syllabus-step-dirty', step: 'course_outcomes', dirty: false);
+        $this->dispatch('syllabus-course-outcomes-updated');
+
+        return true;
     }
 
-    public function render()
+    // Called from Alpine when the user confirms deletion of a saved CO row.
+    // Unsaved rows are removed client-side by splicing the Alpine array — no round-trip.
+    public function removeSavedOutcome(int $id): void
     {
-        return view('livewire.syllabus.steps.course-outcomes');
+        CourseOutcome::where('syllabus_id', $this->syllabusId)
+            ->where('id', $id)
+            ->delete();
+
+        $this->reloadCourseOutcomes();
+        $this->dispatch('lw-toast', type: 'success', message: 'Course Outcome removed.');
+        $this->dispatch('syllabus-step-dirty', step: 'course_outcomes', dirty: false);
+        $this->dispatch('syllabus-course-outcomes-updated');
     }
 
-    // ── Private ───────────────────────────────────────────────────────────────
+    // ── Private helpers ───────────────────────────────────────────────────────
 
+    // Full data load: course outcomes + program outcomes reference panel.
+    // Called from mount() and onStepChanged().
     private function loadData(): void
     {
-        if ($this->isLoaded) {
-            return;
-        }
+        $this->reloadCourseOutcomes();
 
-        $this->courseOutcomes = CourseOutcome::query()
-            ->where('syllabus_id', $this->syllabusId)
-            ->orderBy('co_code')
-            ->get()
-            ->map(fn ($co) => [
-                'id'          => $co->id,
-                'temp_key'    => 'co_' . $co->id,
-                'co_code'     => $co->co_code,
-                'description' => $co->description,
-            ])->values()->all();
-
-        $syllabus = Syllabus::query()
-            ->with(['course.program.outcomes', 'course.programOutcomes'])
+        $syllabus = Syllabus::with(['course.program.outcomes', 'course.programOutcomes'])
             ->findOrFail($this->syllabusId);
 
         $coursePoIedById = $syllabus->course?->programOutcomes
@@ -132,123 +177,22 @@ class CourseOutcomesStep extends Component
                 'po_text' => $po->po_text,
                 'ied'     => $coursePoIedById->get((int) $po->id, ''),
             ])->values()->all() ?? [];
-
-        $this->resequenceCourseOutcomes();
-        $this->isLoaded = true;
     }
 
-    private function saveCourseOutcomes(): bool
+    // Reload only the course outcomes array from DB.
+    // Called after save/delete to refresh IDs and codes without re-querying POs.
+    private function reloadCourseOutcomes(): void
     {
-        $this->loadData();
-
-        $this->courseOutcomes = array_values($this->courseOutcomes ?? []);
-        foreach ($this->courseOutcomes as $i => $outcome) {
-            $this->courseOutcomes[$i]['co_code'] = 'CO' . ($i + 1);
-            if (empty($this->courseOutcomes[$i]['temp_key'])) {
-                $this->courseOutcomes[$i]['temp_key'] = ! empty($outcome['id'])
-                    ? 'co_' . $outcome['id']
-                    : $this->newOutcomeTempKey();
-            }
-        }
-
-        $existingCos = CourseOutcome::query()
-            ->where('syllabus_id', $this->syllabusId)
+        $this->courseOutcomes = CourseOutcome::where('syllabus_id', $this->syllabusId)
+            ->orderBy('co_code')
             ->get()
-            ->keyBy('id');
-
-        $validDescriptions = collect($this->courseOutcomes)
-            ->filter(fn ($co) => trim((string) ($co['description'] ?? '')) !== '')
-            ->values();
-
-        if ($existingCos->isNotEmpty() && $validDescriptions->isEmpty()) {
-            $this->coAddError = 'At least one Course Outcome description is required before saving.';
-            $this->dispatch('lw-toast', type: 'error', message: $this->coAddError);
-            return false;
-        }
-
-        $submittedIds = collect($this->courseOutcomes)
-            ->pluck('id')
-            ->filter()
-            ->map(fn ($id) => (int) $id)
+            ->map(fn ($co) => [
+                'id'          => $co->id,
+                'temp_key'    => 'co_' . $co->id,
+                'co_code'     => $co->co_code,
+                'description' => $co->description,
+            ])
             ->values()
             ->all();
-
-        $idsToDelete = $existingCos->keys()->diff($submittedIds);
-        if ($idsToDelete->isNotEmpty()) {
-            CourseOutcome::query()
-                ->where('syllabus_id', $this->syllabusId)
-                ->whereIn('id', $idsToDelete->all())
-                ->delete();
-        }
-
-        $saved            = false;
-        $hasValidOutcomes = false;
-
-        foreach ($this->courseOutcomes as $index => $outcome) {
-            $description = trim((string) ($outcome['description'] ?? ''));
-            if ($description === '') {
-                continue;
-            }
-
-            $hasValidOutcomes = true;
-            $coCode           = $this->courseOutcomes[$index]['co_code'];
-
-            if (! empty($outcome['id']) && $existingCos->has((int) $outcome['id'])) {
-                $co         = $existingCos[(int) $outcome['id']];
-                $hasChanged = $co->co_code !== $coCode || trim((string) $co->description) !== $description;
-                if ($hasChanged) {
-                    $co->update(['co_code' => $coCode, 'description' => $description]);
-                    $saved = true;
-                }
-                continue;
-            }
-
-            $created = CourseOutcome::create([
-                'syllabus_id' => $this->syllabusId,
-                'co_code'     => $coCode,
-                'description' => $description,
-            ]);
-
-            $this->courseOutcomes[$index]['id']       = $created->id;
-            $this->courseOutcomes[$index]['temp_key'] = 'co_' . $created->id;
-            $saved = true;
-        }
-
-        if ($saved || $hasValidOutcomes) {
-            $this->dispatch('syllabus-step-dirty', step: 'course_outcomes', dirty: false);
-        }
-
-        return $saved || $hasValidOutcomes;
-    }
-
-    private function newOutcomeTempKey(): string
-    {
-        return uniqid('new_', false);
-    }
-
-    private function resequenceCourseOutcomes(): void
-    {
-        $this->courseOutcomes = array_values($this->courseOutcomes ?? []);
-        foreach ($this->courseOutcomes as $i => $outcome) {
-            $this->courseOutcomes[$i]['co_code'] = 'CO' . ($i + 1);
-            if (empty($this->courseOutcomes[$i]['temp_key'])) {
-                $this->courseOutcomes[$i]['temp_key'] = ! empty($outcome['id'])
-                    ? 'co_' . $outcome['id']
-                    : $this->newOutcomeTempKey();
-            }
-            if (! array_key_exists('description', $this->courseOutcomes[$i])) {
-                $this->courseOutcomes[$i]['description'] = '';
-            }
-        }
-    }
-
-    private function hasBlankCourseOutcome(): bool
-    {
-        foreach ($this->courseOutcomes as $outcome) {
-            if (trim((string) ($outcome['description'] ?? '')) === '') {
-                return true;
-            }
-        }
-        return false;
     }
 }

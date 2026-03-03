@@ -7,6 +7,12 @@
                 Weeks are auto-generated from the academic calendar. Fill in coverage details per week. <br
                 Weeks containing <strong>Exam</strong> or <strong>Non-Teaching</strong> calendar events are locked automatically.
             </p>
+            @if ($courseComponents)
+                @php $hasLEC = isset($courseComponents['LEC']); $hasLAB = isset($courseComponents['LAB']); @endphp
+                    <p>
+                        Make sure Course Outcomes are same for each week in both Lecture and Laboratory.
+                </p>
+            @endif
 
             <div class="mt-3 flex items-center gap-2 flex-wrap">
                 @if (! $weeksGenerated)
@@ -58,7 +64,6 @@
         <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs text-slate-600">
             <div class="grid grid-cols-2 gap-4">
                 @if ($courseComponents)
-                    @php $hasLEC = isset($courseComponents['LEC']); $hasLAB = isset($courseComponents['LAB']); @endphp
                     <div>
                         <div class="font-semibold text-slate-700 mb-2">Class Schedule</div>
                         <div class="space-y-2.5">
@@ -275,6 +280,22 @@
                             <div class="flex items-center gap-2 min-w-0">
                                 <span class="font-semibold text-sm {{ $isLocked ? 'text-red-700' : 'text-slate-800' }} shrink-0">
                                     Week {{ $week->week_no }}
+                                    {{-- Show CO code if set --}}
+                                    @php
+                                        $coId = $weekInputs[$wKey]['course_outcome_id'] ?? null;
+                                        $coCode = null;
+                                        if ($coId && !empty($courseOutcomes)) {
+                                            foreach ($courseOutcomes as $co) {
+                                                if ($co['id'] == $coId) {
+                                                    $coCode = $co['co_code'];
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    @endphp
+                                    @if ($coCode)
+                                        <span class="ml-2 px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-xs font-medium border border-emerald-200">{{ $coCode }}</span>
+                                    @endif
                                 </span>
                                 <span class="text-xs text-slate-400 shrink-0">
                                     ({{ $start->format('M d') }} – {{ $end->format('M d, Y') }})

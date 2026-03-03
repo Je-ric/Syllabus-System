@@ -20,10 +20,10 @@ class SyllabusWizard extends Component
     public string    $currentStep = 'academic_calendar';
     public array     $stepDirty   = [];
 
-    /**
-     * This runs when the component loads. It sets up the wizard for either editing an existing syllabus or creating a new one.
-     * If neither a syllabus nor a course is found, it shows a 404 error.
-     */
+    // ── Mount ─────────────────────────────────────────────────────────────────
+
+    // Sets up the wizard for editing an existing syllabus or creating a new one.
+    // Aborts with 404 if neither a valid syllabusId nor courseId is provided.
     public function mount($syllabusId = null, $courseId = null)
     {
         $syllabusId = $syllabusId ? (int) $syllabusId : null;
@@ -72,16 +72,14 @@ class SyllabusWizard extends Component
         $this->stepDirty[$step] = $dirty;
     }
 
-    /**
-     * Child steps still fire this after saving so the wizard can:
-     *  - clear the dirty flag
-     *  - show a toast if a message was provided
-     *  - refresh the syllabus model (e.g. after calendar is linked)
-     *
-     * Navigation is NO LONGER gated on this event — saveAndNavigate() already
-     * changed $currentStep in the same request as the save dispatch, so the
-     * UI has already updated by the time this event arrives.
-     */
+    // Child steps fire this after saving so the wizard can:
+    //   - clear the dirty flag for that step
+    //   - show a toast if a message was provided
+    //   - refresh the syllabus model (e.g. after the calendar is linked)
+    //
+    // Navigation is NOT gated on this event — saveAndNavigate() already changed
+    // $currentStep in the same request as the dispatch, so the UI has already
+    // updated by the time this event arrives.
     #[On('syllabus-step-saved')]
     public function onStepSaved(string $step, ?string $message = null): void
     {
@@ -98,27 +96,24 @@ class SyllabusWizard extends Component
         $this->syllabus->refresh();
     }
 
-    // ── Navigation — ONE round trip ───────────────────────────────────────────
+    // ── Navigation (ONE round trip) ───────────────────────────────────────────
 
-    /**
-     * HOW THIS IS FAST:
-     *
-     * Old flow (2 round trips, 3-5 s):
-     *   1. clickTab() → dispatch 'syllabus-save-step'
-     *      Child receives it, saves, dispatches 'syllabus-step-saved' back
-     *   2. onStepSaved() receives it → calls setStep() → re-renders wizard
-     *      The child component has :key="...currentStep" so it's DESTROYED and
-     *      REMOUNTED — cold-boot DB queries, full render.
-     *
-     * New flow (1 round trip, ~200-400 ms):
-     *   1. saveAndNavigate() → dispatch 'syllabus-save-step' (fire-and-forget to child)
-     *      + immediately set $currentStep in the SAME request
-     *   2. Wizard re-renders with new $currentStep.
-     *      The blade uses block/hidden on wrapper divs — NO :key, NO remount.
-     *      The child component that was already mounted just gets hidden/shown.
-     *      Child's onSaveRequested() runs in the same Livewire request batch,
-     *      writing to DB before the response is sent.
-     */
+    // How this stays fast:
+    //
+    // Old flow (2 round trips, 3-5 s):
+    //   1. clickTab() dispatches 'syllabus-save-step'.
+    //      Child saves, dispatches 'syllabus-step-saved' back.
+    //   2. onStepSaved() changes $currentStep → re-renders wizard.
+    //      The child had :key="currentStep" so it was DESTROYED and REMOUNTED —
+    //      cold-boot DB queries, full render.
+    //
+    // New flow (1 round trip, ~200-400 ms):
+    //   1. saveAndNavigate() dispatches 'syllabus-save-step' (fire-and-forget to child)
+    //      AND immediately sets $currentStep — same request.
+    //   2. Wizard re-renders with the new $currentStep.
+    //      The blade uses block/hidden on wrapper divs — no :key, no remount.
+    //      Child's onSaveRequested() runs in the same request batch, writing to
+    //      DB before the response is sent.
     private function saveAndNavigate(string $toStep): void
     {
         if (! array_key_exists($toStep, $this->syllabus->getWizardSteps())) {
@@ -128,14 +123,14 @@ class SyllabusWizard extends Component
             return;
         }
 
-        // 1. Tell the current child to save — fire-and-forget within this request
+        // Tell the current child to save (fire-and-forget within this request)
         $this->dispatch('syllabus-save-step', step: $this->currentStep);
 
-        // 2. Switch step immediately — same round trip, no waiting
+        // Switch step immediately — same round trip
         $this->currentStep = $toStep;
         $this->syllabus->update(['current_step' => $toStep]);
 
-        // 3. Notify the new step it's now active (safety net for steps that use this)
+        // Notify the new step it is now active
         $this->dispatch('syllabus-step-changed', step: $toStep);
     }
 
@@ -216,11 +211,14 @@ class SyllabusWizard extends Component
         return $index !== false && $index > 0;
     }
 
+    // Check whether a wizard step is missing required data.
+    // Used by submitForReview() to block incomplete submissions.
     public function stepHasMissingRequired(string $step): bool
     {
         $syllabusId = (int) $this->syllabus->id;
 
         switch ($step) {
+
             case 'academic_calendar':
                 return empty($this->syllabus->academic_calendar_id);
 
@@ -233,28 +231,33 @@ class SyllabusWizard extends Component
 
             case 'course_outcomes':
                 return ! CourseOutcome::where('syllabus_id', $syllabusId)
-                    ->whereRaw("TRIM(description) <> ''")->exists();
+                    ->whereRaw("TRIM(description) <> ''")
+                    ->exists();
 
             case 'weekly_coverage':
                 return ! SyllabusWeek::where('syllabus_id', $syllabusId)->exists();
 
             case 'course_evaluation':
-                // Require weights for all week contents that have an assessment task or belong to an exam week.
+                // Find every WeekContent row that should have a weight entered.
+                //
+                // Qualifying rows must have a non-empty assessment_task AND must NOT be
+                // "Non-Teaching Week" (those are locked placeholder rows, not assessable).
+                // We do not rely on syllabus_weeks.exam_type because that column is
+                // not used by the new evaluation flow — we read assessment_task directly.
                 $weekContentIds = WeekContent::query()
                     ->join('syllabus_weeks', 'syllabus_weeks.id', '=', 'week_contents.syllabus_week_id')
                     ->where('syllabus_weeks.syllabus_id', $syllabusId)
-                    ->where(function ($q) {
-                        $q->whereNotNull('syllabus_weeks.exam_type')
-                            ->orWhereRaw("TRIM(COALESCE(week_contents.assessment_task, '')) <> ''");
-                    })
+                    ->whereRaw("TRIM(COALESCE(week_contents.assessment_task, '')) <> ''")
+                    ->whereRaw("TRIM(week_contents.assessment_task) <> 'Non-Teaching Week'")
                     ->pluck('week_contents.id');
 
                 if ($weekContentIds->isEmpty()) {
+                    // No tasks exist yet — treat as incomplete
                     return true;
                 }
 
-                $evaluatedCount = SyllabusEvaluationItem::query()
-                    ->whereIn('week_content_id', $weekContentIds)
+                // All qualifying rows must have a non-null weight saved
+                $evaluatedCount = SyllabusEvaluationItem::whereIn('week_content_id', $weekContentIds)
                     ->whereNotNull('weight')
                     ->count();
 

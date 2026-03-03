@@ -18,21 +18,25 @@
     <div
         wire:loading.flex
         wire:target="goNextStep,goPreviousStep,clickTab"
-        class="fixed inset-0 z-9999 hidden items-center justify-center bg-white/70 backdrop-blur-sm">
-        <div class="flex flex-col items-center gap-4 px-8 py-6 bg-white rounded-2xl shadow-2xl border border-slate-100">
+        class="fixed inset-0 z-50 hidden items-center justify-center bg-white/70 backdrop-blur-md">
+        
+        <div class="flex flex-col items-center gap-4 px-8 py-6 bg-white rounded-2xl shadow-xl border border-slate-100">
+            
             <div class="relative w-12 h-12">
-                <svg class="absolute inset-0 animate-spin text-blue-500" viewBox="0 0 48 48" fill="none">
+                <svg class="absolute inset-0 animate-spin text-emerald-500" viewBox="0 0 48 48" fill="none">
                     <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="4"
                             stroke-linecap="round" stroke-dasharray="100" stroke-dashoffset="60" />
                 </svg>
                 <span class="absolute inset-0 flex items-center justify-center">
-                    <span class="w-3 h-3 rounded-full bg-blue-600 animate-pulse"></span>
+                    <span class="w-3 h-3 rounded-full bg-emerald-600 animate-pulse"></span>
                 </span>
             </div>
+
             <div class="text-center">
                 <p class="text-sm font-semibold text-slate-700">Saving &amp; switching…</p>
-                <p class="text-xs text-slate-400 mt-0.5">Just a moment</p>
+                <p class="text-xs text-slate-400 mt-1">Just a moment</p>
             </div>
+
         </div>
     </div>
 
