@@ -7,22 +7,23 @@
     @vite(['resources/css/preview.css', 'resources/js/app.js'])
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Tahoma&display=swap" rel="stylesheet">
 
     <title>Course Syllabus - {{ $syllabus->course->course_code }}</title>
 
     @php
         $lecLabValue = function ($lecValue, $labValue) {
-        $lines = [];
+            $lines = [];
 
-        if (!blank($lecValue)) {
-            $lines[] = 'LEC: ' . e($lecValue);
-        }
+            if (!blank($lecValue)) {
+                $lines[] = 'LEC: ' . e($lecValue);
+            }
 
-        if (!blank($labValue)) {
-            $lines[] = 'LAB: ' . e($labValue);
-        }
+            if (!blank($labValue)) {
+                $lines[] = 'LAB: ' . e($labValue);
+            }
 
             return count($lines) ? implode('<br>', $lines) : 'N/A';
         };
@@ -106,7 +107,8 @@
                 </div>
                 <div class="indent-level-1-5">
                     {{-- <div>b.</div> --}}
-                    <div>b. We are committed to develop globally-competent and empowered human resources, and to generate
+                    <div>b. We are committed to develop globally-competent and empowered human resources, and to
+                        generate
                         knowledge and technologies for inclusive societal development.</div>
                 </div>
                 <div class="indent-level-1-5">
@@ -170,90 +172,91 @@
             </table>
         </div>
 
-            <strong class="title-numbered">1. Program Educational Objectives (PEOs)</strong>
-            <table>
-                <thead>
+        <strong class="title-numbered">1. Program Educational Objectives (PEOs)</strong>
+        <table>
+            <thead>
+                <tr>
+                    <th><b>Program Educational Objectives</b><br>
+                        <p>Three to five years after graduation, the BSIT graduates are:</p>
+                    </th>
+                    <th>Mission</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($peos as $peo)
                     <tr>
-                        <th><b>Program Educational Objectives</b><br>
-                            <p>Three to five years after graduation, the BSIT graduates are:</p>
-                        </th>
-                        <th>Mission</th>
+                        <td>{{ $peo->peo_code }}. {{ $peo->peo_text }}</td>
+                        <td><i class="bx bx-check">&#10003;</i></td>
                     </tr>
-                </thead>
-                <tbody>
-                    @forelse ($peos as $peo)
-                        <tr>
-                            <td>{{ $peo->peo_code }}. {{ $peo->peo_text }}</td>
-                            <td><i class="bx bx-check">&#10003;</i></td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="2">No PEOs found.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                @empty
+                    <tr>
+                        <td colspan="2">No PEOs found.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
 
-            <strong class="title-numbered">2. Program Outcomes (POs) and its Relationship to the Program Educational Objectives (PEOs)</strong>
-            <table>
-                <thead>
+        <strong class="title-numbered">2. Program Outcomes (POs) and its Relationship to the Program Educational
+            Objectives (PEOs)</strong>
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="2">Program Outcomes</th>
+                    <th colspan="{{ max($peos->count(), 1) }}">Program Educational Objectives</th>
+                </tr>
+                <tr>
+                    <th colspan="2">By the time of graduation, students of the program have the ability to:</th>
+                    @forelse ($peos as $peo)
+                        <th>{{ $peo->peo_code }}</th>
+                    @empty
+                        <th>-</th>
+                    @endforelse
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($pos as $po)
                     <tr>
-                        <th colspan="2">Program Outcomes</th>
-                        <th colspan="{{ max($peos->count(), 1) }}">Program Educational Objectives</th>
-                    </tr>
-                    <tr>
-                        <th colspan="2">By the time of graduation, students of the program have the ability to:</th>
+                        <td>({{ $po->po_code }})</td>
+                        <td>{{ $po->po_text }}</td>
                         @forelse ($peos as $peo)
-                            <th>{{ $peo->peo_code }}</th>
+                            <td>{!! $po->peos->contains('id', $peo->id) ? '&#10003;' : ' ' !!}</td>
                         @empty
-                            <th>-</th>
+                            <td>-</td>
                         @endforelse
                     </tr>
-                </thead>
-                <tbody>
-                    @forelse ($pos as $po)
-                        <tr>
-                            <td>({{ $po->po_code }})</td>
-                            <td>{{ $po->po_text }}</td>
-                            @forelse ($peos as $peo)
-                                <td>{!! $po->peos->contains('id', $peo->id) ? '&#10003;' : ' ' !!}</td>
-                            @empty
-                                <td>-</td>
-                            @endforelse
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="{{ $peos->count() + 2 }}">No POs found.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                @empty
+                    <tr>
+                        <td colspan="{{ $peos->count() + 2 }}">No POs found.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
 
-            <h3 class="a4-section title-lettered">C. Instructor Information</h3>
-            <table class="kv-table">
-                <tbody>
-                    <tr>
-                        <td>1. Name of Instructor/Professor</td>
-                        <td>{!! $lecLabValue($lecComponent?->instructor_name, $labComponent?->instructor_name) !!}</td>
-                    </tr>
-                    <tr>
-                        <td>2. Office</td>
-                        <td>{!! $lecLabValue($lecComponent?->office, $labComponent?->office) !!}</td>
-                    </tr>
-                    <tr>
-                        <td>3. Phone No. (Optional)</td>
-                        <td>{!! $lecLabValue($lecComponent?->phone, $labComponent?->phone) !!}</td>
-                    </tr>
-                    <tr>
-                        <td>4. Email Address</td>
-                        <td>{!! $lecLabValue($lecComponent?->instructor_email, $labComponent?->instructor_email) !!}</td>
-                    </tr>
-                    <tr>
-                        <td>5. Consultation Hours</td>
-                        <td>{!! $lecLabValue($lecComponent?->consultation_hours, $labComponent?->consultation_hours) !!}</td>
-                    </tr>
-                </tbody>
-            </table>
+        <h3 class="a4-section title-lettered">C. Instructor Information</h3>
+        <table class="kv-table">
+            <tbody>
+                <tr>
+                    <td>1. Name of Instructor/Professor</td>
+                    <td>{!! $lecLabValue($lecComponent?->instructor_name, $labComponent?->instructor_name) !!}</td>
+                </tr>
+                <tr>
+                    <td>2. Office</td>
+                    <td>{!! $lecLabValue($lecComponent?->office, $labComponent?->office) !!}</td>
+                </tr>
+                <tr>
+                    <td>3. Phone No. (Optional)</td>
+                    <td>{!! $lecLabValue($lecComponent?->phone, $labComponent?->phone) !!}</td>
+                </tr>
+                <tr>
+                    <td>4. Email Address</td>
+                    <td>{!! $lecLabValue($lecComponent?->instructor_email, $labComponent?->instructor_email) !!}</td>
+                </tr>
+                <tr>
+                    <td>5. Consultation Hours</td>
+                    <td>{!! $lecLabValue($lecComponent?->consultation_hours, $labComponent?->consultation_hours) !!}</td>
+                </tr>
+            </tbody>
+        </table>
 
         <h3 class="a4-section title-lettered">D. Course Information</h3>
         <table class="kv-table">
@@ -299,40 +302,160 @@
             <table>
                 <thead>
                     <tr>
-                        <th style="text-align:left;">Program Outcomes (Reference)</th>
+                        <th rowspan="3" style="background-color:#ddd; text-align:left; vertical-align:top;">
+                            Program Outcomes addressed by the course
+                        </th>
+
+                        <th colspan="{{ count($pos) }}" style="background-color:#ddd; text-align:center;">
+                            PO Code
+                        </th>
+                    </tr>
+
+                    <tr>
+                        @foreach ($pos as $po)
+                            <th style="text-align:center; width:30px;">
+                                {{ $po->po_code }}
+                            </th>
+                        @endforeach
+                    </tr>
+                    <tr>
+                        @foreach ($pos as $po)
+                            <td style="text-align:center;">
+                                @php
+                                    $is_mapped = isset($coursePoIedMap[$po->id]);
+                                @endphp
+                                {{ $is_mapped ? '✓' : '' }}
+                            </td>
+                        @endforeach
                     </tr>
                 </thead>
+            </table>
+
+            <table border="1" style="width:100%; border-collapse: collapse;">
                 <tbody>
-                    @forelse ($pos as $po)
+                    {{-- Header Row 1 --}}
+                    <tr>
+                        <td rowspan="2" style="background-color:#ddd; font-weight:bold; vertical-align:top;">
+                            Program Outcomes addressed by the course
+                        </td>
+
+                        <td colspan="{{ count($pos) }}"
+                            style="background-color:#ddd; text-align:center; font-weight:bold;">
+                            PO Code
+                        </td>
+                    </tr>
+
+                    <tr>
+                        @foreach ($pos as $po)
+                            <td style="background-color:#ddd; text-align:center; font-weight:bold;">
+                                {{ $po->po_code }}
+                            </td>
+                        @endforeach
+                    </tr>
+
+                    @forelse ($courseOutcomes as $co)
                         <tr>
-                            <td>{{ $po->po_code }} - {{ $po->po_text }}</td>
+                            <td>
+                                <strong>{{ $co->co_code }}:</strong>
+                                {{ $co->description }}
+                            </td>
+
+                            @foreach ($pos as $po)
+                                <td style="text-align:center;">
+                                    {{ $coursePoIedMap[$po->id] ?? '' }}
+                                </td>
+                            @endforeach
                         </tr>
                     @empty
                         <tr>
-                            <td style="text-align:center;">No program outcomes found.</td>
+                            <td colspan="{{ count($pos) + 1 }}" style="text-align:center;">
+                                No course outcomes found.
+                            </td>
+                        </tr>
+                    @endforelse
+
+                </tbody>
+            </table>
+
+            <p><strong>*Level:</strong> &nbsp; I – Introductory, &nbsp; E – Enabling, &nbsp; D – Demonstrative</p>
+        </div>
+
+        <div class="landscape">
+            <h3 class="a4-section title-numbered">10. Weekly Coverage</h3>
+
+            <p><strong>Lecture (LEC)</strong></p>
+            <table border="1" style="width:100%; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th style="text-align:center; width: 90px;">Week</th>
+                        <th style="text-align:center; width: 320px;">Course Outcome</th>
+                        <th style="text-align:center;">Topics</th>
+                        <th style="text-align:center;">Learning Outcomes</th>
+                        <th style="text-align:center;">Teaching and Learning Activities</th>
+                        <th style="text-align:center;">Assessment Task</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse (($weeklyCoverageRows['LEC'] ?? []) as $row)
+                        <tr>
+                            @if (($row['is_exam'] ?? false) === true)
+                                <td colspan="6" style="text-align:center; font-weight:bold;">
+                                    {{ $row['week_label'] }}
+                                </td>
+                            @else
+                                <td style="text-align:center;">{{ $row['week_label'] }}</td>
+                                <td>{{ $row['co_description'] ?? '' }}</td>
+                                <td>{{ $row['topics'] ?? '' }}</td>
+                                <td>{{ $row['learning_outcomes'] ?? '' }}</td>
+                                <td>{{ $row['tla'] ?? '' }}</td>
+                                <td style="text-align:center;">{{ $row['assessment_task'] ?? '' }}</td>
+                            @endif
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" style="text-align:center;">No weekly coverage found.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th style="text-align:left;">Course Outcomes</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($courseOutcomes as $co)
+            @if ($syllabus->course->has_lec_lab)
+                <p style="margin-top: 10px;"><strong>Laboratory (LAB)</strong></p>
+                <table border="1" style="width:100%; border-collapse: collapse;">
+                    <thead>
                         <tr>
-                            <td>{{ $co->co_code }}: {{ $co->description }}</td>
+                            <th style="text-align:center; width: 90px;">Week</th>
+                            <th style="text-align:center; width: 320px;">Course Outcome</th>
+                            <th style="text-align:center;">Topics</th>
+                            <th style="text-align:center;">Learning Outcomes</th>
+                            <th style="text-align:center;">Teaching and Learning Activities</th>
+                            <th style="text-align:center;">Assessment Task</th>
                         </tr>
-                    @empty
-                        <tr>
-                            <td style="text-align:center;">No course outcomes found.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @forelse (($weeklyCoverageRows['LAB'] ?? []) as $row)
+                            <tr>
+                                @if (($row['is_exam'] ?? false) === true)
+                                    <td colspan="6" style="text-align:center; font-weight:bold;">
+                                        {{ $row['week_label'] }}
+                                    </td>
+                                @else
+                                    <td style="text-align:center;">{{ $row['week_label'] }}</td>
+                                    <td>{{ $row['co_description'] ?? '' }}</td>
+                                    <td>{{ $row['topics'] ?? '' }}</td>
+                                    <td>{{ $row['learning_outcomes'] ?? '' }}</td>
+                                    <td>{{ $row['tla'] ?? '' }}</td>
+                                    <td style="text-align:center;">{{ $row['assessment_task'] ?? '' }}</td>
+                                @endif
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" style="text-align:center;">No weekly coverage found.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            @endif
         </div>
 
         <div class="portrait">
@@ -359,8 +482,10 @@
             Array.from(source.children).forEach(element => {
                 const hasLandscapeClass = element.classList?.contains("landscape");
                 const hasPortraitClass = element.classList?.contains("portrait");
-                const explicitOrientation = hasLandscapeClass ? "landscape" : (hasPortraitClass ? "portrait" : null);
-                const targetOrientation = explicitOrientation ?? (currentOrientation === "landscape" ? "portrait" : "portrait");
+                const explicitOrientation = hasLandscapeClass ? "landscape" : (hasPortraitClass ?
+                    "portrait" : null);
+                const targetOrientation = explicitOrientation ?? (currentOrientation === "landscape" ?
+                    "portrait" : "portrait");
 
                 if (targetOrientation !== currentOrientation) {
                     if (page.children.length > 0) {
@@ -412,7 +537,8 @@
                     let current = page;
                     path.forEach(node => {
                         let wrapper = current.lastElementChild;
-                        if (!wrapper || wrapper.getAttribute('data-split-id') !== node.getAttribute('data-split-id')) {
+                        if (!wrapper || wrapper.getAttribute('data-split-id') !== node.getAttribute(
+                                'data-split-id')) {
                             wrapper = node.cloneNode(false);
                             wrapper.removeAttribute('id');
                             wrapper.setAttribute('data-split-id', node.getAttribute('data-split-id'));
@@ -430,11 +556,14 @@
 
                         if (page.scrollHeight > getCurrentPageMaxHeight()) {
                             currentWrapper.removeChild(child);
-                            if (!currentWrapper.hasChildNodes()) currentWrapper.parentNode.removeChild(currentWrapper);
+                            if (!currentWrapper.hasChildNodes()) currentWrapper.parentNode.removeChild(
+                                currentWrapper);
 
-                            if (child.nodeType === Node.ELEMENT_NODE && ['DIV', 'UL', 'OL', 'LI'].includes(child.tagName) && child.childNodes.length > 0) {
+                            if (child.nodeType === Node.ELEMENT_NODE && ['DIV', 'UL', 'OL', 'LI'].includes(
+                                    child.tagName) && child.childNodes.length > 0) {
                                 if (!child.hasAttribute('data-split-id')) {
-                                    child.setAttribute('data-split-id', Math.random().toString(36).substr(2, 9));
+                                    child.setAttribute('data-split-id', Math.random().toString(36).substr(2,
+                                        9));
                                 }
                                 appendNodes(Array.from(child.childNodes), [...parentPath, child]);
                             } else {
@@ -473,7 +602,8 @@
                         page = createNewPage(currentOrientation);
                         container.appendChild(page);
 
-                        newTable = createTableWithHeader(table, thead); // Repeat header on each continued page
+                        newTable = createTableWithHeader(table,
+                        thead); // Repeat header on each continued page
                         page.appendChild(newTable);
 
                         newTable.querySelector("tbody").appendChild(row);

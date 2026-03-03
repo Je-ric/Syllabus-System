@@ -7,6 +7,7 @@ use App\Models\Syllabus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Access\AuthorizationException;
+use Carbon\Carbon;
 
 class SyllabusController extends Controller
 {
@@ -163,8 +164,11 @@ class SyllabusController extends Controller
             'course.program.outcomes.peos',
             'course.program.departments.objectives',
             'course.program.departments.college.goals',
+            'course.programOutcomes',
             'components',
             'courseOutcomes',
+            'weeks.contents.courseOutcome',
+            'weeks.contents.evaluation',
         ]);
 
         $program = $syllabus->course->program;
@@ -181,6 +185,115 @@ class SyllabusController extends Controller
         $lecComponent = $syllabus->components->firstWhere('type', 'LEC');
         $labComponent = $syllabus->components->firstWhere('type', 'LAB');
 
+        $coursePoIedMap = $syllabus->course?->programOutcomes
+            ?->pluck('pivot.ied', 'id')
+            ?->filter()
+            ?->toArray()
+            ?? [];
+
+        $courseYearLevel = $syllabus->course?->year_level;
+        $courseSemester = $syllabus->course?->semester;
+
+        $ordinal = static function (?int $n): ?string {
+            if (!$n) {
+                return null;
+            }
+
+            $suffix = 'th';
+            if (!in_array($n % 100, [11, 12, 13], true)) {
+                $suffix = match ($n % 10) {
+                    1 => 'st',
+                    2 => 'nd',
+                    3 => 'rd',
+                    default => 'th',
+                };
+            }
+
+            return $n . $suffix;
+        };
+
+        $courseLevel = match (true) {
+            !blank($courseYearLevel) && !blank($courseSemester) => ($ordinal((int) $courseYearLevel) . ' Year, ' . $ordinal((int) $courseSemester) . ' Semester'),
+            !blank($courseYearLevel) => ($ordinal((int) $courseYearLevel) . ' Year'),
+            !blank($courseSemester) => ($ordinal((int) $courseSemester) . ' Semester'),
+            default => 'N/A',
+        };
+
+        $examLabel = static function (?string $examType): string {
+            $examType = trim((string) $examType);
+
+            return match ($examType) {
+                'first_term'  => '1st Term Exam',
+                'second_term' => '2nd Term Exam',
+                'final_term'  => 'Final Term Exam',
+                'midterm'     => 'Midterm Exam',
+                'final'       => 'Final Exam',
+                default       => $examType !== '' ? (ucwords(str_replace('_', ' ', $examType)) . ' Exam') : 'Exam',
+            };
+        };
+
+        $weeklyCoverageRows = [
+            'LEC' => [],
+            'LAB' => [],
+        ];
+
+        $assessmentCounters = [
+            'LEC' => ['activity' => 0, 'quiz' => 0],
+            'LAB' => ['activity' => 0, 'quiz' => 0],
+        ];
+
+        $weeks = $syllabus->weeks?->sortBy('week_no') ?? collect();
+        foreach ($weeks as $week) {
+            $isExam = (bool) $week->is_exam_week;
+
+            $dateRange = null;
+            if ($week->start_date && $week->end_date) {
+                $dateRange = Carbon::parse($week->start_date)->format('M d, Y') . ' - ' . Carbon::parse($week->end_date)->format('M d, Y');
+            }
+
+            foreach (['LEC', 'LAB'] as $componentType) {
+                $content = $week->contents
+                    ?->where('component_type', $componentType)
+                    ?->first();
+
+                if ($isExam) {
+                    $weeklyCoverageRows[$componentType][] = [
+                        'week_label'        => $examLabel($week->exam_type),
+                        'week_no'           => (int) $week->week_no,
+                        'is_exam'           => true,
+                        'date_range'        => $dateRange,
+                        'co_description'    => '',
+                        'learning_outcomes' => '',
+                        'topics'            => '',
+                        'tla'               => '',
+                        'assessment_task'   => '',
+                    ];
+                    continue;
+                }
+
+                $kind = $content?->evaluation?->kind;
+                $task = trim((string) ($content?->assessment_task ?? ''));
+
+                $assessmentDisplay = $task;
+                if ($task !== '' && in_array($kind, ['activity', 'quiz'], true)) {
+                    $assessmentCounters[$componentType][$kind]++;
+                    $assessmentDisplay = ucfirst($kind) . ' ' . $assessmentCounters[$componentType][$kind];
+                }
+
+                $weeklyCoverageRows[$componentType][] = [
+                    'week_label'        => 'Week ' . (int) $week->week_no,
+                    'week_no'           => (int) $week->week_no,
+                    'is_exam'           => false,
+                    'date_range'        => $dateRange,
+                    'co_description'    => $content?->courseOutcome?->description ?? '',
+                    'learning_outcomes' => trim((string) ($content?->learning_outcomes ?? '')),
+                    'topics'            => trim((string) ($content?->topics ?? '')),
+                    'tla'               => trim((string) ($content?->tla ?? '')),
+                    'assessment_task'   => $assessmentDisplay,
+                ];
+            }
+        }
+
         return compact(
             'syllabus',
             'program',
@@ -192,7 +305,10 @@ class SyllabusController extends Controller
             'pos',
             'courseOutcomes',
             'lecComponent',
-            'labComponent'
+            'labComponent',
+            'coursePoIedMap',
+            'courseLevel',
+            'weeklyCoverageRows'
         );
     }
 
