@@ -1,9 +1,7 @@
 <div>
-    {{-- Header --}}
-    <div class="mb-5">
-        <h3 class="text-xl font-semibold text-slate-900">Course Components</h3>
-        <p class="text-sm text-slate-500 mt-0.5">Fill in lecture and laboratory details. Changes auto-save when you navigate away.</p>
-    </div>
+    <x-wizard.step-header
+        title="Course Components"
+        description="Fill in lecture and laboratory details. Changes auto-save when you navigate away." />
 
     {{-- ══ Lecture ══════════════════════════════════════════════════════════════ --}}
     <div class="mb-6 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">

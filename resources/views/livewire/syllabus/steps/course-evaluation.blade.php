@@ -1,16 +1,9 @@
 <div>
 
     {{-- ══ Header ══════════════════════════════════════════════════════════════ --}}
-    <div class="mb-5 flex items-start justify-between gap-4">
-        <div>
-            <h3 class="text-xl font-semibold text-slate-900">Course Evaluation</h3>
-            <p class="mt-0.5 text-sm text-slate-500">
-                Set the weight (%) for each assessment task.
-                Only weeks with an assessment task entered in <strong>Weekly Coverage</strong> appear here.
-                Exam weeks are auto-detected from locked calendar events.
-            </p>
-        </div>
-
+    <x-wizard.step-header
+        title="Course Evaluation"
+        description="Set the weight (%) for each assessment task. Only weeks with an assessment task entered in Weekly Coverage appear here. Exam weeks are auto-detected from locked calendar events.">
         @if (count($rows) > 0)
             <button type="button"
                 wire:click="save"
@@ -27,7 +20,7 @@
                 </span>
             </button>
         @endif
-    </div>
+    </x-wizard.step-header>
 
     {{-- ══ Empty state ══════════════════════════════════════════════════════════ --}}
     @if (count($rows) === 0)

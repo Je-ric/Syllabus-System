@@ -2,15 +2,13 @@
     {{-- ══ Header ══════════════════════════════════════════════════════════════ --}}
     <div class="mb-5 grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div>
-            <h3 class="text-xl font-semibold text-slate-900">Weekly Coverage</h3>
-            <p class="mt-0.5 text-sm text-slate-500">
-                Weeks are auto-generated from the academic calendar. Fill in coverage details per week. <br
-                Weeks containing <strong>Exam</strong> or <strong>Non-Teaching</strong> calendar events are locked automatically.
-            </p>
+            <x-wizard.step-header
+                title="Weekly Coverage"
+                description="Weeks are auto-generated from the academic calendar. Fill in coverage details per week. Weeks containing Exam or Non-Teaching calendar events are locked automatically." />
             @if ($courseComponents)
                 @php $hasLEC = isset($courseComponents['LEC']); $hasLAB = isset($courseComponents['LAB']); @endphp
-                    <p>
-                        Make sure Course Outcomes are same for each week in both Lecture and Laboratory.
+                <p class="mt-2 text-sm text-slate-500">
+                    Make sure Course Outcomes are the same for each week in both Lecture and Laboratory.
                 </p>
             @endif
 
@@ -116,11 +114,10 @@
 
     {{-- ══ Empty State ═════════════════════════════════════════════════════════ --}}
     @if ($syllabusWeeks->isEmpty())
-        <div class="text-center py-14 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
-            <i class="bx bx-calendar-x text-5xl text-slate-300"></i>
-            <p class="mt-2 text-sm font-medium text-slate-500">No weeks generated yet.</p>
-            <p class="mt-1 text-xs text-slate-400">Select an academic calendar and click <strong>Generate Weeks</strong> to begin.</p>
-        </div>
+        <x-empty-state
+            icon="bx-calendar-x"
+            title="No weeks generated yet"
+            message="Select an academic calendar and click Generate Weeks to begin." />
 
     @else
 

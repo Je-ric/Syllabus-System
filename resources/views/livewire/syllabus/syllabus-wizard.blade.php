@@ -56,13 +56,13 @@
                     class="flex-1 flex flex-col items-center gap-1 px-2 py-3.5 text-xs font-medium
                             transition-all duration-150 focus:outline-none border-b-2
                             {{ $isCurrent
-                                ? 'border-blue-600 text-blue-700 bg-blue-50'
+                                ? 'border-emerald-600 text-emerald-700 bg-emerald-50'
                                 : ($isCompleted
-                                    ? 'border-green-500 text-green-700 hover:bg-green-50'
+                                    ? 'border-emerald-500 text-emerald-700 hover:bg-emerald-50'
                                     : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50') }}
                             disabled:opacity-50 disabled:cursor-not-allowed">
                     <span class="w-7 h-7 rounded-full flex items-center justify-center font-semibold text-xs shrink-0
-                                {{ $isCurrent ? 'bg-blue-600 text-white' : ($isCompleted ? 'bg-green-500 text-white' : 'bg-slate-200 text-slate-600') }}">
+                                {{ $isCurrent ? 'bg-emerald-600 text-white' : ($isCompleted ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-600') }}">
                         @if($isCompleted)
                             <i class="bx bx-check text-sm"></i>
                         @else
@@ -140,15 +140,14 @@
                     Next <i class="bx bx-chevron-right"></i>
                 </x-button>
             @else
-                <button type="button"
+                <x-button
+                    variant="save"
+                    type="button"
                     wire:click="submitForReview"
                     wire:loading.attr="disabled"
-                    wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview"
-                    class="inline-flex items-center gap-2 px-6 py-2 bg-green-600 text-white text-sm font-semibold
-                            rounded-lg hover:bg-green-700 transition-colors
-                            disabled:opacity-60 disabled:cursor-not-allowed">
+                    wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview">
                     <i class="bx bx-check-double"></i> Submit for Review
-                </button>
+                </x-button>
             @endif
         </div>
     </div>

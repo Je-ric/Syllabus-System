@@ -1,8 +1,7 @@
 <div>
-    <div class="mb-4">
-        <h3 class="text-xl font-semibold text-slate-900">Review & Submit</h3>
-        <p class="text-sm text-slate-600">Review all details before submitting for approval.</p>
-    </div>
+    <x-wizard.step-header
+        title="Review & Submit"
+        description="Review all details before submitting for approval." />
 
     <div class="space-y-6">
         <div class="border border-slate-200 rounded-xl p-4 bg-slate-50">
@@ -30,7 +29,7 @@
             @endphp
 
             <div class="mb-4">
-                <h5 class="text-sm font-semibold text-blue-700 mb-2">Lecture</h5>
+                <h5 class="text-sm font-semibold text-emerald-700 mb-2">Lecture</h5>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
                     <div><span class="text-slate-600">Instructor:</span> {{ $lec?->instructor_name ?: '-' }}</div>
                     <div><span class="text-slate-600">Email:</span> {{ $lec?->instructor_email ?: '-' }}</div>
@@ -45,7 +44,7 @@
 
             @if($course && $course->has_lec_lab)
                 <div>
-                    <h5 class="text-sm font-semibold text-purple-700 mb-2">Laboratory</h5>
+                    <h5 class="text-sm font-semibold text-blue-700 mb-2">Laboratory</h5>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
                         <div><span class="text-slate-600">Instructor:</span> {{ $lab?->instructor_name ?: '-' }}</div>
                         <div><span class="text-slate-600">Email:</span> {{ $lab?->instructor_email ?: '-' }}</div>
@@ -108,10 +107,10 @@
         </div>
     </div>
 
-    <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-        <p class="text-sm text-yellow-800">
-            <i class="bx bx-info-circle"></i>
-            Once you submit, the syllabus will be sent for review by the department chair. Make sure all information is correct.
-        </p>
+    <div class="mt-6">
+        <x-feedback-status.alert
+            type="warning"
+            title="Before you submit"
+            message="Once you submit, the syllabus will be sent for review by the department chair. Make sure all information is correct." />
     </div>
 </div>

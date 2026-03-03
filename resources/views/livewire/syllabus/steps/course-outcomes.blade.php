@@ -17,13 +17,10 @@
 <div x-data="courseOutcomesManager(@entangle('courseOutcomes'))" class="space-y-4 text-slate-800">
 
     {{-- ── Header ──────────────────────────────────────────────────────────── --}}
-    <div class="mb-5">
-        <h3 class="text-xl font-semibold text-slate-900">Course Outcomes</h3>
-        <p class="mt-0.5 text-sm text-slate-500">
-            Define what students should be able to do after completing this course.
-            Align each outcome with the most relevant Program Outcomes — not every CO needs to cover all POs.
-        </p>
-    </div>
+    <x-wizard.step-header
+        title="Course Outcomes"
+        description="Define what students should be able to do after completing this course. Align each outcome with the most relevant Program Outcomes - not every CO needs to cover all POs.">
+    </x-wizard.step-header>
 
     {{-- ── CO rows ─────────────────────────────────────────────────────────── --}}
     <template x-for="(co, index) in cos" :key="co.id ?? ('new-' + index)">
@@ -98,11 +95,10 @@
 
     {{-- Empty state --}}
     <template x-if="cos.length === 0">
-        <div class="rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50
-                    py-10 text-center">
-            <i class="bx bx-book-open text-4xl text-slate-300"></i>
-            <p class="mt-2 text-sm text-slate-400">No Course Outcomes yet. Add the first one below.</p>
-        </div>
+        <x-empty-state
+            icon="bx-book-open"
+            title="No Course Outcomes yet"
+            message="Add the first one below." />
     </template>
 
     {{-- Validation hint --}}
