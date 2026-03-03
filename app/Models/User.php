@@ -23,8 +23,6 @@ class User extends Authenticatable
         'email',
         'password',
         'account_status', // admin, oloi, faculty, dean
-        'otp',
-        'otp_expires_at',
         'phone_number',
         'office',
         'email_verified_at',
@@ -50,7 +48,6 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'otp_expires_at' => 'datetime',
             'password' => 'hashed',
         ];
     }

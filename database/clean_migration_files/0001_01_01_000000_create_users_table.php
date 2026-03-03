@@ -17,8 +17,6 @@ return new class extends Migration
             $table->string('account_status')->default('pending'); // pending, active, rejected, disabled
             $table->string('phone_number')->nullable();
             $table->string('office')->nullable();
-            $table->string('otp')->nullable();
-            $table->timestamp('otp_expires_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

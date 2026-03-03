@@ -82,9 +82,9 @@ class OtpService
             ]
         );
 
-        $user->update([
+        $user->forceFill([
             'otp' => null,
             'otp_expires_at' => null,
-        ]);
+        ])->save();
     }
 }

@@ -10,7 +10,9 @@ return new class extends Migration
     {
         Schema::create('user_assignments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')
+                ->constrained()
+                ->cascadeOnDelete();
             $table->foreignId('college_id')
                 ->nullable()
                 ->constrained()

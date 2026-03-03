@@ -10,7 +10,9 @@ return new class extends Migration
     {
         Schema::create('courses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('program_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('program_id')
+                ->constrained()
+                ->cascadeOnDelete();
             $table->string('course_code');
             $table->string('course_title');
             $table->text('course_description')->nullable();
@@ -28,7 +30,9 @@ return new class extends Migration
             // Admin
             $table->enum('status', ['active', 'archived'])->default('active');
             $table->unsignedTinyInteger('version')->default(1);
-            $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('created_by')
+                    ->constrained('users')
+                    ->cascadeOnDelete();
 
             $table->timestamps();
 

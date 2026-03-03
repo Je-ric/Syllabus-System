@@ -24,7 +24,7 @@ return new class extends Migration
                 ->constrained('course_outcomes')
                 ->nullOnDelete();
 
-            // Required fields – saved as 'N/A' when user leaves blank
+            // Required fields - saved as 'N/A' when user leaves blank
             $table->text('learning_outcomes');   // Unit Learning Outcomes
             $table->text('topics');               // Topics
 

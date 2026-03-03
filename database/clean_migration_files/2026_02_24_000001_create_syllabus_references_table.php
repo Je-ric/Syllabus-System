@@ -10,7 +10,9 @@ return new class extends Migration
     {
         Schema::create('syllabus_references', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('syllabus_id')->constrained('syllabi')->cascadeOnDelete();
+            $table->foreignId('syllabus_id')
+                ->constrained('syllabi')
+                ->cascadeOnDelete();
             $table->foreignId('syllabus_week_id')
                 ->nullable()
                 ->constrained('syllabus_weeks')

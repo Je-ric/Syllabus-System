@@ -10,7 +10,9 @@ return new class extends Migration
     {
         Schema::create('syllabi', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('course_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('course_id')
+                ->constrained()
+                ->cascadeOnDelete();
             $table->foreignId('academic_calendar_id')
                 ->nullable()
                 ->constrained('academic_calendars')
@@ -22,7 +24,7 @@ return new class extends Migration
             // Tracks which step of the syllabus wizard the user is on
             $table->string('current_step')->default('academic_calendar');
 
-            $table->foreignId('prepared_by')   // faculty user
+            $table->foreignId('prepared_by')   // faculty user / authenticated user
                 ->constrained('users')
                 ->cascadeOnDelete();
             $table->foreignId('concurred_by')  // chair
@@ -38,7 +40,7 @@ return new class extends Migration
 
             $table->timestamps();
 
-            // One syllabus per course per semester
+            // One syllabus per course per academic calendar
             $table->unique(['course_id', 'academic_calendar_id']);
         });
     }

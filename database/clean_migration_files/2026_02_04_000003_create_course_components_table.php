@@ -10,7 +10,9 @@ return new class extends Migration
     {
         Schema::create('course_components', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('syllabus_id')->constrained('syllabi')->cascadeOnDelete();
+            $table->foreignId('syllabus_id')
+                ->constrained('syllabi')
+                ->cascadeOnDelete();
             $table->enum('type', ['LEC', 'LAB']);
             $table->string('class_hours');
             $table->text('schedule')->nullable(); // comma-separated days/times
@@ -21,7 +23,8 @@ return new class extends Migration
             $table->string('office')->nullable();
             $table->string('consultation_hours')->nullable();
 
-            $table->enum('performance_standard', ['50%', '60%', '75%'])->default('50%');
+            // $table->enum('performance_standard', ['50%', '60%', '75%'])->default('50%');
+            $table->decimal('performance_standard', 5, 2)->default(50.00);
 
             $table->timestamps();
         });

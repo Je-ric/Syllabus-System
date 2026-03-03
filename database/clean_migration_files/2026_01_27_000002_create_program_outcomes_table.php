@@ -10,7 +10,9 @@ return new class extends Migration
     {
         Schema::create('program_outcomes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('program_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('program_id')
+                ->constrained()
+                ->cascadeOnDelete();
             $table->string('po_code')->nullable(); // a, b, c... auto-assigned
             $table->text('po_text');
             $table->timestamps();

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->text('description');
             $table->timestamps();
 
+            // Ensure CO codes are unique within a syllabus
             $table->unique(['syllabus_id', 'co_code']);
         });
     }

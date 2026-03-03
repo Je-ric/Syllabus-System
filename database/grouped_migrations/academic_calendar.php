@@ -8,18 +8,31 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Academic Calendars
+        Schema::create('academic_calendars', function (Blueprint $table) {
+            $table->id();
+            $table->string('academic_year'); // e.g. 2025-2026
+            $table->enum('semester', ['1st', '2nd']);
+            $table->date('start_date');
+            $table->date('end_date');
+            $table->timestamps();
+        });
+
+        // Academic Calendar Events
         Schema::create('academic_calendar_events', function (Blueprint $table) {
             $table->id();
             $table->foreignId('academic_calendar_id')
                 ->constrained('academic_calendars')
                 ->cascadeOnDelete();
+
             $table->enum('type', [
                 'holiday',
-                'exam', // disable week
-                'break', // skip week in generating weeks
-                'non_teaching', // disable week
+                'exam',
+                'break',
+                'non_teaching',
                 'other'
             ]);
+
             $table->string('name');
             $table->date('date');
             $table->timestamps();
@@ -29,5 +42,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('academic_calendar_events');
+        Schema::dropIfExists('academic_calendars');
     }
 };

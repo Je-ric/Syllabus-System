@@ -10,7 +10,9 @@ return new class extends Migration
     {
         Schema::create('user_otps', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')
+                ->constrained()
+                ->cascadeOnDelete();
             $table->string('purpose', 50); // e.g. 'email_verification', 'password_reset'
             $table->string('otp');
             $table->timestamp('otp_expires_at')->nullable();
