@@ -14,7 +14,13 @@
     <title>Course Syllabus - {{ $syllabus->course->course_code }}</title>
 
     @php
-        $lecLabValue = function ($lecValue, $labValue) {
+        $hasLab = (bool) ($syllabus->course?->has_lec_lab);
+
+        $lecLabValue = function ($lecValue, $labValue) use ($hasLab) {
+            if (!$hasLab) {
+                return !blank($lecValue) ? e($lecValue) : 'N/A';
+            }
+
             $lines = [];
 
             if (!blank($lecValue)) {
@@ -383,7 +389,9 @@
         <div class="landscape">
             <h3 class="a4-section title-numbered">10. Weekly Coverage</h3>
 
-            <p><strong>Lecture (LEC)</strong></p>
+            @if ($syllabus->course->has_lec_lab)
+                <p><strong>Lecture (LEC)</strong></p>
+            @endif
             <table border="1" style="width:100%; border-collapse: collapse;">
                 <thead>
                     <tr>
@@ -399,8 +407,9 @@
                     @forelse (($weeklyCoverageRows['LEC'] ?? []) as $row)
                         <tr>
                             @if (($row['is_exam'] ?? false) === true)
-                                <td colspan="6" style="text-align:center; font-weight:bold;">
-                                    {{ $row['week_label'] }}
+                                <td style="text-align:center;">{{ $row['week_label'] }}</td>
+                                <td colspan="5" style="text-align:center; font-weight:bold;">
+                                    {{ $row['exam_label'] ?? 'Exam' }}
                                 </td>
                             @else
                                 <td style="text-align:center;">{{ $row['week_label'] }}</td>
@@ -436,8 +445,9 @@
                         @forelse (($weeklyCoverageRows['LAB'] ?? []) as $row)
                             <tr>
                                 @if (($row['is_exam'] ?? false) === true)
-                                    <td colspan="6" style="text-align:center; font-weight:bold;">
-                                        {{ $row['week_label'] }}
+                                    <td style="text-align:center;">{{ $row['week_label'] }}</td>
+                                    <td colspan="5" style="text-align:center; font-weight:bold;">
+                                        {{ $row['exam_label'] ?? 'Exam' }}
                                     </td>
                                 @else
                                     <td style="text-align:center;">{{ $row['week_label'] }}</td>
@@ -459,7 +469,68 @@
         </div>
 
         <div class="portrait">
-            <h3 class="a4-section title-numbered">Testing if portrait is working</h3>
+            <h3 class="a4-section title-numbered">11. Course Evaluation</h3>
+
+            <table border="1" style="width:100%; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th rowspan="2" style="text-align:center; width: 90px;">CO</th>
+                        <th colspan="2" style="text-align:center;">
+                            {{ $syllabus->course->has_lec_lab ? 'LECTURE (67%)' : 'LECTURE' }}
+                        </th>
+                        @if ($syllabus->course->has_lec_lab)
+                            <th colspan="2" style="text-align:center;">LABORATORY (33%)</th>
+                        @endif
+                        <th rowspan="2" style="text-align:center; width: 90px;">Passing Standard</th>
+                    </tr>
+                    <tr>
+                        <th style="text-align:center;">Task</th>
+                        <th style="text-align:center; width: 90px;">Weight (%)</th>
+                        @if ($syllabus->course->has_lec_lab)
+                            <th style="text-align:center;">Task</th>
+                            <th style="text-align:center; width: 90px;">Weight (%)</th>
+                        @endif
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse (($evaluationRows ?? []) as $row)
+                        <tr>
+                            <td style="text-align:center;">{{ $row['co_label'] ?? '' }}</td>
+                            <td>{{ $row['lec_task'] ?? '' }}</td>
+                            <td style="text-align:center;">{{ $row['lec_weight'] ?? '' }}</td>
+                            @if ($syllabus->course->has_lec_lab)
+                                <td>{{ $row['lab_task'] ?? '' }}</td>
+                                <td style="text-align:center;">{{ $row['lab_weight'] ?? '' }}</td>
+                            @endif
+                            <td style="text-align:center;">
+                                @if (($row['is_exam'] ?? false) === true)
+                                    <strong>60%</strong>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="{{ $syllabus->course->has_lec_lab ? 6 : 4 }}" style="text-align:center;">
+                                No evaluation items found.
+                            </td>
+                        </tr>
+                    @endforelse
+
+                    <tr>
+                        <td style="text-align:left; font-weight:bold;">Total</td>
+                        <td></td>
+                        <td style="text-align:center; font-weight:bold;">{{ $evaluationTotals['lec'] ?? '' }}%</td>
+                        @if ($syllabus->course->has_lec_lab)
+                            <td></td>
+                            <td style="text-align:center; font-weight:bold;">{{ $evaluationTotals['lab'] ?? '' }}%</td>
+                        @endif
+                        <td style="text-align:center; font-weight:bold;">60%</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p style="margin-top: 10px; font-weight:bold;">Minimum Average for Satisfactory Performance</p>
+            <p style="margin-top: 2px;">60%</p>
         </div>
 
     </div>

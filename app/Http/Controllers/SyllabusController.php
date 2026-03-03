@@ -258,7 +258,8 @@ class SyllabusController extends Controller
 
                 if ($isExam) {
                     $weeklyCoverageRows[$componentType][] = [
-                        'week_label'        => $examLabel($week->exam_type),
+                        'week_label'        => 'Week ' . (int) $week->week_no,
+                        'exam_label'        => $examLabel($week->exam_type),
                         'week_no'           => (int) $week->week_no,
                         'is_exam'           => true,
                         'date_range'        => $dateRange,
@@ -277,11 +278,12 @@ class SyllabusController extends Controller
                 $assessmentDisplay = $task;
                 if ($task !== '' && in_array($kind, ['activity', 'quiz'], true)) {
                     $assessmentCounters[$componentType][$kind]++;
-                    $assessmentDisplay = ucfirst($kind) . ' ' . $assessmentCounters[$componentType][$kind];
+                    $assessmentDisplay = ucfirst($kind) . ' ' . $assessmentCounters[$componentType][$kind] . ': ' . $task;
                 }
 
                 $weeklyCoverageRows[$componentType][] = [
                     'week_label'        => 'Week ' . (int) $week->week_no,
+                    'exam_label'        => null,
                     'week_no'           => (int) $week->week_no,
                     'is_exam'           => false,
                     'date_range'        => $dateRange,
@@ -292,6 +294,78 @@ class SyllabusController extends Controller
                     'assessment_task'   => $assessmentDisplay,
                 ];
             }
+        }
+
+        $evaluationRows = [];
+        $evaluationTotals = [
+            'lec' => 0,
+            'lab' => 0,
+        ];
+
+        $evalCounters = [
+            'LEC' => ['activity' => 0, 'quiz' => 0],
+            'LAB' => ['activity' => 0, 'quiz' => 0],
+        ];
+
+        foreach ($weeks as $week) {
+            $lecContent = $week->contents?->where('component_type', 'LEC')?->first();
+            $labContent = $week->contents?->where('component_type', 'LAB')?->first();
+
+            $lecTaskRaw = trim((string) ($lecContent?->assessment_task ?? ''));
+            $labTaskRaw = trim((string) ($labContent?->assessment_task ?? ''));
+
+            if ($lecTaskRaw === '' && $labTaskRaw === '') {
+                continue;
+            }
+
+            if ($lecTaskRaw === 'Non-Teaching Week' || $labTaskRaw === 'Non-Teaching Week') {
+                continue;
+            }
+
+            $lecEval = $lecContent?->evaluation;
+            $labEval = $labContent?->evaluation;
+
+            $isExam = str_contains(strtolower($lecTaskRaw), 'exam')
+                || str_contains(strtolower($labTaskRaw), 'exam');
+
+            $lecTaskLabel = $lecTaskRaw;
+            if (!$isExam && $lecTaskRaw !== '' && in_array($lecEval?->kind, ['activity', 'quiz'], true)) {
+                $k = $lecEval->kind;
+                $evalCounters['LEC'][$k]++;
+                $lecTaskLabel = ucfirst($k) . ' ' . $evalCounters['LEC'][$k];
+            }
+
+            $labTaskLabel = $labTaskRaw;
+            if (!$isExam && $labTaskRaw !== '' && in_array($labEval?->kind, ['activity', 'quiz'], true)) {
+                $k = $labEval->kind;
+                $evalCounters['LAB'][$k]++;
+                $labTaskLabel = ucfirst($k) . ' ' . $evalCounters['LAB'][$k];
+            }
+
+            $lecWeight = $lecEval?->weight;
+            $labWeight = $labEval?->weight;
+
+            if ($lecWeight !== null) {
+                $evaluationTotals['lec'] += (int) $lecWeight;
+            }
+            if ($syllabus->course?->has_lec_lab && $labWeight !== null) {
+                $evaluationTotals['lab'] += (int) $labWeight;
+            }
+
+            $coLabel = $lecEval?->outcome_label
+                ?? $labEval?->outcome_label
+                ?? $lecContent?->courseOutcome?->co_code
+                ?? $labContent?->courseOutcome?->co_code
+                ?? '';
+
+            $evaluationRows[] = [
+                'co_label'   => $coLabel,
+                'is_exam'    => $isExam,
+                'lec_task'   => $lecTaskLabel,
+                'lec_weight' => $lecWeight,
+                'lab_task'   => $labTaskLabel,
+                'lab_weight' => $labWeight,
+            ];
         }
 
         return compact(
@@ -308,7 +382,9 @@ class SyllabusController extends Controller
             'labComponent',
             'coursePoIedMap',
             'courseLevel',
-            'weeklyCoverageRows'
+            'weeklyCoverageRows',
+            'evaluationRows',
+            'evaluationTotals'
         );
     }
 
