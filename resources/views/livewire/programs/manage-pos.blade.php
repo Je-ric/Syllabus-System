@@ -22,6 +22,8 @@
     class="space-y-3">
 
     @include('livewire.programs.include.flash-message')
+
+    <x-wizard.section title="Program Outcomes (POs)" icon="target-lock" color="blue">
     
     {{-- ── PO rows ─────────────────────────────────────────────────────────── --}}
     <template x-for="(po, index) in pos" :key="po.id ?? ('new-' + index)">
@@ -165,31 +167,31 @@
     {{-- ── Action buttons ──────────────────────────────────────────────────── --}}
     <div class="flex items-center gap-2 pt-1">
 
-        <button @click="addPo()" type="button"
-            class="flex-1 inline-flex items-center justify-center gap-2
-                   border-2 border-dashed border-blue-300 rounded-2xl p-3
-                   text-sm font-semibold text-blue-700
-                   hover:border-blue-500 hover:bg-blue-50
-                   transition-colors duration-150">
+        <x-wizard.btn
+            variant="add-dashed"
+            type="button"
+            @click="addPo()"
+            class="flex-1 w-auto border-blue-300 text-blue-700 hover:border-blue-500 hover:bg-blue-50">
             <i class="bx bx-plus text-base"></i>
             Add PO
-        </button>
+        </x-wizard.btn>
 
-        <button @click="savePos()" type="button" :disabled="isSaving"
-            class="inline-flex items-center gap-2 px-5 py-3 rounded-xl
-                   bg-emerald-600 text-white text-sm font-semibold shadow-sm
-                   hover:bg-emerald-700 active:bg-emerald-800
-                   disabled:opacity-50 disabled:cursor-not-allowed
-                   transition-colors duration-150">
+        <x-wizard.btn
+            variant="save"
+            type="button"
+            @click="savePos()"
+            x-bind:disabled="isSaving"
+            class="px-5 py-3">
             <span x-show="!isSaving" class="inline-flex items-center gap-2">
                 <i class="bx bx-save text-base"></i> Save All
             </span>
             <span x-show="isSaving" x-cloak class="inline-flex items-center gap-2">
                 <i class="bx bx-loader-alt bx-spin text-base"></i> Saving…
             </span>
-        </button>
+        </x-wizard.btn>
     </div>
 
+</x-wizard.section>
 </div>
 
 <script>

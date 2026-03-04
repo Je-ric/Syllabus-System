@@ -1,35 +1,3 @@
-{{--
-    x-wizard.alert
-    ─────────────────────────────────────────────────────────────────────────────
-    Inline alert banner for step feedback: locked week, notice, warning, success.
-
-    UX principle — Feedback & Affordance:
-      Every alert has an icon matching its severity so users instantly recognise
-      the message type without reading the text first (colour + icon double-encode).
-
-    Props:
-      type         string  — 'info' | 'warning' | 'danger' | 'success'  default: 'info'
-      icon         string  — override the default icon (boxicons, no "bx-")
-      title        string  — optional bold first line inside the alert
-      dismissable  bool    — adds an × to close the alert (Alpine x-show)  default: false
-
-    Slot:
-      Alert body — plain text or markup.
-
-    ─── USAGE ────────────────────────────────────────────────────────────────────
-    <x-wizard.alert type="danger" title="Exam Week" icon="lock-alt">
-        This week is locked. Coverage details cannot be entered.
-    </x-wizard.alert>
-
-    <x-wizard.alert type="info" dismissable>
-        Weeks are auto-generated from the academic calendar. Click <strong>Generate</strong> to begin.
-    </x-wizard.alert>
-
-    <x-wizard.alert type="warning">
-        Please fill in the blank CO before adding another.
-    </x-wizard.alert>
---}}
-
 @props([
     'type'        => 'info',
     'icon'        => null,

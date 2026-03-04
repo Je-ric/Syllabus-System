@@ -1,22 +1,3 @@
-{{--
-    x-wizard.badge
-    ─────────────────────────────────────────────────────────────────────────────
-    Compact pill for CO codes, step status, lock state, event type, etc.
-
-    Props:
-      variant  string  — colour variant (default: 'slate')
-                         'emerald' | 'blue' | 'amber' | 'rose' | 'violet'
-                         | 'sky' | 'indigo' | 'slate'
-      icon     string  — boxicons WITHOUT "bx-" (e.g. "lock-alt")   default: null
-      dot      bool    — coloured status dot before the text          default: false
-
-    ─── USAGE ────────────────────────────────────────────────────────────────────
-    <x-wizard.badge variant="emerald">CO1</x-wizard.badge>
-    <x-wizard.badge variant="rose" icon="lock-alt">Exam Week</x-wizard.badge>
-    <x-wizard.badge variant="amber" :dot="true">Unsaved</x-wizard.badge>
-    <x-wizard.badge variant="violet">3 refs</x-wizard.badge>
---}}
-
 @props([
     'variant' => 'slate',
     'icon'    => null,

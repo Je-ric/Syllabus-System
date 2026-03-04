@@ -4,63 +4,67 @@
         description="Review all details before submitting for approval." />
 
     <div class="space-y-6">
-        <div class="border border-slate-200 rounded-xl p-4 bg-slate-50">
-            <h4 class="font-semibold text-slate-700 mb-2">Academic Calendar</h4>
+        
+        <x-wizard.section title="Academic Calendar" icon="calendar" color="slate">
             @php
                 $calendar = $academicCalendars->firstWhere('id', $academic_calendar_id);
+                $calendarLabel = $calendar
+                    ? ($calendar->academic_year . ' - ' . $calendar->getFormattedSemester())
+                    : null;
+                $calendarPeriod = $calendar
+                    ? (($calendar->start_date?->format('M d, Y') ?? '—') . ' – ' . ($calendar->end_date?->format('M d, Y') ?? '—'))
+                    : null;
             @endphp
-            <p class="text-sm">
-                @if($calendar)
-                    {{ $calendar->academic_year }} - {{ $calendar->getFormattedSemester() }}
-                    <span class="text-slate-500">
-                        ({{ $calendar->start_date?->format('M d, Y') }} - {{ $calendar->end_date?->format('M d, Y') }})
-                    </span>
-                @else
-                    <span class="text-red-600">Not selected</span>
-                @endif
-            </p>
-        </div>
 
-        <div class="border border-slate-200 rounded-xl p-4 bg-slate-50">
-            <h4 class="font-semibold text-slate-700 mb-3">Course Components</h4>
+            @if ($calendar)
+                <x-wizard.info-card color="slate">
+                    <x-wizard.info-row label="Academic Year & Semester" :value="$calendarLabel" bold />
+                    <x-wizard.info-row label="Period" :value="$calendarPeriod" muted />
+                </x-wizard.info-card>
+            @else
+                <x-wizard.alert type="danger" title="Not selected">
+                    Select an academic calendar to proceed.
+                </x-wizard.alert>
+            @endif
+        </x-wizard.section>
+
+        <x-wizard.section title="Course Components" icon="notepad" color="slate">
             @php
                 $lec = $syllabus?->components?->firstWhere('type', 'LEC');
                 $lab = $syllabus?->components?->firstWhere('type', 'LAB');
             @endphp
 
-            <div class="mb-4">
-                <h5 class="text-sm font-semibold text-emerald-700 mb-2">Lecture</h5>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                    <div><span class="text-slate-600">Instructor:</span> {{ $lec?->instructor_name ?: '-' }}</div>
-                    <div><span class="text-slate-600">Email:</span> {{ $lec?->instructor_email ?: '-' }}</div>
-                    <div><span class="text-slate-600">Phone:</span> {{ $lec?->phone ?: '-' }}</div>
-                    <div><span class="text-slate-600">Office:</span> {{ $lec?->office ?: '-' }}</div>
-                    <div><span class="text-slate-600">Class Hours:</span> {{ $lec?->class_hours ?: '-' }}</div>
-                    <div><span class="text-slate-600">Schedule:</span> {{ $lec?->schedule ?: '-' }}</div>
-                    <div><span class="text-slate-600">Consultation:</span> {{ $lec?->consultation_hours ?: '-' }}</div>
-                    <div><span class="text-slate-600">Performance:</span> {{ $lec?->performance_standard ?: '-' }}</div>
-                </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <x-wizard.info-card title="Lecture (LEC)" icon="book-open" color="emerald">
+                    <x-wizard.info-row label="Instructor" :value="$lec?->instructor_name" bold />
+                    <x-wizard.info-row label="Email" :value="$lec?->instructor_email" />
+                    <x-wizard.info-row label="Phone" :value="$lec?->phone" />
+                    <x-wizard.info-row label="Office" :value="$lec?->office" />
+                    <x-wizard.info-row label="Class Hours" :value="$lec?->class_hours" />
+                    <x-wizard.info-row label="Schedule" :value="$lec?->schedule" />
+                    <x-wizard.info-row label="Consultation" :value="$lec?->consultation_hours" />
+                    <x-wizard.info-row label="Performance" :value="$lec?->performance_standard" muted />
+                </x-wizard.info-card>
+
+                @if ($course && $course->has_lec_lab)
+                    <x-wizard.info-card title="Laboratory (LAB)" icon="test-tube" color="blue">
+                        <x-wizard.info-row label="Instructor" :value="$lab?->instructor_name" bold />
+                        <x-wizard.info-row label="Email" :value="$lab?->instructor_email" />
+                        <x-wizard.info-row label="Phone" :value="$lab?->phone" />
+                        <x-wizard.info-row label="Office" :value="$lab?->office" />
+                        <x-wizard.info-row label="Class Hours" :value="$lab?->class_hours" />
+                        <x-wizard.info-row label="Schedule" :value="$lab?->schedule" />
+                        <x-wizard.info-row label="Consultation" :value="$lab?->consultation_hours" />
+                        <x-wizard.info-row label="Performance" :value="$lab?->performance_standard" muted />
+                    </x-wizard.info-card>
+                @endif
             </div>
+        </x-wizard.section>
 
-            @if($course && $course->has_lec_lab)
-                <div>
-                    <h5 class="text-sm font-semibold text-blue-700 mb-2">Laboratory</h5>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                        <div><span class="text-slate-600">Instructor:</span> {{ $lab?->instructor_name ?: '-' }}</div>
-                        <div><span class="text-slate-600">Email:</span> {{ $lab?->instructor_email ?: '-' }}</div>
-                        <div><span class="text-slate-600">Phone:</span> {{ $lab?->phone ?: '-' }}</div>
-                        <div><span class="text-slate-600">Office:</span> {{ $lab?->office ?: '-' }}</div>
-                        <div><span class="text-slate-600">Class Hours:</span> {{ $lab?->class_hours ?: '-' }}</div>
-                        <div><span class="text-slate-600">Schedule:</span> {{ $lab?->schedule ?: '-' }}</div>
-                        <div><span class="text-slate-600">Consultation:</span> {{ $lab?->consultation_hours ?: '-' }}</div>
-                        <div><span class="text-slate-600">Performance:</span> {{ $lab?->performance_standard ?: '-' }}</div>
-                    </div>
-                </div>
-            @endif
-        </div>
-
-        <div class="border border-slate-200 rounded-xl p-4 bg-slate-50">
-            <h4 class="font-semibold text-slate-700 mb-3">Course Outcomes ({{ count($courseOutcomes) }})</h4>
+        <x-wizard.section title="Course Outcomes" icon="list-check" color="slate">
+            <p class="text-xs text-slate-500 mb-3">
+                Total: <span class="font-semibold text-slate-700">{{ count($courseOutcomes) }}</span>
+            </p>
             @if(count($courseOutcomes) > 0)
                 <ul class="space-y-2 text-sm">
                     @foreach($courseOutcomes as $co)
@@ -73,14 +77,13 @@
             @else
                 <p class="text-sm text-slate-500">No course outcomes defined yet.</p>
             @endif
-        </div>
+        </x-wizard.section>
 
-        <div class="border border-slate-200 rounded-xl p-4 bg-slate-50">
-            <h4 class="font-semibold text-slate-700 mb-3">Weekly Coverage</h4>
+        <x-wizard.section title="Weekly Coverage" icon="calendar-week" color="slate">
             @if(isset($syllabusWeeks) && $syllabusWeeks->count() > 0)
-                <div class="text-sm text-slate-700">
-                    <p>Total weeks: <span class="font-semibold">{{ $syllabusWeeks->count() }}</span></p>
-                    <div class="mt-2">
+                <x-wizard.info-card color="slate">
+                    <x-wizard.info-row label="Total weeks" :value="$syllabusWeeks->count()" bold />
+                    <div class="mt-2 space-y-1 text-xs text-slate-700">
                         @php
                             $examLabels = [
                                 'first_term' => '1st Term Exam',
@@ -92,19 +95,17 @@
                             @php
                                 $weekNo = $examWeeks[$key] ?? null;
                             @endphp
-                            <div>
-                                {{ $label }}:
-                                <span class="font-semibold">
-                                    {{ $weekNo ? 'Week ' . $weekNo : 'Not set' }}
-                                </span>
-                            </div>
+                            <x-wizard.info-row
+                                :label="$label"
+                                :value="$weekNo ? ('Week ' . $weekNo) : 'Not set'"
+                                :muted="! $weekNo" />
                         @endforeach
                     </div>
-                </div>
+                </x-wizard.info-card>
             @else
                 <p class="text-sm text-slate-500">Weekly coverage not generated yet.</p>
             @endif
-        </div>
+        </x-wizard.section>
     </div>
 
     <div class="mt-6">

@@ -5,16 +5,8 @@
         description="Fill in details. Changes auto-save when you navigate away." />
 
     {{-- ══ Lecture ══════════════════════════════════════════════════════════════ --}}
-    <div class="mb-6 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-        <div class="flex items-center gap-2.5 px-5 py-3.5 border-b border-slate-100 bg-emerald-50">
-            <span class="flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 shrink-0">
-                <i class="bx bx-book-open text-base"></i>
-            </span>
-            <h4 class="text-sm font-semibold text-emerald-800">Lecture (LEC)</h4>
-        </div>
-
-        <div class="p-5">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+    <x-wizard.section title="Lecture (LEC)" icon="book-open" color="emerald" class="mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
 
                 {{-- Left column --}}
                 <div class="space-y-4">
@@ -66,22 +58,13 @@
                         </x-form.select>
                     </div>
                 </div>
-            </div>
         </div>
-    </div>
+    </x-wizard.section>
 
     {{-- ══ Laboratory (only shown when course has LEC+LAB) ════════════════════ --}}
     @if ($course->has_lec_lab)
-        <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div class="flex items-center gap-2.5 px-5 py-3.5 border-b border-slate-100 bg-blue-50">
-                <span class="flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 text-blue-700 shrink-0">
-                    <i class="bx bx-test-tube text-base"></i>
-                </span>
-                <h4 class="text-sm font-semibold text-blue-800">Laboratory (LAB)</h4>
-            </div>
-
-            <div class="p-5">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+        <x-wizard.section title="Laboratory (LAB)" icon="test-tube" color="blue">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
 
                     {{-- Left column --}}
                     <div class="space-y-4">
@@ -133,8 +116,7 @@
                             </x-form.select>
                         </div>
                     </div>
-                </div>
             </div>
-        </div>
+        </x-wizard.section>
     @endif
 </div>

@@ -8,14 +8,14 @@
 @php
     // ─── Style map ────────────────────────────────────────────────────────────
     $full = 'inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl
-             shadow-sm transition-all duration-150 focus:ring-2 focus:outline-none
-             active:scale-[.97] disabled:opacity-50 disabled:pointer-events-none ';
+                shadow-sm transition-all duration-150 focus:ring-2 focus:outline-none
+                active:scale-[.97] disabled:opacity-50 disabled:pointer-events-none ';
 
     $table = 'inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg
-              transition-colors duration-150 disabled:opacity-50 disabled:pointer-events-none ';
+                transition-colors duration-150 disabled:opacity-50 disabled:pointer-events-none ';
 
     $sm = 'inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg
-           transition-colors duration-150 disabled:opacity-50 disabled:pointer-events-none ';
+            transition-colors duration-150 disabled:opacity-50 disabled:pointer-events-none ';
 
     $styles = [
         // Full-size CLSU-branded
@@ -29,11 +29,11 @@
         'danger'     => $full . 'bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-500/30',
         // Full-width dashed
         'add-dashed' => 'flex w-full items-center justify-center gap-2 px-4 py-3
-                         border-2 border-dashed border-emerald-300 rounded-2xl
-                         text-sm font-semibold text-emerald-700
-                         hover:border-emerald-500 hover:bg-emerald-50
-                         transition-colors duration-150
-                         disabled:opacity-50 disabled:pointer-events-none',
+                            border-2 border-dashed border-emerald-300 rounded-2xl
+                            text-sm font-semibold text-emerald-700
+                            hover:border-emerald-500 hover:bg-emerald-50
+                            transition-colors duration-150
+                            disabled:opacity-50 disabled:pointer-events-none',
         // Table compact
         'table-confirm'  => $table . 'bg-emerald-600 text-white hover:bg-emerald-700',
         'table-edit'     => $table . 'bg-blue-600 text-white hover:bg-blue-700',

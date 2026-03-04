@@ -1,32 +1,3 @@
-{{--
-    x-wizard.section
-    ─────────────────────────────────────────────────────────────────────────────
-    A consistent card used inside wizard step bodies.
-    Renders a coloured header strip (icon + title + optional action) and a padded body.
-
-    Props:
-      title   string   required  — section heading
-      icon    string   optional  — boxicons name WITHOUT "bx-" prefix
-      color   string   optional  — 'emerald' (default) | 'blue' | 'amber' | 'slate' | 'rose'
-
-    Named slots:
-      $slot            — main body content (always required)
-      $action (named)  — optional content placed on the right of the header strip
-
-    ─── USAGE ────────────────────────────────────────────────────────────────────
-    <x-wizard.section title="Lecture (LEC)" icon="book-open" color="emerald">
-        <x-slot:action>
-            <x-wizard.btn variant="sm-success"
-                wire:click="saveLec" wire:target="saveLec" loading="Saving…">
-                <i class="bx bx-save"></i> Save
-            </x-wizard.btn>
-        </x-slot:action>
-
-        {{-- body --}}
-        <div class="grid grid-cols-2 gap-4">…</div>
-    </x-wizard.section>
---}}
-
 @props([
     'title',
     'icon'  => null,

@@ -18,15 +18,15 @@
 
     {{-- ══ Empty state ════════════════════════════════════════════════════════ --}}
     @if (count($rows) === 0)
-        <x-wizard.empty
+        <x-empty-state
             icon="notepad"
             title="No assessment tasks yet"
-            message="Fill in assessment tasks in the Weekly Coverage step first. Exam weeks are auto-detected from calendar events." />
-
+            description="Fill in assessment tasks in the Weekly Coverage step first. Exam weeks are auto-detected from calendar events." />
     @else
-
-        <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
-            <table class="w-full text-sm border-collapse">
+        <x-wizard.section title="Evaluation Items" icon="table" color="slate">
+            <div class="overflow-x-auto -mx-5 px-5">
+                <div class="rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <table class="w-full text-sm border-collapse">
                 <thead>
                     {{-- Row 1: Group headers --}}
                     <tr class="bg-slate-50 border-b border-slate-200">
@@ -227,23 +227,23 @@
                         <td class="px-4 py-3 text-center text-slate-500 text-xs font-normal">Min. 60%</td>
                     </tr>
                 </tbody>
-            </table>
-        </div>
+                    </table>
+                </div>
+            </div>
 
-        <div class="mt-4 space-y-1.5">
-            <p class="text-xs text-slate-400 flex items-center gap-1">
-                <i class="bx bx-info-circle"></i>
-                Rows come from <strong>Weekly Coverage</strong>. Only weeks with an assessment task appear here.
-                Greyed columns mean that component has no task for that week.
-            </p>
-            @if ($courseHasLab)
-                <p class="text-xs text-slate-400 flex items-center gap-1">
-                    <i class="bx bx-info-circle"></i>
-                    Standard split: <strong class="text-emerald-600">LEC 67%</strong> + <strong class="text-blue-600">LAB 33%</strong> = 100%.
-                    Minimum passing per term: <strong>60%</strong>.
+            <x-wizard.info-card title="Notes" icon="info-circle" color="slate" class="mt-4">
+                <p class="text-xs text-slate-600">
+                    Rows come from <strong>Weekly Coverage</strong>. Only weeks with an assessment task appear here.
+                    Greyed columns mean that component has no task for that week.
                 </p>
-            @endif
-        </div>
+                @if ($courseHasLab)
+                    <p class="mt-2 text-xs text-slate-600">
+                        Standard split: <strong class="text-emerald-700">LEC 67%</strong> + <strong class="text-blue-700">LAB 33%</strong> = 100%.
+                        Minimum passing per term: <strong>60%</strong>.
+                    </p>
+                @endif
+            </x-wizard.info-card>
+        </x-wizard.section>
 
     @endif
 </div>

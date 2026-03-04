@@ -13,6 +13,8 @@
 <div x-data="peosManager(@entangle('peos'))" class="space-y-3">
 
     @include('livewire.programs.include.flash-message')
+
+    <x-wizard.section title="Program Educational Objectives (PEOs)" icon="graduation" color="emerald">
     
     {{-- ── PEO rows ────────────────────────────────────────────────────────── --}}
     <template x-for="(peo, index) in peos" :key="peo.id ?? ('new-' + index)">
@@ -99,31 +101,31 @@
     {{-- ── Action buttons ──────────────────────────────────────────────────── --}}
     <div class="flex items-center gap-2 pt-1">
 
-        <button @click="addPeo()" type="button"
-            class="flex-1 inline-flex items-center justify-center gap-2
-                   border-2 border-dashed border-emerald-300 rounded-2xl p-3
-                   text-sm font-semibold text-emerald-700
-                   hover:border-emerald-500 hover:bg-emerald-50
-                   transition-colors duration-150">
+        <x-wizard.btn
+            variant="add-dashed"
+            type="button"
+            @click="addPeo()"
+            class="flex-1 w-auto">
             <i class="bx bx-plus text-base"></i>
             Add PEO
-        </button>
+        </x-wizard.btn>
 
-        <button @click="savePeos()" type="button" :disabled="isSaving"
-            class="inline-flex items-center gap-2 px-5 py-3 rounded-xl
-                    bg-emerald-600 text-white text-sm font-semibold shadow-sm
-                    hover:bg-emerald-700 active:bg-emerald-800
-                    disabled:opacity-50 disabled:cursor-not-allowed
-                    transition-colors duration-150">
+        <x-wizard.btn
+            variant="save"
+            type="button"
+            @click="savePeos()"
+            x-bind:disabled="isSaving"
+            class="px-5 py-3">
             <span x-show="!isSaving" class="inline-flex items-center gap-2">
                 <i class="bx bx-save text-base"></i> Save All
             </span>
             <span x-show="isSaving" x-cloak class="inline-flex items-center gap-2">
                 <i class="bx bx-loader-alt bx-spin text-base"></i> Saving…
             </span>
-        </button>
+        </x-wizard.btn>
     </div>
 
+</x-wizard.section>
 </div>
 
 <script>
