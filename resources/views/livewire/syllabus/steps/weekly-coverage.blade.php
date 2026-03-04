@@ -116,10 +116,10 @@
 
     {{-- ══ Empty State ═════════════════════════════════════════════════════════ --}}
     @if ($syllabusWeeks->isEmpty())
-        <x-wizard.empty
+        <x-empty-state   
             icon="calendar-x"
             title="No weeks generated yet"
-            message="Select an academic calendar in the previous step, then click Generate Weeks.">
+            description="Select an academic calendar in the previous step, then click Generate Weeks.">
             <x-wizard.btn variant="sm-success"
                 wire:click="generateWeeklyCoverage"
                 :disabled="! $academic_calendar_id"
@@ -127,7 +127,7 @@
                 loading="Generating…">
                 <i class="bx bx-calendar-plus"></i> Generate Weeks
             </x-wizard.btn>
-        </x-wizard.empty>
+        </x-empty-state>
     @else
 
         @php $hasLEC = isset($courseComponents['LEC']); $hasLAB = isset($courseComponents['LAB']); @endphp

@@ -43,16 +43,38 @@
         rgba(0, 129, 2, 1) 0%,
         rgba(149, 210, 45, 1) 100%
     );
+
+    /* ── Typography tokens ───────────────────────────── */
+    --font-body:    Tahoma, 'Tahoma MT', Geneva, Verdana, sans-serif;
+    --font-table:   'Times New Roman', Times, serif;
+    --fs-body:      11pt;   /* Tahoma body text                    */
+    --fs-table:     9pt;    /* Times New Roman inside weekly tables */
+    --lh-body:      1.2;
+}
+
+/* ═══════════════════════════════════════════════
+   BASE
+═══════════════════════════════════════════════ */
+html,
+body {
+    /* Tahoma is a Windows/macOS system font – no external import needed.
+       The Google Fonts <link> for Tahoma in the <head> does nothing;
+       the browser will fall back to the system copy automatically. */
+    font-family: var(--font-body);
+    font-size:   var(--fs-body);
+    line-height: var(--lh-body);
+    color: #111827;
 }
 
 body {
     background: #f0f0f0;
-    font-family: 'Tahoma', sans-serif;
-    color: #111827;
     min-height: 100vh;
     padding: 56px 0 72px;
 }
 
+/* ═══════════════════════════════════════════════
+   TOOLBAR
+═══════════════════════════════════════════════ */
 #toolbar {
     position: fixed;
     top: 0;
@@ -97,6 +119,9 @@ body {
     cursor: pointer;
 }
 
+/* ═══════════════════════════════════════════════
+   A4 CONTAINER & PAGES
+═══════════════════════════════════════════════ */
 #a4-container {
     display: flex;
     flex-direction: column;
@@ -106,72 +131,59 @@ body {
 }
 
 .a4-page {
-    padding: 96px;
-    margin: 0 auto 20px;
     background: #fff;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
     overflow: hidden;
     position: relative;
     break-inside: auto;
+    margin: 0 auto 20px;
 }
 
+/* ── Portrait: 794 × 1122 px at 96 dpi ≈ A4 ── */
 .a4-page.portrait {
-    width: 794px;
-    height: 1122px;
+    width:   794px;
+    height:  1122px;
+    padding: 72px 72px 72px 72px;   /* uniform 72 px (~19 mm) inset  */
 }
 
+/* ── Landscape: 1122 × 794 px ──
+   Content width = 1122 - 72 - 72 = 978 px
+   No extra right bleed; tables must not exceed 978 px.           */
 .a4-page.landscape {
-    width: 1122px;
-    height: 794px;
-    padding: 72px;
+    width:   1122px;
+    height:  794px;
+    padding: 56px 72px 56px 72px;   /* tighter top/bottom, equal L/R */
 }
 
+/* ═══════════════════════════════════════════════
+   PAGE TYPOGRAPHY (Tahoma, 11 pt, all sections
+   EXCEPT the weekly-coverage tables)
+═══════════════════════════════════════════════ */
 .a4-title {
     text-align: center;
     font-weight: 700;
     letter-spacing: 0.04em;
-}
-
-.indent-level-1,
-.indent-level-1-5,
-.indent-level-1-5-text,
-.indent-level-2 {
-    display: block;
-}
-
-.indent-level-1 {
-    padding-left: 40px;
-}
-
-.indent-level-1-5 {
-    padding-left: 55px;
-}
-
-.indent-level-1-5-text {
-    padding-left: 40px;
-    text-indent: 20px;
-}
-
-.indent-level-2 {
-    padding-left: 60px;
-    text-indent: 40px;
+    font-size: var(--fs-body);
+    font-family: var(--font-body);
 }
 
 .a4-subtitle {
     text-align: center;
-    font-size: 12px;
+    font-size: 11pt;          /* was 12px – now aligned to body token */
     color: #4b5563;
     margin-top: 2px;
+    font-family: var(--font-body);
 }
 
 .a4-section {
-    margin-top: 10px;
+    margin-top: 20px;
     break-inside: auto;
     page-break-inside: auto;
 }
 
 .a4-section h3 {
-    font-size: 11pt;
+    font-size:   var(--fs-body);
+    font-family: var(--font-body);
     font-weight: 700;
     margin: 0 0 6px;
     text-align: justify;
@@ -181,9 +193,51 @@ h3.a4-section {
     margin: 10px 0 6px;
 }
 
+/* Indentation helpers */
+.indent-level-1,
+.indent-level-1-5,
+.indent-level-1-5-text,
+.indent-level-2 {
+    display: block;
+    font-weight: 100;
+}
+
+.indent-level-1       { padding-left: 40px; }
+.indent-level-1-5     { padding-left: 60px; padding-bottom: 5px; }
+.indent-level-1-5-text{ padding-left: 40px; text-indent: 20px; }
+.indent-level-2       { padding-left: 60px; text-indent: 40px; }
+
+/* ── Shared text styles ── */
+p,
+ul li,
+strong,
+.a4-list,
+.a4-row {
+    font-family:    var(--font-body);
+    font-size:      var(--fs-body);
+    text-align:     justify;
+    letter-spacing: 0.04em;
+    line-height:    var(--lh-body);
+}
+
+p {
+    margin: 4px 0;
+    line-height: var(--lh-body);
+}
+
+.title-numbered,
+.title-lettered {
+    font-family: var(--font-body);
+    font-size:   var(--fs-body);
+    font-weight: 700;
+}
+
+.title-numbered { text-transform: none; }
+.title-lettered { text-transform: uppercase; }
+
+/* Lists */
 .a4-list {
     display: grid;
-    /* gap: 4px; */
     break-inside: auto;
 }
 
@@ -201,52 +255,25 @@ ul li {
     list-style-type: disc;
     list-style-position: outside;
     padding-left: 8px;
-    line-height: 1;
 }
 
-.title-numbered,
-.title-lettered {
-    font-size: 11pt;
-    font-weight: 700;
-}
-
-.title-numbered {
-    text-transform: none;
-}
-
-.title-lettered {
-    text-transform: uppercase;
-}
-
-p,
-ul li,
-strong,
-.a4-list,
-.a4-row {
-    font-size: 11pt;
-    text-align: justify;
-    letter-spacing: 0.04em; /* Match spacing */
-    line-height: 1.2; /* Match line-height */
-}
-
-p {
-    margin: 4px 0;
-    line-height: 1.2;
-}
-
+/* ═══════════════════════════════════════════════
+   TABLES – base (Tahoma 11 pt)
+═══════════════════════════════════════════════ */
 table {
-    break-inside: auto;
-    width: 100%;
+    break-inside:    auto;
+    width:           100%;
     border-collapse: collapse;
-    border: 1px solid #000;
-    margin-top: 4px;
-    font-size: 12px;
+    border:          1px solid #000;
+    margin-top:      4px;
+    font-family:     var(--font-body);
+    font-size:       var(--fs-body);       /* default: Tahoma 11 pt */
 }
 
 table td,
 table th {
-    border: 1px solid #000;
-    padding: 4px;
+    border:         1px solid #000;
+    padding:        4px;
     vertical-align: top;
 }
 
@@ -254,19 +281,39 @@ table th {
     background: #d9d9d9;
 }
 
+/* Key-value info tables (Course info, Instructor, etc.) */
 .kv-table td:first-child {
     width: 5%;
     white-space: nowrap;
 }
 
+/* ═══════════════════════════════════════════════
+   WEEKLY COVERAGE TABLE – Times New Roman, 9 pt
+   Applied via a dedicated class on those tables.
+═══════════════════════════════════════════════ */
+.weekly-coverage-table,
+.weekly-coverage-table td,
+.weekly-coverage-table th {
+    font-family: var(--font-table);   /* Times New Roman */
+    font-size:   var(--fs-table);     /* 9 pt            */
+}
+
+/* Keep header shading consistent */
+.weekly-coverage-table th {
+    background: #d9d9d9;
+}
+
+/* ═══════════════════════════════════════════════
+   PRINT
+═══════════════════════════════════════════════ */
 @media print {
     @page portrait {
-        size: A4 portrait;
+        size:   A4 portrait;
         margin: 0;
     }
 
     @page landscape {
-        size: A4 landscape;
+        size:   A4 landscape;
         margin: 0;
     }
 
@@ -287,18 +334,13 @@ table th {
     .a4-page {
         margin: 0;
         box-shadow: none;
-        page-break-after: always;
-        break-after: page;
+        page-break-after:  always;
+        break-after:       page;
         page-break-inside: avoid;
     }
 
-    .a4-page.portrait {
-        page: portrait;
-    }
-
-    .a4-page.landscape {
-        page: landscape;
-    }
+    .a4-page.portrait  { page: portrait;  }
+    .a4-page.landscape { page: landscape; }
 
     table {
         page-break-inside: auto;

@@ -150,11 +150,32 @@ class SyllabusController extends Controller
         return redirect()->route('syllabus.preview', ['syllabus' => $syllabus->id]);
     }
 
-    public function preview(Syllabus $syllabus)
+    // public function preview(Syllabus $syllabus)
+    // {
+    //     $this->authorizeSyllabusAccess($syllabus);
+
+    //     return redirect()->route('syllabus.preview.complete', ['syllabus' => $syllabus->id]);
+    // }
+
+    public function previewComplete(Syllabus $syllabus)
     {
         $this->authorizeSyllabusAccess($syllabus);
 
-        return view('Syllabus.preview', $this->buildPreviewData($syllabus));
+        return view('Syllabus.preview.complete', $this->buildPreviewData($syllabus));
+    }
+
+    public function previewAbridged(Syllabus $syllabus)
+    {
+        $this->authorizeSyllabusAccess($syllabus);
+
+        return view('Syllabus.preview.abridged', $this->buildPreviewData($syllabus));
+    }
+
+    public function previewAssessment(Syllabus $syllabus)
+    {
+        $this->authorizeSyllabusAccess($syllabus);
+
+        return view('Syllabus.preview.assessment', $this->buildPreviewData($syllabus));
     }
 
     private function buildPreviewData(Syllabus $syllabus): array

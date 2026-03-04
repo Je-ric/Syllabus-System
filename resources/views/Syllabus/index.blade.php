@@ -83,7 +83,7 @@
                     </x-button>
 
                     <x-button
-                        href="{{ route('syllabus.preview', ['syllabus' => $syllabus->id]) }}"
+                        href="{{ route('syllabus.preview.complete', ['syllabus' => $syllabus->id]) }}"
                         variant="cancel"
                         class="flex-1 justify-center">
                         Preview

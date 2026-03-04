@@ -66,7 +66,7 @@ class CourseOutcomesStep extends Component
         }
 
         // Pass $this->courseOutcomes directly — @entangle keeps it in sync
-        if ($this->saveCourseOutcomes($this->courseOutcomes)) {
+        if ($this->saveCourseOutcomes($this->courseOutcomes) !== null) {
             $this->dispatch('syllabus-step-saved', step: 'course_outcomes');
             $this->dispatch('syllabus-course-outcomes-updated');
         }
@@ -76,14 +76,14 @@ class CourseOutcomesStep extends Component
 
     // Called from Alpine's saveCos() via $wire.call('saveCourseOutcomes', this.cos).
     // Receives the full array from Alpine (including any unsaved rows the user added).
-    public function saveCourseOutcomes(array $cosData): bool
+    public function saveCourseOutcomes(array $cosData): ?array
     {
         // Reject if any description is blank
         foreach ($cosData as $index => $co) {
             if (trim((string) ($co['description'] ?? '')) === '') {
                 $this->dispatch('lw-toast', type: 'warning',
                     message: 'CO row ' . ($index + 1) . ' is blank — fill it in before saving.');
-                return false;
+                return null;
             }
         }
 
@@ -140,7 +140,7 @@ class CourseOutcomesStep extends Component
         $this->dispatch('syllabus-step-dirty', step: 'course_outcomes', dirty: false);
         $this->dispatch('syllabus-course-outcomes-updated');
 
-        return true;
+        return $this->courseOutcomes;
     }
 
     // Called from Alpine when the user confirms deletion of a saved CO row.

@@ -4,6 +4,37 @@
         description="Review all details before submitting for approval." />
 
     <div class="space-y-6">
+
+        <x-wizard.section title="Previews" icon="show" color="slate">
+            <div class="flex flex-col sm:flex-row gap-2">
+                <x-wizard.btn
+                    href="{{ route('syllabus.preview.complete', ['syllabus' => $syllabus->id]) }}"
+                    variant="outline"
+                    target="_blank"
+                    rel="noopener"
+                    class="flex-1 justify-center">
+                    Complete
+                </x-wizard.btn>
+
+                <x-wizard.btn
+                    href="{{ route('syllabus.preview.abridged', ['syllabus' => $syllabus->id]) }}"
+                    variant="outline"
+                    target="_blank"
+                    rel="noopener"
+                    class="flex-1 justify-center">
+                    Abridged
+                </x-wizard.btn>
+
+                <x-wizard.btn
+                    href="{{ route('syllabus.preview.assessment', ['syllabus' => $syllabus->id]) }}"
+                    variant="outline"
+                    target="_blank"
+                    rel="noopener"
+                    class="flex-1 justify-center">
+                    Assessment Plan
+                </x-wizard.btn>
+            </div>
+        </x-wizard.section>
         
         <x-wizard.section title="Academic Calendar" icon="calendar" color="slate">
             @php

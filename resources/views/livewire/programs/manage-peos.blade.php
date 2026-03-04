@@ -4,8 +4,8 @@
     Livewire: ManagePeos  |  Alpine: peosManager()
 
     Row states:
-      Saved   (peo.id truthy)  → emerald badge, trash submits DELETE to controller
-      Unsaved (peo.id null)    → amber border + badge + "unsaved" hint, × removes from array
+        Saved   (peo.id truthy)  → emerald badge, trash submits DELETE to controller
+        Unsaved (peo.id null)    → amber border + badge + "unsaved" hint, × removes from array
 
     Notifications: lw-toast only (no flash-message include — avoids double toasts)
 --}}
@@ -14,8 +14,11 @@
 
     @include('livewire.programs.include.flash-message')
 
-    <x-wizard.section title="Program Educational Objectives (PEOs)" icon="graduation" color="emerald">
-    
+    <x-wizard.section
+        title="Program Educational Objectives (PEOs)"
+        icon="list-check"
+        color="emerald">
+
     {{-- ── PEO rows ────────────────────────────────────────────────────────── --}}
     <template x-for="(peo, index) in peos" :key="peo.id ?? ('new-' + index)">
 
