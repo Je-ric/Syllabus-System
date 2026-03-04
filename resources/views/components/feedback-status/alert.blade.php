@@ -2,6 +2,8 @@
     'type'    => 'info',
     'title'   => null,
     'message' => null,
+    'showTitle' => true,
+    'dismissable' => false,
     'class'   => '',
 ])
 
@@ -34,10 +36,11 @@
     ];
 
     $alert        = $styles[$type] ?? $styles['info'];
-    $resolvedTitle = $title ?: $alert['title'];
+    $resolvedTitle = $showTitle ? ($title ?: $alert['title']) : null;
 @endphp
 
 <div
+    @if ($dismissable) x-data="{ show: true }" x-show="show" @endif
     {{ $attributes->class(['rounded-xl border p-4', $alert['container'], $class]) }}
     role="alert">
 
@@ -64,5 +67,14 @@
                 </div>
             @endif
         </div>
+
+        @if ($dismissable)
+            <button @click="show = false" type="button"
+                class="shrink-0 mt-0.5 p-0.5 rounded-md opacity-60
+                    hover:opacity-100 transition-opacity focus:outline-none"
+                aria-label="Dismiss alert">
+                <i class="bx bx-x text-base" aria-hidden="true"></i>
+            </button>
+        @endif
     </div>
 </div>

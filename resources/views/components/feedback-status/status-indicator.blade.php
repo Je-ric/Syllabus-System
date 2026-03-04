@@ -1,10 +1,23 @@
-@props(['status',
-        'label' => null,
-        'icon' => null
-        ])
+@props([
+    // Semantic status mode (existing API)
+    'status' => null,
+    'label'  => null,
+
+    // UI variant mode (wizard-badge-like)
+    'variant' => null,
+    'dot'     => false,
+
+    // Icon class (pass full class string, e.g. "bx bx-check-circle")
+    'icon' => null,
+
+    // Appearance
+    // All indicators are pills (rounded-full). Use size to control padding.
+    // Kept for backward compatibility; padding is now consistent everywhere.
+    'size'  => 'md',
+])
 
 @php
-$variant = [
+$statusStyles = [
     // General statuses
     'success' => 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200',
     'neutral' => 'bg-slate-50 text-slate-600 ring-1 ring-slate-200',
@@ -29,7 +42,7 @@ $variant = [
     'lec_lab' => 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200',
 ];
 
-$icons = [
+$statusIcons = [
     'success' => 'bx bx-check-circle',
     'neutral' => 'bx bx-minus-circle',
     'info' => 'bx bx-info-circle',
@@ -47,19 +60,46 @@ $icons = [
     'lec_lab' => 'bx bx-flask',
 ];
 
-$style = $variant[$status] ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-300';
-$iconClass = $icon ?? ($icons[$status] ?? '');
+$variantStyles = [
+    // Matches (and extends) the old `x-wizard.badge` variants
+    'emerald' => ['pill' => 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200', 'dot' => 'bg-emerald-500'],
+    'blue'    => ['pill' => 'bg-blue-100 text-blue-700 ring-1 ring-blue-200',          'dot' => 'bg-blue-500'],
+    'amber'   => ['pill' => 'bg-amber-100 text-amber-700 ring-1 ring-amber-200',       'dot' => 'bg-amber-500'],
+    'rose'    => ['pill' => 'bg-rose-100 text-rose-700 ring-1 ring-rose-200',          'dot' => 'bg-rose-500'],
+    'slate'   => ['pill' => 'bg-slate-100 text-slate-600 ring-1 ring-slate-200',       'dot' => 'bg-slate-400'],
+    // Extra variants used in syllabus steps
+    'violet'  => ['pill' => 'bg-violet-100 text-violet-700 ring-1 ring-violet-200',    'dot' => 'bg-violet-500'],
+];
+
+$isStatusMode = filled($status);
+
+$style = $isStatusMode
+    ? ($statusStyles[$status] ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-300')
+    : ($variantStyles[$variant]['pill'] ?? $variantStyles['slate']['pill']);
+
+$defaultStatusIcon = $isStatusMode ? ($statusIcons[$status] ?? null) : null;
+$iconClass = $icon ?? $defaultStatusIcon;
+$padClass = '';
+
+$resolvedLabel = $label
+    ?? ($slot->isNotEmpty() ? null : ($isStatusMode ? ucfirst(str_replace('_', ' ', (string) $status)) : null));
+$dotClass = $variantStyles[$variant]['dot'] ?? 'bg-slate-400';
 @endphp
 
-<span class="inline-flex items-center gap-1 px-3 py-1 text-xs rounded-full font-semibold {{ $style }}">
-    @if($iconClass)
-        <i class="{{ $iconClass }}"></i>
+<span {{ $attributes->class([
+    'inline-flex items-center gap-1 text-xs font-semibold px-3 py-1',
+    'rounded-full',
+    $style,
+]) }}>
+    @if ($dot)
+        <span class="w-1.5 h-1.5 rounded-full shrink-0 {{ $dotClass }}" aria-hidden="true"></span>
+    @elseif ($iconClass)
+        <i class="{{ $iconClass }} text-xs shrink-0" aria-hidden="true"></i>
     @endif
-    {{ $label ?? ucfirst(str_replace('_', ' ', $status)) }}
-</span>
 
-{{--
-Usage: <x-feedback-status.status-indicator status="success" />
-        <x-feedback-status.status-indicator status="pending" label="Awaiting Approval" />
-        <x-feedback-status.status-indicator status="published" icon="bx-check-circle" />
---}}
+    @if ($resolvedLabel)
+        {{ $resolvedLabel }}
+    @else
+        {{ $slot }}
+    @endif
+</span>

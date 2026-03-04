@@ -130,9 +130,9 @@
 
         {{-- Server-side validation error (blank check done pre-save) --}}
         @if ($coAddError)
-            <x-wizard.alert type="warning" class="mt-2">
+            <x-feedback-status.alert type="warning" :showTitle="false" class="mt-2">
                 {{ $coAddError }}
-            </x-wizard.alert>
+            </x-feedback-status.alert>
         @endif
 
         {{-- Add CO button — full width dashed --}}

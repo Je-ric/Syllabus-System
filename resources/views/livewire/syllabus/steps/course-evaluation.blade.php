@@ -5,8 +5,8 @@
         title="Course Evaluation"
         icon="notepad"
         description="Set the weight (%) for each assessment task. Rows come from Weekly Coverage.
-                     Week 1 (MVGO) appears here only if an assessment task was entered.
-                     The 60% passing standard applies to every assessment per semester.">
+                        Week 1 (MVGO) appears here only if an assessment task was entered.
+                        The 60% passing standard applies to every assessment per semester.">
 
         @if (count($rows) > 0)
             <x-wizard.btn variant="sm-success"
@@ -127,9 +127,9 @@
                                                 Week 1 — always MVGO. No editable input here.
                                                 outcome_label is forced to 'MVGO' in PHP on save.
                                             --}}
-                                            <x-wizard.badge variant="violet" icon="star">MVGO</x-wizard.badge>
+                                            <x-feedback-status.status-indicator variant="violet" icon="bx bx-star" size="sm">MVGO</x-feedback-status.status-indicator>
                                         @elseif ($displayCo)
-                                            <x-wizard.badge variant="slate">{{ $displayCo }}</x-wizard.badge>
+                                            <x-feedback-status.status-indicator variant="slate" size="sm">{{ $displayCo }}</x-feedback-status.status-indicator>
                                         @elseif ($outcomeInputId)
                                             {{-- Non-MVGO row with no CO — allow freetext outcome label --}}
                                             <input type="text"
@@ -224,7 +224,7 @@
                                         not just exam rows. Show the badge on all rows.
                                     ────────────────────────────────────────────────────────────── --}}
                                     <td class="px-4 py-3 text-center align-middle">
-                                        <x-wizard.badge variant="emerald">60%</x-wizard.badge>
+                                        <x-feedback-status.status-indicator variant="emerald" size="sm">60%</x-feedback-status.status-indicator>
                                     </td>
 
                                 </tr>

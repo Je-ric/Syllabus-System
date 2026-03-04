@@ -53,9 +53,9 @@
                     <x-wizard.info-row label="Period" :value="$calendarPeriod" muted />
                 </x-wizard.info-card>
             @else
-                <x-wizard.alert type="danger" title="Not selected">
+                <x-feedback-status.alert type="error" title="Not selected">
                     Select an academic calendar to proceed.
-                </x-wizard.alert>
+                </x-feedback-status.alert>
             @endif
         </x-wizard.section>
 

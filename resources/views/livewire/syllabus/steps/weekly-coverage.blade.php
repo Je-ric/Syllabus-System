@@ -17,9 +17,9 @@
                             <i class="bx bx-calendar-plus"></i> Generate Weeks
                         </x-wizard.btn>
                         @if (! $academic_calendar_id)
-                            <x-wizard.alert type="danger" class="text-xs">
+                            <x-feedback-status.alert type="error" :showTitle="false" class="text-xs">
                                 No academic calendar selected. Please go back to the previous step and select one to generate weeks.
-                            </x-wizard.alert>
+                            </x-feedback-status.alert>
                         @endif
                     @else
                         <x-wizard.btn variant="sm-warning"
@@ -251,9 +251,9 @@
 
         @elseif ($hasLEC || $hasLAB)
             <div class="mb-4">
-                <x-wizard.badge :variant="$hasLEC ? 'emerald' : 'blue'" :dot="true">
+                <x-feedback-status.status-indicator :variant="$hasLEC ? 'emerald' : 'blue'" :dot="true" size="sm">
                     {{ $hasLEC ? 'Lecture (LEC)' : 'Laboratory (LAB)' }}
-                </x-wizard.badge>
+                </x-feedback-status.status-indicator>
             </div>
         @endif
 
@@ -333,16 +333,16 @@
                                 @if ($isLocked)
                                     {{-- Locked type badge: exam=amber, non-teaching=rose --}}
                                     @if ($lockType === 'exam')
-                                        <x-wizard.badge variant="rose" icon="clipboard">{{ $lockLabel }}</x-wizard.badge>
+                                        <x-feedback-status.status-indicator variant="rose" icon="bx bx-clipboard" size="sm">{{ $lockLabel }}</x-feedback-status.status-indicator>
                                     @else
-                                        <x-wizard.badge variant="rose" icon="lock-alt">{{ $lockLabel }}</x-wizard.badge>
+                                        <x-feedback-status.status-indicator variant="rose" icon="bx bx-lock-alt" size="sm">{{ $lockLabel }}</x-feedback-status.status-indicator>
                                     @endif
                                 @else
                                     @if ($isMvgo)
                                         {{-- Week 1 always labelled MVGO --}}
-                                        <x-wizard.badge variant="emerald">MVGO</x-wizard.badge>
+                                        <x-feedback-status.status-indicator variant="emerald" size="sm">MVGO</x-feedback-status.status-indicator>
                                     @elseif ($coCode)
-                                        <x-wizard.badge variant="emerald">{{ $coCode }}</x-wizard.badge>
+                                        <x-feedback-status.status-indicator variant="emerald" size="sm">{{ $coCode }}</x-feedback-status.status-indicator>
                                     @endif
                                     @if ($savedTopic)
                                         <span class="text-xs text-slate-400 truncate max-w-xs hidden md:block">
@@ -357,13 +357,13 @@
                         <div class="flex items-center gap-1.5 shrink-0 ml-3">
                             @if (! $isLocked)
                                 @if (count($events) > 0)
-                                    <x-wizard.badge variant="amber">{{ count($events) }} event{{ count($events) !== 1 ? 's' : '' }}</x-wizard.badge>
+                                    <x-feedback-status.status-indicator variant="amber" size="sm">{{ count($events) }} event{{ count($events) !== 1 ? 's' : '' }}</x-feedback-status.status-indicator>
                                 @endif
                                 @if ($refCount > 0)
-                                    <x-wizard.badge variant="emerald">{{ $refCount }} ref{{ $refCount !== 1 ? 's' : '' }}</x-wizard.badge>
+                                    <x-feedback-status.status-indicator variant="emerald" size="sm">{{ $refCount }} ref{{ $refCount !== 1 ? 's' : '' }}</x-feedback-status.status-indicator>
                                 @endif
                                 @if ($matCount > 0)
-                                    <x-wizard.badge variant="blue">{{ $matCount }} mat{{ $matCount !== 1 ? 's' : '' }}</x-wizard.badge>
+                                    <x-feedback-status.status-indicator variant="blue" size="sm">{{ $matCount }} mat{{ $matCount !== 1 ? 's' : '' }}</x-feedback-status.status-indicator>
                                 @endif
                             @endif
                             <i class="bx text-slate-400 text-lg transition-transform duration-200"
@@ -377,7 +377,7 @@
 
                         {{-- LOCKED ──────────────────────────────────────────── --}}
                         @if ($isLocked)
-                            <x-wizard.alert type="{{ $lockType === 'exam' ? 'warning' : 'danger' }}" :title="$lockLabel" class="mb-4">
+                            <x-feedback-status.alert type="{{ $lockType === 'exam' ? 'warning' : 'error' }}" :title="$lockLabel" class="mb-4">
                                 This week contains a
                                 <strong>{{ $lockType === 'exam' ? 'scheduled exam' : 'non-teaching class' }}</strong>
                                 in the academic calendar. Coverage details cannot be entered.
@@ -393,11 +393,11 @@
                                         @endforeach
                                     </ul>
                                 @endif
-                            </x-wizard.alert>
+                            </x-feedback-status.alert>
 
                             @php $otherEvents = array_filter($events, fn ($ev) => ! in_array($ev['type'], ['exam', 'non_teaching'])); @endphp
                             @if (count($otherEvents) > 0)
-                                <x-wizard.alert type="info" title="Other events this week">
+                                <x-feedback-status.alert type="info" title="Other events this week">
                                     <ul class="space-y-1 mt-1">
                                         @foreach ($otherEvents as $ev)
                                             <li class="flex items-center gap-1.5">
@@ -406,7 +406,7 @@
                                             </li>
                                         @endforeach
                                     </ul>
-                                </x-wizard.alert>
+                                </x-feedback-status.alert>
                             @endif
 
                         {{-- EDITABLE ─────────────────────────────────────────── --}}
@@ -414,12 +414,12 @@
 
                             {{-- MVGO notice (Week 1 only) --}}
                             @if ($isMvgo)
-                                <x-wizard.alert type="info" class="mb-4">
+                                <x-feedback-status.alert type="info" :showTitle="false" class="mb-4">
                                     <strong>Week 1 — MVGO.</strong>
                                     This week covers the Mission, Vision, Goals &amp; Objectives.
                                     All fields are editable. Assessment task is optional — if entered,
                                     it will appear in Course Evaluation.
-                                </x-wizard.alert>
+                                </x-feedback-status.alert>
                             @endif
 
                             {{-- Calendar events for this week --}}
@@ -441,7 +441,7 @@
                                                 <span class="w-1.5 h-1.5 rounded-full {{ $evDot }} shrink-0"></span>
                                                 <span class="font-medium">{{ $ev['name'] }}</span>
                                                 <span class="text-slate-400">({{ $ev['date_display'] }})</span>
-                                                <x-wizard.badge variant="slate">{{ str_replace('_', ' ', $ev['type']) }}</x-wizard.badge>
+                                                <x-feedback-status.status-indicator variant="slate" size="sm">{{ str_replace('_', ' ', $ev['type']) }}</x-feedback-status.status-indicator>
                                             </li>
                                         @endforeach
                                     </ul>
@@ -457,7 +457,7 @@
                                         <x-form.label>Outcome</x-form.label>
                                         <div class="flex items-center gap-2 mt-1 px-3 py-2.5
                                                     rounded-xl border border-slate-200 bg-slate-50">
-                                            <x-wizard.badge variant="slate">MVGO</x-wizard.badge>
+                                            <x-feedback-status.status-indicator variant="slate" size="sm">MVGO</x-feedback-status.status-indicator>
                                             <span class="text-xs text-slate-500">Mission-Vision-Goals-Objectives</span>
                                         </div>
                                     @else
@@ -589,9 +589,9 @@
 
                             {{-- Per-week footer: hint + reset + save --}}
                             <div class="flex items-center justify-between mt-5 pt-3 border-t border-slate-100">
-                                <x-wizard.alert type="info" class="text-xs">
+                                <x-feedback-status.alert type="info" :showTitle="false" class="text-xs">
                                     <span>Changes are saved automatically when you collapse or use Save All above.</span>
-                                </x-wizard.alert>
+                                </x-feedback-status.alert>
 
                                 <div class="flex items-center gap-2">
                                     {{--
@@ -627,9 +627,9 @@
 
         </div>{{-- /accordion --}}
 
-        <x-wizard.alert type="info" class="mt-2">
+        <x-feedback-status.alert type="info" :showTitle="false" class="mt-2">
             Weeks with scheduled exams or non-teaching classes are locked automatically based on the academic calendar. You can identify them by the badges and red highlight. Click on locked weeks to see details.
-        </x-wizard.alert>
+        </x-feedback-status.alert>
 
     @endif
 </div>
