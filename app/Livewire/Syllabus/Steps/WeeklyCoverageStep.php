@@ -76,7 +76,6 @@ class WeeklyCoverageStep extends Component
 
     public function boot(): void
     {
-        // Initialise the collection so it is never null before the first render()
         $this->syllabusWeeks = collect();
     }
 
@@ -195,8 +194,6 @@ class WeeklyCoverageStep extends Component
     }
 
     // Save a single week when the user clicks "Save Week N".
-    // wire:model.lazy has already synced $weekInputs before this fires.
-    // Do NOT call loadData() — that would overwrite user's current edits.
     public function saveWeek(int $weekNo): void
     {
         if ($weekNo <= 0 || isset($this->lockedWeeks[$weekNo])) {
@@ -204,6 +201,65 @@ class WeeklyCoverageStep extends Component
         }
         $this->saveWeeklyEntries($weekNo);
         $this->dispatch('lw-toast', type: 'success', message: "Week {$weekNo} saved.");
+    }
+
+    // Reset a single week — clears all content from DB and blanks the form inputs.
+    //
+    // This is the "start over" action for a week. It:
+    //   1. Deletes WeekContent fields (learning outcomes, assessment task, topics, TLA, CO)
+    //      but PRESERVES the WeekContent row itself (so the week still exists).
+    //   2. Deletes all References and OnlineMaterials for that week.
+    //   3. Resets $weekInputs[$key] to empty defaults so the form fields go blank.
+    //
+    // Locked weeks (exam / non-teaching) are guarded — they cannot be reset.
+    // The blade only shows the Reset button on editable weeks, but we double-check here.
+    public function resetWeek(int $weekNo): void
+    {
+        if ($weekNo <= 0 || isset($this->lockedWeeks[$weekNo])) {
+            return;
+        }
+
+        $week = SyllabusWeek::where('syllabus_id', $this->syllabusId)
+            ->where('week_no', $weekNo)
+            ->first();
+
+        if (! $week) {
+            return;
+        }
+
+        // Clear WeekContent fields — keep the row, just blank the editable columns
+        WeekContent::where('syllabus_week_id', $week->id)
+            ->where('component_type', $this->activeComponent)
+            ->update([
+                'course_outcome_id'  => null,
+                'learning_outcomes'  => '',
+                'assessment_task'    => '',
+                'topics'             => '',
+                'tla'                => '',
+            ]);
+
+        // Delete references and materials for this week
+        Reference::where('syllabus_id', $this->syllabusId)
+            ->where('syllabus_week_id', $week->id)
+            ->delete();
+
+        OnlineMaterial::where('syllabus_id', $this->syllabusId)
+            ->where('syllabus_week_id', $week->id)
+            ->delete();
+
+        // Reset in-memory inputs so the form fields clear immediately
+        $key = 'w' . $weekNo;
+        $this->weekInputs[$key] = [
+            'course_outcome_id'   => null,
+            'learning_outcomes'   => '',
+            'assessment_task'     => '',
+            'topic'               => '',
+            'teaching_activities' => '',
+            'references'          => [['text' => '']],
+            'materials'           => [['name' => '', 'url' => '']],
+        ];
+
+        $this->dispatch('lw-toast', type: 'success', message: "Week {$weekNo} reset.");
     }
 
     // Save every unlocked week at once.
@@ -418,21 +474,17 @@ class WeeklyCoverageStep extends Component
 
             $this->lockedWeeks[$week->week_no] = $lockingEvent->type;
 
-            // ── Exam week: write sequential term labels into WeekContent ──────
             if ($lockingEvent->type === 'exam') {
                 $termLabel = $examTermLabels[min($examsSeen, 2)];
                 $examsSeen++;
 
-                $lecLabel = $termLabel . ' Exam';           // e.g. "1st Term Exam"
-                $labLabel = $termLabel . ' Practical Exam'; // e.g. "1st Term Practical Exam"
-
                 WeekContent::where('syllabus_week_id', $week->id)
                     ->where('component_type', 'LEC')
-                    ->update(['assessment_task' => $lecLabel]);
+                    ->update(['assessment_task' => $termLabel . ' Exam']);
 
                 WeekContent::where('syllabus_week_id', $week->id)
                     ->where('component_type', 'LAB')
-                    ->update(['assessment_task' => $labLabel]);
+                    ->update(['assessment_task' => $termLabel . ' Practical Exam']);
             }
 
             // ── Non-teaching week: write label into WeekContent ───────────────

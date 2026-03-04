@@ -23,7 +23,7 @@
     @if($for) for="{{ $for }}" @endif
     {{-- class="flex items-center text-sm font-medium sm:gap-2 text-[#1a2235] mb-2 {{ $class }}" --}}
     {{-- class="text-xs uppercase tracking-[0.25em] text-slate-500 {{ $class }}" --}}
-    class="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-slate-500 pb-1.5"
+    class="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em] text-slate-500 pb-1.5"
 >
     @if($icon)
         <i class="bx {{ $icon }} text-emerald-700 mr-1"></i>

@@ -5,8 +5,9 @@
         description="Choose the academic year and semester for this syllabus." />
 
     <x-wizard.section title="Select Academic Calendar" icon="calendar" color="slate" class="max-w-sm">
-        <x-form.label isRequired class="block mb-2">Academic Calendar</x-form.label>
-
+        <x-form.label isRequired class="block mb-2">
+            <i class="bx bx-calendar"></i>Academic Calendar
+        </x-form.label>
         <x-form.select
             wire:model="academic_calendar_id"
             wire:change="updatedAcademicCalendarId"

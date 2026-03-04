@@ -5,18 +5,16 @@
         title="Course Outcomes"
         icon="book-open"
         description="Define what students should be able to do after completing this course.
-                        Align each outcome with the most relevant Program Outcomes —
-                        not every CO needs to cover all POs.">
+                     Align each outcome with the most relevant Program Outcomes —
+                     not every CO needs to cover all POs.">
 
         {{--
-            Save All — uses same variant as Course Evaluation's Save Evaluation button.
-            Alpine isSaving drives the spinner. :disabled prevents double-clicks.
+            Save All — x-wizard.btn provides consistent sm-success styling.
+            The `loading` prop is NOT used because the spinner is driven by
+            Alpine's isSaving flag (not wire:loading). Instead we put the
+            spinner markup in the slot so Alpine controls show/hide directly.
         --}}
-        <button @click="saveCos()" type="button" :disabled="isSaving"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg
-                    transition-colors duration-150
-                    disabled:opacity-50 disabled:pointer-events-none
-                    bg-emerald-50 text-emerald-700 border border-emerald-300 hover:bg-emerald-100">
+        <x-wizard.btn variant="sm-success" @click="saveCos()" type="button" x-bind:disabled="isSaving">
             <span x-show="!isSaving" class="inline-flex items-center gap-1.5">
                 <i class="bx bx-save" aria-hidden="true"></i> Save All
             </span>
@@ -29,7 +27,7 @@
                 </svg>
                 Saving…
             </span>
-        </button>
+        </x-wizard.btn>
     </x-wizard.step-header>
 
     {{-- ── CO rows ─────────────────────────────────────────────────────────── --}}
@@ -70,9 +68,9 @@
                                 rows="2"
                                 placeholder="Describe what students will be able to do after completing this course…"
                                 class="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-3 py-2
-                                       text-sm text-slate-800 placeholder:text-slate-300
-                                       focus:bg-white focus:border-emerald-400 focus:ring-1 focus:ring-emerald-300
-                                       focus:outline-none transition-colors"></textarea>
+                                        text-sm text-slate-800 placeholder:text-slate-300
+                                        focus:bg-white focus:border-emerald-400 focus:ring-1 focus:ring-emerald-300
+                                        focus:outline-none transition-colors"></textarea>
 
                             {{-- Amber "unsaved" hint — disappears the instant co.id is set --}}
                             <p x-show="!co.id"
@@ -127,23 +125,24 @@
                 <p class="text-sm font-medium text-slate-500">No Course Outcomes yet</p>
                 <p class="text-xs text-slate-400">Add the first one below.</p>
             </div>
+            x-empty-state
         </template>
 
-    {{-- Validation hint --}}
-    @if ($coAddError)
-        <p class="text-xs text-red-600 flex items-center gap-1">
-            <i class="bx bx-error-circle"></i> {{ $coAddError }}
-        </p>
-    @endif
+        {{-- Server-side validation error (blank check done pre-save) --}}
+        @if ($coAddError)
+            <x-wizard.alert type="warning" class="mt-2">
+                {{ $coAddError }}
+            </x-wizard.alert>
+        @endif
 
         {{-- Add CO button — full width dashed --}}
         <div class="pt-1">
             <button @click="addCo()" type="button"
                 class="flex w-full items-center justify-center gap-2 px-4 py-3
-                       border-2 border-dashed border-emerald-300 rounded-2xl
-                       text-sm font-semibold text-emerald-700
-                       hover:border-emerald-500 hover:bg-emerald-50
-                       transition-colors duration-150">
+                        border-2 border-dashed border-emerald-300 rounded-2xl
+                        text-sm font-semibold text-emerald-700
+                        hover:border-emerald-500 hover:bg-emerald-50
+                        transition-colors duration-150">
                 <i class="bx bx-plus text-base" aria-hidden="true"></i>
                 Add Course Outcome
             </button>
@@ -180,6 +179,32 @@
 </div>
 
 <script>
+/**
+ * courseOutcomesManager
+ * ──────────────────────────────────────────────────────────────────────────────
+ * WHY $wire IS CAPTURED IN init() AND NOT USED DIRECTLY IN saveCos():
+ *
+ * $wire is a magic property injected by Livewire INTO Alpine component objects.
+ * It is only available inside the reactive Alpine context — NOT in regular JS
+ * functions defined in <script> tags.
+ *
+ * This function (courseOutcomesManager) is a plain JS factory referenced by
+ * x-data="courseOutcomesManager(...)". When saveCos() runs, the call stack is
+ * inside this plain function, so $wire is undefined → ReferenceError → the
+ * Promise chain never settles → isSaving stays true forever (spinner never stops).
+ *
+ * THE FIX:
+ * Alpine calls init() with `this` bound to the fully initialised Alpine component
+ * object, where $wire IS available as this.$wire. We capture it to this._wire
+ * during init() so saveCos() can use this._wire safely.
+ *
+ * WHY REALTIME COLOR CHANGE WORKS:
+ * saveCourseOutcomes() returns $this->courseOutcomes (fresh from DB, all rows
+ * have real IDs). The .then() callback replaces this.cos with that server array.
+ * Alpine immediately re-renders all <template x-for> rows:
+ *   co.id → truthy  →  border-slate-200 bg-white/90 (emerald badge, no amber hint)
+ * The amber "Unsaved" indicator disappears in the same render tick.
+ */
 function courseOutcomesManager(initialCos) {
     return {
         cos:      initialCos,
