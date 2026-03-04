@@ -13,14 +13,13 @@
             @if ($courseComponents)
                 @php $hasLEC = isset($courseComponents['LEC']); $hasLAB = isset($courseComponents['LAB']); @endphp
                 @if ($hasLEC && $hasLAB)
-                    <p class="mb-3 text-xs text-slate-500 flex items-center gap-1.5">
-                        <i class="bx bx-info-circle text-slate-400"></i>
+                    <x-wizard.alert type="info" class="mb-3">
                         Keep Course Outcomes consistent across Lecture and Laboratory tabs for each week.
-                    </p>
+                    </x-wizard.alert>
                 @endif
             @endif
 
-            {{-- Generate / Regenerate / Save All ──────────────────────────── --}}
+            {{-- Generate / Regenerate / Save All --}}
             <div class="flex items-center gap-2 flex-wrap">
                 @if (! $weeksGenerated)
                     <x-wizard.btn variant="sm-success"
@@ -31,9 +30,7 @@
                         <i class="bx bx-calendar-plus"></i> Generate Weeks
                     </x-wizard.btn>
                     @if (! $academic_calendar_id)
-                        <span class="text-xs text-amber-600 flex items-center gap-1">
-                            <i class="bx bx-error-circle"></i> Select a calendar first
-                        </span>
+                        <x-wizard.alert type="danger">Select a calendar first</x-wizard.alert>
                     @endif
                 @else
                     <x-wizard.btn variant="sm-warning"
@@ -54,72 +51,162 @@
             </div>
         </div>
 
-        {{-- Right: info card ─────────────────────────────────────────────── --}}
-        <x-wizard.info-card color="slate">
-            <div class="grid grid-cols-2 gap-4">
+        {{-- ══ Right: Info card — improved UI ════════════════════════════════ --}}
+        {{--
+            Replaces the flat gray card with a richer layout:
+            – LEC/LAB schedule items use their brand colours (emerald/blue)
+            – Calendar date range is shown with an icon and clear formatting
+            – Stats (weeks, events, locked) use count badges instead of plain rows
+            – Each section has a small coloured label so nothing gets lost visually
+        --}}
+        <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
 
-                {{-- Class schedule --}}
-                @if ($courseComponents ?? null)
-                    @php $hasLEC = isset($courseComponents['LEC']); $hasLAB = isset($courseComponents['LAB']); @endphp
-                    <div>
-                        <p class="text-xs font-semibold text-slate-700 mb-2">Class Schedule</p>
-                        <div class="space-y-2.5">
-                            @if ($hasLEC)
-                                <div>
-                                    <div class="font-semibold text-emerald-700 text-xs mb-0.5">Lecture (LEC)</div>
-                                    <div class="text-slate-600">{{ $courseComponents['LEC']['schedule'] ?? '—' }}</div>
-                                    <div class="text-slate-400">{{ $courseComponents['LEC']['class_hours'] ?? '—' }} hrs</div>
+            @if ($courseComponents ?? null)
+                @php $hasLEC = isset($courseComponents['LEC']); $hasLAB = isset($courseComponents['LAB']); @endphp
+
+                {{-- ── Class Schedule section ──────────────────────────────── --}}
+                <div class="px-4 pt-4 pb-3 border-b border-slate-100">
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2.5">
+                        Class Schedule
+                    </p>
+                    <div class="flex flex-wrap gap-3">
+
+                        @if ($hasLEC)
+                            <div class="flex-1 min-w-[120px] rounded-lg bg-emerald-50 border border-emerald-100 px-3 py-2.5">
+                                <div class="flex items-center gap-1.5 mb-1">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Lecture</span>
                                 </div>
-                            @endif
-                            @if ($hasLAB)
-                                <div>
-                                    <div class="font-semibold text-blue-700 text-xs mb-0.5">Laboratory (LAB)</div>
-                                    <div class="text-slate-600">{{ $courseComponents['LAB']['schedule'] ?? '—' }}</div>
-                                    <div class="text-slate-400">{{ $courseComponents['LAB']['class_hours'] ?? '—' }} hrs</div>
+                                <div class="text-xs font-semibold text-slate-800 leading-snug">
+                                    {{ $courseComponents['LEC']['schedule'] ?? '—' }}
+                                </div>
+                                <div class="mt-0.5 flex items-center gap-1 text-[11px] text-emerald-600">
+                                    <i class="bx bx-time-five text-xs"></i>
+                                    {{ $courseComponents['LEC']['class_hours'] ?? '—' }} hrs/week
+                                </div>
+                            </div>
+                        @endif
+
+                        @if ($hasLAB)
+                            <div class="flex-1 min-w-[120px] rounded-lg bg-blue-50 border border-blue-100 px-3 py-2.5">
+                                <div class="flex items-center gap-1.5 mb-1">
+                                    <span class="w-2 h-2 rounded-full bg-blue-500 shrink-0"></span>
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-blue-700">Laboratory</span>
+                                </div>
+                                <div class="text-xs font-semibold text-slate-800 leading-snug">
+                                    {{ $courseComponents['LAB']['schedule'] ?? '—' }}
+                                </div>
+                                <div class="mt-0.5 flex items-center gap-1 text-[11px] text-blue-600">
+                                    <i class="bx bx-time-five text-xs"></i>
+                                    {{ $courseComponents['LAB']['class_hours'] ?? '—' }} hrs/week
+                                </div>
+                            </div>
+                        @endif
+
+                    </div>
+                </div>
+            @endif
+
+            {{-- ── Academic Calendar section ────────────────────────────────── --}}
+            <div class="px-4 pt-3 pb-3 {{ $weeksGenerated ? 'border-b border-slate-100' : '' }}">
+                <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2">
+                    Academic Calendar
+                </p>
+
+                @if ($syllabus?->academicCalendar)
+                    <div class="flex items-center gap-2">
+                        <span class="shrink-0 flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100 text-slate-500">
+                            <i class="bx bx-calendar text-base"></i>
+                        </span>
+                        <div>
+                            <div class="text-xs font-semibold text-slate-800">
+                                {{ \Carbon\Carbon::parse($syllabus->academicCalendar->start_date)->format('M d, Y') }}
+                                <span class="text-slate-400 font-normal mx-0.5">to</span>
+                                {{ \Carbon\Carbon::parse($syllabus->academicCalendar->end_date)->format('M d, Y') }}
+                            </div>
+                            @if (isset($syllabus->academicCalendar->academic_year))
+                                <div class="text-[11px] text-slate-400 mt-0.5">
+                                    {{ $syllabus->academicCalendar->academic_year }}
                                 </div>
                             @endif
                         </div>
                     </div>
+                @else
+                    <div class="flex items-center gap-2 text-slate-400 text-xs italic">
+                        <i class="bx bx-calendar-x text-base"></i>
+                        No calendar selected yet
+                    </div>
                 @endif
+            </div>
 
-                {{-- Calendar summary --}}
-                <div>
-                    <p class="text-xs font-semibold text-slate-700 mb-2">Academic Calendar</p>
-                    @if ($syllabus?->academicCalendar)
-                        <div class="text-slate-700 font-medium text-xs">
-                            {{ \Carbon\Carbon::parse($syllabus->academicCalendar->start_date)->format('M d, Y') }}
-                            <span class="text-slate-400 mx-0.5">–</span>
-                            {{ \Carbon\Carbon::parse($syllabus->academicCalendar->end_date)->format('M d, Y') }}
+            {{-- ── Coverage stats section (only after weeks are generated) ───── --}}
+            @if ($weeksGenerated)
+                <div class="px-4 pt-3 pb-4 bg-slate-50/60">
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2.5">
+                        Coverage Overview
+                    </p>
+                    <div class="grid grid-cols-3 gap-2">
+
+                        {{-- Total weeks --}}
+                        <div class="rounded-lg bg-white border border-slate-200 px-3 py-2 text-center shadow-sm">
+                            <div class="text-lg font-bold text-slate-800 leading-none">
+                                {{ $syllabusWeeks->count() }}
+                            </div>
+                            <div class="text-[10px] text-slate-400 mt-0.5 font-medium">Weeks</div>
                         </div>
-                    @else
-                        <span class="text-slate-400 italic text-xs">Not set</span>
-                    @endif
 
-                    @if ($weeksGenerated)
-                        <div class="mt-2.5 pt-2.5 border-t border-slate-200 space-y-1">
-                            <x-wizard.info-row label="Weeks" :value="$syllabusWeeks->count()" bold />
-                            <x-wizard.info-row label="Events" :value="collect($weekEvents)->flatten(1)->count()" />
-                            @if (count($lockedWeeks) > 0)
-                                <div class="flex items-start justify-between gap-2 py-1">
-                                    <span class="text-xs font-medium text-slate-500">Locked</span>
-                                    <x-wizard.badge variant="rose" icon="lock-alt">
-                                        {{ count($lockedWeeks) }} weeks
-                                    </x-wizard.badge>
-                                </div>
-                            @endif
+                        {{-- Total events --}}
+                        @php $totalEvents = collect($weekEvents)->flatten(1)->count(); @endphp
+                        <div class="rounded-lg bg-white border border-amber-100 px-3 py-2 text-center shadow-sm">
+                            <div class="text-lg font-bold text-amber-600 leading-none">
+                                {{ $totalEvents }}
+                            </div>
+                            <div class="text-[10px] text-slate-400 mt-0.5 font-medium">Events</div>
+                        </div>
+
+                        {{-- Locked weeks --}}
+                        @php $lockedCount = count($lockedWeeks); @endphp
+                        <div class="rounded-lg bg-white border border-rose-100 px-3 py-2 text-center shadow-sm">
+                            <div class="text-lg font-bold {{ $lockedCount > 0 ? 'text-rose-500' : 'text-slate-300' }} leading-none">
+                                {{ $lockedCount }}
+                            </div>
+                            <div class="text-[10px] text-slate-400 mt-0.5 font-medium flex items-center justify-center gap-0.5">
+                                @if ($lockedCount > 0)
+                                    <i class="bx bx-lock-alt text-rose-400 text-xs"></i>
+                                @endif
+                                Locked
+                            </div>
+                        </div>
+
+                    </div>
+
+                    {{-- Exam weeks breakdown --}}
+                    @php
+                        $examWeekNos = collect($lockedWeeks)->filter(fn ($t) => $t === 'exam')->keys();
+                        $ntWeekNos   = collect($lockedWeeks)->filter(fn ($t) => $t === 'non_teaching')->keys();
+                    @endphp
+                    @if ($examWeekNos->isNotEmpty() || $ntWeekNos->isNotEmpty())
+                        <div class="mt-2.5 flex flex-wrap gap-1.5">
+                            @foreach ($examWeekNos as $wn)
+                                <x-wizard.badge variant="amber" icon="clipboard">Wk {{ $wn }} Exam</x-wizard.badge>
+                            @endforeach
+                            @foreach ($ntWeekNos as $wn)
+                                <x-wizard.badge variant="rose" icon="calendar-x">Wk {{ $wn }} Non-Teaching</x-wizard.badge>
+                            @endforeach
                         </div>
                     @endif
                 </div>
-            </div>
-        </x-wizard.info-card>
+            @endif
+
+        </div>{{-- /info card --}}
     </div>
 
     {{-- ══ Empty State ═════════════════════════════════════════════════════════ --}}
     @if ($syllabusWeeks->isEmpty())
-        <x-empty-state   
+        <x-empty-state
             icon="calendar-x"
             title="No weeks generated yet"
-            description="Select an academic calendar in the previous step, then click Generate Weeks.">
+            message="Select an academic calendar in the previous step, then click Generate Weeks.">
             <x-wizard.btn variant="sm-success"
                 wire:click="generateWeeklyCoverage"
                 :disabled="! $academic_calendar_id"
@@ -132,16 +219,7 @@
 
         @php $hasLEC = isset($courseComponents['LEC']); $hasLAB = isset($courseComponents['LAB']); @endphp
 
-        {{--
-            ── LEC / LAB Tab Switcher ────────────────────────────────────────────
-            UX design:
-            - Clicking a tab fires setComponentType() which in one Livewire request:
-            (a) saves the current component silently, (b) switches, (c) repopulates.
-            - wire:loading on wire:target="setComponentType" shows a spinner ON the
-            tab that was clicked while the request is in flight.
-            - The active tab is always highlighted correctly from $activeComponent
-            (server-driven, not Alpine-driven) so it stays consistent after re-render.
-        --}}
+        {{-- ── LEC / LAB Tab Switcher ────────────────────────────────────────── --}}
         @if ($hasLEC && $hasLAB)
             <div class="mb-5">
                 <div class="inline-flex items-center gap-1 p-1 bg-slate-100 rounded-xl">
@@ -200,7 +278,6 @@
 
                 </div>
 
-                {{-- Inline status while switching --}}
                 <div wire:loading wire:target="setComponentType"
                     class="mt-2 flex items-center gap-1.5 text-xs text-slate-400">
                     <i class="bx bx-loader-alt bx-spin"></i>
@@ -209,7 +286,6 @@
             </div>
 
         @elseif ($hasLEC || $hasLAB)
-            {{-- Single component label --}}
             <div class="mb-4">
                 <x-wizard.badge :variant="$hasLEC ? 'emerald' : 'blue'" :dot="true">
                     {{ $hasLEC ? 'Lecture (LEC)' : 'Laboratory (LAB)' }}
@@ -218,12 +294,6 @@
         @endif
 
         {{-- ── Accordion ────────────────────────────────────────────────────── --}}
-        {{--
-            Alpine $watch: when a week is collapsed (oldVal changes), saveWeek(oldVal)
-            fires — committing edits before moving to another week.
-            This also ensures wire:model.lazy has had a chance to sync on the blur
-            that happens when the user clicks the next accordion header.
-        --}}
         <div x-data="{
                 openWeek: {{ $syllabusWeeks->first()?->week_no ?? 1 }},
                 init() {
@@ -245,6 +315,9 @@
                     $isLocked = isset($lockedWeeks[$week->week_no]);
                     $lockType = $lockedWeeks[$week->week_no] ?? null;
 
+                    // Week 1 is always the MVGO week — no CO dropdown, just a badge
+                    $isMvgo = ((int) $week->week_no === 1);
+
                     $savedTopic = $weekInputs[$wKey]['topic'] ?? '';
                     $refCount   = count(array_filter($weekInputs[$wKey]['references'] ?? [], fn ($r) => trim($r['text'] ?? '') !== ''));
                     $matCount   = count(array_filter($weekInputs[$wKey]['materials'] ?? [], fn ($m) => trim($m['name'] ?? '') !== '' || trim($m['url'] ?? '') !== ''));
@@ -255,10 +328,10 @@
                         default        => 'Locked',
                     };
 
-                    // CO code lookup for the accordion badge
+                    // CO badge in accordion header (only for non-MVGO weeks)
                     $coId   = $weekInputs[$wKey]['course_outcome_id'] ?? null;
                     $coCode = null;
-                    if ($coId) {
+                    if (! $isMvgo && $coId) {
                         foreach ($courseOutcomes as $co) {
                             if ($co['id'] == $coId) { $coCode = $co['co_code']; break; }
                         }
@@ -272,23 +345,25 @@
                         @click="openWeek = openWeek === {{ $week->week_no }} ? null : {{ $week->week_no }}"
                         @class([
                             'w-full flex items-center px-5 py-3.5 transition-colors duration-100 focus:outline-none text-left',
-                            'hover:bg-rose-50/40 bg-rose-50/20' => $isLocked,
-                            'hover:bg-slate-50'                 => ! $isLocked,
+                            'hover:bg-rose-50/40 bg-rose-50/20'   => $isLocked,
+                            'hover:bg-violet-50/30 bg-violet-50/10' => ! $isLocked && $isMvgo,
+                            'hover:bg-slate-50'                   => ! $isLocked && ! $isMvgo,
                         ])>
 
-                        {{-- Left: week badge + label + date + lock/CO pill --}}
                         <div class="flex items-center gap-3 min-w-0 flex-1">
-
                             <span @class([
                                 'inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold shrink-0',
-                                'bg-rose-100 text-rose-700 ring-1 ring-rose-300' => $isLocked,
-                                'bg-slate-100 text-slate-600'                    => ! $isLocked,
+                                'bg-rose-100 text-rose-700 ring-1 ring-rose-300'     => $isLocked,
+                                'bg-violet-100 text-violet-700 ring-1 ring-violet-300' => ! $isLocked && $isMvgo,
+                                'bg-slate-100 text-slate-600'                        => ! $isLocked && ! $isMvgo,
                             ])>
                                 {{ $week->week_no }}
                             </span>
 
                             <div class="flex items-center gap-2 flex-wrap min-w-0">
-                                <span class="font-semibold text-sm {{ $isLocked ? 'text-rose-700' : 'text-slate-800' }} shrink-0">
+                                <span class="font-semibold text-sm shrink-0 {{
+                                    $isLocked ? 'text-rose-700' : ($isMvgo ? 'text-violet-800' : 'text-slate-800')
+                                }}">
                                     Week {{ $week->week_no }}
                                 </span>
 
@@ -298,20 +373,23 @@
 
                                 @if ($isLocked)
                                     <x-wizard.badge variant="rose" icon="lock-alt">{{ $lockLabel }}</x-wizard.badge>
+                                @elseif ($isMvgo)
+                                    {{-- Week 1 always shows MVGO badge --}}
+                                    <x-wizard.badge variant="violet" icon="star">MVGO</x-wizard.badge>
                                 @else
                                     @if ($coCode)
                                         <x-wizard.badge variant="emerald">{{ $coCode }}</x-wizard.badge>
                                     @endif
-                                    @if ($savedTopic)
-                                        <span class="text-xs text-slate-400 truncate max-w-xs hidden md:block">
-                                            — {{ \Illuminate\Support\Str::limit($savedTopic, 55) }}
-                                        </span>
-                                    @endif
+                                @endif
+
+                                @if (! $isLocked && $savedTopic)
+                                    <span class="text-xs text-slate-400 truncate max-w-xs hidden md:block">
+                                        — {{ \Illuminate\Support\Str::limit($savedTopic, 55) }}
+                                    </span>
                                 @endif
                             </div>
                         </div>
 
-                        {{-- Right: event/ref/material pills + chevron --}}
                         <div class="flex items-center gap-2 shrink-0 ml-3">
                             @if (! $isLocked && (count($events) > 0 || $refCount > 0 || $matCount > 0))
                                 @if (count($events) > 0)
@@ -333,7 +411,7 @@
 
                     {{-- Accordion Body ────────────────────────────────────── --}}
                     <div x-show="openWeek === {{ $week->week_no }}" x-cloak
-                        class="px-5 pb-5 pt-1 {{ $isLocked ? 'bg-rose-50/20' : 'bg-white' }}">
+                        class="px-5 pb-5 pt-1 {{ $isLocked ? 'bg-rose-50/20' : ($isMvgo ? 'bg-violet-50/10' : 'bg-white') }}">
 
                         {{-- LOCKED ────────────────────────────────────────── --}}
                         @if ($isLocked)
@@ -355,7 +433,6 @@
                                 @endif
                             </x-wizard.alert>
 
-                            {{-- Other non-locking events --}}
                             @php $otherEvents = array_filter($events, fn ($ev) => ! in_array($ev['type'], ['exam', 'non_teaching'])); @endphp
                             @if (count($otherEvents) > 0)
                                 <x-wizard.alert type="info" title="Other events this week">
@@ -370,8 +447,26 @@
                                 </x-wizard.alert>
                             @endif
 
-                        {{-- EDITABLE ──────────────────────────────────────── --}}
+                        {{-- EDITABLE (all weeks including MVGO) ────────────── --}}
                         @else
+
+                            {{--
+                                MVGO notice — shown at top of Week 1 body only.
+                                Explains why there is no CO dropdown.
+                                Fields are NOT disabled — faculty can fill all details.
+                            --}}
+                            @if ($isMvgo)
+                                <x-wizard.alert type="info" class="mb-4">
+                                    <div class="flex items-start gap-2">
+                                        <x-wizard.badge variant="violet" icon="star" class="shrink-0 mt-0.5">MVGO</x-wizard.badge>
+                                        <span>
+                                            Week 1 is the <strong>Mission-Vision-Goals-Objectives</strong> week.
+                                            It is required for every syllabus. You may optionally add an assessment task —
+                                            if provided, it will appear in Course Evaluation.
+                                        </span>
+                                    </div>
+                                </x-wizard.alert>
+                            @endif
 
                             {{-- Non-locking calendar events --}}
                             @if (count($events) > 0)
@@ -399,34 +494,37 @@
                                 </div>
                             @endif
 
-                            {{--
-                                EDITABLE FORM FIELDS
-                                ─────────────────────────────────────────────────────────────────
-                                wire:model.lazy binds each field to weekInputs.w{n}.field.
-                                On mount(), populateWeekInputs() fills these from the DB,
-                                so existing saved data appears immediately as editable content.
-
-                                KEY: 'w{week_no}' e.g. 'w1', 'w3' — the 'w' prefix prevents
-                                PHP from silently casting the key to an integer, which would
-                                break the Livewire JSON snapshot round-trip.
-
-                                NEVER add loadData() to save/blur paths — it would overwrite
-                                what the user is actively typing with stale DB values.
-                            --}}
-
                             {{-- Form fields --}}
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                                {{-- CO field — MVGO badge for Week 1, select for all others --}}
                                 <div class="md:col-span-2">
-                                    <x-form.label for="co_{{ $wKey }}">Course Outcome</x-form.label>
-                                    <x-form.select id="co_{{ $wKey }}"
-                                        wire:model.lazy="weekInputs.{{ $wKey }}.course_outcome_id">
-                                        <option value="">— Select Course Outcome —</option>
-                                        @foreach ($courseOutcomes as $outcome)
-                                            <option value="{{ $outcome['id'] }}">
-                                                {{ $outcome['co_code'] }} – {{ \Illuminate\Support\Str::limit($outcome['description'], 70) }}
-                                            </option>
-                                        @endforeach
-                                    </x-form.select>
+                                    @if ($isMvgo)
+                                        {{--
+                                            Week 1: no CO dropdown. Show a read-only MVGO label.
+                                            All other fields (ULO, assessment, topics, TLA) remain
+                                            fully editable — faculty can optionally add tasks.
+                                        --}}
+                                        <x-form.label>Outcome</x-form.label>
+                                        <div class="flex items-center gap-2 mt-1 px-3 py-2.5
+                                                    rounded-xl border border-violet-200 bg-violet-50/60">
+                                            <x-wizard.badge variant="violet" icon="star">MVGO</x-wizard.badge>
+                                            <span class="text-xs text-violet-700 font-medium">
+                                                Mission-Vision-Goals-Objectives
+                                            </span>
+                                        </div>
+                                    @else
+                                        <x-form.label for="co_{{ $wKey }}">Course Outcome</x-form.label>
+                                        <x-form.select id="co_{{ $wKey }}"
+                                            wire:model.lazy="weekInputs.{{ $wKey }}.course_outcome_id">
+                                            <option value="">— Select Course Outcome —</option>
+                                            @foreach ($courseOutcomes as $outcome)
+                                                <option value="{{ $outcome['id'] }}">
+                                                    {{ $outcome['co_code'] }} – {{ \Illuminate\Support\Str::limit($outcome['description'], 70) }}
+                                                </option>
+                                            @endforeach
+                                        </x-form.select>
+                                    @endif
                                 </div>
 
                                 <div>
@@ -436,9 +534,13 @@
                                         wire:model.lazy="weekInputs.{{ $wKey }}.learning_outcomes" />
                                 </div>
                                 <div>
-                                    <x-form.label for="at_{{ $wKey }}">Assessment Task</x-form.label>
+                                    <x-form.label for="at_{{ $wKey }}">Assessment Task
+                                        @if ($isMvgo)
+                                            <span class="text-slate-400 font-normal text-xs ml-1">(optional)</span>
+                                        @endif
+                                    </x-form.label>
                                     <x-form.textarea id="at_{{ $wKey }}" rows="4"
-                                        placeholder="Enter assessment task…"
+                                        placeholder="{{ $isMvgo ? 'Optional — e.g. Orientation Quiz' : 'Enter assessment task…' }}"
                                         wire:model.lazy="weekInputs.{{ $wKey }}.assessment_task" />
                                 </div>
                                 <div>
@@ -541,10 +643,9 @@
 
                             {{-- Per-week save footer --}}
                             <div class="flex items-center justify-between mt-5 pt-3 border-t border-slate-100">
-                                <p class="text-xs text-slate-400 flex items-center gap-1">
-                                    <i class="bx bx-info-circle"></i>
-                                    Auto-saves when you collapse this week or use Save All above.
-                                </p>
+                                <x-wizard.alert type="info" class="px-3 py-1.5">
+                                    Changes are auto-saved when you collapse this section or navigate away. Use the Save buttons to persist without leaving the section.
+                                </x-wizard.alert>
                                 <x-wizard.btn variant="sm-success"
                                     wire:click="saveWeek({{ $week->week_no }})"
                                     wire:loading.attr="disabled"
@@ -552,20 +653,22 @@
                                     loading="Saving…">
                                     <i class="bx bx-save"></i> Save Week {{ $week->week_no }}
                                 </x-wizard.btn>
+                                <x-wizard.btn variant="cancel" type="reset">
+                                    Reset
+                                </x-wizard.btn>
                             </div>
 
-                        @endif {{-- end locked/editable --}}
-                    </div>{{-- /body --}}
-                </div>{{-- /wire:key --}}
+                        @endif
+                    </div>
+                </div>
             @endforeach
 
         </div>{{-- /accordion --}}
 
-        <p class="text-xs text-slate-400 mt-4 flex items-center gap-1">
-            <i class="bx bx-bulb"></i>
-            Use <strong>Save Week N</strong> per accordion section or <strong>Save All</strong> to persist everything at once.
-            Navigating steps (Next / Previous) also auto-saves.
-        </p>
+        <x-wizard.alert type="info" class="mt-4">
+            <i class="bx bx-info-circle text-sky-400"></i>
+            Remember to click <strong>Save Week N</strong> for each week or <strong>Save All</strong> at the top to persist your changes.
+        </x-wizard.alert>
 
     @endif
 </div>

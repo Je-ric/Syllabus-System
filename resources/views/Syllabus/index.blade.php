@@ -27,7 +27,7 @@
             <div class="flex flex-col rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
 
                 {{-- Card header — bg-gradient-to-r (was bg-linear-to-r, invalid Tailwind) --}}
-                <div class="px-4 py-3 bg-gradient-to-r from-slate-50 to-emerald-50/60 border-b border-slate-200">
+                <div class="px-4 py-3 bg-linear-to-r from-slate-50 to-emerald-50/60 border-b border-slate-200">
                     <h3 class="font-bold text-slate-800 font-mono">
                         {{ $syllabus->course->course_code }}
                     </h3>
