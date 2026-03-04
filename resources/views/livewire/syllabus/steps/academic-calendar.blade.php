@@ -1,6 +1,7 @@
 <div>
     <x-wizard.step-header
         title="Academic Calendar"
+        icon="calendar"
         description="Choose the academic year and semester for this syllabus." />
 
     <div class="max-w-sm">

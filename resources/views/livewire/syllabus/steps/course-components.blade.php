@@ -1,7 +1,8 @@
 <div>
     <x-wizard.step-header
         title="Course Components"
-        description="Fill in lecture and laboratory details. Changes auto-save when you navigate away." />
+        icon="notepad"
+        description="Fill in details. Changes auto-save when you navigate away." />
 
     {{-- ══ Lecture ══════════════════════════════════════════════════════════════ --}}
     <div class="mb-6 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">

@@ -1,19 +1,3 @@
-{{--
-    course-outcomes.blade.php
-    Editable CO list for a syllabus step.
-    Livewire: CourseOutcomesStep  |  Alpine: courseOutcomesManager()
-
-    Row states:
-      Saved   (co.id truthy) → emerald badge, trash calls $wire.call('removeSavedOutcome', co.id)
-      Unsaved (co.id null)   → amber border + badge + "unsaved" hint, × splices from array
-
-    Save flow:
-      "Save All" → saveCos() in Alpine → $wire.call('saveCourseOutcomes', this.cos)
-      Step navigation → onSaveRequested() in Livewire reads $this->courseOutcomes (@entangle)
-
-    No auto-save on blur. No $wire.set() on blur. Pure Alpine x-model on textareas.
---}}
-
 <div x-data="courseOutcomesManager(@entangle('courseOutcomes'))" class="space-y-4 text-slate-800">
 
     {{-- ── Header ──────────────────────────────────────────────────────────── --}}
