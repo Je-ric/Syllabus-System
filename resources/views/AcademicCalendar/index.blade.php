@@ -17,9 +17,23 @@
                 <x-empty-state
                     icon="bx-calendar"
                     title="No Academic Calendars"
-                    message="Create academic calendars to manage semester dates and events." /> 
+                    message="Create academic calendars to manage semester dates and events." />
             @else
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+
+                    <x-feedback-status.alert type="info" :showTitle="false" class="mb-4 xl:col-span-2">
+                        <div class="text-sm leading-relaxed">
+                            <span class="font-semibold">Remember:</span>
+                            Use
+                            <x-feedback-status.status-indicator variant="slate" size="sm">
+                                Manage Events 
+                            </x-feedback-status.status-indicator>
+                            to add or remove holidays, exams, breaks, and other dates. Academic years with existing events
+                            cannot be edited or deleted until those events are removed. Remove the events from
+                            <strong>Manage Events</strong> first to enable updating or deleting this academic year.
+                        </div>
+                    </x-feedback-status.alert>
+
                     @foreach ($calendars->groupBy('academic_year') as $year => $semesters)
                         @php
                             $totalEvents = $semesters->flatMap->events->count();
@@ -30,14 +44,14 @@
                         <div class="border border-slate-200/80 bg-white/90 p-5 rounded-2xl shadow-sm flex flex-col">
                             <div class="flex flex-wrap items-center justify-between gap-3">
                                 <h2 class="text-lg font-semibold text-slate-800">Academic Year: {{ $year }}</h2>
-                                <span class="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+                                <x-feedback-status.status-indicator variant="emerald" size="sm" :dot="true">
                                     {{ $semesters->count() }} semester(s)
-                                </span>
+                                </x-feedback-status.status-indicator>
                             </div>
-    
+
                             <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                                 <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                                    <p class="text-xs uppercase tracking-[0.2em] text-slate-500 mb-1">1st Semester</p>
+                                    <x-form.label>1st Semester</x-form.label>
                                     <p class="font-semibold text-slate-700">
                                         {{ $firstSem ? \Carbon\Carbon::parse($firstSem->start_date)->format('M d, Y') : '-' }}
                                         -
@@ -45,7 +59,7 @@
                                     </p>
                                 </div>
                                 <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                                    <p class="text-xs uppercase tracking-[0.2em] text-slate-500 mb-1">2nd Semester</p>
+                                    <x-form.label>2nd Semester</x-form.label>
                                     <p class="font-semibold text-slate-700">
                                         {{ $secondSem ? \Carbon\Carbon::parse($secondSem->start_date)->format('M d, Y') : '-' }}
                                         -
@@ -53,18 +67,24 @@
                                     </p>
                                 </div>
                             </div>
-    
+
                             @if($hasEvents)
-                                <div class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">
-                                    <i class="bx bx-info-circle"></i>
-                                    This academic year has <strong>{{ $totalEvents }} event(s)</strong>. Edit and delete are disabled while events exist. Delete the events from the Manage Events page if you need to modify this calendar.
-                                </div>
+                                <x-feedback-status.alert type="warning" :showTitle="false" class="mt-4 text-sm">
+                                    <div class="flex flex-col gap-1">
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-semibold">Edit/Delete locked</span>
+                                            <x-feedback-status.status-indicator variant="amber" size="sm" :dot="true">
+                                                {{ $totalEvents }} event{{ $totalEvents !== 1 ? 's' : '' }}
+                                            </x-feedback-status.status-indicator>
+                                        </div>
+                                    </div>
+                                </x-feedback-status.alert>
                             @endif
-    
+
                             <div class="mt-4 flex items-center gap-2">
                                 <x-button href="{{ route('academic.calendar.events.index', $year) }}"
                                     variant="table-manage">Manage Events</x-button>
-    
+
                                 @if($hasEvents)
                                     <x-button variant="table-edit" disabled class="opacity-50 cursor-not-allowed min-w-10 px-3" title="Update">
                                         <i class="bx bx-edit text-lg"></i>
@@ -77,7 +97,7 @@
                                         <i class="bx bx-edit text-lg"></i>
                                     </x-button>
                                 @endif
-    
+
                                 @if($hasEvents)
                                     <x-button type="button" variant="table-danger" disabled class="opacity-50 cursor-not-allowed min-w-10 px-3" title="Delete">
                                         <i class="bx bx-trash text-lg"></i>
@@ -93,7 +113,7 @@
                                     </x-button>
                                 @endif
                             </div>
-    
+
                             @if(!$hasEvents)
                                 @include('AcademicCalendar.modals.deleteAYModal', ['year' => $year, 'semesters' => $semesters])
                             @endif

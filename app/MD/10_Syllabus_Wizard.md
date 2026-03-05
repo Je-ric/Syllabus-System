@@ -5,21 +5,25 @@ Use this when changing logic, debugging behavior, or explaining flow to non-tech
 
 ## Scope and Source of Truth
 
+- Step list source:
+  - `app/Models/Syllabus.php` (`getWizardSteps()`)
 - Parent wizard:
-- `app/Livewire/Syllabus/SyllabusWizard.php`
-- `resources/views/livewire/syllabus/syllabus-wizard.blade.php`
+  - `app/Livewire/Syllabus/SyllabusWizard.php`
+  - `resources/views/livewire/syllabus/syllabus-wizard.blade.php`
 - Step components:
-- `app/Livewire/Syllabus/Steps/AcademicCalendarStep.php`
-- `app/Livewire/Syllabus/Steps/ComponentsStep.php`
-- `app/Livewire/Syllabus/Steps/CourseOutcomesStep.php`
-- `app/Livewire/Syllabus/Steps/WeeklyCoverageStep.php`
-- `app/Livewire/Syllabus/Steps/ReviewStep.php`
+  - `app/Livewire/Syllabus/Steps/AcademicCalendarStep.php`
+  - `app/Livewire/Syllabus/Steps/ComponentsStep.php`
+  - `app/Livewire/Syllabus/Steps/CourseOutcomesStep.php`
+  - `app/Livewire/Syllabus/Steps/WeeklyCoverageStep.php`
+  - `app/Livewire/Syllabus/Steps/CourseEvaluationStep.php`
+  - `app/Livewire/Syllabus/Steps/ReviewStep.php`
 - Step views:
-- `resources/views/livewire/syllabus/steps/academic-calendar.blade.php`
-- `resources/views/livewire/syllabus/steps/course-components.blade.php`
-- `resources/views/livewire/syllabus/steps/course-outcomes.blade.php`
-- `resources/views/livewire/syllabus/steps/weekly-coverage.blade.php`
-- `resources/views/livewire/syllabus/steps/review.blade.php`
+  - `resources/views/livewire/syllabus/steps/academic-calendar.blade.php`
+  - `resources/views/livewire/syllabus/steps/course-components.blade.php`
+  - `resources/views/livewire/syllabus/steps/course-outcomes.blade.php`
+  - `resources/views/livewire/syllabus/steps/weekly-coverage.blade.php`
+  - `resources/views/livewire/syllabus/steps/course-evaluation.blade.php`
+  - `resources/views/livewire/syllabus/steps/review.blade.php`
 
 Related docs:
 - `app/MD/02_Academic_Calendar_and_Events.md`
@@ -41,7 +45,8 @@ The UI renders these steps:
 2. `course_components`
 3. `course_outcomes`
 4. `weekly_coverage`
-5. `review`
+5. `course_evaluation`
+6. `review`
 
 Note:
 - Any legacy mention of `co_po_mapping` is outdated for this wizard screen and should not be treated as an active tab here.
@@ -82,6 +87,15 @@ Practical meaning:
 - Switching step and saving happen in one round trip for better speed.
 - Wizard does not wait for a second request just to switch tabs.
 
+## Wizard UI Conditions (If / Then)
+
+- If user clicks `Next`, `Previous`, or a step tab:
+  - Then a full-screen "Saving & switching…" overlay is shown via `wire:loading` until Livewire re-renders.
+- If a tab is before the current step index:
+  - Then it is styled as "completed" (visual only; not a validation gate).
+- If a child step component does not have a `:key` attribute:
+  - Then Livewire keeps it mounted; step switching is show/hide only (intentional for speed and state preservation).
+
 ## Submit Conditions (If / Then)
 
 When `Submit for Review` is clicked:
@@ -97,6 +111,10 @@ When `Submit for Review` is clicked:
 
 - If no syllabus week exists:
 - Then block submit and show error toast.
+
+- If Course Evaluation is incomplete:
+  - Then block submit and show error toast.
+  - (Definition: at least one assessable week exists, and every assessable week_content has a non-null weight.)
 
 - If `course_outcomes` step is marked dirty:
 - Then block submit and show warning toast to save course outcomes first.
@@ -116,6 +134,8 @@ Purpose:
 If / Then:
 - If user changes dropdown:
 - Then `updatedAcademicCalendarId()` runs.
+- If component is not yet loaded (`isLoaded = false`):
+  - Then `updatedAcademicCalendarId()` returns early (prevents double-save during mount).
 - If validation passes:
 - Then save `academic_calendar_id` to syllabus.
 - Then emit `syllabus-step-saved`.
@@ -134,6 +154,7 @@ Purpose:
 If / Then:
 - If first load and no LEC row exists:
 - Then prefill LEC name/email/phone/office from logged-in user profile (if available).
+  - Prefill only fills fields that are currently empty.
 
 - If course has lab (`has_lec_lab = true`):
 - Then LAB section is shown and required.
@@ -143,6 +164,7 @@ If / Then:
 - If any LEC/LAB field changes:
 - Then mark step dirty.
 - Then do not auto-save immediately.
+  - (Implementation: changes are only tracked after the component is loaded, and only for `lec_*` / `lab_*` fields.)
 
 Save behavior:
 - On `syllabus-save-step`, validate completeness and save with `updateOrCreate`.
@@ -155,28 +177,34 @@ Purpose:
 - Create and maintain CO list for the syllabus.
 
 If / Then:
-- If user types in description:
-- Then local Alpine value updates first.
-- If textarea loses focus:
-- Then Livewire receives one update (`$wire.set(...)`) and marks step dirty.
-
-- If user clicks Add CO while any CO description is blank:
-- Then block add and show warning.
-
-- If user removes a CO row:
-- Then resequence CO codes (`CO1`, `CO2`, ...), mark dirty.
+- Course Outcomes are stored in a Livewire-owned `rows` array:
+  - Each row is `['id' => int|null, 'description' => string]`.
+- If there are no DB rows yet:
+  - Then the UI still shows 1 blank row (form is never empty on first visit).
+- If user clicks **Add CO**:
+  - Then append a new blank row (no validation gate on adding).
+- If user removes a row with an existing DB `id`:
+  - Then delete it immediately in DB.
+  - Then remove the row from the local array.
+- If parent requests save (`syllabus-save-step` for `course_outcomes`):
+  - Then save runs in `silent` mode:
+    - No warning toast when all rows are blank.
+    - Step is still considered "saved" from the parent’s perspective.
 
 Save behavior:
-- Recompute sequential `co_code` before save.
-- Delete DB rows removed in UI.
-- Update changed existing rows.
-- Insert new non-empty rows.
+- Blank descriptions are ignored (not saved; no error).
+- If all rows are blank:
+  - Then save exits early.
+  - If not silent (Save All button), a warning toast is shown.
+- Saved COs are always re-sequenced and re-coded as `CO1`, `CO2`, ... in the save order.
+- Save updates existing rows (matched by `id`) and creates missing rows.
+- After save, any DB COs not present in the saved set are deleted (DB mirrors UI state).
+- After a successful non-silent save:
+  - Then mark `course_outcomes` as clean via `syllabus-step-dirty dirty:false`.
 
-Critical condition:
-- If DB already has CO rows and all submitted descriptions are blank:
-- Then block save with error.
-
-Step is marked clean when successful save confirms at least one valid CO still exists.
+Data load (PO table in the step):
+- If syllabus course + program outcomes exist:
+  - Then show each PO with its PO text and the I/E/D level from `course_curriculum_maps` (via `course.programOutcomes()->withPivot('ied')`).
 
 ## 4) Weekly Coverage Step
 
@@ -192,31 +220,59 @@ Generation rules:
 
 - If weeks already exist:
 - Then `ensureWeeksGenerated()` skips creating duplicates.
+- If weeks already exist and user clicks Regenerate:
+  - Then all existing weeks + week contents are deleted and recreated from the calendar.
+  - Then all previously encoded weekly coverage is lost (UI asks for confirmation).
 
 - If weeks do not exist:
 - Then create sequential week records from calendar start/end date in 7-day blocks.
 - Then create default `WeekContent` rows for available components (LEC/LAB).
 
-Locking rules (current implementation):
-- Weeks are locked dynamically if that week contains event type `exam` or `non_teaching`.
-- Locked week is visible but not editable.
-- Locked week blocks:
-- `saveWeek`
-- `add/remove reference`
-- `add/remove material`
-- `saveWeeklyEntries` write path
+- If academic calendar contains event type `break`:
+  - Then any 7-day block that contains a break date is skipped entirely.
+  - Then the cursor advances to the next block.
+  - Then `week_no` does NOT increment for the skipped block (week numbers stay sequential with only created weeks).
 
-Important note:
-- Event type `non_teaching` is currently referenced in weekly coverage logic.
-- Calendar event validation in events controller currently allows only:
-- `holiday`, `exam`, `break`, `other`
-- So `non_teaching` lock path may never trigger unless event rules are expanded.
+Locking rules (current implementation):
+- If a week range contains an event type `exam`:
+  - Then that week is marked locked as `exam`.
+  - Then UI shows an "Exam Week" badge and disables editing.
+  - Then assessment task is auto-filled for that component:
+    - LEC: `1st Term Exam`, `2nd Term Exam`, `Final Term Exam` (in order, capped)
+    - LAB: `1st Term Practical Exam`, `2nd Term Practical Exam`, `Final Term Practical Exam` (in order, capped)
+- If a week range contains an event type `non_teaching`:
+  - Then that week is marked locked as `non_teaching`.
+  - Then UI shows a "Non-Teaching Week" badge and disables editing.
+  - Then assessment task is auto-filled as `Non-Teaching Week` for all components.
+- If a week is locked:
+  - Then server-side guards prevent:
+    - `saveWeek`
+    - `resetWeek`
+    - `addReference/removeReference`
+    - `addMaterial/removeMaterial`
+    - `saveAllWeeklyEntries` write path (skips locked weeks)
 
 Editing rules:
 - Uses `weekInputs['w{week_no}']` key format to avoid PHP numeric key coercion issues.
-- Collapsing one accordion week triggers save of previous week.
+- If user collapses a week and opens a different week:
+  - Then Alpine watches `openWeek` and triggers `$wire.saveWeek(oldWeekNo)`.
 - Save All persists all unlocked weeks.
 - `loadData()` is intentionally not called in save paths to avoid overwriting in-progress user edits.
+
+MVGO rule (Week 1):
+- If `week_no === 1`:
+  - Then CO selection is replaced by a fixed MVGO badge (Mission-Vision-Goals-Objectives).
+  - Then assessment task is optional.
+  - If an assessment task is entered for Week 1:
+    - Then it will appear in Course Evaluation; otherwise it will not.
+
+Calendar event display:
+- If the week is editable and has events:
+  - Then all events are displayed with a type chip.
+  - Event dot colors: `holiday` → emerald, `break` → blue, others → amber.
+- If the week is locked:
+  - Then only `exam` / `non_teaching` events are shown in the main lock alert.
+  - Then other events (e.g., holiday/break) are shown separately under "Other events this week".
 
 LEC/LAB switching:
 - If both components exist, user can switch tab.
@@ -224,8 +280,50 @@ LEC/LAB switching:
 - Save current component data silently.
 - Change active component.
 - Reload inputs for new component.
+- If LAB is requested but the course has no LAB component:
+  - Then the switch is ignored (stays on current component).
 
-## 5) Review Step
+## 5) Course Evaluation Step
+
+Purpose:
+- Encode the weight (%) for each assessment task generated from Weekly Coverage.
+
+Row generation rules (If / Then):
+- If Weekly Coverage has no assessment tasks:
+  - Then show empty state (no table).
+- If a week has assessment_task empty for both LEC and LAB:
+  - Then it does not appear in the evaluation table.
+- If assessment_task is `Non-Teaching Week` on either side:
+  - Then that week is excluded from evaluation rows.
+- If assessment_task contains the word `exam` (case-insensitive) on either side:
+  - Then the row is treated as an exam row (`is_exam = true`) and visually highlighted.
+  - Then the term label increments in order (capped): `1st Term`, `2nd Term`, `Final Term`.
+- If Week 1 has an assessment task:
+  - Then the row is flagged `is_mvgo = true` and the outcome label is forced to `MVGO`.
+- If the course has no LAB:
+  - Then only LEC columns render and total expected is 100%.
+- If the course has LAB:
+  - Then both LEC + LAB columns render and totals are expected as 67% (LEC) + 33% (LAB).
+- If a component has no task for a row:
+  - Then its task cell shows “No LEC task” / “No LAB task”, and the weight input is disabled.
+
+Save rules (If / Then):
+- If Save Evaluation is clicked:
+  - Then save all rows via `SyllabusEvaluationItem::updateOrCreate()` per `week_content_id`.
+  - If a row is exam:
+    - Then its `kind` is `exam`, and its `exam_type` is mapped from the term label.
+  - Else:
+    - Then its `kind` defaults to `activity`.
+
+Completion rules (used by wizard submit gate):
+- Assessable week contents are those with:
+  - `assessment_task` not empty AND not equal to `Non-Teaching Week`
+- If there are zero assessable week contents:
+  - Then the step is considered incomplete.
+- If any assessable week content has no weight (NULL):
+  - Then the step is considered incomplete.
+
+## 6) Review Step
 
 Purpose:
 - Show final summary before submit.
@@ -242,6 +340,7 @@ Summary includes:
 - Lecture/Lab component details
 - Course outcomes list
 - Weekly coverage count and exam-type mapping summary
+- Course evaluation rows / weights summary (as implemented by Review step)
 
 ## Event Contract (Parent <-> Child)
 
@@ -265,8 +364,9 @@ Intent:
 3. Fill lecture/lab details.
 4. Add course outcomes and save them.
 5. Generate weeks and fill weekly coverage for editable weeks.
-6. Review everything.
-7. Submit for review.
+6. Encode Course Evaluation weights.
+7. Review everything.
+8. Submit for review.
 
 If something required is missing:
 - The system blocks submit and tells the user what to fix.
