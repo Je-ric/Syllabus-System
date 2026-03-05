@@ -166,29 +166,35 @@
                             <x-table.head class="border-b border-slate-200">
                                 <x-table.row>
                                     <x-table.th class="border-0 w-20">PO</x-table.th>
-                                    <x-table.th class="border-0">Learning Outcome</x-table.th>
-                                    <x-table.th class="border-0 w-36 min-w-36">IED Level</x-table.th>
+                                    <x-table.th class="border-0">Program Outcome</x-table.th>
+                                    <x-table.th class="border-0 w-40 text-center">IED Level</x-table.th>
                                 </x-table.row>
                             </x-table.head>
+
                             <x-table.body class="divide-y divide-slate-100">
                                 @foreach ($programOutcomes as $outcome)
                                     <x-table.row class="hover:bg-emerald-50/40 transition-colors">
-                                        <x-table.td class="border-0 font-mono font-bold text-sm text-slate-700">
+                                        
+                                        <x-table.td class="border-0 w-20 font-mono font-bold text-sm text-slate-700">
                                             {{ $outcome->po_code }}
                                         </x-table.td>
-                                        <x-table.td class="border-0 text-sm text-slate-700 leading-relaxed wrap-break-words max-w-36">
+
+                                        <x-table.td class="border-0 text-sm text-slate-700 leading-relaxed wrap-break-words">
                                             {{ $outcome->po_text }}
                                         </x-table.td>
-                                        <x-table.td class="border-0 w-36 min-w-36 text-sm text-slate-700">
+
+                                        <x-table.td class="border-0 w-40 text-sm text-slate-700">
                                             @php $selected = $poSelections[$outcome->id] ?? null; @endphp
-                                            <div class="flex justify-start items-center gap-3 whitespace-nowrap">
+
+                                            <div class="flex items-center justify-start gap-3 whitespace-nowrap">
                                                 <x-form.radio
                                                     :name="'po_mapping[' . $outcome->id . ']'"
                                                     :options="['I' => 'I', 'E' => 'E', 'D' => 'D']"
                                                     :value="$selected"
-                                                    class="m-0" />
+                                                    class="m-0 shrink-0" />
                                             </div>
                                         </x-table.td>
+
                                     </x-table.row>
                                 @endforeach
                             </x-table.body>
