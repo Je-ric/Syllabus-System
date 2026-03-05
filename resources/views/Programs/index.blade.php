@@ -55,18 +55,18 @@
 
                 {{-- ── PEO Tab ────────────────────────────────────────────────── --}}
                 <x-slot name="slot_peo">
-                    <div class="rounded-2xl border border-slate-200 bg-white/90 shadow-sm p-5">
+                    <x-wizard.section
+                        title="Program Educational Objectives (PEOs)"
+                        icon="list-check"
+                        color="emerald">
                         <div class="mb-4">
-                            <h3 class="text-sm font-semibold text-slate-800">
-                                Program Educational Objectives
-                            </h3>
-                            <p class="mt-0.5 text-xs text-slate-500">
+                            <p class="mx-1 text-xs text-slate-500">
                                 Three to five years after graduation, graduates of
                                 <strong>{{ $program->name }}</strong> are expected to be:
                             </p>
                         </div>
                         <livewire:programs.manage-peos :program="$program" />
-                    </div>
+                    </x-wizard.section>
                 </x-slot>
 
                 {{-- ── PO Tab ─────────────────────────────────────────────────── --}}
@@ -78,19 +78,18 @@
                     </div>
 
                     {{-- Editable PO section below the reference --}}
-                    <div class="rounded-2xl border border-slate-200 bg-white/90 shadow-sm p-5">
-                        <div class="mb-4">
-                            <h3 class="text-sm font-semibold text-slate-800">
-                                Program Outcomes
-                            </h3>
-                            <p class="mt-0.5 text-xs text-slate-500">
-                                By the time of graduation, students of
-                                <strong>{{ $program->name }}</strong> have the ability to:
-                            </p>
-                        </div>
-                        <livewire:programs.manage-pos :program="$program" />
-                    </div>
-
+                        <x-wizard.section
+                            title="Program Outcomes (POs)"
+                            icon="target-lock"
+                            color="blue">
+                            <div class="mb-4">
+                                <p class="mt-0.5 text-xs text-slate-500">
+                                    By the time of graduation, students of
+                                    <strong>{{ $program->name }}</strong> have the ability to:
+                                </p>
+                            </div>
+                            <livewire:programs.manage-pos :program="$program" />
+                        </x-wizard.section>
                 </x-slot>
 
             </x-navigation.tabs-modern>

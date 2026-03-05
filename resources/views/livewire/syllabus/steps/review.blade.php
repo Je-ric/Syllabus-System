@@ -7,32 +7,32 @@
 
         <x-wizard.section title="Previews" icon="show" color="slate">
             <div class="flex flex-col sm:flex-row gap-2">
-                <x-wizard.btn
+                <x-button
                     href="{{ route('syllabus.preview.complete', ['syllabus' => $syllabus->id]) }}"
                     variant="outline"
                     target="_blank"
                     rel="noopener"
                     class="flex-1 justify-center">
                     Complete
-                </x-wizard.btn>
+                </x-button>
 
-                <x-wizard.btn
+                <x-button
                     href="{{ route('syllabus.preview.abridged', ['syllabus' => $syllabus->id]) }}"
                     variant="outline"
                     target="_blank"
                     rel="noopener"
                     class="flex-1 justify-center">
                     Abridged
-                </x-wizard.btn>
+                </x-button>
 
-                <x-wizard.btn
+                <x-button
                     href="{{ route('syllabus.preview.assessment', ['syllabus' => $syllabus->id]) }}"
                     variant="outline"
                     target="_blank"
                     rel="noopener"
                     class="flex-1 justify-center">
                     Assessment Plan
-                </x-wizard.btn>
+                </x-button>
             </div>
         </x-wizard.section>
         

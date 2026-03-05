@@ -9,33 +9,33 @@
                             Fill in coverage details per week. Exam and Non-Teaching weeks are locked automatically." >
                 <div class="flex items-center gap-2 flex-wrap">
                     @if (! $weeksGenerated)
-                        <x-wizard.btn variant="sm-success"
+                        <x-button variant="sm-success"
                             wire:click="generateWeeklyCoverage"
                             :disabled="! $academic_calendar_id"
                             wire:target="generateWeeklyCoverage"
                             loading="Generating…">
                             <i class="bx bx-calendar-plus"></i> Generate Weeks
-                        </x-wizard.btn>
+                        </x-button>
                         @if (! $academic_calendar_id)
                             <x-feedback-status.alert type="error" :showTitle="false" class="text-xs">
                                 No academic calendar selected. Please go back to the previous step and select one to generate weeks.
                             </x-feedback-status.alert>
                         @endif
                     @else
-                        <x-wizard.btn variant="sm-warning"
+                        <x-button variant="sm-warning"
                             wire:click="regenerateWeeks"
                             wire:target="regenerateWeeks"
                             wire:confirm="This will delete all existing weeks and recreate them. All content will be lost. Continue?"
                             loading="Regenerating…">
                             <i class="bx bx-refresh"></i> Regenerate Weeks
-                        </x-wizard.btn>
+                        </x-button>
 
-                        <x-wizard.btn variant="sm-success"
+                        <x-button variant="sm-success"
                             wire:click="saveAllWeeklyEntries"
                             wire:target="saveAllWeeklyEntries"
                             loading="Saving…">
                             <i class="bx bx-save"></i> Save All
-                        </x-wizard.btn>
+                        </x-button>
                     @endif
                 </div>
             </div>
@@ -174,13 +174,13 @@
             icon="calendar-x"
             title="No weeks generated yet"
             message="Select an academic calendar in the previous step, then click Generate Weeks.">
-            <x-wizard.btn variant="sm-success"
+            <x-button variant="sm-success"
                 wire:click="generateWeeklyCoverage"
                 :disabled="! $academic_calendar_id"
                 wire:target="generateWeeklyCoverage"
                 loading="Generating…">
                 <i class="bx bx-calendar-plus"></i> Generate Weeks
-            </x-wizard.btn>
+            </x-button>
         </x-empty-state>
     @else
 
@@ -514,10 +514,10 @@
                                         <x-form.label>
                                             <i class="bx bx-book-open text-slate-500"></i> References
                                         </x-form.label>
-                                        <x-wizard.btn variant="sm-primary"
+                                        <x-button variant="sm-primary"
                                             wire:click="addReference({{ $week->week_no }})">
                                             <i class="bx bx-plus text-sm"></i> Add
-                                        </x-wizard.btn>
+                                        </x-button>
                                     </div>
                                     <div class="space-y-2">
                                         @foreach ($weekInputs[$wKey]['references'] ?? [['text' => '']] as $rIdx => $ref)
@@ -549,10 +549,10 @@
                                         <x-form.label>
                                             <i class="bx bx-link text-slate-500"></i> Online Materials
                                         </x-form.label>
-                                        <x-wizard.btn variant="sm-primary"
+                                        <x-button variant="sm-primary"
                                             wire:click="addMaterial({{ $week->week_no }})">
                                             <i class="bx bx-plus text-sm"></i> Add
-                                        </x-wizard.btn>
+                                        </x-button>
                                     </div>
                                     <div class="space-y-3">
                                         @foreach ($weekInputs[$wKey]['materials'] ?? [['name' => '', 'url' => '']] as $mIdx => $mat)
@@ -601,22 +601,22 @@
                                         Locked weeks are guarded server-side; this button is
                                         only shown on editable weeks.
                                     --}}
-                                    <x-wizard.btn variant="sm-cancel"
+                                    <x-button variant="sm-cancel"
                                         wire:click="resetWeek({{ $week->week_no }})"
                                         wire:loading.attr="disabled"
                                         wire:target="resetWeek({{ $week->week_no }})"
                                         wire:confirm="Reset Week {{ $week->week_no }}? This will clear all content for this week. Cannot be undone."
                                         loading="Resetting…">
                                         <i class="bx bx-reset"></i> Reset
-                                    </x-wizard.btn>
+                                    </x-button>
 
-                                    <x-wizard.btn variant="sm-success"
+                                    <x-button variant="sm-success"
                                         wire:click="saveWeek({{ $week->week_no }})"
                                         wire:loading.attr="disabled"
                                         wire:target="saveWeek({{ $week->week_no }})"
                                         loading="Saving…">
                                         <i class="bx bx-save"></i> Save Week {{ $week->week_no }}
-                                    </x-wizard.btn>
+                                    </x-button>
                                 </div>
                             </div>
 

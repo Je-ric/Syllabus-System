@@ -9,12 +9,12 @@
                      not every CO needs to cover all POs.">
 
         {{--
-            Save All — x-wizard.btn provides consistent sm-success styling.
+            Save All — x-button provides consistent sm-success styling.
             The `loading` prop is NOT used because the spinner is driven by
             Alpine's isSaving flag (not wire:loading). Instead we put the
             spinner markup in the slot so Alpine controls show/hide directly.
         --}}
-        <x-wizard.btn variant="sm-success" @click="saveCos()" type="button" x-bind:disabled="isSaving">
+        <x-button variant="sm-success" @click="saveCos()" type="button" x-bind:disabled="isSaving">
             <span x-show="!isSaving" class="inline-flex items-center gap-1.5">
                 <i class="bx bx-save" aria-hidden="true"></i> Save All
             </span>
@@ -27,7 +27,7 @@
                 </svg>
                 Saving…
             </span>
-        </x-wizard.btn>
+        </x-button>
     </x-wizard.step-header>
 
     {{-- ── CO rows ─────────────────────────────────────────────────────────── --}}

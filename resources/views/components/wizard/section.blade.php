@@ -44,7 +44,7 @@
             @if ($icon)
                 <span aria-hidden="true"
                     class="shrink-0 flex items-center justify-center
-                           w-7 h-7 rounded-full {{ $p['icon_bg'] }}">
+                            w-7 h-7 rounded-full {{ $p['icon_bg'] }}">
                     <i class="bx bx-{{ $icon }} text-base leading-none"></i>
                 </span>
             @endif

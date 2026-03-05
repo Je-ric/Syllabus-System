@@ -23,15 +23,14 @@
 
     @include('livewire.programs.include.flash-message')
 
-    <x-wizard.section title="Program Outcomes (POs)" icon="target-lock" color="blue">
-    
+
     {{-- ── PO rows ─────────────────────────────────────────────────────────── --}}
     <template x-for="(po, index) in pos" :key="po.id ?? ('new-' + index)">
 
         <div :class="po.id
                 ? 'border-slate-200 bg-white/90'
                 : 'border-amber-200 bg-amber-50/40'"
-            class="rounded-2xl border shadow-sm p-4 transition-colors duration-200">
+            class="border shadow-sm p-4 transition-colors duration-200">
 
             {{-- ── Text row ────────────────────────────────────────────────── --}}
             <div class="flex items-start gap-3">
@@ -167,31 +166,29 @@
     {{-- ── Action buttons ──────────────────────────────────────────────────── --}}
     <div class="flex items-center gap-2 pt-1">
 
-        <x-wizard.btn
+        <x-button
             variant="add-dashed"
             type="button"
             @click="addPo()"
-            class="flex-1 w-auto border-blue-300 text-blue-700 hover:border-blue-500 hover:bg-blue-50">
+            class="flex-1 w-full">
             <i class="bx bx-plus text-base"></i>
             Add PO
-        </x-wizard.btn>
+        </x-button>
 
-        <x-wizard.btn
+        <x-button
             variant="save"
             type="button"
             @click="savePos()"
             x-bind:disabled="isSaving"
-            class="px-5 py-3">
+            class="whitespace-nowrap">
             <span x-show="!isSaving" class="inline-flex items-center gap-2">
                 <i class="bx bx-save text-base"></i> Save All
             </span>
             <span x-show="isSaving" x-cloak class="inline-flex items-center gap-2">
                 <i class="bx bx-loader-alt bx-spin text-base"></i> Saving…
             </span>
-        </x-wizard.btn>
+        </x-button>
     </div>
-
-</x-wizard.section>
 </div>
 
 <script>

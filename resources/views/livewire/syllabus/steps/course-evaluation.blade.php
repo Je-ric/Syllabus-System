@@ -9,12 +9,12 @@
                         The 60% passing standard applies to every assessment per semester.">
 
         @if (count($rows) > 0)
-            <x-wizard.btn variant="sm-success"
+            <x-button variant="sm-success"
                 wire:click="save"
                 wire:target="save"
                 loading="Saving…">
                 <i class="bx bx-save"></i> Save Evaluation
-            </x-wizard.btn>
+            </x-button>
         @endif
     </x-wizard.step-header>
 

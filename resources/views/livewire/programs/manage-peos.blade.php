@@ -14,18 +14,13 @@
 
     @include('livewire.programs.include.flash-message')
 
-    <x-wizard.section
-        title="Program Educational Objectives (PEOs)"
-        icon="list-check"
-        color="emerald">
-
     {{-- ── PEO rows ────────────────────────────────────────────────────────── --}}
     <template x-for="(peo, index) in peos" :key="peo.id ?? ('new-' + index)">
 
         <div :class="peo.id
                 ? 'border-slate-200 bg-white/90'
                 : 'border-amber-200 bg-amber-50/40'"
-            class="rounded-2xl border shadow-sm p-4 transition-colors duration-200">
+            class="border shadow-sm p-4 transition-colors duration-200">
 
             <div class="flex items-start gap-3">
 
@@ -94,41 +89,38 @@
 
     {{-- Empty state --}}
     <template x-if="peos.length === 0">
-        <div class="rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50
-                    py-10 text-center">
-            <i class="bx bx-graduation text-4xl text-slate-300"></i>
-            <p class="mt-2 text-sm text-slate-400">No PEOs yet. Add the first one below.</p>
-        </div>
+        <x-empty-state
+            icon="graduation"
+            title="No PEOs yet"
+            description="Add the first one below." />
     </template>
 
     {{-- ── Action buttons ──────────────────────────────────────────────────── --}}
     <div class="flex items-center gap-2 pt-1">
 
-        <x-wizard.btn
+        <x-button
             variant="add-dashed"
             type="button"
             @click="addPeo()"
-            class="flex-1 w-auto">
-            <i class="bx bx-plus text-base"></i>
+            class="flex-1 w-full">
+            <i class="bx bx-plus"></i>
             Add PEO
-        </x-wizard.btn>
+        </x-button>
 
-        <x-wizard.btn
+        <x-button
             variant="save"
             type="button"
             @click="savePeos()"
             x-bind:disabled="isSaving"
-            class="px-5 py-3">
+            class="whitespace-nowrap">
             <span x-show="!isSaving" class="inline-flex items-center gap-2">
                 <i class="bx bx-save text-base"></i> Save All
             </span>
             <span x-show="isSaving" x-cloak class="inline-flex items-center gap-2">
                 <i class="bx bx-loader-alt bx-spin text-base"></i> Saving…
             </span>
-        </x-wizard.btn>
+        </x-button>
     </div>
-
-</x-wizard.section>
 </div>
 
 <script>
