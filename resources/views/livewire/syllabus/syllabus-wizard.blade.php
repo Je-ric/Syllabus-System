@@ -5,10 +5,12 @@
 @endphp
 
 <div>
-    <x-header-with-button title="{{ $syllabus->id ? 'Edit' : 'Create' }} Syllabus"
-        description="{{ $course->course_code }} - {{ $course->course_title }}">
+    <x-page-header
+        icon="bx-book-open"
+        title="{{ $syllabus->id ? 'Edit' : 'Create' }} Syllabus"
+        desc="{{ $course->course_code }} - {{ $course->course_title }}">
         <x-button variant="cancel" href="{{ route('syllabus.index') }}">&larr; Back to Syllabi</x-button>
-    </x-header-with-button>
+    </x-page-header>
 
     {{-- ══ Full-screen saving overlay ══════════════════════════════════════════
         Shown only during goNextStep / goPreviousStep / clickTab.

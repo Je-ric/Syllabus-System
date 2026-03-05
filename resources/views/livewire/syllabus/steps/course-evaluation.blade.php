@@ -76,7 +76,7 @@
                                     Assessment Task
                                 </th>
                                 <th class="px-4 py-2.5 text-left text-xs font-medium text-slate-600 w-32
-                                           {{ $courseHasLab ? 'border-r border-slate-200' : '' }}">
+                                            {{ $courseHasLab ? 'border-r border-slate-200' : '' }}">
                                     Weight (%)
                                 </th>
                                 @if ($courseHasLab)
@@ -136,8 +136,8 @@
                                                 wire:model.lazy="inputs.{{ $outcomeInputId }}.outcome_label"
                                                 placeholder="e.g. CO1"
                                                 class="w-full text-xs rounded-lg border border-slate-300 bg-white
-                                                       px-2 py-1.5 focus:border-emerald-400 focus:ring-1
-                                                       focus:ring-emerald-300 focus:outline-none placeholder:text-slate-300" />
+                                                        px-2 py-1.5 focus:border-emerald-400 focus:ring-1
+                                                        focus:ring-emerald-300 focus:outline-none placeholder:text-slate-300" />
                                         @else
                                             <span class="text-slate-300 text-xs">—</span>
                                         @endif

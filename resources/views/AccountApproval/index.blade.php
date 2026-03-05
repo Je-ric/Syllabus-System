@@ -2,9 +2,13 @@
 
 @section('content')
 
-    <x-header-with-button title="User Accounts"
-                        description="Manage user access, statuses, and role assignments">
-    </x-header-with-button>
+    <x-page-header
+        icon="bx-user-check"
+        title="User Accounts"
+        desc="Manage user access, statuses, and role assignments">
+    </x-page-header>
 
-    <livewire:account-approval.manage-queue />
+    <x-panel>
+        <livewire:account-approval.manage-queue />
+    </x-panel>
 @endsection

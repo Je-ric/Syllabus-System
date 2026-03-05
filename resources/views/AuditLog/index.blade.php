@@ -2,10 +2,13 @@
 
 @section('content')
 
-    <x-header-with-button
+    <x-page-header
+        icon="bx-history"
         title="Audit Logs"
-        description="Track system actions, changes, and approvals in real-time" />
+        desc="Track system actions, changes, and approvals in real-time" />
 
-    <livewire:audit-log.audit-log />
+    <x-panel>
+        <livewire:audit-log.audit-log />
+    </x-panel>
 
 @endsection
