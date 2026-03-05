@@ -27,7 +27,7 @@
         <div id="sidebar-overlay" class="fixed inset-0 bg-green-900/50 backdrop-blur-sm z-30 hidden lg:hidden {{ $isWizardRoute ? 'hidden' : '' }}"></div>
 
         <aside id="app-sidebar"
-                class="fixed inset-y-0 left-0 z-40 w-72
+                class="fixed inset-y-0 left-0 z-40 w-64
                     bg-white shadow-2xl border-r border-slate-200
                     transform -translate-x-full lg:translate-x-0
                     transition-transform duration-300 ease-out
@@ -145,7 +145,7 @@
             </div>
         </aside>
 
-        <div class="flex flex-col min-h-screen {{ $isWizardRoute ? '' : 'lg:ml-72' }}">
+        <div class="flex flex-col min-h-screen {{ $isWizardRoute ? '' : 'lg:ml-64' }}">
             <header class="sticky top-0 z-20 green-grad backdrop-blur border-b border-slate-200">
                 <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
                     <div class="flex items-center gap-3">

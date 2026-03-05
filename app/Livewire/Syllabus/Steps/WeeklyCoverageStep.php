@@ -16,70 +16,22 @@ use Livewire\Component;
 
 class WeeklyCoverageStep extends Component
 {
-    // ── Public state (Livewire snapshots these between requests) ──────────────
-
     public int    $syllabusId;
     public ?int   $academic_calendar_id = null;
     public bool   $weeksGenerated       = false;
+    public array  $courseComponents     = [];
+    public string $activeComponent      = 'LEC';
+    public array  $courseOutcomes       = [];
+    public array  $lockedWeeks          = [];
+    public array  $weekEvents           = [];
+    public array  $weekInputs           = [];
 
-    // Keyed by component type string: ['LEC' => [...], 'LAB' => [...]]
-    public array  $courseComponents = [];
-
-    // Which component tab is currently active: 'LEC' or 'LAB'
-    public string $activeComponent = 'LEC';
-
-    // Course outcomes for the CO dropdown in each week form.
-    // Shape: [['id' => 1, 'co_code' => 'CO1', 'description' => '...']]
-    public array $courseOutcomes = [];
-
-    // Which weeks are locked and why.
-    // Format: [ week_no => 'exam' | 'non_teaching' ]
-    // Computed fresh on every loadData() — no extra DB column needed.
-    public array $lockedWeeks = [];
-
-    // Calendar events per week, shown as info badges in the accordion header.
-    // Format: [ week_no => [ ['name' => '...', 'type' => '...', 'date_display' => '...'], ... ] ]
-    public array $weekEvents = [];
-
-    // The editable form data for each week.
-    //
-    // KEY FORMAT: 'w1', 'w2', ... — never plain integers.
-    //
-    // Why the 'w' prefix:
-    // PHP silently casts any numeric string key to int. Livewire serialises this
-    // array to JSON between requests. Without the prefix: key "1" is stored as
-    // int 1, JSON encodes as {"1":{...}}, decoded back as int 1. Your lookup for
-    // "w1" then finds nothing. The 'w' prefix makes keys genuinely non-numeric so
-    // they survive the JSON round-trip unchanged.
-    //
-    // CRITICAL RULE: Only call populateWeekInputs() from loadData() and
-    // setComponentType(). Never from save actions or blur events — that would
-    // overwrite what the user is currently typing with stale DB values.
-    //
-    // Shape per week key:
-    // [
-    //   'course_outcome_id'   => int|null,
-    //   'learning_outcomes'   => string,
-    //   'assessment_task'     => string,
-    //   'topic'               => string,
-    //   'teaching_activities' => string,
-    //   'references'          => [ ['text' => ''], ... ],
-    //   'materials'           => [ ['name' => '', 'url' => ''], ... ],
-    // ]
-    public array $weekInputs = [];
-
-    // Rebuilt on every render() call.
-    // Protected so Livewire does NOT serialise it between requests.
     protected Collection $syllabusWeeks;
-
-    // ── Boot ──────────────────────────────────────────────────────────────────
 
     public function boot(): void
     {
         $this->syllabusWeeks = collect();
     }
-
-    // ── Mount ─────────────────────────────────────────────────────────────────
 
     public function mount(int $syllabusId): void
     {
@@ -87,12 +39,8 @@ class WeeklyCoverageStep extends Component
         $this->loadData();
     }
 
-    // ── Render ────────────────────────────────────────────────────────────────
-
     public function render()
     {
-        // Re-fetch weeks on every render so the accordion reflects any changes
-        // from generate/regenerate without needing a full loadData() call.
         $this->syllabusWeeks = SyllabusWeek::where('syllabus_id', $this->syllabusId)
             ->orderBy('week_no')
             ->get();
@@ -107,7 +55,6 @@ class WeeklyCoverageStep extends Component
 
     // ── Event listeners ───────────────────────────────────────────────────────
 
-    // Wizard dispatches this when the user navigates TO this step.
     #[On('syllabus-step-changed')]
     public function onStepChanged(string $step): void
     {
@@ -116,16 +63,12 @@ class WeeklyCoverageStep extends Component
         }
     }
 
-    // Fired when the user picks a new academic calendar in the previous step.
     #[On('syllabus-calendar-updated')]
     public function onCalendarUpdated(): void
     {
         $this->loadData();
     }
 
-    // Wizard dispatches this just before navigating AWAY from this step.
-    // We persist $weekInputs now. Do NOT call loadData() here — that would
-    // overwrite the user's typed values with the last-saved DB state.
     #[On('syllabus-save-step')]
     public function onSaveRequested(string $step): void
     {
@@ -138,7 +81,6 @@ class WeeklyCoverageStep extends Component
 
     // ── Public actions ────────────────────────────────────────────────────────
 
-    // Generate SyllabusWeek + WeekContent rows for the first time.
     public function generateWeeklyCoverage(): void
     {
         $syllabus = $this->freshSyllabus();
@@ -148,23 +90,15 @@ class WeeklyCoverageStep extends Component
             return;
         }
 
-        // if academic calendar events type == exam or non-teaching, disabled the weeks in weekly coverage, 
-        // it means it will create a week but the users/faculty cant input in that week
-
-        // Reload components fresh — needed by ensureWeeksGenerated()
         $this->reloadCourseComponents();
         $this->academic_calendar_id = (int) $syllabus->academic_calendar_id;
         $this->createWeekRows($syllabus);
-
-        // Full reload is correct here — new DB rows were just created and we
-        // need to populate $weekInputs and compute locked weeks from fresh data.
         $this->loadData();
 
         $this->dispatch('lw-toast', type: 'success', message: 'Weekly coverage generated.');
         $this->dispatch('syllabus-step-saved', step: 'weekly_coverage');
     }
 
-    // Delete all weeks and recreate them from the academic calendar.
     public function regenerateWeeks(): void
     {
         $syllabus = $this->freshSyllabus();
@@ -194,13 +128,17 @@ class WeeklyCoverageStep extends Component
     }
 
     // Save a single week when the user clicks "Save Week N".
+    // Only shows a success toast when something actually changed — prevents
+    // constant "saved" noise when the user clicks Save on an unmodified week.
     public function saveWeek(int $weekNo): void
     {
         if ($weekNo <= 0 || isset($this->lockedWeeks[$weekNo])) {
             return;
         }
-        $this->saveWeeklyEntries($weekNo);
-        $this->dispatch('lw-toast', type: 'success', message: "Week {$weekNo} saved.");
+        $changed = $this->saveWeeklyEntries($weekNo);
+        if ($changed) {
+            $this->dispatch('lw-toast', type: 'success', message: "Week {$weekNo} saved.");
+        }
     }
 
     // Reset a single week — clears all content from DB and blanks the form inputs.
@@ -263,14 +201,16 @@ class WeeklyCoverageStep extends Component
     }
 
     // Save every unlocked week at once.
+    // Only toasts when at least one week actually had changes.
     public function saveAllWeeklyEntries(): void
     {
-        $this->saveWeeklyEntries();
-        $this->dispatch('lw-toast', type: 'success', message: 'All weeks saved.');
+        $changed = $this->saveWeeklyEntries();
+        if ($changed) {
+            $this->dispatch('lw-toast', type: 'success', message: 'All weeks saved.');
+        }
         $this->dispatch('syllabus-step-saved', step: 'weekly_coverage');
     }
 
-    // Add a blank reference row to the given week.
     public function addReference(int $weekNo): void
     {
         if (isset($this->lockedWeeks[$weekNo])) {
@@ -279,8 +219,6 @@ class WeeklyCoverageStep extends Component
         $this->weekInputs['w' . $weekNo]['references'][] = ['text' => ''];
     }
 
-    // Remove a reference row by its array index.
-    // Always keeps at least one blank row so the section does not disappear.
     public function removeReference(int $weekNo, int $index): void
     {
         if (isset($this->lockedWeeks[$weekNo])) {
@@ -296,7 +234,6 @@ class WeeklyCoverageStep extends Component
         }
     }
 
-    // Add a blank online material row to the given week.
     public function addMaterial(int $weekNo): void
     {
         if (isset($this->lockedWeeks[$weekNo])) {
@@ -305,8 +242,6 @@ class WeeklyCoverageStep extends Component
         $this->weekInputs['w' . $weekNo]['materials'][] = ['name' => '', 'url' => ''];
     }
 
-    // Remove an online material row by its array index.
-    // Always keeps at least one blank row so the section does not disappear.
     public function removeMaterial(int $weekNo, int $index): void
     {
         if (isset($this->lockedWeeks[$weekNo])) {
@@ -322,11 +257,6 @@ class WeeklyCoverageStep extends Component
         }
     }
 
-    // Switch between LEC and LAB tabs.
-    // All three steps happen in ONE Livewire round-trip:
-    //   1. Persist the current component's $weekInputs to DB silently.
-    //   2. Change $activeComponent.
-    //   3. Re-populate $weekInputs from DB for the new component.
     public function setComponentType(string $type): void
     {
         $type = strtoupper($type);
@@ -351,15 +281,11 @@ class WeeklyCoverageStep extends Component
 
     // ── Private helpers ───────────────────────────────────────────────────────
 
-    // Always query the Syllabus fresh with its relations.
-    // Livewire strips eager-loaded relations on rehydration, so $this->syllabus
-    // (if stored as a property) would return null for ->academicCalendar etc.
     private function freshSyllabus(): ?Syllabus
     {
         return Syllabus::with('academicCalendar', 'courseOutcomes')->find($this->syllabusId);
     }
 
-    // Reload LEC/LAB component data from the database.
     private function reloadCourseComponents(): void
     {
         $this->courseComponents = \App\Models\CourseComponent::where('syllabus_id', $this->syllabusId)
@@ -368,16 +294,6 @@ class WeeklyCoverageStep extends Component
             ->toArray();
     }
 
-    // ── Private: master data loader ───────────────────────────────────────────
-
-    // Load everything this step needs from the database.
-    //
-    // Call ONLY from:
-    //   mount()
-    //   generateWeeklyCoverage() / regenerateWeeks()
-    //   onStepChanged() / onCalendarUpdated()
-    //
-    // NEVER from save actions, blur handlers, or setComponentType() directly.
     private function loadData(): void
     {
         $syllabus = $this->freshSyllabus();
@@ -391,7 +307,6 @@ class WeeklyCoverageStep extends Component
 
         $this->reloadCourseComponents();
 
-        // Prefer LEC; fall back to LAB for lab-only courses
         $this->activeComponent = isset($this->courseComponents['LEC']) ? 'LEC'
             : (isset($this->courseComponents['LAB']) ? 'LAB' : 'LEC');
 
@@ -414,22 +329,6 @@ class WeeklyCoverageStep extends Component
         $this->populateWeekInputs();
     }
 
-    // ── Private: locked week logic ────────────────────────────────────────────
-
-    // Determine which weeks are locked and auto-write labels into WeekContent.
-    //
-    // Lock rules:
-    //   'exam'         → lock + write "1st Term Exam" / "1st Term Practical Exam" etc.
-    //                    Labels increment per occurrence: 1st, 2nd, Final.
-    //   'non_teaching' → lock + write "Non-Teaching Week" into assessment_task for all
-    //                    component types so it surfaces in Course Evaluation display.
-    //   'break'        → NOT locked. Week stays fully editable. Shown as an info badge only.
-    //
-    // Why write to WeekContent for exam and non_teaching:
-    //   CourseEvaluationStep decides which rows to show by reading assessment_task.
-    //   Writing the label here means no special detection code is needed there —
-    //   it simply shows every row where assessment_task is non-empty (and not
-    //   "Non-Teaching Week", which is filtered out in CourseEvaluationStep).
     private function computeLockedWeeks(Syllabus $syllabus): void
     {
         $this->weekEvents  = [];
@@ -443,7 +342,6 @@ class WeeklyCoverageStep extends Component
             ->orderBy('date')
             ->get();
 
-        // Labels for exam terms, assigned in order of first occurrence
         $examTermLabels = ['1st Term', '2nd Term', 'Final Term'];
         $examsSeen      = 0;
 
@@ -451,19 +349,16 @@ class WeeklyCoverageStep extends Component
             $weekStart = Carbon::parse($week->start_date);
             $weekEnd   = Carbon::parse($week->end_date);
 
-            // Collect all events that fall within this week's date range
             $eventsThisWeek = $allEvents->filter(
                 fn ($event) => Carbon::parse($event->date)->between($weekStart, $weekEnd)
             );
 
-            // Store as plain arrays — Eloquent models must not live in public Livewire properties
             $this->weekEvents[$week->week_no] = $eventsThisWeek->map(fn ($event) => [
                 'name'         => $event->name,
                 'type'         => $event->type,
                 'date_display' => Carbon::parse($event->date)->format('M d'),
             ])->values()->all();
 
-            // Only exam and non_teaching lock the week; break does NOT
             $lockingEvent = $eventsThisWeek->first(
                 fn ($event) => in_array($event->type, ['exam', 'non_teaching'], true)
             );
@@ -487,12 +382,6 @@ class WeeklyCoverageStep extends Component
                     ->update(['assessment_task' => $termLabel . ' Practical Exam']);
             }
 
-            // ── Non-teaching week: write label into WeekContent ───────────────
-            // Written to ALL component type rows for this week.
-            // CourseEvaluationStep explicitly skips rows with this value so it
-            // does not appear as an assessment task in the evaluation table.
-            // It is stored so the weekly coverage locked banner can display it,
-            // and so any review/print step can reference it.
             if ($lockingEvent->type === 'non_teaching') {
                 WeekContent::where('syllabus_week_id', $week->id)
                     ->update(['assessment_task' => 'Non-Teaching Week']);
@@ -500,11 +389,6 @@ class WeeklyCoverageStep extends Component
         }
     }
 
-    // ── Private: populate form inputs ─────────────────────────────────────────
-
-    // Read WeekContent rows from the DB and fill $weekInputs.
-    // Only call from loadData() and setComponentType().
-    // Calling from save/blur would overwrite the user's in-progress edits.
     private function populateWeekInputs(): void
     {
         if ($this->syllabusWeeks->isEmpty()) {
@@ -514,27 +398,23 @@ class WeeklyCoverageStep extends Component
 
         $weekIds = $this->syllabusWeeks->pluck('id')->all();
 
-        // One WeekContent per (week_id, component_type) combination
         $weekContents = WeekContent::whereIn('syllabus_week_id', $weekIds)
             ->where('component_type', $this->activeComponent)
             ->get()
             ->keyBy('syllabus_week_id');
 
-        // References — multiple rows per week
         $allRefs = Reference::where('syllabus_id', $this->syllabusId)
             ->whereIn('syllabus_week_id', $weekIds)
             ->orderBy('id')
             ->get()
             ->groupBy('syllabus_week_id');
 
-        // Online materials — multiple rows per week
         $allMats = OnlineMaterial::where('syllabus_id', $this->syllabusId)
             ->whereIn('syllabus_week_id', $weekIds)
             ->orderBy('id')
             ->get()
             ->groupBy('syllabus_week_id');
 
-        // Convert null / "N/A" sentinel values to blank string for clean display
         $clean = fn (?string $value): string => ($value === null || $value === 'N/A') ? '' : $value;
 
         $inputs = [];
@@ -564,10 +444,16 @@ class WeeklyCoverageStep extends Component
         $this->weekInputs = $inputs;
     }
 
-    // ── Private: create week rows ─────────────────────────────────────────────
-
-    // Create one SyllabusWeek row per calendar week plus a WeekContent row for
+    // Create one SyllabusWeek row per calendar week, plus a WeekContent row for
     // each component type (LEC and/or LAB).
+    //
+    // Break weeks are SKIPPED entirely — a week whose range overlaps a 'break'
+    // event is not created. Week numbers stay sequential (no gaps). A 3-week
+    // break reduces total week count by 3.
+    //
+    // Exam and non-teaching weeks are created here and then locked later by
+    // computeLockedWeeks() once the rows exist.
+    //
     // Idempotent — exits immediately if weeks already exist for this syllabus.
     private function createWeekRows(Syllabus $syllabus): void
     {
@@ -589,6 +475,15 @@ class WeeklyCoverageStep extends Component
             return;
         }
 
+        // Pre-load break events so we can skip break weeks cheaply inside the loop.
+        // A week is considered a break week if any break event date falls within
+        // [weekStart, weekEnd]. Skipped weeks do not create any rows.
+        $breakDates = AcademicCalendarEvent::where('academic_calendar_id', $syllabus->academic_calendar_id)
+            ->where('type', 'break')
+            ->orderBy('date')
+            ->pluck('date')
+            ->map(fn ($d) => Carbon::parse($d)->startOfDay());
+
         $start  = Carbon::parse($calendar->start_date)->startOfDay();
         $end    = Carbon::parse($calendar->end_date)->startOfDay();
         $weekNo = 1;
@@ -599,6 +494,16 @@ class WeeklyCoverageStep extends Component
             $weekEnd   = $cursor->copy()->addDays(6);
             if ($weekEnd->gt($end)) {
                 $weekEnd = $end->copy();
+            }
+
+            // Skip break weeks — institution is closed, no coverage needed.
+            // The cursor still advances so the rest of the calendar is unaffected.
+            $isBreak = $breakDates->contains(
+                fn ($d) => $d->between($weekStart, $weekEnd)
+            );
+            if ($isBreak) {
+                $cursor = $weekEnd->copy()->addDay();
+                continue;
             }
 
             $syllabusWeek = SyllabusWeek::create([
@@ -640,28 +545,27 @@ class WeeklyCoverageStep extends Component
         ]);
     }
 
-    // ── Private: save to DB ───────────────────────────────────────────────────
-
-    // Persist $weekInputs to the database.
-    // Pass $onlyWeekNo to save a single week; omit it to save all.
-    // Called by: saveWeek(), saveAllWeeklyEntries(), setComponentType(), onSaveRequested().
-    // Do NOT call loadData() after — that would overwrite the user's typed values.
-    private function saveWeeklyEntries(?int $onlyWeekNo = null): void
+    private function saveWeeklyEntries(?int $onlyWeekNo = null): bool
     {
         $weeks = SyllabusWeek::where('syllabus_id', $this->syllabusId)
             ->orderBy('week_no')
             ->get();
 
         if ($weeks->isEmpty()) {
-            return;
+            return false;
         }
+
+        // Track whether anything actually differed from DB values.
+        // updateOrCreate always runs even for no-op updates, so we compare
+        // the incoming payload against the existing row manually.
+        // Callers check this return value to decide whether to show a toast.
+        $changed = false;
 
         foreach ($weeks as $week) {
             if ($onlyWeekNo !== null && (int) $week->week_no !== $onlyWeekNo) {
                 continue;
             }
 
-            // Server-side guard: never write to locked weeks
             if (isset($this->lockedWeeks[$week->week_no])) {
                 continue;
             }
@@ -673,60 +577,128 @@ class WeeklyCoverageStep extends Component
                 continue;
             }
 
-            // Treat blank string as null for the foreign key
             $courseOutcomeId = (isset($payload['course_outcome_id'])
                 && $payload['course_outcome_id'] !== ''
                 && $payload['course_outcome_id'] !== null)
                 ? (int) $payload['course_outcome_id']
                 : null;
 
+            $incoming = [
+                'course_outcome_id'  => $courseOutcomeId,
+                'learning_outcomes'  => trim((string) ($payload['learning_outcomes']   ?? '')),
+                'assessment_task'    => trim((string) ($payload['assessment_task']     ?? '')),
+                'topics'             => trim((string) ($payload['topic']               ?? '')),
+                'tla'                => trim((string) ($payload['teaching_activities'] ?? '')),
+            ];
+
+            // ── Dirty-check content fields ────────────────────────────────────
+            // Compare each incoming field against the existing DB row.
+            // Casts to string for safe comparison across int/null/'' variants.
+            $existing = WeekContent::where('syllabus_week_id', $week->id)
+                ->where('component_type', $this->activeComponent)
+                ->first();
+
+            $contentChanged = ! $existing || array_reduce(
+                array_keys($incoming),
+                fn (bool $carry, string $k) => $carry
+                    || ((string) ($existing->{$k} ?? '')) !== ((string) ($incoming[$k] ?? '')),
+                false
+            );
+
+            // ── Dirty-check references ────────────────────────────────────────
+            // Sort both sides so order changes (e.g. after delete+reinsert) don't
+            // trigger false positives.
+            $existingRefs = Reference::where('syllabus_id', $this->syllabusId)
+                ->where('syllabus_week_id', $week->id)
+                ->pluck('reference_text')
+                ->map(fn ($t) => trim((string) $t))
+                ->filter()
+                ->sort()
+                ->values()
+                ->all();
+
+            $incomingRefs = collect((array) ($payload['references'] ?? []))
+                ->map(fn ($r) => trim((string) ($r['text'] ?? '')))
+                ->filter()
+                ->sort()
+                ->values()
+                ->all();
+
+            $refsChanged = $existingRefs !== $incomingRefs;
+
+            // ── Dirty-check materials ─────────────────────────────────────────
+            $existingMats = OnlineMaterial::where('syllabus_id', $this->syllabusId)
+                ->where('syllabus_week_id', $week->id)
+                ->get()
+                ->map(fn ($m) => trim($m->material_name ?? '') . '|' . trim($m->url ?? ''))
+                ->sort()
+                ->values()
+                ->all();
+
+            $incomingMats = collect((array) ($payload['materials'] ?? []))
+                ->map(fn ($m) => trim((string) ($m['name'] ?? '')) . '|' . trim((string) ($m['url'] ?? '')))
+                ->filter(fn ($s) => $s !== '|')
+                ->sort()
+                ->values()
+                ->all();
+
+            $matsChanged = $existingMats !== $incomingMats;
+
+            // Skip this week entirely — nothing to write
+            if (! $contentChanged && ! $refsChanged && ! $matsChanged) {
+                continue;
+            }
+
+            $changed = true;
+
             WeekContent::updateOrCreate(
                 [
                     'syllabus_week_id' => $week->id,
                     'component_type'   => $this->activeComponent,
                 ],
-                [
-                    'course_outcome_id'  => $courseOutcomeId,
-                    'learning_outcomes'  => trim((string) ($payload['learning_outcomes']   ?? '')),
-                    'assessment_task'    => trim((string) ($payload['assessment_task']     ?? '')),
-                    'topics'             => trim((string) ($payload['topic']               ?? '')),
-                    'tla'                => trim((string) ($payload['teaching_activities'] ?? '')),
-                ]
+                $incoming
             );
 
-            // Delete + re-insert references (simpler than row-level diffing)
-            Reference::where('syllabus_id', $this->syllabusId)
-                ->where('syllabus_week_id', $week->id)
-                ->delete();
+            // Delete + re-insert references only when they actually changed.
+            // (Simpler than row-level diffing; acceptable for small counts.)
+            if ($refsChanged) {
+                Reference::where('syllabus_id', $this->syllabusId)
+                    ->where('syllabus_week_id', $week->id)
+                    ->delete();
 
-            foreach ((array) ($payload['references'] ?? []) as $ref) {
-                $text = trim((string) ($ref['text'] ?? ''));
-                if ($text !== '') {
-                    Reference::create([
-                        'syllabus_id'      => $this->syllabusId,
-                        'syllabus_week_id' => $week->id,
-                        'reference_text'   => $text,
-                    ]);
+                foreach ((array) ($payload['references'] ?? []) as $ref) {
+                    $text = trim((string) ($ref['text'] ?? ''));
+                    if ($text !== '') {
+                        Reference::create([
+                            'syllabus_id'      => $this->syllabusId,
+                            'syllabus_week_id' => $week->id,
+                            'reference_text'   => $text,
+                        ]);
+                    }
                 }
             }
 
-            // Delete + re-insert materials (simpler than row-level diffing)
-            OnlineMaterial::where('syllabus_id', $this->syllabusId)
-                ->where('syllabus_week_id', $week->id)
-                ->delete();
+            // Delete + re-insert materials only when they actually changed.
+            if ($matsChanged) {
+                OnlineMaterial::where('syllabus_id', $this->syllabusId)
+                    ->where('syllabus_week_id', $week->id)
+                    ->delete();
 
-            foreach ((array) ($payload['materials'] ?? []) as $mat) {
-                $name = trim((string) ($mat['name'] ?? ''));
-                $url  = trim((string) ($mat['url']  ?? ''));
-                if ($name !== '' || $url !== '') {
-                    OnlineMaterial::create([
-                        'syllabus_id'      => $this->syllabusId,
-                        'syllabus_week_id' => $week->id,
-                        'material_name'    => $name ?: 'Online Material',
-                        'url'              => $url,
-                    ]);
+                foreach ((array) ($payload['materials'] ?? []) as $mat) {
+                    $name = trim((string) ($mat['name'] ?? ''));
+                    $url  = trim((string) ($mat['url']  ?? ''));
+                    if ($name !== '' || $url !== '') {
+                        OnlineMaterial::create([
+                            'syllabus_id'      => $this->syllabusId,
+                            'syllabus_week_id' => $week->id,
+                            'material_name'    => $name ?: 'Online Material',
+                            'url'              => $url,
+                        ]);
+                    }
                 }
             }
         }
+
+        return $changed;
     }
 }
