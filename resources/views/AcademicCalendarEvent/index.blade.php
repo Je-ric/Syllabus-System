@@ -1,17 +1,3 @@
-{{-- @extends('layouts.app')
-
-@section('content')
-
-    <x-page-header
-        icon="bx-calendar-event"
-        title="Manage Events - {{ $academicYear }}"
-        desc="Add, edit, and delete events for each semester.">
-        <x-button href="{{ route('academic.calendars.index') }}" variant="cancel">
-            <i class="bx bx-arrow-back"></i> Back
-        </x-button>
-    </x-page-header>
-    <livewire:academic-calendar.manage-events :academicYear="$academicYear" />
-@endsection --}}
 @extends('layouts.app')
 
 @section('content')
@@ -30,8 +16,9 @@
     
         @php
             $tabs = $semesters->map(fn($s) => [
-                'id' => $s->semester,
-                'label' => $s->semester . ' Semester'
+                // Use a safe, stable tab id (must be valid for both JS and Blade slot variable names)
+                'id' => 'sem_' . $s->id,
+                'label' => $s->semester . ' Semester',
             ])->toArray();
         @endphp
     
@@ -46,7 +33,7 @@
             :defaultTab="$tabs[0]['id'] ?? null"
             :stateKey="'academic-calendar-events:' . $academicYear">
             @foreach($semesters as $semester)
-                @slot('slot_' . $semester->semester)
+                <x-slot :name="'slot_sem_' . $semester->id">
                 <div class="grid grid-cols-2 gap-6">
     
                     {{-- Form --}}
@@ -140,7 +127,7 @@
                     </div>
     
                 </div>
-                @endslot
+                </x-slot>
             @endforeach
         </x-navigation.tabs-modern>
     </x-panel>
