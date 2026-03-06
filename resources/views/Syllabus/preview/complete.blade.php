@@ -1062,6 +1062,12 @@
 
                 function appendNodes(nodes, parentPath) {
                     nodes.forEach(child => {
+                        // Special-case tables: split them across pages instead of moving the whole table.
+                        if (child.nodeType === Node.ELEMENT_NODE && child.tagName === "TABLE") {
+                            splitTable(child, () => ensureWrapperPath(parentPath));
+                            return;
+                        }
+
                         let currentWrapper = ensureWrapperPath(parentPath);
                         currentWrapper.appendChild(child);
 
@@ -1104,7 +1110,7 @@
 
             // FIX 3: splitTable — fill the current page first, then continue on next pages.
             // Tables continue across pages WITHOUT repeating the header (cleaner for long tables).
-            function splitTable(table) {
+            function splitTable(table, getAppendTarget) {
                 const thead = table.querySelector("thead");
                 const rows  = Array.from(table.querySelectorAll("tbody tr"));
 
@@ -1113,18 +1119,25 @@
                     return;
                 }
 
-                const pageWasEmpty = !pageHasContent(page);
+                const getTarget = (typeof getAppendTarget === "function")
+                    ? getAppendTarget
+                    : () => page;
+
+                let target = getTarget();
+                const targetWasEmpty = !(target && target.children && target.children.length > 0);
+
                 let shell = createTableShell(table, thead, true);
-                page.appendChild(shell);
+                target.appendChild(shell);
 
                 // If the table header alone doesn't fit (because the page already has content),
                 // move the entire table to a fresh page before adding rows.
-                if (!pageWasEmpty && page.scrollHeight > getMaxPageHeight()) {
-                    page.removeChild(shell);
+                if (!targetWasEmpty && page.scrollHeight > getMaxPageHeight()) {
+                    target.removeChild(shell);
                     page = createNewPage(currentOrientation);
                     container.appendChild(page);
                     shell = createTableShell(table, thead, true);
-                    page.appendChild(shell);
+                    target = getTarget();
+                    target.appendChild(shell);
                 }
 
                 rows.forEach(row => {
@@ -1144,8 +1157,9 @@
                         container.appendChild(page);
 
                         // FIX 2: Continuation table — no header repeat, starts from top of new page
+                        target = getTarget();
                         shell = createTableShell(table, thead, false);
-                        page.appendChild(shell);
+                        target.appendChild(shell);
                         shell.querySelector("tbody").appendChild(row);
                     }
                 });

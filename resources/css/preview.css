@@ -348,6 +348,8 @@ table th {
         page-break-after:  always;
         break-after:       page;
         page-break-inside: avoid;
+        /* Extra safety: keep content inside page box in print preview. */
+        overflow: hidden;
     }
 
     .a4-page.portrait  { page: portrait;  }
@@ -355,5 +357,18 @@ table th {
 
     table {
         page-break-inside: auto;
+    }
+
+    /* Print dialog often uses a slightly smaller printable area; reduce padding in landscape. */
+    .a4-page.landscape {
+        padding: 12mm 12mm;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Weekly coverage tables: remove fixed inline widths to avoid landscape overflow. */
+    .weekly-coverage-table th,
+    .weekly-coverage-table td {
+        width: auto !important;
     }
 }
