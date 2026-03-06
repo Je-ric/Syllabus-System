@@ -445,7 +445,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse (($weeklyCoverageRows['LAB'] ?? []) as $row)
+                    @forelse (($weeklyCoverageRows['LAB'] ?? []) as $row)
                             <tr>
                                 @if (($row['is_exam'] ?? false) === true)
                                     <td style="text-align:center;">{{ $row['week_label'] }}</td>
@@ -627,21 +627,29 @@
             <h3 class="a4-section title-numbered">12. References</h3>
 
             <div class="a4-list">
-                @forelse (($syllabus->references ?? []) as $reference)
-                    <div class="indent-level-1-5">{{ $reference->reference_text }}</div>
+                @forelse (($allReferences ?? []) as $refText)
+                    <div class="indent-level-1-5">{{ $refText }}</div>
                 @empty
-                    {{-- Fallback: static references from the PDF as default placeholder --}}
-                    <div class="indent-level-1-5">Behrouz A. Forouzan, <em>Data Communications and Networking</em> – 7th Edition</div>
-                    <div class="indent-level-1-5">J. FitzGerald, A. Dennis, and A. Durcikova, <em>Business Data Communications and Networking</em>, 12th Edition. Wiley, 2014.</div>
-                    <div class="indent-level-1-5"><em>Business Data Communications and Networking</em> 13th Edition</div>
-                    <div class="indent-level-1-5">W. Stallings, <em>Data and Computer Communications</em>, 9th ed. Prentice Hall, 2010.</div>
-                    <div class="indent-level-1-5" style="margin-top: 6px;"><strong>Online materials:</strong></div>
-                    <div class="indent-level-1-5">
-                        <a href="https://highered.mheducation.com/sites/0073376221/information_center_view0/" target="_blank">
-                            https://highered.mheducation.com/sites/0073376221/information_center_view0/
-                        </a>
-                    </div>
+                    <div class="indent-level-1-5">No references encoded.</div>
                 @endforelse
+
+                    <div class="indent-level-1-5"  style="margin-top:8px; font-weight: bold;">
+                        <strong>Online materials:</strong>
+                    </div>
+
+                    @forelse (($onlineMaterialLinks ?? []) as $url)
+                        @php
+                            $link = Str::startsWith($url, ['http://', 'https://']) ? $url : 'https://' . $url;
+                        @endphp
+
+                        <div class="indent-level-1-5">
+                            <a href="{{ $link }}" target="_blank" style="text-decoration: underline; font-weight: bold;">
+                                {{ $url }}
+                            </a>
+                        </div>
+                    @empty
+                        <div class="indent-level-1-5">No online materials encoded.</div>
+                    @endforelse
             </div>
         </div>
 
@@ -676,7 +684,7 @@
             </div>
         </div>
 
-        
+
 
         <div class="portrait">
             <h3 class="a4-section title-lettered">E. Others</h3>

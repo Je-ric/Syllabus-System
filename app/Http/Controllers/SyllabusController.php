@@ -188,6 +188,8 @@ class SyllabusController extends Controller
             'course.programOutcomes',
             'components',
             'courseOutcomes',
+            'references',
+            'onlineMaterials',
             'weeks.contents.courseOutcome',
             'weeks.contents.evaluation',
         ]);
@@ -308,7 +310,10 @@ class SyllabusController extends Controller
                     'week_no'           => (int) $week->week_no,
                     'is_exam'           => false,
                     'date_range'        => $dateRange,
-                    'co_description'    => $content?->courseOutcome?->description ?? '',
+                    // Wizard rule: Week 1 is MVGO (no CO mapping); show MVGO label in preview.
+                    'co_description'    => (int) $week->week_no === 1
+                        ? 'MVGO — Mission, Vision, Goals & Objectives'
+                        : ($content?->courseOutcome?->description ?? ''),
                     'learning_outcomes' => trim((string) ($content?->learning_outcomes ?? '')),
                     'topics'            => trim((string) ($content?->topics ?? '')),
                     'tla'               => trim((string) ($content?->tla ?? '')),
@@ -316,6 +321,26 @@ class SyllabusController extends Controller
                 ];
             }
         }
+
+        $lower = static fn (string $t): string => function_exists('mb_strtolower')
+            ? mb_strtolower($t)
+            : strtolower($t);
+
+        $allReferences = $syllabus->references
+            ->pluck('reference_text')
+            ->map(fn ($t) => trim((string) $t))
+            ->filter()
+            ->unique(fn ($t) => $lower($t))
+            ->sortBy(fn ($t) => $lower($t))
+            ->values();
+
+        $onlineMaterialLinks = $syllabus->onlineMaterials
+            ->pluck('url')
+            ->map(fn ($t) => trim((string) $t))
+            ->filter()
+            ->unique(fn ($t) => $lower($t))
+            ->sortBy(fn ($t) => $lower($t))
+            ->values();
 
         $evaluationRows = [];
         $evaluationTotals = [
@@ -404,6 +429,8 @@ class SyllabusController extends Controller
             'coursePoIedMap',
             'courseLevel',
             'weeklyCoverageRows',
+            'allReferences',
+            'onlineMaterialLinks',
             'evaluationRows',
             'evaluationTotals'
         );
