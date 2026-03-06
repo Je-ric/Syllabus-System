@@ -141,18 +141,18 @@ body {
 
 /* ── Portrait: 794 × 1122 px at 96 dpi ≈ A4 ── */
 .a4-page.portrait {
-    width:   794px;
-    height:  1122px;
-    padding: 72px 72px 72px 72px;   /* uniform 72 px (~19 mm) inset  */
+    width:   210mm;
+    height:  297mm;
+    padding: 19mm; /* ~72px */
 }
 
 /* ── Landscape: 1122 × 794 px ──
    Content width = 1122 - 72 - 72 = 978 px
    No extra right bleed; tables must not exceed 978 px.           */
 .a4-page.landscape {
-    width:   1122px;
-    height:  794px;
-    padding: 56px 72px 56px 72px;   /* tighter top/bottom, equal L/R */
+    width:   297mm;
+    height:  210mm;
+    padding: 15mm 19mm; /* ~56px top/bottom, ~72px left/right */
 }
 
 /* ═══════════════════════════════════════════════
@@ -170,7 +170,7 @@ body {
 .a4-subtitle {
     text-align: center;
     font-size: 11pt;          /* was 12px – now aligned to body token */
-    color: #4b5563;
+    /* color: #4b5563; */
     margin-top: 2px;
     font-family: var(--font-body);
 }
@@ -301,6 +301,17 @@ table th {
 /* Keep header shading consistent */
 .weekly-coverage-table th {
     background: #d9d9d9;
+}
+
+/* Print-safety: keep wide weekly tables inside the page box (esp. landscape). */
+.weekly-coverage-table {
+    table-layout: fixed;
+}
+
+.weekly-coverage-table th,
+.weekly-coverage-table td {
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 /* ═══════════════════════════════════════════════

@@ -47,10 +47,19 @@
     </div>
 
     <div id="syllabus-content" style="display:none;">
-        <div class="a4-subtitle">Republic of the Philippines</div>
-        <div class="a4-title">CENTRAL LUZON STATE UNIVERSITY</div>
-        <div class="a4-subtitle">Science City of Muñoz, Nueva Ecija</div>
-        <div class="a4-subtitle">Office of the Vice President for Academic Affairs</div>
+
+        <div style="display:grid; grid-template-columns: 80px 1fr 80px; align-items:center; column-gap: 12px;">
+            <div style="display:flex; justify-content:flex-start;">
+                <img src="{{ asset('assets/clsu-logo-green.png') }}" alt="CLSU Logo" style="width:100px; height:auto;" />
+            </div>
+            <div style="text-align:center;">
+                <div class="a4-subtitle">Republic of the Philippines</div>
+                    <div class="a4-title">CENTRAL LUZON STATE UNIVERSITY</div>
+                    <div class="a4-subtitle">Science City of Muñoz, Nueva Ecija</div>
+                    <div class="a4-subtitle">Office of the Vice President for Academic Affairs</div>
+            </div>
+            <div aria-hidden="true"></div>
+        </div>
         <div class="a4-section a4-title">COURSE SYLLABUS</div>
         <div class="a4-subtitle">{{ $syllabus->course->course_code }} - {{ $syllabus->course->course_title }}</div>
 
@@ -618,12 +627,7 @@
                 </tbody>
             </table>
             <p style="margin-top: 4px;" class="indent-level-2"><strong>Passing Mark: 60%</strong></p>
-        </div>
-
-        {{-- ============================================================
-             SECTION 12: REFERENCES
-             ============================================================ --}}
-        <div class="portrait">
+        
             <h3 class="a4-section title-numbered">12. References</h3>
 
             <div class="a4-list">
@@ -651,12 +655,7 @@
                         <div class="indent-level-1-5">No online materials encoded.</div>
                     @endforelse
             </div>
-        </div>
 
-        {{-- ============================================================
-             SECTION 13: COURSE MATERIALS MADE AVAILABLE
-             ============================================================ --}}
-        <div class="portrait">
             <h3 class="a4-section title-numbered">13. Course Materials Made Available</h3>
             <div class="a4-list">
                 @forelse (($syllabus->courseMaterials ?? []) as $material)
@@ -668,13 +667,7 @@
                     <div class="indent-level-1-5">d. Lecture Notes and Slide Presentations</div>
                 @endforelse
             </div>
-        </div>
 
-        {{-- ============================================================
-             SECTION 14: CONTRIBUTION OF COURSE TO MEETING THE
-             PROFESSIONAL COMPONENT
-             ============================================================ --}}
-        <div class="portrait">
             <h3 class="a4-section title-numbered">14. Contribution of Course to Meeting the Professional Component</h3>
             <div class="a4-list">
                 <div class="indent-level-1-5">a. General Education: {{ $syllabus->contribution_general_ed ?? '0' }} %</div>
@@ -682,11 +675,7 @@
                 <div class="indent-level-1-5">c. ITE Professional Courses: {{ $syllabus->contribution_ite_professional ?? '0' }} %</div>
                 <div class="indent-level-1-5">d. ITE Electives: {{ $syllabus->contribution_ite_electives ?? '0' }} %</div>
             </div>
-        </div>
 
-
-
-        <div class="portrait">
             <h3 class="a4-section title-lettered">E. Others</h3>
 
             {{-- 1. Life-long Learning Opportunities --}}
@@ -837,9 +826,7 @@
                 <p class="indent-level-2">Any documented case of dishonesty will be dealt with accordingly based on
                     the guidelines stipulated in the CLSU Code of Student Conduct and Discipline.</p>
             </div>
-        </div>
 
-        <div class="portrait">
             <h3 class="a4-section title-lettered">F. Revision History</h3>
 
             <table border="1" style="width:100%; border-collapse: collapse;">
@@ -868,9 +855,7 @@
                     @endforelse
                 </tbody>
             </table>
-        </div>
 
-        <div class="portrait">
             <h3 class="a4-section title-lettered">G. Preparation, Review and Approval</h3>
 
             <table border="1" style="width:100%; border-collapse: collapse;">
@@ -946,41 +931,55 @@
     <div id="a4-container"></div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const source = document.getElementById("syllabus-content");
+        document.addEventListener("DOMContentLoaded", function () {
+            const source    = document.getElementById("syllabus-content");
             const container = document.getElementById("a4-container");
             const pageCount = document.getElementById("page-count");
-            const PAGE_HEIGHT = {
-                portrait: 1122,
-                landscape: 794
+
+            // Usable content dimensions in px (page size minus padding)
+            // Portrait:  794 - 72 - 72 = 650 px tall content area
+            // Landscape: 794 - 56 - 56 = 682 px tall content area
+            const CONTENT_HEIGHT = {
+                portrait:  978,   // 1122 - 72top - 72bottom
+                landscape: 682,   //  794 - 56top - 56bottom
             };
+
             let currentOrientation = "portrait";
             let page = createNewPage(currentOrientation);
             container.appendChild(page);
 
+            // ── Process each top-level child of #syllabus-content ──────────────────
             Array.from(source.children).forEach(element => {
-                const hasLandscapeClass = element.classList?.contains("landscape");
-                const hasPortraitClass = element.classList?.contains("portrait");
-                const explicitOrientation = hasLandscapeClass ? "landscape" : (hasPortraitClass ?
-                    "portrait" : null);
-                const targetOrientation = explicitOrientation ?? (currentOrientation === "landscape" ?
-                    "portrait" : "portrait");
+                const wantsLandscape = element.classList.contains("landscape");
+                const wantsPortrait  = element.classList.contains("portrait");
 
-                if (targetOrientation !== currentOrientation) {
-                    if (page.children.length > 0) {
+                let targetOrientation;
+                if (wantsLandscape)     targetOrientation = "landscape";
+                else if (wantsPortrait) targetOrientation = "portrait";
+                else                    targetOrientation = currentOrientation;
+
+                // FIX 1: Orientation-tagged elements ALWAYS start a new page.
+                if (wantsLandscape || wantsPortrait) {
+                    // Only start a new page if the current one isn't already empty
+                    // AND the orientation is changing (or it's a fresh section break)
+                    if (pageHasContent(page) || targetOrientation !== currentOrientation) {
                         page = createNewPage(targetOrientation);
                         container.appendChild(page);
                     } else {
+                        // Empty page but wrong orientation — just reclassify it
                         page.classList.remove("portrait", "landscape");
                         page.classList.add(targetOrientation);
                     }
                     currentOrientation = targetOrientation;
-                }
-
-                if (explicitOrientation) {
+                    // Remove orientation classes so content isn't double-styled
                     element.classList.remove("landscape", "portrait");
+                } else if (targetOrientation !== currentOrientation) {
+                    page = createNewPage(targetOrientation);
+                    container.appendChild(page);
+                    currentOrientation = targetOrientation;
                 }
 
+                // Dispatch by element type
                 if (element.tagName === "TABLE") {
                     splitTable(element);
                 } else {
@@ -991,13 +990,30 @@
             source.remove();
             addPageNumbers();
 
+            // ── Helpers ─────────────────────────────────────────────────────────────
+
+            // True if the page already contains any element nodes.
+            // (scrollHeight/clientHeight is unreliable because scrollHeight can equal clientHeight
+            // even when the page contains content that doesn't overflow.)
+            function pageHasContent(p) {
+                return !!(p && p.children && p.children.length > 0);
+            }
+
+            // Measure actual used height inside a page (excludes padding via scrollHeight vs clientHeight gap)
+            function pageContentHeight(p) {
+                return p.scrollHeight - p.clientHeight;
+            }
+
+            // FIX 2 & 4: appendElement — use scrollHeight vs a stored baseline,
+            // NOT the entire page height as the limit.
             function appendElement(el) {
                 page.appendChild(el);
 
-                if (page.scrollHeight > getCurrentPageMaxHeight()) {
+                if (page.scrollHeight > getMaxPageHeight()) {
                     page.removeChild(el);
 
-                    if (['DIV', 'UL', 'OL', 'LI'].includes(el.tagName) && el.children.length > 0) {
+                    // Try splitting containers before giving up and starting a new page
+                    if (canSplit(el)) {
                         splitContainer(el);
                     } else {
                         page = createNewPage(currentOrientation);
@@ -1007,20 +1023,36 @@
                 }
             }
 
+            function canSplit(el) {
+                return (
+                    el.nodeType === Node.ELEMENT_NODE &&
+                    ["DIV", "UL", "OL", "LI", "SECTION"].includes(el.tagName) &&
+                    el.childNodes.length > 0
+                );
+            }
+
+            function getMaxPageHeight() {
+                // Use the rendered page height so pagination stays correct in both
+                // on-screen preview and browser print preview.
+                return page ? page.clientHeight : (currentOrientation === "landscape" ? 794 : 1122);
+            }
+
+            // FIX 3 & 4: splitContainer — recursively splits a container element
+            // across pages, placing as much as fits on the current page first.
             function splitContainer(el) {
-                if (!el.hasAttribute('data-split-id')) {
-                    el.setAttribute('data-split-id', Math.random().toString(36).substr(2, 9));
+                if (!el.hasAttribute("data-split-id")) {
+                    el.setAttribute("data-split-id", Math.random().toString(36).substr(2, 9));
                 }
 
                 function ensureWrapperPath(path) {
                     let current = page;
                     path.forEach(node => {
                         let wrapper = current.lastElementChild;
-                        if (!wrapper || wrapper.getAttribute('data-split-id') !== node.getAttribute(
-                                'data-split-id')) {
+                        const id = node.getAttribute("data-split-id");
+                        if (!wrapper || wrapper.getAttribute("data-split-id") !== id) {
                             wrapper = node.cloneNode(false);
-                            wrapper.removeAttribute('id');
-                            wrapper.setAttribute('data-split-id', node.getAttribute('data-split-id'));
+                            wrapper.removeAttribute("id");
+                            wrapper.setAttribute("data-split-id", id);
                             current.appendChild(wrapper);
                         }
                         current = wrapper;
@@ -1033,21 +1065,28 @@
                         let currentWrapper = ensureWrapperPath(parentPath);
                         currentWrapper.appendChild(child);
 
-                        if (page.scrollHeight > getCurrentPageMaxHeight()) {
+                        if (page.scrollHeight > getMaxPageHeight()) {
                             currentWrapper.removeChild(child);
-                            if (!currentWrapper.hasChildNodes()) currentWrapper.parentNode.removeChild(
-                                currentWrapper);
 
-                            if (child.nodeType === Node.ELEMENT_NODE && ['DIV', 'UL', 'OL', 'LI'].includes(
-                                    child.tagName) && child.childNodes.length > 0) {
-                                if (!child.hasAttribute('data-split-id')) {
-                                    child.setAttribute('data-split-id', Math.random().toString(36).substr(2,
-                                        9));
+                            // Clean up empty wrappers
+                            let w = currentWrapper;
+                            while (w && w !== page && !w.hasChildNodes()) {
+                                const parent = w.parentNode;
+                                if (parent) parent.removeChild(w);
+                                w = parent;
+                            }
+
+                            // Start new page
+                            page = createNewPage(currentOrientation);
+                            container.appendChild(page);
+
+                            // Recurse into child if splittable, otherwise place whole
+                            if (child.nodeType === Node.ELEMENT_NODE && canSplit(child)) {
+                                if (!child.hasAttribute("data-split-id")) {
+                                    child.setAttribute("data-split-id", Math.random().toString(36).substr(2, 9));
                                 }
                                 appendNodes(Array.from(child.childNodes), [...parentPath, child]);
                             } else {
-                                page = createNewPage(currentOrientation);
-                                container.appendChild(page);
                                 currentWrapper = ensureWrapperPath(parentPath);
                                 currentWrapper.appendChild(child);
                             }
@@ -1056,53 +1095,73 @@
                 }
 
                 appendNodes(Array.from(el.childNodes), [el]);
-                document.querySelectorAll('[data-split-id]').forEach(e => e.removeAttribute('data-split-id'));
+
+                // Clean up split tracking attributes
+                document.querySelectorAll("[data-split-id]").forEach(e =>
+                    e.removeAttribute("data-split-id")
+                );
             }
 
+            // FIX 3: splitTable — fill the current page first, then continue on next pages.
+            // Tables continue across pages WITHOUT repeating the header (cleaner for long tables).
             function splitTable(table) {
                 const thead = table.querySelector("thead");
-                const rows = Array.from(table.querySelectorAll("tbody tr"));
+                const rows  = Array.from(table.querySelectorAll("tbody tr"));
 
                 if (!rows.length) {
                     appendElement(table);
                     return;
                 }
 
-                // First page: include the header
-                let newTable = createTableShell(table, thead, true);
-                page.appendChild(newTable);
+                const pageWasEmpty = !pageHasContent(page);
+                let shell = createTableShell(table, thead, true);
+                page.appendChild(shell);
+
+                // If the table header alone doesn't fit (because the page already has content),
+                // move the entire table to a fresh page before adding rows.
+                if (!pageWasEmpty && page.scrollHeight > getMaxPageHeight()) {
+                    page.removeChild(shell);
+                    page = createNewPage(currentOrientation);
+                    container.appendChild(page);
+                    shell = createTableShell(table, thead, true);
+                    page.appendChild(shell);
+                }
 
                 rows.forEach(row => {
-                    newTable.querySelector("tbody").appendChild(row);
+                    shell.querySelector("tbody").appendChild(row);
 
-                    if (page.scrollHeight > getCurrentPageMaxHeight()) {
-                        newTable.querySelector("tbody").removeChild(row);
+                    if (page.scrollHeight > getMaxPageHeight()) {
+                        shell.querySelector("tbody").removeChild(row);
+
+                        // Don't start a new page if shell is empty (very tall single row edge case)
+                        if (shell.querySelector("tbody").children.length === 0) {
+                            // Row is taller than a full page — just put it anyway to avoid infinite loop
+                            shell.querySelector("tbody").appendChild(row);
+                            return;
+                        }
 
                         page = createNewPage(currentOrientation);
                         container.appendChild(page);
 
-                        // Continuation pages: NO repeated header
-                        newTable = createTableShell(table, thead, false);
-                        page.appendChild(newTable);
-
-                        newTable.querySelector("tbody").appendChild(row);
+                        // FIX 2: Continuation table — no header repeat, starts from top of new page
+                        shell = createTableShell(table, thead, false);
+                        page.appendChild(shell);
+                        shell.querySelector("tbody").appendChild(row);
                     }
                 });
             }
 
-            /**
-             * createTableShell
-             * @param {HTMLTableElement} original      - source table (copies class & inline style)
-             * @param {HTMLElement|null} thead          - the <thead> to optionally clone
-             * @param {boolean}         includeHeader   - true only on the first page
-             */
             function createTableShell(original, thead, includeHeader) {
                 const table = document.createElement("table");
-                table.className = original.className;
-                // Copy all inline styles from the original so classes like weekly-coverage-table carry over
+
+                // Copy class names and inline styles so weekly-coverage-table etc. carry over
+                table.className  = original.className;
                 table.style.cssText = original.style.cssText;
-                table.style.width = "100%";
+                // FIX 2: Landscape tables must not exceed the content width.
+                // The CSS already constrains this via padding, but set width explicitly.
+                table.style.width          = "100%";
                 table.style.borderCollapse = "collapse";
+                table.setAttribute("border", original.getAttribute("border") || "");
 
                 if (includeHeader && thead) {
                     table.appendChild(thead.cloneNode(true));
@@ -1110,17 +1169,12 @@
 
                 const tbody = document.createElement("tbody");
                 table.appendChild(tbody);
-
                 return table;
             }
 
-            function getCurrentPageMaxHeight() {
-                return PAGE_HEIGHT[currentOrientation] ?? PAGE_HEIGHT.portrait;
-            }
-
             function createNewPage(orientation = "portrait") {
-                const div = document.createElement("div");
-                div.className = "a4-page " + orientation;
+                const div       = document.createElement("div");
+                div.className   = "a4-page " + orientation;
                 return div;
             }
 
@@ -1129,22 +1183,28 @@
 
                 pages.forEach((p, index) => {
                     const footer = document.createElement("div");
-                    footer.style.position = "absolute";
-                    footer.style.bottom = "20px";
-                    footer.style.left = "60px";
-                    footer.style.right = "60px";
-                    footer.style.borderTop = "1px solid #808080";
-                    footer.style.paddingTop = "10px";
-                    footer.style.textAlign = "right";
-                    footer.style.fontSize = "10pt";
-                    footer.style.color = "#808080";
-                    footer.innerText = "Course Syllabus: {{ $syllabus->course->course_code }} | Page " + (
-                        index + 1) + " of " + pages.length;
+                    footer.style.cssText = [
+                        "position: absolute",
+                        "bottom: 20px",
+                        "left: 60px",
+                        "right: 60px",
+                        "border-top: 1px solid #808080",
+                        "padding-top: 6px",
+                        "text-align: right",
+                        "font-size: 9pt",
+                        "color: #808080",
+                        "font-family: Tahoma, sans-serif",
+                    ].join(";");
+                    // Blade renders this as a literal string in the output HTML
+                    footer.innerText =
+                        "Course Syllabus: {{ $syllabus->course->course_code }} | Page " +
+                        (index + 1) + " of " + pages.length;
                     p.appendChild(footer);
                 });
 
                 if (pageCount) {
-                    pageCount.textContent = pages.length + " page" + (pages.length !== 1 ? "s" : "");
+                    pageCount.textContent =
+                        pages.length + " page" + (pages.length !== 1 ? "s" : "");
                 }
             }
         });
