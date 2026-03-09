@@ -24,11 +24,11 @@ return new class extends Migration
                 ->constrained('week_contents')
                 ->cascadeOnDelete()
                 ->unique();
-                
+
             // For rows that are not tied to a CO (e.g., MVGO).
             $table->string('outcome_label')->nullable();
             // User-selectable for regular weeks; exam rows are forced to 'exam' automatically.
-            $table->enum('kind', ['activity', 'quiz', 'other', 'exam'])->nullable();
+            $table->enum('kind', ['activity', 'quiz', 'exam'])->nullable();
             // Only relevant when kind = exam (auto-filled based on syllabus_weeks.exam_type).
             $table->enum('exam_type', ['first_term', 'second_term', 'final_term'])->nullable();
 
