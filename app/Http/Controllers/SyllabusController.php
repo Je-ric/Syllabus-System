@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Program;
 use App\Models\Syllabus;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -149,14 +150,7 @@ class SyllabusController extends Controller
         // Dedicated show page is not used; use preview as canonical view.
         return redirect()->route('syllabus.preview', ['syllabus' => $syllabus->id]);
     }
-
-    // public function preview(Syllabus $syllabus)
-    // {
-    //     $this->authorizeSyllabusAccess($syllabus);
-
-    //     return redirect()->route('syllabus.preview.complete', ['syllabus' => $syllabus->id]);
-    // }
-
+    
     public function previewComplete(Syllabus $syllabus)
     {
         $this->authorizeSyllabusAccess($syllabus);
@@ -176,6 +170,19 @@ class SyllabusController extends Controller
         $this->authorizeSyllabusAccess($syllabus);
 
         return view('Syllabus.preview.assessment', $this->buildPreviewData($syllabus));
+    }
+
+    public function generateCompletePdfBytes(Syllabus $syllabus): string
+    {
+        $this->authorizeSyllabusAccess($syllabus);
+
+        $data = $this->buildPreviewData($syllabus);
+        $data['isPdf'] = true;
+
+        return Pdf::loadView('Syllabus.preview.complete', $data)
+            ->setPaper('a4', 'portrait')
+            ->setOption('isRemoteEnabled', true)
+            ->output();
     }
 
     private function buildPreviewData(Syllabus $syllabus): array

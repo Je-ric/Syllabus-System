@@ -85,9 +85,16 @@
                         Performance Standard
                     </x-form.label>
                     <x-form.select wire:model.defer="lec_performance_standard" required>
+                        @if ($course->has_lec_lab)
+                            <option value="67%">67%</option>
+                        @endif
                         <option value="50%">50%</option>
+                        <option value="50%">55%</option>
                         <option value="60%">60%</option>
+                        <option value="60%">65%</option>
+                        <option value="70%">70%</option>
                         <option value="75%">75%</option>
+                        <option value="80%">80%</option>
                     </x-form.select>
                 </div>
 
@@ -177,9 +184,7 @@
                             Performance Standard
                         </x-form.label>
                         <x-form.select wire:model.defer="lab_performance_standard" required>
-                            <option value="50%">50%</option>
-                            <option value="60%">60%</option>
-                            <option value="75%">75%</option>
+                            <option value="50%">33%</option>
                         </x-form.select>
                     </div>
 

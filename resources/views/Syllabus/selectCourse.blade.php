@@ -7,7 +7,7 @@
         desc="Step 1: Select program, Step 2: Choose course, Step 3: Fill details" />
 
     <x-panel>
-        <div class="border border-slate-200/80 rounded-2xl p-6 bg-white/90 shadow-sm">
+        <div class="mb-8 border border-slate-200/80 rounded-2xl p-6 bg-white/90 shadow-sm">
             <h2 class="text-sm uppercase tracking-[0.25em] text-slate-500 mb-4">Select Program</h2>
             <livewire:programs.program-selector 
                 :program-id="optional($program)?->id" 
@@ -23,7 +23,7 @@
             </div>
     
             @forelse ($groupedCourses as $year => $semesters)
-                < class="mb-8">
+                <div class="mb-8">
                     <h3 class="text-sm uppercase tracking-[0.25em] text-slate-500 mb-4 border-b border-slate-200 pb-2">
                         Year {{ $year ?? 'N/A' }}
                     </h3>

@@ -59,7 +59,6 @@
 
             {{-- ── Curriculum map ────────────────────────────────────────────── --}}
             @forelse ($groupedCourses as $year => $semesters)
-                <div class="mb-8">
 
                     {{-- Year heading --}}
                     <div class="flex items-center gap-3 mb-4">
@@ -182,7 +181,6 @@
                         <x-empty-state icon="bx-book" title="No courses this semester"
                             message="No courses have been added for this semester yet." />
                     @endforelse
-                </div>
             @empty
                 <x-empty-state icon="bx-book-open" title="No courses found"
                     message="This program has no courses yet. Add the first one to get started.">

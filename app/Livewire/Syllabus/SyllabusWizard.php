@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Syllabus;
 
+use App\Http\Controllers\SyllabusController;
+use App\Models\CompleteSyllabus;
 use App\Models\CourseComponent;
 use App\Models\CourseOutcome;
 use App\Models\Course;
@@ -10,8 +12,11 @@ use App\Models\SyllabusWeek;
 use App\Models\WeekContent;
 use App\Models\SyllabusEvaluationItem;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Throwable;
 
 class SyllabusWizard extends Component
 {
@@ -195,6 +200,83 @@ class SyllabusWizard extends Component
     public function saveCurrentStep(): void
     {
         $this->dispatch('syllabus-save-step', step: $this->currentStep);
+    }
+
+    // when approval process is available, this will be modified entirely.
+    // draft: doesnt have any pdf version
+    // under_review: approved_at and approved_by are null
+    // needs_revision: still null
+    // approved: has approved_at and approved_by, but not necessarily the latest version (e.g. v1 approved, v2 under review)
+    // this status will be dependent to the approved_by(department chair) - not reviewer
+    public function saveAsDone(): void
+    {
+        if (! $this->syllabus) {
+            $this->dispatch('lw-toast', type: 'error', message: 'No syllabus loaded.');
+            return;
+        }
+
+        $syllabus = Syllabus::query()
+            ->with(['course', 'academicCalendar'])
+            ->findOrFail($this->syllabus->id);
+
+        if (! $syllabus->academic_calendar_id) {
+            $this->dispatch('lw-toast', type: 'error', message: 'Select an academic calendar first.');
+            return;
+        }
+
+        try {
+            $pdfBytes = app(SyllabusController::class)->generateCompletePdfBytes($syllabus);
+        } catch (Throwable $e) {
+            report($e);
+            $this->dispatch('lw-toast', type: 'error', message: 'Failed to generate the PDF: ' . $e->getMessage());
+            return;
+        }
+
+        $version      = (int) (CompleteSyllabus::where('syllabus_id', $syllabus->id)->max('version') ?? 0) + 1;
+        $academicYear = $syllabus->academicCalendar?->academic_year ?? 'N-A';
+        $semester     = $syllabus->academicCalendar?->semester     ?? 'N-A';
+        $courseCode   = $syllabus->course?->course_code            ?? 'COURSE';
+
+        $fileName     = Str::slug($courseCode . '-' . $academicYear . '-' . $semester . '-v' . $version) . '.pdf';
+        $relativePath = 'syllabi/' . $syllabus->id . '/' . $fileName;
+
+        try {
+            $disk = Storage::disk('public');
+            $ok   = $disk->put($relativePath, $pdfBytes);
+
+            if (! $ok) {
+                $this->dispatch('lw-toast', type: 'error', message: 'Failed to save PDF — storage returned false.');
+                return;
+            }
+
+            $pdfUrl = $disk->url($relativePath);
+        } catch (Throwable $e) {
+            report($e);
+            $this->dispatch('lw-toast', type: 'error', message: 'Local PDF save error: ' . $e->getMessage());
+            return;
+        }
+
+        CompleteSyllabus::create([
+            'syllabus_id'   => $syllabus->id,
+            'course_id'     => $syllabus->course_id,
+            'academic_year' => $academicYear,
+            'semester'      => $semester,
+            'pdf_path'      => $pdfUrl,
+            'version'       => $version,
+            'approved_at'   => null,
+            'approved_by'   => null,
+            'checksum'      => hash('sha256', $pdfBytes),
+        ]);
+
+        $syllabus->forceFill([
+            'status'       => 'approved', //for now
+            'current_step' => 'review',
+        ])->save();
+
+        $this->syllabus->refresh();
+
+        $this->dispatch('lw-toast', type: 'success', message: 'Syllabus saved and PDF generated (v' . $version . ').');
+        $this->dispatch('syllabus-step-changed', step: 'review');
     }
 
     public function hasNextStep(): bool

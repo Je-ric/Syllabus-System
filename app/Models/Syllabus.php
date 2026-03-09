@@ -165,3 +165,4 @@ class Syllabus extends Model
     }
 
 }
+
