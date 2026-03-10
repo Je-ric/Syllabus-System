@@ -5,6 +5,7 @@ namespace App\Livewire\Syllabus\Steps;
 use App\Models\AcademicCalendar;
 use App\Models\CompleteSyllabus;
 use App\Models\Syllabus;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -20,6 +21,7 @@ class ReviewStep extends Component
     public           $syllabusWeeks;
     public           $course;
     public ?CompleteSyllabus $latestComplete = null;
+    public           $completeVersions;
 
     // ── Mount ──────────────────────────────────────────────────────────────
 
@@ -28,6 +30,7 @@ class ReviewStep extends Component
         $this->syllabusId        = $syllabusId;
         $this->academicCalendars = collect();
         $this->syllabusWeeks     = collect();
+        $this->completeVersions  = collect();
         $this->loadData();
     }
 
@@ -116,9 +119,16 @@ class ReviewStep extends Component
         }
         $this->examWeeks = $examWeeks;
 
-        $this->latestComplete = CompleteSyllabus::where('syllabus_id', $this->syllabusId)
+        $this->completeVersions = CompleteSyllabus::query()
+            ->whereHas('syllabus', function ($query) {
+                $query->where('course_id', $this->course->id)
+                    ->where('prepared_by', Auth::id());
+            })
             ->orderByDesc('version')
-            ->first();
+            ->orderByDesc('created_at')
+            ->get();
+
+        $this->latestComplete = $this->completeVersions->first();
 
         $this->isLoaded = true;
     }

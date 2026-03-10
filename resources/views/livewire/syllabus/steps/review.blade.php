@@ -141,52 +141,72 @@
             @endif
         </x-wizard.section>
 
-        {{-- ── Latest saved version ──────────────────────────────────────── --}}
-        @if ($latestComplete)
-            <x-wizard.section title="Latest Saved Version" icon="cloud-upload" color="emerald">
+        {{-- ── Saved versions ────────────────────────────────────────────── --}}
+        <x-wizard.section title="Saved Versions" icon="cloud-upload" color="emerald">
+            @if (isset($completeVersions) && $completeVersions->count() > 0)
                 <x-wizard.info-card color="emerald">
-                    <x-wizard.info-row label="Version"       :value="'v' . $latestComplete->version" bold />
-                    <x-wizard.info-row label="Academic Year" :value="$latestComplete->academic_year" />
-                    <x-wizard.info-row label="Semester"      :value="$latestComplete->semester" />
-                    <x-wizard.info-row label="Saved at"      :value="$latestComplete->created_at?->format('M d, Y H:i')" muted />
+                    <x-wizard.info-row
+                        label="Total saved versions"
+                        :value="$completeVersions->count()"
+                        bold />
 
-                    @if ($latestComplete->pdf_path)
-                        @php
-                            $savedPath  = (string) $latestComplete->pdf_path;
-                            $isExternal = preg_match('#^https?://#i', $savedPath) || str_starts_with($savedPath, '/');
+                    <div class="mt-3 space-y-3">
+                        @foreach ($completeVersions as $version)
+                            @php
+                                $savedPath  = (string) ($version->pdf_path ?? '');
+                                $isExternal = preg_match('#^https?://#i', $savedPath) || str_starts_with($savedPath, '/');
 
-                            $previewUrl  = $isExternal
-                                ? $savedPath
-                                : route('syllabus.saved.complete.preview', $latestComplete);
-                            $downloadUrl = $isExternal
-                                ? null
-                                : route('syllabus.saved.complete.download', $latestComplete);
-                        @endphp
+                                $previewUrl  = $isExternal
+                                    ? $savedPath
+                                    : route('syllabus.saved.complete.preview', $version);
+                                $downloadUrl = $isExternal
+                                    ? null
+                                    : route('syllabus.saved.complete.download', $version);
+                            @endphp
 
-                        <div class="mt-3 pt-3 border-t border-emerald-200 flex flex-wrap gap-2">
-                            <a href="{{ $previewUrl }}"
-                               target="_blank" rel="noopener"
-                               class="inline-flex items-center gap-2 px-4 py-2 rounded-xl
-                                      bg-emerald-600 text-white text-sm font-semibold shadow-sm
-                                      hover:bg-emerald-700 transition-colors">
-                                <i class="bx bx-link-external text-base"></i>
-                                Open Saved Version (v{{ $latestComplete->version }})
-                            </a>
+                            <div class="rounded-xl border border-emerald-200 bg-white/70 p-3">
+                                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                    <div class="space-y-1">
+                                        <p class="text-sm font-semibold text-emerald-800">
+                                            Version v{{ $version->version }}
+                                        </p>
+                                        <p class="text-xs text-slate-600">
+                                            {{ $version->academic_year }} | {{ $version->semester }}
+                                        </p>
+                                        <p class="text-xs text-slate-500">
+                                            Saved {{ $version->created_at?->format('M d, Y H:i') }}
+                                        </p>
+                                    </div>
 
-                            @if ($downloadUrl)
-                                <a href="{{ $downloadUrl }}"
-                                   class="inline-flex items-center gap-2 px-4 py-2 rounded-xl
-                                          bg-white text-emerald-700 text-sm font-semibold shadow-sm ring-1 ring-emerald-200
-                                          hover:bg-emerald-50 transition-colors">
-                                    <i class="bx bx-download text-base"></i>
-                                    Download HTML
-                                </a>
-                            @endif
-                        </div>
-                    @endif
+                                    <div class="flex flex-wrap gap-2">
+                                        <a href="{{ $previewUrl }}"
+                                           target="_blank" rel="noopener"
+                                           class="inline-flex items-center gap-2 px-3 py-2 rounded-lg
+                                                  bg-emerald-600 text-white text-xs font-semibold shadow-sm
+                                                  hover:bg-emerald-700 transition-colors">
+                                            <i class="bx bx-link-external text-base"></i>
+                                            Open
+                                        </a>
+
+                                        @if ($downloadUrl)
+                                            <a href="{{ $downloadUrl }}"
+                                               class="inline-flex items-center gap-2 px-3 py-2 rounded-lg
+                                                      bg-white text-emerald-700 text-xs font-semibold shadow-sm ring-1 ring-emerald-200
+                                                      hover:bg-emerald-50 transition-colors">
+                                                <i class="bx bx-download text-base"></i>
+                                                Download HTML
+                                            </a>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
                 </x-wizard.info-card>
-            </x-wizard.section>
-        @endif
+            @else
+                <p class="text-sm text-slate-500">No saved versions yet for this course.</p>
+            @endif
+        </x-wizard.section>
 
     </div>
 
