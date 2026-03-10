@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CompleteSyllabus;
 use App\Models\Program;
 use App\Models\Syllabus;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
 class SyllabusController extends Controller
@@ -183,6 +185,65 @@ class SyllabusController extends Controller
             ->setPaper('a4', 'portrait')
             ->setOption('isRemoteEnabled', true)
             ->output();
+    }
+
+    /**
+     * Render the complete preview as HTML for an immutable "saved version" snapshot.
+     *
+     * This keeps the same @vite preview.css and in-browser JS pagination working,
+     * unlike DomPDF (which does not execute JS and only supports limited CSS).
+     */
+    public function generateCompleteHtmlSnapshot(Syllabus $syllabus): string
+    {
+        $this->authorizeSyllabusAccess($syllabus);
+
+        $data = $this->buildPreviewData($syllabus);
+        $data['isSnapshot'] = true;
+
+        return view('Syllabus.preview.complete', $data)->render();
+    }
+
+    public function previewSavedComplete(CompleteSyllabus $completeSyllabus)
+    {
+        $syllabus = $completeSyllabus->syllabus()->firstOrFail();
+        $this->authorizeSyllabusAccess($syllabus);
+
+        $path = trim((string) $completeSyllabus->pdf_path);
+
+        // Backward compatible: if the stored value is already a URL, just open it.
+        if (preg_match('#^https?://#i', $path) || str_starts_with($path, '/')) {
+            return redirect()->away($path);
+        }
+
+        if ($path === '' || ! Storage::disk('local')->exists($path)) {
+            abort(404, 'Saved version file not found.');
+        }
+
+        $html = Storage::disk('local')->get($path);
+
+        return response($html, 200, [
+            'Content-Type' => 'text/html; charset=UTF-8',
+        ]);
+    }
+
+    public function downloadSavedComplete(CompleteSyllabus $completeSyllabus)
+    {
+        $syllabus = $completeSyllabus->syllabus()->firstOrFail();
+        $this->authorizeSyllabusAccess($syllabus);
+
+        $path = trim((string) $completeSyllabus->pdf_path);
+
+        if ($path === '' || preg_match('#^https?://#i', $path) || str_starts_with($path, '/')) {
+            abort(400, 'This saved version is not stored locally.');
+        }
+
+        if (! Storage::disk('local')->exists($path)) {
+            abort(404, 'Saved version file not found.');
+        }
+
+        return Storage::disk('local')->download($path, basename($path), [
+            'Content-Type' => 'text/html; charset=UTF-8',
+        ]);
     }
 
     private function buildPreviewData(Syllabus $syllabus): array

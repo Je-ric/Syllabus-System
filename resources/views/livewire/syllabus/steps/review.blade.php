@@ -5,6 +5,7 @@
 
     <div class="space-y-6">
 
+        {{-- ── Previews ──────────────────────────────────────────────────── --}}
         <x-wizard.section title="Previews" icon="show" color="slate">
             <div class="flex flex-col sm:flex-row gap-2">
                 <x-button
@@ -13,7 +14,7 @@
                     target="_blank"
                     rel="noopener"
                     class="flex-1 justify-center">
-                    Complete
+                <i class="bx bx-file-blank"></i> Complete
                 </x-button>
 
                 <x-button
@@ -22,7 +23,7 @@
                     target="_blank"
                     rel="noopener"
                     class="flex-1 justify-center">
-                    Abridged
+                    <i class="bx bx-file"></i> Abridged
                 </x-button>
 
                 <x-button
@@ -31,7 +32,7 @@
                     target="_blank"
                     rel="noopener"
                     class="flex-1 justify-center">
-                    Assessment Plan
+                    <i class="bx bx-clipboard"></i> Assessment Plan
                 </x-button>
             </div>
         </x-wizard.section>
@@ -39,7 +40,7 @@
         {{-- ── Academic Calendar ─────────────────────────────────────────── --}}
         <x-wizard.section title="Academic Calendar" icon="calendar" color="slate">
             @php
-                $calendar = $academicCalendars->firstWhere('id', $academic_calendar_id);
+                $calendar      = $academicCalendars->firstWhere('id', $academic_calendar_id);
                 $calendarLabel = $calendar
                     ? ($calendar->academic_year . ' - ' . $calendar->getFormattedSemester())
                     : null;
@@ -148,26 +149,74 @@
                     <x-wizard.info-row label="Academic Year" :value="$latestComplete->academic_year" />
                     <x-wizard.info-row label="Semester"      :value="$latestComplete->semester" />
                     <x-wizard.info-row label="Saved at"      :value="$latestComplete->created_at?->format('M d, Y H:i')" muted />
-                    <x-wizard.info-row label="File"          :value="basename($latestComplete->pdf_path)" muted />
+
+                    @if ($latestComplete->pdf_path)
+                        @php
+                            $savedPath  = (string) $latestComplete->pdf_path;
+                            $isExternal = preg_match('#^https?://#i', $savedPath) || str_starts_with($savedPath, '/');
+
+                            $previewUrl  = $isExternal
+                                ? $savedPath
+                                : route('syllabus.saved.complete.preview', $latestComplete);
+                            $downloadUrl = $isExternal
+                                ? null
+                                : route('syllabus.saved.complete.download', $latestComplete);
+                        @endphp
+
+                        <div class="mt-3 pt-3 border-t border-emerald-200 flex flex-wrap gap-2">
+                            <a href="{{ $previewUrl }}"
+                               target="_blank" rel="noopener"
+                               class="inline-flex items-center gap-2 px-4 py-2 rounded-xl
+                                      bg-emerald-600 text-white text-sm font-semibold shadow-sm
+                                      hover:bg-emerald-700 transition-colors">
+                                <i class="bx bx-link-external text-base"></i>
+                                Open Saved Version (v{{ $latestComplete->version }})
+                            </a>
+
+                            @if ($downloadUrl)
+                                <a href="{{ $downloadUrl }}"
+                                   class="inline-flex items-center gap-2 px-4 py-2 rounded-xl
+                                          bg-white text-emerald-700 text-sm font-semibold shadow-sm ring-1 ring-emerald-200
+                                          hover:bg-emerald-50 transition-colors">
+                                    <i class="bx bx-download text-base"></i>
+                                    Download HTML
+                                </a>
+                            @endif
+                        </div>
+                    @endif
                 </x-wizard.info-card>
             </x-wizard.section>
         @endif
 
     </div>
 
-    {{--
-        ── Save as Done ──────────────────────────────────────────────────────
-        IMPORTANT: use a plain <button wire:click="..."> here.
-        Do NOT wrap in <x-button> — Blade components swallow wire:click
-        attributes when they render to a non-button root element, causing the
-        "Public method not found" error.
+    {{-- ────────────────────────────────────────────────────────────────────────
+         Save as Done button
+         ─────────────────────────────────────────────────────────────────────────
+         WHY Alpine instead of wire:loading here:
+         saveAsDone() lives on SyllabusWizard (the PARENT Livewire component).
+         wire:loading only watches the current component's requests — it cannot
+         track a request fired on the parent. So we use Alpine local state:
+
+           1. Click → x-on:click sets saving=true (spinner appears immediately)
+                    → $dispatch('wizard-save-as-done') fires a browser event
+           2. SyllabusWizard hears the event via #[On('wizard-save-as-done')]
+              and runs saveAsDone() (freezes an immutable version snapshot, saves, toasts, reloads step)
+           3. 'syllabus-step-changed' event causes this component to re-render,
+              which resets saving=false via the @wizard-save-done.window listener.
+
+         Do NOT add a saveAsDone() method to ReviewStep — it will be called
+         instead of the wizard's, and will spin forever (method not found or
+         version freezing fails silently in the child context).
     --}}
-    <div class="mt-6 flex flex-wrap items-center gap-4">
+    <div class="mt-6 flex flex-wrap items-center gap-4"
+         x-data="{ saving: false }"
+         x-on:wizard-save-done.window="saving = false">
+
         <button
             type="button"
-            wire:click="saveAsDone"
-            wire:loading.attr="disabled"
-            wire:target="saveAsDone"
+            x-on:click="saving = true; $dispatch('wizard-save-as-done')"
+            x-bind:disabled="saving"
             class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl
                    bg-emerald-600 text-white text-sm font-semibold shadow-sm
                    hover:bg-emerald-700 active:bg-emerald-800
@@ -175,29 +224,23 @@
                    transition-colors duration-150">
 
             {{-- Idle label --}}
-            <span wire:loading.remove wire:target="saveAsDone"
-                  class="inline-flex items-center gap-2">
+            <span x-show="!saving" class="inline-flex items-center gap-2">
                 <i class="bx bx-save text-base"></i>
                 Save as Done
             </span>
 
-            {{-- Spinning label while Livewire request is in flight --}}
-            <span wire:loading wire:target="saveAsDone"
-                  class="inline-flex items-center gap-2">
+            {{-- Spinner while saving --}}
+            <span x-show="saving" x-cloak class="inline-flex items-center gap-2">
                 <svg class="animate-spin h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none">
-                    <circle class="opacity-25" cx="12" cy="12" r="10"
-                        stroke="currentColor" stroke-width="4"/>
-                    <path class="opacity-75" fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                 </svg>
-                Generating PDF…
+                Freezing version…
             </span>
         </button>
 
-        {{-- Inline hint shown only while saving --}}
-        <p wire:loading wire:target="saveAsDone"
-           class="text-xs text-slate-500 animate-pulse">
-            Building the syllabus PDF — this may take a few seconds.
+        <p x-show="saving" x-cloak class="text-xs text-slate-500 animate-pulse">
+            Creating an immutable saved version — this may take a few seconds.
         </p>
     </div>
 

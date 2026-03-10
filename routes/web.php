@@ -141,6 +141,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/syllabus/{syllabus}/preview/complete', [SyllabusController::class, 'previewComplete'])->name('syllabus.preview.complete');
         Route::get('/syllabus/{syllabus}/preview/abridged', [SyllabusController::class, 'previewAbridged'])->name('syllabus.preview.abridged');
         Route::get('/syllabus/{syllabus}/preview/assessment-plan', [SyllabusController::class, 'previewAssessment'])->name('syllabus.preview.assessment');
+        Route::get('/syllabus/saved/{completeSyllabus}/preview', [SyllabusController::class, 'previewSavedComplete'])->name('syllabus.saved.complete.preview');
+        Route::get('/syllabus/saved/{completeSyllabus}/download', [SyllabusController::class, 'downloadSavedComplete'])->name('syllabus.saved.complete.download');
         Route::get('/syllabus/{syllabus}/edit', [SyllabusController::class, 'edit'])->name('syllabus.edit');
         Route::put('/syllabus/{syllabus}', [SyllabusController::class, 'update'])->name('syllabus.update');
         Route::delete('/syllabus/{syllabus}', [SyllabusController::class, 'destroy'])->name('syllabus.destroy');
