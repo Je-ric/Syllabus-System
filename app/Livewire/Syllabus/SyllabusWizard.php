@@ -185,9 +185,13 @@ class SyllabusWizard extends Component
             return;
         }
 
-        // Re-load with relations needed by the PDF builder
+        // Re-load with relations needed by the PDF builder and folder hierarchy
         $syllabus = Syllabus::query()
-            ->with(['course', 'academicCalendar'])
+            ->with([
+                'course.program.departments.college',
+                'academicCalendar',
+                'preparer',
+            ])
             ->findOrFail($this->syllabus->id);
 
         if (! $syllabus->academic_calendar_id) {
@@ -204,16 +208,34 @@ class SyllabusWizard extends Component
             return;
         }
 
-        // 2. Build versioned file path ─────────────────────────────────────
+        // 2. Build hierarchical folder path ────────────────────────────────
+        // Organize snapshots by: College → Department → Program → Faculty
+        $program    = $syllabus->course?->program;
+        $department = $program?->departments?->first(); // Primary department
+        $college    = $department?->college;
+        $faculty    = $syllabus->preparer;
+
+        $collegeName    = Str::slug($college?->name ?? 'unknown-college');
+        $departmentName = Str::slug($department?->name ?? 'unknown-department');
+        $programName    = Str::slug($program?->program_name ?? $program?->name ?? 'unknown-program');
+        $facultyName    = Str::slug($faculty?->name ?? 'user-' . ($syllabus->prepared_by ?? 'unknown'));
+
         $version      = (int) (CompleteSyllabus::where('syllabus_id', $syllabus->id)->max('version') ?? 0) + 1;
         $academicYear = $syllabus->academicCalendar?->academic_year ?? 'N-A';
         $semester     = $syllabus->academicCalendar?->semester      ?? 'N-A';
         $courseCode   = $syllabus->course?->course_code             ?? 'COURSE';
 
-        // Stored in storage/app/public/syllabi/{syllabusId}/{file}.pdf
-        // Accessible at /storage/syllabi/{syllabusId}/{file}.pdf
+        // Stored in storage/app/private/syllabus-snapshots/{college}/{dept}/{program}/{faculty}/{file}.html
+        // Accessible via controller route (SyllabusController::previewSavedComplete)
         $fileName    = Str::slug($courseCode . '-' . $academicYear . '-' . $semester . '-v' . $version) . '.html';
-        $storagePath = 'syllabus-snapshots/' . $syllabus->id . '/' . $fileName;
+        $storagePath = implode('/', [
+            'syllabus-snapshots',
+            $collegeName,
+            $departmentName,
+            $programName,
+            $facultyName,
+            $fileName,
+        ]);
 
         // 3. Write to public disk ─────────────────────────────────────────
         try {

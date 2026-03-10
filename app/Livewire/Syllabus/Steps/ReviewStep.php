@@ -5,6 +5,9 @@ namespace App\Livewire\Syllabus\Steps;
 use App\Models\AcademicCalendar;
 use App\Models\CompleteSyllabus;
 use App\Models\Syllabus;
+use App\Models\SyllabusRevision;
+use App\Models\SyllabusReviewer;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -23,6 +26,11 @@ class ReviewStep extends Component
     public ?CompleteSyllabus $latestComplete = null;
     public           $completeVersions;
 
+    public array     $revisions = [];
+    public array     $reviewers = [];
+    public           $allUsers;
+    public ?int      $selectedReviewerId = null;
+
     // ── Mount ──────────────────────────────────────────────────────────────
 
     public function mount(int $syllabusId): void
@@ -31,6 +39,7 @@ class ReviewStep extends Component
         $this->academicCalendars = collect();
         $this->syllabusWeeks     = collect();
         $this->completeVersions  = collect();
+        $this->allUsers          = collect();
         $this->loadData();
     }
 
@@ -130,6 +139,159 @@ class ReviewStep extends Component
 
         $this->latestComplete = $this->completeVersions->first();
 
+        $this->loadRevisions();
+        $this->loadReviewers();
+
         $this->isLoaded = true;
+    }
+
+    private function loadRevisions(): void
+    {
+        $this->revisions = $this->syllabus->revisions
+            ->map(fn ($rev) => [
+                'id' => $rev->id,
+                'revision_no' => $rev->revision_no,
+                'revision_date' => $rev->revision_date->format('Y-m-d'),
+                'implementation_semester' => $rev->implementation_semester,
+                'highlights' => $rev->highlights,
+                'contributors' => $rev->contributors,
+            ])
+            ->values()
+            ->all();
+
+        if (empty($this->revisions)) {
+            $this->revisions = [[
+                'id' => null,
+                'revision_no' => $this->syllabus->getCurrentRevisionNumber() + 1,
+                'revision_date' => now()->format('Y-m-d'),
+                'implementation_semester' => '',
+                'highlights' => '',
+                'contributors' => '',
+            ]];
+        }
+    }
+
+    private function loadReviewers(): void
+    {
+        $this->reviewers = $this->syllabus->reviewers()->with('user')->get()
+            ->map(fn ($reviewer) => [
+                'id' => $reviewer->id,
+                'user_id' => $reviewer->user_id,
+                'user_name' => $reviewer->user->name,
+                'user_email' => $reviewer->user->email,
+                'status' => $reviewer->status,
+            ])
+            ->values()
+            ->all();
+
+        $this->allUsers = User::whereHas('roles', function ($q) {
+            $q->whereIn('name', ['dean', 'chair']);
+        })->orderBy('name')->get();
+    }
+
+    public function addRevision(): void
+    {
+        $this->revisions[] = [
+            'id' => null,
+            'revision_no' => $this->syllabus->getCurrentRevisionNumber() + count($this->revisions) + 1,
+            'revision_date' => now()->format('Y-m-d'),
+            'implementation_semester' => '',
+            'highlights' => '',
+            'contributors' => '',
+        ];
+    }
+
+    public function removeRevision(int $index): void
+    {
+        if (count($this->revisions) <= 1) {
+            return;
+        }
+
+        $revision = $this->revisions[$index];
+        if (isset($revision['id']) && $revision['id']) {
+            SyllabusRevision::find($revision['id'])?->delete();
+        }
+
+        array_splice($this->revisions, $index, 1);
+    }
+
+    public function saveRevisions(): void
+    {
+        foreach ($this->revisions as $revision) {
+            if (empty($revision['implementation_semester'])) {
+                continue;
+            }
+
+            if (isset($revision['id']) && $revision['id']) {
+                SyllabusRevision::find($revision['id'])?->update([
+                    'revision_date' => $revision['revision_date'],
+                    'implementation_semester' => $revision['implementation_semester'],
+                    'highlights' => $revision['highlights'] ?? null,
+                    'contributors' => $revision['contributors'] ?? null,
+                ]);
+            } else {
+                SyllabusRevision::create([
+                    'syllabus_id' => $this->syllabusId,
+                    'revision_no' => $revision['revision_no'],
+                    'revision_date' => $revision['revision_date'],
+                    'implementation_semester' => $revision['implementation_semester'],
+                    'highlights' => $revision['highlights'] ?? null,
+                    'contributors' => $revision['contributors'] ?? null,
+                ]);
+            }
+        }
+
+        $this->dispatch('toast', message: 'Revisions saved successfully.', type: 'success');
+        $this->loadData(force: true);
+    }
+
+    public function addReviewer(): void
+    {
+        if (!$this->selectedReviewerId) {
+            $this->dispatch('toast', message: 'Please select a reviewer.', type: 'error');
+            return;
+        }
+
+        foreach ($this->reviewers as $reviewer) {
+            if ($reviewer['user_id'] == $this->selectedReviewerId) {
+                $this->dispatch('toast', message: 'This reviewer is already added.', type: 'warning');
+                return;
+            }
+        }
+
+        SyllabusReviewer::create([
+            'syllabus_id' => $this->syllabusId,
+            'user_id' => $this->selectedReviewerId,
+            'status' => 'pending',
+        ]);
+
+        $this->selectedReviewerId = null;
+        $this->dispatch('toast', message: 'Reviewer added successfully.', type: 'success');
+        $this->loadData(force: true);
+    }
+
+    public function removeReviewer(int $reviewerId): void
+    {
+        SyllabusReviewer::find($reviewerId)?->delete();
+        $this->dispatch('toast', message: 'Reviewer removed.', type: 'success');
+       $this->loadData(force: true);
+    }
+
+    public function updateReviewerStatus(int $reviewerId, string $status): void
+    {
+        $reviewer = SyllabusReviewer::find($reviewerId);
+        if ($reviewer) {
+            $reviewer->update(['status' => $status]);
+            $this->dispatch('toast', message: 'Reviewer status updated.', type: 'success');
+            $this->loadData(force: true);
+        }
+    }
+
+    public function updatedSyllabus($value, $key): void
+    {
+        if (in_array($key, ['concurred_by', 'approved_by'])) {
+            $this->syllabus->update([$key => $value]);
+            $this->dispatch('toast', message: 'Approval signatures updated.', type: 'success');
+        }
     }
 }

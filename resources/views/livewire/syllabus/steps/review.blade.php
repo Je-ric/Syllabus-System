@@ -37,108 +37,200 @@
             </div>
         </x-wizard.section>
 
-        {{-- ── Academic Calendar ─────────────────────────────────────────── --}}
-        <x-wizard.section title="Academic Calendar" icon="calendar" color="slate">
-            @php
-                $calendar      = $academicCalendars->firstWhere('id', $academic_calendar_id);
-                $calendarLabel = $calendar
-                    ? ($calendar->academic_year . ' - ' . $calendar->getFormattedSemester())
-                    : null;
-                $calendarPeriod = $calendar
-                    ? (($calendar->start_date?->format('M d, Y') ?? '—') . ' — ' . ($calendar->end_date?->format('M d, Y') ?? '—'))
-                    : null;
-            @endphp
+        <x-wizard.section title="Revision History" icon="history" color="slate">
+            <div class="space-y-3">
+                @foreach ($revisions as $rIdx => $revision)
+                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-4" wire:key="rev-{{ $rIdx }}">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <x-form.label for="rev-{{ $rIdx }}-no">Revision No.</x-form.label>
+                                <input type="number"
+                                    wire:model="revisions.{{ $rIdx }}.revision_no"
+                                    id="rev-{{ $rIdx }}-no"
+                                    readonly
+                                    class="w-full text-sm rounded-lg border border-slate-300 bg-slate-100 px-3 py-2" />
+                            </div>
 
-            @if ($calendar)
-                <x-wizard.info-card color="slate">
-                    <x-wizard.info-row label="Academic Year & Semester" :value="$calendarLabel" bold />
-                    <x-wizard.info-row label="Period" :value="$calendarPeriod" muted />
-                </x-wizard.info-card>
-            @else
-                <x-feedback-status.alert type="error" title="Not selected">
-                    Select an academic calendar to proceed.
-                </x-feedback-status.alert>
-            @endif
-        </x-wizard.section>
+                            <div>
+                                <x-form.label for="rev-{{ $rIdx }}-date">Revision Date</x-form.label>
+                                <input type="date"
+                                    wire:model="revisions.{{ $rIdx }}.revision_date"
+                                    id="rev-{{ $rIdx }}-date"
+                                    class="w-full text-sm rounded-lg border border-slate-300 bg-white px-3 py-2
+                                           focus:border-blue-400 focus:ring-1 focus:ring-blue-300 focus:outline-none" />
+                            </div>
 
-        {{-- ── Course Components ─────────────────────────────────────────── --}}
-        <x-wizard.section title="Course Components" icon="notepad" color="slate">
-            @php
-                $lec = $syllabus?->components?->firstWhere('type', 'LEC');
-                $lab = $syllabus?->components?->firstWhere('type', 'LAB');
-            @endphp
+                            <div class="md:col-span-2">
+                                <x-form.label for="rev-{{ $rIdx }}-semester">Implementation Semester *</x-form.label>
+                                <input type="text"
+                                    wire:model="revisions.{{ $rIdx }}.implementation_semester"
+                                    id="rev-{{ $rIdx }}-semester"
+                                    placeholder="e.g., 1st Sem 2025-2026"
+                                    class="w-full text-sm rounded-lg border border-slate-300 bg-white px-3 py-2
+                                           focus:border-blue-400 focus:ring-1 focus:ring-blue-300 focus:outline-none
+                                           placeholder:text-slate-300" />
+                            </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <x-wizard.info-card title="Lecture (LEC)" icon="book-open" color="emerald">
-                    <x-wizard.info-row label="Instructor"   :value="$lec?->instructor_name" bold />
-                    <x-wizard.info-row label="Email"        :value="$lec?->instructor_email" />
-                    <x-wizard.info-row label="Phone"        :value="$lec?->phone" />
-                    <x-wizard.info-row label="Office"       :value="$lec?->office" />
-                    <x-wizard.info-row label="Class Hours"  :value="$lec?->class_hours" />
-                    <x-wizard.info-row label="Schedule"     :value="$lec?->schedule" />
-                    <x-wizard.info-row label="Consultation" :value="$lec?->consultation_hours" />
-                    <x-wizard.info-row label="Performance"  :value="$lec?->performance_standard" muted />
-                </x-wizard.info-card>
+                            <div class="md:col-span-2">
+                                <x-form.label for="rev-{{ $rIdx }}-highlights">Highlights</x-form.label>
+                                <textarea
+                                    wire:model="revisions.{{ $rIdx }}.highlights"
+                                    id="rev-{{ $rIdx }}-highlights"
+                                    rows="2"
+                                    placeholder="Brief summary of changes..."
+                                    class="w-full text-sm rounded-lg border border-slate-300 bg-white px-3 py-2
+                                           focus:border-blue-400 focus:ring-1 focus:ring-blue-300 focus:outline-none
+                                           placeholder:text-slate-300"></textarea>
+                            </div>
 
-                @if ($course && $course->has_lec_lab)
-                    <x-wizard.info-card title="Laboratory (LAB)" icon="test-tube" color="blue">
-                        <x-wizard.info-row label="Instructor"   :value="$lab?->instructor_name" bold />
-                        <x-wizard.info-row label="Email"        :value="$lab?->instructor_email" />
-                        <x-wizard.info-row label="Phone"        :value="$lab?->phone" />
-                        <x-wizard.info-row label="Office"       :value="$lab?->office" />
-                        <x-wizard.info-row label="Class Hours"  :value="$lab?->class_hours" />
-                        <x-wizard.info-row label="Schedule"     :value="$lab?->schedule" />
-                        <x-wizard.info-row label="Consultation" :value="$lab?->consultation_hours" />
-                        <x-wizard.info-row label="Performance"  :value="$lab?->performance_standard" muted />
-                    </x-wizard.info-card>
-                @endif
+                            <div class="md:col-span-2">
+                                <x-form.label for="rev-{{ $rIdx }}-contributors">Contributors</x-form.label>
+                                <textarea
+                                    wire:model="revisions.{{ $rIdx }}.contributors"
+                                    id="rev-{{ $rIdx }}-contributors"
+                                    rows="2"
+                                    placeholder="Names of contributors..."
+                                    class="w-full text-sm rounded-lg border border-slate-300 bg-white px-3 py-2
+                                           focus:border-blue-400 focus:ring-1 focus:ring-blue-300 focus:outline-none
+                                           placeholder:text-slate-300"></textarea>
+                            </div>
+                        </div>
+
+                        @if (count($revisions) > 1)
+                            <div class="mt-3 flex justify-end">
+                                <button type="button"
+                                    wire:click="removeRevision({{ $rIdx }})"
+                                    class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium
+                                           text-rose-600 hover:text-rose-700 hover:bg-rose-50
+                                           rounded-lg transition-colors">
+                                    <i class="bx bx-trash text-sm"></i> Remove
+                                </button>
+                            </div>
+                        @endif
+                    </div>
+                @endforeach
+
+                <div class="flex gap-2">
+                    <x-button variant="sm-primary" wire:click="addRevision">
+                        <i class="bx bx-plus text-sm"></i> Add Revision
+                    </x-button>
+
+                    <x-button variant="sm-secondary" wire:click="saveRevisions">
+                        <i class="bx bx-save text-sm"></i> Save Revisions
+                    </x-button>
+                </div>
             </div>
         </x-wizard.section>
 
-        {{-- ── Course Outcomes ───────────────────────────────────────────── --}}
-        <x-wizard.section title="Course Outcomes" icon="list-check" color="slate">
-            <p class="text-xs text-slate-500 mb-3">
-                Total: <span class="font-semibold text-slate-700">{{ count($courseOutcomes) }}</span>
-            </p>
-            @if (count($courseOutcomes) > 0)
-                <ul class="space-y-2 text-sm">
-                    @foreach ($courseOutcomes as $co)
-                        <li class="flex items-start gap-2">
-                            <span class="shrink-0 font-semibold text-emerald-700">{{ $co['co_code'] }}:</span>
-                            <span class="text-slate-700">{{ $co['description'] }}</span>
-                        </li>
-                    @endforeach
-                </ul>
-            @else
-                <p class="text-sm text-slate-500">No course outcomes defined yet.</p>
-            @endif
-        </x-wizard.section>
+        <x-wizard.section title="Review & Approval" icon="user-check" color="slate">
+            <div class="space-y-4">
+                {{-- Prepared By (Auto-filled) --}}
+                <div class="rounded-lg border border-blue-200 bg-blue-50 p-4">
+                    <x-form.label>
+                        <i class="bx bx-user text-blue-600"></i> Prepared By
+                    </x-form.label>
+                    <p class="text-sm font-medium text-slate-800 mt-1">
+                        {{ $syllabus->preparer->name ?? 'N/A' }}
+                    </p>
+                    <p class="text-xs text-slate-600">
+                        {{ $syllabus->preparer->email ?? '' }}
+                    </p>
+                </div>
 
-        {{-- ── Weekly Coverage ───────────────────────────────────────────── --}}
-        <x-wizard.section title="Weekly Coverage" icon="calendar-week" color="slate">
-            @if (isset($syllabusWeeks) && $syllabusWeeks->count() > 0)
-                <x-wizard.info-card color="slate">
-                    <x-wizard.info-row label="Total weeks" :value="$syllabusWeeks->count()" bold />
-                    <div class="mt-2 space-y-1 text-xs text-slate-700">
-                        @php
-                            $examLabels = [
-                                'first_term'  => '1st Term Exam',
-                                'second_term' => '2nd Term Exam',
-                                'final_term'  => 'Final Term Exam',
-                            ];
-                        @endphp
-                        @foreach ($examLabels as $key => $label)
-                            @php $weekNo = $examWeeks[$key] ?? null; @endphp
-                            <x-wizard.info-row
-                                :label="$label"
-                                :value="$weekNo ? ('Week ' . $weekNo) : 'Not set'"
-                                :muted="! $weekNo" />
+                {{-- Concurred By (Chair - Manual) --}}
+                <div class="rounded-lg border border-slate-200 bg-white p-4">
+                    <x-form.label for="concurred">Concurred By (Department Chair)</x-form.label>
+                    <select
+                        wire:model="syllabus.concurred_by"
+                        id="concurred"
+                        class="w-full text-sm rounded-lg border border-slate-300 bg-white px-3 py-2
+                               focus:border-blue-400 focus:ring-1 focus:ring-blue-300 focus:outline-none">
+                        <option value="">Select Chair...</option>
+                        @foreach ($allUsers as $user)
+                            <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
                         @endforeach
+                    </select>
+                </div>
+
+                {{-- Approved By (Dean - Manual) --}}
+                <div class="rounded-lg border border-slate-200 bg-white p-4">
+                    <x-form.label for="approved">Approved By (Dean)</x-form.label>
+                    <select
+                        wire:model="syllabus.approved_by"
+                        id="approved"
+                        class="w-full text-sm rounded-lg border border-slate-300 bg-white px-3 py-2
+                               focus:border-blue-400 focus:ring-1 focus:ring-blue-300 focus:outline-none">
+                        <option value="">Select Dean...</option>
+                        @foreach ($allUsers as $user)
+                            <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Additional Reviewers --}}
+                <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <x-form.label>
+                            <i class="bx bx-group text-slate-500"></i> Additional Reviewers
+                        </x-form.label>
                     </div>
-                </x-wizard.info-card>
-            @else
-                <p class="text-sm text-slate-500">Weekly coverage not generated yet.</p>
-            @endif
+
+                    {{-- Add Reviewer Form --}}
+                    <div class="flex gap-2 mb-3">
+                        <select
+                            wire:model="selectedReviewerId"
+                            class="flex-1 text-sm rounded-lg border border-slate-300 bg-white px-3 py-2
+                                   focus:border-blue-400 focus:ring-1 focus:ring-blue-300 focus:outline-none">
+                            <option value="">Select reviewer...</option>
+                            @foreach ($allUsers as $user)
+                                <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
+                            @endforeach
+                        </select>
+                        <x-button variant="sm-primary" wire:click="addReviewer">
+                            <i class="bx bx-plus text-sm"></i> Add
+                        </x-button>
+                    </div>
+
+                    {{-- Reviewers List --}}
+                    @if (count($reviewers) > 0)
+                        <div class="space-y-2">
+                            @foreach ($reviewers as $reviewer)
+                                <div class="flex items-center justify-between p-3 bg-white rounded-lg border border-slate-200"
+                                     wire:key="reviewer-{{ $reviewer['id'] }}">
+                                    <div class="flex-1">
+                                        <p class="text-sm font-medium text-slate-800">
+                                            {{ $reviewer['user_name'] }}
+                                        </p>
+                                        <p class="text-xs text-slate-600">
+                                            {{ $reviewer['user_email'] }}
+                                        </p>
+                                    </div>
+
+                                    <div class="flex items-center gap-2">
+                                        <select
+                                            wire:change="updateReviewerStatus({{ $reviewer['id'] }}, $event.target.value)"
+                                            class="text-xs rounded-lg border border-slate-300 px-2 py-1">
+                                            <option value="pending" {{ $reviewer['status'] === 'pending' ? 'selected' : '' }}>Pending</option>
+                                            <option value="approved" {{ $reviewer['status'] === 'approved' ? 'selected' : '' }}>Approved</option>
+                                            <option value="rejected" {{ $reviewer['status'] === 'rejected' ? 'selected' : '' }}>Rejected</option>
+                                        </select>
+
+                                        <button type="button"
+                                            wire:click="removeReviewer({{ $reviewer['id'] }})"
+                                            class="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50
+                                                   rounded-md transition-colors"
+                                            title="Remove">
+                                            <i class="bx bx-trash text-sm"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-sm text-slate-500 text-center py-2">No additional reviewers added yet.</p>
+                    @endif
+                </div>
+            </div>
         </x-wizard.section>
 
         {{-- ── Saved versions ────────────────────────────────────────────── --}}
