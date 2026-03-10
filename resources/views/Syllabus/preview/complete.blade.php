@@ -4,7 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    @vite(['resources/css/preview.css', 'resources/js/app.js'])
+    @if (!empty($isSnapshot) && !empty($inlinePreviewCss))
+        <style>{!! $inlinePreviewCss !!}</style>
+    @else
+        @vite(['resources/css/preview.css', 'resources/js/app.js'])
+    @endif
     {{-- <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@300;400;500;600;700&display=swap"
@@ -50,7 +54,10 @@
 
         <div style="display:grid; grid-template-columns: 80px 1fr 80px; align-items:center; column-gap: 12px;">
             <div style="display:flex; justify-content:flex-start;">
-                <img src="{{ asset('assets/clsu-logo-green.png') }}" alt="CLSU Logo" style="width:100px; height:auto;" />
+                <img
+                    src="{{ (!empty($isSnapshot) && !empty($inlineLogoDataUri)) ? $inlineLogoDataUri : asset('assets/clsu-logo-green.png') }}"
+                    alt="CLSU Logo"
+                    style="width:100px; height:auto;" />
             </div>
             <div style="text-align:center;">
                 <div class="a4-subtitle">Republic of the Philippines</div>

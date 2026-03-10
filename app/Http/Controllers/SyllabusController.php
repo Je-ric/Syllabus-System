@@ -199,6 +199,12 @@ class SyllabusController extends Controller
 
         $data = $this->buildPreviewData($syllabus);
         $data['isSnapshot'] = true;
+        $data['inlinePreviewCss'] = @file_get_contents(resource_path('css/preview.css')) ?: null;
+
+        $logoPath = public_path('assets/clsu-logo-green.png');
+        $data['inlineLogoDataUri'] = is_file($logoPath)
+            ? ('data:image/png;base64,' . base64_encode((string) file_get_contents($logoPath)))
+            : null;
 
         return view('Syllabus.preview.complete', $data)->render();
     }
