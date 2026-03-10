@@ -11,9 +11,12 @@ use App\Models\Syllabus;
 use App\Models\SyllabusWeek;
 use App\Models\WeekContent;
 use App\Models\SyllabusEvaluationItem;
+use App\Services\Syllabus\SyllabusRevisionHistoryService;
+use App\Services\Syllabus\SyllabusReviewService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Throwable;
@@ -25,11 +28,15 @@ class SyllabusWizard extends Component
     public string    $currentStep = 'academic_calendar';
     public array     $stepDirty   = [];
 
+    // Reviewer list lives here because addReviewer() / removeReviewer() are
+    // parent methods called via $parent.* from the child blade. After each
+    // mutation we reload and dispatch 'syllabus-reviewers-updated' so ReviewStep
+    // re-renders with the fresh list passed from render() below.
+    public array $reviewers = [];
+
     // ── Mount ─────────────────────────────────────────────────────────────────
 
-    // Sets up the wizard for editing an existing syllabus or creating a new one.
-    // Aborts with 404 if neither a valid syllabusId nor courseId is provided.
-    public function mount($syllabusId = null, $courseId = null)
+    public function mount($syllabusId = null, $courseId = null): void
     {
         $syllabusId = $syllabusId ? (int) $syllabusId : null;
         $courseId   = $courseId   ? (int) $courseId   : null;
@@ -64,6 +71,7 @@ class SyllabusWizard extends Component
         }
 
         $this->initializeStepState();
+        $this->loadReviewers();
     }
 
     // ── Event listeners ───────────────────────────────────────────────────────
@@ -77,14 +85,6 @@ class SyllabusWizard extends Component
         $this->stepDirty[$step] = $dirty;
     }
 
-    // Child steps fire this after saving so the wizard can:
-    //   - clear the dirty flag for that step
-    //   - show a toast if a message was provided
-    //   - refresh the syllabus model (e.g. after the calendar is linked)
-    //
-    // Navigation is NOT gated on this event — saveAndNavigate() already changed
-    // $currentStep in the same request as the dispatch, so the UI has already
-    // updated by the time this event arrives.
     #[On('syllabus-step-saved')]
     public function onStepSaved(string $step, ?string $message = null): void
     {
@@ -101,24 +101,166 @@ class SyllabusWizard extends Component
         $this->syllabus->refresh();
     }
 
-    // ── Navigation (ONE round trip) ───────────────────────────────────────────
+    #[On('syllabus-reviewers-updated')]
+    public function onReviewersUpdated(): void
+    {
+        $this->loadReviewers();
+    }
 
-    // How this stays fast:
+    // ── Revision history ──────────────────────────────────────────────────────
     //
-    // Old flow (2 round trips, 3-5 s):
-    //   1. clickTab() dispatches 'syllabus-save-step'.
-    //      Child saves, dispatches 'syllabus-step-saved' back.
-    //   2. onStepSaved() changes $currentStep → re-renders wizard.
-    //      The child had :key="currentStep" so it was DESTROYED and REMOUNTED —
-    //      cold-boot DB queries, full render.
+    // $revisions lives on ReviewStep so wire:model works within the child blade.
+    // The "Save Revisions" button calls $parent.saveRevisions($wire.revisions),
+    // passing the full local array here for DB persistence.
     //
-    // New flow (1 round trip, ~200-400 ms):
-    //   1. saveAndNavigate() dispatches 'syllabus-save-step' (fire-and-forget to child)
-    //      AND immediately sets $currentStep — same request.
-    //   2. Wizard re-renders with the new $currentStep.
-    //      The blade uses block/hidden on wrapper divs — no :key, no remount.
-    //      Child's onSaveRequested() runs in the same request batch, writing to
-    //      DB before the response is sent.
+    // removeRevision() in ReviewStep dispatches 'wizard-delete-revision' when
+    // the removed row has a persisted id, caught here for the DB delete.
+    public function addRevision(array $revisions = []): void
+    {
+        $maxRevisionNo = (int) collect($revisions)
+            ->pluck('revision_no')
+            ->map(fn ($n) => (int) $n)
+            ->max();
+
+        $revisions[] = [
+            'id' => null,
+            'revision_no' => max(0, $maxRevisionNo) + 1,
+            'revision_date' => now()->format('Y-m-d'),
+            'implementation_semester' => '',
+            'highlights' => '',
+            'contributors' => '',
+        ];
+
+        $this->dispatch('review-step-set-revisions', revisions: array_values($revisions));
+    }
+    public function removeRevision(array $revisions, int $index): void
+    {
+        if (count($revisions) <= 1) {
+            return;
+        }
+
+        $row = $revisions[$index] ?? null;
+        if (! $row) {
+            return;
+        }
+
+        $revisionId = (int) ($row['id'] ?? 0);
+        if ($revisionId > 0 && $this->syllabus) {
+            try {
+                app(SyllabusRevisionHistoryService::class)->delete($this->syllabus, $revisionId);
+            } catch (Throwable $e) {
+                report($e);
+                $this->dispatch('lw-toast', type: 'error', message: 'Unable to delete revision.');
+                return;
+            }
+        }
+
+        array_splice($revisions, $index, 1);
+        $this->dispatch('review-step-set-revisions', revisions: array_values($revisions));
+    }
+
+    /**
+     * Persist revisions passed from ReviewStep's "Save Revisions" button.
+     * Called as: wire:click="$parent.saveRevisions($wire.revisions)"
+     *
+     * @param  array<int, array<string, mixed>>  $revisions
+     */
+    public function saveRevisions(array $revisions): void
+    {
+        if (! $this->syllabus) {
+            $this->dispatch('lw-toast', type: 'error', message: 'No syllabus loaded.');
+            return;
+        }
+
+        try {
+            app(SyllabusRevisionHistoryService::class)->upsertMany($this->syllabus, $revisions);
+        } catch (Throwable $e) {
+            report($e);
+            $this->dispatch('lw-toast', type: 'error', message: 'Unable to save revisions.');
+            return;
+        }
+
+        $this->dispatch('lw-toast', type: 'success', message: 'Revisions saved successfully.');
+        // Notify ReviewStep to reload its $revisions array with fresh IDs from DB
+        $this->dispatch('syllabus-revisions-updated');
+    }
+
+    // ── Reviewer management ───────────────────────────────────────────────────
+    //
+    // Called from the child blade via $parent.addReviewer($wire.selectedReviewerId)
+    // and $parent.removeReviewer(id). After each mutation we reload $this->reviewers
+    // and dispatch 'syllabus-reviewers-updated' so ReviewStep re-renders.
+
+    public function addReviewer(?int $reviewerUserId = null): void
+    {
+        if (! $this->syllabus) {
+            $this->dispatch('lw-toast', type: 'error', message: 'No syllabus loaded.');
+            return;
+        }
+
+        try {
+            app(SyllabusReviewService::class)->assignReviewer($this->syllabus, (int) $reviewerUserId);
+        } catch (ValidationException $e) {
+            $message = collect($e->errors())->flatten()->first() ?? 'Unable to add reviewer.';
+            $this->dispatch('lw-toast', type: 'error', message: $message);
+            return;
+        } catch (Throwable $e) {
+            report($e);
+            $this->dispatch('lw-toast', type: 'error', message: 'Unable to add reviewer.');
+            return;
+        }
+
+        $this->dispatch('lw-toast', type: 'success', message: 'Reviewer assigned (auto-approved).');
+        $this->loadReviewers();
+        $this->dispatch('syllabus-reviewers-updated');
+    }
+
+    public function removeReviewer(int $syllabusReviewerId): void
+    {
+        if (! $this->syllabus) {
+            $this->dispatch('lw-toast', type: 'error', message: 'No syllabus loaded.');
+            return;
+        }
+
+        try {
+            app(SyllabusReviewService::class)->removeReviewer($this->syllabus, $syllabusReviewerId);
+        } catch (Throwable $e) {
+            report($e);
+            $this->dispatch('lw-toast', type: 'error', message: 'Unable to remove reviewer.');
+            return;
+        }
+
+        $this->dispatch('lw-toast', type: 'success', message: 'Reviewer removed.');
+        $this->loadReviewers();
+        $this->dispatch('syllabus-reviewers-updated');
+    }
+
+    public function updateReviewerStatus(int $syllabusReviewerId, string $status): void
+    {
+        if (! $this->syllabus) {
+            $this->dispatch('lw-toast', type: 'error', message: 'No syllabus loaded.');
+            return;
+        }
+
+        try {
+            app(SyllabusReviewService::class)->updateReviewerStatus($this->syllabus, $syllabusReviewerId, $status);
+        } catch (ValidationException $e) {
+            $message = collect($e->errors())->flatten()->first() ?? 'Unable to update reviewer.';
+            $this->dispatch('lw-toast', type: 'error', message: $message);
+            return;
+        } catch (Throwable $e) {
+            report($e);
+            $this->dispatch('lw-toast', type: 'error', message: 'Unable to update reviewer.');
+            return;
+        }
+
+        $this->dispatch('lw-toast', type: 'success', message: 'Reviewer status updated.');
+        $this->loadReviewers();
+        $this->dispatch('syllabus-reviewers-updated');
+    }
+
+    // ── Navigation ────────────────────────────────────────────────────────────
+
     private function saveAndNavigate(string $toStep): void
     {
         if (! array_key_exists($toStep, $this->syllabus->getWizardSteps())) {
@@ -128,14 +270,11 @@ class SyllabusWizard extends Component
             return;
         }
 
-        // Tell the current child to save (fire-and-forget within this request)
         $this->dispatch('syllabus-save-step', step: $this->currentStep);
 
-        // Switch step immediately — same round trip
         $this->currentStep = $toStep;
         $this->syllabus->update(['current_step' => $toStep]);
 
-        // Notify the new step it is now active
         $this->dispatch('syllabus-step-changed', step: $toStep);
     }
 
@@ -165,18 +304,7 @@ class SyllabusWizard extends Component
     }
 
     // ── Save as Done ──────────────────────────────────────────────────────────
-    //
-    // THE only saveAsDone() in the codebase. ReviewStep has NONE.
-    //
-    // Called via wire:click="saveAsDone" on the button in review.blade.php.
-    // Because review.blade.php is a child Livewire component (ReviewStep),
-    // the button there uses $dispatch('wizard-save-as-done') and this method
-    // listens via #[On('wizard-save-as-done')].
-    //
-    // Versioning: every call creates a new CompleteSyllabus row (v1, v2, …).
-    // Old versions are preserved — they remain editable until a chair approves.
-    // Status is set to 'under_review'; only a department chair sets 'approved'.
-    //
+
     #[On('wizard-save-as-done')]
     public function saveAsDone(): void
     {
@@ -185,7 +313,6 @@ class SyllabusWizard extends Component
             return;
         }
 
-        // Re-load with relations needed by the PDF builder and folder hierarchy
         $syllabus = Syllabus::query()
             ->with([
                 'course.program.departments.college',
@@ -199,7 +326,7 @@ class SyllabusWizard extends Component
             return;
         }
 
-        // 1. Generate PDF ──────────────────────────────────────────────────
+        // 1. Generate HTML snapshot ───────────────────────────────────────
         try {
             $html = app(SyllabusController::class)->generateCompleteHtmlSnapshot($syllabus);
         } catch (Throwable $e) {
@@ -208,25 +335,22 @@ class SyllabusWizard extends Component
             return;
         }
 
-        // 2. Build hierarchical folder path ────────────────────────────────
-        // Organize snapshots by: College → Department → Program → Faculty
+        // 2. Build storage path ──────────────────────────────────────────
         $program    = $syllabus->course?->program;
-        $department = $program?->departments?->first(); // Primary department
+        $department = $program?->departments?->first();
         $college    = $department?->college;
         $faculty    = $syllabus->preparer;
 
-        $collegeName    = Str::slug($college?->name ?? 'unknown-college');
+        $collegeName    = Str::slug($college?->name    ?? 'unknown-college');
         $departmentName = Str::slug($department?->name ?? 'unknown-department');
         $programName    = Str::slug($program?->program_name ?? $program?->name ?? 'unknown-program');
-        $facultyName    = Str::slug($faculty?->name ?? 'user-' . ($syllabus->prepared_by ?? 'unknown'));
+        $facultyName    = Str::slug($faculty?->name    ?? 'user-' . ($syllabus->prepared_by ?? 'unknown'));
 
         $version      = (int) (CompleteSyllabus::where('syllabus_id', $syllabus->id)->max('version') ?? 0) + 1;
         $academicYear = $syllabus->academicCalendar?->academic_year ?? 'N-A';
         $semester     = $syllabus->academicCalendar?->semester      ?? 'N-A';
         $courseCode   = $syllabus->course?->course_code             ?? 'COURSE';
 
-        // Stored in storage/app/private/syllabus-snapshots/{college}/{dept}/{program}/{faculty}/{file}.html
-        // Accessible via controller route (SyllabusController::previewSavedComplete)
         $fileName    = Str::slug($courseCode . '-' . $academicYear . '-' . $semester . '-v' . $version) . '.html';
         $storagePath = implode('/', [
             'syllabus-snapshots',
@@ -237,29 +361,27 @@ class SyllabusWizard extends Component
             $fileName,
         ]);
 
-        // 3. Write to public disk ─────────────────────────────────────────
+        // 3. Write to local disk ──────────────────────────────────────────
         try {
             $ok = Storage::disk('local')->put($storagePath, $html);
-
             if (! $ok) {
                 $this->dispatch('lw-toast', type: 'error', message: 'Snapshot write failed — storage returned false.');
                 return;
             }
-
         } catch (Throwable $e) {
             report($e);
             $this->dispatch('lw-toast', type: 'error', message: 'Disk write error: ' . $e->getMessage());
             return;
         }
 
-        // 4. Persist version record ───────────────────────────────────────
+        // 4. Persist version record ──────────────────────────────────────
         try {
             CompleteSyllabus::create([
                 'syllabus_id'   => $syllabus->id,
                 'course_id'     => $syllabus->course_id,
                 'academic_year' => $academicYear,
                 'semester'      => $semester,
-                'pdf_path'      => $storagePath,     // local path (served via controller route)
+                'pdf_path'      => $storagePath,
                 'version'       => $version,
                 'approved_at'   => null,
                 'approved_by'   => null,
@@ -271,8 +393,7 @@ class SyllabusWizard extends Component
             return;
         }
 
-        // 5. Update syllabus status ────────────────────────────────────────
-        // 'under_review' = submitted for review. 'approved' is set by the chair only.
+        // 5. Update syllabus status ───────────────────────────────────────
         try {
             $syllabus->forceFill([
                 'status'       => 'under_review',
@@ -280,17 +401,13 @@ class SyllabusWizard extends Component
             ])->save();
         } catch (Throwable $e) {
             report($e);
-            // Non-fatal — version snapshot is saved; just warn
+            // Non-fatal — snapshot is saved
         }
 
         $this->syllabus->refresh();
 
         $this->dispatch('lw-toast', type: 'success', message: "Syllabus version frozen (v{$version}).");
-
-        // Reset the Alpine spinner in review.blade.php
         $this->dispatch('wizard-save-done');
-
-        // Tell ReviewStep to reload so the "Latest Saved Version" card updates
         $this->dispatch('syllabus-step-changed', step: 'review');
     }
 
@@ -346,8 +463,6 @@ class SyllabusWizard extends Component
         return $index !== false && $index > 0;
     }
 
-    // Check whether a wizard step is missing required data.
-    // Used by submitForReview() to block incomplete submissions.
     public function stepHasMissingRequired(string $step): bool
     {
         $syllabusId = (int) $this->syllabus->id;
@@ -373,12 +488,6 @@ class SyllabusWizard extends Component
                 return ! SyllabusWeek::where('syllabus_id', $syllabusId)->exists();
 
             case 'course_evaluation':
-                // Find every WeekContent row that should have a weight entered.
-                //
-                // Qualifying rows must have a non-empty assessment_task AND must NOT be
-                // "Non-Teaching Week" (those are locked placeholder rows, not assessable).
-                // We do not rely on syllabus_weeks.exam_type because that column is
-                // not used by the new evaluation flow — we read assessment_task directly.
                 $weekContentIds = WeekContent::query()
                     ->join('syllabus_weeks', 'syllabus_weeks.id', '=', 'week_contents.syllabus_week_id')
                     ->where('syllabus_weeks.syllabus_id', $syllabusId)
@@ -387,11 +496,9 @@ class SyllabusWizard extends Component
                     ->pluck('week_contents.id');
 
                 if ($weekContentIds->isEmpty()) {
-                    // No tasks exist yet — treat as incomplete
                     return true;
                 }
 
-                // All qualifying rows must have a non-null weight saved
                 $evaluatedCount = SyllabusEvaluationItem::whereIn('week_content_id', $weekContentIds)
                     ->whereNotNull('weight')
                     ->count();
@@ -426,5 +533,27 @@ class SyllabusWizard extends Component
         foreach (array_keys($this->syllabus->getWizardSteps()) as $step) {
             $this->stepDirty[$step] = false;
         }
+    }
+
+    private function loadReviewers(): void
+    {
+        if (! $this->syllabus) {
+            $this->reviewers = [];
+            return;
+        }
+
+        $this->reviewers = $this->syllabus->reviewers()
+            ->with('user')
+            ->orderBy('created_at')
+            ->get()
+            ->map(fn ($reviewer) => [
+                'id'         => $reviewer->id,
+                'user_id'    => $reviewer->user_id,
+                'user_name'  => $reviewer->user->name,
+                'user_email' => $reviewer->user->email,
+                'status'     => $reviewer->status,
+            ])
+            ->values()
+            ->all();
     }
 }

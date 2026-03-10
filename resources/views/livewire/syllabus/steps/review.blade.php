@@ -1,4 +1,4 @@
-﻿<div>
+<div>
     <x-wizard.step-header
         title="Review & Submit"
         description="Review all details before submitting for approval." />
@@ -44,78 +44,69 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div>
                                 <x-form.label for="rev-{{ $rIdx }}-no">Revision No.</x-form.label>
-                                <input type="number"
+                                <x-form.input type="number"
                                     wire:model="revisions.{{ $rIdx }}.revision_no"
                                     id="rev-{{ $rIdx }}-no"
                                     readonly
-                                    class="w-full text-sm rounded-lg border border-slate-300 bg-slate-100 px-3 py-2" />
+                                    class="bg-slate-100" />
                             </div>
 
                             <div>
                                 <x-form.label for="rev-{{ $rIdx }}-date">Revision Date</x-form.label>
-                                <input type="date"
+                                <x-form.input type="date"
                                     wire:model="revisions.{{ $rIdx }}.revision_date"
                                     id="rev-{{ $rIdx }}-date"
-                                    class="w-full text-sm rounded-lg border border-slate-300 bg-white px-3 py-2
-                                           focus:border-blue-400 focus:ring-1 focus:ring-blue-300 focus:outline-none" />
+                                />
                             </div>
 
                             <div class="md:col-span-2">
                                 <x-form.label for="rev-{{ $rIdx }}-semester">Implementation Semester *</x-form.label>
-                                <input type="text"
+                                <x-form.input type="text"
                                     wire:model="revisions.{{ $rIdx }}.implementation_semester"
                                     id="rev-{{ $rIdx }}-semester"
                                     placeholder="e.g., 1st Sem 2025-2026"
-                                    class="w-full text-sm rounded-lg border border-slate-300 bg-white px-3 py-2
-                                           focus:border-blue-400 focus:ring-1 focus:ring-blue-300 focus:outline-none
-                                           placeholder:text-slate-300" />
+                                />
                             </div>
 
                             <div class="md:col-span-2">
                                 <x-form.label for="rev-{{ $rIdx }}-highlights">Highlights</x-form.label>
-                                <textarea
+                                <x-form.textarea
                                     wire:model="revisions.{{ $rIdx }}.highlights"
                                     id="rev-{{ $rIdx }}-highlights"
                                     rows="2"
                                     placeholder="Brief summary of changes..."
-                                    class="w-full text-sm rounded-lg border border-slate-300 bg-white px-3 py-2
-                                           focus:border-blue-400 focus:ring-1 focus:ring-blue-300 focus:outline-none
-                                           placeholder:text-slate-300"></textarea>
+                                />
                             </div>
 
                             <div class="md:col-span-2">
                                 <x-form.label for="rev-{{ $rIdx }}-contributors">Contributors</x-form.label>
-                                <textarea
+                                <x-form.textarea
                                     wire:model="revisions.{{ $rIdx }}.contributors"
                                     id="rev-{{ $rIdx }}-contributors"
                                     rows="2"
                                     placeholder="Names of contributors..."
-                                    class="w-full text-sm rounded-lg border border-slate-300 bg-white px-3 py-2
-                                           focus:border-blue-400 focus:ring-1 focus:ring-blue-300 focus:outline-none
-                                           placeholder:text-slate-300"></textarea>
+                                />
                             </div>
                         </div>
 
                         @if (count($revisions) > 1)
                             <div class="mt-3 flex justify-end">
-                                <button type="button"
-                                    wire:click="removeRevision({{ $rIdx }})"
-                                    class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium
-                                           text-rose-600 hover:text-rose-700 hover:bg-rose-50
-                                           rounded-lg transition-colors">
+                                <x-button
+                                    variant="sm-danger"
+                                    wire:click="$parent.removeRevision($wire.revisions, {{ $rIdx }})">
                                     <i class="bx bx-trash text-sm"></i> Remove
-                                </button>
+                                </x-button>
                             </div>
                         @endif
                     </div>
                 @endforeach
 
                 <div class="flex gap-2">
-                    <x-button variant="sm-primary" wire:click="addRevision">
+                    <x-button variant="sm-primary" wire:click="$parent.addRevision($wire.revisions)">
                         <i class="bx bx-plus text-sm"></i> Add Revision
                     </x-button>
 
-                    <x-button variant="sm-secondary" wire:click="saveRevisions">
+                    <x-button variant="sm-success" wire:click="$parent.saveRevisions($wire.revisions)">
                         <i class="bx bx-save text-sm"></i> Save Revisions
                     </x-button>
                 </div>
@@ -140,31 +131,27 @@
                 {{-- Concurred By (Chair - Manual) --}}
                 <div class="rounded-lg border border-slate-200 bg-white p-4">
                     <x-form.label for="concurred">Concurred By (Department Chair)</x-form.label>
-                    <select
+                    <x-form.select
                         wire:model="syllabus.concurred_by"
-                        id="concurred"
-                        class="w-full text-sm rounded-lg border border-slate-300 bg-white px-3 py-2
-                               focus:border-blue-400 focus:ring-1 focus:ring-blue-300 focus:outline-none">
+                        id="concurred">
                         <option value="">Select Chair...</option>
                         @foreach ($allUsers as $user)
                             <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
                         @endforeach
-                    </select>
+                    </x-form.select>
                 </div>
 
                 {{-- Approved By (Dean - Manual) --}}
                 <div class="rounded-lg border border-slate-200 bg-white p-4">
                     <x-form.label for="approved">Approved By (Dean)</x-form.label>
-                    <select
+                    <x-form.select
                         wire:model="syllabus.approved_by"
-                        id="approved"
-                        class="w-full text-sm rounded-lg border border-slate-300 bg-white px-3 py-2
-                               focus:border-blue-400 focus:ring-1 focus:ring-blue-300 focus:outline-none">
+                        id="approved">
                         <option value="">Select Dean...</option>
                         @foreach ($allUsers as $user)
                             <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
                         @endforeach
-                    </select>
+                    </x-form.select>
                 </div>
 
                 {{-- Additional Reviewers --}}
@@ -177,16 +164,15 @@
 
                     {{-- Add Reviewer Form --}}
                     <div class="flex gap-2 mb-3">
-                        <select
+                        <x-form.select
                             wire:model="selectedReviewerId"
-                            class="flex-1 text-sm rounded-lg border border-slate-300 bg-white px-3 py-2
-                                   focus:border-blue-400 focus:ring-1 focus:ring-blue-300 focus:outline-none">
+                            class="flex-1">
                             <option value="">Select reviewer...</option>
                             @foreach ($allUsers as $user)
                                 <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
                             @endforeach
-                        </select>
-                        <x-button variant="sm-primary" wire:click="addReviewer">
+                        </x-form.select>
+                        <x-button variant="sm-primary" wire:click="$parent.addReviewer($wire.selectedReviewerId)">
                             <i class="bx bx-plus text-sm"></i> Add
                         </x-button>
                     </div>
@@ -196,7 +182,7 @@
                         <div class="space-y-2">
                             @foreach ($reviewers as $reviewer)
                                 <div class="flex items-center justify-between p-3 bg-white rounded-lg border border-slate-200"
-                                     wire:key="reviewer-{{ $reviewer['id'] }}">
+                                    wire:key="reviewer-{{ $reviewer['id'] }}">
                                     <div class="flex-1">
                                         <p class="text-sm font-medium text-slate-800">
                                             {{ $reviewer['user_name'] }}
@@ -207,21 +193,15 @@
                                     </div>
 
                                     <div class="flex items-center gap-2">
-                                        <select
-                                            wire:change="updateReviewerStatus({{ $reviewer['id'] }}, $event.target.value)"
-                                            class="text-xs rounded-lg border border-slate-300 px-2 py-1">
-                                            <option value="pending" {{ $reviewer['status'] === 'pending' ? 'selected' : '' }}>Pending</option>
-                                            <option value="approved" {{ $reviewer['status'] === 'approved' ? 'selected' : '' }}>Approved</option>
-                                            <option value="rejected" {{ $reviewer['status'] === 'rejected' ? 'selected' : '' }}>Rejected</option>
-                                        </select>
+                                        <x-feedback-status.status-indicator
+                                            :status="$reviewer['status'] === 'approved' ? 'success' : $reviewer['status']"
+                                            :label="$reviewer['status'] === 'approved' ? 'Approved' : ucfirst($reviewer['status'])" />
 
-                                        <button type="button"
-                                            wire:click="removeReviewer({{ $reviewer['id'] }})"
-                                            class="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50
-                                                   rounded-md transition-colors"
-                                            title="Remove">
-                                            <i class="bx bx-trash text-sm"></i>
-                                        </button>
+                                        <x-button
+                                            variant="sm-danger"
+                                            wire:click="$parent.removeReviewer({{ $reviewer['id'] }})">
+                                            <i class="bx bx-trash text-sm"></i> Remove
+                                        </x-button>
                                     </div>
                                 </div>
                             @endforeach

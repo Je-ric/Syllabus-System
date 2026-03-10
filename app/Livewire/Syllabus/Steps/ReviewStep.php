@@ -5,8 +5,6 @@ namespace App\Livewire\Syllabus\Steps;
 use App\Models\AcademicCalendar;
 use App\Models\CompleteSyllabus;
 use App\Models\Syllabus;
-use App\Models\SyllabusRevision;
-use App\Models\SyllabusReviewer;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
@@ -57,6 +55,23 @@ class ReviewStep extends Component
     // Reload when any other step saves (so summary stays fresh)
     #[On('syllabus-step-saved')]
     public function onAnyStepSaved(): void
+    {
+        if ($this->isLoaded) {
+            $this->loadData(force: true);
+        }
+    }
+
+    #[On('syllabus-reviewers-updated')]
+    public function onReviewersUpdated(): void
+    {
+        if ($this->isLoaded) {
+            $this->selectedReviewerId = null;
+            $this->loadData(force: true);
+        }
+    }
+
+    #[On('syllabus-revisions-updated')]
+    public function onRevisionsUpdated(): void
     {
         if ($this->isLoaded) {
             $this->loadData(force: true);
@@ -209,89 +224,17 @@ class ReviewStep extends Component
 
         $revision = $this->revisions[$index];
         if (isset($revision['id']) && $revision['id']) {
-            SyllabusRevision::find($revision['id'])?->delete();
+            $this->dispatch('wizard-delete-revision', revisionId: (int) $revision['id']);
         }
 
         array_splice($this->revisions, $index, 1);
-    }
-
-    public function saveRevisions(): void
-    {
-        foreach ($this->revisions as $revision) {
-            if (empty($revision['implementation_semester'])) {
-                continue;
-            }
-
-            if (isset($revision['id']) && $revision['id']) {
-                SyllabusRevision::find($revision['id'])?->update([
-                    'revision_date' => $revision['revision_date'],
-                    'implementation_semester' => $revision['implementation_semester'],
-                    'highlights' => $revision['highlights'] ?? null,
-                    'contributors' => $revision['contributors'] ?? null,
-                ]);
-            } else {
-                SyllabusRevision::create([
-                    'syllabus_id' => $this->syllabusId,
-                    'revision_no' => $revision['revision_no'],
-                    'revision_date' => $revision['revision_date'],
-                    'implementation_semester' => $revision['implementation_semester'],
-                    'highlights' => $revision['highlights'] ?? null,
-                    'contributors' => $revision['contributors'] ?? null,
-                ]);
-            }
-        }
-
-        $this->dispatch('toast', message: 'Revisions saved successfully.', type: 'success');
-        $this->loadData(force: true);
-    }
-
-    public function addReviewer(): void
-    {
-        if (!$this->selectedReviewerId) {
-            $this->dispatch('toast', message: 'Please select a reviewer.', type: 'error');
-            return;
-        }
-
-        foreach ($this->reviewers as $reviewer) {
-            if ($reviewer['user_id'] == $this->selectedReviewerId) {
-                $this->dispatch('toast', message: 'This reviewer is already added.', type: 'warning');
-                return;
-            }
-        }
-
-        SyllabusReviewer::create([
-            'syllabus_id' => $this->syllabusId,
-            'user_id' => $this->selectedReviewerId,
-            'status' => 'pending',
-        ]);
-
-        $this->selectedReviewerId = null;
-        $this->dispatch('toast', message: 'Reviewer added successfully.', type: 'success');
-        $this->loadData(force: true);
-    }
-
-    public function removeReviewer(int $reviewerId): void
-    {
-        SyllabusReviewer::find($reviewerId)?->delete();
-        $this->dispatch('toast', message: 'Reviewer removed.', type: 'success');
-       $this->loadData(force: true);
-    }
-
-    public function updateReviewerStatus(int $reviewerId, string $status): void
-    {
-        $reviewer = SyllabusReviewer::find($reviewerId);
-        if ($reviewer) {
-            $reviewer->update(['status' => $status]);
-            $this->dispatch('toast', message: 'Reviewer status updated.', type: 'success');
-            $this->loadData(force: true);
-        }
     }
 
     public function updatedSyllabus($value, $key): void
     {
         if (in_array($key, ['concurred_by', 'approved_by'])) {
             $this->syllabus->update([$key => $value]);
-            $this->dispatch('toast', message: 'Approval signatures updated.', type: 'success');
+            $this->dispatch('lw-toast', type: 'success', message: 'Approval signatures updated.');
         }
     }
 }

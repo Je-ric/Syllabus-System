@@ -5,27 +5,29 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class SyllabusRevision extends Model
+class SyllabusReviewer extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'syllabus_id',
-        'revision_no',
-        'revision_date',
-        'implementation_semester',
-        'highlights',
-        'contributors',
+        'user_id',
+        'status',
     ];
 
     protected $casts = [
-        'revision_date' => 'date',
-        'revision_no'   => 'integer',
-        'syllabus_id'   => 'integer',
+        'syllabus_id' => 'integer',
+        'user_id' => 'integer',
     ];
 
+    // Relationships
     public function syllabus()
     {
         return $this->belongsTo(Syllabus::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

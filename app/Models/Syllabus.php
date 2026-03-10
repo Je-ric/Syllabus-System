@@ -60,6 +60,12 @@ class Syllabus extends Model
         return $this->hasMany(SyllabusRevision::class);
     }
 
+    // Used in:
+    public function reviewers()
+    {
+        return $this->hasMany(SyllabusReviewer::class);
+    }
+
     // Direct relationship to components (now tied to syllabus)
     // Used in:
     public function components()
@@ -127,13 +133,6 @@ class Syllabus extends Model
         ]);
     }
 
-    // Helper: Get current revision number
-    // Used in:
-    public function getCurrentRevisionNumber()
-    {
-        return $this->revisions()->max('revision_no') ?? 0;
-    }
-
     // Helper: Check if syllabus is approved
     // Used in:
     public function isApproved()
@@ -146,6 +145,11 @@ class Syllabus extends Model
     public function isEditable()
     {
         return in_array($this->status, ['draft', 'for_revision']);
+    }
+
+    public function getCurrentRevisionNumber(): int
+    {
+        return (int) ($this->revisions()->max('revision_no') ?? 0);
     }
 
     // Helper: Get wizard steps based on course type
@@ -165,4 +169,3 @@ class Syllabus extends Model
     }
 
 }
-
