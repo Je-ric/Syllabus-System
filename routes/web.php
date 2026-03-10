@@ -146,7 +146,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/syllabus/{syllabus}/edit', [SyllabusController::class, 'edit'])->name('syllabus.edit');
         Route::put('/syllabus/{syllabus}', [SyllabusController::class, 'update'])->name('syllabus.update');
         Route::delete('/syllabus/{syllabus}', [SyllabusController::class, 'destroy'])->name('syllabus.destroy');
-
+        Route::view('/showcase', 'components.showcase');
     });
 
 });
