@@ -6,6 +6,7 @@ use App\Models\AcademicCalendar;
 use App\Models\CompleteSyllabus;
 use App\Models\Syllabus;
 use App\Models\User;
+use App\Models\SyllabusRevision;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -23,11 +24,28 @@ class ReviewStep extends Component
     public           $course;
     public ?CompleteSyllabus $latestComplete = null;
     public           $completeVersions;
-
-    public array     $revisions = [];
     public array     $reviewers = [];
     public           $allUsers;
-    public ?int      $selectedReviewerId = null;
+
+    // ── Revision history (local array — wire:model binds here) ────────────
+    //
+    // $revisions lives on ReviewStep so that wire:model="revisions.N.field"
+    // works within this component's blade.
+    //
+    // addRevision() / removeRevision() only mutate this local array (no DB).
+    //
+    // The "Save Revisions" button calls $parent.saveRevisions($wire.revisions)
+    // which passes the full array to SyllabusWizard::saveRevisions() for
+    // persistence via SyllabusRevisionHistoryService.
+    //
+    // When a persisted row (id != null) is removed, we dispatch
+    // 'wizard-delete-revision' so SyllabusWizard can hard-delete it from the DB.
+
+    public array $revisions = [];
+
+    // selectedReviewerId lives here so $wire.selectedReviewerId works in the
+    // blade when calling $parent.addReviewer($wire.selectedReviewerId).
+    public ?int $selectedReviewerId = null;
 
     // ── Mount ──────────────────────────────────────────────────────────────
 
@@ -43,7 +61,6 @@ class ReviewStep extends Component
 
     // ── Livewire event listeners ───────────────────────────────────────────
 
-    // Reload when the wizard navigates to this step
     #[On('syllabus-step-changed')]
     public function onStepChanged(string $step): void
     {
@@ -52,7 +69,6 @@ class ReviewStep extends Component
         }
     }
 
-    // Reload when any other step saves (so summary stays fresh)
     #[On('syllabus-step-saved')]
     public function onAnyStepSaved(): void
     {
@@ -65,8 +81,7 @@ class ReviewStep extends Component
     public function onReviewersUpdated(): void
     {
         if ($this->isLoaded) {
-            $this->selectedReviewerId = null;
-            $this->loadData(force: true);
+            $this->loadReviewers();
         }
     }
 
@@ -78,6 +93,12 @@ class ReviewStep extends Component
         }
     }
 
+    #[On('review-step-set-revisions')]
+    public function onSetRevisions(array $revisions): void
+    {
+        $this->revisions = $revisions;
+    }
+
     // ── Render ─────────────────────────────────────────────────────────────
 
     public function render()
@@ -86,17 +107,6 @@ class ReviewStep extends Component
             'course' => $this->course,
         ]);
     }
-
-    // NOTE: There is NO saveAsDone() here.
-    //
-    // The "Save as Done" button in review.blade.php dispatches the browser event
-    // 'wizard-save-as-done', which is caught by SyllabusWizard via #[On('wizard-save-as-done')].
-    // SyllabusWizard::saveAsDone() freezes an immutable HTML snapshot, saves it to disk, creates the
-    // CompleteSyllabus version record, and then dispatches 'syllabus-step-changed' so
-    // this component reloads and shows the updated "Latest Saved Version" card.
-    //
-    // This design avoids duplicating the save logic and ensures wire:loading on the
-    // button works correctly (it targets the parent wizard, not this child).
 
     // ── Private helpers ────────────────────────────────────────────────────
 
@@ -112,6 +122,7 @@ class ReviewStep extends Component
             'components',
             'weeks',
             'academicCalendar',
+            'revisions',
         ])->findOrFail($this->syllabusId);
 
         $this->course               = $this->syllabus->course;
@@ -156,85 +167,58 @@ class ReviewStep extends Component
 
         $this->loadRevisions();
         $this->loadReviewers();
+        $this->loadAssignableUsers();
 
         $this->isLoaded = true;
     }
 
     private function loadRevisions(): void
     {
-        $this->revisions = $this->syllabus->revisions
-            ->map(fn ($rev) => [
-                'id' => $rev->id,
-                'revision_no' => $rev->revision_no,
-                'revision_date' => $rev->revision_date->format('Y-m-d'),
+        $mapped = $this->syllabus->revisions
+            ->sortBy('revision_no')
+            ->map(fn (SyllabusRevision $rev) => [
+                'id'                      => $rev->id,
+                'revision_no'             => $rev->revision_no,
+                'revision_date'           => $rev->revision_date->format('Y-m-d'),
                 'implementation_semester' => $rev->implementation_semester,
-                'highlights' => $rev->highlights,
-                'contributors' => $rev->contributors,
+                'highlights'              => $rev->highlights ?? '',
+                'contributors'            => $rev->contributors ?? '',
             ])
             ->values()
             ->all();
 
-        if (empty($this->revisions)) {
-            $this->revisions = [[
-                'id' => null,
-                'revision_no' => $this->syllabus->getCurrentRevisionNumber() + 1,
-                'revision_date' => now()->format('Y-m-d'),
+        if (empty($mapped)) {
+            $mapped = [[
+                'id'                      => null,
+                'revision_no'             => $this->syllabus->getCurrentRevisionNumber() + 1,
+                'revision_date'           => now()->format('Y-m-d'),
                 'implementation_semester' => '',
-                'highlights' => '',
-                'contributors' => '',
+                'highlights'              => '',
+                'contributors'            => '',
             ]];
         }
+
+        $this->revisions = $mapped;
     }
 
     private function loadReviewers(): void
     {
-        $this->reviewers = $this->syllabus->reviewers()->with('user')->get()
-            ->map(fn ($reviewer) => [
-                'id' => $reviewer->id,
-                'user_id' => $reviewer->user_id,
-                'user_name' => $reviewer->user->name,
-                'user_email' => $reviewer->user->email,
-                'status' => $reviewer->status,
-            ])
-            ->values()
-            ->all();
-
-        $this->allUsers = User::whereHas('roles', function ($q) {
-            $q->whereIn('name', ['dean', 'chair']);
-        })->orderBy('name')->get();
+        $this->reviewers = $this->syllabus
+            ? $this->syllabus->reviewers()->with('user')->orderBy('created_at')->get()
+                ->map(fn ($r) => [
+                    'id' => $r->id,
+                    'user_id' => $r->user_id,
+                    'user_name' => $r->user->name,
+                    'user_email' => $r->user->email,
+                    'status' => $r->status,
+                ])->values()->all()
+            : [];
     }
 
-    public function addRevision(): void
+    private function loadAssignableUsers(): void
     {
-        $this->revisions[] = [
-            'id' => null,
-            'revision_no' => $this->syllabus->getCurrentRevisionNumber() + count($this->revisions) + 1,
-            'revision_date' => now()->format('Y-m-d'),
-            'implementation_semester' => '',
-            'highlights' => '',
-            'contributors' => '',
-        ];
-    }
-
-    public function removeRevision(int $index): void
-    {
-        if (count($this->revisions) <= 1) {
-            return;
-        }
-
-        $revision = $this->revisions[$index];
-        if (isset($revision['id']) && $revision['id']) {
-            $this->dispatch('wizard-delete-revision', revisionId: (int) $revision['id']);
-        }
-
-        array_splice($this->revisions, $index, 1);
-    }
-
-    public function updatedSyllabus($value, $key): void
-    {
-        if (in_array($key, ['concurred_by', 'approved_by'])) {
-            $this->syllabus->update([$key => $value]);
-            $this->dispatch('lw-toast', type: 'success', message: 'Approval signatures updated.');
-        }
+        $this->allUsers = User::whereHas('roles', fn ($q) =>
+            $q->whereIn('name', ['dean', 'chair'])
+        )->orderBy('name')->get();
     }
 }
