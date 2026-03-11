@@ -5,47 +5,40 @@ namespace App\Livewire\Syllabus\Steps;
 use App\Models\AcademicCalendar;
 use App\Models\CompleteSyllabus;
 use App\Models\Syllabus;
-use App\Models\User;
 use App\Models\SyllabusRevision;
+use App\Models\User;
+use App\Services\Syllabus\SyllabusRevisionHistoryService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 class ReviewStep extends Component
 {
-    public int       $syllabusId;
-    public bool      $isLoaded             = false;
-    public ?Syllabus $syllabus             = null;
-    public           $academicCalendars;
-    public ?int      $academic_calendar_id = null;
-    public array     $courseOutcomes       = [];
-    public array     $examWeeks            = [];
-    public           $syllabusWeeks;
-    public           $course;
-    public ?CompleteSyllabus $latestComplete = null;
-    public           $completeVersions;
-    public array     $reviewers = [];
-    public           $allUsers;
+    public int               $syllabusId;
+    public bool              $isLoaded             = false;
+    public ?Syllabus         $syllabus             = null;
+    public                   $academicCalendars;
+    public ?int              $academic_calendar_id = null;
+    public array             $courseOutcomes       = [];
+    public array             $examWeeks            = [];
+    public                   $syllabusWeeks;
+    public                   $course;
+    public ?CompleteSyllabus $latestComplete       = null;
+    public                   $completeVersions;
 
-    // ── Revision history (local array — wire:model binds here) ────────────
-    //
-    // $revisions lives on ReviewStep so that wire:model="revisions.N.field"
-    // works within this component's blade.
-    //
-    // addRevision() / removeRevision() only mutate this local array (no DB).
-    //
-    // The "Save Revisions" button calls $parent.saveRevisions($wire.revisions)
-    // which passes the full array to SyllabusWizard::saveRevisions() for
-    // persistence via SyllabusRevisionHistoryService.
-    //
-    // When a persisted row (id != null) is removed, we dispatch
-    // 'wizard-delete-revision' so SyllabusWizard can hard-delete it from the DB.
-
+    // ── Revision history ───────────────────────────────────────────────────
+    // $revisions lives here so wire:model="revisions.N.field" works in the blade.
+    // saveRevisions() is also here — it calls the service directly, removing the
+    // need for $parent.saveRevisions() which cannot receive $wire.revisions args.
     public array $revisions = [];
 
-    // selectedReviewerId lives here so $wire.selectedReviewerId works in the
-    // blade when calling $parent.addReviewer($wire.selectedReviewerId).
-    public ?int $selectedReviewerId = null;
+    // ── Approval signature slots ────────────────────────────────────────────
+    // concurred_by  → Department Chair (exactly 1)
+    // approved_by   → Dean (exactly 1)
+    // reviewedBy    → Additional reviewers (N, stored in syllabus_reviewers table)
+    public ?int  $concurredBy         = null;  // maps to syllabus.concurred_by
+    public ?int  $approvedBy          = null;  // maps to syllabus.approved_by
+    public ?int  $selectedReviewerId  = null;  // staging field for "Add Reviewer"
 
     // ── Mount ──────────────────────────────────────────────────────────────
 
@@ -55,11 +48,10 @@ class ReviewStep extends Component
         $this->academicCalendars = collect();
         $this->syllabusWeeks     = collect();
         $this->completeVersions  = collect();
-        $this->allUsers          = collect();
         $this->loadData();
     }
 
-    // ── Livewire event listeners ───────────────────────────────────────────
+    // ── Event listeners ───────────────────────────────────────────────────
 
     #[On('syllabus-step-changed')]
     public function onStepChanged(string $step): void
@@ -81,7 +73,7 @@ class ReviewStep extends Component
     public function onReviewersUpdated(): void
     {
         if ($this->isLoaded) {
-            $this->loadReviewers();
+            $this->syllabus?->refresh();
         }
     }
 
@@ -93,19 +85,127 @@ class ReviewStep extends Component
         }
     }
 
-    #[On('review-step-set-revisions')]
-    public function onSetRevisions(array $revisions): void
-    {
-        $this->revisions = $revisions;
-    }
-
     // ── Render ─────────────────────────────────────────────────────────────
 
     public function render()
     {
+        $reviewers = $this->syllabus
+            ? $this->syllabus->reviewers()->with('user')->orderBy('created_at')->get()
+                ->map(fn ($r) => [
+                    'id'         => $r->id,
+                    'user_id'    => $r->user_id,
+                    'user_name'  => $r->user->name,
+                    'user_email' => $r->user->email,
+                    'status'     => $r->status,
+                ])->values()->all()
+            : [];
+
+        $allUsers = User::whereHas('roles', fn ($q) =>
+            $q->whereIn('name', ['dean', 'chair'])
+        )->orderBy('name')->get();
+
+        $concurredUser = $this->concurredBy
+            ? User::find($this->concurredBy)
+            : null;
+
+        $approvedUser = $this->approvedBy
+            ? User::find($this->approvedBy)
+            : null;
+
         return view('livewire.syllabus.steps.review', [
-            'course' => $this->course,
+            'course'        => $this->course,
+            'reviewers'     => $reviewers,
+            'allUsers'      => $allUsers,
+            'concurredUser' => $concurredUser,
+            'approvedUser'  => $approvedUser,
         ]);
+    }
+
+    // ── Revision mutations (local + DB, no $parent needed) ────────────────
+
+    public function addRevision(): void
+    {
+        $maxNo = (int) max(array_column($this->revisions, 'revision_no') ?: [0]);
+
+        $this->revisions[] = [
+            'id'                      => null,
+            'revision_no'             => $maxNo + 1,
+            'revision_date'           => now()->format('Y-m-d'),
+            'implementation_semester' => '',
+            'highlights'              => '',
+            'contributors'            => '',
+        ];
+    }
+
+    public function removeRevision(int $index): void
+    {
+        if (count($this->revisions) <= 1) {
+            return;
+        }
+
+        $row = $this->revisions[$index] ?? null;
+
+        if ($row && ! empty($row['id'])) {
+            // Delete persisted row directly — no $parent dispatch needed
+            app(SyllabusRevisionHistoryService::class)->delete($this->syllabus, (int) $row['id']);
+        }
+
+        array_splice($this->revisions, $index, 1);
+    }
+
+    public function saveRevisions(): void
+    {
+        if (! $this->syllabus) {
+            $this->dispatch('lw-toast', type: 'error', message: 'No syllabus loaded.');
+            return;
+        }
+
+        try {
+            app(SyllabusRevisionHistoryService::class)->upsertMany($this->syllabus, $this->revisions);
+        } catch (\Throwable $e) {
+            report($e);
+            $this->dispatch('lw-toast', type: 'error', message: 'Unable to save revisions.');
+            return;
+        }
+
+        $this->dispatch('lw-toast', type: 'success', message: 'Revisions saved.');
+        $this->loadData(force: true);
+    }
+
+    // ── Approval signature mutations ───────────────────────────────────────
+
+    public function saveConcurred(): void
+    {
+        if (! $this->syllabus) return;
+
+        $this->syllabus->update(['concurred_by' => $this->concurredBy ?: null]);
+        $this->dispatch('lw-toast', type: 'success', message: 'Concurred-by saved.');
+    }
+
+    public function clearConcurred(): void
+    {
+        if (! $this->syllabus) return;
+
+        $this->concurredBy = null;
+        $this->syllabus->update(['concurred_by' => null]);
+        $this->dispatch('lw-toast', type: 'success', message: 'Concurred-by cleared.');
+    }
+
+    public function saveApproved(): void
+    {
+        if (! $this->syllabus) return;
+
+        $this->syllabus->update(['approved_by' => $this->approvedBy ?: null]);
+        $this->dispatch('lw-toast', type: 'success', message: 'Approved-by saved.');
+    }
+
+    public function clearApproved(): void
+    {
+        if (! $this->syllabus) return;
+
+        $this->approvedBy = null;
+        $this->syllabus->update(['approved_by' => null]);
+        $this->dispatch('lw-toast', type: 'success', message: 'Approved-by cleared.');
     }
 
     // ── Private helpers ────────────────────────────────────────────────────
@@ -128,6 +228,14 @@ class ReviewStep extends Component
         $this->course               = $this->syllabus->course;
         $this->academic_calendar_id = $this->syllabus->academic_calendar_id
             ? (int) $this->syllabus->academic_calendar_id
+            : null;
+
+        $this->concurredBy = $this->syllabus->concurred_by
+            ? (int) $this->syllabus->concurred_by
+            : null;
+
+        $this->approvedBy = $this->syllabus->approved_by
+            ? (int) $this->syllabus->approved_by
             : null;
 
         $this->academicCalendars = AcademicCalendar::query()
@@ -166,8 +274,6 @@ class ReviewStep extends Component
         $this->latestComplete = $this->completeVersions->first();
 
         $this->loadRevisions();
-        $this->loadReviewers();
-        $this->loadAssignableUsers();
 
         $this->isLoaded = true;
     }
@@ -199,26 +305,5 @@ class ReviewStep extends Component
         }
 
         $this->revisions = $mapped;
-    }
-
-    private function loadReviewers(): void
-    {
-        $this->reviewers = $this->syllabus
-            ? $this->syllabus->reviewers()->with('user')->orderBy('created_at')->get()
-                ->map(fn ($r) => [
-                    'id' => $r->id,
-                    'user_id' => $r->user_id,
-                    'user_name' => $r->user->name,
-                    'user_email' => $r->user->email,
-                    'status' => $r->status,
-                ])->values()->all()
-            : [];
-    }
-
-    private function loadAssignableUsers(): void
-    {
-        $this->allUsers = User::whereHas('roles', fn ($q) =>
-            $q->whereIn('name', ['dean', 'chair'])
-        )->orderBy('name')->get();
     }
 }

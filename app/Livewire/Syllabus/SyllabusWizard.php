@@ -11,7 +11,6 @@ use App\Models\Syllabus;
 use App\Models\SyllabusWeek;
 use App\Models\WeekContent;
 use App\Models\SyllabusEvaluationItem;
-use App\Services\Syllabus\SyllabusRevisionHistoryService;
 use App\Services\Syllabus\SyllabusReviewService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -101,91 +100,11 @@ class SyllabusWizard extends Component
         $this->syllabus->refresh();
     }
 
-    #[On('syllabus-reviewers-updated')]
-    public function onReviewersUpdated(): void
-    {
-        $this->loadReviewers();
-    }
-
-    // ── Revision history ──────────────────────────────────────────────────────
-    //
-    // $revisions lives on ReviewStep so wire:model works within the child blade.
-    // The "Save Revisions" button calls $parent.saveRevisions($wire.revisions),
-    // passing the full local array here for DB persistence.
-    //
-    // removeRevision() in ReviewStep dispatches 'wizard-delete-revision' when
-    // the removed row has a persisted id, caught here for the DB delete.
-    public function addRevision(array $revisions = []): void
-    {
-        $maxRevisionNo = (int) collect($revisions)
-            ->pluck('revision_no')
-            ->map(fn ($n) => (int) $n)
-            ->max();
-
-        $revisions[] = [
-            'id' => null,
-            'revision_no' => max(0, $maxRevisionNo) + 1,
-            'revision_date' => now()->format('Y-m-d'),
-            'implementation_semester' => '',
-            'highlights' => '',
-            'contributors' => '',
-        ];
-
-        $this->dispatch('review-step-set-revisions', revisions: array_values($revisions));
-    }
-    public function removeRevision(array $revisions, int $index): void
-    {
-        if (count($revisions) <= 1) {
-            return;
-        }
-
-        $row = $revisions[$index] ?? null;
-        if (! $row) {
-            return;
-        }
-
-        $revisionId = (int) ($row['id'] ?? 0);
-        if ($revisionId > 0 && $this->syllabus) {
-            try {
-                app(SyllabusRevisionHistoryService::class)->delete($this->syllabus, $revisionId);
-            } catch (Throwable $e) {
-                report($e);
-                $this->dispatch('lw-toast', type: 'error', message: 'Unable to delete revision.');
-                return;
-            }
-        }
-
-        array_splice($revisions, $index, 1);
-        $this->dispatch('review-step-set-revisions', revisions: array_values($revisions));
-    }
-
-    /**
-     * Persist revisions passed from ReviewStep's "Save Revisions" button.
-     * Called as: wire:click="$parent.saveRevisions($wire.revisions)"
-     *
-     * @param  array<int, array<string, mixed>>  $revisions
-     */
-    public function saveRevisions(array $revisions): void
-    {
-        if (! $this->syllabus) {
-            $this->dispatch('lw-toast', type: 'error', message: 'No syllabus loaded.');
-            return;
-        }
-
-        try {
-            app(SyllabusRevisionHistoryService::class)->upsertMany($this->syllabus, $revisions);
-        } catch (Throwable $e) {
-            report($e);
-            $this->dispatch('lw-toast', type: 'error', message: 'Unable to save revisions.');
-            return;
-        }
-
-        $this->dispatch('lw-toast', type: 'success', message: 'Revisions saved successfully.');
-        // Notify ReviewStep to reload its $revisions array with fresh IDs from DB
-        $this->dispatch('syllabus-revisions-updated');
-    }
-
     // ── Reviewer management ───────────────────────────────────────────────────
+    //
+    // Revision history mutations (saveRevisions, addRevision, removeRevision,
+    // saveConcurred, saveApproved) all live on ReviewStep directly — no $parent
+    // calls needed, removing the "public method not found on component" error.
     //
     // Called from the child blade via $parent.addReviewer($wire.selectedReviewerId)
     // and $parent.removeReviewer(id). After each mutation we reload $this->reviewers
