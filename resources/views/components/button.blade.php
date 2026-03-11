@@ -6,11 +6,12 @@
 ])
 
 @php
-    // [&>i] targets Boxicons (and any <i> icon) placed directly inside the button.
+    // [&_i] targets ALL descendant <i> tags (Boxicons) anywhere inside the button,
+    // including those wrapped in a <span> slot — fixes alignment in all usage patterns.
     // - leading-none   → removes line-height that pushes icons upward
     // - text-[1.1em]   → makes icon scale with the button's font size
     // - translate-y-px → 1 px nudge to optically center against cap-height text
-    $iconFix = '[&>i]:leading-none [&>i]:text-[1.1em] [&>i]:translate-y-px ';
+    $iconFix = '[&_i]:leading-none [&_i]:text-[1.1em] [&_i]:translate-y-px ';
 
     // Table buttons: compact, no scale animation (jarring on small targets), disabled support
     $tableBtn = 'inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg
@@ -45,6 +46,7 @@
 
         'danger' => $formBtn . 'bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-600/30',
 
+        // ── CLSU-branded buttons ───────────────────────────────────────────────
         'add-button' => $formBtn . 'focus:ring-[#009639]/30 bg-emerald-600 text-white hover:bg-emerald-700',
 
         'save' => $formBtn . '

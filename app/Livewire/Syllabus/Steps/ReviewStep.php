@@ -27,17 +27,12 @@ class ReviewStep extends Component
     public                   $completeVersions;
 
     // ── Revision history ───────────────────────────────────────────────────
-    // $revisions = saved rows (shown in the right list, read-only).
-    // The left side is a single add/edit form using these draft fields.
-    // "Add" saves immediately to DB and refreshes the right list.
-    // "Edit" loads a row into the draft form; "Update" saves in-place.
-    public array  $revisions          = [];
-    public ?int   $editingRevisionId  = null;   // null = new, int = editing
-    public string $draftDate          = '';
-    public int    $draftRevisionNo    = 0;       // starts from 0
-    public string $draftSemester      = '';
-    public string $draftHighlights    = '';
-    public string $draftContributors  = '';
+    // $revisions = saved rows shown in the right list.
+    // The left form is PURE ALPINE — no wire:model at all.
+    // saveRevision() receives all values as method arguments → single network
+    // call on submit, zero round-trips while typing.
+    public array $revisions         = [];
+    public int   $nextRevisionNo    = 0;    // passed to blade so Alpine can init
 
     // ── Approval slots ────────────────────────────────────────────────────
     // approved_by  → Dean (required when set, must differ from concurred_by)
@@ -128,16 +123,26 @@ class ReviewStep extends Component
     // ── Revision mutations ─────────────────────────────────────────────────
 
     /**
-     * Save draft form → DB, refresh right-side list.  No page reload.
+     * Called from Alpine with all form values as arguments.
+     * No wire:model on the form — zero round-trips while typing.
      */
-    public function saveRevision(): void
-    {
-        $this->validate([
-            'draftDate'     => 'required|date',
-            'draftSemester' => 'required|string|max:255',
-            'draftHighlights'   => 'nullable|string',
-            'draftContributors' => 'nullable|string',
-        ]);
+    public function saveRevision(
+        ?int    $editingId,
+        int     $revisionNo,
+        string  $date,
+        string  $semester,
+        string  $highlights   = '',
+        string  $contributors = ''
+    ): void {
+        $semester = trim($semester);
+        if (! $semester) {
+            $this->dispatch('lw-toast', type: 'error', message: 'Implementation Semester is required.');
+            return;
+        }
+        if (! $date) {
+            $this->dispatch('lw-toast', type: 'error', message: 'Date is required.');
+            return;
+        }
 
         if (! $this->syllabus) {
             $this->dispatch('lw-toast', type: 'error', message: 'No syllabus loaded.');
@@ -146,12 +151,12 @@ class ReviewStep extends Component
 
         try {
             app(SyllabusRevisionHistoryService::class)->upsertMany($this->syllabus, [[
-                'id'                      => $this->editingRevisionId,
-                'revision_no'             => $this->draftRevisionNo,
-                'revision_date'           => $this->draftDate,
-                'implementation_semester' => $this->draftSemester,
-                'highlights'              => $this->draftHighlights,
-                'contributors'            => $this->draftContributors,
+                'id'                      => $editingId,
+                'revision_no'             => $revisionNo,
+                'revision_date'           => $date,
+                'implementation_semester' => $semester,
+                'highlights'              => $highlights,
+                'contributors'            => $contributors,
             ]]);
         } catch (\Throwable $e) {
             report($e);
@@ -159,38 +164,18 @@ class ReviewStep extends Component
             return;
         }
 
-        $isEdit = $this->editingRevisionId !== null;
+        $isEdit = $editingId !== null;
         $this->syllabus->load('revisions');
         $this->loadRevisions();
-        $this->resetDraftForm();
 
+        // Tell Alpine to reset the form and pass the next revision number
+        $this->dispatch('revision-form-reset', nextNo: $this->nextRevisionNo);
         $this->dispatch('lw-toast', type: 'success',
             message: $isEdit ? 'Revision updated.' : 'Revision added.');
     }
 
     /**
-     * Load a saved revision into the draft form for editing.
-     */
-    public function editRevision(int $revisionId): void
-    {
-        $rev = collect($this->revisions)->firstWhere('id', $revisionId);
-        if (! $rev) return;
-
-        $this->editingRevisionId = $revisionId;
-        $this->draftRevisionNo   = (int) $rev['revision_no'];
-        $this->draftDate         = $rev['revision_date'];
-        $this->draftSemester     = $rev['implementation_semester'];
-        $this->draftHighlights   = $rev['highlights'] ?? '';
-        $this->draftContributors = $rev['contributors'] ?? '';
-    }
-
-    public function cancelEdit(): void
-    {
-        $this->resetDraftForm();
-    }
-
-    /**
-     * Delete by DB id (not array index).
+     * Delete by DB id.
      */
     public function removeRevision(int $revisionId): void
     {
@@ -299,7 +284,6 @@ class ReviewStep extends Component
         $this->latestComplete = $this->completeVersions->first();
 
         $this->loadRevisions();
-        $this->resetDraftForm();
         $this->isLoaded = true;
     }
 
@@ -315,16 +299,8 @@ class ReviewStep extends Component
                 'highlights'              => $rev->highlights ?? '',
                 'contributors'            => $rev->contributors ?? '',
             ])->values()->all();
-    }
 
-    private function resetDraftForm(): void
-    {
-        $this->editingRevisionId = null;
-        $this->draftDate         = now()->format('Y-m-d');
-        // Next revision_no = count of existing rows (0-based)
-        $this->draftRevisionNo   = count($this->revisions);
-        $this->draftSemester     = '';
-        $this->draftHighlights   = '';
-        $this->draftContributors = '';
+        // 0-based: next = count of saved rows
+        $this->nextRevisionNo = count($this->revisions);
     }
 }

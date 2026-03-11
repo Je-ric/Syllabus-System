@@ -46,6 +46,9 @@
             </div>
         </x-wizard.info-card>
     @else
-        <p class="text-sm text-slate-500">No saved versions yet for this course.</p>
+        <x-empty-state
+            icon="cloud-upload"
+            title="No Saved Versions"
+            message="Save a version as done to create an immutable snapshot of the syllabus at its current state." />
     @endif
 </x-wizard.section>

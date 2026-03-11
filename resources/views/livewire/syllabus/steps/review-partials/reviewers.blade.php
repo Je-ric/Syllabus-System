@@ -4,7 +4,8 @@
     • approved_by  → dean only (required when set)
     • concurred_by → dean only, nullable, must differ from approved_by
     • Reviewed By  → faculty only; already-added names removed from options
-    • Adding a reviewer: $parent.addReviewer → accordion stays open, no reload
+    • Add/Remove reviewer uses Alpine saving/removing flags — wire:loading
+      cannot track $parent.* calls, so Alpine owns the loading state.
     • Alpine local mirrors (localApprovedBy / localConcurredBy) give instant
       badge updates without a round-trip; "Set" button persists to DB.
     • Concurred dean select filters out whoever is selected as Approved.
@@ -12,16 +13,34 @@
 --}}
 <div
     x-data="{
-        open: true,
+        open: false,
         localApprovedBy:  {{ $approvedBy  ?? 'null' }},
         localConcurredBy: {{ $concurredBy ?? 'null' }},
+        addingReviewer:   false,
+        removingId:       null,
+        selectedFaculty:  null,
+
         deanMap: {
             @foreach ($deanUsers as $u)
-                '{{ $u->id }}': @js($u->name),
+                {{ $u->id }}: @js($u->name),
             @endforeach
         },
         getName(id) {
             return id && this.deanMap[id] ? this.deanMap[id] : null;
+        },
+
+        async addReviewer() {
+            if (!this.selectedFaculty) return;
+            this.addingReviewer = true;
+            await $wire.$parent.addReviewer(this.selectedFaculty);
+            this.addingReviewer = false;
+            this.selectedFaculty = null;
+        },
+
+        async removeReviewer(id) {
+            this.removingId = id;
+            await $wire.$parent.removeReviewer(id);
+            this.removingId = null;
         }
     }"
     class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
@@ -68,98 +87,85 @@
                 </div>
             </div>
 
-            {{-- ══ Approved + Concurred (two columns) ══ --}}
+            {{-- Approved + Concurred (two columns) --}}
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
                 {{-- Approved By (Dean) --}}
                 <div class="space-y-2">
-                    <x-form.label for="approved-by">
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
                         Approved By <span class="text-slate-400 font-normal normal-case">(Dean)</span>
-                    </x-form.label>
-
-                    {{-- Current badge — instant via Alpine mirror --}}
+                    </p>
                     <div x-show="getName(localApprovedBy)"
-                         class="rounded-xl border border-emerald-200 bg-emerald-50 p-3
-                                flex items-center justify-between gap-2">
+                         class="rounded-xl border border-emerald-200 bg-emerald-50 p-3 flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2 min-w-0">
-                            <span class="flex items-center justify-center w-7 h-7 rounded-full
-                                         bg-emerald-200 text-emerald-700 shrink-0 text-xs font-bold"
+                            <span class="flex items-center justify-center w-7 h-7 rounded-full bg-emerald-200 text-emerald-700 shrink-0 text-xs font-bold"
                                   x-text="getName(localApprovedBy)?.charAt(0)?.toUpperCase() ?? ''"></span>
-                            <p class="text-xs font-semibold text-slate-800 truncate"
-                               x-text="getName(localApprovedBy)"></p>
+                            <p class="text-xs font-semibold text-slate-800 truncate" x-text="getName(localApprovedBy)"></p>
                         </div>
-                        <button type="button"
-                            wire:click="clearApproved"
-                            x-on:click="localApprovedBy = null"
+                        <button type="button" wire:click="clearApproved" x-on:click="localApprovedBy = null"
                             class="shrink-0 text-rose-400 hover:text-rose-600 transition-colors">
-                            <i class="bx bx-x text-base"></i>
+                            <i class="bx bx-x text-base leading-none"></i>
                         </button>
                     </div>
                     <div x-show="!getName(localApprovedBy)"
                          class="rounded-xl border border-dashed border-slate-200 p-3 text-center">
                         <p class="text-xs text-slate-400">No dean assigned yet.</p>
                     </div>
-
                     <div class="flex gap-2">
-                        <x-form.select id="approved-by" wire:model="approvedBy"
+                        <select wire:model="approvedBy"
                             x-on:change="localApprovedBy = $event.target.value ? parseInt($event.target.value) : null"
-                            class="flex-1 text-xs rounded-xl px-2.5 py-2">
+                            class="flex-1 text-xs rounded-xl border border-slate-300 bg-white px-2.5 py-2
+                                   focus:border-emerald-400 focus:ring-1 focus:ring-emerald-300 focus:outline-none">
                             <option value="">Select Dean…</option>
                             @foreach ($deanUsers as $user)
                                 <option value="{{ $user->id }}">{{ $user->name }}</option>
                             @endforeach
-                        </x-form.select>
-                        <x-button
-                            type="button"
-                            wire:click="saveApproved"
-                            wire:target="saveApproved"
-                            variant="table-confirm"
-                            loading="Saving"
-                            class="shrink-0 text-xs">
-                            <i class="bx bx-check"></i> Set
-                        </x-button>
+                        </select>
+                        <button type="button" wire:click="saveApproved"
+                            wire:loading.attr="disabled" wire:target="saveApproved"
+                            class="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-xl
+                                   bg-emerald-600 text-white text-xs font-semibold
+                                   hover:bg-emerald-700 disabled:opacity-60 transition-colors">
+                            <span wire:loading.remove wire:target="saveApproved" class="inline-flex items-center gap-1.5">
+                                <i class="bx bx-check leading-none"></i> Set
+                            </span>
+                            <span wire:loading wire:target="saveApproved" class="inline-flex items-center gap-1.5">
+                                <svg class="animate-spin h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                </svg>
+                                Saving…
+                            </span>
+                        </button>
                     </div>
                 </div>
 
-                {{-- Concurred By (Dean, nullable, must differ from approved) --}}
+                {{-- Concurred By (Dean, nullable) --}}
                 <div class="space-y-2">
-                    <x-form.label for="concurred-by">
-                        Concurred By
-                        <span class="text-slate-400 font-normal normal-case">(Dean · optional)</span>
-                    </x-form.label>
-
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                        Concurred By <span class="text-slate-400 font-normal normal-case">(Dean · optional)</span>
+                    </p>
                     <div x-show="getName(localConcurredBy)"
-                         class="rounded-xl border border-emerald-200 bg-emerald-50 p-3
-                                flex items-center justify-between gap-2">
+                         class="rounded-xl border border-emerald-200 bg-emerald-50 p-3 flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2 min-w-0">
-                            <span class="flex items-center justify-center w-7 h-7 rounded-full
-                                         bg-emerald-200 text-emerald-700 shrink-0 text-xs font-bold"
+                            <span class="flex items-center justify-center w-7 h-7 rounded-full bg-emerald-200 text-emerald-700 shrink-0 text-xs font-bold"
                                   x-text="getName(localConcurredBy)?.charAt(0)?.toUpperCase() ?? ''"></span>
-                            <p class="text-xs font-semibold text-slate-800 truncate"
-                               x-text="getName(localConcurredBy)"></p>
+                            <p class="text-xs font-semibold text-slate-800 truncate" x-text="getName(localConcurredBy)"></p>
                         </div>
-                        <button type="button"
-                            wire:click="clearConcurred"
-                            x-on:click="localConcurredBy = null"
+                        <button type="button" wire:click="clearConcurred" x-on:click="localConcurredBy = null"
                             class="shrink-0 text-rose-400 hover:text-rose-600 transition-colors">
-                            <i class="bx bx-x text-base"></i>
+                            <i class="bx bx-x text-base leading-none"></i>
                         </button>
                     </div>
                     <div x-show="!getName(localConcurredBy)"
                          class="rounded-xl border border-dashed border-slate-200 p-3 text-center">
                         <p class="text-xs text-slate-400">No concurrence assigned.</p>
                     </div>
-
                     <div class="flex gap-2">
-                        {{--
-                            Filter out whoever is selected as Approved so the two
-                            selects can never share the same dean.
-                            Alpine hides matching options client-side for instant feedback;
-                            saveConcurred() double-checks server-side.
-                        --}}
-                        <x-form.select id="concurred-by" wire:model="concurredBy"
+                        <select wire:model="concurredBy"
                             x-on:change="localConcurredBy = $event.target.value ? parseInt($event.target.value) : null"
-                            class="flex-1 text-xs rounded-xl px-2.5 py-2">
+                            class="flex-1 text-xs rounded-xl border border-slate-300 bg-white px-2.5 py-2
+                                   focus:border-emerald-400 focus:ring-1 focus:ring-emerald-300 focus:outline-none">
                             <option value="">Select Dean…</option>
                             @foreach ($deanUsers as $user)
                                 <option value="{{ $user->id }}"
@@ -168,51 +174,73 @@
                                     {{ $user->name }}
                                 </option>
                             @endforeach
-                        </x-form.select>
-                        <x-button
-                            type="button"
-                            wire:click="saveConcurred"
-                            wire:target="saveConcurred"
-                            variant="table-confirm"
-                            loading="Saving"
-                            class="shrink-0 text-xs">
-                            <i class="bx bx-check"></i> Set
-                        </x-button>
+                        </select>
+                        <button type="button" wire:click="saveConcurred"
+                            wire:loading.attr="disabled" wire:target="saveConcurred"
+                            class="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-xl
+                                   bg-emerald-600 text-white text-xs font-semibold
+                                   hover:bg-emerald-700 disabled:opacity-60 transition-colors">
+                            <span wire:loading.remove wire:target="saveConcurred" class="inline-flex items-center gap-1.5">
+                                <i class="bx bx-check leading-none"></i> Set
+                            </span>
+                            <span wire:loading wire:target="saveConcurred" class="inline-flex items-center gap-1.5">
+                                <svg class="animate-spin h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                </svg>
+                                Saving…
+                            </span>
+                        </button>
                     </div>
                 </div>
             </div>
 
-            {{-- ══ Reviewed By (additional faculty) ══ --}}
+            {{-- Reviewed By (additional faculty) --}}
             <div>
-                <div class="mb-3">
-                    <x-form.label for="reviewer-id">
-                        Reviewed By
-                        <span class="text-slate-400 font-normal normal-case">(Additional — Faculty)</span>
-                    </x-form.label>
-                </div>
+                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
+                    Reviewed By
+                    <span class="text-slate-400 font-normal normal-case">(Additional — Faculty)</span>
+                </p>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
-                    {{-- LEFT: add form --}}
+                    {{--
+                        LEFT: add form
+                        wire:loading CANNOT track $parent.addReviewer because the method
+                        lives on SyllabusWizard, not ReviewStep. Alpine `addingReviewer`
+                        is the correct loading indicator here.
+                    --}}
                     <div class="space-y-2">
                         <div class="flex gap-2">
-                            {{-- facultyUsers already excludes already-added reviewers (from render()) --}}
-                            <x-form.select id="reviewer-id" wire:model="selectedReviewerId"
-                                class="flex-1 text-xs rounded-xl px-2.5 py-2">
+                            <select x-model="selectedFaculty"
+                                class="flex-1 text-xs rounded-xl border border-slate-300 bg-white px-2.5 py-2
+                                       focus:border-emerald-400 focus:ring-1 focus:ring-emerald-300 focus:outline-none">
                                 <option value="">Select faculty reviewer…</option>
                                 @foreach ($facultyUsers as $user)
                                     <option value="{{ $user->id }}">{{ $user->name }}</option>
                                 @endforeach
-                            </x-form.select>
-                            <x-button
-                                type="button"
-                                wire:click="$parent.addReviewer($wire.selectedReviewerId)"
-                                wire:target="addReviewer"
-                                variant="table-confirm"
-                                loading="Adding"
-                                class="shrink-0 text-xs">
-                                <i class="bx bx-plus"></i> Add
-                            </x-button>
+                            </select>
+                            <button type="button"
+                                x-on:click="addReviewer()"
+                                x-bind:disabled="addingReviewer || !selectedFaculty"
+                                class="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-xl
+                                       bg-emerald-600 text-white text-xs font-semibold
+                                       hover:bg-emerald-700 disabled:opacity-60 transition-colors">
+                                <template x-if="!addingReviewer">
+                                    <span class="inline-flex items-center gap-1.5">
+                                        <i class="bx bx-plus leading-none"></i> Add
+                                    </span>
+                                </template>
+                                <template x-if="addingReviewer">
+                                    <span class="inline-flex items-center gap-1.5">
+                                        <svg class="animate-spin h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                        </svg>
+                                        Adding…
+                                    </span>
+                                </template>
+                            </button>
                         </div>
                         <p class="text-xs text-slate-400">
                             Each reviewer will appear in the printed syllabus signature section.
@@ -223,8 +251,9 @@
                     <div class="space-y-2">
                         @if (count($reviewers) > 0)
                             @foreach ($reviewers as $reviewer)
-                                <div class="flex items-center justify-between p-3 bg-white
-                                            rounded-xl border border-slate-200"
+                                <div class="flex items-center justify-between p-3 bg-white rounded-xl
+                                            border border-slate-200 transition-opacity"
+                                     x-bind:class="removingId === {{ $reviewer['id'] }} ? 'opacity-40 pointer-events-none' : ''"
                                      wire:key="reviewer-{{ $reviewer['id'] }}">
                                     <div class="flex items-center gap-2 min-w-0">
                                         <span class="flex items-center justify-center w-7 h-7 rounded-full
@@ -244,20 +273,38 @@
                                         <x-feedback-status.status-indicator
                                             :status="$reviewer['status'] === 'approved' ? 'success' : $reviewer['status']"
                                             :label="$reviewer['status'] === 'approved' ? 'Approved' : ucfirst($reviewer['status'])" />
+
+                                        {{--
+                                            wire:loading cannot track $parent.removeReviewer.
+                                            removingId shows a spinner on the exact row being deleted.
+                                        --}}
                                         <button type="button"
-                                            wire:click="$parent.removeReviewer({{ $reviewer['id'] }})"
-                                            wire:confirm="Remove this reviewer?"
-                                            class="text-rose-400 hover:text-rose-600 transition-colors">
-                                            <i class="bx bx-trash text-sm"></i>
+                                            x-on:click="removeReviewer({{ $reviewer['id'] }})"
+                                            x-bind:disabled="removingId === {{ $reviewer['id'] }}"
+                                            class="inline-flex items-center justify-center w-6 h-6
+                                                   text-rose-400 hover:text-rose-600
+                                                   disabled:opacity-50 transition-colors">
+                                            <template x-if="removingId !== {{ $reviewer['id'] }}">
+                                                <i class="bx bx-trash text-sm leading-none"></i>
+                                            </template>
+                                            <template x-if="removingId === {{ $reviewer['id'] }}">
+                                                <svg class="animate-spin h-3.5 w-3.5 shrink-0 text-rose-400"
+                                                     viewBox="0 0 24 24" fill="none">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10"
+                                                            stroke="currentColor" stroke-width="4"/>
+                                                    <path class="opacity-75" fill="currentColor"
+                                                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                                </svg>
+                                            </template>
                                         </button>
                                     </div>
                                 </div>
                             @endforeach
                         @else
-                            <x-empty-state
-                                icon="bx bx-group"
-                                title="No additional reviewers yet."
-                                description="Use the form on the left to add faculty reviewers who will appear in the printed syllabus signature section." />
+                            <div class="rounded-xl border border-dashed border-slate-200 p-5 text-center">
+                                <i class="bx bx-group text-2xl text-slate-300"></i>
+                                <p class="text-xs text-slate-400 mt-1">No additional reviewers yet.</p>
+                            </div>
                         @endif
                     </div>
                 </div>
