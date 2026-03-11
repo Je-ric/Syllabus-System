@@ -12,7 +12,7 @@
 --}}
 <div
     x-data="{
-        open: true,
+        open: false,
         localApprovedBy:  {{ $approvedBy  ?? 'null' }},
         localConcurredBy: {{ $concurredBy ?? 'null' }},
         deanMap: {
