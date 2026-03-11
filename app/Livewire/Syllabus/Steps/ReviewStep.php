@@ -27,23 +27,17 @@ class ReviewStep extends Component
     public                   $completeVersions;
 
     // ── Revision history ───────────────────────────────────────────────────
-    // Single form for adding new revisions + saved revisions list
-    public array $revisions = [];  // saved revisions from DB
+    // $revisions lives here so wire:model.lazy="revisions.N.field" works.
+    // All mutations (add/remove/save) are local — no $parent calls needed.
+    public array $revisions = [];
 
-    // Form fields for new revision entry
-    public string $newRevisionDate = '';
-    public int    $newRevisionNo = 1;
-    public string $newImplementationSemester = '';
-    public string $newHighlights = '';
-    public string $newContributors = '';
-
-    // ── Approval signature slots ────────────────────────────────────────────
-    // concurred_by  → Department Chair (exactly 1)
-    // approved_by   → Dean (exactly 1)
-    // reviewedBy    → Additional reviewers (N, stored in syllabus_reviewers table)
-    public ?int  $concurredBy         = null;  // maps to syllabus.concurred_by
-    public ?int  $approvedBy          = null;  // maps to syllabus.approved_by
-    public ?int  $selectedReviewerId  = null;  // staging field for "Add Reviewer"
+    // ── Approval signature slots ───────────────────────────────────────────
+    // approved_by  → Dean      (exactly 1, nullable)   — only users with 'dean' role
+    // concurred_by → Dean/Chair (exactly 1, nullable)   — only users with 'dean' role
+    // selectedReviewerId → staging for "Add Reviewer"  — users with 'faculty' role
+    public ?int $concurredBy        = null;
+    public ?int $approvedBy         = null;
+    public ?int $selectedReviewerId = null;
 
     // ── Mount ──────────────────────────────────────────────────────────────
 
@@ -94,6 +88,16 @@ class ReviewStep extends Component
 
     public function render()
     {
+        // Only users with 'dean' role appear in approved_by / concurred_by selects
+        $deanUsers = User::whereHas('roles', fn ($q) => $q->where('name', 'dean'))
+            ->orderBy('name')
+            ->get();
+
+        // All faculty appear in the "Reviewed By" additional reviewer select
+        $facultyUsers = User::whereHas('roles', fn ($q) => $q->where('name', 'faculty'))
+            ->orderBy('name')
+            ->get();
+
         $reviewers = $this->syllabus
             ? $this->syllabus->reviewers()->with('user')->orderBy('created_at')->get()
                 ->map(fn ($r) => [
@@ -105,108 +109,67 @@ class ReviewStep extends Component
                 ])->values()->all()
             : [];
 
-        $reviewerIds = collect($reviewers)
-            ->pluck('user_id')
-            ->map(fn ($id) => (int) $id)
-            ->all();
-
-        $deans = User::whereHas('roles', fn ($q) =>
-            $q->where('name', 'dean')
-        )->orderBy('name')->get();
-
-        $availableReviewerUsers = User::whereHas('roles', fn ($q) =>
-            $q->whereIn('name', ['dean', 'chair'])
-        )
-            ->whereNotIn('id', $reviewerIds)
-            ->orderBy('name')
-            ->get();
-
-        $concurredUser = $this->concurredBy
-            ? User::find($this->concurredBy)
-            : null;
-
-        $approvedUser = $this->approvedBy
-            ? User::find($this->approvedBy)
-            : null;
+        $concurredUser = $this->concurredBy ? User::find($this->concurredBy) : null;
+        $approvedUser  = $this->approvedBy  ? User::find($this->approvedBy)  : null;
 
         return view('livewire.syllabus.steps.review', [
             'course'        => $this->course,
             'reviewers'     => $reviewers,
-            'deans'         => $deans,
-            'availableReviewerUsers' => $availableReviewerUsers,
+            'deanUsers'     => $deanUsers,
+            'facultyUsers'  => $facultyUsers,
             'concurredUser' => $concurredUser,
             'approvedUser'  => $approvedUser,
         ]);
     }
 
-    // ── Revision mutations (local + DB, no $parent needed) ────────────────
+    // ── Revision mutations ─────────────────────────────────────────────────
 
     public function addRevision(): void
     {
-        $this->validate([
-            'newRevisionDate' => 'required|date',
-            'newImplementationSemester' => 'required|string|max:255',
-            'newHighlights' => 'nullable|string',
-            'newContributors' => 'nullable|string',
-        ]);
+        $maxNo = (int) max(array_column($this->revisions, 'revision_no') ?: [0]);
 
-        if (!$this->syllabus) {
+        $this->revisions[] = [
+            'id'                      => null,
+            'revision_no'             => $maxNo + 1,
+            'revision_date'           => now()->format('Y-m-d'),
+            'implementation_semester' => '',
+            'highlights'              => '',
+            'contributors'            => '',
+        ];
+    }
+
+    public function removeRevision(int $index): void
+    {
+        if (count($this->revisions) <= 1) {
+            return;
+        }
+
+        $row = $this->revisions[$index] ?? null;
+
+        if ($row && ! empty($row['id'])) {
+            app(SyllabusRevisionHistoryService::class)->delete($this->syllabus, (int) $row['id']);
+        }
+
+        array_splice($this->revisions, $index, 1);
+    }
+
+    public function saveRevisions(): void
+    {
+        if (! $this->syllabus) {
             $this->dispatch('lw-toast', type: 'error', message: 'No syllabus loaded.');
             return;
         }
 
         try {
-            $revisionData = [
-                'id' => null,
-                'revision_no' => $this->newRevisionNo,
-                'revision_date' => $this->newRevisionDate,
-                'implementation_semester' => $this->newImplementationSemester,
-                'highlights' => $this->newHighlights,
-                'contributors' => $this->newContributors,
-            ];
-
-            app(SyllabusRevisionHistoryService::class)->upsertMany($this->syllabus, [$revisionData]);
-
-            $this->clearForm();
-            $this->loadRevisions();
-            $this->dispatch('lw-toast', type: 'success', message: 'Revision added successfully.');
+            app(SyllabusRevisionHistoryService::class)->upsertMany($this->syllabus, $this->revisions);
         } catch (\Throwable $e) {
             report($e);
-            $this->dispatch('lw-toast', type: 'error', message: 'Unable to add revision.');
-        }
-    }
-
-    public function removeRevision(int $revisionId): void
-    {
-        if (!$this->syllabus) return;
-
-        try {
-            app(SyllabusRevisionHistoryService::class)->delete($this->syllabus, $revisionId);
-            $this->loadRevisions();
-            $this->dispatch('lw-toast', type: 'success', message: 'Revision removed.');
-        } catch (\Throwable $e) {
-            report($e);
-            $this->dispatch('lw-toast', type: 'error', message: 'Unable to remove revision.');
-        }
-    }
-
-    private function clearForm(): void
-    {
-        $this->newRevisionDate = now()->format('Y-m-d');
-        $this->newRevisionNo = $this->getNextRevisionNumber();
-        $this->newImplementationSemester = '';
-        $this->newHighlights = '';
-        $this->newContributors = '';
-    }
-
-    private function getNextRevisionNumber(): int
-    {
-        if (empty($this->revisions)) {
-            return 1;
+            $this->dispatch('lw-toast', type: 'error', message: 'Unable to save revisions.');
+            return;
         }
 
-        $maxNo = (int) max(array_column($this->revisions, 'revision_no') ?: [0]);
-        return $maxNo + 1;
+        $this->dispatch('lw-toast', type: 'success', message: 'Revisions saved.');
+        $this->loadData(force: true);
     }
 
     // ── Approval signature mutations ───────────────────────────────────────
@@ -214,18 +177,6 @@ class ReviewStep extends Component
     public function saveConcurred(): void
     {
         if (! $this->syllabus) return;
-
-        if ($this->concurredBy) {
-            $isDean = User::where('id', $this->concurredBy)
-                ->whereHas('roles', fn ($q) => $q->where('name', 'dean'))
-                ->exists();
-
-            if (! $isDean) {
-                $this->dispatch('lw-toast', type: 'error', message: 'Concurred-by must be a dean.');
-                return;
-            }
-        }
-
         $this->syllabus->update(['concurred_by' => $this->concurredBy ?: null]);
         $this->dispatch('lw-toast', type: 'success', message: 'Concurred-by saved.');
     }
@@ -233,7 +184,6 @@ class ReviewStep extends Component
     public function clearConcurred(): void
     {
         if (! $this->syllabus) return;
-
         $this->concurredBy = null;
         $this->syllabus->update(['concurred_by' => null]);
         $this->dispatch('lw-toast', type: 'success', message: 'Concurred-by cleared.');
@@ -242,18 +192,6 @@ class ReviewStep extends Component
     public function saveApproved(): void
     {
         if (! $this->syllabus) return;
-
-        if ($this->approvedBy) {
-            $isDean = User::where('id', $this->approvedBy)
-                ->whereHas('roles', fn ($q) => $q->where('name', 'dean'))
-                ->exists();
-
-            if (! $isDean) {
-                $this->dispatch('lw-toast', type: 'error', message: 'Approved-by must be a dean.');
-                return;
-            }
-        }
-
         $this->syllabus->update(['approved_by' => $this->approvedBy ?: null]);
         $this->dispatch('lw-toast', type: 'success', message: 'Approved-by saved.');
     }
@@ -261,7 +199,6 @@ class ReviewStep extends Component
     public function clearApproved(): void
     {
         if (! $this->syllabus) return;
-
         $this->approvedBy = null;
         $this->syllabus->update(['approved_by' => null]);
         $this->dispatch('lw-toast', type: 'success', message: 'Approved-by cleared.');
@@ -333,14 +270,13 @@ class ReviewStep extends Component
         $this->latestComplete = $this->completeVersions->first();
 
         $this->loadRevisions();
-        $this->clearForm();
 
         $this->isLoaded = true;
     }
 
     private function loadRevisions(): void
     {
-        $this->revisions = $this->syllabus->revisions
+        $mapped = $this->syllabus->revisions
             ->sortBy('revision_no')
             ->map(fn (SyllabusRevision $rev) => [
                 'id'                      => $rev->id,
@@ -352,5 +288,18 @@ class ReviewStep extends Component
             ])
             ->values()
             ->all();
+
+        if (empty($mapped)) {
+            $mapped = [[
+                'id'                      => null,
+                'revision_no'             => $this->syllabus->getCurrentRevisionNumber() + 1,
+                'revision_date'           => now()->format('Y-m-d'),
+                'implementation_semester' => '',
+                'highlights'              => '',
+                'contributors'            => '',
+            ]];
+        }
+
+        $this->revisions = $mapped;
     }
 }
