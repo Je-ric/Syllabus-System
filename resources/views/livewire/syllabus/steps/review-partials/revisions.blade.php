@@ -61,82 +61,75 @@
 
                         <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-xs font-medium text-slate-600 mb-1">Date *</label>
-                                <input type="date"
+                                <x-form.label for="revision-date" :is-required="true">Date</x-form.label>
+                                <x-form.input
+                                    id="revision-date"
+                                    type="date"
                                     wire:model.lazy="draftDate"
-                                    class="w-full text-xs rounded-lg border border-slate-300 bg-white
-                                           px-2.5 py-1.5 focus:border-emerald-400 focus:ring-1
-                                           focus:ring-emerald-300 focus:outline-none" />
+                                    class="text-xs" />
                                 @error('draftDate')
                                     <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-slate-600 mb-1">Rev. No.</label>
-                                <input type="number"
+                                <x-form.label for="revision-no">Rev. No.</x-form.label>
+                                <x-form.input
+                                    id="revision-no"
+                                    type="number"
                                     wire:model="draftRevisionNo"
                                     readonly
-                                    class="w-full text-xs rounded-lg border border-slate-200 bg-slate-100
-                                           px-2.5 py-1.5 text-slate-500 cursor-not-allowed" />
+                                    class="text-xs bg-slate-100 border-slate-200 text-slate-500 cursor-not-allowed hover:border-slate-200" />
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">
-                                Implementation Semester *
-                            </label>
-                            <input type="text"
+                            <x-form.label for="implementation-semester" :is-required="true">
+                                Implementation Semester
+                            </x-form.label>
+                            <x-form.input
+                                id="implementation-semester"
+                                type="text"
                                 wire:model.lazy="draftSemester"
                                 placeholder="e.g., 1st Sem 2025-2026"
-                                class="w-full text-xs rounded-lg border border-slate-300 bg-white
-                                       px-2.5 py-1.5 focus:border-emerald-400 focus:ring-1
-                                       focus:ring-emerald-300 focus:outline-none placeholder:text-slate-300" />
+                                class="text-xs" />
                             @error('draftSemester')
                                 <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Highlights</label>
-                            <textarea wire:model.lazy="draftHighlights" rows="2"
+                            <x-form.label for="revision-highlights">Highlights</x-form.label>
+                            <x-form.textarea
+                                id="revision-highlights"
+                                wire:model.lazy="draftHighlights"
+                                rows="2"
                                 placeholder="Brief summary of changes…"
-                                class="w-full text-xs rounded-lg border border-slate-300 bg-white
-                                       px-2.5 py-1.5 focus:border-emerald-400 focus:ring-1
-                                       focus:ring-emerald-300 focus:outline-none resize-none
-                                       placeholder:text-slate-300"></textarea>
+                                class="text-xs resize-none" />
                         </div>
 
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Contributors</label>
-                            <textarea wire:model.lazy="draftContributors" rows="2"
+                            <x-form.label for="revision-contributors">Contributors</x-form.label>
+                            <x-form.textarea
+                                id="revision-contributors"
+                                wire:model.lazy="draftContributors"
+                                rows="2"
                                 placeholder="Names of contributors…"
-                                class="w-full text-xs rounded-lg border border-slate-300 bg-white
-                                       px-2.5 py-1.5 focus:border-emerald-400 focus:ring-1
-                                       focus:ring-emerald-300 focus:outline-none resize-none
-                                       placeholder:text-slate-300"></textarea>
+                                class="text-xs resize-none" />
                         </div>
 
-                        <button type="button"
+                        <x-button
+                            type="button"
                             wire:click="saveRevision"
-                            wire:loading.attr="disabled"
                             wire:target="saveRevision"
-                            class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl
-                                   text-sm font-semibold transition-colors
-                                   {{ $editingRevisionId
-                                       ? 'bg-amber-500 text-white hover:bg-amber-600'
-                                       : 'bg-emerald-600 text-white hover:bg-emerald-700' }}
-                                   disabled:opacity-60">
-                            <span wire:loading.remove wire:target="saveRevision" class="flex items-center gap-2">
-                                @if ($editingRevisionId)
-                                    <i class="bx bx-save"></i> Update Revision
-                                @else
-                                    <i class="bx bx-plus"></i> Add Revision
-                                @endif
-                            </span>
-                            <span wire:loading wire:target="saveRevision" class="flex items-center gap-2">
-                                <i class="bx bx-loader-alt bx-spin"></i> Saving…
-                            </span>
-                        </button>
+                            variant="{{ $editingRevisionId ? 'secondary' : 'add-button' }}"
+                            loading="Saving…"
+                            class="w-full">
+                            @if ($editingRevisionId)
+                                <i class="bx bx-save"></i> Update Revision
+                            @else
+                                <i class="bx bx-plus"></i> Add Revision
+                            @endif
+                        </x-button>
                     </div>
                 </div>
 
@@ -147,7 +140,7 @@
                     </p>
 
                     @if (count($revisions) > 0)
-                        <div class="space-y-2 max-h-[420px] overflow-y-auto pr-1">
+                        <div class="space-y-2 max-h-105 overflow-y-auto pr-1">
                             @foreach ($revisions as $rev)
                                 <div class="rounded-xl border {{ $editingRevisionId === $rev['id'] ? 'border-amber-300 bg-amber-50' : 'border-slate-200 bg-white' }} p-3"
                                      wire:key="saved-rev-{{ $rev['id'] }}">
@@ -193,11 +186,10 @@
                             @endforeach
                         </div>
                     @else
-                        <div class="rounded-xl border border-dashed border-slate-200 p-8 text-center">
-                            <i class="bx bx-history text-3xl text-slate-300"></i>
-                            <p class="text-xs text-slate-400 mt-2">No revisions saved yet.</p>
-                            <p class="text-xs text-slate-300 mt-0.5">Use the form to add your first revision.</p>
-                        </div>
+                        <x-empty-state
+                            icon="bx bx-history"
+                            title="No revisions saved yet."
+                            description="Use the form to add the syllabus revisions history." />
                     @endif
                 </div>
 

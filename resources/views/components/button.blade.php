@@ -6,20 +6,26 @@
 ])
 
 @php
+    // [&>i] targets Boxicons (and any <i> icon) placed directly inside the button.
+    // - leading-none   → removes line-height that pushes icons upward
+    // - text-[1.1em]   → makes icon scale with the button's font size
+    // - translate-y-px → 1 px nudge to optically center against cap-height text
+    $iconFix = '[&>i]:leading-none [&>i]:text-[1.1em] [&>i]:translate-y-px ';
+
     // Table buttons: compact, no scale animation (jarring on small targets), disabled support
     $tableBtn = 'inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg
                 transition-colors duration-150
-                disabled:opacity-50 disabled:pointer-events-none ';
+                disabled:opacity-50 disabled:pointer-events-none ' . $iconFix;
 
     // Form / CRUD buttons: larger, scale animation is fine on full-size buttons
     $formBtn  = 'inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg
                 shadow-sm transition-all duration-150 active:scale-95
                 focus:ring-2 focus:outline-none
-                disabled:opacity-50 disabled:pointer-events-none ';
+                disabled:opacity-50 disabled:pointer-events-none ' . $iconFix;
 
-    // Livewire buttons: small inline buttons used in Livewire steps
+    // Livewire / wizard buttons: small inline buttons used in Livewire steps
     $wizardBtn = 'inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg
-                transition-colors duration-150 disabled:opacity-50 disabled:pointer-events-none ';
+                transition-colors duration-150 disabled:opacity-50 disabled:pointer-events-none ' . $iconFix;
 
     $styles = [
         // ── Table buttons ──────────────────────────────────────────────────────
@@ -30,23 +36,16 @@
         'table-manage'  => $tableBtn . 'text-white bg-slate-600 hover:bg-slate-700',
         'table-edit'    => $tableBtn . 'text-white bg-blue-600 hover:bg-blue-700',
         'table-view'    => $tableBtn . 'text-white bg-cyan-600 hover:bg-cyan-700',
-        // slate, not gray
         'table-cancel'  => $tableBtn . 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 hover:border-slate-400',
 
         // ── Form / CRUD buttons ────────────────────────────────────────────────
-        // slate, not gray
         'cancel' => $formBtn . 'bg-white text-slate-700 border border-slate-300
                                 hover:bg-slate-50 hover:border-slate-400
                                 focus:ring-slate-400/30',
 
         'danger' => $formBtn . 'bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-600/30',
 
-        // ── CLSU-branded buttons ───────────────────────────────────────────────
-        'add-button' => $formBtn . '
-            bg-[linear-gradient(90deg,#003a10_0%,#009639_100%)]
-            text-white
-            hover:brightness-110
-            focus:ring-[#009639]/30',
+        'add-button' => $formBtn . 'focus:ring-[#009639]/30 bg-emerald-600 text-white hover:bg-emerald-700',
 
         'save' => $formBtn . '
             bg-[linear-gradient(90deg,#009639_0%,#92d12c_100%)]
@@ -66,23 +65,16 @@
             hover:brightness-105
             focus:ring-[#e0a70d]/30',
 
-        'soft' => $formBtn . '
-            bg-[linear-gradient(90deg,#92d12c_0%,#cdfb13_100%)]
-            text-[#003a10]
-            hover:brightness-105
-            focus:ring-[#92d12c]/30',
-
         'outline' => $formBtn . '
             bg-white text-[#1a5f30]
             border-2 border-[#1a5f30]
             hover:bg-[#1a5f30] hover:text-white
             focus:ring-[#1a5f30]/30',
 
-        // Dashed "add" button used in wizard-like editors
         'add-dashed' => $formBtn . 'justify-center bg-white text-emerald-700 border-2 border-dashed border-emerald-300
             hover:border-emerald-500 hover:bg-emerald-50 focus:ring-emerald-500/20',
 
-        // (small inline) buttons
+        // ── Small / wizard buttons ─────────────────────────────────────────────
         'sm-primary' => $wizardBtn . 'bg-emerald-50 text-emerald-700 border border-emerald-300 hover:bg-emerald-50 hover:border-emerald-400',
         'sm-cancel'  => $wizardBtn . 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 hover:border-slate-400',
         'sm-danger'  => $wizardBtn . 'bg-rose-600 text-white hover:bg-rose-700',
@@ -104,7 +96,7 @@
         {{ $attributes->merge(['class' => $class]) }}>
 
         @if ($wireTarget)
-            <span wire:loading.remove wire:target="{{ $wireTarget }}">{{ $slot }}</span>
+            <span wire:loading.remove wire:target="{{ $wireTarget }}" class="inline-flex items-center gap-1.5">{{ $slot }}</span>
             <span wire:loading wire:target="{{ $wireTarget }}" class="inline-flex items-center gap-1.5">
                 <svg class="animate-spin h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
@@ -114,7 +106,7 @@
                 {{ $loading }}
             </span>
         @else
-            <span wire:loading.remove>{{ $slot }}</span>
+            <span wire:loading.remove class="inline-flex items-center gap-1.5">{{ $slot }}</span>
             <span wire:loading class="inline-flex items-center gap-1.5">
                 <svg class="animate-spin h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
@@ -138,7 +130,11 @@ Table (compact, no scale):
 
 Form (larger, scales on click):
   primary    save    add-button    cancel    danger
-  secondary  soft    outline
+  secondary  outline add-dashed
+
+Small / wizard:
+  sm-primary  sm-cancel  sm-danger
+  sm-warning  sm-info    sm-success  sm-soft
 
 USAGE
 ────────────────────────────────────────────────────────────────────
@@ -150,7 +146,12 @@ USAGE
     <i class="bx bx-plus"></i> Add User
 </x-button>
 
-<x-button variant="cancel" onclick="modal.close()">Cancel</x-button>
+<x-button variant="save"
+    wire:click="saveForm"
+    wire:target="saveForm"
+    loading="Saving…">
+    <i class="bx bx-save"></i> Save
+</x-button>
 
 <x-button variant="table-edit"
     onclick="document.getElementById('editModal').showModal()">

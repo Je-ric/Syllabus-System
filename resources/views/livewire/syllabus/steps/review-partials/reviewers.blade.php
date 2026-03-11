@@ -12,7 +12,7 @@
 --}}
 <div
     x-data="{
-        open: false,
+        open: true,
         localApprovedBy:  {{ $approvedBy  ?? 'null' }},
         localConcurredBy: {{ $concurredBy ?? 'null' }},
         deanMap: {
@@ -73,9 +73,9 @@
 
                 {{-- Approved By (Dean) --}}
                 <div class="space-y-2">
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                    <x-form.label for="approved-by">
                         Approved By <span class="text-slate-400 font-normal normal-case">(Dean)</span>
-                    </p>
+                    </x-form.label>
 
                     {{-- Current badge — instant via Alpine mirror --}}
                     <div x-show="getName(localApprovedBy)"
@@ -101,37 +101,32 @@
                     </div>
 
                     <div class="flex gap-2">
-                        <select wire:model="approvedBy"
+                        <x-form.select id="approved-by" wire:model="approvedBy"
                             x-on:change="localApprovedBy = $event.target.value ? parseInt($event.target.value) : null"
-                            class="flex-1 text-xs rounded-xl border border-slate-300 bg-white px-2.5 py-2
-                                   focus:border-emerald-400 focus:ring-1 focus:ring-emerald-300 focus:outline-none">
+                            class="flex-1 text-xs rounded-xl px-2.5 py-2">
                             <option value="">Select Dean…</option>
                             @foreach ($deanUsers as $user)
                                 <option value="{{ $user->id }}">{{ $user->name }}</option>
                             @endforeach
-                        </select>
-                        <button type="button"
+                        </x-form.select>
+                        <x-button
+                            type="button"
                             wire:click="saveApproved"
-                            wire:loading.attr="disabled" wire:target="saveApproved"
-                            class="shrink-0 flex items-center gap-1 px-3 py-2 rounded-xl
-                                   bg-slate-700 text-white text-xs font-semibold
-                                   hover:bg-slate-800 disabled:opacity-60 transition-colors">
-                            <span wire:loading.remove wire:target="saveApproved">
-                                <i class="bx bx-check"></i> Set
-                            </span>
-                            <span wire:loading wire:target="saveApproved">
-                                <i class="bx bx-loader-alt bx-spin"></i>
-                            </span>
-                        </button>
+                            wire:target="saveApproved"
+                            variant="table-confirm"
+                            loading="Saving"
+                            class="shrink-0 text-xs">
+                            <i class="bx bx-check"></i> Set
+                        </x-button>
                     </div>
                 </div>
 
                 {{-- Concurred By (Dean, nullable, must differ from approved) --}}
                 <div class="space-y-2">
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                    <x-form.label for="concurred-by">
                         Concurred By
                         <span class="text-slate-400 font-normal normal-case">(Dean · optional)</span>
-                    </p>
+                    </x-form.label>
 
                     <div x-show="getName(localConcurredBy)"
                          class="rounded-xl border border-emerald-200 bg-emerald-50 p-3
@@ -162,10 +157,9 @@
                             Alpine hides matching options client-side for instant feedback;
                             saveConcurred() double-checks server-side.
                         --}}
-                        <select wire:model="concurredBy"
+                        <x-form.select id="concurred-by" wire:model="concurredBy"
                             x-on:change="localConcurredBy = $event.target.value ? parseInt($event.target.value) : null"
-                            class="flex-1 text-xs rounded-xl border border-slate-300 bg-white px-2.5 py-2
-                                   focus:border-emerald-400 focus:ring-1 focus:ring-emerald-300 focus:outline-none">
+                            class="flex-1 text-xs rounded-xl px-2.5 py-2">
                             <option value="">Select Dean…</option>
                             @foreach ($deanUsers as $user)
                                 <option value="{{ $user->id }}"
@@ -174,30 +168,28 @@
                                     {{ $user->name }}
                                 </option>
                             @endforeach
-                        </select>
-                        <button type="button"
+                        </x-form.select>
+                        <x-button
+                            type="button"
                             wire:click="saveConcurred"
-                            wire:loading.attr="disabled" wire:target="saveConcurred"
-                            class="shrink-0 flex items-center gap-1 px-3 py-2 rounded-xl
-                                   bg-slate-700 text-white text-xs font-semibold
-                                   hover:bg-slate-800 disabled:opacity-60 transition-colors">
-                            <span wire:loading.remove wire:target="saveConcurred">
-                                <i class="bx bx-check"></i> Set
-                            </span>
-                            <span wire:loading wire:target="saveConcurred">
-                                <i class="bx bx-loader-alt bx-spin"></i>
-                            </span>
-                        </button>
+                            wire:target="saveConcurred"
+                            variant="table-confirm"
+                            loading="Saving"
+                            class="shrink-0 text-xs">
+                            <i class="bx bx-check"></i> Set
+                        </x-button>
                     </div>
                 </div>
             </div>
 
             {{-- ══ Reviewed By (additional faculty) ══ --}}
             <div>
-                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
-                    Reviewed By
-                    <span class="text-slate-400 font-normal normal-case">(Additional — Faculty)</span>
-                </p>
+                <div class="mb-3">
+                    <x-form.label for="reviewer-id">
+                        Reviewed By
+                        <span class="text-slate-400 font-normal normal-case">(Additional — Faculty)</span>
+                    </x-form.label>
+                </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
@@ -205,27 +197,22 @@
                     <div class="space-y-2">
                         <div class="flex gap-2">
                             {{-- facultyUsers already excludes already-added reviewers (from render()) --}}
-                            <select wire:model="selectedReviewerId"
-                                class="flex-1 text-xs rounded-xl border border-slate-300 bg-white px-2.5 py-2
-                                       focus:border-emerald-400 focus:ring-1 focus:ring-emerald-300 focus:outline-none">
+                            <x-form.select id="reviewer-id" wire:model="selectedReviewerId"
+                                class="flex-1 text-xs rounded-xl px-2.5 py-2">
                                 <option value="">Select faculty reviewer…</option>
                                 @foreach ($facultyUsers as $user)
                                     <option value="{{ $user->id }}">{{ $user->name }}</option>
                                 @endforeach
-                            </select>
-                            <button type="button"
+                            </x-form.select>
+                            <x-button
+                                type="button"
                                 wire:click="$parent.addReviewer($wire.selectedReviewerId)"
-                                wire:loading.attr="disabled" wire:target="addReviewer"
-                                class="shrink-0 flex items-center gap-1 px-3 py-2 rounded-xl
-                                       bg-emerald-600 text-white text-xs font-semibold
-                                       hover:bg-emerald-700 disabled:opacity-60 transition-colors">
-                                <span wire:loading.remove wire:target="addReviewer">
-                                    <i class="bx bx-plus"></i> Add
-                                </span>
-                                <span wire:loading wire:target="addReviewer">
-                                    <i class="bx bx-loader-alt bx-spin"></i>
-                                </span>
-                            </button>
+                                wire:target="addReviewer"
+                                variant="table-confirm"
+                                loading="Adding"
+                                class="shrink-0 text-xs">
+                                <i class="bx bx-plus"></i> Add
+                            </x-button>
                         </div>
                         <p class="text-xs text-slate-400">
                             Each reviewer will appear in the printed syllabus signature section.
@@ -267,10 +254,10 @@
                                 </div>
                             @endforeach
                         @else
-                            <div class="rounded-xl border border-dashed border-slate-200 p-5 text-center">
-                                <i class="bx bx-group text-2xl text-slate-300"></i>
-                                <p class="text-xs text-slate-400 mt-1">No additional reviewers yet.</p>
-                            </div>
+                            <x-empty-state
+                                icon="bx bx-group"
+                                title="No additional reviewers yet."
+                                description="Use the form on the left to add faculty reviewers who will appear in the printed syllabus signature section." />
                         @endif
                     </div>
                 </div>

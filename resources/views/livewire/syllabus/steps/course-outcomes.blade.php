@@ -86,10 +86,10 @@
             <button type="button"
                 wire:click="addRow"
                 class="flex w-full items-center justify-center gap-2 px-4 py-3
-                       border-2 border-dashed border-emerald-300 rounded-2xl
-                       text-sm font-semibold text-emerald-700
-                       hover:border-emerald-500 hover:bg-emerald-50
-                       transition-colors duration-150">
+                        border-2 border-dashed border-emerald-300 rounded-2xl
+                        text-sm font-semibold text-emerald-700
+                        hover:border-emerald-50a0 hover:bg-emerald-50
+                        transition-colors duration-150">
                 <i class="bx bx-plus text-base"></i>
                 Add Course Outcome
             </button>
