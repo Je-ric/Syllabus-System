@@ -32,6 +32,8 @@
         /* ── Faculty reviewer state ── */
         addingReviewer:  false,
         removingId:      null,
+        clearingApproved: false,
+        clearingConcurred: false,
         selectedFaculty: null,
 
         async addReviewer() {
@@ -46,6 +48,22 @@
             this.removingId = id;
             await $wire.$parent.removeReviewer(id);
             this.removingId = null;
+        },
+
+        async clearApprovedBy() {
+            if (this.clearingApproved) return;
+            this.clearingApproved = true;
+            await $wire.clearApproved();
+            this.localApprovedBy = null;
+            this.clearingApproved = false;
+        },
+
+        async clearConcurredBy() {
+            if (this.clearingConcurred) return;
+            this.clearingConcurred = true;
+            await $wire.clearConcurred();
+            this.localConcurredBy = null;
+            this.clearingConcurred = false;
         }
     }"
     class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
@@ -137,10 +155,21 @@
                                    x-text="getName(localApprovedBy)"></p>
                             </div>
                             <button type="button"
-                                wire:click="clearApproved"
-                                x-on:click="localApprovedBy = null"
+                                x-on:click="clearApprovedBy()"
+                                x-bind:disabled="clearingApproved"
                                 class="shrink-0 p-0.5 text-rose-400 hover:text-rose-600 transition-colors">
-                                <i class="bx bx-x text-base leading-none"></i>
+                                <template x-if="!clearingApproved">
+                                    <i class="bx bx-x text-base leading-none"></i>
+                                </template>
+                                <template x-if="clearingApproved">
+                                    <svg class="animate-spin h-3.5 w-3.5 text-rose-400"
+                                         viewBox="0 0 24 24" fill="none">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10"
+                                                stroke="currentColor" stroke-width="4"/>
+                                        <path class="opacity-75" fill="currentColor"
+                                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                    </svg>
+                                </template>
                             </button>
                         </div>
                             <div x-show="!getName(localApprovedBy)"
@@ -206,10 +235,21 @@
                                    x-text="getName(localConcurredBy)"></p>
                             </div>
                             <button type="button"
-                                wire:click="clearConcurred"
-                                x-on:click="localConcurredBy = null"
+                                x-on:click="clearConcurredBy()"
+                                x-bind:disabled="clearingConcurred"
                                 class="shrink-0 p-0.5 text-rose-400 hover:text-rose-600 transition-colors">
-                                <i class="bx bx-x text-base leading-none"></i>
+                                <template x-if="!clearingConcurred">
+                                    <i class="bx bx-x text-base leading-none"></i>
+                                </template>
+                                <template x-if="clearingConcurred">
+                                    <svg class="animate-spin h-3.5 w-3.5 text-rose-400"
+                                         viewBox="0 0 24 24" fill="none">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10"
+                                                stroke="currentColor" stroke-width="4"/>
+                                        <path class="opacity-75" fill="currentColor"
+                                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                    </svg>
+                                </template>
                             </button>
                         </div>
                             <div x-show="!getName(localConcurredBy)"

@@ -297,7 +297,7 @@
                     </div>
 
                     @if (count($revisions) > 0)
-                        <div class="space-y-2 max-h-[440px] overflow-y-auto pr-0.5">
+                        <div class="space-y-2 max-h-110 overflow-y-auto pr-0.5">
                             @foreach ($revisions as $rev)
                                 <div
                                     wire:key="saved-rev-{{ $rev['id'] }}"
