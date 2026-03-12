@@ -2,23 +2,44 @@
 
 namespace App\Livewire\Syllabus\Steps;
 
-use App\Models\CourseOutcome;
 use App\Models\Syllabus;
+use App\Services\Syllabus\CourseOutcomeService;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
+/**
+ * Course Outcomes step — individual CRUD per outcome.
+ *
+ * UI contract (enforced by Alpine in the blade):
+ *  • editingId  = int|null — which saved CO card is in edit mode
+ *  • addingNew  = bool     — whether the "Add" form is open
+ *  • savingId   = int|null — which card is mid-save (shows spinner on that card only)
+ *  • deletingId = int|null — which card is mid-delete
+ *
+ * Livewire owns: $outcomes (the authoritative list), $programOutcomes (read-only).
+ * Alpine owns: all transient UI state (editingId, draft text, etc).
+ *
+ * Why individual save/delete instead of saveAll?
+ *  → Instant per-row feedback. Users know exactly which CO saved.
+ *  → No "unsaved" ambiguity — every card is either persisted or clearly in draft.
+ *  → Beginner-friendly: buttons live on each card, not in a distant header.
+ */
 class CourseOutcomesStep extends Component
 {
+    // ── Identity ───────────────────────────────────────────────────────────────
     public int $syllabusId;
 
-    // Each row: ['id' => int|null, 'description' => string]
-    // Owned entirely by Livewire — no @entangle, no Alpine proxy issues.
-    // wire:model.live binds each textarea directly to this array.
-    public array $rows = [];
+    // ── Data ───────────────────────────────────────────────────────────────────
+    // Each item: ['id' => int, 'co_code' => string, 'description' => string]
+    public array $outcomes = [];
 
+    // Program Outcomes for the reference panel
+    // Each item: ['po_code' => string, 'po_text' => string, 'ied' => string]
     public array $programOutcomes = [];
 
-    // ── Mount ─────────────────────────────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════════════════════
+    // LIFECYCLE
+    // ══════════════════════════════════════════════════════════════════════════
 
     public function mount(int $syllabusId): void
     {
@@ -26,14 +47,14 @@ class CourseOutcomesStep extends Component
         $this->loadData();
     }
 
-    // ── Render ────────────────────────────────────────────────────────────────
-
     public function render()
     {
         return view('livewire.syllabus.steps.course-outcomes');
     }
 
-    // ── Event listeners ───────────────────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════════════════════
+    // EVENT LISTENERS
+    // ══════════════════════════════════════════════════════════════════════════
 
     #[On('syllabus-step-changed')]
     public function onStepChanged(string $step): void
@@ -43,117 +64,103 @@ class CourseOutcomesStep extends Component
         }
     }
 
+    /**
+     * Auto-save on step navigation.
+     * Individual-save model means there is nothing pending — just signal done.
+     */
     #[On('syllabus-save-step')]
     public function onSaveRequested(string $step): void
     {
         if ($step !== 'course_outcomes') {
             return;
         }
-        $this->save(silent: true);
+
         $this->dispatch('syllabus-step-saved', step: 'course_outcomes');
         $this->dispatch('syllabus-course-outcomes-updated');
     }
 
-    // ── Public actions ────────────────────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════════════════════
+    // CRUD — called from Alpine via $wire.*
+    // ══════════════════════════════════════════════════════════════════════════
 
-    public function addRow(): void
+    /**
+     * Create a new CO.
+     * Called by Alpine: await $wire.createOutcome(draftText)
+     * Returns the new outcome so Alpine can clear the draft and close the form.
+     * Dispatches 'co-created' with the new list so Alpine can update its mirror.
+     */
+    public function createOutcome(string $description): void
     {
-        $this->rows[] = ['id' => null, 'description' => ''];
-    }
-
-    public function removeRow(int $index): void
-    {
-        $row = $this->rows[$index] ?? null;
-        if (! $row) {
+        try {
+            app(CourseOutcomeService::class)->create($this->syllabusId, $description);
+        } catch (\InvalidArgumentException $e) {
+            $this->dispatch('lw-toast', type: 'error', message: $e->getMessage());
+            return;
+        } catch (\Throwable $e) {
+            report($e);
+            $this->dispatch('lw-toast', type: 'error', message: 'Unable to save Course Outcome.');
             return;
         }
 
-        // If it has an ID, delete from DB
-        if (! empty($row['id'])) {
-            CourseOutcome::where('syllabus_id', $this->syllabusId)
-                ->where('id', (int) $row['id'])
-                ->delete();
-            $this->dispatch('lw-toast', type: 'success', message: 'Course Outcome removed.');
-            $this->dispatch('syllabus-course-outcomes-updated');
-        }
-
-        array_splice($this->rows, $index, 1);
-    }
-
-    // Called by the Save All button directly via wire:click.
-    // No Alpine, no $wire.call(), no proxy — just a plain Livewire action.
-    public function saveAll(): void
-    {
-        $this->save(silent: false);
-    }
-
-    // ── Private helpers ───────────────────────────────────────────────────────
-
-    private function save(bool $silent = false): void
-    {
-        // Filter out completely blank rows silently — don't save them, don't error
-        $toSave = array_filter(
-            $this->rows,
-            fn ($row) => trim((string) ($row['description'] ?? '')) !== ''
-        );
-
-        if (empty($toSave)) {
-            if (! $silent) {
-                $this->dispatch('lw-toast', type: 'warning', message: 'Add at least one Course Outcome.');
-            }
-            return;
-        }
-
-        $existing = CourseOutcome::where('syllabus_id', $this->syllabusId)
-            ->get()
-            ->keyBy('id');
-
-        $savedIds = [];
-        $coNumber = 1;
-
-        foreach ($toSave as $row) {
-            $description = trim((string) ($row['description'] ?? ''));
-            $coCode      = 'CO' . $coNumber++;
-            $id          = ! empty($row['id']) ? (int) $row['id'] : null;
-
-            if ($id && $existing->has($id)) {
-                $existing[$id]->update([
-                    'co_code'     => $coCode,
-                    'description' => $description,
-                ]);
-                $savedIds[] = $id;
-            } else {
-                $new        = CourseOutcome::create([
-                    'syllabus_id' => $this->syllabusId,
-                    'co_code'     => $coCode,
-                    'description' => $description,
-                ]);
-                $savedIds[] = $new->id;
-            }
-        }
-
-        // Delete any DB rows the user removed
-        $toDelete = $existing->keys()->diff($savedIds);
-        if ($toDelete->isNotEmpty()) {
-            CourseOutcome::where('syllabus_id', $this->syllabusId)
-                ->whereIn('id', $toDelete->all())
-                ->delete();
-        }
-
-        // Reload rows from DB so IDs and codes are fresh
-        $this->reloadRows();
-
-        if (! $silent) {
-            $this->dispatch('lw-toast', type: 'success', message: 'Course Outcomes saved.');
-        }
-
-        $this->dispatch('syllabus-step-dirty', step: 'course_outcomes', dirty: false);
+        $this->outcomes = app(CourseOutcomeService::class)->all($this->syllabusId);
+        $this->dispatch('co-saved');
+        $this->dispatch('lw-toast', type: 'success', message: 'Course Outcome added.');
         $this->dispatch('syllabus-course-outcomes-updated');
     }
 
+    /**
+     * Update an existing CO's description.
+     * Called by Alpine: await $wire.updateOutcome(id, draftText)
+     * Dispatches 'co-saved' so Alpine closes the edit form.
+     */
+    public function updateOutcome(int $outcomeId, string $description): void
+    {
+        try {
+            app(CourseOutcomeService::class)->update($this->syllabusId, $outcomeId, $description);
+        } catch (\InvalidArgumentException $e) {
+            $this->dispatch('lw-toast', type: 'error', message: $e->getMessage());
+            return;
+        } catch (\Throwable $e) {
+            report($e);
+            $this->dispatch('lw-toast', type: 'error', message: 'Unable to update Course Outcome.');
+            return;
+        }
+
+        $this->outcomes = app(CourseOutcomeService::class)->all($this->syllabusId);
+        $this->dispatch('co-saved');
+        $this->dispatch('lw-toast', type: 'success', message: 'Course Outcome updated.');
+        $this->dispatch('syllabus-course-outcomes-updated');
+    }
+
+    /**
+     * Delete a CO by id.
+     * Called by Alpine: await $wire.deleteOutcome(id)
+     * Dispatches 'co-deleted' so Alpine clears deletingId.
+     */
+    public function deleteOutcome(int $outcomeId): void
+    {
+        try {
+            app(CourseOutcomeService::class)->delete($this->syllabusId, $outcomeId);
+        } catch (\Throwable $e) {
+            report($e);
+            $this->dispatch('lw-toast', type: 'error', message: 'Unable to delete Course Outcome.');
+            $this->dispatch('co-delete-failed');
+            return;
+        }
+
+        $this->outcomes = app(CourseOutcomeService::class)->all($this->syllabusId);
+        $this->dispatch('co-deleted');
+        $this->dispatch('lw-toast', type: 'success', message: 'Course Outcome removed.');
+        $this->dispatch('syllabus-course-outcomes-updated');
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // PRIVATE HELPERS
+    // ══════════════════════════════════════════════════════════════════════════
+
     private function loadData(): void
     {
-        $this->reloadRows();
+        $this->outcomes = app(CourseOutcomeService::class)->all($this->syllabusId);
 
         $syllabus = Syllabus::with(['course.program.outcomes', 'course.programOutcomes'])
             ->findOrFail($this->syllabusId);
@@ -167,23 +174,5 @@ class CourseOutcomesStep extends Component
                 'po_text' => $po->po_text,
                 'ied'     => $coursePoIedById->get((int) $po->id, ''),
             ])->values()->all() ?? [];
-    }
-
-    private function reloadRows(): void
-    {
-        $this->rows = CourseOutcome::where('syllabus_id', $this->syllabusId)
-            ->orderBy('co_code')
-            ->get()
-            ->map(fn ($co) => [
-                'id'          => $co->id,
-                'description' => $co->description,
-            ])
-            ->values()
-            ->all();
-
-        // Always keep at least one blank row so the form isn't empty on first visit
-        if (empty($this->rows)) {
-            $this->rows = [['id' => null, 'description' => '']];
-        }
     }
 }
