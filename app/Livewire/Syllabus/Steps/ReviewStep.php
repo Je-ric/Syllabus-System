@@ -35,16 +35,14 @@ class ReviewStep extends Component
     // ── Revision history ───────────────────────────────────────────────────
     // Pure-Alpine form — no wire:model on any draft field.
     // saveRevision() receives all values as typed method arguments.
-    // removeRevision() dispatches 'revision-deleted' so Alpine can clear its
-    // local deletingId state after the server round-trip completes.
+    // removeRevision() dispatches 'revision-deleted' so Alpine clears its flag.
+    // resequenceRevisions() renumbers all rows 0,1,2,… by current order.
     public array $revisions = [];
 
     // ── Approval ───────────────────────────────────────────────────────────
-    // wire:model on the dean selects — they are simple dropdowns with no
-    // round-trip on typing. The "Set" button is the only network call.
     public ?int $approvedBy         = null;
     public ?int $concurredBy        = null;
-    public ?int $selectedReviewerId = null;  // faculty staging field
+    public ?int $selectedReviewerId = null;
 
     // ══════════════════════════════════════════════════════════════════════
     // LIFECYCLE
@@ -52,10 +50,10 @@ class ReviewStep extends Component
 
     public function mount(int $syllabusId): void
     {
-        $this->syllabusId       = $syllabusId;
+        $this->syllabusId        = $syllabusId;
         $this->academicCalendars = collect();
-        $this->syllabusWeeks    = collect();
-        $this->completeVersions = collect();
+        $this->syllabusWeeks     = collect();
+        $this->completeVersions  = collect();
         $this->loadData();
     }
 
@@ -81,8 +79,7 @@ class ReviewStep extends Component
 
     /**
      * Fired by SyllabusWizard after addReviewer/removeReviewer mutations.
-     * Refreshes the Eloquent relation so render() returns the fresh list.
-     * Does NOT trigger a full component reload — accordion stays open.
+     * Refreshes the Eloquent relation — accordion stays open.
      */
     #[On('syllabus-reviewers-updated')]
     public function onReviewersUpdated(): void
@@ -145,7 +142,8 @@ class ReviewStep extends Component
 
     /**
      * Called from Alpine with all form values as typed arguments.
-     * Zero wire:model round-trips while typing — single call on submit.
+     * Zero wire:model round-trips while typing — single network call on submit.
+     * Dispatches 'revision-saved' so Alpine can reset the form.
      */
     public function saveRevision(
         ?int   $editingId,
@@ -183,6 +181,9 @@ class ReviewStep extends Component
                 'highlights'              => $highlights,
                 'contributors'            => $contributors,
             ]]);
+        } catch (\InvalidArgumentException $e) {
+            $this->dispatch('lw-toast', type: 'error', message: $e->getMessage());
+            return;
         } catch (\Throwable $e) {
             report($e);
             $this->dispatch('lw-toast', type: 'error', message: 'Unable to save revision.');
@@ -193,9 +194,33 @@ class ReviewStep extends Component
         $this->syllabus->load('revisions');
         $this->loadRevisions();
 
-        $this->dispatch('revision-form-reset');
+        // 'revision-saved' tells Alpine to reset the form.
+        $this->dispatch('revision-saved');
         $this->dispatch('lw-toast', type: 'success',
             message: $isEdit ? 'Revision updated.' : 'Revision added.');
+    }
+
+    /**
+     * Renumber all revisions 0, 1, 2, … by their current revision_no order.
+     * Dispatches 'revisions-resequenced' so Alpine knows to reload display.
+     */
+    public function resequenceRevisions(): void
+    {
+        if (! $this->syllabus) {
+            return;
+        }
+
+        try {
+            app(SyllabusRevisionHistoryService::class)->resequence($this->syllabus);
+        } catch (\Throwable $e) {
+            report($e);
+            $this->dispatch('lw-toast', type: 'error', message: 'Unable to resequence revisions.');
+            return;
+        }
+
+        $this->syllabus->load('revisions');
+        $this->loadRevisions();
+        $this->dispatch('lw-toast', type: 'success', message: 'Revisions renumbered 0, 1, 2, …');
     }
 
     /**
@@ -369,6 +394,5 @@ class ReviewStep extends Component
                     'contributors'            => $rev->contributors ?? '',
                 ];
             })->values()->all();
-
     }
 }

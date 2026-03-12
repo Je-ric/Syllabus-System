@@ -2,19 +2,23 @@
     REVISION HISTORY ACCORDION
     ─────────────────────────────────────────────────────────────────────────
     PERFORMANCE: Pure Alpine x-model — zero wire round-trips while typing.
-    Single $wire.saveRevision(...) on submit. Edit is zero-round-trip too:
-    the pencil button dispatches 'revision-load-form' with the row's data;
-    Alpine populates the form instantly from the event detail.
+    Single $wire.saveRevision(...) on submit. Edit loads form via window
+    event — pure Alpine, zero server call.
 
     Loading indicators:
-    • Save/Update  — Alpine saving=true  while awaiting $wire.saveRevision
+    • Save/Update  — Alpine saving=true while awaiting $wire.saveRevision
     • Delete       — Alpine deletingId=N while awaiting $wire.removeRevision
-      Server dispatches 'revision-deleted' / 'revision-delete-failed' to
-      clear the flag after the round-trip completes.
+
+    BUG NOTE: <template x-if> inside a <button> causes double-rendering and
+    text-disappearing issues because Alpine reuses DOM nodes. All button
+    content uses x-show on plain <span> elements instead — this is the
+    correct, stable approach.
+
+    Revision numbering:
+    • User enters any non-negative integer (0-based by convention).
+    • "Resequence" button renumbers all saved rows 0, 1, 2, … in order.
     ─────────────────────────────────────────────────────────────────────────
 --}}
-
-{{-- Outer wrapper: handles accordion open state --}}
 <div
     x-data="{ open: true }"
     x-on:revision-load-form.window="open = true"
@@ -48,10 +52,14 @@
     <div x-show="open" x-collapse>
         <div class="border-t border-slate-100 p-5">
 
-            {{-- Inner x-data owns the form state AND the deletingId flag --}}
+            {{--
+                x-data owns form state + delete state.
+                'revision-saved'        → server save finished → reset form
+                'revision-deleted'      → server delete finished → clear deletingId
+                'revision-delete-failed'→ server delete failed  → clear deletingId
+            --}}
             <div
                 x-data="{
-                    /* ── form state ── */
                     editingId:    null,
                     revisionNo:   '',
                     date:         '{{ now()->format('Y-m-d') }}',
@@ -59,11 +67,8 @@
                     highlights:   '',
                     contributors: '',
                     saving:       false,
-
-                    /* ── delete state ── */
                     deletingId:   null,
 
-                    /* ── methods ── */
                     loadForm(e) {
                         this.editingId    = e.detail.id;
                         this.revisionNo   = e.detail.revision_no;
@@ -71,7 +76,6 @@
                         this.semester     = e.detail.implementation_semester ?? '';
                         this.highlights   = e.detail.highlights ?? '';
                         this.contributors = e.detail.contributors ?? '';
-                        // accordion open handled by outer listener
                     },
 
                     reset() {
@@ -85,29 +89,30 @@
                     },
 
                     async submit() {
-                        const parsedRevisionNo = Number(this.revisionNo);
+                        const revNo = parseInt(this.revisionNo, 10);
                         if (!this.date || !this.semester.trim()) return;
-                        if (!Number.isInteger(parsedRevisionNo) || parsedRevisionNo < 0) return;
+                        if (isNaN(revNo) || revNo < 0) return;
                         this.saving = true;
                         await $wire.saveRevision(
                             this.editingId,
-                            parsedRevisionNo,
+                            revNo,
                             this.date,
                             this.semester,
                             this.highlights,
                             this.contributors
                         );
+                        // saving is reset by the reset() call on 'revision-saved'
+                        // but also clear here in case of validation error toast
                         this.saving = false;
                     },
 
                     async deleteRevision(id) {
                         this.deletingId = id;
                         await $wire.removeRevision(id);
-                        // 'revision-deleted' or 'revision-delete-failed' clears deletingId
                     }
                 }"
                 x-on:revision-load-form.window="loadForm($event)"
-                x-on:revision-form-reset.window="reset()"
+                x-on:revision-saved.window="reset()"
                 x-on:revision-deleted.window="deletingId = null"
                 x-on:revision-delete-failed.window="deletingId = null"
                 class="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
@@ -116,16 +121,16 @@
                      LEFT — add / edit form
                      ════════════════════════════════════ --}}
                 <div>
-                    {{-- Form title bar --}}
+                    {{-- Form title + cancel --}}
                     <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center gap-2">
+                        <div>
                             <span x-show="!editingId"
                                   class="text-[10px] font-bold uppercase tracking-widest text-slate-400">
                                 New Entry
                             </span>
                             <span x-show="editingId" x-cloak
-                                  class="inline-flex items-center gap-1.5
-                                         text-[10px] font-bold uppercase tracking-widest text-amber-600">
+                                  class="inline-flex items-center gap-1.5 text-[10px] font-bold
+                                         uppercase tracking-widest text-amber-600">
                                 <i class="bx bx-edit-alt text-xs leading-none"></i>
                                 Editing Rev.&nbsp;<span x-text="revisionNo"></span>
                             </span>
@@ -133,13 +138,13 @@
                         <button type="button"
                             x-show="editingId" x-cloak
                             x-on:click="reset()"
-                            class="text-xs text-slate-400 hover:text-slate-700 underline
-                                   underline-offset-2 transition-colors">
+                            class="text-xs text-slate-400 hover:text-slate-700
+                                   underline underline-offset-2 transition-colors">
                             Cancel
                         </button>
                     </div>
 
-                    {{-- Card: border + bg change in edit mode --}}
+                    {{-- Form card --}}
                     <div class="rounded-xl border p-4 space-y-3.5 transition-colors duration-150"
                          x-bind:class="editingId
                             ? 'border-amber-200 bg-amber-50/60'
@@ -157,23 +162,23 @@
                             </div>
                             <div>
                                 <x-form.label for="draft-rev-no">
-                                    Rev. No.
-                                    <span class="text-rose-400">*</span>
+                                    Rev. No. <span class="text-rose-400">*</span>
                                 </x-form.label>
                                 <x-form.input
                                     id="draft-rev-no"
                                     type="number"
                                     min="0"
                                     step="1"
+                                    placeholder="0"
                                     x-model="revisionNo"
                                     class="text-xs" />
-                                <p class="text-[10px] text-slate-400 mt-1 leading-tight">
-                                    Enter a whole number (0 or higher).
+                                <p class="text-[10px] text-slate-400 mt-1 leading-snug">
+                                    Whole number ≥ 0. Use Resequence to auto-renumber.
                                 </p>
                             </div>
                         </div>
 
-                        {{-- Implementation Semester --}}
+                        {{-- Semester --}}
                         <div>
                             <x-form.label for="draft-semester" :isRequired="true">
                                 Implementation Semester
@@ -184,8 +189,7 @@
                                 x-model="semester"
                                 placeholder="e.g. 1st Sem 2025–2026"
                                 class="text-xs" />
-                            <p x-show="!semester.trim() && saving"
-                               x-cloak
+                            <p x-show="!semester.trim() && saving" x-cloak
                                class="text-[11px] text-rose-500 mt-1">
                                 This field is required.
                             </p>
@@ -213,35 +217,42 @@
                                 class="text-xs resize-none" />
                         </div>
 
-                        {{-- Submit button --}}
+                        {{--
+                            Submit button.
+                            IMPORTANT: do NOT use <template x-if> inside a button —
+                            it causes double-rendering and the text disappearing bug.
+                            Use x-show on plain <span>s instead.
+                        --}}
                         <button type="button"
                             x-on:click="submit()"
                             x-bind:disabled="saving"
                             x-bind:class="editingId
-                                ? 'bg-amber-500 hover:bg-amber-600 focus:ring-amber-400/30'
-                                : 'bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500/30'"
+                                ? 'bg-amber-500 hover:bg-amber-600'
+                                : 'bg-emerald-600 hover:bg-emerald-700'"
                             class="w-full inline-flex items-center justify-center gap-2
                                    px-4 py-2.5 rounded-xl text-sm font-semibold text-white
-                                   transition-colors focus:outline-none focus:ring-2
-                                   disabled:opacity-60 disabled:pointer-events-none">
-                            <template x-if="!saving">
-                                <span class="inline-flex items-center gap-2">
-                                    <i x-show="editingId"  class="bx bx-save leading-none"></i>
-                                    <i x-show="!editingId" class="bx bx-plus leading-none"></i>
-                                    <span x-text="editingId ? 'Update Revision' : 'Add Revision'"></span>
-                                </span>
-                            </template>
-                            <template x-if="saving">
-                                <span class="inline-flex items-center gap-2">
-                                    <svg class="animate-spin h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10"
-                                                stroke="currentColor" stroke-width="4"/>
-                                        <path class="opacity-75" fill="currentColor"
-                                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                                    </svg>
-                                    Saving…
-                                </span>
-                            </template>
+                                   transition-colors disabled:opacity-60
+                                   disabled:pointer-events-none">
+
+                            {{-- Not saving: icon + label --}}
+                            <span x-show="!saving" class="inline-flex items-center gap-2">
+                                <i x-show="editingId"  class="bx bx-save leading-none"></i>
+                                <i x-show="!editingId" class="bx bx-plus leading-none"></i>
+                                <span x-text="editingId ? 'Update Revision' : 'Add Revision'"></span>
+                            </span>
+
+                            {{-- Saving: spinner + label --}}
+                            <span x-show="saving" x-cloak
+                                  class="inline-flex items-center gap-2">
+                                <svg class="animate-spin h-4 w-4 shrink-0"
+                                     viewBox="0 0 24 24" fill="none">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10"
+                                            stroke="currentColor" stroke-width="4"/>
+                                    <path class="opacity-75" fill="currentColor"
+                                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                </svg>
+                                Saving…
+                            </span>
                         </button>
                     </div>
                 </div>
@@ -250,19 +261,51 @@
                      RIGHT — saved revisions list
                      ════════════════════════════════════ --}}
                 <div>
-                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">
-                        Saved Revisions
-                    </p>
+                    {{-- List header with Resequence button --}}
+                    <div class="flex items-center justify-between mb-3">
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                            Saved Revisions
+                        </p>
+                        @if (count($revisions) > 1)
+                            <button type="button"
+                                wire:click="resequenceRevisions"
+                                wire:loading.attr="disabled"
+                                wire:target="resequenceRevisions"
+                                wire:confirm="This will renumber all revisions 0, 1, 2, … in their current order. Continue?"
+                                class="inline-flex items-center gap-1 px-2 py-1 rounded-lg
+                                       text-[11px] font-semibold text-slate-500
+                                       border border-slate-200 bg-white
+                                       hover:bg-slate-50 hover:border-slate-300
+                                       disabled:opacity-50 transition-colors">
+                                <span wire:loading.remove wire:target="resequenceRevisions"
+                                      class="inline-flex items-center gap-1">
+                                    <i class="bx bx-sort-a-z leading-none"></i> Resequence
+                                </span>
+                                <span wire:loading wire:target="resequenceRevisions"
+                                      class="inline-flex items-center gap-1">
+                                    <svg class="animate-spin h-3 w-3 shrink-0"
+                                         viewBox="0 0 24 24" fill="none">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10"
+                                                stroke="currentColor" stroke-width="4"/>
+                                        <path class="opacity-75" fill="currentColor"
+                                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                    </svg>
+                                    Renumbering…
+                                </span>
+                            </button>
+                        @endif
+                    </div>
 
                     @if (count($revisions) > 0)
-                        <div class="space-y-2 max-h-110 overflow-y-auto pr-0.5">
+                        <div class="space-y-2 max-h-[440px] overflow-y-auto pr-0.5">
                             @foreach ($revisions as $rev)
                                 <div
                                     wire:key="saved-rev-{{ $rev['id'] }}"
                                     x-bind:class="{
-                                        'border-amber-200 bg-amber-50/70':  editingId  === {{ $rev['id'] }},
-                                        'border-rose-100  bg-rose-50/60 opacity-60 pointer-events-none':
-                                                                            deletingId === {{ $rev['id'] }},
+                                        'border-amber-200 bg-amber-50/70':
+                                            editingId  === {{ $rev['id'] }},
+                                        'border-rose-100 bg-rose-50/50 opacity-50 pointer-events-none':
+                                            deletingId === {{ $rev['id'] }},
                                         'border-slate-200 bg-white':
                                             editingId  !== {{ $rev['id'] }} &&
                                             deletingId !== {{ $rev['id'] }}
@@ -288,7 +331,8 @@
                                                 @endif
                                             </div>
                                             @if ($rev['highlights'])
-                                                <p class="text-[11px] text-slate-500 mt-1.5 leading-relaxed line-clamp-2">
+                                                <p class="text-[11px] text-slate-500 mt-1.5
+                                                          leading-relaxed line-clamp-2">
                                                     {{ $rev['highlights'] }}
                                                 </p>
                                             @endif
@@ -303,45 +347,55 @@
                                         {{-- Actions --}}
                                         <div class="flex items-center gap-0.5 shrink-0 ml-1">
 
-                                            {{-- Edit — pure Alpine, zero server round-trip --}}
+                                            {{-- Edit — pure Alpine, zero server call --}}
                                             <button type="button"
                                                 x-on:click="$dispatch('revision-load-form', @js($rev))"
-                                                x-bind:disabled="deletingId === {{ $rev['id'] }}"
+                                                x-bind:disabled="deletingId !== null || saving"
                                                 title="Edit"
                                                 class="p-1.5 rounded-lg text-slate-400
                                                        hover:text-amber-600 hover:bg-amber-50
-                                                       disabled:opacity-40
-                                                       transition-colors">
+                                                       disabled:opacity-40 transition-colors">
                                                 <i class="bx bx-edit-alt text-sm leading-none"></i>
                                             </button>
 
-                                            {{-- Delete — Alpine manages loading state --}}
+                                            {{--
+                                                Delete — Alpine spinner (same x-show pattern, NOT
+                                                <template x-if>, to avoid the double-render bug)
+                                            --}}
                                             <button type="button"
                                                 x-on:click="deleteRevision({{ $rev['id'] }})"
                                                 x-bind:disabled="deletingId !== null || saving"
                                                 title="Delete"
                                                 class="p-1.5 rounded-lg transition-colors
                                                        disabled:opacity-40">
-                                                <template x-if="deletingId !== {{ $rev['id'] }}">
-                                                    <i class="bx bx-trash text-sm leading-none
-                                                               text-slate-400 hover:text-rose-600
-                                                               block hover:bg-rose-50 rounded-lg"></i>
-                                                </template>
-                                                <template x-if="deletingId === {{ $rev['id'] }}">
-                                                    <svg class="animate-spin h-3.5 w-3.5 text-rose-400"
-                                                         viewBox="0 0 24 24" fill="none">
-                                                        <circle class="opacity-25" cx="12" cy="12" r="10"
-                                                                stroke="currentColor" stroke-width="4"/>
-                                                        <path class="opacity-75" fill="currentColor"
-                                                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                                                    </svg>
-                                                </template>
+                                                <i x-show="deletingId !== {{ $rev['id'] }}"
+                                                   class="bx bx-trash text-sm leading-none
+                                                          text-slate-400 hover:text-rose-600"></i>
+                                                <svg x-show="deletingId === {{ $rev['id'] }}"
+                                                     x-cloak
+                                                     class="animate-spin h-3.5 w-3.5 text-rose-400"
+                                                     viewBox="0 0 24 24" fill="none">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10"
+                                                            stroke="currentColor" stroke-width="4"/>
+                                                    <path class="opacity-75" fill="currentColor"
+                                                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                                </svg>
                                             </button>
                                         </div>
                                     </div>
                                 </div>
                             @endforeach
                         </div>
+
+                        {{-- Resequence hint --}}
+                        @if (count($revisions) > 1)
+                            <p class="text-[10px] text-slate-400 mt-2 leading-relaxed">
+                                <i class="bx bx-info-circle text-[11px]"></i>
+                                To insert a revision between existing ones, set its number manually,
+                                then click <strong>Resequence</strong> to re-sort and renumber all rows.
+                            </p>
+                        @endif
+
                     @else
                         <x-empty-state
                             icon="bx-history"
@@ -350,7 +404,7 @@
                     @endif
                 </div>
 
-            </div>{{-- /inner grid --}}
+            </div>{{-- /grid --}}
         </div>
     </div>
 </div>
