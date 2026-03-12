@@ -7,72 +7,89 @@ use App\Models\CompleteSyllabus;
 use App\Models\Syllabus;
 use App\Models\SyllabusRevision;
 use App\Models\User;
+use App\Services\Syllabus\SyllabusApprovalService;
 use App\Services\Syllabus\SyllabusRevisionHistoryService;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 class ReviewStep extends Component
 {
-    public int               $syllabusId;
+    // ── Identity ───────────────────────────────────────────────────────────
+    public int $syllabusId;
+
+    // ── Loaded syllabus state ──────────────────────────────────────────────
     public bool              $isLoaded             = false;
     public ?Syllabus         $syllabus             = null;
-    public                   $academicCalendars;
+    public                   $course;
     public ?int              $academic_calendar_id = null;
+    public                   $academicCalendars;
     public array             $courseOutcomes       = [];
     public array             $examWeeks            = [];
     public                   $syllabusWeeks;
-    public                   $course;
     public ?CompleteSyllabus $latestComplete       = null;
     public                   $completeVersions;
 
     // ── Revision history ───────────────────────────────────────────────────
-    // $revisions = saved rows shown in the right list.
-    // The left form is PURE ALPINE — no wire:model at all.
-    // saveRevision() receives all values as method arguments → single network
-    // call on submit, zero round-trips while typing.
-    public array $revisions         = [];
-    public int   $nextRevisionNo    = 0;    // passed to blade so Alpine can init
+    // Pure-Alpine form — no wire:model on any draft field.
+    // saveRevision() receives all values as typed method arguments.
+    // removeRevision() dispatches 'revision-deleted' so Alpine can clear its
+    // local deletingId state after the server round-trip completes.
+    public array $revisions = [];
 
-    // ── Approval slots ────────────────────────────────────────────────────
-    // approved_by  → Dean (required when set, must differ from concurred_by)
-    // concurred_by → Dean (nullable, must differ from approved_by)
-    // selectedReviewerId → staging for "Add Reviewer" (faculty only)
-    public ?int $concurredBy        = null;
+    // ── Approval ───────────────────────────────────────────────────────────
+    // wire:model on the dean selects — they are simple dropdowns with no
+    // round-trip on typing. The "Set" button is the only network call.
     public ?int $approvedBy         = null;
-    public ?int $selectedReviewerId = null;
+    public ?int $concurredBy        = null;
+    public ?int $selectedReviewerId = null;  // faculty staging field
 
-    // ── Mount ──────────────────────────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════════════════
+    // LIFECYCLE
+    // ══════════════════════════════════════════════════════════════════════
 
     public function mount(int $syllabusId): void
     {
-        $this->syllabusId        = $syllabusId;
+        $this->syllabusId       = $syllabusId;
         $this->academicCalendars = collect();
-        $this->syllabusWeeks     = collect();
-        $this->completeVersions  = collect();
+        $this->syllabusWeeks    = collect();
+        $this->completeVersions = collect();
         $this->loadData();
     }
 
-    // ── Event listeners ───────────────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════════════════
+    // EVENT LISTENERS
+    // ══════════════════════════════════════════════════════════════════════
 
     #[On('syllabus-step-changed')]
     public function onStepChanged(string $step): void
     {
-        if ($step === 'review') $this->loadData(force: true);
+        if ($step === 'review') {
+            $this->loadData(force: true);
+        }
     }
 
     #[On('syllabus-step-saved')]
     public function onAnyStepSaved(): void
     {
-        if ($this->isLoaded) $this->loadData(force: true);
+        if ($this->isLoaded) {
+            $this->loadData(force: true);
+        }
     }
 
+    /**
+     * Fired by SyllabusWizard after addReviewer/removeReviewer mutations.
+     * Refreshes the Eloquent relation so render() returns the fresh list.
+     * Does NOT trigger a full component reload — accordion stays open.
+     */
     #[On('syllabus-reviewers-updated')]
     public function onReviewersUpdated(): void
     {
-        // Just refresh the syllabus so render() picks up latest reviewers.
-        // Accordion stays open — no full reload.
-        if ($this->isLoaded) $this->syllabus?->refresh();
+        if ($this->isLoaded) {
+            $this->syllabus?->refresh();
+        }
     }
 
     #[On('syllabus-revisions-updated')]
@@ -84,22 +101,24 @@ class ReviewStep extends Component
         }
     }
 
-    // ── Render ─────────────────────────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════════════════
+    // RENDER
+    // ══════════════════════════════════════════════════════════════════════
 
     public function render()
     {
-        // Approved/concurred: deans only
         $deanUsers = User::whereHas('roles', fn ($q) => $q->where('name', 'dean'))
-            ->orderBy('name')->get();
+            ->orderBy('name')
+            ->get();
 
-        // Additional reviewers: faculty only, exclude already-added ones
         $alreadyAdded = $this->syllabus
             ? $this->syllabus->reviewers()->pluck('user_id')->map(fn ($id) => (int) $id)->all()
             : [];
 
         $facultyUsers = User::whereHas('roles', fn ($q) => $q->where('name', 'faculty'))
             ->whereNotIn('id', $alreadyAdded)
-            ->orderBy('name')->get();
+            ->orderBy('name')
+            ->get();
 
         $reviewers = $this->syllabus
             ? $this->syllabus->reviewers()->with('user')->orderBy('created_at')->get()
@@ -120,20 +139,27 @@ class ReviewStep extends Component
         ]);
     }
 
-    // ── Revision mutations ─────────────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════════════════
+    // REVISION HISTORY
+    // ══════════════════════════════════════════════════════════════════════
 
     /**
-     * Called from Alpine with all form values as arguments.
-     * No wire:model on the form — zero round-trips while typing.
+     * Called from Alpine with all form values as typed arguments.
+     * Zero wire:model round-trips while typing — single call on submit.
      */
     public function saveRevision(
-        ?int    $editingId,
-        int     $revisionNo,
-        string  $date,
-        string  $semester,
-        string  $highlights   = '',
-        string  $contributors = ''
+        ?int   $editingId,
+        int    $revisionNo,
+        string $date,
+        string $semester,
+        string $highlights   = '',
+        string $contributors = ''
     ): void {
+        if (! $this->syllabus) {
+            $this->dispatch('lw-toast', type: 'error', message: 'No syllabus loaded.');
+            return;
+        }
+
         $semester = trim($semester);
         if (! $semester) {
             $this->dispatch('lw-toast', type: 'error', message: 'Implementation Semester is required.');
@@ -143,9 +169,8 @@ class ReviewStep extends Component
             $this->dispatch('lw-toast', type: 'error', message: 'Date is required.');
             return;
         }
-
-        if (! $this->syllabus) {
-            $this->dispatch('lw-toast', type: 'error', message: 'No syllabus loaded.');
+        if ($revisionNo < 0) {
+            $this->dispatch('lw-toast', type: 'error', message: 'Revision No. must be 0 or higher.');
             return;
         }
 
@@ -168,76 +193,105 @@ class ReviewStep extends Component
         $this->syllabus->load('revisions');
         $this->loadRevisions();
 
-        // Tell Alpine to reset the form and pass the next revision number
-        $this->dispatch('revision-form-reset', nextNo: $this->nextRevisionNo);
+        $this->dispatch('revision-form-reset');
         $this->dispatch('lw-toast', type: 'success',
             message: $isEdit ? 'Revision updated.' : 'Revision added.');
     }
 
     /**
-     * Delete by DB id.
+     * Delete revision by DB id.
+     * Dispatches 'revision-deleted' so Alpine clears its deletingId flag.
      */
     public function removeRevision(int $revisionId): void
     {
-        if (! $this->syllabus) return;
+        if (! $this->syllabus) {
+            return;
+        }
 
         try {
             app(SyllabusRevisionHistoryService::class)->delete($this->syllabus, $revisionId);
         } catch (\Throwable $e) {
             report($e);
             $this->dispatch('lw-toast', type: 'error', message: 'Unable to remove revision.');
+            $this->dispatch('revision-delete-failed', id: $revisionId);
             return;
         }
 
         $this->syllabus->load('revisions');
         $this->loadRevisions();
+        $this->dispatch('revision-deleted', id: $revisionId);
         $this->dispatch('lw-toast', type: 'success', message: 'Revision removed.');
     }
 
-    // ── Approval mutations ────────────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════════════════
+    // APPROVAL SIGNATURES
+    // ══════════════════════════════════════════════════════════════════════
 
     public function saveApproved(): void
     {
-        if (! $this->syllabus) return;
-        $this->syllabus->update(['approved_by' => $this->approvedBy ?: null]);
-        $this->dispatch('lw-toast', type: 'success', message: 'Approved-by saved.');
+        if (! $this->syllabus) {
+            return;
+        }
+
+        try {
+            app(SyllabusApprovalService::class)->setApprovedBy($this->syllabus, $this->approvedBy);
+            $this->dispatch('lw-toast', type: 'success', message: 'Approved-by saved.');
+        } catch (\Throwable $e) {
+            report($e);
+            $this->dispatch('lw-toast', type: 'error', message: 'Unable to save Approved-by.');
+        }
     }
 
     public function clearApproved(): void
     {
-        if (! $this->syllabus) return;
+        if (! $this->syllabus) {
+            return;
+        }
+
+        app(SyllabusApprovalService::class)->clearApprovedBy($this->syllabus);
         $this->approvedBy = null;
-        $this->syllabus->update(['approved_by' => null]);
         $this->dispatch('lw-toast', type: 'success', message: 'Approved-by cleared.');
     }
 
     public function saveConcurred(): void
     {
-        if (! $this->syllabus) return;
-
-        if ($this->concurredBy && $this->concurredBy === $this->approvedBy) {
-            $this->dispatch('lw-toast', type: 'error',
-                message: 'Concurred-by must be a different dean from Approved-by.');
+        if (! $this->syllabus) {
             return;
         }
 
-        $this->syllabus->update(['concurred_by' => $this->concurredBy ?: null]);
-        $this->dispatch('lw-toast', type: 'success', message: 'Concurred-by saved.');
+        try {
+            app(SyllabusApprovalService::class)->setConcurredBy($this->syllabus, $this->concurredBy);
+            $this->dispatch('lw-toast', type: 'success', message: 'Concurred-by saved.');
+        } catch (ValidationException $e) {
+            $message = collect($e->errors())->flatten()->first()
+                ?? 'Concurred-by must differ from Approved-by.';
+            $this->dispatch('lw-toast', type: 'error', message: $message);
+        } catch (\Throwable $e) {
+            report($e);
+            $this->dispatch('lw-toast', type: 'error', message: 'Unable to save Concurred-by.');
+        }
     }
 
     public function clearConcurred(): void
     {
-        if (! $this->syllabus) return;
+        if (! $this->syllabus) {
+            return;
+        }
+
+        app(SyllabusApprovalService::class)->clearConcurredBy($this->syllabus);
         $this->concurredBy = null;
-        $this->syllabus->update(['concurred_by' => null]);
         $this->dispatch('lw-toast', type: 'success', message: 'Concurred-by cleared.');
     }
 
-    // ── Private helpers ────────────────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════════════════
+    // PRIVATE HELPERS
+    // ══════════════════════════════════════════════════════════════════════
 
     private function loadData(bool $force = false): void
     {
-        if ($this->isLoaded && ! $force) return;
+        if ($this->isLoaded && ! $force) {
+            return;
+        }
 
         $this->syllabus = Syllabus::query()->with([
             'course.program.outcomes',
@@ -250,15 +304,20 @@ class ReviewStep extends Component
 
         $this->course               = $this->syllabus->course;
         $this->academic_calendar_id = $this->syllabus->academic_calendar_id
-            ? (int) $this->syllabus->academic_calendar_id : null;
+            ? (int) $this->syllabus->academic_calendar_id
+            : null;
 
-        $this->concurredBy = $this->syllabus->concurred_by
-            ? (int) $this->syllabus->concurred_by : null;
         $this->approvedBy  = $this->syllabus->approved_by
-            ? (int) $this->syllabus->approved_by  : null;
+            ? (int) $this->syllabus->approved_by
+            : null;
+        $this->concurredBy = $this->syllabus->concurred_by
+            ? (int) $this->syllabus->concurred_by
+            : null;
 
         $this->academicCalendars = AcademicCalendar::query()
-            ->orderBy('academic_year', 'desc')->orderBy('semester', 'desc')->get();
+            ->orderBy('academic_year', 'desc')
+            ->orderBy('semester', 'desc')
+            ->get();
 
         $this->courseOutcomes = $this->syllabus->courseOutcomes
             ->map(fn ($co) => [
@@ -271,15 +330,20 @@ class ReviewStep extends Component
 
         $examWeeks = [];
         foreach ($this->syllabusWeeks as $week) {
-            if ($week->exam_type) $examWeeks[$week->exam_type] = $week->week_no;
+            if ($week->exam_type) {
+                $examWeeks[$week->exam_type] = $week->week_no;
+            }
         }
         $this->examWeeks = $examWeeks;
 
         $this->completeVersions = CompleteSyllabus::query()
             ->whereHas('syllabus', fn ($q) =>
-                $q->where('course_id', $this->course->id)->where('prepared_by', Auth::id())
+                $q->where('course_id', $this->course->id)
+                  ->where('prepared_by', Auth::id())
             )
-            ->orderByDesc('version')->orderByDesc('created_at')->get();
+            ->orderByDesc('version')
+            ->orderByDesc('created_at')
+            ->get();
 
         $this->latestComplete = $this->completeVersions->first();
 
@@ -291,16 +355,20 @@ class ReviewStep extends Component
     {
         $this->revisions = $this->syllabus->revisions
             ->sortBy('revision_no')
-            ->map(fn (SyllabusRevision $rev) => [
-                'id'                      => $rev->id,
-                'revision_no'             => $rev->revision_no,
-                'revision_date'           => $rev->revision_date->format('Y-m-d'),
-                'implementation_semester' => $rev->implementation_semester,
-                'highlights'              => $rev->highlights ?? '',
-                'contributors'            => $rev->contributors ?? '',
-            ])->values()->all();
+            ->map(function (SyllabusRevision $rev): array {
+                $revisionDate = $rev->revision_date;
 
-        // 0-based: next = count of saved rows
-        $this->nextRevisionNo = count($this->revisions);
+                return [
+                    'id'                      => $rev->id,
+                    'revision_no'             => $rev->revision_no,
+                    'revision_date'           => $revisionDate instanceof CarbonInterface
+                        ? $revisionDate->toDateString()
+                        : (string) ($revisionDate ?? ''),
+                    'implementation_semester' => $rev->implementation_semester,
+                    'highlights'              => $rev->highlights ?? '',
+                    'contributors'            => $rev->contributors ?? '',
+                ];
+            })->values()->all();
+
     }
 }

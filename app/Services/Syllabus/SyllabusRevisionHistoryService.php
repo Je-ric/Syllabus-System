@@ -18,9 +18,19 @@ class SyllabusRevisionHistoryService
                 continue;
             }
 
+            if (! array_key_exists('revision_no', $row) || $row['revision_no'] === null || $row['revision_no'] === '') {
+                throw new \InvalidArgumentException('Revision number is required.');
+            }
+
+            $revisionNo = (int) $row['revision_no'];
+            if ($revisionNo < 0) {
+                throw new \InvalidArgumentException('Revision number must be 0 or higher.');
+            }
+
             $revisionDate = $this->normalizeDate($row['revision_date'] ?? null) ?? now()->toDateString();
 
             $payload = [
+                'revision_no'             => $revisionNo,
                 'revision_date'           => $revisionDate,
                 'implementation_semester' => $implementationSemester,
                 'highlights'              => $this->nullIfBlank($row['highlights'] ?? null),
@@ -36,20 +46,7 @@ class SyllabusRevisionHistoryService
                 continue;
             }
 
-            // revision_no is 0-based. Use null coalescing so explicit 0 is preserved.
-            // Only auto-assign when revision_no is not provided at all (null/missing).
-            $revisionNo = array_key_exists('revision_no', $row)
-                ? (int) $row['revision_no']
-                : null;
-
-            if ($revisionNo === null) {
-                // Not provided — auto-assign as max + 1
-                $revisionNo = ((int) ($syllabus->revisions()->max('revision_no') ?? -1)) + 1;
-            }
-
-            $syllabus->revisions()->create($payload + [
-                'revision_no' => $revisionNo,
-            ]);
+            $syllabus->revisions()->create($payload);
         }
     }
 
