@@ -128,7 +128,7 @@ class Syllabus extends Model
             'courseOutcomes',
             'academicCalendar',
             'preparer',
-            'chair',
+            'deanConcurred',
             'dean',
             'revisions'
         ]);
@@ -170,3 +170,4 @@ class Syllabus extends Model
     }
 
 }
+
