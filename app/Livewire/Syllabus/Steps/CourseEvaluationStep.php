@@ -2,10 +2,7 @@
 
 namespace App\Livewire\Syllabus\Steps;
 
-use App\Models\Syllabus;
-use App\Models\SyllabusEvaluationItem;
-use App\Models\SyllabusWeek;
-use App\Models\WeekContent;
+use App\Services\Syllabus\CourseEvaluationService;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -15,29 +12,51 @@ class CourseEvaluationStep extends Component
 
     public int  $syllabusId;
 
-    // True when the course has both LEC and LAB components.
+    /** True when the course has both LEC and LAB components. */
     public bool $courseHasLab = false;
 
-    // Rows shown in the evaluation table.
-    //
-    // Shape:
-    // [
-    //   'week_no'    => 1,
-    //   'is_exam'    => false,
-    //   'is_mvgo'    => true,   // ← NEW: true only for week 1 (MVGO week)
-    //   'term_label' => null,
-    //   'lec' => [
-    //     'week_content_id' => 3,
-    //     'co_code'         => null,   // always null for MVGO (no CO assigned)
-    //     'task_label'      => 'Quiz 1',
-    //   ],
-    //   'lab' => null,
-    // ]
+    /**
+     * Performance standard strings pulled from the saved CourseComponent rows.
+     * Used in the notes partial to show what the selected standard is and
+     * compare it against the running weight total.
+     * e.g. '67%' for LEC, '33%' for LAB
+     */
+    public ?string $lecPerformanceStd = null;
+    public ?string $labPerformanceStd = null;
+
+    /**
+     * Rows shown in the evaluation table.
+     *
+     * Shape (one entry per week that has at least one assessable task):
+     * [
+     *   'week_no'     => int,
+     *   'is_exam'     => bool,
+     *   'is_mvgo'     => bool,          // true only for week 1
+     *   'term_label'  => string|null,   // '1st Term' / '2nd Term' / 'Final Term'
+     *   'co_coverage' => string,        // auto-resolved CO code for exam rows (read-only)
+     *   'lec' => [
+     *     'week_content_id' => int,
+     *     'co_code'         => string|null,
+     *     'task_label'      => string,
+     *   ] | null,
+     *   'lab' => [...same...] | null,
+     * ]
+     *
+     * For exam rows, 'co_coverage' is the CO code of the last non-exam week
+     * before this exam — resolved automatically in CourseEvaluationService.
+     * It is NOT user-editable in the blade; a read-only badge is shown instead.
+     */
     public array $rows = [];
 
-    // Weight inputs keyed by week_content_id.
-    // For MVGO rows, outcome_label is always pre-filled as 'MVGO' and is
-    // not editable in the blade — the badge is shown instead.
+    /**
+     * Weight (and outcome label) inputs keyed by week_content_id.
+     * wire:model.lazy in the blade binds directly to these slots.
+     *
+     * Shape: [ week_content_id => ['weight' => '10', 'outcome_label' => 'CO1'] ]
+     *
+     * For MVGO rows, 'outcome_label' is pre-set to 'MVGO' and never editable.
+     * For exam rows, 'outcome_label' is auto-filled from co_coverage on save.
+     */
     public array $inputs = [];
 
     // ── Mount ─────────────────────────────────────────────────────────────────
@@ -84,206 +103,26 @@ class CourseEvaluationStep extends Component
         $this->dispatch('syllabus-step-saved', step: 'course_evaluation');
     }
 
-    // ── Private: load data ────────────────────────────────────────────────────
+    // ── Private helpers ───────────────────────────────────────────────────────
 
     private function loadData(): void
     {
-        $syllabus = Syllabus::with('course')->find($this->syllabusId);
-        if (! $syllabus) {
-            return;
-        }
+        $payload = app(CourseEvaluationService::class)->loadRows($this->syllabusId);
 
-        $this->courseHasLab = (bool) $syllabus->course?->has_lec_lab;
-
-        $weeks = SyllabusWeek::where('syllabus_id', $this->syllabusId)
-            ->orderBy('week_no')
-            ->get();
-
-        if ($weeks->isEmpty()) {
-            $this->rows   = [];
-            $this->inputs = [];
-            return;
-        }
-
-        $weekIds = $weeks->pluck('id')->all();
-
-        $allContents = WeekContent::whereIn('syllabus_week_id', $weekIds)
-            ->with('courseOutcome')
-            ->get();
-
-        $contentMap = [];
-        foreach ($allContents as $content) {
-            $contentMap[$content->syllabus_week_id][$content->component_type] = $content;
-        }
-
-        $evalMap = SyllabusEvaluationItem::where('syllabus_id', $this->syllabusId)
-            ->get()
-            ->keyBy('week_content_id');
-
-        $rows   = [];
-        $inputs = [];
-
-        $examTermLabels = ['1st Term', '2nd Term', 'Final Term'];
-        $examCount      = 0;
-
-        foreach ($weeks as $week) {
-            $lecContent = $contentMap[$week->id]['LEC'] ?? null;
-            $labContent = $contentMap[$week->id]['LAB'] ?? null;
-
-            $lecTask = trim($lecContent->assessment_task ?? '');
-            $labTask = trim($labContent->assessment_task ?? '');
-
-            // Skip weeks with no assessable tasks on either side
-            if ($lecTask === '' && $labTask === '') {
-                continue;
-            }
-
-            // Skip non-teaching week placeholder rows
-            if ($lecTask === 'Non-Teaching Week' || $labTask === 'Non-Teaching Week') {
-                continue;
-            }
-
-            $isExam = str_contains(strtolower($lecTask), 'exam')
-                   || str_contains(strtolower($labTask), 'exam');
-
-            $termLabel = null;
-            if ($isExam) {
-                $termLabel = $examTermLabels[min($examCount, 2)];
-                $examCount++;
-            }
-
-            // ── MVGO flag ─────────────────────────────────────────────────────
-            // Week 1 is always the MVGO (Mission-Vision-Goals-Objectives) week.
-            // It never gets a CO assigned — instead it shows a static MVGO badge
-            // in both the Weekly Coverage CO field and the Evaluation CO column.
-            // The outcome_label is always pre-filled as 'MVGO' for this week so
-            // it is saved correctly even if the faculty never visits the evaluation.
-            $isMvgo = ((int) $week->week_no === 1);
-
-            // ── LEC side ──────────────────────────────────────────────────────
-            $lecRow = null;
-            if ($lecTask !== '') {
-                $lecEval = $evalMap->get($lecContent->id);
-                $lecRow  = [
-                    'week_content_id' => $lecContent->id,
-                    'co_code'         => $lecContent->courseOutcome?->co_code,
-                    'task_label'      => $lecTask,
-                ];
-                $inputs[$lecContent->id] = [
-                    // For MVGO, outcome_label is always 'MVGO' — not user-editable
-                    'weight'        => $lecEval?->weight !== null ? (string) $lecEval->weight : '',
-                    'outcome_label' => $isMvgo ? 'MVGO' : ($lecEval?->outcome_label ?? ''),
-                ];
-            }
-
-            // ── LAB side ──────────────────────────────────────────────────────
-            $labRow = null;
-            if ($this->courseHasLab && $labTask !== '') {
-                $labEval = $evalMap->get($labContent->id);
-                $labRow  = [
-                    'week_content_id' => $labContent->id,
-                    'co_code'         => $labContent->courseOutcome?->co_code,
-                    'task_label'      => $labTask,
-                ];
-                $inputs[$labContent->id] = [
-                    'weight'        => $labEval?->weight !== null ? (string) $labEval->weight : '',
-                    'outcome_label' => $isMvgo ? 'MVGO' : ($labEval?->outcome_label ?? ''),
-                ];
-            }
-
-            // Skip row entirely if nothing visible on either side
-            if ($lecRow === null && $labRow === null) {
-                continue;
-            }
-
-            $rows[] = [
-                'week_no'    => (int) $week->week_no,
-                'is_exam'    => $isExam,
-                'is_mvgo'    => $isMvgo,
-                'term_label' => $termLabel,
-                'lec'        => $lecRow,
-                'lab'        => $labRow,
-            ];
-        }
-
-        $this->rows   = $rows;
-        $this->inputs = $inputs;
+        $this->courseHasLab      = $payload['courseHasLab'];
+        $this->lecPerformanceStd = $payload['lecPerformanceStd'];
+        $this->labPerformanceStd = $payload['labPerformanceStd'];
+        $this->rows              = $payload['rows'];
+        $this->inputs            = $payload['inputs'];
     }
-
-    // ── Private: save to DB ───────────────────────────────────────────────────
 
     private function persistEvaluation(): void
     {
-        $syllabus = Syllabus::with('course')->find($this->syllabusId);
-        if (! $syllabus) {
-            return;
-        }
-        $courseId = (int) $syllabus->course?->id;
-
-        foreach ($this->rows as $row) {
-            if (isset($row['lec']['week_content_id'])) {
-                $this->saveOneItem(
-                    weekContentId: (int) $row['lec']['week_content_id'],
-                    courseId:      $courseId,
-                    isExam:        $row['is_exam'],
-                    isMvgo:        $row['is_mvgo'],
-                    termLabel:     $row['term_label'],
-                );
-            }
-
-            if ($this->courseHasLab && isset($row['lab']['week_content_id'])) {
-                $this->saveOneItem(
-                    weekContentId: (int) $row['lab']['week_content_id'],
-                    courseId:      $courseId,
-                    isExam:        $row['is_exam'],
-                    isMvgo:        $row['is_mvgo'],
-                    termLabel:     $row['term_label'],
-                );
-            }
-        }
-    }
-
-    private function saveOneItem(
-        int $weekContentId,
-        int $courseId,
-        bool $isExam,
-        bool $isMvgo,
-        ?string $termLabel,
-    ): void {
-        $data = $this->inputs[$weekContentId] ?? [];
-
-        $weightRaw = trim((string) ($data['weight'] ?? ''));
-        $weight    = $weightRaw !== '' ? (int) $weightRaw : null;
-
-        // MVGO rows always save 'MVGO' as the outcome label — never blank, never editable
-        $outcomeLabel = $isMvgo
-            ? 'MVGO'
-            : trim((string) ($data['outcome_label'] ?? ''));
-        $outcomeLabel = $outcomeLabel !== '' ? $outcomeLabel : null;
-
-        if ($isExam) {
-            $kind     = 'exam';
-            $examType = match ($termLabel) {
-                '1st Term'   => 'first_term',
-                '2nd Term'   => 'second_term',
-                'Final Term' => 'final_term',
-                default      => null,
-            };
-        } else {
-            $kind     = 'activity';
-            $examType = null;
-        }
-
-        SyllabusEvaluationItem::updateOrCreate(
-            ['week_content_id' => $weekContentId],
-            [
-                'syllabus_id'   => $this->syllabusId,
-                'course_id'     => $courseId,
-                'outcome_label' => $outcomeLabel,
-                'kind'          => $kind,
-                'exam_type'     => $examType,
-                'weight'        => $weight,
-            ]
+        app(CourseEvaluationService::class)->persist(
+            syllabusId:   $this->syllabusId,
+            rows:         $this->rows,
+            inputs:       $this->inputs,
+            courseHasLab: $this->courseHasLab,
         );
     }
 }
