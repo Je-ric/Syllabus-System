@@ -352,6 +352,12 @@ table th {
         overflow: hidden;
     }
 
+    /* remove extra page */
+    .a4-page:last-child {
+        page-break-after: auto;
+        break-after: auto;
+    }
+
     .a4-page.portrait  { page: portrait;  }
     .a4-page.landscape { page: landscape; }
 

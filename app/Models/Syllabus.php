@@ -43,6 +43,7 @@ class Syllabus extends Model
     }
 
     // Used in:
+    // this is also a dean
     public function chair()
     {
         return $this->belongsTo(User::class, 'concurred_by');

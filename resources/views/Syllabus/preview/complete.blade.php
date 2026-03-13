@@ -634,7 +634,7 @@
                 </tbody>
             </table>
             <p style="margin-top: 4px;" class="indent-level-2"><strong>Passing Mark: 60%</strong></p>
-        
+
             <h3 class="a4-section title-numbered">12. References</h3>
 
             <div class="a4-list">
@@ -836,101 +836,101 @@
 
             <h3 class="a4-section title-lettered">F. Revision History</h3>
 
-            <table border="1" style="width:100%; border-collapse: collapse;">
-                <thead>
+            <table border="1" style="width:100%; border-collapse:collapse;">
+            <thead>
+                <tr>
+                    <th style="text-align:center; width:80px;">Revision No.</th>
+                    <th style="text-align:center; width:130px;">Date of Revision</th>
+                    <th style="text-align:center; width:160px;">Semester of Implementation</th>
+                    <th style="text-align:center;">Highlights of Revision</th>
+                    <th style="text-align:center; width:180px;">Contributors</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($syllabusRevisions as $revision)
                     <tr>
-                        <th style="text-align:center; width: 80px;">Revision No.</th>
-                        <th style="text-align:center;">Date of Revision</th>
-                        <th style="text-align:center;">Date of Implementation</th>
-                        <th style="text-align:center;">Highlights of Revision</th>
-                        <th style="text-align:center;">Author(s)</th>
+                        <td style="text-align:center;">{{ $revision->revision_no }}</td>
+                        <td style="text-align:center;">
+                            {{ $revision->revision_date
+                                ? \Carbon\Carbon::parse($revision->revision_date)->format('M d, Y')
+                                : '' }}
+                        </td>
+                        <td style="text-align:center;">{{ $revision->implementation_semester }}</td>
+                        <td>{{ $revision->highlights }}</td>
+                        <td>{{ $revision->contributors }}</td>
                     </tr>
-                </thead>
-                <tbody>
-                    @forelse (($syllabus->revisionHistories ?? []) as $revision)
-                        <tr>
-                            <td style="text-align:center;">{{ $revision->revision_number }}</td>
-                            <td style="text-align:center;">{{ $revision->date_of_revision }}</td>
-                            <td style="text-align:center;">{{ $revision->date_of_implementation }}</td>
-                            <td>{{ $revision->highlights }}</td>
-                            <td>{{ $revision->authors }}</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" style="text-align:center;">No revision history found.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                @empty
+                    <tr>
+                        <td colspan="5" style="text-align:center;">No revision history found.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
 
             <h3 class="a4-section title-lettered">G. Preparation, Review and Approval</h3>
+        <table border="1" style="width:100%; border-collapse:collapse;">
+            <thead>
+                <tr>
+                    <th style="text-align:center; width:200px;">Role</th>
+                    <th style="text-align:center;">Name of Faculty</th>
+                    <th style="text-align:center; width:160px;">Signature</th>
+                    <th style="text-align:center; width:120px;">Date Signed</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{-- Prepared by: all unique instructor names across components --}}
+                @php
+                    $preparedByNames = collect($syllabus->components ?? [])
+                        ->pluck('instructor_name')
+                        ->filter()
+                        ->unique()
+                        ->implode('<br>');
+                @endphp
+                <tr>
+                    <td><strong>Prepared by:</strong></td>
+                    <td>{!! $preparedByNames ?: ($lecComponent?->instructor_name ?? 'N/A') !!}</td>
+                    <td></td>
+                    <td></td>
+                </tr>
 
-            <table border="1" style="width:100%; border-collapse: collapse;">
-                <thead>
+                {{-- Reviewed by: each SyllabusReviewer row; name from user relationship --}}
+                @forelse ($syllabusReviewers as $reviewer)
                     <tr>
-                        <th style="text-align:center; width: 200px;">Role</th>
-                        <th style="text-align:center;">Name of Faculty</th>
-                        <th style="text-align:center; width: 160px;">Signature</th>
-                        <th style="text-align:center; width: 120px;">Date Signed</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{-- Prepared By --}}
-                    @php
-                        $preparedByNames = collect($syllabus->components ?? [])
-                            ->pluck('instructor_name')
-                            ->filter()
-                            ->unique()
-                            ->implode('<br>');
-                    @endphp
-                    <tr>
-                        <td><strong>Prepared by:</strong></td>
-                        <td>{!! $preparedByNames ?: ($lecComponent?->instructor_name ?? 'N/A') !!}</td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-
-                    {{-- Reviewed By --}}
-                    @forelse (($syllabus->reviewers ?? []) as $reviewer)
-                        <tr>
-                            <td>
-                                @if ($loop->first)
-                                    <strong>Reviewed by:</strong>
-                                @endif
-                                {{ $reviewer->role ?? '' }}
-                            </td>
-                            <td>{{ $reviewer->name }}</td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td><strong>Reviewed by:</strong></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                    @endforelse
-
-                    {{-- Approved By --}}
-                    <tr>
-                        <td><strong>Approved by:</strong></td>
-                        <td>{{ $syllabus->approver_name ?? ($syllabus->dean?->name ?? '') }}</td>
+                        <td>
+                            @if ($loop->first)<strong>Reviewed by:</strong>@endif
+                        </td>
+                        <td>{{ $reviewer->user?->name ?? $reviewer->name ?? '' }}</td>
                         <td></td>
                         <td></td>
                     </tr>
+                @empty
+                    <tr>
+                        <td><strong>Reviewed by:</strong></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                @endforelse
 
-                    {{-- Concurred By (for service courses) --}}
-                    @if (!blank($syllabus->concurred_by ?? null))
-                        <tr>
-                            <td><strong>Concurred by:</strong><br><em>(Service Courses)</em></td>
-                            <td>{{ $syllabus->concurred_by }}</td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                    @endif
-                </tbody>
-            </table>
+                {{-- Approved by: resolved via approvedByUser relationship --}}
+                <tr>
+                    <td><strong>Approved by:</strong></td>
+                    <td>{{ $approvedByUser?->name ?? '' }}</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+
+                {{-- Concurred by: only shown when set (service courses) --}}
+                @if ($concurredByUser)
+                    <tr>
+                        <td><strong>Concurred by:</strong><br><em>(Service Courses)</em></td>
+                        <td>{{ $concurredByUser->name }}</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                @endif
+            </tbody>
+        </table>
         </div>
 
     </div>

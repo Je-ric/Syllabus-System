@@ -98,6 +98,10 @@ class SyllabusPreviewService
             'onlineMaterials',
             'weeks.contents.courseOutcome',
             'weeks.contents.evaluation',
+            'revisions',
+            'reviewers.user',
+            'dean',
+            'chair',
         ]);
     }
 
@@ -151,6 +155,19 @@ class SyllabusPreviewService
             default => 'N/A',
         };
 
+        // Revision history — uses the service field names:
+        // revision_no, revision_date, implementation_semester, highlights, contributors
+        $syllabusRevisions = $syllabus->revisions
+            ?->sortBy('revision_no')
+            ?? collect();
+
+        // Reviewers — each SyllabusReviewer has a user() relationship
+        $syllabusReviewers = $syllabus->reviewers ?? collect();
+
+        // approved_by → dean() relationship; concurred_by → chair() relationship.
+        $approvedByUser  = $syllabus->dean  ?? null;
+        $concurredByUser = $syllabus->chair ?? null;
+
         $weeks = $syllabus->weeks?->sortBy('week_no') ?? collect();
 
         return [
@@ -169,6 +186,10 @@ class SyllabusPreviewService
                 'labComponent',
                 'coursePoIedMap',
                 'courseLevel',
+                'syllabusRevisions',
+                'syllabusReviewers',
+                'approvedByUser',
+                'concurredByUser',
             ),
         ];
     }
