@@ -98,9 +98,9 @@
                                 <option value="67%">67%</option>
                             @endif
                             <option value="50%">50%</option>
-                            <option value="50%">55%</option>
+                            <option value="55%">55%</option>
                             <option value="60%">60%</option>
-                            <option value="60%">65%</option>
+                            <option value="65%">65%</option>
                             <option value="70%">70%</option>
                             <option value="75%">75%</option>
                             <option value="80%">80%</option>
@@ -169,7 +169,7 @@
                                 <i class="bx bx-time"></i>
                                 Class Hours
                             </x-form.label>
-                            <x-form.select wire:model.defer="lec_class_hours" required>
+                            <x-form.select wire:model.defer="lab_class_hours" required>
                                 <option value="1 hr">1 hr</option>
                                 <option value="1 hr and 30 min">1 hr and 30 min</option>
                                 <option value="2 hr">2 hr</option>
@@ -201,8 +201,11 @@
                                 <i class="bx bx-bar-chart-alt-2"></i>
                                 Performance Standard
                             </x-form.label>
+                            {{-- Naka enum sa csms, update decimal sa 2 --}}
                             <x-form.select wire:model.defer="lab_performance_standard" required>
-                                <option value="50%">33%</option>
+                                <option value="33%">33%</option>
+                                <option value="50%">50%</option>
+                                <option value="60%">60%</option>
                             </x-form.select>
                         </div>
                     </div>
