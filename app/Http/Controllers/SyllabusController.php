@@ -22,7 +22,7 @@ class SyllabusController extends Controller
     public function index()
     {
         $syllabi = Syllabus::where('prepared_by', Auth::id())
-            ->with(['course.program', 'academicCalendar', 'chair', 'dean'])
+            ->with(['course.program', 'academicCalendar', 'deanConcurred', 'dean'])
             ->orderBy('created_at', 'desc')
             ->get();
 

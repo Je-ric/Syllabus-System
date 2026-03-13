@@ -5,7 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     @if (!empty($isSnapshot) && !empty($inlinePreviewCss))
-        <style>{!! $inlinePreviewCss !!}</style>
+        <style>
+            {!! $inlinePreviewCss !!}
+        </style>
     @else
         @vite(['resources/css/preview.css', 'resources/js/app.js'])
     @endif
@@ -18,7 +20,7 @@
     <title>Course Syllabus - {{ $syllabus->course->course_code }}</title>
 
     @php
-        $hasLab = (bool) ($syllabus->course?->has_lec_lab);
+        $hasLab = (bool) $syllabus->course?->has_lec_lab;
 
         $lecLabValue = function ($lecValue, $labValue) use ($hasLab) {
             if (!$hasLab) {
@@ -54,16 +56,14 @@
 
         <div style="display:grid; grid-template-columns: 80px 1fr 80px; align-items:center; column-gap: 12px;">
             <div style="display:flex; justify-content:flex-start;">
-                <img
-                    src="{{ (!empty($isSnapshot) && !empty($inlineLogoDataUri)) ? $inlineLogoDataUri : asset('assets/clsu-logo-green.png') }}"
-                    alt="CLSU Logo"
-                    style="width:100px; height:auto;" />
+                <img src="{{ !empty($isSnapshot) && !empty($inlineLogoDataUri) ? $inlineLogoDataUri : asset('assets/clsu-logo-green.png') }}"
+                    alt="CLSU Logo" style="width:100px; height:auto;" />
             </div>
             <div style="text-align:center;">
                 <div class="a4-subtitle">Republic of the Philippines</div>
-                    <div class="a4-title">CENTRAL LUZON STATE UNIVERSITY</div>
-                    <div class="a4-subtitle">Science City of Muñoz, Nueva Ecija</div>
-                    <div class="a4-subtitle">Office of the Vice President for Academic Affairs</div>
+                <div class="a4-title">CENTRAL LUZON STATE UNIVERSITY</div>
+                <div class="a4-subtitle">Science City of Muñoz, Nueva Ecija</div>
+                <div class="a4-subtitle">Office of the Vice President for Academic Affairs</div>
             </div>
             <div aria-hidden="true"></div>
         </div>
@@ -131,12 +131,14 @@
                         generate knowledge and technologies for inclusive societal development.</div>
                 </div>
                 <div class="indent-level-1-5">
-                    <div>c.&nbsp; We are dedicated to uphold CLSU's core values and principles, comply with statutory and
+                    <div>c.&nbsp; We are dedicated to uphold CLSU's core values and principles, comply with statutory
+                        and
                         regulatory standards and continuously improve the effectiveness of our quality management
                         systems.</div>
                 </div>
                 <div class="indent-level-1-5">
-                    <div>d.&nbsp; Mahalaga ang inyong tinig upang higit na mapahusay ang kalidad ng aming paglilingkod.</div>
+                    <div>d.&nbsp; Mahalaga ang inyong tinig upang higit na mapahusay ang kalidad ng aming paglilingkod.
+                    </div>
                 </div>
             </div>
         </div>
@@ -461,7 +463,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                    @forelse (($weeklyCoverageRows['LAB'] ?? []) as $row)
+                        @forelse (($weeklyCoverageRows['LAB'] ?? []) as $row)
                             <tr>
                                 @if (($row['is_exam'] ?? false) === true)
                                     <td style="text-align:center;">{{ $row['week_label'] }}</td>
@@ -548,7 +550,8 @@
                         <td style="text-align:center; font-weight:bold;">{{ $evaluationTotals['lec'] ?? '' }}%</td>
                         @if ($syllabus->course->has_lec_lab)
                             <td></td>
-                            <td style="text-align:center; font-weight:bold;">{{ $evaluationTotals['lab'] ?? '' }}%</td>
+                            <td style="text-align:center; font-weight:bold;">{{ $evaluationTotals['lab'] ?? '' }}%
+                            </td>
                         @endif
                         <td style="text-align:center; font-weight:bold;">60%</td>
                     </tr>
@@ -559,7 +562,8 @@
             <p style="margin-top: 2px;">60%</p>
 
             {{-- b. Computation of Final Course Average Score (FCAS) --}}
-            <p style="margin-top: 14px;" class="indent-level-1"><strong>b. Computation of Final Course Average Score (FCAS)</strong></p>
+            <p style="margin-top: 14px;" class="indent-level-1"><strong>b. Computation of Final Course Average Score
+                    (FCAS)</strong></p>
             @if ($syllabus->course->has_lec_lab)
                 <p class="indent-level-2">
                     <strong>FCAS = (0.67) × LecAve + (0.33) × LabAve + APP</strong>
@@ -569,7 +573,8 @@
                     <div class="indent-level-2">FCAS &nbsp;= Final Course Average Score</div>
                     <div class="indent-level-2">LecAve = Lecture Average Score</div>
                     <div class="indent-level-2">LabAve = Laboratory Average Score</div>
-                    <div class="indent-level-2">APP &nbsp;&nbsp;&nbsp;= Additional point incentive for student athletes, performers and student delegates/representatives [CLSU BOR Resolution No. 32-09]</div>
+                    <div class="indent-level-2">APP &nbsp;&nbsp;&nbsp;= Additional point incentive for student
+                        athletes, performers and student delegates/representatives [CLSU BOR Resolution No. 32-09]</div>
                 </div>
             @else
                 <p class="indent-level-2">
@@ -579,7 +584,8 @@
                 <div class="a4-list">
                     <div class="indent-level-2">FCAS &nbsp;= Final Course Average Score</div>
                     <div class="indent-level-2">LecAve = Lecture Average Score</div>
-                    <div class="indent-level-2">APP &nbsp;&nbsp;&nbsp;= Additional point incentive for student athletes, performers and student delegates/representatives [CLSU BOR Resolution No. 32-09]</div>
+                    <div class="indent-level-2">APP &nbsp;&nbsp;&nbsp;= Additional point incentive for student
+                        athletes, performers and student delegates/representatives [CLSU BOR Resolution No. 32-09]</div>
                 </div>
             @endif
 
@@ -644,23 +650,24 @@
                     <div class="indent-level-1-5">No references encoded.</div>
                 @endforelse
 
-                    <div class="indent-level-1-5"  style="margin-top:8px; font-weight: bold;">
-                        <strong>Online materials:</strong>
+                <div class="indent-level-1-5" style="margin-top:8px; font-weight: bold;">
+                    <strong>Online materials:</strong>
+                </div>
+
+                @forelse (($onlineMaterialLinks ?? []) as $url)
+                    @php
+                        $link = Str::startsWith($url, ['http://', 'https://']) ? $url : 'https://' . $url;
+                    @endphp
+
+                    <div class="indent-level-1-5">
+                        <a href="{{ $link }}" target="_blank"
+                            style="text-decoration: underline; font-weight: bold;">
+                            {{ $url }}
+                        </a>
                     </div>
-
-                    @forelse (($onlineMaterialLinks ?? []) as $url)
-                        @php
-                            $link = Str::startsWith($url, ['http://', 'https://']) ? $url : 'https://' . $url;
-                        @endphp
-
-                        <div class="indent-level-1-5">
-                            <a href="{{ $link }}" target="_blank" style="text-decoration: underline; font-weight: bold;">
-                                {{ $url }}
-                            </a>
-                        </div>
-                    @empty
-                        <div class="indent-level-1-5">No online materials encoded.</div>
-                    @endforelse
+                @empty
+                    <div class="indent-level-1-5">No online materials encoded.</div>
+                @endforelse
             </div>
 
             <h3 class="a4-section title-numbered">13. Course Materials Made Available</h3>
@@ -677,10 +684,14 @@
 
             <h3 class="a4-section title-numbered">14. Contribution of Course to Meeting the Professional Component</h3>
             <div class="a4-list">
-                <div class="indent-level-1-5">a. General Education: {{ $syllabus->contribution_general_ed ?? '0' }} %</div>
-                <div class="indent-level-1-5">b. Professional Education: {{ $syllabus->contribution_professional_ed ?? '100' }} %</div>
-                <div class="indent-level-1-5">c. ITE Professional Courses: {{ $syllabus->contribution_ite_professional ?? '0' }} %</div>
-                <div class="indent-level-1-5">d. ITE Electives: {{ $syllabus->contribution_ite_electives ?? '0' }} %</div>
+                <div class="indent-level-1-5">a. General Education: {{ $syllabus->contribution_general_ed ?? '0' }} %
+                </div>
+                <div class="indent-level-1-5">b. Professional Education:
+                    {{ $syllabus->contribution_professional_ed ?? '100' }} %</div>
+                <div class="indent-level-1-5">c. ITE Professional Courses:
+                    {{ $syllabus->contribution_ite_professional ?? '0' }} %</div>
+                <div class="indent-level-1-5">d. ITE Electives: {{ $syllabus->contribution_ite_electives ?? '0' }} %
+                </div>
             </div>
 
             <h3 class="a4-section title-lettered">E. Others</h3>
@@ -696,7 +707,8 @@
             {{-- 2. Course Policies --}}
             <div class="a4-section">
                 <strong class="indent-level-1 title-numbered">2. Course Policies</strong>
-                <p class="indent-level-2">The policies to be implemented in this course are based on the approved academic
+                <p class="indent-level-2">The policies to be implemented in this course are based on the approved
+                    academic
                     policies indicated in the University Code or Student Handbook.</p>
             </div>
 
@@ -837,100 +849,152 @@
             <h3 class="a4-section title-lettered">F. Revision History</h3>
 
             <table border="1" style="width:100%; border-collapse:collapse;">
-            <thead>
-                <tr>
-                    <th style="text-align:center; width:80px;">Revision No.</th>
-                    <th style="text-align:center; width:130px;">Date of Revision</th>
-                    <th style="text-align:center; width:160px;">Semester of Implementation</th>
-                    <th style="text-align:center;">Highlights of Revision</th>
-                    <th style="text-align:center; width:180px;">Contributors</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($syllabusRevisions as $revision)
+                <thead>
                     <tr>
-                        <td style="text-align:center;">{{ $revision->revision_no }}</td>
-                        <td style="text-align:center;">
-                            {{ $revision->revision_date
-                                ? \Carbon\Carbon::parse($revision->revision_date)->format('M d, Y')
-                                : '' }}
-                        </td>
-                        <td style="text-align:center;">{{ $revision->implementation_semester }}</td>
-                        <td>{{ $revision->highlights }}</td>
-                        <td>{{ $revision->contributors }}</td>
+                        <th style="text-align:center; width:80px;">Revision No.</th>
+                        <th style="text-align:center; width:130px;">Date of Revision</th>
+                        <th style="text-align:center; width:160px;">Semester of Implementation</th>
+                        <th style="text-align:center;">Highlights of Revision</th>
+                        <th style="text-align:center; width:180px;">Contributors</th>
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="5" style="text-align:center;">No revision history found.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @forelse ($syllabusRevisions as $revision)
+                        <tr>
+                            <td style="text-align:center;">{{ $revision->revision_no }}</td>
+                            <td style="text-align:center;">
+                                {{ $revision->revision_date ? \Carbon\Carbon::parse($revision->revision_date)->format('M d, Y') : '' }}
+                            </td>
+                            <td style="text-align:center;">{{ $revision->implementation_semester }}</td>
+                            <td>{{ $revision->highlights }}</td>
+                            <td>{{ $revision->contributors }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" style="text-align:center;">No revision history found.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
 
             <h3 class="a4-section title-lettered">G. Preparation, Review and Approval</h3>
-        <table border="1" style="width:100%; border-collapse:collapse;">
-            <thead>
-                <tr>
-                    <th style="text-align:center; width:200px;">Role</th>
-                    <th style="text-align:center;">Name of Faculty</th>
-                    <th style="text-align:center; width:160px;">Signature</th>
-                    <th style="text-align:center; width:120px;">Date Signed</th>
-                </tr>
-            </thead>
-            <tbody>
-                {{-- Prepared by: all unique instructor names across components --}}
-                @php
-                    $preparedByNames = collect($syllabus->components ?? [])
-                        ->pluck('instructor_name')
-                        ->filter()
-                        ->unique()
-                        ->implode('<br>');
-                @endphp
-                <tr>
-                    <td><strong>Prepared by:</strong></td>
-                    <td>{!! $preparedByNames ?: ($lecComponent?->instructor_name ?? 'N/A') !!}</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-
-                {{-- Reviewed by: each SyllabusReviewer row; name from user relationship --}}
-                @forelse ($syllabusReviewers as $reviewer)
+            <table border="1" style="width:100%; border-collapse:collapse;">
+                <thead>
                     <tr>
+                        <th style="text-align:center; width:200px;">Role</th>
+                        <th style="text-align:center;">Name of Faculty</th>
+                        <th style="text-align:center; width:160px;">Signature</th>
+                        <th style="text-align:center; width:120px;">Date Signed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{-- ── Prepared by ──────────────────────────────────────────────── --}}
+                    @php
+                        $preparedByNames = collect($syllabus->components ?? [])
+                            ->pluck('instructor_name')
+                            ->filter()
+                            ->unique()
+                            ->values();
+                        $preparedCount = max($preparedByNames->count(), 1);
+                    @endphp
+
+                    @if ($preparedByNames->isNotEmpty())
+                        @foreach ($preparedByNames as $preparedName)
+                            <tr>
+                                @if ($loop->first)
+                                    <td rowspan="{{ $preparedCount }}" style="vertical-align:top;">
+                                        <strong>Prepared by:</strong>
+                                    </td>
+                                @endif
+                                <td>{{ $preparedName }}</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        @endforeach
+                    @else
+                        <tr>
+                            <td><strong>Prepared by:</strong></td>
+                            <td>{{ $lecComponent?->instructor_name ?? 'N/A' }}</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    @endif
+
+                    {{-- ── Reviewed by ──────────────────────────────────────────────── --}}
+                    {{--
+                    "Reviewed by:" label in ONE merged cell (rowspan = reviewer count).
+                    Every reviewer row shows their name + "Member" role.
+                    If no reviewers, show an empty placeholder row.
+                --}}
+                    @php $reviewerCount = count($syllabusReviewers); @endphp
+
+                    @if ($reviewerCount > 0)
+                        @foreach ($syllabusReviewers as $rIdx => $reviewer)
+                            <tr>
+                                @if ($rIdx === 0)
+                                    <td rowspan="{{ $reviewerCount }}" style="vertical-align:top;">
+                                        <strong>Reviewed by:</strong>
+                                    </td>
+                                @endif
+                                <td>
+                                    {{ $reviewer->user?->name ?? ($reviewer->name ?? '') }}
+                                    <br>
+                                    <span style="font-size:9pt; color:#444;">Member</span>
+                                </td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        @endforeach
+                    @else
+                        <tr>
+                            <td><strong>Reviewed by:</strong></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    @endif
+
+                    {{-- ── Approved by (Dean) ───────────────────────────────────────── --}}
+                    <tr>
+                        <td><strong>Approved by:</strong></td>
                         <td>
-                            @if ($loop->first)<strong>Reviewed by:</strong>@endif
+                            {{ $approvedByUser?->name ?? '' }}
+                            @if ($approvedByUser)
+                                <br>
+                                <span style="font-size:9pt; color:#444;">
+                                    Dean, {{ $collegeName ?? 'College' }}
+                                </span>
+                            @endif
                         </td>
-                        <td>{{ $reviewer->user?->name ?? $reviewer->name ?? '' }}</td>
                         <td></td>
                         <td></td>
                     </tr>
-                @empty
-                    <tr>
-                        <td><strong>Reviewed by:</strong></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                @endforelse
 
-                {{-- Approved by: resolved via approvedByUser relationship --}}
-                <tr>
-                    <td><strong>Approved by:</strong></td>
-                    <td>{{ $approvedByUser?->name ?? '' }}</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-
-                {{-- Concurred by: only shown when set (service courses) --}}
-                @if ($concurredByUser)
-                    <tr>
-                        <td><strong>Concurred by:</strong><br><em>(Service Courses)</em></td>
-                        <td>{{ $concurredByUser->name }}</td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                @endif
-            </tbody>
-        </table>
+                    {{-- ── Concurred by (Service Courses only) ─────────────────────── --}}
+                    
+                        <tr>
+                            <td colspan="4"
+                                style="font-style:italic; font-size:9pt; color:#555;
+                                               padding:4px 6px; background:#f8f8f8;">
+                                Additional Signatories for Service Courses:
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Concurred by:</strong></td>
+                            <td>
+                                {{ $concurredByUser->name ?? '' }}
+                                @if ($concurredByUser)
+                                <br>
+                                <span style="font-size:9pt; color:#444;">
+                                    Chairperson, {{ $departmentName ?? 'Department' }}
+                                </span>
+                                @endif
+                            </td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                </tbody>
+            </table>
         </div>
 
     </div>
@@ -938,8 +1002,8 @@
     <div id="a4-container"></div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const source    = document.getElementById("syllabus-content");
+        document.addEventListener("DOMContentLoaded", function() {
+            const source = document.getElementById("syllabus-content");
             const container = document.getElementById("a4-container");
             const pageCount = document.getElementById("page-count");
 
@@ -947,8 +1011,8 @@
             // Portrait:  794 - 72 - 72 = 650 px tall content area
             // Landscape: 794 - 56 - 56 = 682 px tall content area
             const CONTENT_HEIGHT = {
-                portrait:  978,   // 1122 - 72top - 72bottom
-                landscape: 682,   //  794 - 56top - 56bottom
+                portrait: 978, // 1122 - 72top - 72bottom
+                landscape: 682, //  794 - 56top - 56bottom
             };
 
             let currentOrientation = "portrait";
@@ -958,12 +1022,12 @@
             // ── Process each top-level child of #syllabus-content ──────────────────
             Array.from(source.children).forEach(element => {
                 const wantsLandscape = element.classList.contains("landscape");
-                const wantsPortrait  = element.classList.contains("portrait");
+                const wantsPortrait = element.classList.contains("portrait");
 
                 let targetOrientation;
-                if (wantsLandscape)     targetOrientation = "landscape";
+                if (wantsLandscape) targetOrientation = "landscape";
                 else if (wantsPortrait) targetOrientation = "portrait";
-                else                    targetOrientation = currentOrientation;
+                else targetOrientation = currentOrientation;
 
                 // FIX 1: Orientation-tagged elements ALWAYS start a new page.
                 if (wantsLandscape || wantsPortrait) {
@@ -1032,8 +1096,8 @@
 
             function canSplit(el) {
                 return (
-                    el.nodeType === Node.ELEMENT_NODE &&
-                    ["DIV", "UL", "OL", "LI", "SECTION"].includes(el.tagName) &&
+                    el.nodeType === Node.ELEMENT_NODE && ["DIV", "UL", "OL", "LI", "SECTION"].includes(el
+                        .tagName) &&
                     el.childNodes.length > 0
                 );
             }
@@ -1096,7 +1160,8 @@
                             // Recurse into child if splittable, otherwise place whole
                             if (child.nodeType === Node.ELEMENT_NODE && canSplit(child)) {
                                 if (!child.hasAttribute("data-split-id")) {
-                                    child.setAttribute("data-split-id", Math.random().toString(36).substr(2, 9));
+                                    child.setAttribute("data-split-id", Math.random().toString(36).substr(2,
+                                        9));
                                 }
                                 appendNodes(Array.from(child.childNodes), [...parentPath, child]);
                             } else {
@@ -1119,16 +1184,16 @@
             // Tables continue across pages WITHOUT repeating the header (cleaner for long tables).
             function splitTable(table, getAppendTarget) {
                 const thead = table.querySelector("thead");
-                const rows  = Array.from(table.querySelectorAll("tbody tr"));
+                const rows = Array.from(table.querySelectorAll("tbody tr"));
 
                 if (!rows.length) {
                     appendElement(table);
                     return;
                 }
 
-                const getTarget = (typeof getAppendTarget === "function")
-                    ? getAppendTarget
-                    : () => page;
+                const getTarget = (typeof getAppendTarget === "function") ?
+                    getAppendTarget :
+                    () => page;
 
                 let target = getTarget();
                 const targetWasEmpty = !(target && target.children && target.children.length > 0);
@@ -1176,11 +1241,11 @@
                 const table = document.createElement("table");
 
                 // Copy class names and inline styles so weekly-coverage-table etc. carry over
-                table.className  = original.className;
+                table.className = original.className;
                 table.style.cssText = original.style.cssText;
                 // FIX 2: Landscape tables must not exceed the content width.
                 // The CSS already constrains this via padding, but set width explicitly.
-                table.style.width          = "100%";
+                table.style.width = "100%";
                 table.style.borderCollapse = "collapse";
                 table.setAttribute("border", original.getAttribute("border") || "");
 
@@ -1194,8 +1259,8 @@
             }
 
             function createNewPage(orientation = "portrait") {
-                const div       = document.createElement("div");
-                div.className   = "a4-page " + orientation;
+                const div = document.createElement("div");
+                div.className = "a4-page " + orientation;
                 return div;
             }
 

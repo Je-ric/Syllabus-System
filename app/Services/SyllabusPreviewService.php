@@ -101,7 +101,7 @@ class SyllabusPreviewService
             'revisions',
             'reviewers.user',
             'dean',
-            'chair',
+            'deanConcurred',
         ]);
     }
 
@@ -166,7 +166,7 @@ class SyllabusPreviewService
 
         // approved_by → dean() relationship; concurred_by → chair() relationship.
         $approvedByUser  = $syllabus->dean  ?? null;
-        $concurredByUser = $syllabus->chair ?? null;
+        $concurredByUser = $syllabus->deanConcurred ?? null;
 
         $weeks = $syllabus->weeks?->sortBy('week_no') ?? collect();
 
