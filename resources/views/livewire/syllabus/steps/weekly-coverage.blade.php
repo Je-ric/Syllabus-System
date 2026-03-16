@@ -13,7 +13,7 @@
             <x-button variant="sm-success"
                 wire:click="generateWeeklyCoverage"
                 :disabled="! $academic_calendar_id"
-                wire:target="generateWeeklyCoverage"
+                wireTarget="generateWeeklyCoverage"
                 loading="Generating…">
                 <i class="bx bx-calendar-plus"></i> Generate Weeks
             </x-button>

@@ -1,8 +1,9 @@
 @props([
-    'href'    => null,
-    'type'    => 'button',
-    'variant' => 'primary',
-    'loading' => null,
+    'href'       => null,
+    'type'       => 'button',
+    'variant'    => 'primary',
+    'loading'    => null,
+    'wireTarget' => null,
 ])
 
 @php
@@ -87,19 +88,17 @@
     ];
 
     $class = $styles[strval($variant)] ?? $styles['primary'];
-    $wireTarget = $loading ? ($attributes->get('wire:target') ?? '') : '';
 @endphp
 
 @if ($href)
     <a href="{{ $href }}" {{ $attributes->merge(['class' => $class]) }}>{{ $slot }}</a>
 @elseif ($loading)
     <button type="{{ $type }}"
-        wire:loading.attr="disabled"
         {{ $attributes->merge(['class' => $class]) }}>
 
         @if ($wireTarget)
             <span wire:loading.remove wire:target="{{ $wireTarget }}" class="inline-flex items-center gap-1.5">{{ $slot }}</span>
-            <span wire:loading wire:target="{{ $wireTarget }}" class="inline-flex items-center gap-1.5">
+            <span wire:loading wire:target="{{ $wireTarget }}" wire:loading.attr="disabled" class="inline-flex items-center gap-1.5">
                 <svg class="animate-spin h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                     <path class="opacity-75" fill="currentColor"
@@ -109,7 +108,7 @@
             </span>
         @else
             <span wire:loading.remove class="inline-flex items-center gap-1.5">{{ $slot }}</span>
-            <span wire:loading class="inline-flex items-center gap-1.5">
+            <span wire:loading wire:loading.attr="disabled" class="inline-flex items-center gap-1.5">
                 <svg class="animate-spin h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                     <path class="opacity-75" fill="currentColor"

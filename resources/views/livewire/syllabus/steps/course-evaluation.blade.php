@@ -12,7 +12,7 @@
     @if (count($rows) > 0)
         <x-button variant="sm-success"
             wire:click="save"
-            wire:target="save"
+            wireTarget="save"
             loading="Saving…">
             <i class="bx bx-save"></i> Save Evaluation
         </x-button>

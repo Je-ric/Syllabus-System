@@ -26,7 +26,7 @@
             <div class="flex items-center gap-2 flex-wrap">
                 @if (!$weeksGenerated)
                     <x-button variant="sm-success" wire:click="generateWeeklyCoverage" :disabled="!$academic_calendar_id"
-                        wire:target="generateWeeklyCoverage" loading="Generating…">
+                        wireTarget="generateWeeklyCoverage" loading="Generating…">
                         <i class="bx bx-calendar-plus"></i> Generate Weeks
                     </x-button>
 
@@ -37,13 +37,13 @@
                         </x-feedback-status.alert>
                     @endif
                 @else
-                    <x-button variant="sm-warning" wire:click="regenerateWeeks" wire:target="regenerateWeeks"
+                    <x-button variant="sm-warning" wire:click="regenerateWeeks" wireTarget="regenerateWeeks"
                         wire:confirm="This will delete all existing weeks and recreate them. All content will be lost. Continue?"
                         loading="Regenerating…">
                         <i class="bx bx-refresh"></i> Regenerate Weeks
                     </x-button>
 
-                    <x-button variant="sm-success" wire:click="saveAllWeeklyEntries" wire:target="saveAllWeeklyEntries"
+                    <x-button variant="sm-success" wire:click="saveAllWeeklyEntries" wireTarget="saveAllWeeklyEntries"
                         loading="Saving…">
                         <i class="bx bx-save"></i> Save All
                     </x-button>
@@ -133,7 +133,7 @@
                                 @endif
                             </div>
                         </div>
-    
+
                         {{-- Coverage stats (only once weeks are generated) --}}
                         @if ($weeksGenerated)
                             @php $lockedCount = count($lockedWeeks); @endphp

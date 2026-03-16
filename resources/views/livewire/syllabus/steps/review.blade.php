@@ -33,7 +33,7 @@
             type="button"
             variant="add-button"
             wire:click="$dispatch('wizard-save-as-done')"
-            wire:target="wizard-save-as-done"
+            wireTarget="wizard-save-as-done"
             loading="Freezing version…">
             <i class="bx bx-save text-base"></i> Save as Done
         </x-button>

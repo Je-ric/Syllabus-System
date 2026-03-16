@@ -10,7 +10,6 @@
         </x-form.label>
         <x-form.select
             wire:model="academic_calendar_id"
-            wire:change="updatedAcademicCalendarId"
             class="@error('academic_calendar_id') border-red-400 focus:border-red-400 focus:ring-red-200 @enderror"
             required>
             <option value="">&mdash; Choose Academic Calendar &mdash;</option>

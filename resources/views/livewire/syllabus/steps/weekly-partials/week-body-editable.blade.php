@@ -215,8 +215,7 @@
     <div class="flex items-center gap-2">
         <x-button variant="sm-cancel"
             wire:click="resetWeek({{ $week->week_no }})"
-            wire:loading.attr="disabled"
-            wire:target="resetWeek({{ $week->week_no }})"
+            wireTarget="resetWeek({{ $week->week_no }})"
             wire:confirm="Reset Week {{ $week->week_no }}? This will clear all content for this week. Cannot be undone."
             loading="Resetting…">
             <i class="bx bx-reset"></i> Reset
@@ -224,8 +223,7 @@
 
         <x-button variant="sm-success"
             wire:click="saveWeek({{ $week->week_no }})"
-            wire:loading.attr="disabled"
-            wire:target="saveWeek({{ $week->week_no }})"
+            wireTarget="saveWeek({{ $week->week_no }})"
             loading="Saving…">
             <i class="bx bx-save"></i> Save Week {{ $week->week_no }}
         </x-button>
