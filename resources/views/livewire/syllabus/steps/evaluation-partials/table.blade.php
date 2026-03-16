@@ -85,7 +85,7 @@
                             $rowBg = $isExam
                                 ? 'bg-amber-50/70 border-t-2 border-amber-200'
                                 : ($isMvgo
-                                    ? 'bg-violet-50/40 border-t border-violet-100'
+                                    ? 'bg-emerald-50/40 border-t border-emerald-100'
                                     : ($rowIndex % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'));
 
                             $lecId        = $row['lec']['week_content_id'] ?? null;
@@ -97,7 +97,7 @@
                             $labTaskLabel = $row['lab']['task_label']      ?? '';
 
                             // CO to display in the CO column:
-                            //   MVGO     → violet MVGO badge
+                            //   MVGO     → emerald MVGO badge
                             //   Exam     → auto-resolved co_coverage badge (amber)
                             //   Regular  → the CO code from the week content (slate badge)
                             //              or a freetext input if no CO is mapped yet
@@ -112,7 +112,7 @@
 
                                 @if ($isMvgo)
                                     {{-- Week 1 — always MVGO, never user-editable --}}
-                                    <x-feedback-status.status-indicator variant="violet" icon="bx bx-star" size="sm">
+                                    <x-feedback-status.status-indicator variant="emerald" icon="bx bx-star" size="sm">
                                         MVGO
                                     </x-feedback-status.status-indicator>
 
@@ -156,13 +156,13 @@
                             @if ($lecId)
                                 <td class="px-4 py-3 align-middle
                                            {{ $isExam  ? 'font-semibold text-amber-800'
-                                            : ($isMvgo ? 'text-violet-800'
+                                            : ($isMvgo ? 'text-emerald-800'
                                             : 'text-slate-700') }}">
                                     <div class="flex items-center gap-2">
                                         @if ($isExam)
                                             <i class="bx bx-clipboard text-amber-500 shrink-0 text-base"></i>
                                         @elseif ($isMvgo)
-                                            <i class="bx bx-star text-violet-400 shrink-0 text-base"></i>
+                                            <i class="bx bx-star text-emerald-400 shrink-0 text-base"></i>
                                         @endif
                                         {{ $lecTaskLabel }}
                                     </div>
@@ -197,13 +197,13 @@
                                 @if ($labId)
                                     <td class="px-4 py-3 align-middle
                                                {{ $isExam  ? 'font-semibold text-blue-800'
-                                                : ($isMvgo ? 'text-violet-700'
+                                                : ($isMvgo ? 'text-emerald-700'
                                                 : 'text-slate-700') }}">
                                         <div class="flex items-center gap-2">
                                             @if ($isExam)
                                                 <i class="bx bx-clipboard text-blue-400 shrink-0 text-base"></i>
                                             @elseif ($isMvgo)
-                                                <i class="bx bx-star text-violet-400 shrink-0 text-base"></i>
+                                                <i class="bx bx-star text-emerald-400 shrink-0 text-base"></i>
                                             @endif
                                             {{ $labTaskLabel }}
                                         </div>

@@ -51,11 +51,11 @@
             @endif
         }
     }"
-    class="{{ $class }}">
+    class="rounded-2xl border border-slate-200/80 bg-white/90 shadow-sm overflow-hidden {{ $class }}">
 
     {{-- ── Tab bar ─────────────────────────────────────────────────────── --}}
-    <div class="border-b border-slate-200 bg-white">
-        <nav class="flex flex-wrap px-4 gap-x-1" aria-label="Tabs" role="tablist">
+    <div class="border-b border-slate-200 bg-slate-50/70 px-4 py-2">
+        <nav class="flex flex-wrap gap-2" aria-label="Tabs" role="tablist">
             @foreach ($tabs as $tab)
                 <button
                     type="button"
@@ -63,11 +63,11 @@
                     :aria-selected="activeTab === '{{ $tab['id'] }}'"
                     @click="setTab('{{ $tab['id'] }}')"
                     :class="activeTab === '{{ $tab['id'] }}'
-                        ? 'border-b-2 border-emerald-600 text-emerald-700 font-semibold'
-                        : 'border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'"
+                        ? 'bg-white text-emerald-700 ring-1 ring-emerald-200 shadow-sm font-semibold'
+                        : 'text-slate-600 hover:text-slate-800 hover:bg-white/80 ring-1 ring-transparent'"
                     class="inline-flex items-center gap-2 whitespace-nowrap
-                           -mb-px py-3 px-3 text-sm
-                           transition-colors duration-150
+                           rounded-xl px-3.5 py-2.5 text-sm
+                           transition duration-150
                            focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-1">
                     @if (isset($tab['icon']))
                         <i class="bx {{ $tab['icon'] }} text-base leading-none"></i>
@@ -79,7 +79,7 @@
     </div>
 
     {{-- ── Tab panels ──────────────────────────────────────────────────── --}}
-    <div class="py-5">
+    <div class="p-5">
         @foreach ($tabIds as $tabId)
             <div
                 x-show="activeTab === '{{ $tabId }}'"
