@@ -708,8 +708,7 @@
             <div class="a4-section">
                 <strong class="indent-level-1 title-numbered">2. Course Policies</strong>
                 <p class="indent-level-2">The policies to be implemented in this course are based on the approved
-                    academic
-                    policies indicated in the University Code or Student Handbook.</p>
+                    academic policies indicated in the University Code or Student Handbook.</p>
             </div>
 
             {{-- 3. Ethics and Conduct --}}
@@ -971,11 +970,9 @@
                     </tr>
 
                     {{-- ── Concurred by (Service Courses only) ─────────────────────── --}}
-                    
                         <tr>
                             <td colspan="4"
-                                style="font-style:italic; font-size:9pt; color:#555;
-                                               padding:4px 6px; background:#f8f8f8;">
+                                style="font-style:italic; font-size:9pt; color:#555; padding:4px 6px; background:#f8f8f8;">
                                 Additional Signatories for Service Courses:
                             </td>
                         </tr>
@@ -1248,6 +1245,34 @@
                 table.style.width = "100%";
                 table.style.borderCollapse = "collapse";
                 table.setAttribute("border", original.getAttribute("border") || "");
+
+                // Preserve column widths — getBoundingClientRect() returns 0 on
+                // hidden elements so we read from th style/attribute instead.
+                // Use the last header row (leaf cells, no spanning colspans).
+                const existingCg = original.querySelector(":scope > colgroup");
+                if (existingCg) {
+                    table.appendChild(existingCg.cloneNode(true));
+                } else if (thead) {
+                    const hRows   = thead.querySelectorAll("tr");
+                    const leafRow = hRows[hRows.length - 1];
+                    if (leafRow) {
+                        const cg = document.createElement("colgroup");
+                        Array.from(leafRow.cells).forEach(cell => {
+                            const col = document.createElement("col");
+                            const sw  = cell.style.width;
+                            if (sw && sw !== "") {
+                                col.style.width = sw;
+                            } else {
+                                const aw = cell.getAttribute("width");
+                                if (aw && aw !== "") {
+                                    col.style.width = /^\d+$/.test(aw) ? aw + "px" : aw;
+                                }
+                            }
+                            cg.appendChild(col);
+                        });
+                        table.appendChild(cg);
+                    }
+                }
 
                 if (includeHeader && thead) {
                     table.appendChild(thead.cloneNode(true));

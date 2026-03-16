@@ -184,11 +184,13 @@
                 III. Course Calendar
             </h3>
 
-            @if ($syllabus->course->has_lec_lab)
-                <p style="margin:0 0 4px; font-size:9pt;"><strong>Lecture (LEC)</strong></p>
-            @endif
+            @php
+                $lecRows = $weeklyCoverageRows['LEC'] ?? [];
+                $labRows = $weeklyCoverageRows['LAB'] ?? [];
+            @endphp
 
-            <table class="weekly-coverage-table" border="1" style="width:100%; border-collapse:collapse;">
+            <p style="margin:0 0 4px; font-size:9pt;"><strong>Lecture (LEC)</strong></p>
+            <table class="weekly-coverage-table" border="1" style="width:100%; border-collapse:collapse; margin-bottom:10px;">
                 <thead>
                     <tr>
                         <th style="text-align:center; width:50px;">CO No.</th>
@@ -199,35 +201,71 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse ($abridgedWeeklyRows as $row)
+                    @forelse ($lecRows as $row)
                         @if ($row['is_exam'])
                             <tr>
-                                <td colspan="5" style="text-align:center; font-weight:bold; font-style:italic;">
+                                <td style="text-align:center; font-weight:bold;">{{ $row['co_no'] }}</td>
+                                <td style="text-align:center; font-weight:bold;">{{ $row['week_no'] }}</td>
+                                <td colspan="3" style="text-align:center; font-weight:bold; font-style:italic;">
                                     {{ $row['exam_label'] }}
                                 </td>
                             </tr>
                         @else
                             <tr>
                                 <td style="text-align:center;">{{ $row['co_no'] }}</td>
-                                <td style="text-align:center;">{{ $row['wk_label'] }}</td>
-                                <td style="vertical-align:top;">
-                                    {!! nl2br(e($row['topics'])) !!}
-                                </td>
-                                <td style="vertical-align:top;">
-                                    {!! nl2br(e($row['tla'])) !!}
-                                </td>
-                                <td style="text-align:center; vertical-align:top;">
-                                    {{ $row['assessment'] }}
-                                </td>
+                                <td style="text-align:center;">{{ $row['week_no'] }}</td>
+                                <td style="vertical-align:top;">{!! nl2br(e($row['topics'])) !!}</td>
+                                <td style="vertical-align:top;">{!! nl2br(e($row['tla'])) !!}</td>
+                                <td style="text-align:center; vertical-align:top;">{{ $row['assessment_task'] }}</td>
                             </tr>
                         @endif
                     @empty
                         <tr>
-                            <td colspan="5" style="text-align:center;">No weekly coverage found.</td>
+                            <td colspan="5" style="text-align:center;">No lecture weekly coverage found.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
+
+            @if ($syllabus->course->has_lec_lab)
+                <p style="margin:0 0 4px; font-size:9pt;"><strong>Laboratory (LAB)</strong></p>
+                <table class="weekly-coverage-table" border="1" style="width:100%; border-collapse:collapse;">
+                    <thead>
+                        <tr>
+                            <th style="text-align:center; width:50px;">CO No.</th>
+                            <th style="text-align:center; width:70px;">Wk No.</th>
+                            <th style="text-align:center;">Topics</th>
+                            <th style="text-align:center;">Learning Activities</th>
+                            <th style="text-align:center; width:120px;">Assessment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($labRows as $row)
+                            @if ($row['is_exam'])
+                                <tr>
+                                    <td style="text-align:center; font-weight:bold;">{{ $row['co_no'] }}</td>
+                                    <td style="text-align:center; font-weight:bold;">{{ $row['week_no'] }}</td>
+                                    <td colspan="3" style="text-align:center; font-weight:bold; font-style:italic;">
+                                        {{ $row['exam_label'] }}
+                                    </td>
+                                </tr>
+                            @else
+                                <tr>
+                                    <td style="text-align:center;">{{ $row['co_no'] }}</td>
+                                    <td style="text-align:center;">{{ $row['week_no'] }}</td>
+                                    <td style="vertical-align:top;">{!! nl2br(e($row['topics'])) !!}</td>
+                                    <td style="vertical-align:top;">{!! nl2br(e($row['tla'])) !!}</td>
+                                    <td style="text-align:center; vertical-align:top;">{{ $row['assessment_task'] }}</td>
+                                </tr>
+                            @endif
+                        @empty
+                            <tr>
+                                <td colspan="5" style="text-align:center;">No laboratory weekly coverage found.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            @endif
         </div>
 
         {{-- ═══════════════════════════════════════════════════════════════════
@@ -559,11 +597,40 @@
 
         function makeShell(orig, thead, includeHeader) {
             const t = document.createElement("table");
-            t.className = orig.className;
-            t.style.cssText = orig.style.cssText;
-            t.style.width = "100%";
+            t.className        = orig.className;
+            t.style.cssText    = orig.style.cssText;
+            t.style.width      = "100%";
             t.style.borderCollapse = "collapse";
             t.setAttribute("border", orig.getAttribute("border") || "");
+
+            // Preserve column widths — getBoundingClientRect() returns 0 on
+            // hidden elements so we read from th style/attribute instead.
+            // Use the last header row (leaf cells, no spanning colspans).
+            const existingCg = orig.querySelector(":scope > colgroup");
+            if (existingCg) {
+                t.appendChild(existingCg.cloneNode(true));
+            } else if (thead) {
+                const hRows  = thead.querySelectorAll("tr");
+                const leafRow = hRows[hRows.length - 1];
+                if (leafRow) {
+                    const cg = document.createElement("colgroup");
+                    Array.from(leafRow.cells).forEach(cell => {
+                        const col = document.createElement("col");
+                        const sw  = cell.style.width;
+                        if (sw && sw !== "") {
+                            col.style.width = sw;
+                        } else {
+                            const aw = cell.getAttribute("width");
+                            if (aw && aw !== "") {
+                                col.style.width = /^\d+$/.test(aw) ? aw + "px" : aw;
+                            }
+                        }
+                        cg.appendChild(col);
+                    });
+                    t.appendChild(cg);
+                }
+            }
+
             if (includeHeader && thead) t.appendChild(thead.cloneNode(true));
             t.appendChild(document.createElement("tbody"));
             return t;
