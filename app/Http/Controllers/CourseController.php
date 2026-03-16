@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\SaveCourseRequest;
 use App\Models\Course;
 use App\Models\Program;
 use App\Services\CourseService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 
 class CourseController extends Controller
@@ -89,9 +89,9 @@ class CourseController extends Controller
     }
 
 
-    public function store(SaveCourseRequest $request)
+    public function store(Request $request)
     {
-        $validatedData = $request->validated();
+        $validatedData = $request->validate($this->courseRules());
 
         try {
             $this->courseService->createCourse(
@@ -128,9 +128,9 @@ class CourseController extends Controller
             ]);
     }
 
-    public function update(SaveCourseRequest $request, Course $course)
+    public function update(Request $request, Course $course)
     {
-        $validatedData = $request->validated();
+        $validatedData = $request->validate($this->courseRules($course));
 
         try {
             $this->courseService->updateCourse(
@@ -167,5 +167,30 @@ class CourseController extends Controller
     //             'type'    => 'success',
     //         ]);
     // }
+
+    protected function courseRules(?Course $course = null): array
+    {
+        $courseCodeRule = Rule::unique('courses', 'course_code');
+
+        if ($course) {
+            $courseCodeRule->ignore($course->id);
+        }
+
+        return [
+            'program_id' => [$course ? 'sometimes' : 'required', 'exists:programs,id'],
+            'confirmed_submission' => ['accepted'],
+            'code' => ['required', 'string', $courseCodeRule],
+            'name' => ['required', 'string'],
+            'description' => ['nullable', 'string'],
+            'credits' => ['required', 'integer', 'min:1'],
+            'has_lec_lab' => ['nullable', 'boolean'],
+            'year_level' => ['nullable', 'integer', 'between:1,5'],
+            'semester' => ['nullable', 'integer', 'in:1,2'],
+            'prerequisite' => ['nullable', 'string'],
+            'corequisite' => ['nullable', 'string'],
+            'po_mapping' => ['nullable', 'array'],
+            'po_mapping.*' => ['nullable', 'in:I,E,D'],
+        ];
+    }
 
 }

@@ -20,13 +20,16 @@ class CourseService
     public function createCourse(array $data, array $poMapping = [])
     {
         return DB::transaction(function () use ($data, $poMapping) {
+            $prerequisite = $this->normalizeRequisite($data['prerequisite'] ?? null);
+            $corequisite = $this->normalizeRequisite($data['corequisite'] ?? null);
+
             $course = Course::create([
                 'program_id' => $data['program_id'],
                 'course_code' => $data['code'],
                 'course_title' => $data['name'],
                 'course_description' => $data['description'] ?? null,
-                'prerequisite' => $data['prerequisite'] ?? null,
-                'corequisite' => $data['corequisite'] ?? null,
+                'prerequisite' => $prerequisite,
+                'corequisite' => $corequisite,
                 'credit_units' => $data['credits'],
                 'year_level' => $data['year_level'] ?? null,
                 'semester' => $data['semester'] ?? null,
@@ -55,12 +58,15 @@ class CourseService
     public function updateCourse(Course $course, array $data, array $poMapping = [])
     {
         return DB::transaction(function () use ($course, $data, $poMapping) {
+            $prerequisite = $this->normalizeRequisite($data['prerequisite'] ?? null);
+            $corequisite = $this->normalizeRequisite($data['corequisite'] ?? null);
+
             $course->update([
                 'course_code' => $data['code'],
                 'course_title' => $data['name'],
                 'course_description' => $data['description'] ?? null,
-                'prerequisite' => $data['prerequisite'] ?? null,
-                'corequisite' => $data['corequisite'] ?? null,
+                'prerequisite' => $prerequisite,
+                'corequisite' => $corequisite,
                 'credit_units' => $data['credits'],
                 'year_level' => $data['year_level'] ?? null,
                 'semester' => $data['semester'] ?? null,
@@ -107,5 +113,12 @@ class CourseService
             referenceId: $course->id,
             description: $description
         );
+    }
+
+    protected function normalizeRequisite(?string $value): string
+    {
+        $trimmed = trim((string) $value);
+
+        return $trimmed === '' ? 'None' : $trimmed;
     }
 }

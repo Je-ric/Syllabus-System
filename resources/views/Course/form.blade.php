@@ -19,7 +19,7 @@
         </x-feedback-status.alert>
     @endif
     
-    <form action="{{ $formAction }}" method="POST" id="courseForm">
+    <form action="{{ $formAction }}" method="POST" id="courseForm" class="space-y-6">
         @csrf
         @if ($formMethod !== 'POST')
             @method($formMethod)
@@ -40,109 +40,113 @@
         @endif
     
         {{-- ── Section: Course Details ────────────────────────────────────────── --}}
-        <div class="rounded-2xl border border-slate-200/80 bg-white/90 shadow-sm p-6 mb-5 space-y-5">
-            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 -mb-1">
-                Course Details
-            </p>
-    
-            {{-- Code + Title --}}
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="space-y-1.5">
-                    <x-form.label for="code" variant="title" isRequired>Course Code</x-form.label>
-                    <x-form.input id="code" type="text" name="code"
-                        value="{{ old('code', $course->course_code ?? '') }}" required />
-                    @error('code')
-                        <p class="text-xs text-rose-600">{{ $message }}</p>
-                    @enderror
-                </div>
-                <div class="space-y-1.5">
-                    <x-form.label for="name" variant="title" isRequired>Course Title</x-form.label>
-                    <x-form.input id="name" type="text" name="name"
-                        value="{{ old('name', $course->course_title ?? '') }}" required />
-                    @error('name')
-                        <p class="text-xs text-rose-600">{{ $message }}</p>
-                    @enderror
-                </div>
+        <div class="rounded-2xl border border-slate-200/80 bg-white/90 shadow-sm">
+            <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/60 flex items-center justify-between gap-3">
+                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                    Course Details
+                </p>
             </div>
     
-            {{-- Description --}}
-            <div class="space-y-1.5">
-                <x-form.label for="description" variant="title">Course Description</x-form.label>
-                <x-form.textarea id="description" name="description" rows="3">{{ old('description', $course->course_description ?? '') }}</x-form.textarea>
-                @error('description')
-                    <p class="text-xs text-rose-600">{{ $message }}</p>
-                @enderror
-            </div>
-    
-            {{-- Credits + Lab + Year + Semester — responsive 2→4 col --}}
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="px-6 pt-4 pb-6 space-y-5">
+                {{-- Code + Title --}}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <x-form.label for="code" variant="title" isRequired>Course Code</x-form.label>
+                        <x-form.input id="code" type="text" name="code"
+                            value="{{ old('code', $course->course_code ?? '') }}" required />
+                        @error('code')
+                            <p class="text-xs text-rose-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div class="space-y-1.5">
+                        <x-form.label for="name" variant="title" isRequired>Course Title</x-form.label>
+                        <x-form.input id="name" type="text" name="name"
+                            value="{{ old('name', $course->course_title ?? '') }}" required />
+                        @error('name')
+                            <p class="text-xs text-rose-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+        
+                {{-- Description --}}
                 <div class="space-y-1.5">
-                    <x-form.label for="credits" variant="title" isRequired>Credit Units</x-form.label>
-                    <x-form.input id="credits" type="number" name="credits" min="0"
-                        value="{{ old('credits', $course->credit_units ?? '') }}" required />
-                    @error('credits')
+                    <x-form.label for="description" variant="title">Course Description</x-form.label>
+                    <x-form.textarea id="description" name="description" rows="3">{{ old('description', $course->course_description ?? '') }}</x-form.textarea>
+                    @error('description')
                         <p class="text-xs text-rose-600">{{ $message }}</p>
                     @enderror
                 </div>
-    
-                <div class="space-y-1.5">
-                    <x-form.label variant="title" isRequired>Has Laboratory</x-form.label>
-                    @php
-                        $labValue = old('has_lec_lab', isset($course) ? ($course->has_lec_lab ? '1' : '0') : '');
-                    @endphp
-                    <x-form.radio
-                        name="has_lec_lab"
-                        :options="['1' => 'Yes', '0' => 'No']"
-                        :value="$labValue" />
+        
+                {{-- Credits + Lab + Year + Semester — responsive 2→4 col --}}
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="space-y-1.5">
+                        <x-form.label for="credits" variant="title" isRequired>Credit Units</x-form.label>
+                        <x-form.input id="credits" type="number" name="credits" min="0"
+                            value="{{ old('credits', $course->credit_units ?? '') }}" required />
+                        @error('credits')
+                            <p class="text-xs text-rose-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+        
+                    <div class="space-y-1.5">
+                        <x-form.label variant="title" isRequired>Has Laboratory</x-form.label>
+                        @php
+                            $labValue = old('has_lec_lab', isset($course) ? ($course->has_lec_lab ? '1' : '0') : '');
+                        @endphp
+                        <x-form.radio
+                            name="has_lec_lab"
+                            :options="['1' => 'Yes', '0' => 'No']"
+                            :value="$labValue" />
+                    </div>
+        
+                    <div class="space-y-1.5">
+                        <x-form.label for="year_level" variant="title" isRequired>Year Level</x-form.label>
+                        <x-form.select id="year_level" name="year_level">
+                            <option value="">Select Year</option>
+                            @for ($i = 1; $i <= 5; $i++)
+                                <option value="{{ $i }}"
+                                    {{ old('year_level', $course->year_level ?? '') == $i ? 'selected' : '' }}>
+                                    Year {{ $i }}
+                                </option>
+                            @endfor
+                        </x-form.select>
+                        @error('year_level')
+                            <p class="text-xs text-rose-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+        
+                    <div class="space-y-1.5">
+                        <x-form.label for="semester" variant="title" isRequired>Semester</x-form.label>
+                        <x-form.select id="semester" name="semester">
+                            <option value="">Select Semester</option>
+                            <option value="1" {{ old('semester', $course->semester ?? '') == '1' ? 'selected' : '' }}>1st Semester</option>
+                            <option value="2" {{ old('semester', $course->semester ?? '') == '2' ? 'selected' : '' }}>2nd Semester</option>
+                        </x-form.select>
+                        @error('semester')
+                            <p class="text-xs text-rose-600">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
-    
-                <div class="space-y-1.5">
-                    <x-form.label for="year_level" variant="title" isRequired>Year Level</x-form.label>
-                    <x-form.select id="year_level" name="year_level">
-                        <option value="">Select Year</option>
-                        @for ($i = 1; $i <= 5; $i++)
-                            <option value="{{ $i }}"
-                                {{ old('year_level', $course->year_level ?? '') == $i ? 'selected' : '' }}>
-                                Year {{ $i }}
-                            </option>
-                        @endfor
-                    </x-form.select>
-                    @error('year_level')
-                        <p class="text-xs text-rose-600">{{ $message }}</p>
-                    @enderror
-                </div>
-    
-                <div class="space-y-1.5">
-                    <x-form.label for="semester" variant="title" isRequired>Semester</x-form.label>
-                    <x-form.select id="semester" name="semester">
-                        <option value="">Select Semester</option>
-                        <option value="1" {{ old('semester', $course->semester ?? '') == '1' ? 'selected' : '' }}>1st Semester</option>
-                        <option value="2" {{ old('semester', $course->semester ?? '') == '2' ? 'selected' : '' }}>2nd Semester</option>
-                    </x-form.select>
-                    @error('semester')
-                        <p class="text-xs text-rose-600">{{ $message }}</p>
-                    @enderror
-                </div>
-            </div>
-    
-            {{-- Prerequisite + Corequisite --}}
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="space-y-1.5">
-                    <x-form.label for="prerequisite" variant="title">Prerequisite</x-form.label>
-                    <x-form.input id="prerequisite" type="text" name="prerequisite"
-                        value="{{ old('prerequisite', $course->prerequisite ?? '') }}" />
-                </div>
-                <div class="space-y-1.5">
-                    <x-form.label for="corequisite" variant="title">Corequisite</x-form.label>
-                    <x-form.input id="corequisite" type="text" name="corequisite"
-                        value="{{ old('corequisite', $course->corequisite ?? '') }}" />
+        
+                {{-- Prerequisite + Corequisite --}}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <x-form.label for="prerequisite" variant="title">Prerequisite (None if not applicable)</x-form.label>
+                        <x-form.input id="prerequisite" type="text" name="prerequisite"
+                            value="{{ old('prerequisite', $course->prerequisite ?? '') }}" />
+                    </div>
+                    <div class="space-y-1.5">
+                        <x-form.label for="corequisite" variant="title">Corequisite (None if not applicable)</x-form.label>
+                        <x-form.input id="corequisite" type="text" name="corequisite"
+                            value="{{ old('corequisite', $course->corequisite ?? '') }}" />
+                    </div>
                 </div>
             </div>
         </div>
     
         {{-- ── Section: PO Mapping ─────────────────────────────────────────────── --}}
         @if ($program)
-            <div class="rounded-2xl border border-slate-200/80 bg-white/90 shadow-sm overflow-hidden mb-5">
+            <div class="rounded-2xl border border-slate-200/80 bg-white/90 shadow-sm overflow-hidden">
     
                 <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/60 flex items-center justify-between gap-3">
                     <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">

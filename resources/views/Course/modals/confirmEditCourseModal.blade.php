@@ -1,8 +1,7 @@
 <x-modal.dialog id="confirmEditCourseModal" maxWidth="max-w-lg" width="w-11/12">
 
     {{-- modalId prop makes x-modal.header render its own close button — no x-modal.x-button needed in slot --}}
-    <x-modal.header modalId="confirmEditCourseModal"
-        class="bg-blue-100">
+    <x-modal.header modalId="confirmEditCourseModal">
         <h2 class="text-xl font-semibold text-blue-900 tracking-tight">Confirm Course Update</h2>
     </x-modal.header>
 
@@ -18,7 +17,7 @@
         </div>
     </x-modal.body>
 
-    <x-modal.footer class="bg-blue-100">
+    <x-modal.footer>
         <x-modal.close-button modalId="confirmEditCourseModal" text="Review Again" variant="cancel" />
         <x-button type="button" variant="save" onclick="confirmCourseSubmit()">
             <i class="bx bx-check"></i> Confirm &amp; Update

@@ -2,7 +2,7 @@
 
     <x-modal.header modalId="viewCourseModal_{{ $course->id }}">
         <div class="flex items-center gap-3 min-w-0">
-            <div class="shrink-0 flex items-center justify-center w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700">
+            <div class="shrink-0 flex items-center justify-center w-9 h-9 rounded-xl text-emerald-700">
                 <i class="bx bx-book text-lg"></i>
             </div>
             <div class="min-w-0">

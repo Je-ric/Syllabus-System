@@ -1,7 +1,6 @@
 <x-modal.dialog id="confirmCourseModal" maxWidth="max-w-lg" width="w-11/12">
 
-    <x-modal.header modalId="confirmCourseModal"
-        class="bg-emerald-100">
+    <x-modal.header modalId="confirmCourseModal">
         <h2 class="text-xl font-semibold text-emerald-900 tracking-tight">Confirm Course Creation</h2>
     </x-modal.header>
 
@@ -17,7 +16,7 @@
         </div>
     </x-modal.body>
 
-    <x-modal.footer class="bg-emerald-100">
+    <x-modal.footer>
         <x-modal.close-button modalId="confirmCourseModal" text="Review Again" variant="cancel" />
         <x-button type="button" variant="save" onclick="confirmCourseSubmit()">
             <i class="bx bx-check"></i> Confirm &amp; Create
