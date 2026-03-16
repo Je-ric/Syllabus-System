@@ -244,23 +244,49 @@
 
                     {{-- ══ Totals row ═══════════════════════════════════════ --}}
                     @php
+                        $toInt = static function (mixed $value): int {
+                            if ($value === null || $value === '') {
+                                return 0;
+                            }
+
+                            if (is_numeric($value)) {
+                                return (int) round((float) $value);
+                            }
+
+                            $clean = preg_replace('/[^0-9.\-]/', '', (string) $value);
+                            return is_numeric($clean) ? (int) round((float) $clean) : 0;
+                        };
+
                         $lecTotal = 0;
                         $labTotal = 0;
                         foreach ($rows as $row) {
-                            if (isset($row['lec']['week_content_id']))
-                                $lecTotal += (int) ($inputs[$row['lec']['week_content_id']]['weight'] ?? 0);
-                            if ($courseHasLab && isset($row['lab']['week_content_id']))
-                                $labTotal += (int) ($inputs[$row['lab']['week_content_id']]['weight'] ?? 0);
+                            if (isset($row['lec']['week_content_id'])) {
+                                $lecId = $row['lec']['week_content_id'];
+                                $lecTotal += $toInt($inputs[$lecId]['weight'] ?? null);
+                            }
+
+                            if ($courseHasLab && isset($row['lab']['week_content_id'])) {
+                                $labId = $row['lab']['week_content_id'];
+                                $labTotal += $toInt($inputs[$labId]['weight'] ?? null);
+                            }
                         }
 
-                        // Parse the performance standard to its numeric target.
-                        // e.g. '67%' → 67,  '100%' → 100,  null → 100 (LEC-only fallback)
-                        $lecStdNum = $lecPerformanceStd !== null
-                            ? (int) filter_var($lecPerformanceStd, FILTER_SANITIZE_NUMBER_INT)
-                            : ($courseHasLab ? 67 : 100);
-                        $labStdNum = $labPerformanceStd !== null
-                            ? (int) filter_var($labPerformanceStd, FILTER_SANITIZE_NUMBER_INT)
-                            : 33;
+                        // Parse performance standards safely.
+                        $parseStd = static function (mixed $value, int $fallback): int {
+                            if ($value === null || $value === '') {
+                                return $fallback;
+                            }
+
+                            if (is_numeric($value)) {
+                                return (int) round((float) $value);
+                            }
+
+                            $clean = preg_replace('/[^0-9.\-]/', '', (string) $value);
+                            return is_numeric($clean) ? (int) round((float) $clean) : $fallback;
+                        };
+
+                        $lecStdNum = $parseStd($lecPerformanceStd, $courseHasLab ? 67 : 100);
+                        $labStdNum = $parseStd($labPerformanceStd, 33);
 
                         $lecOk   = $lecTotal === $lecStdNum;
                         $lecWarn = $lecTotal > 0 && ! $lecOk;
