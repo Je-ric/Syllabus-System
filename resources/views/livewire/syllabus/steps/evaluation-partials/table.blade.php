@@ -1,10 +1,18 @@
 {{--
     course-evaluation-partials/table.blade.php
     ────────────────────────────────────────────
-    Variables expected (all from CourseEvaluationStep Livewire state):
-      $rows          — array  (evaluation row data)
-      $inputs        — array  (wire:model targets keyed by week_content_id)
-      $courseHasLab  — bool
+    Variables from CourseEvaluationStep:
+      $rows              — array
+      $inputs            — array  (wire:model targets keyed by week_content_id)
+      $courseHasLab      — bool
+      $lecPerformanceStd — string|null  (raw DB value e.g. "67.00")
+      $labPerformanceStd — string|null
+      $lecStdNum         — int   (target total, pre-computed in PHP)
+      $labStdNum         — int
+      $lecTotal          — int   (running total from saved weights, pre-computed in PHP)
+      $labTotal          — int
+
+    All totals / targets are computed in the PHP service — the blade only displays.
 --}}
 
 <x-wizard.section title="Evaluation Items" icon="table" color="slate">
@@ -15,7 +23,6 @@
                 {{-- ══ Column group headers ══════════════════════════════════ --}}
                 <thead>
                     <tr class="bg-slate-50 border-b border-slate-200">
-                        {{-- CO — rowspan 2 so it spans both header rows --}}
                         <th rowspan="2"
                             class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide
                                    text-slate-500 border-r border-slate-200 w-24 align-middle">
@@ -23,7 +30,7 @@
                         </th>
 
                         {{-- LEC group --}}
-                        <th colspan="2"
+                        <th colspan="3"
                             class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide
                                    text-emerald-700 bg-emerald-50
                                    {{ $courseHasLab ? 'border-r border-slate-200' : '' }}">
@@ -33,9 +40,8 @@
                             </div>
                         </th>
 
-                        {{-- LAB group (only when course has LAB) --}}
                         @if ($courseHasLab)
-                            <th colspan="2"
+                            <th colspan="3"
                                 class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide
                                        text-blue-700 bg-blue-50 border-r border-slate-200">
                                 <div class="flex items-center justify-center gap-1.5">
@@ -45,7 +51,6 @@
                             </th>
                         @endif
 
-                        {{-- Passing — rowspan 2 --}}
                         <th rowspan="2"
                             class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide
                                    text-slate-500 w-28 align-middle">
@@ -53,20 +58,26 @@
                         </th>
                     </tr>
 
-                    {{-- Sub-headers --}}
+                    {{-- Sub-headers — now 3 cols per component: Task | Kind | Weight --}}
                     <tr class="bg-slate-100 border-b-2 border-slate-300">
-                        <th class="px-4 py-2.5 text-left text-xs font-medium text-slate-600 min-w-[180px]">
+                        <th class="px-4 py-2.5 text-left text-xs font-medium text-slate-600 min-w-[160px]">
                             Assessment Task
                         </th>
-                        <th class="px-4 py-2.5 text-left text-xs font-medium text-slate-600 w-32
+                        <th class="px-4 py-2.5 text-left text-xs font-medium text-slate-600 w-28">
+                            Kind
+                        </th>
+                        <th class="px-4 py-2.5 text-left text-xs font-medium text-slate-600 w-28
                                    {{ $courseHasLab ? 'border-r border-slate-200' : '' }}">
                             Weight (%)
                         </th>
                         @if ($courseHasLab)
-                            <th class="px-4 py-2.5 text-left text-xs font-medium text-slate-600 min-w-[180px]">
+                            <th class="px-4 py-2.5 text-left text-xs font-medium text-slate-600 min-w-[160px]">
                                 Assessment Task
                             </th>
-                            <th class="px-4 py-2.5 text-left text-xs font-medium text-slate-600 w-32 border-r border-slate-200">
+                            <th class="px-4 py-2.5 text-left text-xs font-medium text-slate-600 w-28">
+                                Kind
+                            </th>
+                            <th class="px-4 py-2.5 text-left text-xs font-medium text-slate-600 w-28 border-r border-slate-200">
                                 Weight (%)
                             </th>
                         @endif
@@ -75,12 +86,11 @@
 
                 {{-- ══ Body rows ════════════════════════════════════════════ --}}
                 <tbody class="divide-y divide-slate-100">
-
                     @foreach ($rows as $rowIndex => $row)
                         @php
                             $isMvgo  = $row['is_mvgo']     ?? false;
                             $isExam  = $row['is_exam']     ?? false;
-                            $coAuto  = $row['co_coverage'] ?? '';   // exam CO (read-only)
+                            $coAuto  = $row['co_coverage'] ?? '';
 
                             $rowBg = $isExam
                                 ? 'bg-amber-50/70 border-t-2 border-amber-200'
@@ -96,11 +106,6 @@
                             $labCo        = $row['lab']['co_code']         ?? null;
                             $labTaskLabel = $row['lab']['task_label']      ?? '';
 
-                            // CO to display in the CO column:
-                            //   MVGO     → emerald MVGO badge
-                            //   Exam     → auto-resolved co_coverage badge (amber)
-                            //   Regular  → the CO code from the week content (slate badge)
-                            //              or a freetext input if no CO is mapped yet
                             $displayCo      = $lecCo ?? $labCo ?? null;
                             $outcomeInputId = $lecId ?? $labId;
                         @endphp
@@ -109,20 +114,11 @@
 
                             {{-- ── CO column ─────────────────────────────── --}}
                             <td class="px-4 py-3 border-r border-slate-200 align-middle">
-
                                 @if ($isMvgo)
-                                    {{-- Week 1 — always MVGO, never user-editable --}}
                                     <x-feedback-status.status-indicator variant="emerald" icon="bx bx-star" size="sm">
                                         MVGO
                                     </x-feedback-status.status-indicator>
-
                                 @elseif ($isExam)
-                                    {{--
-                                        Exam rows: CO is auto-determined from the last
-                                        non-exam week before this exam.
-                                        Display as a read-only amber badge.
-                                        If unresolvable (e.g. very first week is exam) show '—'.
-                                    --}}
                                     @if ($coAuto !== '')
                                         <x-feedback-status.status-indicator variant="amber" icon="bx bx-lock-alt" size="sm">
                                             {{ $coAuto }}
@@ -130,34 +126,27 @@
                                     @else
                                         <span class="text-slate-400 text-xs italic">—</span>
                                     @endif
-
                                 @elseif ($displayCo)
-                                    {{-- Regular week with a mapped CO --}}
                                     <x-feedback-status.status-indicator variant="slate" size="sm">
                                         {{ $displayCo }}
                                     </x-feedback-status.status-indicator>
-
                                 @elseif ($outcomeInputId)
-                                    {{-- No CO mapped yet — allow freetext outcome label --}}
                                     <input type="text"
                                         wire:model.blur="inputs.{{ $outcomeInputId }}.outcome_label"
                                         placeholder="e.g. CO1"
                                         class="w-full text-xs rounded-lg border border-slate-300 bg-white
                                                px-2 py-1.5 focus:border-emerald-400 focus:ring-1
                                                focus:ring-emerald-300 focus:outline-none placeholder:text-slate-300" />
-
                                 @else
                                     <span class="text-slate-300 text-xs">—</span>
                                 @endif
-
                             </td>
 
-                            {{-- ── LEC Task ──────────────────────────────── --}}
+                            {{-- ── LEC Task + Kind + Weight ──────────────── --}}
                             @if ($lecId)
                                 <td class="px-4 py-3 align-middle
                                            {{ $isExam  ? 'font-semibold text-amber-800'
-                                            : ($isMvgo ? 'text-emerald-800'
-                                            : 'text-slate-700') }}">
+                                            : ($isMvgo ? 'text-emerald-800' : 'text-slate-700') }}">
                                     <div class="flex items-center gap-2">
                                         @if ($isExam)
                                             <i class="bx bx-clipboard text-amber-500 shrink-0 text-base"></i>
@@ -167,6 +156,26 @@
                                         {{ $lecTaskLabel }}
                                     </div>
                                 </td>
+
+                                {{-- Kind selector: disabled for exam and MVGO rows --}}
+                                <td class="px-4 py-3 align-middle">
+                                    @if ($isExam || $isMvgo)
+                                        <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium
+                                                     {{ $isExam ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700' }}">
+                                            {{ $isExam ? 'Exam' : 'Activity' }}
+                                        </span>
+                                    @else
+                                        <select
+                                            wire:model.live="inputs.{{ $lecId }}.kind"
+                                            class="text-xs rounded-lg border border-slate-300 bg-white
+                                                   px-2 py-1.5 focus:border-emerald-400 focus:ring-1
+                                                   focus:ring-emerald-300 focus:outline-none">
+                                            <option value="activity">Activity</option>
+                                            <option value="quiz">Quiz</option>
+                                        </select>
+                                    @endif
+                                </td>
+
                                 <td class="px-4 py-3 align-middle {{ $courseHasLab ? 'border-r border-slate-200' : '' }}">
                                     <div class="flex items-center gap-1.5">
                                         <input type="number"
@@ -182,23 +191,22 @@
                                 <td class="px-4 py-3 bg-slate-50/70 align-middle">
                                     <span class="text-slate-300 text-xs italic">No LEC task</span>
                                 </td>
+                                <td class="px-4 py-3 bg-slate-50/70 align-middle">
+                                    <span class="text-slate-200 text-xs">—</span>
+                                </td>
                                 <td class="px-4 py-3 bg-slate-50/70 align-middle {{ $courseHasLab ? 'border-r border-slate-200' : '' }}">
-                                    <div class="flex items-center gap-1.5">
-                                        <input type="number" disabled placeholder="—"
-                                            class="w-20 text-sm text-right rounded-lg border border-slate-200
-                                                   bg-slate-100 text-slate-400 px-2 py-1.5 cursor-not-allowed" />
-                                        <span class="text-xs text-slate-300">%</span>
-                                    </div>
+                                    <input type="number" disabled placeholder="—"
+                                        class="w-20 text-sm text-right rounded-lg border border-slate-200
+                                               bg-slate-100 text-slate-400 px-2 py-1.5 cursor-not-allowed" />
                                 </td>
                             @endif
 
-                            {{-- ── LAB Task ──────────────────────────────── --}}
+                            {{-- ── LAB Task + Kind + Weight ──────────────── --}}
                             @if ($courseHasLab)
                                 @if ($labId)
                                     <td class="px-4 py-3 align-middle
                                                {{ $isExam  ? 'font-semibold text-blue-800'
-                                                : ($isMvgo ? 'text-emerald-700'
-                                                : 'text-slate-700') }}">
+                                                : ($isMvgo ? 'text-emerald-700' : 'text-slate-700') }}">
                                         <div class="flex items-center gap-2">
                                             @if ($isExam)
                                                 <i class="bx bx-clipboard text-blue-400 shrink-0 text-base"></i>
@@ -208,6 +216,25 @@
                                             {{ $labTaskLabel }}
                                         </div>
                                     </td>
+
+                                    <td class="px-4 py-3 align-middle">
+                                        @if ($isExam || $isMvgo)
+                                            <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium
+                                                         {{ $isExam ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700' }}">
+                                                {{ $isExam ? 'Exam' : 'Activity' }}
+                                            </span>
+                                        @else
+                                            <select
+                                                wire:model.live="inputs.{{ $labId }}.kind"
+                                                class="text-xs rounded-lg border border-slate-300 bg-white
+                                                       px-2 py-1.5 focus:border-blue-400 focus:ring-1
+                                                       focus:ring-blue-300 focus:outline-none">
+                                                <option value="activity">Activity</option>
+                                                <option value="quiz">Quiz</option>
+                                            </select>
+                                        @endif
+                                    </td>
+
                                     <td class="px-4 py-3 align-middle border-r border-slate-200">
                                         <div class="flex items-center gap-1.5">
                                             <input type="number"
@@ -223,13 +250,13 @@
                                     <td class="px-4 py-3 bg-slate-50/70 align-middle">
                                         <span class="text-slate-300 text-xs italic">No LAB task</span>
                                     </td>
+                                    <td class="px-4 py-3 bg-slate-50/70 align-middle">
+                                        <span class="text-slate-200 text-xs">—</span>
+                                    </td>
                                     <td class="px-4 py-3 bg-slate-50/70 align-middle border-r border-slate-200">
-                                        <div class="flex items-center gap-1.5">
-                                            <input type="number" disabled placeholder="—"
-                                                class="w-20 text-sm text-right rounded-lg border border-slate-200
-                                                       bg-slate-100 text-slate-400 px-2 py-1.5 cursor-not-allowed" />
-                                            <span class="text-xs text-slate-300">%</span>
-                                        </div>
+                                        <input type="number" disabled placeholder="—"
+                                            class="w-20 text-sm text-right rounded-lg border border-slate-200
+                                                   bg-slate-100 text-slate-400 px-2 py-1.5 cursor-not-allowed" />
                                     </td>
                                 @endif
                             @endif
@@ -243,86 +270,54 @@
                     @endforeach
 
                     {{-- ══ Totals row ═══════════════════════════════════════ --}}
+                    {{--
+                        All values pre-computed in PHP (CourseEvaluationService::loadRows).
+                        Blade just displays — no arithmetic here.
+                        lecTotal / labTotal  = running sum of saved weights
+                        lecStdNum / labStdNum = target (from performance_standard column)
+                    --}}
                     @php
-                        $toInt = static function (mixed $value): int {
-                            if ($value === null || $value === '') {
-                                return 0;
-                            }
-
-                            if (is_numeric($value)) {
-                                return (int) round((float) $value);
-                            }
-
-                            $clean = preg_replace('/[^0-9.\-]/', '', (string) $value);
-                            return is_numeric($clean) ? (int) round((float) $clean) : 0;
-                        };
-
-                        $lecTotal = 0;
-                        $labTotal = 0;
-                        foreach ($rows as $row) {
-                            if (isset($row['lec']['week_content_id'])) {
-                                $lecId = $row['lec']['week_content_id'];
-                                $lecTotal += $toInt($inputs[$lecId]['weight'] ?? null);
-                            }
-
-                            if ($courseHasLab && isset($row['lab']['week_content_id'])) {
-                                $labId = $row['lab']['week_content_id'];
-                                $labTotal += $toInt($inputs[$labId]['weight'] ?? null);
-                            }
-                        }
-
-                        // Parse performance standards safely.
-                        $parseStd = static function (mixed $value, int $fallback): int {
-                            if ($value === null || $value === '') {
-                                return $fallback;
-                            }
-
-                            if (is_numeric($value)) {
-                                return (int) round((float) $value);
-                            }
-
-                            $clean = preg_replace('/[^0-9.\-]/', '', (string) $value);
-                            return is_numeric($clean) ? (int) round((float) $clean) : $fallback;
-                        };
-
-                        $lecStdNum = $parseStd($lecPerformanceStd, $courseHasLab ? 67 : 100);
-                        $labStdNum = $parseStd($labPerformanceStd, 33);
-
-                        $lecOk   = $lecTotal === $lecStdNum;
-                        $lecWarn = $lecTotal > 0 && ! $lecOk;
-                        $labOk   = $labTotal === $labStdNum;
-                        $labWarn = $courseHasLab && $labTotal > 0 && ! $labOk;
+                        $lecOk   = $lecTotal === $lecStdNum && $lecTotal > 0;
+                        $lecWarn = $lecTotal > 0 && $lecTotal !== $lecStdNum;
+                        $labOk   = $labTotal === $labStdNum && $labTotal > 0;
+                        $labWarn = $courseHasLab && $labTotal > 0 && $labTotal !== $labStdNum;
                     @endphp
 
                     <tr class="bg-slate-100 border-t-2 border-slate-300 font-semibold text-sm">
                         <td class="px-4 py-3 text-slate-600 border-r border-slate-200 text-xs uppercase tracking-wide">
+                            -
+                        </td>
+                        <td class="px-4 py-3 text-slate-600 border-r border-slate-200 text-xs uppercase tracking-wide">
                             Total
                         </td>
-                        <td class="px-4 py-3 text-slate-500 text-xs"></td>
+                        {{-- LEC task column (empty) --}}
+                        <td class="px-4 py-3"></td>
+                        {{-- LEC kind column (empty) --}}
                         <td class="px-4 py-3 {{ $courseHasLab ? 'border-r border-slate-200' : '' }}">
                             <span class="{{ $lecWarn ? 'text-rose-600' : ($lecOk ? 'text-emerald-700' : 'text-slate-500') }}">
-                                {{ $lecTotal }}%
+                                {{ $lecTotal }} / {{ $lecStdNum }}%
                             </span>
                             @if ($lecWarn)
                                 <span class="text-xs text-rose-500 block font-normal">
-                                    Expected {{ $lecStdNum }}%
+                                    Need {{ $lecStdNum - $lecTotal }}% more
                                 </span>
                             @elseif ($lecOk)
-                                <span class="text-xs text-emerald-600 block font-normal">✓ Matches standard</span>
+                                <span class="text-xs text-emerald-600 block font-normal">✓ Complete</span>
                             @endif
                         </td>
                         @if ($courseHasLab)
-                            <td class="px-4 py-3 text-slate-500 text-xs"></td>
+                            <td class="px-4 py-3"></td>
+                            <td class="px-4 py-3"></td>
                             <td class="px-4 py-3 border-r border-slate-200">
                                 <span class="{{ $labWarn ? 'text-rose-600' : ($labOk ? 'text-blue-700' : 'text-slate-500') }}">
-                                    {{ $labTotal }}%
+                                    {{ $labTotal }} / {{ $labStdNum }}%
                                 </span>
                                 @if ($labWarn)
                                     <span class="text-xs text-rose-500 block font-normal">
-                                        Expected {{ $labStdNum }}%
+                                        Need {{ $labStdNum - $labTotal }}% more
                                     </span>
                                 @elseif ($labOk)
-                                    <span class="text-xs text-blue-600 block font-normal">✓ Matches standard</span>
+                                    <span class="text-xs text-blue-600 block font-normal">✓ Complete</span>
                                 @endif
                             </td>
                         @endif

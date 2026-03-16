@@ -5,9 +5,10 @@
         title="Course Evaluation"
         icon="notepad"
         description="Set the weight (%) for each assessment task.
-                    Rows are pulled from Weekly Coverage — only weeks with an assessment task appear.
-                    Exam course outcomes are auto-determined from the last covered week before each exam.
-                    The 60% passing standard applies to every assessment per semester.">
+                     Rows are pulled from Weekly Coverage.
+                     Select Activity or Quiz for each row.
+                     Exam course outcomes are auto-determined from the last covered week.
+                     The 60% passing standard applies to every assessment per semester.">
 
     @if (count($rows) > 0)
         <x-button variant="sm-success"

@@ -162,8 +162,9 @@ class CourseEvaluationService
                 ];
                 $inputs[$lecContent->id] = [
                     'weight'        => $lecEval?->weight !== null ? (string) $lecEval->weight : '',
-                    // MVGO outcome label is always forced; exam co_coverage is read-only badge
                     'outcome_label' => $isMvgo ? 'MVGO' : ($lecEval?->outcome_label ?? ''),
+                    // kind: 'activity', 'quiz', or 'exam' — user-selectable for regular rows
+                    'kind'          => $isMvgo ? 'activity' : ($lecEval?->kind ?? 'activity'),
                 ];
             }
 
@@ -179,6 +180,7 @@ class CourseEvaluationService
                 $inputs[$labContent->id] = [
                     'weight'        => $labEval?->weight !== null ? (string) $labEval->weight : '',
                     'outcome_label' => $isMvgo ? 'MVGO' : ($labEval?->outcome_label ?? ''),
+                    'kind'          => $isMvgo ? 'activity' : ($labEval?->kind ?? 'activity'),
                 ];
             }
 
@@ -197,10 +199,37 @@ class CourseEvaluationService
             ];
         }
 
+        // ── Compute totals in PHP so the blade just displays, never calculates ──
+        $lecTotal = 0;
+        $labTotal = 0;
+        foreach ($rows as $row) {
+            if (isset($row['lec']['week_content_id'])) {
+                $w = (int) ($inputs[$row['lec']['week_content_id']]['weight'] ?? 0);
+                $lecTotal += $w;
+            }
+            if ($courseHasLab && isset($row['lab']['week_content_id'])) {
+                $w = (int) ($inputs[$row['lab']['week_content_id']]['weight'] ?? 0);
+                $labTotal += $w;
+            }
+        }
+
+        // Parse performance standard to int for target display (e.g. 67.00 → 67)
+        $parseStd = static fn (mixed $v, int $fb): int =>
+            is_numeric(str_replace('%', '', (string) ($v ?? '')))
+                ? (int) round((float) str_replace('%', '', (string) $v))
+                : $fb;
+
+        $lecStdNum = $parseStd($lecPerformanceStd, $courseHasLab ? 67 : 100);
+        $labStdNum = $parseStd($labPerformanceStd, 33);
+
         return [
             'courseHasLab'      => $courseHasLab,
             'lecPerformanceStd' => $lecPerformanceStd,
             'labPerformanceStd' => $labPerformanceStd,
+            'lecStdNum'         => $lecStdNum,   // target total (int)
+            'labStdNum'         => $labStdNum,
+            'lecTotal'          => $lecTotal,    // running total from saved weights
+            'labTotal'          => $labTotal,
             'rows'              => $rows,
             'inputs'            => $inputs,
         ];
@@ -296,7 +325,10 @@ class CourseEvaluationService
             $outcomeLabel = $outcomeLabel !== '' ? $outcomeLabel : null;
         }
 
-        $kind     = $isExam ? 'exam' : 'activity';
+        // kind: exam rows are always 'exam'; regular rows respect user selection
+        $kind = $isExam
+            ? 'exam'
+            : (in_array($data['kind'] ?? '', ['activity', 'quiz']) ? $data['kind'] : 'activity');
         $examType = $isExam
             ? match ($termLabel) {
                 '1st Term'   => 'first_term',
