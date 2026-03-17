@@ -303,6 +303,7 @@ class SyllabusPreviewService
 
         // Pass 1: build one raw row per week (per component)
         $rawRows = [];
+        $lastKnownCoNo = '';
         foreach ($weeks as $week) {
             $weekContents = $week->contents ?? collect();
             $weekExamTask = $weekContents->first(function ($c) {
@@ -335,6 +336,10 @@ class SyllabusPreviewService
                     $coNo = 'MVGO';
                 } elseif ($coCode !== '') {
                     $coNo = preg_replace('/^[A-Za-z]+/', '', $coCode); // strip 'CO' prefix
+                }
+
+                if ($coNo === '') {
+                    $coNo = $lastKnownCoNo;
                 }
 
                 $rawRows[] = [
@@ -370,6 +375,10 @@ class SyllabusPreviewService
                 $coNo = 'MVGO';
             } elseif ($coCode !== '') {
                 $coNo = preg_replace('/^[A-Za-z]+/', '', $coCode); // strip 'CO' prefix
+            }
+
+            if ($coNo !== '') {
+                $lastKnownCoNo = $coNo;
             }
 
             $rawRows[] = [

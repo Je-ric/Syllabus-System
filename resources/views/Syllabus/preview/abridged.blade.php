@@ -367,6 +367,29 @@
                         if ($groupStartIndex !== null) {
                             $coRowSpans[$groupStartIndex] = count($evaluationRows) - $groupStartIndex;
                         }
+
+                        // Group Performance Standard by term (term ends at exam row).
+                        $termRowSpans = [];
+                        $isTermStart = [];
+                        $termStartIndex = null;
+
+                        foreach ($evaluationRows as $index => $evaluationRow) {
+                            if ($termStartIndex === null) {
+                                $termStartIndex = $index;
+                                $isTermStart[$index] = true;
+                            } else {
+                                $isTermStart[$index] = false;
+                            }
+
+                            if (($evaluationRow['is_exam'] ?? false) === true) {
+                                $termRowSpans[$termStartIndex] = $index - $termStartIndex + 1;
+                                $termStartIndex = null;
+                            }
+                        }
+
+                        if ($termStartIndex !== null) {
+                            $termRowSpans[$termStartIndex] = count($evaluationRows) - $termStartIndex;
+                        }
                     @endphp
                     @forelse ($evaluationRows as $index => $row)
                         <tr>
@@ -382,8 +405,8 @@
                                 <td>{{ $row['lab_task'] ?? '' }}</td>
                                 <td style="text-align:center;">{{ $row['lab_weight'] ?? '' }}</td>
                             @endif
-                            @if ($isCoGroupStart[$index] ?? false)
-                                <td rowspan="{{ $coRowSpans[$index] ?? 1 }}"
+                            @if ($isTermStart[$index] ?? false)
+                                <td rowspan="{{ $termRowSpans[$index] ?? 1 }}"
                                     style="text-align:center; vertical-align:middle;">
                                     <strong>{{ $lecPassMark }}%</strong>
                                 </td>

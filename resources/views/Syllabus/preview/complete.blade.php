@@ -529,8 +529,32 @@
                         $labPassMark = $labComponent?->performance_standard
                             ? (int) round((float) str_replace('%', '', (string) $labComponent->performance_standard))
                             : 60;
+
+                        // Group Performance Standard by term (term ends at exam row).
+                        $termRowSpans = [];
+                        $isTermStart = [];
+                        $termStartIndex = null;
+
+                        foreach (($evaluationRows ?? []) as $index => $evaluationRow) {
+                            if ($termStartIndex === null) {
+                                $termStartIndex = $index;
+                                $isTermStart[$index] = true;
+                            } else {
+                                $isTermStart[$index] = false;
+                            }
+
+                            if (($evaluationRow['is_exam'] ?? false) === true) {
+                                $termRowSpans[$termStartIndex] = $index - $termStartIndex + 1;
+                                $termStartIndex = null;
+                            }
+                        }
+
+                        if ($termStartIndex !== null) {
+                            $termStart = (int) $termStartIndex;
+                            $termRowSpans[$termStart] = count($evaluationRows ?? []) - $termStart;
+                        }
                     @endphp
-                    @forelse (($evaluationRows ?? []) as $row)
+                    @forelse (($evaluationRows ?? []) as $index => $row)
                         <tr>
                             <td style="text-align:center;">{{ $row['co_label'] ?? '' }}</td>
                             <td>{{ $row['lec_task'] ?? '' }}</td>
@@ -539,11 +563,11 @@
                                 <td>{{ $row['lab_task'] ?? '' }}</td>
                                 <td style="text-align:center;">{{ $row['lab_weight'] ?? '' }}</td>
                             @endif
-                            <td style="text-align:center;">
-                                @if (($row['is_exam'] ?? false) === true)
+                            @if ($isTermStart[$index] ?? false)
+                                <td rowspan="{{ $termRowSpans[$index] ?? 1 }}" style="text-align:center; vertical-align:middle;">
                                     <strong>{{ $lecPassMark }}%</strong>
-                                @endif
-                            </td>
+                                </td>
+                            @endif
                         </tr>
                     @empty
                         <tr>
