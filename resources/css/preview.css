@@ -207,6 +207,11 @@ h3.a4-section {
 .indent-level-1-5-text{ padding-left: 40px; text-indent: 20px; }
 .indent-level-2       { padding-left: 60px; text-indent: 40px; }
 
+.abridged-indent {
+    text-indent: 20px;
+    padding: 15px;
+
+}
 /* ── Shared text styles ── */
 p,
 ul li,
@@ -285,6 +290,16 @@ table th {
 .kv-table td:first-child {
     width: 5%;
     white-space: nowrap;
+}
+
+.abridged-table td {
+    width: 50%;
+    vertical-align: top;
+    word-break: break-word;
+}
+
+.abridged-table{
+    margin-bottom: 15px;
 }
 
 /* ═══════════════════════════════════════════════

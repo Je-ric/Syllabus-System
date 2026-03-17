@@ -429,7 +429,7 @@
                         <tr>
                             @if (($row['is_exam'] ?? false) === true)
                                 <td style="text-align:center;">{{ $row['week_label'] }}</td>
-                                <td colspan="5" style="text-align:center; font-weight:bold;">
+                                <td colspan="5" style="text-align:center; font-weight:bold; font-style:italic; vertical-align:middle;">
                                     {{ $row['exam_label'] ?? 'Exam' }}
                                 </td>
                             @else
@@ -467,7 +467,7 @@
                             <tr>
                                 @if (($row['is_exam'] ?? false) === true)
                                     <td style="text-align:center;">{{ $row['week_label'] }}</td>
-                                    <td colspan="5" style="text-align:center; font-weight:bold;">
+                                    <td colspan="5" style="text-align:center; font-weight:bold; font-style:italic; vertical-align:middle;">
                                         {{ $row['exam_label'] ?? 'Exam' }}
                                     </td>
                                 @else
