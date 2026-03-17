@@ -184,6 +184,13 @@
                 III. Course Calendar
             </h3>
 
+            {{-- Reusable weekly table macro for both LEC and LAB --}}
+            @php
+                $lecRows = $abridgedWeeklyRows['LEC'] ?? [];
+                $labRows = $abridgedWeeklyRows['LAB'] ?? [];
+            @endphp
+
+            {{-- ── LEC table ──────────────────────────────────────────── --}}
             @if ($syllabus->course->has_lec_lab)
                 <p style="margin:0 0 4px; font-size:9pt;"><strong>Lecture (LEC)</strong></p>
             @endif
@@ -199,28 +206,22 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse ($abridgedWeeklyRows as $row)
+                    @forelse ($lecRows as $row)
                         @if ($row['is_exam'])
-                            <tr>
-                                <td style="text-align:center; font-weight:bold;">{{ $row['co_no'] }}</td>
-                                <td style="text-align:center; font-weight:bold;">{{ $row['week_no'] }}</td>
-                                <td colspan="3" style="text-align:center; font-weight:bold; font-style:italic;">
+                            {{-- Exam: single full-width row, centered, bold, shaded --}}
+                            <tr style="background:#f0f0f0;">
+                                <td colspan="5"
+                                    style="text-align:center; font-weight:bold; font-style:italic;">
                                     {{ $row['exam_label'] }}
                                 </td>
                             </tr>
                         @else
                             <tr>
-                                <td style="text-align:center;">{{ $row['co_no'] }}</td>
-                                <td style="text-align:center;">{{ $row['wk_label'] }}</td>
-                                <td style="vertical-align:top;">
-                                    {!! nl2br(e($row['topics'])) !!}
-                                </td>
-                                <td style="vertical-align:top;">
-                                    {!! nl2br(e($row['tla'])) !!}
-                                </td>
-                                <td style="text-align:center; vertical-align:top;">
-                                    {{ $row['assessment'] }}
-                                </td>
+                                <td style="text-align:center; vertical-align:top;">{{ $row['co_no'] }}</td>
+                                <td style="text-align:center; vertical-align:top;">{{ $row['wk_label'] }}</td>
+                                <td style="vertical-align:top;">{!! nl2br(e($row['topics'])) !!}</td>
+                                <td style="vertical-align:top;">{!! nl2br(e($row['tla'])) !!}</td>
+                                <td style="vertical-align:top;">{!! nl2br(e($row['assessment'])) !!}</td>
                             </tr>
                         @endif
                     @empty
@@ -230,6 +231,48 @@
                     @endforelse
                 </tbody>
             </table>
+
+            {{-- ── LAB table (LEC+LAB courses only) ───────────────────── --}}
+            @if ($syllabus->course->has_lec_lab)
+                <p style="margin:10px 0 4px; font-size:9pt;"><strong>Laboratory (LAB)</strong></p>
+
+                <table class="weekly-coverage-table" border="1" style="width:100%; border-collapse:collapse;">
+                    <thead>
+                        <tr>
+                            <th style="text-align:center; width:50px;">CO No.</th>
+                            <th style="text-align:center; width:70px;">Wk No.</th>
+                            <th style="text-align:center;">Topics</th>
+                            <th style="text-align:center;">Learning Activities</th>
+                            <th style="text-align:center; width:120px;">Assessment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($labRows as $row)
+                        @if ($row['is_exam'])
+                            {{-- Exam: single full-width row, centered, bold, shaded --}}
+                            <tr style="background:#f0f0f0;">
+                                <td colspan="5"
+                                    style="text-align:center; font-weight:bold; font-style:italic;">
+                                    {{ $row['exam_label'] }}
+                                </td>
+                            </tr>
+                        @else
+                            <tr>
+                                <td style="text-align:center; vertical-align:top;">{{ $row['co_no'] }}</td>
+                                <td style="text-align:center; vertical-align:top;">{{ $row['wk_label'] }}</td>
+                                <td style="vertical-align:top;">{!! nl2br(e($row['topics'])) !!}</td>
+                                <td style="vertical-align:top;">{!! nl2br(e($row['tla'])) !!}</td>
+                                <td style="vertical-align:top;">{!! nl2br(e($row['assessment'])) !!}</td>
+                            </tr>
+                        @endif
+                    @empty
+                        <tr>
+                            <td colspan="5" style="text-align:center;">No weekly coverage found.</td>
+                        </tr>
+                    @endforelse
+                    </tbody>
+                </table>
+            @endif
         </div>
 
         {{-- ═══════════════════════════════════════════════════════════════════

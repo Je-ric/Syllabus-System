@@ -69,10 +69,15 @@ class SyllabusPreviewService
         // ── Portrait-optimised weekly rows ────────────────────────────────────
         // Uses the LEC component (primary) — same as the sample abridged PDF.
         // Adds co_code and co_no to every row for the CO No. column.
-        $abridgedWeeklyRows = $this->buildAbridgedWeeklyRows(
-            $syllabus,
-            $base['weeks'] ?? null
-        );
+        $weeks = $base['weeks'] ?? null;
+
+        $abridgedWeeklyRows = [
+            'LEC' => $this->buildAbridgedWeeklyRows($syllabus, $weeks, 'LEC'),
+        ];
+
+        if ($syllabus->course?->has_lec_lab) {
+            $abridgedWeeklyRows['LAB'] = $this->buildAbridgedWeeklyRows($syllabus, $weeks, 'LAB');
+        }
 
         return array_merge($base, [
             'coPoLetterMap'      => $coPoLetterMap,
@@ -270,21 +275,34 @@ class SyllabusPreviewService
 
     /**
      * Portrait-only weekly rows for the abridged view.
-     * Uses LEC component. Columns: CO No., Wk No., Topics, Learning Activities, Assessment.
+     * Accepts a component type (`LEC` or `LAB`).
+     * Columns: CO No., Wk No., Topics, Learning Activities, Assessment.
      * Exam rows span all columns.
-     * Groups consecutive weeks with the same CO into a single merged row.
+     * Consecutive weeks with the same CO are merged into one grouped row.
      */
-    private function buildAbridgedWeeklyRows(Syllabus $syllabus, $weeks): array
+    private function buildAbridgedWeeklyRows(Syllabus $syllabus, $weeks, string $componentType = 'LEC'): array
     {
         $weeks     = $weeks ?? $syllabus->weeks?->sortBy('week_no') ?? collect();
         $examLabel = $this->examLabelFn();
         $rows      = [];
 
-        // ── Pass 1: build one raw row per week (LEC only) ─────────────────────
+        // For displaying "Activity 1", "Quiz 1", etc. in the Assessment column
+        $counters  = ['activity' => 0, 'quiz' => 0];
+
+        // Pass 1: build one raw row per week (per component)
         $rawRows = [];
         foreach ($weeks as $week) {
             $isExam  = (bool) $week->is_exam_week;
-            $content = $week->contents?->where('component_type', 'LEC')?->first();
+            $content = $week->contents?->where('component_type', $componentType)?->first();
+
+            // CO is shared per week; if LAB has no CO selected, fall back to LEC's CO
+            $coContent = $content;
+            if ((int) $week->week_no !== 1 && ! $coContent?->course_outcome_id) {
+                $lecContent = $week->contents?->where('component_type', 'LEC')?->first();
+                if ($lecContent?->course_outcome_id) {
+                    $coContent = $lecContent;
+                }
+            }
 
             if ($isExam) {
                 $rawRows[] = [
@@ -300,8 +318,20 @@ class SyllabusPreviewService
                 continue;
             }
 
+            // Assessment label with Activity/Quiz numbering when kind is set
+            $taskRaw    = trim((string) ($content?->assessment_task ?? ''));
+            $taskLabel  = $taskRaw;
+            $isTaskExam = str_contains(strtolower($taskRaw), 'exam');
+            $eval       = $content?->evaluation;
+
+            if (! $isTaskExam && $taskRaw !== '' && in_array($eval?->kind, ['activity', 'quiz'], true)) {
+                $k = $eval->kind;
+                $counters[$k]++;
+                $taskLabel = ucfirst($k) . ' ' . $counters[$k];
+            }
+
             // Extract numeric part of CO code for the CO No. column
-            $coCode = $content?->courseOutcome?->co_code ?? '';
+            $coCode = $coContent?->courseOutcome?->co_code ?? '';
             $coNo   = '';
             if ((int) $week->week_no === 1) {
                 $coNo = 'MVGO';
@@ -314,14 +344,14 @@ class SyllabusPreviewService
                 'week_no'    => (int) $week->week_no,
                 'exam_label' => null,
                 'co_no'      => $coNo,
-                'co_id'      => $content?->course_outcome_id,
+                'co_id'      => $coContent?->course_outcome_id,
                 'topics'     => trim((string) ($content?->topics ?? '')),
                 'tla'        => trim((string) ($content?->tla ?? '')),
-                'assessment' => trim((string) ($content?->assessment_task ?? '')),
+                'assessment' => $taskLabel,
             ];
         }
 
-        // ── Pass 2: merge consecutive non-exam rows with same CO into one ─────
+        // Pass 2: merge consecutive non-exam rows with same CO into one
         $i = 0;
         while ($i < count($rawRows)) {
             $row = $rawRows[$i];
@@ -333,8 +363,8 @@ class SyllabusPreviewService
             }
 
             // Look ahead: collect consecutive weeks with same co_id
-            $group    = [$row];
-            $j        = $i + 1;
+            $group = [$row];
+            $j     = $i + 1;
             while (
                 $j < count($rawRows) &&
                 ! $rawRows[$j]['is_exam'] &&
@@ -349,7 +379,6 @@ class SyllabusPreviewService
             $endWk   = end($group)['week_no'];
             $wkLabel = $startWk === $endWk ? (string) $startWk : $startWk . ' – ' . $endWk;
 
-            // Merge topics, tla, assessments across the group
             $topics     = collect($group)->pluck('topics')->filter()->implode("\n");
             $tla        = collect($group)->pluck('tla')->filter()->unique()->implode(', ');
             $assessment = collect($group)->pluck('assessment')->filter()->unique()->implode('; ');
@@ -368,6 +397,7 @@ class SyllabusPreviewService
 
         return $rows;
     }
+
 
     // ── Evaluation rows ───────────────────────────────────────────────────────
 
