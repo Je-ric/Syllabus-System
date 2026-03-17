@@ -1,6 +1,6 @@
-{{--
+﻿{{--
     Partial: weekly-partials/week-accordion.blade.php
-    ──────────────────────────────────────────────────
+
     Alpine-driven accordion that wraps every week row.
     Auto-saves the week that just collapsed via $watch.
 
@@ -64,22 +64,37 @@
                     if ($co['id'] == $coId) { $coCode = $co['co_code']; break; }
                 }
             }
+
+            // UI accents
+            $accentClosed = $isLocked ? 'bg-rose-200' : 'bg-slate-200';
+            $accentOpen   = $isLocked ? 'bg-rose-500' : 'bg-emerald-500';
+
+            $openHeaderClass = $isLocked
+                ? 'bg-rose-50/30 ring-1 ring-inset ring-rose-200'
+                : 'bg-slate-50 ring-1 ring-inset ring-slate-200';
+
+            $bodyBgClass = $isLocked ? 'bg-rose-50/10' : 'bg-slate-50/40';
         @endphp
 
-        <div wire:key="week-{{ $week->week_no }}-{{ $activeComponent }}">
+        <div wire:key="week-{{ $week->week_no }}-{{ $activeComponent }}" class="relative">
 
-            {{-- ── Accordion Header ──────────────────────────────────────────── --}}
+            {{-- Left accent bar (helps differentiate header vs body on open) --}}
+            <span class="absolute left-0 top-0 bottom-0 w-1"
+                :class="openWeek === {{ $week->week_no }} ? '{{ $accentOpen }}' : '{{ $accentClosed }}'"></span>
+
+            {{-- Accordion Header --}}
             <button type="button"
                 @click="openWeek = openWeek === {{ $week->week_no }} ? null : {{ $week->week_no }}"
+                :class="openWeek === {{ $week->week_no }} ? '{{ $openHeaderClass }}' : ''"
                 @class([
-                    'w-full flex items-center px-5 py-3.5 transition-colors duration-100 focus:outline-none text-left',
+                    'w-full flex items-center pl-6 pr-5 py-3.5 transition-colors duration-100 focus:outline-none text-left',
                     'hover:bg-rose-50/30 bg-rose-50/10' => $isLocked,
                     'hover:bg-slate-50'                  => ! $isLocked,
                 ])>
 
                 <div class="flex items-center gap-3 min-w-0 flex-1">
 
-                    {{-- Week number circle —— rose = locked, slate = normal --}}
+                    {{-- Week number circle — rose = locked, slate = normal --}}
                     <span @class([
                         'inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold shrink-0',
                         'bg-rose-100 text-rose-700 ring-1 ring-rose-200' => $isLocked,
@@ -144,9 +159,9 @@
 
             </button>
 
-            {{-- ── Accordion Body ─────────────────────────────────────────────── --}}
+            {{-- Accordion Body --}}
             <div x-show="openWeek === {{ $week->week_no }}" x-cloak
-                class="px-5 pb-5 pt-2 {{ $isLocked ? 'bg-rose-50/10' : 'bg-white' }}">
+                class="pl-6 pr-5 pb-5 pt-4 border-t border-slate-100 {{ $bodyBgClass }}">
 
                 @if ($isLocked)
                     @include('livewire.syllabus.steps.weekly-partials.week-body-locked', [
