@@ -2,7 +2,7 @@
 @import "boxicons/css/boxicons.min.css";
 @import './auth.css';
 @import './sidebar.css';
-@import './preview.css';
+/* @import './preview.css'; */
 
 @plugin "daisyui";
 

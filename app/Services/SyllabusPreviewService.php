@@ -215,23 +215,36 @@ class SyllabusPreviewService
                 $t = trim((string) ($c?->assessment_task ?? ''));
                 return $t !== '' && str_contains(strtolower($t), 'exam');
             });
+            $weekNoClassTask = $weekContents->first(function ($c) {
+                $t = strtolower(trim((string) ($c?->assessment_task ?? '')));
+                return $t !== '' && (
+                    str_contains($t, 'non-teaching week')
+                    || str_contains($t, 'non teaching week')
+                    || str_contains($t, 'no class')
+                );
+            });
 
             $isExam = $weekExamTask !== null
                 || trim((string) ($week->exam_type ?? '')) !== ''
                 || (bool) $week->is_exam_week;
 
+            $isNoClass = $weekNoClassTask !== null;
+
             $resolvedExamLabel = $weekExamTask
                 ? trim((string) $weekExamTask->assessment_task)
                 : $examLabel($week->exam_type);
+            $resolvedNoClassLabel = $weekNoClassTask
+                ? trim((string) $weekNoClassTask->assessment_task)
+                : 'Non-Teaching Week / No Class';
             $dateRange = $this->formatDateRange($week);
 
             foreach (['LEC', 'LAB'] as $type) {
                 $content = $week->contents?->where('component_type', $type)?->first();
 
-                if ($isExam) {
+                if ($isNoClass || $isExam) {
                     $weeklyCoverageRows[$type][] = [
                         'week_label'        => 'Week ' . (int) $week->week_no,
-                        'exam_label'        => $resolvedExamLabel,
+                        'exam_label'        => $isNoClass ? $resolvedNoClassLabel : $resolvedExamLabel,
                         'week_no'           => (int) $week->week_no,
                         'is_exam'           => true,
                         'date_range'        => $dateRange,
@@ -310,14 +323,27 @@ class SyllabusPreviewService
                 $t = trim((string) ($c?->assessment_task ?? ''));
                 return $t !== '' && str_contains(strtolower($t), 'exam');
             });
+            $weekNoClassTask = $weekContents->first(function ($c) {
+                $t = strtolower(trim((string) ($c?->assessment_task ?? '')));
+                return $t !== '' && (
+                    str_contains($t, 'non-teaching week')
+                    || str_contains($t, 'non teaching week')
+                    || str_contains($t, 'no class')
+                );
+            });
 
             $isExam = $weekExamTask !== null
                 || trim((string) ($week->exam_type ?? '')) !== ''
                 || (bool) $week->is_exam_week;
 
+            $isNoClass = $weekNoClassTask !== null;
+
             $resolvedExamLabel = $weekExamTask
                 ? trim((string) $weekExamTask->assessment_task)
                 : $examLabel($week->exam_type);
+            $resolvedNoClassLabel = $weekNoClassTask
+                ? trim((string) $weekNoClassTask->assessment_task)
+                : 'Non-Teaching Week / No Class';
             $content = $week->contents?->where('component_type', $componentType)?->first();
 
             // CO is shared per week; if LAB has no CO selected, fall back to LEC's CO
@@ -329,7 +355,7 @@ class SyllabusPreviewService
                 }
             }
 
-            if ($isExam) {
+            if ($isNoClass || $isExam) {
                 $coCode = $coContent?->courseOutcome?->co_code ?? '';
                 $coNo   = '';
                 if ((int) $week->week_no === 1) {
@@ -346,7 +372,7 @@ class SyllabusPreviewService
                     'is_exam'    => true,
                     'week_no'    => (int) $week->week_no,
                     'wk_label'   => (string) ((int) $week->week_no),
-                    'exam_label' => $resolvedExamLabel,
+                    'exam_label' => $isNoClass ? $resolvedNoClassLabel : $resolvedExamLabel,
                     'co_no'      => $coNo,
                     'co_id'      => null,
                     'topics'     => '',

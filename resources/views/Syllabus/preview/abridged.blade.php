@@ -240,11 +240,11 @@
                             </tr>
                         @else
                             <tr>
-                                <td style="text-align:center; vertical-align:top;">{{ $row['co_no'] }}</td>
+                                <td style="text-align:center; vertical-align:top;">{{ blank($row['co_no'] ?? null) ? '---' : $row['co_no'] }}</td>
                                 <td style="text-align:center; vertical-align:top;">Week {{ $row['wk_label'] ?? $row['week_label'] ?? $row['week_no'] ?? '' }}</td>
-                                <td style="vertical-align:top;">{!! nl2br(e($toMultilineCell($row['topics'] ?? ''))) !!}</td>
-                                <td style="vertical-align:top;">{!! nl2br(e($toMultilineCell($row['tla'] ?? ''))) !!}</td>
-                                <td style="vertical-align:top;">{!! nl2br(e($toMultilineCell($row['assessment'] ?? ''))) !!}</td>
+                                <td style="vertical-align:top;">{!! nl2br(e(($toMultilineCell($row['topics'] ?? '')) !== '' ? $toMultilineCell($row['topics'] ?? '') : '---')) !!}</td>
+                                <td style="vertical-align:top;">{!! nl2br(e(($toMultilineCell($row['tla'] ?? '')) !== '' ? $toMultilineCell($row['tla'] ?? '') : '---')) !!}</td>
+                                <td style="vertical-align:top;">{!! nl2br(e(($toMultilineCell($row['assessment'] ?? '')) !== '' ? $toMultilineCell($row['assessment'] ?? '') : '---')) !!}</td>
                             </tr>
                         @endif
                     @empty
@@ -283,11 +283,11 @@
                                 </tr>
                             @else
                                 <tr>
-                                    <td style="text-align:center; vertical-align:top;">{{ $row['co_no'] }}</td>
+                                    <td style="text-align:center; vertical-align:top;">{{ blank($row['co_no'] ?? null) ? '---' : $row['co_no'] }}</td>
                                     <td style="text-align:center; vertical-align:top;">Week {{ $row['wk_label'] ?? $row['week_label'] ?? $row['week_no'] ?? '' }}</td>
-                                    <td style="vertical-align:top;">{!! nl2br(e($toMultilineCell($row['topics'] ?? ''))) !!}</td>
-                                    <td style="vertical-align:top;">{!! nl2br(e($toMultilineCell($row['tla'] ?? ''))) !!}</td>
-                                    <td style="vertical-align:top;">{!! nl2br(e($toMultilineCell($row['assessment'] ?? ''))) !!}</td>
+                                    <td style="vertical-align:top;">{!! nl2br(e(($toMultilineCell($row['topics'] ?? '')) !== '' ? $toMultilineCell($row['topics'] ?? '') : '---')) !!}</td>
+                                    <td style="vertical-align:top;">{!! nl2br(e(($toMultilineCell($row['tla'] ?? '')) !== '' ? $toMultilineCell($row['tla'] ?? '') : '---')) !!}</td>
+                                    <td style="vertical-align:top;">{!! nl2br(e(($toMultilineCell($row['assessment'] ?? '')) !== '' ? $toMultilineCell($row['assessment'] ?? '') : '---')) !!}</td>
                                 </tr>
                             @endif
                         @empty
