@@ -194,6 +194,22 @@
             @php
                 $lecRows = $abridgedWeeklyRows['LEC'] ?? [];
                 $labRows = $abridgedWeeklyRows['LAB'] ?? [];
+
+                $toMultilineCell = function ($value) {
+                    $text = trim((string) ($value ?? ''));
+
+                    if ($text === '') {
+                        return '';
+                    }
+
+                    $text = str_replace(["\r\n", "\r"], "\n", $text);
+                    $text = str_replace(['•', '●', '▪'], "\n", $text);
+                    $text = preg_replace('/\s*[;|]\s*/', "\n", $text) ?? $text;
+                    $text = preg_replace('/\s*,\s*/', "\n", $text) ?? $text;
+                    $text = preg_replace('/\n{2,}/', "\n", $text) ?? $text;
+
+                    return trim($text);
+                };
             @endphp
 
             {{-- ── LEC table ──────────────────────────────────────────── --}}
@@ -214,19 +230,21 @@
                 <tbody>
                     @forelse ($lecRows as $row)
                         @if ($row['is_exam'])
-                            {{-- Exam: single full-width row, centered, bold, shaded --}}
+                            {{-- Exam row keeps CO + Week visible, then spans remaining columns --}}
                             <tr style="background:#f0f0f0;">
-                                <td colspan="5" style="text-align:center; font-weight:bold; font-style:italic;">
-                                    {{ $row['exam_label'] }}
+                                <td style="text-align:center; vertical-align:middle;">{{ $row['co_no'] ?? $row['co_label'] ?? '-' }}</td>
+                                <td style="text-align:center; vertical-align:middle;">Week {{ $row['wk_label'] ?? $row['week_label'] ?? $row['week_no'] ?? '' }}</td>
+                                <td colspan="3" style="text-align:center; font-weight:bold; font-style:italic; vertical-align:middle;">
+                                    {{ $row['exam_label'] ?? 'Exam' }}
                                 </td>
                             </tr>
                         @else
                             <tr>
                                 <td style="text-align:center; vertical-align:top;">{{ $row['co_no'] }}</td>
-                                <td style="text-align:center; vertical-align:top;">{{ $row['wk_label'] }}</td>
-                                <td style="vertical-align:top;">{!! nl2br(e($row['topics'])) !!}</td>
-                                <td style="vertical-align:top;">{!! nl2br(e($row['tla'])) !!}</td>
-                                <td style="vertical-align:top;">{!! nl2br(e($row['assessment'])) !!}</td>
+                                <td style="text-align:center; vertical-align:top;">Week {{ $row['wk_label'] ?? $row['week_label'] ?? $row['week_no'] ?? '' }}</td>
+                                <td style="vertical-align:top;">{!! nl2br(e($toMultilineCell($row['topics'] ?? ''))) !!}</td>
+                                <td style="vertical-align:top;">{!! nl2br(e($toMultilineCell($row['tla'] ?? ''))) !!}</td>
+                                <td style="vertical-align:top;">{!! nl2br(e($toMultilineCell($row['assessment'] ?? ''))) !!}</td>
                             </tr>
                         @endif
                     @empty
@@ -255,19 +273,21 @@
                     <tbody>
                         @forelse ($labRows as $row)
                             @if ($row['is_exam'])
-                                {{-- Exam: single full-width row, centered, bold, shaded --}}
+                                {{-- Exam row keeps CO + Week visible, then spans remaining columns --}}
                                 <tr style="background:#f0f0f0;">
-                                    <td colspan="5" style="text-align:center; font-weight:bold; font-style:italic;">
-                                        {{ $row['exam_label'] }}
+                                    <td style="text-align:center; vertical-align:middle;">{{ $row['co_no'] ?? $row['co_label'] ?? '-' }}</td>
+                                    <td style="text-align:center; vertical-align:middle;">Week {{ $row['wk_label'] ?? $row['week_label'] ?? $row['week_no'] ?? '' }}</td>
+                                    <td colspan="3" style="text-align:center; font-weight:bold; font-style:italic; vertical-align:middle;">
+                                        {{ $row['exam_label'] ?? 'Exam' }}
                                     </td>
                                 </tr>
                             @else
                                 <tr>
                                     <td style="text-align:center; vertical-align:top;">{{ $row['co_no'] }}</td>
-                                    <td style="text-align:center; vertical-align:top;">{{ $row['wk_label'] }}</td>
-                                    <td style="vertical-align:top;">{!! nl2br(e($row['topics'])) !!}</td>
-                                    <td style="vertical-align:top;">{!! nl2br(e($row['tla'])) !!}</td>
-                                    <td style="vertical-align:top;">{!! nl2br(e($row['assessment'])) !!}</td>
+                                    <td style="text-align:center; vertical-align:top;">Week {{ $row['wk_label'] ?? $row['week_label'] ?? $row['week_no'] ?? '' }}</td>
+                                    <td style="vertical-align:top;">{!! nl2br(e($toMultilineCell($row['topics'] ?? ''))) !!}</td>
+                                    <td style="vertical-align:top;">{!! nl2br(e($toMultilineCell($row['tla'] ?? ''))) !!}</td>
+                                    <td style="vertical-align:top;">{!! nl2br(e($toMultilineCell($row['assessment'] ?? ''))) !!}</td>
                                 </tr>
                             @endif
                         @empty
@@ -395,14 +415,21 @@
                         {{ $lecPassMark }}%</strong></p>
 
                 {{-- b. FCAS formula --}}
+                <br>
                 <p style="margin-top:12px;" class="indent-level-1">
                     <strong>b. Computation of Final Course Average Score (FCAS)</strong>
                 </p>
+                <br>
                 @if ($syllabus->course->has_lec_lab)
-                    <p class="indent-level-2"><strong>FCAS = (0.67) × LecAve + (0.33) × LabAve + APP</strong></p>
+                    <p style="text-align:center; font-weight:700;">
+                        FCAS = (0.67) × LecAve + (0.33) × LabAve + APP
+                    </p>
                 @else
-                    <p class="indent-level-2"><strong>FCAS = LecAve + APP</strong></p>
+                    <p style="text-align:center; font-weight:700;">
+                        FCAS = LecAve + APP
+                    </p>
                 @endif
+                <br>
 
                 {{-- c. Transmutation --}}
                 <p style="margin-top:12px;" class="indent-level-1">
@@ -412,7 +439,7 @@
                 </p>
             </div>
 
-            <table class="abridged-indent" border="1"
+            <table class="abridged-indent-table" border="1"
                 style="width:100%; border-collapse:collapse; margin-top:4px;margin-bottom:10px;">
                 <thead>
                     <tr>

@@ -199,7 +199,7 @@ h3.a4-section {
 .indent-level-1-5-text,
 .indent-level-2 {
     display: block;
-    font-weight: 100;
+    /* font-weight: 100; */
 }
 
 .indent-level-1       { padding-left: 40px; }
@@ -211,6 +211,12 @@ h3.a4-section {
     text-indent: 20px;
     padding: 15px;
 
+}
+
+/* For full table offset: move the table box, not just the text inside cells. */
+.abridged-indent-table {
+    margin-left: 15px;
+    width: calc(100% - 15px);
 }
 /* ── Shared text styles ── */
 p,

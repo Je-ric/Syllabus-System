@@ -329,11 +329,20 @@ class SyllabusPreviewService
             }
 
             if ($isExam) {
+                $coCode = $coContent?->courseOutcome?->co_code ?? '';
+                $coNo   = '';
+                if ((int) $week->week_no === 1) {
+                    $coNo = 'MVGO';
+                } elseif ($coCode !== '') {
+                    $coNo = preg_replace('/^[A-Za-z]+/', '', $coCode); // strip 'CO' prefix
+                }
+
                 $rawRows[] = [
                     'is_exam'    => true,
                     'week_no'    => (int) $week->week_no,
+                    'wk_label'   => (string) ((int) $week->week_no),
                     'exam_label' => $resolvedExamLabel,
-                    'co_no'      => '',
+                    'co_no'      => $coNo,
                     'co_id'      => null,
                     'topics'     => '',
                     'tla'        => '',
