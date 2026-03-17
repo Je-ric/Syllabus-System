@@ -22,7 +22,7 @@ class SyllabusController extends Controller
     public function index()
     {
         $syllabi = Syllabus::where('prepared_by', Auth::id())
-            ->with(['course.program', 'academicCalendar', 'deanConcurred', 'dean'])
+            ->with(['course.program', 'academicCalendar', 'chair', 'dean'])
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -199,8 +199,13 @@ class SyllabusController extends Controller
         $this->authorizeSyllabusAccess($syllabus);
 
         $data = $this->previewService->buildAbridgedData($syllabus);
-        $data['isSnapshot']       = true;
-        $data['inlinePreviewCss'] = @file_get_contents(resource_path('css/preview.css')) ?: null;
+        $data['isSnapshot'] = true;
+
+        // Inline both shared (preview.css) and abridged-specific (abridged.css) stylesheets.
+        $sharedCss   = @file_get_contents(resource_path('css/preview.css'))  ?: '';
+        $abridgedCss = @file_get_contents(resource_path('css/abridged.css')) ?: '';
+        $data['inlinePreviewCss'] = $sharedCss . "
+" . $abridgedCss ?: null;
 
         $logoPath = public_path('assets/clsu-logo-green.png');
         $data['inlineLogoDataUri'] = is_file($logoPath)
@@ -245,6 +250,51 @@ class SyllabusController extends Controller
 
         if (! Storage::disk('local')->exists($path)) {
             abort(404, 'Saved version file not found.');
+        }
+
+        return Storage::disk('local')->download($path, basename($path), [
+            'Content-Type' => 'text/html; charset=UTF-8',
+        ]);
+    }
+
+    public function previewSavedAbridged(CompleteSyllabus $completeSyllabus)
+    {
+        $syllabus = $completeSyllabus->syllabus()->firstOrFail();
+        $this->authorizeSyllabusAccess($syllabus);
+
+        $path = trim((string) ($completeSyllabus->abridged_path ?? ''));
+
+        if ($path === '') {
+            // No abridged snapshot saved yet — fall back to live render
+            return $this->previewAbridged($syllabus);
+        }
+
+        if (preg_match('#^https?://#i', $path) || str_starts_with($path, '/')) {
+            return redirect()->away($path);
+        }
+
+        if (! Storage::disk('local')->exists($path)) {
+            abort(404, 'Abridged saved version file not found.');
+        }
+
+        return response(Storage::disk('local')->get($path), 200, [
+            'Content-Type' => 'text/html; charset=UTF-8',
+        ]);
+    }
+
+    public function downloadSavedAbridged(CompleteSyllabus $completeSyllabus)
+    {
+        $syllabus = $completeSyllabus->syllabus()->firstOrFail();
+        $this->authorizeSyllabusAccess($syllabus);
+
+        $path = trim((string) ($completeSyllabus->abridged_path ?? ''));
+
+        if ($path === '' || preg_match('#^https?://#i', $path) || str_starts_with($path, '/')) {
+            abort(400, 'This abridged version is not stored locally.');
+        }
+
+        if (! Storage::disk('local')->exists($path)) {
+            abort(404, 'Abridged saved version file not found.');
         }
 
         return Storage::disk('local')->download($path, basename($path), [

@@ -245,16 +245,17 @@ class SyllabusWizard extends Component
             return;
         }
 
-        // 1. Generate HTML snapshot ───────────────────────────────────────
+        // 1. Generate HTML snapshots (complete + abridged) ────────────────
         try {
-            $html = app(SyllabusController::class)->generateCompleteHtmlSnapshot($syllabus);
+            $html         = app(SyllabusController::class)->generateCompleteHtmlSnapshot($syllabus);
+            $htmlAbridged = app(SyllabusController::class)->generateAbridgedHtmlSnapshot($syllabus);
         } catch (Throwable $e) {
             report($e);
             $this->dispatch('lw-toast', type: 'error', message: 'Save-as-done failed: ' . $e->getMessage());
             return;
         }
 
-        // 2. Build storage path ──────────────────────────────────────────
+        // 2. Build storage paths ─────────────────────────────────────────
         $program    = $syllabus->course?->program;
         $department = $program?->departments?->first();
         $college    = $department?->college;
@@ -270,23 +271,19 @@ class SyllabusWizard extends Component
         $semester     = $syllabus->academicCalendar?->semester      ?? 'N-A';
         $courseCode   = $syllabus->course?->course_code             ?? 'COURSE';
 
-        $fileName    = Str::slug($courseCode . '-' . $academicYear . '-' . $semester . '-v' . $version) . '.html';
-        $storagePath = implode('/', [
-            'syllabus-snapshots',
-            $collegeName,
-            $departmentName,
-            $programName,
-            $facultyName,
-            $fileName,
-        ]);
+        $baseSlug    = Str::slug($courseCode . '-' . $academicYear . '-' . $semester . '-v' . $version);
+        $baseDir     = implode('/', ['syllabus-snapshots', $collegeName, $departmentName, $programName, $facultyName]);
+        $storagePath         = $baseDir . '/' . $baseSlug . '.html';
+        $storagePathAbridged = $baseDir . '/' . $baseSlug . '-abridged.html';
 
-        // 3. Write to local disk ──────────────────────────────────────────
+        // 3. Write both to local disk ─────────────────────────────────────
         try {
             $ok = Storage::disk('local')->put($storagePath, $html);
             if (! $ok) {
                 $this->dispatch('lw-toast', type: 'error', message: 'Snapshot write failed — storage returned false.');
                 return;
             }
+            Storage::disk('local')->put($storagePathAbridged, $htmlAbridged);
         } catch (Throwable $e) {
             report($e);
             $this->dispatch('lw-toast', type: 'error', message: 'Disk write error: ' . $e->getMessage());
@@ -296,15 +293,17 @@ class SyllabusWizard extends Component
         // 4. Persist version record ──────────────────────────────────────
         try {
             CompleteSyllabus::create([
-                'syllabus_id'   => $syllabus->id,
-                'course_id'     => $syllabus->course_id,
-                'academic_year' => $academicYear,
-                'semester'      => $semester,
-                'pdf_path'      => $storagePath,
-                'version'       => $version,
-                'approved_at'   => null,
-                'approved_by'   => null,
-                'checksum'      => hash('sha256', $html),
+                'syllabus_id'          => $syllabus->id,
+                'course_id'            => $syllabus->course_id,
+                'academic_year'        => $academicYear,
+                'semester'             => $semester,
+                'pdf_path'             => $storagePath,
+                'abridged_path'        => $storagePathAbridged,
+                'version'              => $version,
+                'approved_at'          => null,
+                'approved_by'          => null,
+                'checksum'             => hash('sha256', $html),
+                'checksum_abridged'    => hash('sha256', $htmlAbridged),
             ]);
         } catch (Throwable $e) {
             report($e);
@@ -435,11 +434,10 @@ class SyllabusWizard extends Component
             return false;
         }
 
+        // phone and office are optional — not checked here
         return collect([
             $component->instructor_name,
             $component->instructor_email,
-            $component->phone,
-            $component->office,
             $component->class_hours,
             $component->schedule,
             $component->consultation_hours,
