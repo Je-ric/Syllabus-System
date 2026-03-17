@@ -1,13 +1,35 @@
-Notes Commands:
+﻿# CSMS Commands (Developer Notes)
 
+Quick command reference used while developing CSMS.
 
-----------------------------------
-MIGRATION
-----------------------------------
+## Files Used
+
+- Laravel entrypoint: `artisan`
+- Migrations: `database/migrations/*`
+- Models: `app/Models/*`
+- Controllers: `app/Http/Controllers/*`
+- Livewire components: `app/Livewire/*`
+- Mailables: `app/Mail/*`
+
+## Sequences (Typical)
+
+### Add a new feature (DB-backed)
+
+1. Create migration.
+2. Create model.
+3. Create controller and/or Livewire component.
+4. Run migrations.
+5. Seed (if needed).
+
+## Migrations
+
+Use when adding or changing tables:
+
+```bash
 php artisan make:migration create_roles_table
 php artisan make:migration create_user_roles_table
-php artisan make:migration create_colleges_table 
-php artisan make:migration create_college_goals_table 
+php artisan make:migration create_colleges_table
+php artisan make:migration create_college_goals_table
 php artisan make:migration create_departments_table
 php artisan make:migration create_department_objectives_table
 php artisan make:migration create_programs_table
@@ -30,11 +52,14 @@ php artisan make:migration create_co_assessment_plans_table
 php artisan make:migration create_week_contents_table
 php artisan make:migration create_syllabus_references_table
 php artisan make:migration create_syllabus_materials_table
+php artisan make:migration create_audit_logs_table
+```
 
+## Models
 
-----------------------------------
-MODEL
-----------------------------------
+Use when adding new entities:
+
+```bash
 php artisan make:model User
 php artisan make:model Role
 php artisan make:model UserRole
@@ -48,22 +73,25 @@ php artisan make:model ProgramOutcome
 php artisan make:model AcademicCalendar
 php artisan make:model AcademicCalendarEvent
 php artisan make:model Course
-php artisan make:model CourseCurriculumMap 
+php artisan make:model CourseCurriculumMap
 php artisan make:model Syllabus
 php artisan make:model SyllabusRevision
-php artisan make:model CourseComponent 
-php artisan make:model CourseOutcome 
-php artisan make:model UserAssigment 
+php artisan make:model CourseComponent
+php artisan make:model CourseOutcome
+php artisan make:model UserAssigment
 php artisan make:model SyllabusWeek
 php artisan make:model COAssessmentPlan
 php artisan make:model WeekContent
 php artisan make:model Reference
 php artisan make:model OnlineMaterial
+php artisan make:model AuditLog
+```
 
+## Controllers
 
-----------------------------------
-CONTROLLER
-----------------------------------
+Use for HTTP pages/actions:
+
+```bash
 php artisan make:controller AuthController
 php artisan make:controller AccountApprovalController
 php artisan make:controller OTPController
@@ -76,49 +104,56 @@ php artisan make:controller AcademicCalendarEventController
 php artisan make:controller CourseController
 php artisan make:controller SyllabusController
 php artisan make:controller UserController
+```
 
-----------------------------------
-LIVEWIRE
-----------------------------------
+## Livewire
+
+Use for interactive components:
+
+```bash
 php artisan make:livewire Programs/ManagePeos
 php artisan make:livewire Programs/ProgramSelector
+```
 
+## Mail
 
-----------------------------------
-MAIL
-----------------------------------
+Use when sending emails:
+
+```bash
 php artisan make:mail OtpMail
 php artisan make:mail AccountStatusUpdated
+```
 
+## Blade Components
 
-----------------------------------
-COMPONENT
-----------------------------------
+```bash
 php artisan make:component StatusIndicator
 php artisan make:component Button
 php artisan make:component Toast
-----------------------------------
+```
 
+## Requests
 
-----------------------------------
-REQUEST
-----------------------------------
+Use for form validation request classes:
+
+```bash
 php artisan make:request SaveAcademicCalendarRequest
 php artisan make:request SaveCourseRequest
 php artisan make:request SaveDepartmentRequest
 php artisan make:request SaveProgramRequest
-php artisan make:request 
-----------------------------------
+```
 
+## Run / Reset Database
 
-
-php artisan make:migration create_audit_logs_table
-php artisan make:model AuditLog
-
+```bash
 php artisan migrate
 php artisan migrate:fresh
-
 php artisan db:seed --class=AdminSeeder
+```
+
+## Dependencies (Notes)
+
+```bash
 composer require blade-ui-kit/blade-heroicons
 php artisan vendor:publish --tag=heroicons
 npm install -D daisyui
@@ -126,3 +161,4 @@ npm i -D daisyui@latest
 composer require barryvdh/laravel-dompdf
 npm install laravel-precognition-alpine
 composer require laravel/precognition
+```

@@ -1,84 +1,112 @@
-# Organizational Hierarchy Rules
+﻿# Organizational Hierarchy (Dean, Chair, Faculty)
 
-This document summarizes assignment conditions for dean, chair, and faculty across colleges/departments.
+Rules for organizational assignments and what appears in hierarchy views.
 
-## Source Controller
+## Files Used (Source of Truth)
 
-- `app/Http/Controllers/OrganizationalHierarchyController.php`
+- Controller
+  - `app/Http/Controllers/OrganizationalHierarchyController.php`
+- Models
+  - `app/Models/User.php`
+  - `app/Models/UserAssignment.php`
+- Routes
+  - `routes/web.php` (organizational hierarchy routes)
 
-## General Assignment Preconditions
+## Preconditions (Applies to All Assignments)
 
-- Target user must exist.
-- Target college/department must exist.
-- User account must be active to appear in potential-assignee lists.
+- If the target user does not exist:
+  - Then assignment is blocked.
+- If the target college/department does not exist:
+  - Then assignment is blocked.
+- If a user account is not `active`:
+  - Then they should not appear in potential-assignee lists.
 
-## Dean Assignment Conditions
+## Conditions (If / Then)
 
-- User must have `dean` or `admin` role.
-- User must not currently be assigned as chair.
-- User must not already be assigned as dean of any college.
-- Duplicate dean assignment to same college is blocked.
+### Dean Assignment
 
-## Dean Assignment Behavior
+- If assigning a dean:
+  - Then user must have role `dean` or `admin`.
+  - Then user must not currently be assigned as chair.
+  - Then user must not already be assigned as dean of any college.
+  - Then duplicate dean assignment to the same college is blocked.
 
-- Creates `user_assignments` row with:
-- `context = dean`
-- `college_id` set
-- `department_id = null`
-- Automatically ensures faculty role and corresponding faculty assignment.
+### Dean Assignment (Behavior)
 
-## Dean Removal
+- If dean assignment succeeds:
+  - Then create `user_assignments` row:
+    - `context = dean`
+    - `college_id` set
+    - `department_id = null`
+  - Then ensure faculty role and corresponding faculty assignment.
 
-- Removes dean assignment by `(college_id, user_id, context=dean)`.
+### Chair Assignment
 
-## Chair Assignment Conditions
+- If assigning a chair:
+  - Then user must have role `chair` or `admin`.
+  - Then user must not currently be assigned as dean.
+  - Then user must not already be assigned as chair of any department.
+  - Then duplicate chair assignment to the same department is blocked.
 
-- User must have `chair` or `admin` role.
-- User must not currently be assigned as dean.
-- User must not already be assigned as chair of any department.
-- Duplicate chair assignment to same department is blocked.
+### Chair Assignment (Behavior)
 
-## Chair Assignment Behavior
+- If chair assignment succeeds:
+  - Then create `user_assignments` row:
+    - `context = chair`
+    - `department_id` set
+    - `college_id = null`
+  - Then ensure faculty role and corresponding faculty assignment.
 
-- Creates `user_assignments` row with:
-- `context = chair`
-- `department_id` set
-- `college_id = null`
-- Automatically ensures faculty role and corresponding faculty assignment.
+### Faculty Assignment
 
-## Chair Removal
+- If assigning a faculty member:
+  - Then user must have role `faculty` or `admin`.
+  - Then duplicate faculty assignment to the same department is blocked.
 
-- Removes chair assignment by `(department_id, user_id, context=chair)`.
+### Faculty Assignment (Behavior)
 
-## Faculty Assignment Conditions
+- If faculty assignment succeeds:
+  - Then create `user_assignments` row:
+    - `context = faculty`
+    - `department_id` set
+    - `college_id = null`
 
-- User must have `faculty` or `admin` role.
-- Duplicate faculty assignment to same department is blocked.
+## Removal Rules
 
-## Faculty Assignment Behavior
+- Dean removal deletes assignment by `(college_id, user_id, context=dean)`.
+- Chair removal deletes assignment by `(department_id, user_id, context=chair)`.
+- Faculty removal deletes assignment by `(department_id, user_id, context=faculty)`.
 
-- Creates `user_assignments` row with:
-- `context = faculty`
-- `department_id` set
-- `college_id = null`
+## Potential Assignee Lists
 
-## Faculty Removal
-
-- Removes faculty assignment by `(department_id, user_id, context=faculty)`.
-
-## Potential User Lists Logic
-
-- Potential dean list: users with role `admin` or `dean`, active accounts, excluding users already assigned as dean.
-- Potential chair list: users with role `admin` or `chair`, active accounts, excluding users already assigned as chair.
-- Potential faculty list: users with role `admin` or `faculty`, active accounts.
+- Potential dean list:
+  - Users with role `admin` or `dean`
+  - Account is active
+  - Excluding users already assigned as dean
+- Potential chair list:
+  - Users with role `admin` or `chair`
+  - Account is active
+  - Excluding users already assigned as chair
+- Potential faculty list:
+  - Users with role `admin` or `faculty`
+  - Account is active
 
 ## Hierarchy View Conditions
 
 - If logged-in user is dean:
-- Show dean's assigned college.
-- Show each department with its chair and faculty.
+  - Then show dean’s assigned college.
+  - Then show each department with its chair and faculty.
 - If logged-in user is chair:
-- Show chair's department and its faculty list.
-- If neither has matching assignment:
-- Show no-assignment view.
+  - Then show chair’s department and its faculty list.
+- If neither has a matching assignment:
+  - Then show no-assignment view.
 
+## Sequences (Typical Flow)
+
+### Assign Dean/Chair/Faculty
+
+1. Admin selects target scope (college or department).
+2. Admin selects a user from the filtered potential list.
+3. System validates role + exclusivity constraints.
+4. System creates a `user_assignments` row for the context.
+5. System ensures faculty role/assignment when required.

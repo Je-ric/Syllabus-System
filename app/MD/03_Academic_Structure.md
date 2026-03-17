@@ -1,61 +1,73 @@
-# Academic Structure Rules
+﻿# Academic Structure (Colleges, Departments, Programs)
 
-This document summarizes conditions for managing colleges, departments, and programs under Academic Structure.
+Practical reference for how CSMS manages the academic structure hierarchy.
 
-## Source Controller
+## Files Used (Source of Truth)
 
-- `app/Http/Controllers/AcademicStructureController.php`
+- Controller
+  - `app/Http/Controllers/AcademicStructureController.php`
+- Models
+  - `app/Models/College.php`
+  - `app/Models/Department.php`
+  - `app/Models/Program.php`
+- Pivot / relationships
+  - `program_departments` (program-to-department link with `role=primary`)
+- Routes
+  - `routes/web.php` (Academic Structure routes)
 
-## Colleges
+## Key Concepts
 
-### Create Conditions
+- Colleges contain Departments.
+- Programs belong to Departments through a pivot (`program_departments`) with a `primary` role.
 
-- College name is required and must be unique.
+## Conditions (If / Then)
 
-### Update Conditions
+### Colleges
 
-- College must exist.
-- Updated name is required.
-- Updated name must be unique except current college id.
+- If creating a college:
+  - Then `name` is required and must be unique.
+- If updating a college:
+  - Then the college must exist.
+  - Then `name` is required.
+  - Then `name` must be unique (excluding the current college id).
 
-## Departments
+### Departments
 
-### Create Conditions
+- If creating a department:
+  - Then `name` is required.
+  - Then `college_id` is required and must exist.
+- If updating a department:
+  - Then the department must exist.
+  - Then `name` is required.
+  - Then `college_id` is required and must exist.
 
-- Department name is required.
-- `college_id` is required.
-- `college_id` must exist in colleges table.
+### Programs (structure-level registration)
 
-### Update Conditions
+- If creating a program:
+  - Then `name` is required and must be unique.
+  - Then `department_id` is required and must exist.
+  - Then BOR approval number is optional.
+  - If BOR approval date is provided:
+    - Then it must be a valid date.
+- If updating a program:
+  - Then the program must exist.
+  - Then `name` is required and must be unique (excluding current program id).
+  - Then `department_id` is required and must exist.
+  - BOR fields keep the same optional rules.
 
-- Department must exist.
-- Department name is required.
-- `college_id` is required and must exist.
+## Sequences (Typical Flow)
 
-## Programs (Structure-level registration)
+### Create Program
 
-### Create Conditions
+1. User selects a Department and enters Program details.
+2. System validates name uniqueness and department existence.
+3. System inserts `programs` row.
+4. System inserts `program_departments` row:
+   - `sync([$departmentId => ['role' => 'primary']])`
 
-- Program name is required and unique.
-- `department_id` is required and must exist.
-- BOR approval number is optional.
-- BOR approval date is optional and must be a valid date when provided.
+### Update Program Department Link
 
-### Create Behavior
-
-- Program row is inserted into `programs`.
-- Link to department is inserted in `program_departments` with role `primary`.
-
-### Update Conditions
-
-- Program must exist.
-- Program name is required and unique except current program id.
-- `department_id` is required and must exist.
-- BOR fields keep same optional rules.
-
-### Update Behavior
-
-- Program row is updated.
-- Program-department relationship is synced to a single primary department:
-- `sync([$department_id => ['role' => 'primary']])`
-
+1. User selects a new Department for the Program.
+2. System validates department existence.
+3. System updates `programs`.
+4. System syncs `program_departments` back to a single primary department.

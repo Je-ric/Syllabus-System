@@ -1,22 +1,29 @@
-# How Livewire Works in CSMS (Beginner-Friendly)
+﻿# Livewire in CSMS (Beginner-Friendly)
 
-This guide explains Livewire in plain language for both technical and non-technical readers.
+Plain-language explanation of how Livewire is used in CSMS.
+
+## Files Used (Examples)
+
+- Components (examples)
+  - `app/Livewire/AccountApproval/ManageQueue.php`
+  - `app/Livewire/Programs/ProgramSelector.php`
+  - `app/Livewire/Programs/ManagePeos.php`
+  - `app/Livewire/Programs/ManagePos.php`
+  - `app/Livewire/Programs/PeoDisplay.php`
+  - `app/Livewire/Syllabus/SyllabusWizard.php`
+  - `app/Livewire/Syllabus/Steps/*`
+- Views (examples)
+  - `resources/views/livewire/programs/*`
+  - `resources/views/livewire/syllabus/*`
+
+Related docs:
+- `app/MD/10_Syllabus_Wizard.md`
 
 ## What Livewire Is
 
 - Livewire lets pages feel interactive without writing a lot of custom JavaScript.
 - You write PHP component classes + Blade views.
 - When users click/type/change inputs, Livewire sends small requests and updates only needed parts of the page.
-
-## CSMS Livewire Components (Current)
-
-- `app/Livewire/AccountApproval/ManageQueue.php`
-- `app/Livewire/Programs/ProgramSelector.php`
-- `app/Livewire/Programs/ManagePeos.php`
-- `app/Livewire/Programs/ManagePos.php`
-- `app/Livewire/Programs/PeoDisplay.php`
-- `app/Livewire/Syllabus/SyllabusWizard.php`
-- `app/Livewire/Syllabus/Steps/*`
 
 ## Basic Pattern in CSMS
 
@@ -28,49 +35,69 @@ Each component usually has:
 4. `render()` returning Blade view.
 5. Event listeners using `#[On('event-name')]`.
 
-## Common Livewire Syntax You See
+## Common Livewire Syntax
 
-## In Blade (View)
+### In Blade (View)
 
-- `wire:model="field"`:
-- Two-way bind input and component property.
-- `wire:model.live`:
-- More immediate syncing behavior.
-- `wire:click="method"`:
-- Call PHP method on click.
-- `wire:submit.prevent="method"`:
-- Prevent normal form submit, call Livewire method instead.
-- `wire:loading`:
-- Show/hide loading indicator while request is running.
-- `wire:key="unique-id"`:
-- Helps Livewire track repeated rows correctly.
+- `wire:model="field"`
+  - Two-way bind input and component property.
+- `wire:model.live`
+  - More immediate syncing behavior.
+- `wire:click="method"`
+  - Call PHP method on click.
+- `wire:submit.prevent="method"`
+  - Prevent normal submit; call method instead.
+- `wire:loading`
+  - Show/hide loading indicator while a request is running.
+- `wire:key="unique-id"`
+  - Helps Livewire track repeated rows correctly.
 
-## In Component Class (PHP)
+### In Component Class (PHP)
 
-- `public $field`: Property that view can read/write.
-- `mount(...)`: Runs once when component starts.
-- `updatedFieldName()`: Auto-called when specific property changes.
-- `updated($property)`: Generic hook for any property update.
-- `#[On('event-name')]`: Listen for event dispatched by another Livewire component.
-- `$this->dispatch('event-name', key: value)`: Send event to other components/browser listeners.
+- `public $field`
+  - Property that the view can read/write.
+- `mount(...)`
+  - Runs once when component starts.
+- `updatedFieldName()`
+  - Auto-called when a specific property changes.
+- `updated($property)`
+  - Generic hook for any property update.
+- `#[On('event-name')]`
+  - Listen for an event dispatched by another Livewire component.
+- `$this->dispatch('event-name', key: value)`
+  - Dispatch an event to other components/browser listeners.
 
-## Event-Driven Flow in CSMS Wizard
+## Conditions (Common Patterns)
 
-- Parent wizard asks step to save via event: `syllabus-save-step`.
-- Step component listens, validates, saves, then dispatches `syllabus-step-saved`.
-- Parent receives it and updates UI state (`stepDirty`, timestamp, toast).
+Typical guard clauses used in CSMS Livewire components:
 
-This is why components stay modular and still work together.
+- If a step is not active:
+  - Then ignore incoming save events.
+- If required fields are incomplete:
+  - Then stop and show a toast.
+- If data is unchanged:
+  - Then skip unnecessary writes.
+- If user tries to leave CO step with unsaved changes:
+  - Then block navigation.
+- If selected ids are invalid:
+  - Then ignore action safely.
 
-## Conditional Logic Style in Livewire Components
+## Sequences (How a Livewire Interaction Works)
 
-Typical conditions used in CSMS:
+### Typical request cycle
 
-- If step is not active, ignore incoming save event.
-- If required fields are incomplete, stop and show toast.
-- If data is unchanged, skip unnecessary updates.
-- If user tries to leave CO step with unsaved changes, block navigation.
-- If selected ids are invalid, ignore action safely.
+1. User interacts (click/type/change input).
+2. Livewire sends an AJAX request with the changed data/action.
+3. Component method runs on the server (validate, compute, save).
+4. Component re-renders.
+5. Browser patches only the relevant DOM updates.
+
+### Event-driven wizard example (CSMS Syllabus)
+
+1. Parent dispatches `syllabus-save-step`.
+2. Step listens, validates, saves.
+3. Step dispatches `syllabus-step-saved`.
+4. Parent updates UI state (dirty flags, timestamps, toasts) and switches the active step.
 
 ## Non-Technical Interpretation
 
@@ -79,7 +106,7 @@ Typical conditions used in CSMS:
 - Methods = what happens when user interacts.
 - Dispatch/listen = components sending short messages to each other.
 
-## Why CSMS Uses Livewire Here
+## Why CSMS Uses Livewire
 
 - Faster development with Laravel Blade/PHP.
 - Less custom JavaScript needed for forms/wizards.

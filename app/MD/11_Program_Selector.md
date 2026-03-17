@@ -1,11 +1,18 @@
-# ProgramSelector Component (Current Behavior)
+﻿# ProgramSelector (Livewire Component)
 
-This document reflects the current implementation of `ProgramSelector`.
+Current behavior of `ProgramSelector` used across pages (Courses, Programs, Syllabus creation).
 
-## Source
+## Files Used (Source of Truth)
 
-- `app/Livewire/Programs/ProgramSelector.php`
-- View: `resources/views/livewire/programs/program-selector.blade.php`
+- Component
+  - `app/Livewire/Programs/ProgramSelector.php`
+- View
+  - `resources/views/livewire/programs/program-selector.blade.php`
+- Models (loaded by the selector)
+  - `app/Models/College.php`
+  - `app/Models/Department.php`
+  - `app/Models/Program.php`
+  - `app/Models/User.php` (assignment-based defaults)
 
 ## Purpose
 
@@ -14,7 +21,7 @@ Reusable selector for:
 - Department
 - Program
 
-Used across pages (Courses, Programs, Syllabus creation) with optional auto-redirect.
+Supports optional auto-redirect after program selection.
 
 ## Public Properties
 
@@ -33,73 +40,91 @@ Used across pages (Courses, Programs, Syllabus creation) with optional auto-redi
 mount($programId = null, $redirectRoute = null, $autoRedirect = true)
 ```
 
-Behavior:
-- Loads all colleges ordered by name.
-- Stores route/redirect config.
-- If `programId` is provided: preselects college+department+program from that program.
-- Else: attempts preselect from user assignments.
+## Conditions (If / Then)
 
-## Assignment-based Preselection
+### Mount Behavior
 
-Priority used:
+- On mount:
+  - Then load all colleges ordered by name.
+  - Then store redirect config.
+- If `programId` is provided:
+  - Then preselect `collegeId`, `departmentId`, `programId` based on that Program.
+- If `programId` is not provided:
+  - Then attempt preselect from user assignments.
+
+### Assignment-Based Preselection
+
+Priority:
+
 1. Department assignment (`chair` first, then `faculty`)
 2. College assignment (`dean`)
 
 Rules:
-- If user has department assignment:
-  - preselect college + department
-  - load department programs
-  - if exactly one program, auto-select it
-- If user has college assignment:
-  - preselect college
-  - if exactly one department, auto-select it
-  - if that department has exactly one program, auto-select it
+- If user has a department assignment:
+  - Then preselect college + department.
+  - Then load department programs.
+  - If exactly one program exists:
+    - Then auto-select it.
+- If user has a college assignment:
+  - Then preselect college.
+  - If exactly one department exists:
+    - Then auto-select it.
+    - If that department has exactly one program:
+      - Then auto-select it.
 
-## Redirect behavior
+### Redirect Behavior (`updatedProgramId()`)
 
-Program selection emits event first, then optional redirect.
-
-On `updatedProgramId()`:
-- Always dispatches `programSelected` with selected program id.
-- Redirect only when:
-  - `autoRedirect = true`
-  - `redirectRoute` is set
+- When `programId` changes:
+  - Then always dispatch `programSelected` with selected program id.
+  - If `autoRedirect = true` and `redirectRoute` is set:
+    - Then redirect using the special rules below.
 
 Special route handling:
-- `courses.index` -> redirects with query: `?program_id={id}`
-- `syllabus.create` -> redirects with query: `?program_id={id}`
-- Any other route -> redirects using route param (`route($redirectRoute, $programId)`)
+- If `redirectRoute = courses.index`:
+  - Then redirect with query: `?program_id={id}`.
+- If `redirectRoute = syllabus.create`:
+  - Then redirect with query: `?program_id={id}`.
+- Else:
+  - Then redirect using route param: `route($redirectRoute, $programId)`.
 
-Mount-time redirect (`redirectWithProgramId`) also handles:
-- `programs.show` -> `route('programs.show', ['program' => $id])`
+Mount-time redirect helper also supports:
+- If `redirectRoute = programs.show`:
+  - Then redirect via `route('programs.show', ['program' => $id])`.
 
-## Change Handlers
+## Sequences
 
-## `updatedCollegeId()`
-- Loads departments by selected college.
-- Resets department/program selections.
-- Dispatches `programSelected` with `null`.
+### `updatedCollegeId()`
 
-## `updatedDepartmentId()`
-- Loads programs belonging to selected department.
-- Resets `programId`.
-- Dispatches `programSelected` with `null`.
+1. Load departments by selected college.
+2. Reset `departmentId` and `programId`.
+3. Dispatch `programSelected` with `null`.
 
-## `updatedProgramId()`
-- Dispatches selected program event.
-- Performs redirect if enabled/configured.
+### `updatedDepartmentId()`
+
+1. Load programs by selected department.
+2. Reset `programId`.
+3. Dispatch `programSelected` with `null`.
+
+### `updatedProgramId()`
+
+1. Dispatch `programSelected` with selected id.
+2. Redirect if enabled/configured.
 
 ## Event Dispatched
+
+Event:
 
 ```text
 programSelected
 ```
+
 Payload:
 - `programId` (int|null)
 
 ## Usage Examples
 
 ### With redirect (Courses)
+
 ```blade
 <livewire:programs.program-selector
     :program-id="request('program_id')"
@@ -108,12 +133,14 @@ Payload:
 />
 ```
 
-### Without redirect (AJAX/listen mode)
+### Without redirect (listen mode)
+
 ```blade
 <livewire:programs.program-selector :autoRedirect="false" />
 ```
 
 ### Program page
+
 ```blade
 <livewire:programs.program-selector
     :program-id="optional($program)->id"
@@ -124,6 +151,6 @@ Payload:
 
 ## Notes
 
-- Do not rely on hardcoded DOM selectors when using multiple selector instances.
-- Prefer listening to the `programSelected` event for integration.
+- Prefer listening to `programSelected` for integration.
 - Keep route names valid; invalid route names will fail redirect.
+- Avoid relying on hardcoded DOM selectors when multiple selector instances exist.

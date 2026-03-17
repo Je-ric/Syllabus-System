@@ -1,53 +1,91 @@
-# Program, PEO, and PO Rules
+﻿# Program, PEO, and PO
 
-This document summarizes conditions for program-level PEO/PO management and code sequencing.
+Rules for program-level PEO/PO management, code sequencing, and PO↔PEO mapping.
 
-## Source Files
+## Files Used (Source of Truth)
 
-- `app/Http/Controllers/ProgramController.php`
-- `app/Livewire/Programs/ManagePeos.php`
-- `app/Livewire/Programs/ManagePos.php`
-- `resources/views/livewire/programs/manage-peos.blade.php`
-- `resources/views/livewire/programs/manage-pos.blade.php`
+- Program CRUD
+  - `app/Http/Controllers/ProgramController.php`
+  - `app/Models/Program.php`
+- Livewire PEO
+  - `app/Livewire/Programs/ManagePeos.php`
+  - `resources/views/livewire/programs/manage-peos.blade.php`
+- Livewire PO
+  - `app/Livewire/Programs/ManagePos.php`
+  - `resources/views/livewire/programs/manage-pos.blade.php`
+- Models
+  - `app/Models/ProgramEducationalObjective.php`
+  - `app/Models/ProgramOutcome.php`
+- Mapping pivot
+  - `program_outcome_peo`
+- Routes
+  - `routes/web.php` (program + PEO + PO routes)
 
-## Program Selection and Display
+## Conditions (If / Then)
 
-- Program page can open without selected program.
-- When `program_id` query is present, selected program is loaded.
-- Program `show` route renders same page with explicit program binding.
+### Program Selection
 
-## PEO Rules (Livewire)
+- If the page opens without a selected program:
+  - Then it still renders, but lists/forms may be empty.
+- If `program_id` is present in the query:
+  - Then that program is loaded and becomes the selected program.
+- Program `show` route renders the same page but with explicit program binding.
 
-- If any `peo_text` is blank, save is blocked with warning toast.
-- Existing PEOs are updated via `updateOrCreate`.
-- Removed PEOs are deleted (diff between existing and submitted ids).
-- PEO codes are resequenced after save using:
-- `ProgramCodeHelper::resequencePeoCodes($programId)`
-- Deleting PEO from controller also resequences codes.
+### PEO Rules (Livewire)
 
-## PO Rules (Livewire)
+- If any `peo_text` is blank:
+  - Then save is blocked with a warning toast.
+- If saving PEOs:
+  - Then existing PEOs are updated via `updateOrCreate`.
+  - Then removed PEOs are deleted (diff vs submitted ids).
+  - Then PEO codes are resequenced using `ProgramCodeHelper::resequencePeoCodes($programId)`.
+- If deleting a PEO from controller routes:
+  - Then codes are resequenced after delete.
 
-- If any `po_text` is blank, save is blocked with warning toast.
-- Existing POs are updated via `updateOrCreate`.
-- Removed POs are deleted (diff between existing and submitted ids).
-- PO codes are resequenced after save using:
-- `ProgramCodeHelper::resequencePoCodes($programId)`
-- Deleting PO from controller also resequences codes.
+### PO Rules (Livewire)
 
-## PO-PEO Mapping Rules
+- If any `po_text` is blank:
+  - Then save is blocked with a warning toast.
+- If saving POs:
+  - Then existing POs are updated via `updateOrCreate`.
+  - Then removed POs are deleted (diff vs submitted ids).
+  - Then PO codes are resequenced using `ProgramCodeHelper::resequencePoCodes($programId)`.
+- If deleting a PO from controller routes:
+  - Then codes are resequenced after delete.
 
-- PO-to-PEO links are stored through many-to-many sync (`program_outcome_peo`).
-- Mapping is applied per saved PO id.
-- If PEOs are updated, PO mapping is refreshed.
-- Mapping cleanup removes references to deleted PEO ids.
-- `toggleMapping()` checks:
-- PO must already exist for the selected program.
-- PEO id must belong to the same program.
+### PO ↔ PEO Mapping
 
-## UI Conditions in Program Views
+- Mapping is stored via many-to-many sync on `program_outcome_peo`.
+- If PEOs are updated:
+  - Then PO mapping is refreshed.
+  - Then mapping cleanup removes references to deleted PEO ids.
+- If `toggleMapping()` is called:
+  - Then the PO must already exist for the selected program.
+  - Then the PEO id must belong to the same program.
 
-- Add PEO/PO button blocks insertion when a blank row already exists.
-- Unsaved rows can be removed client-side.
-- Saved rows use delete routes:
-- `/programs/peo/{id}`
-- `/programs/po/{id}`
+### UI Guardrails
+
+- If a blank row already exists:
+  - Then Add PEO/PO blocks inserting another blank row.
+- If a row is unsaved (no id yet):
+  - Then it can be removed client-side.
+- If a row is saved (has id):
+  - Then it uses delete routes:
+    - `/programs/peo/{id}`
+    - `/programs/po/{id}`
+
+## Sequences (Typical Flow)
+
+### Save PEOs/POs
+
+1. User edits rows in Livewire.
+2. On Save, component validates all text fields are non-empty.
+3. Component upserts rows (update existing + create new).
+4. Component deletes removed rows.
+5. Component resequences codes.
+
+### Toggle PO↔PEO Mapping
+
+1. User clicks a mapping cell (PO row × PEO column).
+2. Component validates program ownership and row existence.
+3. Component updates the pivot table for that PO.

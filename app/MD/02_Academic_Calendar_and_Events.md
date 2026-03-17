@@ -1,65 +1,96 @@
-# Academic Calendar and Events Rules
+﻿# Academic Calendar and Events
 
-This document summarizes conditions for academic calendar setup and semester event management.
+Practical reference for how Academic Calendars and their semester events behave in CSMS.
 
-## Source Controllers
+## Files Used (Source of Truth)
 
-- `app/Http/Controllers/AcademicCalendarController.php`
-- `app/Http/Controllers/AcademicCalendarEventController.php`
+- Controllers
+  - `app/Http/Controllers/AcademicCalendarController.php`
+  - `app/Http/Controllers/AcademicCalendarEventController.php`
+- Models
+  - `app/Models/AcademicCalendar.php`
+  - `app/Models/AcademicCalendarEvent.php`
+- Routes
+  - `routes/web.php` (academic calendar + events routes)
 
-## Academic Calendar Creation Conditions
+## Key Concepts
 
-- `academic_year` is required.
-- `academic_year` must be unique in validation.
-- 1st semester start and end dates are required.
-- 1st semester end date must be after or equal to start date.
-- 2nd semester start and end dates are required.
-- 2nd semester end date must be after or equal to start date.
+- One academic year is represented by **two** `academic_calendars` rows (1st + 2nd semester).
+- Events are stored per semester row in `academic_calendar_events`.
 
-## Academic Calendar Creation Behavior
+## Conditions (If / Then)
 
-- Store creates two records:
-- Semester `1st`
-- Semester `2nd`
-- After creation, user is redirected to event management for the created academic year.
+### Academic Calendar (Create)
 
-## Academic Calendar Edit Conditions
+- If `academic_year` is missing:
+  - Then validation fails.
+- If `academic_year` already exists:
+  - Then validation fails (must be unique).
+- If any semester start/end date is missing:
+  - Then validation fails.
+- If a semester `end_date < start_date`:
+  - Then validation fails.
 
-- Requested academic year must exist.
-- If not found, redirect to calendar index with error toast.
+### Academic Calendar (Update)
 
-## Academic Calendar Update Conditions
+- If the requested `academic_year` does not exist:
+  - Then redirect back to calendar index with an error toast.
+- If changing the `academic_year` value:
+  - Then the new year must still be unique.
+- If dates are changed:
+  - Then the same date validations as Create apply.
 
-- Existing academic year records must exist.
-- If changing academic year value, new year must not already exist.
-- Same date validations as creation apply.
+### Academic Calendar (Delete)
 
-## Academic Calendar Deletion
+- If an academic year is deleted:
+  - Then all semester rows for that `academic_year` are removed.
+  - Then related events are removed via FK cascade.
 
-- Deletion removes all calendar rows for the given `academic_year`.
-- Related events are removed through foreign key cascade.
+### Academic Event (Create)
 
-## Academic Event Conditions
+- If `type` is missing:
+  - Then validation fails.
+- If `type` is not one of:
+  - `holiday`
+  - `exam`
+  - `break`
+  - `other`
+  - Then validation fails.
+- If `name` is missing:
+  - Then validation fails.
+- If `date` is missing or invalid:
+  - Then validation fails.
+- If `date` is outside the semester range:
+  - Then validation fails.
+  - (Range check: `date >= semester.start_date` and `date <= semester.end_date`.)
+- If another event already exists on the same `date` for the same semester:
+  - Then validation fails (unique per semester date).
 
-- Event type is required and must be one of:
-- `holiday`
-- `exam`
-- `break`
-- `other`
-- Event name is required.
-- Event date is required and must be a valid date.
-- Event date must be within semester date range:
-- `after_or_equal semester.start_date`
-- `before_or_equal semester.end_date`
-- Event date must be unique per semester date.
+### Academic Event (Update)
 
-## Academic Event Update Conditions
+- If validations fail:
+  - Then update is blocked.
+- If checking date uniqueness:
+  - Then exclude the current event id.
 
-- Same type, name, and date range checks.
-- Date uniqueness check excludes current event id.
+### Academic Event (Delete)
 
-## Academic Event Deletion
+- If an event id is deleted:
+  - Then that event row is removed.
+  - Then redirect back to the academic-year events screen.
 
-- Event is deleted by event id.
-- User is redirected back to academic year events page.
+## Sequences (Typical Flow)
 
+### Create an Academic Year
+
+1. User submits year + two semester date ranges.
+2. System validates year uniqueness and date ranges.
+3. System creates 2 semester rows (1st and 2nd) under the same `academic_year`.
+4. System redirects to the event management screen for that year.
+
+### Add / Edit Events
+
+1. User selects the academic year and semester.
+2. User adds or edits events.
+3. System enforces type whitelist, date-in-range, and per-date uniqueness.
+4. Events immediately affect features that depend on calendar weeks (see `app/MD/10_Syllabus_Wizard.md`).
