@@ -210,7 +210,19 @@ class SyllabusPreviewService
                                'LAB' => ['activity' => 0, 'quiz' => 0]];
 
         foreach ($weeks as $week) {
-            $isExam    = (bool) $week->is_exam_week;
+            $weekContents = $week->contents ?? collect();
+            $weekExamTask = $weekContents->first(function ($c) {
+                $t = trim((string) ($c?->assessment_task ?? ''));
+                return $t !== '' && str_contains(strtolower($t), 'exam');
+            });
+
+            $isExam = $weekExamTask !== null
+                || trim((string) ($week->exam_type ?? '')) !== ''
+                || (bool) $week->is_exam_week;
+
+            $resolvedExamLabel = $weekExamTask
+                ? trim((string) $weekExamTask->assessment_task)
+                : $examLabel($week->exam_type);
             $dateRange = $this->formatDateRange($week);
 
             foreach (['LEC', 'LAB'] as $type) {
@@ -219,7 +231,7 @@ class SyllabusPreviewService
                 if ($isExam) {
                     $weeklyCoverageRows[$type][] = [
                         'week_label'        => 'Week ' . (int) $week->week_no,
-                        'exam_label'        => $examLabel($week->exam_type),
+                        'exam_label'        => $resolvedExamLabel,
                         'week_no'           => (int) $week->week_no,
                         'is_exam'           => true,
                         'date_range'        => $dateRange,
@@ -292,7 +304,19 @@ class SyllabusPreviewService
         // Pass 1: build one raw row per week (per component)
         $rawRows = [];
         foreach ($weeks as $week) {
-            $isExam  = (bool) $week->is_exam_week;
+            $weekContents = $week->contents ?? collect();
+            $weekExamTask = $weekContents->first(function ($c) {
+                $t = trim((string) ($c?->assessment_task ?? ''));
+                return $t !== '' && str_contains(strtolower($t), 'exam');
+            });
+
+            $isExam = $weekExamTask !== null
+                || trim((string) ($week->exam_type ?? '')) !== ''
+                || (bool) $week->is_exam_week;
+
+            $resolvedExamLabel = $weekExamTask
+                ? trim((string) $weekExamTask->assessment_task)
+                : $examLabel($week->exam_type);
             $content = $week->contents?->where('component_type', $componentType)?->first();
 
             // CO is shared per week; if LAB has no CO selected, fall back to LEC's CO
@@ -308,7 +332,7 @@ class SyllabusPreviewService
                 $rawRows[] = [
                     'is_exam'    => true,
                     'week_no'    => (int) $week->week_no,
-                    'exam_label' => $examLabel($week->exam_type),
+                    'exam_label' => $resolvedExamLabel,
                     'co_no'      => '',
                     'co_id'      => null,
                     'topics'     => '',
