@@ -11,11 +11,10 @@ use Livewire\Component;
 /**
  * ComponentsStep
  *
- * wire:model.blur is used in the blade so values sync on blur/change instead of
- * every keystroke. This reduces request queueing and keeps wizard navigation
- * responsive. The save runs on navigation (syllabus-save-step) or the manual
- * Save button. Because the wizard never remounts child components, onStepChanged
- * always reloads fresh DB data when navigating back to this step.
+ * wire:model.live is used in the blade so every field change is immediately
+ * synced to PHP state. The save runs on navigation (syllabus-save-step) or
+ * the manual Save button. Because the wizard never remounts child components,
+ * onStepChanged always reloads fresh DB data when navigating back to this step.
  *
  * DB schema (course_components):
  *   performance_standard  DECIMAL(5,2)  DEFAULT 50.00
@@ -41,7 +40,7 @@ class ComponentsStep extends Component
     public ?string $lec_schedule             = null;
     public ?string $lec_consultation_hours   = null;
     // Stored as bare number string to match <option value="50.00"> or value="50"
-    public string  $lec_performance_standard = '50.00';
+    public string  $lec_performance_standard = '60.00'; // default passing mark
 
     // LAB fields
     public ?string $lab_instructor_name      = null;
@@ -51,7 +50,7 @@ class ComponentsStep extends Component
     public string  $lab_class_hours          = '1 hr';
     public ?string $lab_schedule             = null;
     public ?string $lab_consultation_hours   = null;
-    public string  $lab_performance_standard = '33.00';
+    public string  $lab_performance_standard = '60.00'; // mirrors lec when has_lec_lab
 
     // ── Mount ─────────────────────────────────────────────────────────────────
 
@@ -112,6 +111,11 @@ class ComponentsStep extends Component
         if (! str_starts_with($property, 'lec_') && ! str_starts_with($property, 'lab_')) {
             return;
         }
+        // When has_lec_lab, the performance standard is a single shared field.
+        // Keep lab in sync whenever lec_performance_standard changes.
+        if ($property === 'lec_performance_standard' && $this->courseHasLab) {
+            $this->lab_performance_standard = $this->lec_performance_standard;
+        }
         $this->dispatch('syllabus-step-dirty', step: 'course_components', dirty: true);
     }
 
@@ -139,7 +143,7 @@ class ComponentsStep extends Component
             $this->lec_class_hours          = $lec->class_hours          ?? '1 hr';
             $this->lec_schedule             = $lec->schedule;
             $this->lec_consultation_hours   = $lec->consultation_hours;
-            $this->lec_performance_standard = $this->toOptionValue($lec->performance_standard, '50.00');
+            $this->lec_performance_standard = $this->toOptionValue($lec->performance_standard, '60.00');
         } else {
             $this->prefillLecFromUser();
         }
@@ -157,7 +161,10 @@ class ComponentsStep extends Component
             $this->lab_class_hours          = $lab->class_hours          ?? '1 hr';
             $this->lab_schedule             = $lab->schedule;
             $this->lab_consultation_hours   = $lab->consultation_hours;
-            $this->lab_performance_standard = $this->toOptionValue($lab->performance_standard, '33.00');
+            // Performance standard is shared — use LEC value as the canonical one.
+            // lab_performance_standard is kept in sync on save; we ignore the
+            // stored LAB value here so the blade only shows one input.
+            $this->lab_performance_standard = $this->lec_performance_standard;
         }
 
         $this->isLoaded = true;
@@ -179,6 +186,12 @@ class ComponentsStep extends Component
 
     private function saveComponents(): void
     {
+        // When has_lec_lab, performance standard is a single shared value.
+        // Mirror LEC → LAB before saving so both rows store the same mark.
+        if ($this->courseHasLab) {
+            $this->lab_performance_standard = $this->lec_performance_standard;
+        }
+
         // LEC is always saved
         CourseComponent::query()->updateOrCreate(
             ['syllabus_id' => $this->syllabusId, 'type' => 'LEC'],

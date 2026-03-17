@@ -24,11 +24,15 @@ class CourseEvaluationStep extends Component
     public ?string $lecPerformanceStd = null;
     public ?string $labPerformanceStd = null;
 
-    /** Pre-computed targets and running totals from the service (PHP-side). */
+    /** Pre-computed weight total targets (structural: 67/33/100). */
     public int $lecStdNum = 100;
     public int $labStdNum = 33;
+    /** Running totals from saved weights. */
     public int $lecTotal  = 0;
     public int $labTotal  = 0;
+    /** Passing mark from performance_standard (e.g. 60, 75). */
+    public int $lecPassingMark = 60;
+    public int $labPassingMark = 60;
 
     /**
      * Rows shown in the evaluation table.
@@ -118,10 +122,12 @@ class CourseEvaluationStep extends Component
         $this->courseHasLab      = $payload['courseHasLab'];
         $this->lecPerformanceStd = $payload['lecPerformanceStd'];
         $this->labPerformanceStd = $payload['labPerformanceStd'];
-        $this->lecStdNum         = $payload['lecStdNum']  ?? ($payload['courseHasLab'] ? 67 : 100);
-        $this->labStdNum         = $payload['labStdNum']  ?? 33;
-        $this->lecTotal          = $payload['lecTotal']   ?? 0;
-        $this->labTotal          = $payload['labTotal']   ?? 0;
+        $this->lecStdNum         = $payload['lecStdNum']     ?? ($payload['courseHasLab'] ? 67 : 100);
+        $this->labStdNum         = $payload['labStdNum']     ?? 33;
+        $this->lecTotal          = $payload['lecTotal']      ?? 0;
+        $this->labTotal          = $payload['labTotal']      ?? 0;
+        $this->lecPassingMark    = $payload['lecPassingMark'] ?? 60;
+        $this->labPassingMark    = $payload['labPassingMark'] ?? 60;
         $this->rows              = $payload['rows'];
         $this->inputs            = $payload['inputs'];
     }

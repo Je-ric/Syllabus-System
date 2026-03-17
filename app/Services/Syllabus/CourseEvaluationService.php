@@ -213,23 +213,34 @@ class CourseEvaluationService
             }
         }
 
-        // Parse performance standard to int for target display (e.g. 67.00 → 67)
-        $parseStd = static fn (mixed $v, int $fb): int =>
+        // ── Weight total targets (structural, not configurable) ─────────────────
+        // LEC+LAB courses: LEC must sum to 67, LAB must sum to 33.
+        // LEC-only courses: LEC must sum to 100.
+        // These are fixed academic standards — NOT the performance/passing standard.
+        $lecStdNum = $courseHasLab ? 67 : 100;
+        $labStdNum = 33;
+
+        // ── Passing mark (from performance_standard on the component) ─────────
+        // This is the minimum score a student must achieve (e.g. 60, 75).
+        // Raw score is always out of 100; this is a threshold, not a weight target.
+        $parseDecimal = static fn (mixed $v, int $fb): int =>
             is_numeric(str_replace('%', '', (string) ($v ?? '')))
                 ? (int) round((float) str_replace('%', '', (string) $v))
                 : $fb;
 
-        $lecStdNum = $parseStd($lecPerformanceStd, $courseHasLab ? 67 : 100);
-        $labStdNum = $parseStd($labPerformanceStd, 33);
+        $lecPassingMark = $parseDecimal($lecPerformanceStd, 60);
+        $labPassingMark = $parseDecimal($labPerformanceStd, 60);
 
         return [
             'courseHasLab'      => $courseHasLab,
             'lecPerformanceStd' => $lecPerformanceStd,
             'labPerformanceStd' => $labPerformanceStd,
-            'lecStdNum'         => $lecStdNum,   // target total (int)
-            'labStdNum'         => $labStdNum,
-            'lecTotal'          => $lecTotal,    // running total from saved weights
+            'lecStdNum'         => $lecStdNum,     // weight total target (67 or 100)
+            'labStdNum'         => $labStdNum,     // weight total target (33)
+            'lecTotal'          => $lecTotal,      // running sum of saved weights
             'labTotal'          => $labTotal,
+            'lecPassingMark'    => $lecPassingMark, // passing threshold (e.g. 60, 75)
+            'labPassingMark'    => $labPassingMark,
             'rows'              => $rows,
             'inputs'            => $inputs,
         ];

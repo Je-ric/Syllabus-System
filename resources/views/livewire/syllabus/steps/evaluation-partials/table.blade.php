@@ -7,12 +7,15 @@
       $courseHasLab      — bool
       $lecPerformanceStd — string|null  (raw DB value e.g. "67.00")
       $labPerformanceStd — string|null
-      $lecStdNum         — int   (target total, pre-computed in PHP)
-      $labStdNum         — int
-      $lecTotal          — int   (running total from saved weights, pre-computed in PHP)
+      $lecStdNum         — int   (weight total target: 67 for LEC+LAB, 100 for LEC-only)
+      $labStdNum         — int   (weight total target: always 33)
+      $lecTotal          — int   (running total from saved weights)
       $labTotal          — int
+      $lecPassingMark    — int   (passing threshold from performance_standard, e.g. 60 or 75)
+      $labPassingMark    — int
 
-    All totals / targets are computed in the PHP service — the blade only displays.
+    Weight totals / targets are structural (67/33/100).
+    Passing mark comes from performance_standard in Course Components.
 --}}
 
 <x-wizard.section title="Evaluation Items" icon="table" color="slate">
@@ -54,7 +57,7 @@
                         <th rowspan="2"
                             class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide
                                    text-slate-500 w-28 align-middle">
-                            Passing
+                            Passing Mark
                         </th>
                     </tr>
 
@@ -261,9 +264,16 @@
                                 @endif
                             @endif
 
-                            {{-- ── Passing standard ─────────────────────── --}}
+                            {{-- ── Passing mark (from performance_standard) ── --}}
                             <td class="px-4 py-3 text-center align-middle">
-                                <x-feedback-status.status-indicator variant="emerald" size="sm">60%</x-feedback-status.status-indicator>
+                                @php
+                                    // Show LEC passing mark as the row standard.
+                                    // For LEC+LAB courses both components use the same mark per syllabus.
+                                    $rowPassingMark = $lecPassingMark ?? 60;
+                                @endphp
+                                <x-feedback-status.status-indicator variant="emerald" size="sm">
+                                    {{ $rowPassingMark }}%
+                                </x-feedback-status.status-indicator>
                             </td>
 
                         </tr>
@@ -284,9 +294,6 @@
                     @endphp
 
                     <tr class="bg-slate-100 border-t-2 border-slate-300 font-semibold text-sm">
-                        <td class="px-4 py-3 text-slate-600 border-r border-slate-200 text-xs uppercase tracking-wide">
-                            -
-                        </td>
                         <td class="px-4 py-3 text-slate-600 border-r border-slate-200 text-xs uppercase tracking-wide">
                             Total
                         </td>
@@ -322,7 +329,9 @@
                             </td>
                         @endif
                         <td class="px-4 py-3 text-center">
-                            <span class="text-xs text-slate-500 font-normal">Min. per semester</span>
+                            <span class="text-xs text-slate-500 font-normal">
+                                Min: {{ $lecPassingMark ?? 60 }}%
+                            </span>
                         </td>
                     </tr>
 

@@ -184,13 +184,11 @@
                 III. Course Calendar
             </h3>
 
-            @php
-                $lecRows = $weeklyCoverageRows['LEC'] ?? [];
-                $labRows = $weeklyCoverageRows['LAB'] ?? [];
-            @endphp
+            @if ($syllabus->course->has_lec_lab)
+                <p style="margin:0 0 4px; font-size:9pt;"><strong>Lecture (LEC)</strong></p>
+            @endif
 
-            <p style="margin:0 0 4px; font-size:9pt;"><strong>Lecture (LEC)</strong></p>
-            <table class="weekly-coverage-table" border="1" style="width:100%; border-collapse:collapse; margin-bottom:10px;">
+            <table class="weekly-coverage-table" border="1" style="width:100%; border-collapse:collapse;">
                 <thead>
                     <tr>
                         <th style="text-align:center; width:50px;">CO No.</th>
@@ -201,7 +199,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse ($lecRows as $row)
+                    @forelse ($abridgedWeeklyRows as $row)
                         @if ($row['is_exam'])
                             <tr>
                                 <td style="text-align:center; font-weight:bold;">{{ $row['co_no'] }}</td>
@@ -213,59 +211,25 @@
                         @else
                             <tr>
                                 <td style="text-align:center;">{{ $row['co_no'] }}</td>
-                                <td style="text-align:center;">{{ $row['week_no'] }}</td>
-                                <td style="vertical-align:top;">{!! nl2br(e($row['topics'])) !!}</td>
-                                <td style="vertical-align:top;">{!! nl2br(e($row['tla'])) !!}</td>
-                                <td style="text-align:center; vertical-align:top;">{{ $row['assessment_task'] }}</td>
+                                <td style="text-align:center;">{{ $row['wk_label'] }}</td>
+                                <td style="vertical-align:top;">
+                                    {!! nl2br(e($row['topics'])) !!}
+                                </td>
+                                <td style="vertical-align:top;">
+                                    {!! nl2br(e($row['tla'])) !!}
+                                </td>
+                                <td style="text-align:center; vertical-align:top;">
+                                    {{ $row['assessment'] }}
+                                </td>
                             </tr>
                         @endif
                     @empty
                         <tr>
-                            <td colspan="5" style="text-align:center;">No lecture weekly coverage found.</td>
+                            <td colspan="5" style="text-align:center;">No weekly coverage found.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
-
-            @if ($syllabus->course->has_lec_lab)
-                <p style="margin:0 0 4px; font-size:9pt;"><strong>Laboratory (LAB)</strong></p>
-                <table class="weekly-coverage-table" border="1" style="width:100%; border-collapse:collapse;">
-                    <thead>
-                        <tr>
-                            <th style="text-align:center; width:50px;">CO No.</th>
-                            <th style="text-align:center; width:70px;">Wk No.</th>
-                            <th style="text-align:center;">Topics</th>
-                            <th style="text-align:center;">Learning Activities</th>
-                            <th style="text-align:center; width:120px;">Assessment</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($labRows as $row)
-                            @if ($row['is_exam'])
-                                <tr>
-                                    <td style="text-align:center; font-weight:bold;">{{ $row['co_no'] }}</td>
-                                    <td style="text-align:center; font-weight:bold;">{{ $row['week_no'] }}</td>
-                                    <td colspan="3" style="text-align:center; font-weight:bold; font-style:italic;">
-                                        {{ $row['exam_label'] }}
-                                    </td>
-                                </tr>
-                            @else
-                                <tr>
-                                    <td style="text-align:center;">{{ $row['co_no'] }}</td>
-                                    <td style="text-align:center;">{{ $row['week_no'] }}</td>
-                                    <td style="vertical-align:top;">{!! nl2br(e($row['topics'])) !!}</td>
-                                    <td style="vertical-align:top;">{!! nl2br(e($row['tla'])) !!}</td>
-                                    <td style="text-align:center; vertical-align:top;">{{ $row['assessment_task'] }}</td>
-                                </tr>
-                            @endif
-                        @empty
-                            <tr>
-                                <td colspan="5" style="text-align:center;">No laboratory weekly coverage found.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            @endif
         </div>
 
         {{-- ═══════════════════════════════════════════════════════════════════
@@ -301,6 +265,14 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @php
+                        $lecPassMark = $lecComponent?->performance_standard
+                            ? (int) round((float) str_replace('%', '', (string) $lecComponent->performance_standard))
+                            : 60;
+                        $labPassMark = $labComponent?->performance_standard
+                            ? (int) round((float) str_replace('%', '', (string) $labComponent->performance_standard))
+                            : 60;
+                    @endphp
                     @forelse ($evaluationRows as $row)
                         <tr>
                             <td style="text-align:center;">{{ $row['co_label'] ?? '' }}</td>
@@ -312,7 +284,7 @@
                             @endif
                             <td style="text-align:center;">
                                 @if (($row['is_exam'] ?? false) === true)
-                                    <strong>60%</strong>
+                                    <strong>{{ $lecPassMark }}%</strong>
                                 @endif
                             </td>
                         </tr>
@@ -331,12 +303,12 @@
                             <td></td>
                             <td style="text-align:center; font-weight:bold;">{{ $evaluationTotals['lab'] ?? '' }}%</td>
                         @endif
-                        <td style="text-align:center; font-weight:bold;">60%</td>
+                        <td style="text-align:center; font-weight:bold;">{{ $lecPassMark }}%</td>
                     </tr>
                 </tbody>
             </table>
 
-            <p style="margin-top:8px;"><strong>Minimum Average for Satisfactory Performance: 60%</strong></p>
+            <p style="margin-top:8px;"><strong>Minimum Average for Satisfactory Performance: {{ $lecPassMark }}%</strong></p>
 
             {{-- b. FCAS formula --}}
             <p style="margin-top:12px;" class="indent-level-1">
@@ -388,7 +360,7 @@
                     </tr>
                 </tbody>
             </table>
-            <p class="indent-level-2" style="margin-top:4px;"><strong>Passing Mark: 60%</strong></p>
+            <p class="indent-level-2" style="margin-top:4px;"><strong>Passing Mark: {{ $lecPassMark ?? 60 }}%</strong></p>
         </div>
 
         {{-- ═══════════════════════════════════════════════════════════════════
@@ -603,30 +575,44 @@
             t.style.borderCollapse = "collapse";
             t.setAttribute("border", orig.getAttribute("border") || "");
 
-            // Preserve column widths — getBoundingClientRect() returns 0 on
-            // hidden elements so we read from th style/attribute instead.
-            // Use the last header row (leaf cells, no spanning colspans).
+            // Preserve column widths across split-table continuations.
+            // Multi-row headers: scan all rows, track rowspan/colspan, map col→width.
             const existingCg = orig.querySelector(":scope > colgroup");
             if (existingCg) {
                 t.appendChild(existingCg.cloneNode(true));
             } else if (thead) {
-                const hRows  = thead.querySelectorAll("tr");
-                const leafRow = hRows[hRows.length - 1];
-                if (leafRow) {
-                    const cg = document.createElement("colgroup");
-                    Array.from(leafRow.cells).forEach(cell => {
-                        const col = document.createElement("col");
-                        const sw  = cell.style.width;
-                        if (sw && sw !== "") {
-                            col.style.width = sw;
-                        } else {
+                const hRows = Array.from(thead.querySelectorAll("tr"));
+                if (hRows.length > 0) {
+                    const totalCols = Array.from(hRows[0].cells)
+                        .reduce((s, cell) => s + (parseInt(cell.getAttribute("colspan") || "1", 10)), 0);
+                    const widthMap = new Array(totalCols).fill(null);
+                    const occupied = new Array(totalCols).fill(0);
+                    hRows.forEach(row => {
+                        let ci = 0;
+                        Array.from(row.cells).forEach(cell => {
+                            while (ci < totalCols && occupied[ci] > 0) { occupied[ci]--; ci++; }
+                            const cs = parseInt(cell.getAttribute("colspan") || "1", 10);
+                            const rs = parseInt(cell.getAttribute("rowspan") || "1", 10);
+                            const sw = cell.style.width;
                             const aw = cell.getAttribute("width");
-                            if (aw && aw !== "") {
-                                col.style.width = /^\d+$/.test(aw) ? aw + "px" : aw;
+                            let w = null;
+                            if (sw && sw !== "") { w = sw; }
+                            else if (aw && aw !== "") { w = /^\d+$/.test(aw) ? aw + "px" : aw; }
+                            if (w && cs > 1) {
+                                const m = w.match(/^([\d.]+)(px|%|mm)?$/);
+                                if (m) w = (parseFloat(m[1]) / cs).toFixed(1) + (m[2] || "px");
                             }
-                        }
-                        cg.appendChild(col);
+                            for (let i = 0; i < cs; i++) {
+                                if (ci + i < totalCols) {
+                                    if (widthMap[ci + i] === null && w) widthMap[ci + i] = w;
+                                    if (rs > 1) occupied[ci + i] = Math.max(occupied[ci + i], rs - 1);
+                                }
+                            }
+                            ci += cs;
+                        });
                     });
+                    const cg = document.createElement("colgroup");
+                    widthMap.forEach(w => { const col = document.createElement("col"); if (w) col.style.width = w; cg.appendChild(col); });
                     t.appendChild(cg);
                 }
             }

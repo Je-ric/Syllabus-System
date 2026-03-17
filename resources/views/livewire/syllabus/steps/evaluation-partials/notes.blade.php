@@ -3,11 +3,16 @@
     ────────────────────────────────────────────
     Variables expected:
       $courseHasLab      — bool
-      $lecPerformanceStd — string|null   e.g. '67%' or '100%'
-      $labPerformanceStd — string|null   e.g. '33%'
+      $lecPerformanceStd — string|null  (raw DB decimal e.g. "60.00" or "75.00")
+      $labPerformanceStd — string|null
+      $lecPassingMark    — int   (parsed from lecPerformanceStd, e.g. 60 or 75)
+      $labPassingMark    — int
 
-    Displays the expected weight split based on what was saved in Course Components.
-    If the standard is not yet set (null) it shows a sensible fallback message.
+    Clarification on terminology:
+      • "Performance Standard" = the PASSING MARK (minimum score to pass).
+        Raw scores are always out of 100. This threshold varies by subject.
+      • LEC/LAB weight split is structural and fixed: LEC 67% + LAB 33% = 100%
+        (or LEC 100% for LEC-only). This is NOT configurable.
 --}}
 
 <x-wizard.info-card title="Notes" icon="info-circle" color="slate" class="mt-4">
@@ -27,39 +32,47 @@
         They cannot be edited manually.
     </p>
 
-    {{-- ── Performance standard vs weight total --}}
+    {{-- ── Weight split note (structural, not configurable) --}}
     @if ($courseHasLab)
-        @php
-            $lecLabel = $lecPerformanceStd ?? '67%';
-            $labLabel = $labPerformanceStd ?? '33%';
-        @endphp
         <p class="mt-2 text-xs text-slate-600">
-            Based on your Course Components settings, the expected weight split is:
-            <strong class="text-emerald-700">LEC {{ $lecLabel }}</strong>
+            <strong>Weight split</strong> is fixed:
+            <strong class="text-emerald-700">LEC 67%</strong>
             +
-            <strong class="text-blue-700">LAB {{ $labLabel }}</strong>
+            <strong class="text-blue-700">LAB 33%</strong>
             = 100%.
-            The totals row below your table will turn
-            <span class="text-rose-600 font-medium">red</span> if the entered weights
-            do not match these standards, and
-            <span class="text-emerald-600 font-medium">green</span> when they match.
+            The weight inputs in the table above must sum to these targets.
+            The totals row turns <span class="text-rose-600 font-medium">red</span> if they don't match,
+            and <span class="text-emerald-600 font-medium">green</span> when they do.
         </p>
     @else
-        @php
-            $lecLabel = $lecPerformanceStd ?? '100%';
-        @endphp
         <p class="mt-2 text-xs text-slate-600">
-            Based on your Course Components settings, the expected total LEC weight is
-            <strong class="text-emerald-700">{{ $lecLabel }}</strong>.
-            The totals row will turn
-            <span class="text-rose-600 font-medium">red</span> if it does not match, and
-            <span class="text-emerald-600 font-medium">green</span> when it matches.
+            <strong>Weight total</strong> must sum to
+            <strong class="text-emerald-700">100%</strong> for LEC.
         </p>
     @endif
 
-    {{-- ── Passing standard --}}
-    <p class="mt-2 text-xs text-slate-600">
-        Minimum passing: <strong>60% per semester</strong> for every assessment task.
-    </p>
+    {{-- ── Passing mark (from performance_standard — varies by subject) --}}
+    @php
+        $lecMark = $lecPassingMark ?? 60;
+        $labMark = $labPassingMark ?? 60;
+    @endphp
+
+    @if ($courseHasLab)
+        <p class="mt-2 text-xs text-slate-600">
+            <strong>Passing mark</strong> for this course:
+            <strong class="text-emerald-700">LEC {{ $lecMark }}%</strong>
+            /
+            <strong class="text-blue-700">LAB {{ $labMark }}%</strong>
+            (set in Course Components → Performance Standard).
+            Students must meet or exceed this score to pass the assessment.
+        </p>
+    @else
+        <p class="mt-2 text-xs text-slate-600">
+            <strong>Passing mark</strong> for this course:
+            <strong class="text-emerald-700">{{ $lecMark }}%</strong>
+            (set in Course Components → Performance Standard).
+            Students must meet or exceed this score to pass the assessment.
+        </p>
+    @endif
 
 </x-wizard.info-card>

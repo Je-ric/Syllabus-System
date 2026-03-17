@@ -499,28 +499,37 @@
             <p class="indent-level-1"><strong>a. Course Requirements</strong></p>
             <p class="indent-level-2">The student performance in this course will be rated based on the following:</p>
 
-            <table border="1" style="width:100%; border-collapse: collapse;">
+            <table border="1" style="width:100%; border-collapse:collapse;">
                 <thead>
                     <tr>
-                        <th rowspan="2" style="text-align:center; width: 90px;">CO</th>
+                        <th rowspan="2" style="text-align:center; width:90px;">CO</th>
                         <th colspan="2" style="text-align:center;">
                             {{ $syllabus->course->has_lec_lab ? 'LECTURE (67%)' : 'LECTURE' }}
                         </th>
                         @if ($syllabus->course->has_lec_lab)
                             <th colspan="2" style="text-align:center;">LABORATORY (33%)</th>
                         @endif
-                        <th rowspan="2" style="text-align:center; width: 120px;">Performance Standard</th>
+                        <th rowspan="2" style="text-align:center; width:120px;">Performance Standard</th>
                     </tr>
                     <tr>
                         <th style="text-align:center;">Assessment Task</th>
-                        <th style="text-align:center; width: 90px;">Weight (%)</th>
+                        <th style="text-align:center; width:90px;">Weight (%)</th>
                         @if ($syllabus->course->has_lec_lab)
                             <th style="text-align:center;">Assessment Task</th>
-                            <th style="text-align:center; width: 90px;">Weight (%)</th>
+                            <th style="text-align:center; width:90px;">Weight (%)</th>
                         @endif
                     </tr>
                 </thead>
                 <tbody>
+                    @php
+                        // Passing mark = performance_standard from the component (not a fixed 60%).
+                        $lecPassMark = $lecComponent?->performance_standard
+                            ? (int) round((float) str_replace('%', '', (string) $lecComponent->performance_standard))
+                            : 60;
+                        $labPassMark = $labComponent?->performance_standard
+                            ? (int) round((float) str_replace('%', '', (string) $labComponent->performance_standard))
+                            : 60;
+                    @endphp
                     @forelse (($evaluationRows ?? []) as $row)
                         <tr>
                             <td style="text-align:center;">{{ $row['co_label'] ?? '' }}</td>
@@ -532,7 +541,7 @@
                             @endif
                             <td style="text-align:center;">
                                 @if (($row['is_exam'] ?? false) === true)
-                                    <strong>60%</strong>
+                                    <strong>{{ $lecPassMark }}%</strong>
                                 @endif
                             </td>
                         </tr>
@@ -543,17 +552,15 @@
                             </td>
                         </tr>
                     @endforelse
-
                     <tr>
                         <td style="text-align:left; font-weight:bold;">Total</td>
                         <td></td>
                         <td style="text-align:center; font-weight:bold;">{{ $evaluationTotals['lec'] ?? '' }}%</td>
                         @if ($syllabus->course->has_lec_lab)
                             <td></td>
-                            <td style="text-align:center; font-weight:bold;">{{ $evaluationTotals['lab'] ?? '' }}%
-                            </td>
+                            <td style="text-align:center; font-weight:bold;">{{ $evaluationTotals['lab'] ?? '' }}%</td>
                         @endif
-                        <td style="text-align:center; font-weight:bold;">60%</td>
+                        <td style="text-align:center; font-weight:bold;">{{ $lecPassMark }}%</td>
                     </tr>
                 </tbody>
             </table>
