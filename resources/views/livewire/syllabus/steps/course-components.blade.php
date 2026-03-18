@@ -11,7 +11,7 @@
         When LEC-only: one performance standard in the LEC section, same as before.
         Options: 50%–80% in 5% steps.
 
-        wire:model.blur — syncs on field blur so values are committed to PHP state
+        wire:model.defer — syncs on next request so values are committed to PHP state
         before wizard navigation fires syllabus-save-step.
     --}}
 
@@ -40,19 +40,19 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                     <div>
                         <x-form.label isRequired><i class="bx bx-user"></i> Instructor Name</x-form.label>
-                        <x-form.input wire:model.blur="lec_instructor_name" placeholder="Enter instructor name" />
+                        <x-form.input wire:model.defer="lec_instructor_name" placeholder="Enter instructor name" />
                     </div>
                     <div>
                         <x-form.label isRequired><i class="bx bx-envelope"></i> Instructor Email</x-form.label>
-                        <x-form.input type="email" wire:model.blur="lec_instructor_email" placeholder="instructor@clsu.edu.ph" />
+                        <x-form.input type="email" wire:model.defer="lec_instructor_email" placeholder="instructor@clsu.edu.ph" />
                     </div>
                     <div>
                         <x-form.label><i class="bx bx-phone"></i> Phone (Optional)</x-form.label>
-                        <x-form.input wire:model.blur="lec_phone" placeholder="09XX XXX XXXX" />
+                        <x-form.input wire:model.defer="lec_phone" placeholder="09XX XXX XXXX" />
                     </div>
                     <div>
                         <x-form.label><i class="bx bx-building"></i> Office</x-form.label>
-                        <x-form.input wire:model.blur="lec_office" placeholder="Building / Room" />
+                        <x-form.input wire:model.defer="lec_office" placeholder="Building / Room" />
                     </div>
                 </div>
             </div>
@@ -65,7 +65,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
                     <div>
                         <x-form.label isRequired><i class="bx bx-time"></i> Class Hours</x-form.label>
-                        <x-form.select wire:model.blur="lec_class_hours">
+                        <x-form.select wire:model.defer="lec_class_hours">
                             <option value="1 hr">1 hr</option>
                             <option value="1 hr and 30 min">1 hr and 30 min</option>
                             <option value="2 hr">2 hr</option>
@@ -75,11 +75,11 @@
                     </div>
                     <div>
                         <x-form.label isRequired><i class="bx bx-calendar-event"></i> Schedule</x-form.label>
-                        <x-form.input wire:model.blur="lec_schedule" placeholder="e.g., MWF 9:00–10:00 AM" />
+                        <x-form.input wire:model.defer="lec_schedule" placeholder="e.g., MWF 9:00–10:00 AM" />
                     </div>
                     <div>
                         <x-form.label isRequired><i class="bx bx-chat"></i> Consultation Hours</x-form.label>
-                        <x-form.input wire:model.blur="lec_consultation_hours" placeholder="e.g., MW 2:00–4:00 PM" />
+                        <x-form.input wire:model.defer="lec_consultation_hours" placeholder="e.g., MW 2:00–4:00 PM" />
                     </div>
                     <div>
                         <x-form.label isRequired>
@@ -97,7 +97,7 @@
                             in ComponentsStep::updated(). No separate LAB input is shown.
                             Options are passing thresholds (e.g. 60%, 75%), NOT weight splits.
                         --}}
-                        <x-form.select wire:model.blur="lec_performance_standard">
+                        <x-form.select wire:model.defer="lec_performance_standard">
                             <option value="50.00">50%</option>
                             <option value="55.00">55%</option>
                             <option value="60.00" selected>60%</option>
@@ -131,19 +131,19 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                         <div>
                             <x-form.label isRequired><i class="bx bx-user"></i> Instructor Name</x-form.label>
-                            <x-form.input wire:model.blur="lab_instructor_name" placeholder="Enter instructor name" />
+                            <x-form.input wire:model.defer="lab_instructor_name" placeholder="Enter instructor name" />
                         </div>
                         <div>
                             <x-form.label isRequired><i class="bx bx-envelope"></i> Instructor Email</x-form.label>
-                            <x-form.input type="email" wire:model.blur="lab_instructor_email" placeholder="instructor@clsu.edu.ph" />
+                            <x-form.input type="email" wire:model.defer="lab_instructor_email" placeholder="instructor@clsu.edu.ph" />
                         </div>
                         <div>
                             <x-form.label><i class="bx bx-phone"></i> Phone (Optional)</x-form.label>
-                            <x-form.input wire:model.blur="lab_phone" placeholder="09XX XXX XXXX" />
+                            <x-form.input wire:model.defer="lab_phone" placeholder="09XX XXX XXXX" />
                         </div>
                         <div>
                             <x-form.label><i class="bx bx-building"></i> Office</x-form.label>
-                            <x-form.input wire:model.blur="lab_office" placeholder="Building / Room" />
+                            <x-form.input wire:model.defer="lab_office" placeholder="Building / Room" />
                         </div>
                     </div>
                 </div>
@@ -156,7 +156,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
                         <div>
                             <x-form.label isRequired><i class="bx bx-time"></i> Class Hours</x-form.label>
-                            <x-form.select wire:model.blur="lab_class_hours">
+                            <x-form.select wire:model.defer="lab_class_hours">
                                 <option value="1 hr">1 hr</option>
                                 <option value="1 hr and 30 min">1 hr and 30 min</option>
                                 <option value="2 hr">2 hr</option>
@@ -166,11 +166,11 @@
                         </div>
                         <div>
                             <x-form.label isRequired><i class="bx bx-calendar-event"></i> Schedule</x-form.label>
-                            <x-form.input wire:model.blur="lab_schedule" placeholder="e.g., T 1:00–4:00 PM" />
+                            <x-form.input wire:model.defer="lab_schedule" placeholder="e.g., T 1:00–4:00 PM" />
                         </div>
                         <div>
                             <x-form.label isRequired><i class="bx bx-chat"></i> Consultation Hours</x-form.label>
-                            <x-form.input wire:model.blur="lab_consultation_hours" placeholder="e.g., MW 2:00–4:00 PM" />
+                            <x-form.input wire:model.defer="lab_consultation_hours" placeholder="e.g., MW 2:00–4:00 PM" />
                         </div>
                     </div>
                 </div>

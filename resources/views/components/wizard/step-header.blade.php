@@ -5,7 +5,7 @@
 ])
 
 <div class="mb-6 pb-5 border-b border-slate-100" role="region" aria-label="{{ $title }}">
-    <div class="flex items-start justify-between gap-4">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 
         {{-- Left: icon + text block ─────────────────────────────────────────── --}}
         <div class="flex items-start gap-3 min-w-0">
@@ -40,7 +40,7 @@
 
         {{-- Right: action slot — tertiary; only visible if caller provides content --}}
         @if ($slot->isNotEmpty())
-            <div class="shrink-0 flex items-center flex-wrap gap-2 pt-0.5">
+            <div class="flex items-center flex-wrap gap-2 sm:shrink-0 sm:pt-0.5">
                 {{ $slot }}
             </div>
         @endif

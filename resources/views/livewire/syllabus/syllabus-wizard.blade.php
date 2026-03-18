@@ -20,11 +20,11 @@
         ──────────────────────────────────────────────────────────────────────────── --}}
         <div
             wire:loading.flex
-            wire:target="goNextStep,goPreviousStep,clickTab"
+            wire:target="goNextStep,goPreviousStep,clickTab,saveAsDone"
             class="fixed inset-0 z-50 hidden items-center justify-center bg-white/70 backdrop-blur-md">
-            
+
             <div class="flex flex-col items-center gap-4 px-8 py-6 bg-white rounded-2xl shadow-xl border border-slate-100">
-                
+
                 <div class="relative w-12 h-12">
                     <svg class="absolute inset-0 animate-spin text-emerald-500" viewBox="0 0 48 48" fill="none">
                         <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="4"
@@ -34,15 +34,15 @@
                         <span class="w-3 h-3 rounded-full bg-emerald-600 animate-pulse"></span>
                     </span>
                 </div>
-    
+
                 <div class="text-center">
-                    <p class="text-sm font-semibold text-slate-700">Saving &amp; switching…</p>
-                    <p class="text-xs text-slate-400 mt-1">Just a moment</p>
+                    <p class="text-sm font-semibold text-slate-700">Saving changes…</p>
+                    <p class="text-xs text-slate-400 mt-1">Please wait</p>
                 </div>
-    
+
             </div>
         </div>
-    
+
         {{-- ══ Step nav tabs ════════════════════════════════════════════════════════ --}}
         <div class="mb-6 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
             <nav class="flex border-b border-slate-200" aria-label="Wizard Steps">
@@ -55,7 +55,7 @@
                     <button type="button"
                         wire:click="clickTab('{{ $step }}')"
                         wire:loading.attr="disabled"
-                        wire:target="clickTab,goPreviousStep,goNextStep,submitForReview"
+                        wire:target="clickTab,goPreviousStep,goNextStep,submitForReview,saveAsDone"
                         class="flex-1 flex flex-col items-center gap-1 px-2 py-3.5 text-xs font-medium
                                 transition-all duration-150 focus:outline-none border-b-2
                                 {{ $isCurrent
@@ -77,50 +77,50 @@
                 @endforeach
             </nav>
         </div>
-    
+
         {{-- ══ Step content ════════════════════════════════════════════════════════
             CRITICAL: No :key attribute on any child component.
             Without :key, Livewire keeps the component mounted in memory for the
             entire page session. Switching steps just shows/hides the wrapper div —
             zero remount, zero cold-boot DB queries, instant perceived transition.
-    
+
             Each child listens to 'syllabus-save-step' and only acts on its own step.
             The wizard's saveAndNavigate() dispatches the save event + changes
             $currentStep in ONE round trip, so the UI updates immediately.
         ──────────────────────────────────────────────────────────────────────────── --}}
         <div class="bg-white border border-slate-200 rounded-xl shadow-sm">
-    
+
             {{-- Academic Calendar --}}
             <div class="{{ $currentStep === 'academic_calendar' ? 'block' : 'hidden' }} p-5 sm:p-6">
                 <livewire:syllabus.steps.academic-calendar-step :syllabus-id="$syllabus->id" />
             </div>
-    
+
             {{-- Course Components --}}
             <div class="{{ $currentStep === 'course_components' ? 'block' : 'hidden' }} p-5 sm:p-6">
                 <livewire:syllabus.steps.components-step :syllabus-id="$syllabus->id" />
             </div>
-    
+
             {{-- Course Outcomes --}}
             <div class="{{ $currentStep === 'course_outcomes' ? 'block' : 'hidden' }} p-5 sm:p-6">
                 <livewire:syllabus.steps.course-outcomes-step :syllabus-id="$syllabus->id" />
             </div>
-    
+
             {{-- Weekly Coverage --}}
             <div class="{{ $currentStep === 'weekly_coverage' ? 'block' : 'hidden' }} p-5 sm:p-6">
                 <livewire:syllabus.steps.weekly-coverage-step :syllabus-id="$syllabus->id" />
             </div>
-    
+
             {{-- Course Evaluation --}}
             <div class="{{ $currentStep === 'course_evaluation' ? 'block' : 'hidden' }} p-5 sm:p-6">
                 <livewire:syllabus.steps.course-evaluation-step :syllabus-id="$syllabus->id" />
             </div>
-    
+
             {{-- Review --}}
             <div class="{{ $currentStep === 'review' ? 'block' : 'hidden' }} p-5 sm:p-6">
                 <livewire:syllabus.steps.review-step :syllabus-id="$syllabus->id" />
             </div>
         </div>
-    
+
         {{-- ══ Bottom navigation ════════════════════════════════════════════════════ --}}
         <div class="mt-6 flex justify-between items-center">
             <div>
@@ -128,18 +128,18 @@
                     <x-button variant="cancel"
                         wire:click="goPreviousStep"
                         wire:loading.attr="disabled"
-                        wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview">
+                        wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview,saveAsDone">
                         <i class="bx bx-chevron-left"></i> Previous
                     </x-button>
                 @endif
             </div>
-    
+
             <div class="flex items-center gap-3">
                 @if($this->hasNextStep())
                     <x-button variant="primary"
                         wire:click="goNextStep"
                         wire:loading.attr="disabled"
-                        wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview">
+                        wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview,saveAsDone">
                         Next <i class="bx bx-chevron-right"></i>
                     </x-button>
                 @else
@@ -148,7 +148,7 @@
                         type="button"
                         wire:click="submitForReview"
                         wire:loading.attr="disabled"
-                        wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview">
+                        wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview,saveAsDone">
                         <i class="bx bx-check-double"></i> Submit for Review
                     </x-button>
                 @endif

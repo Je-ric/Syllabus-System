@@ -88,38 +88,61 @@
     ];
 
     $class = $styles[strval($variant)] ?? $styles['primary'];
+
+    $attributeKeys = array_keys($attributes->getAttributes());
+    $wireClickKey = null;
+    foreach ($attributeKeys as $key) {
+        if (str_starts_with($key, 'wire:click')) {
+            $wireClickKey = $key;
+            break;
+        }
+    }
+    $wireClickValue = $wireClickKey ? $attributes->get($wireClickKey) : null;
+
+    $existingTargetAttr = $attributes->get('wire:target');
+    $parsedTarget = null;
+    if (is_string($wireClickValue) && preg_match('/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*(?:\(|$)/', $wireClickValue, $m)) {
+        $parsedTarget = $m[1];
+    }
+
+    $autoTarget = $wireTarget ?: $parsedTarget;
+    $spinnerTarget = $autoTarget ?: $existingTargetAttr;
+    $shouldHandleLoading = filled($loading) || filled($spinnerTarget);
 @endphp
 
 @if ($href)
     <a href="{{ $href }}" {{ $attributes->merge(['class' => $class]) }}>{{ $slot }}</a>
-@elseif ($loading)
+@else
     <button type="{{ $type }}"
-        {{ $attributes->merge(['class' => $class]) }}>
+        {{ $attributes->merge(['class' => $class]) }}
+        @if ($shouldHandleLoading && !$attributes->has('wire:loading.attr')) wire:loading.attr="disabled" @endif
+        @if ($shouldHandleLoading && $autoTarget && !$attributes->has('wire:target')) wire:target="{{ $autoTarget }}" @endif>
 
-        @if ($wireTarget)
-            <span wire:loading.remove wire:target="{{ $wireTarget }}" class="inline-flex items-center gap-1.5">{{ $slot }}</span>
-            <span wire:loading wire:target="{{ $wireTarget }}" wire:loading.attr="disabled" class="inline-flex items-center gap-1.5">
-                <svg class="animate-spin h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                    <path class="opacity-75" fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                </svg>
-                {{ $loading }}
-            </span>
+        @if ($shouldHandleLoading)
+            @if (filled($loading))
+                <span wire:loading.remove @if($spinnerTarget) wire:target="{{ $spinnerTarget }}" @endif class="inline-flex items-center gap-1.5">{{ $slot }}</span>
+                <span wire:loading @if($spinnerTarget) wire:target="{{ $spinnerTarget }}" @endif class="inline-flex items-center gap-1.5">
+                    <svg class="animate-spin h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                        <path class="opacity-75" fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
+                    {{ $loading }}
+                </span>
+            @else
+                <span class="inline-flex items-center gap-1.5">
+                    <span class="inline-flex items-center gap-1.5">{{ $slot }}</span>
+                    <svg wire:loading @if($spinnerTarget) wire:target="{{ $spinnerTarget }}" @endif class="animate-spin h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                        <path class="opacity-75" fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
+                </span>
+            @endif
         @else
-            <span wire:loading.remove class="inline-flex items-center gap-1.5">{{ $slot }}</span>
-            <span wire:loading wire:loading.attr="disabled" class="inline-flex items-center gap-1.5">
-                <svg class="animate-spin h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                    <path class="opacity-75" fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                </svg>
-                {{ $loading }}
-            </span>
+            {{ $slot }}
         @endif
     </button>
-@else
-    <button type="{{ $type }}" {{ $attributes->merge(['class' => $class]) }}>{{ $slot }}</button>
 @endif
 
 {{--

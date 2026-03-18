@@ -70,7 +70,7 @@
         @else
             <x-form.label for="co_{{ $wKey }}">Course Outcome</x-form.label>
             <x-form.select id="co_{{ $wKey }}"
-                wire:model.lazy="weekInputs.{{ $wKey }}.course_outcome_id">
+                wire:model.defer="weekInputs.{{ $wKey }}.course_outcome_id">
                 <option value="">— Select Course Outcome —</option>
                 @foreach ($courseOutcomes as $outcome)
                     <option value="{{ $outcome['id'] }}">
@@ -86,7 +86,7 @@
         <x-form.label for="lo_{{ $wKey }}">Unit Learning Outcomes</x-form.label>
         <x-form.textarea id="lo_{{ $wKey }}" rows="4"
             placeholder="Enter learning outcomes…"
-            wire:model.lazy="weekInputs.{{ $wKey }}.learning_outcomes" />
+            wire:model.defer="weekInputs.{{ $wKey }}.learning_outcomes" />
     </div>
 
     {{-- Assessment Task --}}
@@ -99,7 +99,7 @@
         </x-form.label>
         <x-form.textarea id="at_{{ $wKey }}" rows="4"
             placeholder="{{ $isMvgo ? 'Optional — e.g. Orientation Quiz' : 'Enter assessment task…' }}"
-            wire:model.lazy="weekInputs.{{ $wKey }}.assessment_task" />
+            wire:model.defer="weekInputs.{{ $wKey }}.assessment_task" />
     </div>
 
     {{-- Topics --}}
@@ -107,7 +107,7 @@
         <x-form.label for="tp_{{ $wKey }}">Topics</x-form.label>
         <x-form.textarea id="tp_{{ $wKey }}" rows="4"
             placeholder="Enter topics covered…"
-            wire:model.lazy="weekInputs.{{ $wKey }}.topic" />
+            wire:model.defer="weekInputs.{{ $wKey }}.topic" />
     </div>
 
     {{-- Teaching & Learning Activities --}}
@@ -115,7 +115,7 @@
         <x-form.label for="tla_{{ $wKey }}">Teaching &amp; Learning Activities</x-form.label>
         <x-form.textarea id="tla_{{ $wKey }}" rows="4"
             placeholder="Enter teaching activities…"
-            wire:model.lazy="weekInputs.{{ $wKey }}.teaching_activities" />
+            wire:model.defer="weekInputs.{{ $wKey }}.teaching_activities" />
     </div>
 
 </div>
@@ -138,7 +138,7 @@
             @foreach ($weekInputs[$wKey]['references'] ?? [['text' => '']] as $rIdx => $ref)
                 <div class="flex items-center gap-2" wire:key="ref-{{ $wKey }}-{{ $rIdx }}">
                     <input type="text"
-                        wire:model.lazy="weekInputs.{{ $wKey }}.references.{{ $rIdx }}.text"
+                        wire:model.defer="weekInputs.{{ $wKey }}.references.{{ $rIdx }}.text"
                         placeholder="e.g. Author (Year). Title. Publisher."
                         class="flex-1 text-xs rounded-lg border border-slate-300 bg-white px-3 py-1.5
                                focus:border-emerald-400 focus:ring-1 focus:ring-emerald-300 focus:outline-none
@@ -175,13 +175,13 @@
                 <div class="flex items-start gap-2" wire:key="mat-{{ $wKey }}-{{ $mIdx }}">
                     <div class="flex-1 space-y-1.5">
                         <input type="text"
-                            wire:model.lazy="weekInputs.{{ $wKey }}.materials.{{ $mIdx }}.name"
+                            wire:model.defer="weekInputs.{{ $wKey }}.materials.{{ $mIdx }}.name"
                             placeholder="Name (e.g. Week {{ $week->week_no }} Slides)"
                             class="w-full text-xs rounded-lg border border-slate-300 bg-white px-3 py-1.5
                                    focus:border-blue-400 focus:ring-1 focus:ring-blue-300 focus:outline-none
                                    placeholder:text-slate-300" />
                         <input type="url"
-                            wire:model.lazy="weekInputs.{{ $wKey }}.materials.{{ $mIdx }}.url"
+                            wire:model.defer="weekInputs.{{ $wKey }}.materials.{{ $mIdx }}.url"
                             placeholder="https://…"
                             class="w-full text-xs rounded-lg border border-slate-300 bg-white px-3 py-1.5
                                    focus:border-blue-400 focus:ring-1 focus:ring-blue-300 focus:outline-none
