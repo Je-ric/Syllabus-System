@@ -15,10 +15,14 @@ class CompleteSyllabus extends Model
         'academic_year',
         'semester',
         'pdf_path',
+        'abridged_path',
+        'evaluation_path',
         'version',
         'approved_at',
         'approved_by',
         'checksum',
+        'checksum_abridged',
+        'checksum_evaluation',
     ];
 
     public function syllabus()
