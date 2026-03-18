@@ -333,6 +333,10 @@ table th {
     background: #d9d9d9;
 }
 
+th p {
+    font-weight: normal;
+}
+
 /* Key-value info tables (Course info, Instructor, etc.) */
 .kv-table td:first-child {
     width: 5%;

@@ -225,7 +225,7 @@
                         @forelse ($peos as $peo)
                             <tr>
                                 <td>{{ $peo->peo_code }}. {{ $peo->peo_text }}</td>
-                                <td><i class="bx bx-check">&#10003;</i></td>
+                                <td style="text-align: center;"><i class="bx bx-check">&#10003;</i></td>
                             </tr>
                         @empty
                             <tr>
@@ -265,14 +265,14 @@
                                 <td>({{ $po->po_code }})</td>
                                 <td>{{ $po->po_text }}</td>
                                 @forelse ($peos as $peo)
-                                    <td>{!! $po->peos->contains('id', $peo->id) ? '&#10003;' : ' ' !!}</td>
+                                    <td style="text-align: center;">{!! $po->peos->contains('id', $peo->id) ? '&#10003;' : ' ' !!}</td>
                                 @empty
-                                    <td>-</td>
+                                    <td style="text-align: center;">-</td>
                                 @endforelse
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="{{ $peos->count() + 2 }}">No POs found.</td>
+                                <td colspan="{{ $peos->count() + 2 }}" style="text-align: center;">No POs found.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -355,7 +355,6 @@
 
         <div class="landscape">
             <h3 class="a4-section title-numbered">9. Course Outcomes (COs) and Relationship to Program Outcomes</h3>
-
             <table>
                 <thead>
                     <tr>
@@ -1068,8 +1067,301 @@
     </div>
 
     <div id="a4-container"></div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const source    = document.getElementById("syllabus-content");
+    const container = document.getElementById("a4-container");
+    const pageCountEl = document.getElementById("page-count");
 
-    <script>
+    let currentOrientation = "portrait";
+    let page = makePage(currentOrientation);
+    container.appendChild(page);
+
+    // ── Counter for unique split IDs stored as JS properties ─────────────────
+    let _uid = 0;
+    function uid(node) {
+        if (!node.__sid) node.__sid = ++_uid;
+        return node.__sid;
+    }
+
+    // ── Walk every direct child of #syllabus-content ──────────────────────────
+    Array.from(source.children).forEach(el => {
+        const isLandscape = el.classList.contains("landscape");
+        const isPortrait  = el.classList.contains("portrait");
+
+        if (isLandscape || isPortrait) {
+            const orient = isLandscape ? "landscape" : "portrait";
+            if (pageHasContent() || orient !== currentOrientation) {
+                page = makePage(orient);
+                container.appendChild(page);
+            } else {
+                page.className = "a4-page " + orient;
+            }
+            currentOrientation = orient;
+            el.classList.remove("landscape", "portrait");
+        }
+
+        if (el.tagName === "TABLE") {
+            splitTable(el, () => page);
+        } else {
+            flow(el, []);          // [] = no ancestor wrapper chain yet
+        }
+    });
+
+    source.remove();
+    addPageNumbers();
+
+    // =========================================================================
+    //  flow(node, chain)
+    //
+    //  `chain` = ordered array of original ancestor elements whose shallow
+    //  clones must be present on the current page before `node` can be placed.
+    //
+    //  Algorithm:
+    //    1. Get (or create) the deepest wrapper on the current page.
+    //    2. Append `node`.
+    //    3. If it fits → done.
+    //    4. If it doesn't fit AND it has children → split it:
+    //         a. Remove it, put a shallow clone in its place.
+    //         b. Recurse over each child with `chain + [node]`.
+    //    5. If it doesn't fit AND it's atomic → push to a new page.
+    // =========================================================================
+    function flow(node, chain) {
+        // Tables always go through the specialised table splitter.
+        if (node.nodeType === Node.ELEMENT_NODE && node.tagName === "TABLE") {
+            splitTable(node, () => deepest(chain));
+            return;
+        }
+
+        const target = deepest(chain);
+        target.appendChild(node);
+
+        if (!overflows()) return;   // fits – nothing more to do
+
+        target.removeChild(node);
+
+        // Collect children (empty for text nodes / void elements)
+        const kids = (node.nodeType === Node.ELEMENT_NODE)
+            ? Array.from(node.childNodes)
+            : [];
+
+        if (kids.length === 0) {
+            // Atomic node – push to a fresh page, rebuild the chain there.
+            breakPage();
+            deepest(chain).appendChild(node);
+            return;
+        }
+
+        // Non-atomic – place a shallow clone as the wrapper and distribute kids.
+        uid(node);                          // ensure original has an ID
+        const clone = shallow(node);
+        clone.__sid = node.__sid;           // clone inherits same ID
+        target.appendChild(clone);
+
+        const deeper = [...chain, node];    // extend the ancestry
+        kids.forEach(kid => flow(kid, deeper));
+    }
+
+    // =========================================================================
+    //  deepest(chain)
+    //
+    //  Walk `page`, following last-children that match each level of `chain`
+    //  by __sid. If a level is missing on the current page, create it (and all
+    //  subsequent levels) by appending fresh shallow clones.
+    //
+    //  Returns the innermost live clone on the current page.
+    // =========================================================================
+    function deepest(chain) {
+        let node = page;
+        for (let i = 0; i < chain.length; i++) {
+            const orig = chain[i];
+            uid(orig);
+
+            // Search backwards through node's children for a matching __sid.
+            let found = null;
+            for (let j = node.children.length - 1; j >= 0; j--) {
+                if (node.children[j].__sid === orig.__sid) {
+                    found = node.children[j];
+                    break;
+                }
+            }
+
+            if (!found) {
+                // This level doesn't exist yet on the current page – create the
+                // rest of the chain from here.
+                for (let k = i; k < chain.length; k++) {
+                    const c = shallow(chain[k]);
+                    c.__sid = chain[k].__sid;   // same ID as the original
+                    node.appendChild(c);
+                    node = c;
+                }
+                return node;
+            }
+            node = found;
+        }
+        return node;   // page itself if chain is empty
+    }
+
+    // =========================================================================
+    //  breakPage
+    //  Start a new page.  Does NOT rebuild the wrapper chain – callers that
+    //  need the chain recreated should call deepest(chain) after this.
+    // =========================================================================
+    function breakPage() {
+        page = makePage(currentOrientation);
+        container.appendChild(page);
+    }
+
+    // =========================================================================
+    //  splitTable
+    //
+    //  Distributes <tbody> rows across pages.
+    //  • A colgroup mirroring the header's column widths is injected into every
+    //    shell so continuation tables have identical column proportions.
+    //  • Headers are NOT repeated on continuation pages (cleaner output).
+    //  • `getTarget` is a callback that returns the DOM node to append shells
+    //    to. On a new page this callback re-runs, picking up the freshly rebuilt
+    //    wrapper (if any).
+    // =========================================================================
+    function splitTable(table, getTarget) {
+        const thead = table.querySelector(":scope > thead");
+        const rows  = Array.from(table.querySelectorAll(":scope > tbody > tr"));
+
+        // Table has no body rows – treat as a plain block.
+        if (!rows.length) {
+            const t = getTarget();
+            t.appendChild(table);
+            if (overflows()) {
+                t.removeChild(table);
+                breakPage();
+                getTarget().appendChild(table);
+            }
+            return;
+        }
+
+        const cg = colgroup(table, thead);
+
+        // ── First shell (includes thead) ──────────────────────────────────────
+        let target = getTarget();
+        let shell  = shell_(table, thead, true, cg);
+        target.appendChild(shell);
+
+        if (overflows()) {
+            // Header alone overflows the current page → move to a new page.
+            target.removeChild(shell);
+            breakPage();
+            target = getTarget();
+            shell  = shell_(table, thead, true, cg);
+            target.appendChild(shell);
+            // If it STILL overflows on a blank page, accept it (can't split a header).
+        }
+
+        // ── Row-by-row distribution ───────────────────────────────────────────
+        rows.forEach(row => {
+            const tbody = shell.querySelector("tbody");
+            tbody.appendChild(row);
+
+            if (!overflows()) return;   // fits
+
+            tbody.removeChild(row);
+
+            // Edge-case: the row alone is taller than a full page.
+            if (tbody.children.length === 0) {
+                tbody.appendChild(row);   // accept the overflow, prevent infinite loop
+                return;
+            }
+
+            // Row doesn't fit – open a continuation page (no header).
+            breakPage();
+            target = getTarget();
+            shell  = shell_(table, thead, false, cg);
+            target.appendChild(shell);
+            shell.querySelector("tbody").appendChild(row);
+        });
+    }
+
+    // ── Table helpers ─────────────────────────────────────────────────────────
+
+    function colgroup(table, thead) {
+        const existing = table.querySelector(":scope > colgroup");
+        if (existing) return existing.cloneNode(true);
+        if (!thead) return null;
+
+        const headerRows = thead.querySelectorAll("tr");
+        const leaf = headerRows[headerRows.length - 1];
+        if (!leaf) return null;
+
+        const cg = document.createElement("colgroup");
+        Array.from(leaf.cells).forEach(cell => {
+            const col = document.createElement("col");
+            const sw = cell.style.width;
+            const aw = cell.getAttribute("width");
+            if (sw)      col.style.width = sw;
+            else if (aw) col.style.width = /^\d+$/.test(aw) ? aw + "px" : aw;
+            cg.appendChild(col);
+        });
+        return cg;
+    }
+
+    function shell_(orig, thead, withHeader, cg) {
+        const t = document.createElement("table");
+        t.className     = orig.className;
+        t.style.cssText = orig.style.cssText;
+        t.style.width   = "100%";
+        t.style.borderCollapse = "collapse";
+        const b = orig.getAttribute("border");
+        if (b) t.setAttribute("border", b);
+
+        if (cg)                  t.appendChild(cg.cloneNode(true));
+        if (withHeader && thead) t.appendChild(thead.cloneNode(true));
+        t.appendChild(document.createElement("tbody"));
+        return t;
+    }
+
+    // ── General helpers ───────────────────────────────────────────────────────
+
+    function overflows() {
+        return page.scrollHeight > page.clientHeight;
+    }
+
+    function pageHasContent() {
+        return page.children.length > 0;
+    }
+
+    function shallow(el) {
+        const c = el.cloneNode(false);
+        c.removeAttribute("id");
+        return c;
+    }
+
+    function makePage(orientation) {
+        const div = document.createElement("div");
+        div.className = "a4-page " + (orientation || "portrait");
+        return div;
+    }
+
+    function addPageNumbers() {
+        const pages = document.querySelectorAll(".a4-page");
+        pages.forEach((p, i) => {
+            const footer = document.createElement("div");
+            footer.style.cssText =
+                "position:absolute;bottom:20px;left:60px;right:60px;" +
+                "border-top:1px solid #808080;padding-top:6px;" +
+                "text-align:right;font-size:9pt;color:#808080;" +
+                "font-family:Tahoma,sans-serif;";
+            footer.innerText =
+                "Course Syllabus: {{ $syllabus->course->course_code }} | Page " +
+                (i + 1) + " of " + pages.length;
+            p.appendChild(footer);
+        });
+        if (pageCountEl) {
+            pageCountEl.textContent =
+                pages.length + " page" + (pages.length !== 1 ? "s" : "");
+        }
+    }
+});
+</script>
+    {{-- <script>
         document.addEventListener("DOMContentLoaded", function() {
             const source = document.getElementById("syllabus-content");
             const container = document.getElementById("a4-container");
@@ -1163,13 +1455,8 @@
             }
 
             function canSplit(el) {
-                return (
-                    el.nodeType === Node.ELEMENT_NODE && ["DIV", "UL", "OL", "LI", "SECTION", "P", "H1", "H2",
-                        "H3", "H4", "H5", "H6", "TABLE", "EM", "STRONG", "TBODY", "THEAD", "TR", "TD", "TH"
-                    ].includes(el
-                        .tagName) &&
-                    el.childNodes.length > 0
-                );
+                // Allow any element node with children to be split across pages
+                return el.nodeType === Node.ELEMENT_NODE && el.childNodes.length > 0;
             }
 
             function getMaxPageHeight() {
@@ -1261,6 +1548,33 @@
                     return;
                 }
 
+                // Extract colgroup ONCE at the start to ensure consistent column widths
+                // across all shells (first shell with header, continuation shells without)
+                let colgroup = null;
+                const existingCg = table.querySelector(":scope > colgroup");
+                if (existingCg) {
+                    colgroup = existingCg.cloneNode(true);
+                } else if (thead) {
+                    const hRows = thead.querySelectorAll("tr");
+                    const leafRow = hRows[hRows.length - 1];
+                    if (leafRow) {
+                        colgroup = document.createElement("colgroup");
+                        Array.from(leafRow.cells).forEach(cell => {
+                            const col = document.createElement("col");
+                            const sw = cell.style.width;
+                            if (sw && sw !== "") {
+                                col.style.width = sw;
+                            } else {
+                                const aw = cell.getAttribute("width");
+                                if (aw && aw !== "") {
+                                    col.style.width = /^\d+$/.test(aw) ? aw + "px" : aw;
+                                }
+                            }
+                            colgroup.appendChild(col);
+                        });
+                    }
+                }
+
                 const getTarget = (typeof getAppendTarget === "function") ?
                     getAppendTarget :
                     () => page;
@@ -1268,18 +1582,31 @@
                 let target = getTarget();
                 const targetWasEmpty = !(target && target.children && target.children.length > 0);
 
-                let shell = createTableShell(table, thead, true);
+                let shell = createTableShell(table, thead, true, colgroup);
                 target.appendChild(shell);
 
-                // If the table header alone doesn't fit (because the page already has content),
-                // move the entire table to a fresh page before adding rows.
+                // IMPROVED: Only move table to new page if header alone is too large for a full page.
+                // Otherwise, let the row-by-row logic handle splitting naturally.
                 if (!targetWasEmpty && page.scrollHeight > getMaxPageHeight()) {
-                    target.removeChild(shell);
-                    page = createNewPage(currentOrientation);
-                    container.appendChild(page);
-                    shell = createTableShell(table, thead, true);
-                    target = getTarget();
-                    target.appendChild(shell);
+                    // Check if header alone would fit on an empty page
+                    const testPage = createNewPage(currentOrientation);
+                    const testTarget = testPage; // Assume header goes directly on new page
+                    const testShell = createTableShell(table, thead, true, colgroup);
+                    testTarget.appendChild(testShell);
+                    const headerFitsOnEmptyPage = testTarget.scrollHeight <= getMaxPageHeight();
+                    
+                    if (headerFitsOnEmptyPage) {
+                        // Header CAN fit on a fresh page, so move to new page and continue splitting
+                        target.removeChild(shell);
+                        page = testPage;
+                        container.appendChild(page);
+                        target = getTarget();
+                        target.appendChild(testShell);
+                        shell = testShell;
+                    } else {
+                        // Header is too large even for empty page; just keep it where it is
+                        // and let row-by-row logic handle the overflow
+                    }
                 }
 
                 rows.forEach(row => {
@@ -1300,14 +1627,14 @@
 
                         // FIX 2: Continuation table — no header repeat, starts from top of new page
                         target = getTarget();
-                        shell = createTableShell(table, thead, false);
+                        shell = createTableShell(table, thead, false, colgroup);
                         target.appendChild(shell);
                         shell.querySelector("tbody").appendChild(row);
                     }
                 });
             }
 
-            function createTableShell(original, thead, includeHeader) {
+            function createTableShell(original, thead, includeHeader, colgroup) {
                 const table = document.createElement("table");
 
                 // Copy class names and inline styles so weekly-coverage-table etc. carry over
@@ -1319,32 +1646,9 @@
                 table.style.borderCollapse = "collapse";
                 table.setAttribute("border", original.getAttribute("border") || "");
 
-                // Preserve column widths — getBoundingClientRect() returns 0 on
-                // hidden elements so we read from th style/attribute instead.
-                // Use the last header row (leaf cells, no spanning colspans).
-                const existingCg = original.querySelector(":scope > colgroup");
-                if (existingCg) {
-                    table.appendChild(existingCg.cloneNode(true));
-                } else if (thead) {
-                    const hRows = thead.querySelectorAll("tr");
-                    const leafRow = hRows[hRows.length - 1];
-                    if (leafRow) {
-                        const cg = document.createElement("colgroup");
-                        Array.from(leafRow.cells).forEach(cell => {
-                            const col = document.createElement("col");
-                            const sw = cell.style.width;
-                            if (sw && sw !== "") {
-                                col.style.width = sw;
-                            } else {
-                                const aw = cell.getAttribute("width");
-                                if (aw && aw !== "") {
-                                    col.style.width = /^\d+$/.test(aw) ? aw + "px" : aw;
-                                }
-                            }
-                            cg.appendChild(col);
-                        });
-                        table.appendChild(cg);
-                    }
+                // Append the preserved colgroup to maintain consistent column widths across all shells
+                if (colgroup) {
+                    table.appendChild(colgroup.cloneNode(true));
                 }
 
                 if (includeHeader && thead) {
@@ -1392,7 +1696,7 @@
                 }
             }
         });
-    </script>
+    </script> --}}
 
     @if (empty($isSnapshot))
         @include('Syllabus.preview._versions_drawer', [
