@@ -161,19 +161,40 @@ class SyllabusController extends Controller
     public function previewComplete(Syllabus $syllabus)
     {
         $this->authorizeSyllabusAccess($syllabus);
-        return view('Syllabus.preview.complete', $this->previewService->buildCompleteData($syllabus));
+        return view('Syllabus.preview.complete', array_merge(
+            $this->previewService->buildCompleteData($syllabus),
+            [
+                'previewMode'        => 'live',
+                'previewVariant'     => 'complete',
+                'activeSavedVersion' => null,
+            ],
+        ));
     }
 
     public function previewAbridged(Syllabus $syllabus)
     {
         $this->authorizeSyllabusAccess($syllabus);
-        return view('Syllabus.preview.abridged', $this->previewService->buildAbridgedData($syllabus));
+        return view('Syllabus.preview.abridged', array_merge(
+            $this->previewService->buildAbridgedData($syllabus),
+            [
+                'previewMode'        => 'live',
+                'previewVariant'     => 'abridged',
+                'activeSavedVersion' => null,
+            ],
+        ));
     }
 
     public function previewAssessment(Syllabus $syllabus)
     {
         $this->authorizeSyllabusAccess($syllabus);
-        return view('Syllabus.preview.assessment', $this->previewService->buildCompleteData($syllabus));
+        return view('Syllabus.preview.assessment', array_merge(
+            $this->previewService->buildCompleteData($syllabus),
+            [
+                'previewMode'        => 'live',
+                'previewVariant'     => 'assessment',
+                'activeSavedVersion' => null,
+            ],
+        ));
     }
 
     // ── Snapshot / PDF generation ─────────────────────────────────────────────
@@ -232,7 +253,10 @@ class SyllabusController extends Controller
             abort(404, 'Saved version file not found.');
         }
 
-        return response(Storage::disk('local')->get($path), 200, [
+        $html = Storage::disk('local')->get($path);
+        $html = $this->injectVersionsDrawerIntoHtml($syllabus, $completeSyllabus, 'complete', $html);
+
+        return response($html, 200, [
             'Content-Type' => 'text/html; charset=UTF-8',
         ]);
     }
@@ -277,9 +301,41 @@ class SyllabusController extends Controller
             abort(404, 'Abridged saved version file not found.');
         }
 
-        return response(Storage::disk('local')->get($path), 200, [
+        $html = Storage::disk('local')->get($path);
+        $html = $this->injectVersionsDrawerIntoHtml($syllabus, $completeSyllabus, 'abridged', $html);
+
+        return response($html, 200, [
             'Content-Type' => 'text/html; charset=UTF-8',
         ]);
+    }
+
+    private function injectVersionsDrawerIntoHtml(
+        Syllabus $syllabus,
+        CompleteSyllabus $activeSavedVersion,
+        string $previewVariant,
+        string $html
+    ): string {
+        $savedVersions = CompleteSyllabus::query()
+            ->where('syllabus_id', $syllabus->id)
+            ->orderByDesc('version')
+            ->orderByDesc('created_at')
+            ->get();
+
+        $drawer = view('Syllabus.preview._versions_drawer', [
+            'syllabus'           => $syllabus,
+            'savedVersions'      => $savedVersions,
+            'previewMode'        => 'saved',
+            'previewVariant'     => $previewVariant,
+            'activeSavedVersion' => $activeSavedVersion,
+            'openButton'         => 'floating',
+        ])->render();
+
+        $pos = stripos($html, '</body>');
+        if ($pos === false) {
+            return $html . $drawer;
+        }
+
+        return substr($html, 0, $pos) . $drawer . substr($html, $pos);
     }
 
     public function downloadSavedAbridged(CompleteSyllabus $completeSyllabus)

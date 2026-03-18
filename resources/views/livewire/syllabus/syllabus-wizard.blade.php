@@ -143,14 +143,14 @@
                         Next <i class="bx bx-chevron-right"></i>
                     </x-button>
                 @else
-                    <x-button
+                    {{-- <x-button
                         variant="save"
                         type="button"
                         wire:click="submitForReview"
                         wire:loading.attr="disabled"
                         wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview,saveAsDone">
                         <i class="bx bx-check-double"></i> Submit for Review
-                    </x-button>
+                    </x-button> --}}
                 @endif
             </div>
         </div>

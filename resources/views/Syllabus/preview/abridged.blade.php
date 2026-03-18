@@ -25,7 +25,22 @@
             </span>
             <span class="t-pages" id="page-count"></span>
         </div>
-        <button onclick="window.print()">Print / Save PDF</button>
+        @if (empty($isSnapshot))
+            <div style="display:flex; gap:8px; align-items:center;">
+                <button type="button"
+                    onclick="window.location.href='{{ route('syllabus.preview.complete', $syllabus) }}'">
+                    Complete
+                </button>
+                <button type="button"
+                    onclick="window.location.href='{{ route('syllabus.preview.abridged', $syllabus) }}'">
+                    Abridged
+                </button>
+                <button type="button" onclick="openSyllabusVersions()">Versions</button>
+                <button type="button" onclick="window.print()">Print / Save PDF</button>
+            </div>
+        @else
+            <button type="button" onclick="window.print()">Print / Save PDF</button>
+        @endif
     </div>
 
     {{-- ── Hidden source ───────────────────────────────────────────────────── --}}
@@ -825,6 +840,17 @@
             }
         });
     </script>
+
+    @if (empty($isSnapshot))
+        @include('Syllabus.preview._versions_drawer', [
+            'syllabus' => $syllabus,
+            'savedVersions' => $savedVersions ?? collect(),
+            'previewMode' => $previewMode ?? 'live',
+            'previewVariant' => $previewVariant ?? 'abridged',
+            'activeSavedVersion' => $activeSavedVersion ?? null,
+            'openButton' => 'none',
+        ])
+    @endif
 
 </body>
 

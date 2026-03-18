@@ -46,10 +46,28 @@
 
     <div id="toolbar">
         <div class="t-left">
-            <span class="t-title">{{ $syllabus->course->course_code }} - {{ $syllabus->course->course_title }}</span>
+            <span class="t-title">
+                {{ $syllabus->course->course_code }} - {{ $syllabus->course->course_title }}
+                <span style="font-weight:400; color:#94a3b8; font-size:11px; margin-left:6px;">Complete</span>
+            </span>
             <span class="t-pages" id="page-count"></span>
         </div>
-        <button onclick="window.print()">Print / Save PDF</button>
+        @if (empty($isSnapshot))
+            <div style="display:flex; gap:8px; align-items:center;">
+                <button type="button"
+                    onclick="window.location.href='{{ route('syllabus.preview.complete', $syllabus) }}'">
+                    Complete
+                </button>
+                <button type="button"
+                    onclick="window.location.href='{{ route('syllabus.preview.abridged', $syllabus) }}'">
+                    Abridged
+                </button>
+                <button type="button" onclick="openSyllabusVersions()">Versions</button>
+                <button type="button" onclick="window.print()">Print / Save PDF</button>
+            </div>
+        @else
+            <button type="button" onclick="window.print()">Print / Save PDF</button>
+        @endif
     </div>
 
     <div id="syllabus-content" style="display:none;">
@@ -63,13 +81,15 @@
                 <div class="a4-subtitle">Republic of the Philippines</div>
                 <div class="a4-title">CENTRAL LUZON STATE UNIVERSITY</div>
                 <div class="a4-subtitle">Science City of Muñoz, Nueva Ecija</div>
-                <div class="a4-subtitle">Office of the Vice President for Academic Affairs</div>
+                <br>
+                <div class="a4-subtitle">OFFICE OF THE VICE PRESIDENT FOR ACADEMIC AFFAIRS</div>
             </div>
             <div aria-hidden="true"></div>
         </div>
         <div class="a4-section a4-title">COURSE SYLLABUS</div>
-        <div class="a4-subtitle">{{ $syllabus->course->course_code }} - {{ $syllabus->course->course_title }}</div>
-
+        <br>
+        <div class="a4-subtitle a4-title">{{ $syllabus->course->course_code }} - {{ $syllabus->course->course_title }}</div>
+        <br>
         <h3 class="a4-section title-lettered">A. University Information</h3>
 
         <div class="a4-section">
@@ -88,8 +108,7 @@
 
         <div class="a4-section">
             <strong class="indent-level-1 title-numbered">3. Educational Philosophy</strong>
-            <p class="indent-level-2">The Central Luzon State University is committed and dedicated to provide a
-                holistic transformative education anchored on its mission statement and its institutional core values.
+            <p class="indent-level-2">The Central Luzon State University is committed and dedicated to provide a holistic transformative education anchored on its mission statement and its institutional core values.
                 As stated on its mission, the University shall develop globally competitive, work-ready,
                 socially-responsible and empowered human resources who value life-long learning; and shall generate,
                 disseminate, and apply knowledge and technologies for poverty alleviation, environmental protection and
@@ -97,6 +116,7 @@
             <p class="indent-level-2">Along with the curricular programs, the academic journey of learners revolves on
                 three value-laden dimensions: creativeness and innovativeness, hard work and integrity, and
                 inclusiveness and transformativeness.</p>
+            <br>
             <p class="indent-level-1-5-text">With these, the university shall:</p>
             <ul>
                 <li>Provide a teaching and learning environment which harness creativity and innovativeness among
@@ -124,20 +144,19 @@
             <strong class="indent-level-1 title-numbered">4. Quality Policy Statement</strong>
             <div class="a4-list">
                 <div class="indent-level-1-5">
-                    <div>a.&nbsp; Excellent service to humanity is our commitment.</div>
+                    <div>a. Excellent service to humanity is our commitment.</div>
                 </div>
                 <div class="indent-level-1-5">
-                    <div>b.&nbsp; We are committed to develop globally-competent and empowered human resources, and to
+                    <div>b. We are committed to develop globally-competent and empowered human resources, and to
                         generate knowledge and technologies for inclusive societal development.</div>
                 </div>
                 <div class="indent-level-1-5">
-                    <div>c.&nbsp; We are dedicated to uphold CLSU's core values and principles, comply with statutory
-                        and
-                        regulatory standards and continuously improve the effectiveness of our quality management
+                    <div>c. We are dedicated to uphold CLSU's core values and principles, comply with statutory
+                        and regulatory standards and continuously improve the effectiveness of our quality management
                         systems.</div>
                 </div>
                 <div class="indent-level-1-5">
-                    <div>d.&nbsp; Mahalaga ang inyong tinig upang higit na mapahusay ang kalidad ng aming paglilingkod.
+                    <div>d. Mahalaga ang inyong tinig upang higit na mapahusay ang kalidad ng aming paglilingkod.
                     </div>
                 </div>
             </div>
@@ -1124,7 +1143,8 @@
 
             function canSplit(el) {
                 return (
-                    el.nodeType === Node.ELEMENT_NODE && ["DIV", "UL", "OL", "LI", "SECTION"].includes(el
+                    el.nodeType === Node.ELEMENT_NODE && ["DIV", "UL", "OL", "LI", "SECTION", "P", "H1", "H2",
+                        "H3", "H4", "H5", "H6", "TABLE", "EM", "STRONG", ].includes(el
                         .tagName) &&
                     el.childNodes.length > 0
                 );
@@ -1351,6 +1371,17 @@
             }
         });
     </script>
+
+    @if (empty($isSnapshot))
+        @include('Syllabus.preview._versions_drawer', [
+            'syllabus' => $syllabus,
+            'savedVersions' => $savedVersions ?? collect(),
+            'previewMode' => $previewMode ?? 'live',
+            'previewVariant' => $previewVariant ?? 'complete',
+            'activeSavedVersion' => $activeSavedVersion ?? null,
+            'openButton' => 'none',
+        ])
+    @endif
 
 </body>
 

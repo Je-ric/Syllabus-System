@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\CompleteSyllabus;
 use App\Models\Syllabus;
 use Carbon\Carbon;
 
@@ -175,6 +176,12 @@ class SyllabusPreviewService
 
         $weeks = $syllabus->weeks?->sortBy('week_no') ?? collect();
 
+        $savedVersions = CompleteSyllabus::query()
+            ->where('syllabus_id', $syllabus->id)
+            ->orderByDesc('version')
+            ->orderByDesc('created_at')
+            ->get();
+
         return [
             'weeks'  => $weeks,
             'export' => compact(
@@ -195,6 +202,7 @@ class SyllabusPreviewService
                 'syllabusReviewers',
                 'approvedByUser',
                 'concurredByUser',
+                'savedVersions',
             ),
         ];
     }
