@@ -88,7 +88,8 @@
         </div>
         <div class="a4-section a4-title">COURSE SYLLABUS</div>
         <br>
-        <div class="a4-subtitle a4-title">{{ $syllabus->course->course_code }} - {{ $syllabus->course->course_title }}</div>
+        <div class="a4-subtitle a4-title">{{ $syllabus->course->course_code }} - {{ $syllabus->course->course_title }}
+        </div>
         <br>
         <h3 class="a4-section title-lettered">A. University Information</h3>
 
@@ -108,7 +109,8 @@
 
         <div class="a4-section">
             <strong class="indent-level-1 title-numbered">3. Educational Philosophy</strong>
-            <p class="indent-level-2">The Central Luzon State University is committed and dedicated to provide a holistic transformative education anchored on its mission statement and its institutional core values.
+            <p class="indent-level-2">The Central Luzon State University is committed and dedicated to provide a
+                holistic transformative education anchored on its mission statement and its institutional core values.
                 As stated on its mission, the University shall develop globally competitive, work-ready,
                 socially-responsible and empowered human resources who value life-long learning; and shall generate,
                 disseminate, and apply knowledge and technologies for poverty alleviation, environmental protection and
@@ -142,32 +144,27 @@
 
         <div class="a4-section">
             <strong class="indent-level-1 title-numbered">4. Quality Policy Statement</strong>
-            <div class="a4-list">
-                <div class="indent-level-1-5">
-                    <div>a. Excellent service to humanity is our commitment.</div>
+
+            <div class="a4-alpha-list indent-level-1-5">
+                <div>Excellent service to humanity is our commitment.</div>
+                <div>We are committed to develop globally-competent and empowered human resources,
+                    and to generate knowledge and technologies for inclusive societal development.
                 </div>
-                <div class="indent-level-1-5">
-                    <div>b. We are committed to develop globally-competent and empowered human resources, and to
-                        generate knowledge and technologies for inclusive societal development.</div>
+                <div>We are dedicated to uphold CLSU's core values and principles, comply with statutory
+                    and regulatory standards and continuously improve the effectiveness of our quality management
+                    systems.
                 </div>
-                <div class="indent-level-1-5">
-                    <div>c. We are dedicated to uphold CLSU's core values and principles, comply with statutory
-                        and regulatory standards and continuously improve the effectiveness of our quality management
-                        systems.</div>
-                </div>
-                <div class="indent-level-1-5">
-                    <div>d. Mahalaga ang inyong tinig upang higit na mapahusay ang kalidad ng aming paglilingkod.
-                    </div>
-                </div>
+                <div>Mahalaga ang inyong tinig upang higit na mapahusay ang kalidad ng aming paglilingkod.</div>
             </div>
         </div>
 
         <div class="a4-section">
             <strong class="indent-level-1 title-numbered">5. Goals of the {{ $collegeName }}</strong>
-            <div class="a4-list">
+            <div class="indent-level-1-5">
                 @forelse ($collegeGoals as $goal)
-                    <div class="indent-level-1-5">
-                        <div>{{ $goal->college_goals_code }}.&nbsp; {{ $goal->goal_text }}</div>
+                    <div class="a4-coded-list">
+                        <div class="code">{{ $goal->college_goals_code }}.</div>
+                        <div class="text">{{ $goal->goal_text }}</div>
                     </div>
                 @empty
                     <div class="indent-level-1-5">No college goals found.</div>
@@ -177,10 +174,11 @@
 
         <div class="a4-section">
             <strong class="indent-level-1 title-numbered">6. Objectives of the {{ $departmentName }}</strong>
-            <div class="a4-list">
+            <div class="indent-level-1-5">
                 @forelse ($departmentObjectives as $objective)
-                    <div class="indent-level-1-5">
-                        <div>{{ $objective->dept_obj_code }}.&nbsp; {{ $objective->objective_text }}</div>
+                    <div class="a4-coded-list">
+                        <div class="code">{{ $objective->dept_obj_code }}.</div>
+                        <div class="text">{{ $objective->objective_text }}</div>
                     </div>
                 @empty
                     <div class="indent-level-1-5">No department objectives found.</div>
@@ -189,157 +187,170 @@
         </div>
         <br>
 
-        <h3 class="title-lettered">B. Program Information</h3>
-
+        <h3 class="a4-section title-lettered">B. Program Information</h3>
         <div class="a4-section">
-            <table class="kv-table">
-                <tbody>
-                    <tr>
-                        <td>1. Name of Program</td>
-                        <td>{{ $program->name }}</td>
-                    </tr>
-                    <tr>
-                        <td>2. BOR Approval</td>
-                        <td>{{ $program->bor_approval_no ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td>3. Date of Approval</td>
-                        <td>{{ $program->bor_approval_date ?? '' }}</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="table-indent">
+                <table class="kv-table">
+                    <tbody>
+                        <tr>
+                            <td>1. Name of Program</td>
+                            <td>{{ $program->name }}</td>
+                        </tr>
+                        <tr>
+                            <td>2. BOR Approval</td>
+                            <td>{{ $program->bor_approval_no ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td>3. Date of Approval</td>
+                            <td>{{ $program->bor_approval_date ?? '' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <div class="a4-section">
-            <strong class="title-numbered">1. Program Educational Objectives (PEOs)</strong>
-            <table>
-                <thead>
-                    <tr>
-                        <th><b>Program Educational Objectives</b><br>
-                            <p>Three to five years after graduation, the BSIT graduates are:</p>
-                        </th>
-                        <th>Mission</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($peos as $peo)
+            <strong class="indent-level-1 title-numbered">1. Program Educational Objectives (PEOs)</strong>
+            <div class="table-indent">
+                <table>
+                    <thead>
                         <tr>
-                            <td>{{ $peo->peo_code }}. {{ $peo->peo_text }}</td>
-                            <td><i class="bx bx-check">&#10003;</i></td>
+                            <th><b>Program Educational Objectives</b><br>
+                                <p>Three to five years after graduation, the BSIT graduates are:</p>
+                            </th>
+                            <th>Mission</th>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="2">No PEOs found.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        <div class="a4-section">
-            <strong class="title-numbered">2. Program Outcomes (POs) and its Relationship to the Program Educational
-                Objectives (PEOs)</strong>
-            <table>
-                <thead>
-                    <tr>
-                        <th colspan="2">Program Outcomes</th>
-                        <th colspan="{{ max($peos->count(), 1) }}">Program Educational Objectives</th>
-                    </tr>
-                    <tr>
-                        <th colspan="2">By the time of graduation, students of the program have the ability to:</th>
+                    </thead>
+                    <tbody>
                         @forelse ($peos as $peo)
-                            <th>{{ $peo->peo_code }}</th>
+                            <tr>
+                                <td>{{ $peo->peo_code }}. {{ $peo->peo_text }}</td>
+                                <td><i class="bx bx-check">&#10003;</i></td>
+                            </tr>
                         @empty
-                            <th>-</th>
+                            <tr>
+                                <td colspan="2">No PEOs found.</td>
+                            </tr>
                         @endforelse
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($pos as $po)
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="a4-section">
+            <strong class="indent-level-1 title-numbered">2. Program Outcomes (POs) and its Relationship to the Program
+                Educational
+                Objectives (PEOs)
+            </strong>
+            <div class="table-indent">
+                <table>
+                    <thead>
                         <tr>
-                            <td>({{ $po->po_code }})</td>
-                            <td>{{ $po->po_text }}</td>
+                            <th colspan="2">Program Outcomes</th>
+                            <th colspan="{{ max($peos->count(), 1) }}">Program Educational Objectives</th>
+                        </tr>
+                        <tr>
+                            <th colspan="2">By the time of graduation, students of the program have the ability to:
+                            </th>
                             @forelse ($peos as $peo)
-                                <td>{!! $po->peos->contains('id', $peo->id) ? '&#10003;' : ' ' !!}</td>
+                                <th>{{ $peo->peo_code }}</th>
                             @empty
-                                <td>-</td>
+                                <th>-</th>
                             @endforelse
                         </tr>
-                    @empty
+                    </thead>
+                    <tbody>
+                        @forelse ($pos as $po)
+                            <tr>
+                                <td>({{ $po->po_code }})</td>
+                                <td>{{ $po->po_text }}</td>
+                                @forelse ($peos as $peo)
+                                    <td>{!! $po->peos->contains('id', $peo->id) ? '&#10003;' : ' ' !!}</td>
+                                @empty
+                                    <td>-</td>
+                                @endforelse
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="{{ $peos->count() + 2 }}">No POs found.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <h3 class="a4-section title-lettered">C. Instructor Information</h3>
+        <div class="a4-section">
+            <div class="table-indent">
+                <table class="kv-table">
+                    <tbody>
                         <tr>
-                            <td colspan="{{ $peos->count() + 2 }}">No POs found.</td>
+                            <td>1. Name of Instructor/Professor</td>
+                            <td>{!! $lecLabValue($lecComponent?->instructor_name, $labComponent?->instructor_name) !!}</td>
                         </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                        <tr>
+                            <td>2. Office</td>
+                            <td>{!! $lecLabValue($lecComponent?->office, $labComponent?->office) !!}</td>
+                        </tr>
+                        <tr>
+                            <td>3. Phone No. (Optional)</td>
+                            <td>{!! $lecLabValue($lecComponent?->phone, $labComponent?->phone) !!}</td>
+                        </tr>
+                        <tr>
+                            <td>4. Email Address</td>
+                            <td>{!! $lecLabValue($lecComponent?->instructor_email, $labComponent?->instructor_email) !!}</td>
+                        </tr>
+                        <tr>
+                            <td>5. Consultation Hours</td>
+                            <td>{!! $lecLabValue($lecComponent?->consultation_hours, $labComponent?->consultation_hours) !!}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
+        <h3 class="a4-section title-lettered">D. Course Information</h3>
         <div class="a4-section">
-            <h3 class="title-lettered">C. Instructor Information</h3>
-            <table class="kv-table">
-                <tbody>
-                    <tr>
-                        <td>1. Name of Instructor/Professor</td>
-                        <td>{!! $lecLabValue($lecComponent?->instructor_name, $labComponent?->instructor_name) !!}</td>
-                    </tr>
-                    <tr>
-                        <td>2. Office</td>
-                        <td>{!! $lecLabValue($lecComponent?->office, $labComponent?->office) !!}</td>
-                    </tr>
-                    <tr>
-                        <td>3. Phone No. (Optional)</td>
-                        <td>{!! $lecLabValue($lecComponent?->phone, $labComponent?->phone) !!}</td>
-                    </tr>
-                    <tr>
-                        <td>4. Email Address</td>
-                        <td>{!! $lecLabValue($lecComponent?->instructor_email, $labComponent?->instructor_email) !!}</td>
-                    </tr>
-                    <tr>
-                        <td>5. Consultation Hours</td>
-                        <td>{!! $lecLabValue($lecComponent?->consultation_hours, $labComponent?->consultation_hours) !!}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="a4-section">
-            <h3 class="title-lettered">D. Course Information</h3>
-            <table class="kv-table">
-                <tbody>
-                    <tr>
-                        <td>1. Course Code</td>
-                        <td>{{ $syllabus->course->course_code }}</td>
-                    </tr>
-                    <tr>
-                        <td>2. Course Title</td>
-                        <td>{{ $syllabus->course->course_title ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td>3. Course Description</td>
-                        <td>{{ $syllabus->course->course_description ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td>4. Pre-requisite</td>
-                        <td>{{ $syllabus->course->prerequisite ?? 'None' }}</td>
-                    </tr>
-                    <tr>
-                        <td>5. Co-requisite</td>
-                        <td>{{ $syllabus->course->corequisite ?? 'None' }}</td>
-                    </tr>
-                    <tr>
-                        <td>6. Credit Units</td>
-                        <td>{{ $syllabus->course->credit_units }}</td>
-                    </tr>
-                    <tr>
-                        <td>7. Class Hours</td>
-                        <td>{!! $lecLabValue($lecComponent?->class_hours, $labComponent?->class_hours) !!}</td>
-                    </tr>
-                    <tr>
-                        <td>8. Class Schedule</td>
-                        <td>{!! $lecLabValue($lecComponent?->schedule, $labComponent?->schedule) !!}</td>
-                    </tr>
-                </tbody>
-            </table>
+            <br>
+            <div class="table-indent">
+                <table class="kv-table">
+                    <tbody>
+                        <tr>
+                            <td>1. Course Code</td>
+                            <td>{{ $syllabus->course->course_code }}</td>
+                        </tr>
+                        <tr>
+                            <td>2. Course Title</td>
+                            <td>{{ $syllabus->course->course_title ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td>3. Course Description</td>
+                            <td>{{ $syllabus->course->course_description ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td>4. Pre-requisite</td>
+                            <td>{{ $syllabus->course->prerequisite ?? 'None' }}</td>
+                        </tr>
+                        <tr>
+                            <td>5. Co-requisite</td>
+                            <td>{{ $syllabus->course->corequisite ?? 'None' }}</td>
+                        </tr>
+                        <tr>
+                            <td>6. Credit Units</td>
+                            <td>{{ $syllabus->course->credit_units }}</td>
+                        </tr>
+                        <tr>
+                            <td>7. Class Hours</td>
+                            <td>{!! $lecLabValue($lecComponent?->class_hours, $labComponent?->class_hours) !!}</td>
+                        </tr>
+                        <tr>
+                            <td>8. Class Schedule</td>
+                            <td>{!! $lecLabValue($lecComponent?->schedule, $labComponent?->schedule) !!}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <div class="landscape">
@@ -376,7 +387,7 @@
                     </tr>
                 </thead>
             </table>
-
+            <br>
             <table border="1" style="width:100%; border-collapse: collapse;">
                 <tbody>
                     {{-- Header Row 1 --}}
@@ -422,7 +433,7 @@
 
                 </tbody>
             </table>
-
+            <br>
             <p><strong>*Level:</strong> &nbsp; I – Introductory, &nbsp; E – Enabling, &nbsp; D – Demonstrative</p>
         </div>
 
@@ -448,16 +459,19 @@
                         <tr>
                             @if (($row['is_exam'] ?? false) === true)
                                 <td style="text-align:center;">{{ $row['week_label'] }}</td>
-                                <td colspan="5" style="text-align:center; font-weight:bold; font-style:italic; vertical-align:middle;">
+                                <td colspan="5"
+                                    style="text-align:center; font-weight:bold; font-style:italic; vertical-align:middle;">
                                     {{ $row['exam_label'] ?? 'Exam' }}
                                 </td>
                             @else
                                 <td style="text-align:center;">{{ $row['week_label'] }}</td>
                                 <td>{{ blank($row['co_description'] ?? null) ? '---' : $row['co_description'] }}</td>
                                 <td>{{ blank($row['topics'] ?? null) ? '---' : $row['topics'] }}</td>
-                                <td>{{ blank($row['learning_outcomes'] ?? null) ? '---' : $row['learning_outcomes'] }}</td>
+                                <td>{{ blank($row['learning_outcomes'] ?? null) ? '---' : $row['learning_outcomes'] }}
+                                </td>
                                 <td>{{ blank($row['tla'] ?? null) ? '---' : $row['tla'] }}</td>
-                                <td style="text-align:center;">{{ blank($row['assessment_task'] ?? null) ? '---' : $row['assessment_task'] }}</td>
+                                <td style="text-align:center;">
+                                    {{ blank($row['assessment_task'] ?? null) ? '---' : $row['assessment_task'] }}</td>
                             @endif
                         </tr>
                     @empty
@@ -486,16 +500,21 @@
                             <tr>
                                 @if (($row['is_exam'] ?? false) === true)
                                     <td style="text-align:center;">{{ $row['week_label'] }}</td>
-                                    <td colspan="5" style="text-align:center; font-weight:bold; font-style:italic; vertical-align:middle;">
+                                    <td colspan="5"
+                                        style="text-align:center; font-weight:bold; font-style:italic; vertical-align:middle;">
                                         {{ $row['exam_label'] ?? 'Exam' }}
                                     </td>
                                 @else
                                     <td style="text-align:center;">{{ $row['week_label'] }}</td>
-                                    <td>{{ blank($row['co_description'] ?? null) ? '---' : $row['co_description'] }}</td>
+                                    <td>{{ blank($row['co_description'] ?? null) ? '---' : $row['co_description'] }}
+                                    </td>
                                     <td>{{ blank($row['topics'] ?? null) ? '---' : $row['topics'] }}</td>
-                                    <td>{{ blank($row['learning_outcomes'] ?? null) ? '---' : $row['learning_outcomes'] }}</td>
+                                    <td>{{ blank($row['learning_outcomes'] ?? null) ? '---' : $row['learning_outcomes'] }}
+                                    </td>
                                     <td>{{ blank($row['tla'] ?? null) ? '---' : $row['tla'] }}</td>
-                                    <td style="text-align:center;">{{ blank($row['assessment_task'] ?? null) ? '---' : $row['assessment_task'] }}</td>
+                                    <td style="text-align:center;">
+                                        {{ blank($row['assessment_task'] ?? null) ? '---' : $row['assessment_task'] }}
+                                    </td>
                                 @endif
                             </tr>
                         @empty
@@ -554,7 +573,7 @@
                         $isTermStart = [];
                         $termStartIndex = null;
 
-                        foreach (($evaluationRows ?? []) as $index => $evaluationRow) {
+                        foreach ($evaluationRows ?? [] as $index => $evaluationRow) {
                             if ($termStartIndex === null) {
                                 $termStartIndex = $index;
                                 $isTermStart[$index] = true;
@@ -583,7 +602,8 @@
                                 <td style="text-align:center;">{{ $row['lab_weight'] ?? '' }}</td>
                             @endif
                             @if ($isTermStart[$index] ?? false)
-                                <td rowspan="{{ $termRowSpans[$index] ?? 1 }}" style="text-align:center; vertical-align:middle;">
+                                <td rowspan="{{ $termRowSpans[$index] ?? 1 }}"
+                                    style="text-align:center; vertical-align:middle;">
                                     <strong>{{ $lecPassMark }}%</strong>
                                 </td>
                             @endif
@@ -601,7 +621,8 @@
                         <td style="text-align:center; font-weight:bold;">{{ $evaluationTotals['lec'] ?? '' }}%</td>
                         @if ($syllabus->course->has_lec_lab)
                             <td></td>
-                            <td style="text-align:center; font-weight:bold;">{{ $evaluationTotals['lab'] ?? '' }}%</td>
+                            <td style="text-align:center; font-weight:bold;">{{ $evaluationTotals['lab'] ?? '' }}%
+                            </td>
                         @endif
                         <td style="text-align:center; font-weight:bold;">{{ $lecPassMark }}%</td>
                     </tr>
@@ -1020,26 +1041,26 @@
                     </tr>
 
                     {{-- ── Concurred by (Service Courses only) ─────────────────────── --}}
-                        <tr>
-                            <td colspan="4"
-                                style="font-style:italic; font-size:9pt; color:#555; padding:4px 6px; background:#f8f8f8;">
-                                Additional Signatories for Service Courses:
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>Concurred by:</strong></td>
-                            <td>
-                                {{ $concurredByUser->name ?? '' }}
-                                @if ($concurredByUser)
+                    <tr>
+                        <td colspan="4"
+                            style="font-style:italic; font-size:9pt; color:#555; padding:4px 6px; background:#f8f8f8;">
+                            Additional Signatories for Service Courses:
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Concurred by:</strong></td>
+                        <td>
+                            {{ $concurredByUser->name ?? '' }}
+                            @if ($concurredByUser)
                                 <br>
                                 <span style="font-size:9pt; color:#444;">
                                     Chairperson, {{ $departmentName ?? 'Department' }}
                                 </span>
-                                @endif
-                            </td>
-                            <td></td>
-                            <td></td>
-                        </tr>
+                            @endif
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -1144,7 +1165,8 @@
             function canSplit(el) {
                 return (
                     el.nodeType === Node.ELEMENT_NODE && ["DIV", "UL", "OL", "LI", "SECTION", "P", "H1", "H2",
-                        "H3", "H4", "H5", "H6", "TABLE", "EM", "STRONG", ].includes(el
+                        "H3", "H4", "H5", "H6", "TABLE", "EM", "STRONG", "TBODY", "THEAD", "TR", "TD", "TH"
+                    ].includes(el
                         .tagName) &&
                     el.childNodes.length > 0
                 );
@@ -1304,13 +1326,13 @@
                 if (existingCg) {
                     table.appendChild(existingCg.cloneNode(true));
                 } else if (thead) {
-                    const hRows   = thead.querySelectorAll("tr");
+                    const hRows = thead.querySelectorAll("tr");
                     const leafRow = hRows[hRows.length - 1];
                     if (leafRow) {
                         const cg = document.createElement("colgroup");
                         Array.from(leafRow.cells).forEach(cell => {
                             const col = document.createElement("col");
-                            const sw  = cell.style.width;
+                            const sw = cell.style.width;
                             if (sw && sw !== "") {
                                 col.style.width = sw;
                             } else {

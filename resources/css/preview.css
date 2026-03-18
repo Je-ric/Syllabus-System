@@ -208,10 +208,50 @@ h3.a4-section {
 .indent-level-1-5-text{ padding-left: 35px; text-indent: 10px; }
 .indent-level-2       { padding-left: 45px; text-indent: 40px; }
 
+.table-indent {
+    margin-left: 25px;
+    /* margin-right: 1px; */
+}
+
 .abridged-indent {
     text-indent: 20px;
     padding: 15px;
 
+}
+/* Quality Policy Statements */
+.a4-alpha-list {
+    counter-reset: alpha;
+    text-align: justify;
+}
+
+.a4-alpha-list > div {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 4px;
+}
+
+.a4-alpha-list > div::before {
+    counter-increment: alpha;
+    content: counter(alpha, lower-alpha) ". ";
+    min-width: 20px; /* controls spacing/alignment */
+    font-weight: 500;
+}
+
+/* Goals & Objectives */
+.a4-coded-list {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 4px;
+    text-align: justify;
+}
+
+.a4-coded-list .code {
+    min-width: 22px; /* adjust based on longest code (e.g., G10, OBJ12) */
+    font-weight: 500;
+}
+
+.a4-coded-list .text {
+    flex: 1;
 }
 
 /* For full table offset: move the table box, not just the text inside cells. */
