@@ -317,7 +317,8 @@ table {
     width:           100%;
     border-collapse: collapse;
     border:          1px solid #000;
-    margin-top:      4px;
+    margin-top:      12px;
+    margin-bottom:   12px;
     font-family:     var(--font-body);
     font-size:       var(--fs-body);       /* default: Tahoma 11 pt */
 }
@@ -335,6 +336,7 @@ table th {
 
 th p {
     font-weight: normal;
+    font-size: smaller;
 }
 
 /* Key-value info tables (Course info, Instructor, etc.) */
@@ -362,6 +364,25 @@ th p {
 .weekly-coverage-table th {
     font-family: var(--font-table);   /* Times New Roman */
     font-size:   var(--fs-table);     /* 9 pt            */
+}
+
+.evaluation-table td,
+.evaluation-table th {
+    font-size:   var(--fs-table);     /* 9 pt            */
+}
+
+.evaluation-table td {
+    padding: 0 0 0 2px;
+}
+
+
+table.fcas {
+    border: none;
+}
+
+table.fcas td,
+table.fcas th {
+    border: none;
 }
 
 /* Keep header shading consistent */

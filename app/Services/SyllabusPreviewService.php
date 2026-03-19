@@ -251,7 +251,7 @@ class SyllabusPreviewService
 
                 if ($isNoClass || $isExam) {
                     $weeklyCoverageRows[$type][] = [
-                        'week_label'        => 'Week ' . (int) $week->week_no,
+                        'week_label'        => (int) $week->week_no,
                         'exam_label'        => $isNoClass ? $resolvedNoClassLabel : $resolvedExamLabel,
                         'week_no'           => (int) $week->week_no,
                         'is_exam'           => true,
@@ -281,7 +281,7 @@ class SyllabusPreviewService
                     : ($content?->courseOutcome?->co_code ?? '');
 
                 $weeklyCoverageRows[$type][] = [
-                    'week_label'        => 'Week ' . (int) $week->week_no,
+                    'week_label'        => (int) $week->week_no,
                     'exam_label'        => null,
                     'week_no'           => (int) $week->week_no,
                     'is_exam'           => false,
@@ -513,6 +513,8 @@ class SyllabusPreviewService
             }
 
             $labTaskLabel = $labTaskRaw;
+            // Remove "Term" from lab tasks (e.g., "1st Term Practical Exam" → "1st Practical Exam")
+            $labTaskLabel = preg_replace('/\s*Term\s*/i', ' ', trim($labTaskLabel));
             if (! $isExam && $labTaskRaw !== '' && in_array($labEval?->kind, ['activity', 'quiz'], true)) {
                 $k = $labEval->kind;
                 $evalCounters['LAB'][$k]++;

@@ -210,7 +210,7 @@
         </div>
 
         <div class="a4-section">
-            <strong class="indent-level-1 title-numbered">1. Program Educational Objectives (PEOs)</strong>
+            <strong class="indent-level-1 title-numbered">7. Program Educational Objectives (PEOs)</strong>
             <div class="table-indent">
                 <table>
                     <thead>
@@ -224,7 +224,12 @@
                     <tbody>
                         @forelse ($peos as $peo)
                             <tr>
-                                <td>{{ $peo->peo_code }}. {{ $peo->peo_text }}</td>
+                                <td>
+                                    <div class="a4-coded-list">
+                                        <div class="code">{{ $peo->peo_code }}.</div>
+                                        <div class="text">{{ $peo->peo_text }}</div>
+                                    </div>
+                                </td>
                                 <td style="text-align: center;"><i class="bx bx-check">&#10003;</i></td>
                             </tr>
                         @empty
@@ -238,7 +243,7 @@
         </div>
 
         <div class="a4-section">
-            <strong class="indent-level-1 title-numbered">2. Program Outcomes (POs) and its Relationship to the Program
+            <strong class="indent-level-1 title-numbered">8. Program Outcomes (POs) and its Relationship to the Program
                 Educational
                 Objectives (PEOs)
             </strong>
@@ -250,7 +255,8 @@
                             <th colspan="{{ max($peos->count(), 1) }}">Program Educational Objectives</th>
                         </tr>
                         <tr>
-                            <th colspan="2">By the time of graduation, students of the program have the ability to:
+                            <th colspan="2">
+                                <p>By the time of graduation, students of the program have the ability to:</p>
                             </th>
                             @forelse ($peos as $peo)
                                 <th>{{ $peo->peo_code }}</th>
@@ -312,7 +318,6 @@
 
         <h3 class="a4-section title-lettered">D. Course Information</h3>
         <div class="a4-section">
-            <br>
             <div class="table-indent">
                 <table class="kv-table">
                     <tbody>
@@ -386,10 +391,9 @@
                     </tr>
                 </thead>
             </table>
-            <br>
+
             <table border="1" style="width:100%; border-collapse: collapse;">
                 <tbody>
-                    {{-- Header Row 1 --}}
                     <tr>
                         <td rowspan="2" style="background-color:#ddd; font-weight:bold; vertical-align:top;">
                             Program Outcomes addressed by the course
@@ -412,12 +416,14 @@
                     @forelse ($courseOutcomes as $co)
                         <tr>
                             <td>
-                                <strong>{{ $co->co_code }}:</strong>
-                                {{ $co->description }}
+                                <div class="a4-coded-list">
+                                    <div class="code"><strong>{{ $co->co_code }}: </strong></div>
+                                    <div class="text">{{ $co->description }}</div>
+                                </div>
                             </td>
 
                             @foreach ($pos as $po)
-                                <td style="text-align:center;">
+                                <td style="text-align:center; width:30px;">
                                     {{ $coursePoIedMap[$po->id] ?? '' }}
                                 </td>
                             @endforeach
@@ -432,17 +438,17 @@
 
                 </tbody>
             </table>
-            <br>
             <p><strong>*Level:</strong> &nbsp; I – Introductory, &nbsp; E – Enabling, &nbsp; D – Demonstrative</p>
         </div>
 
         <div class="landscape">
             <h3 class="a4-section title-numbered">10. Weekly Coverage</h3>
 
+            <br>
             @if ($syllabus->course->has_lec_lab)
                 <p><strong>Lecture (LEC)</strong></p>
             @endif
-            <table class="weekly-coverage-table" border="1" style="width:100%; border-collapse: collapse;">
+            <table class="weekly-coverage-table">
                 <thead>
                     <tr>
                         <th style="text-align:center; width: 90px;">Week</th>
@@ -457,9 +463,10 @@
                     @forelse (($weeklyCoverageRows['LEC'] ?? []) as $row)
                         <tr>
                             @if (($row['is_exam'] ?? false) === true)
-                                <td style="text-align:center;">{{ $row['week_label'] }}</td>
+                                <td style="text-align:center; background-color: #d9d9d9;">{{ $row['week_label'] }}
+                                </td>
                                 <td colspan="5"
-                                    style="text-align:center; font-weight:bold; font-style:italic; vertical-align:middle;">
+                                    style="text-align:center; font-weight:bold; background-color: #d9d9d9; font-style:italic; vertical-align:middle;">
                                     {{ $row['exam_label'] ?? 'Exam' }}
                                 </td>
                             @else
@@ -481,6 +488,7 @@
                 </tbody>
             </table>
 
+            <br>
             @if ($syllabus->course->has_lec_lab)
                 <p style="margin-top: 10px;"><strong>Laboratory (LAB)</strong></p>
                 <table class="weekly-coverage-table" border="1" style="width:100%; border-collapse: collapse;">
@@ -498,9 +506,10 @@
                         @forelse (($weeklyCoverageRows['LAB'] ?? []) as $row)
                             <tr>
                                 @if (($row['is_exam'] ?? false) === true)
-                                    <td style="text-align:center;">{{ $row['week_label'] }}</td>
+                                    <td style="text-align:center; background-color: #d9d9d9;">{{ $row['week_label'] }}
+                                    </td>
                                     <td colspan="5"
-                                        style="text-align:center; font-weight:bold; font-style:italic; vertical-align:middle;">
+                                        style="text-align:center; font-weight:bold; background-color: #d9d9d9; font-style:italic; vertical-align:middle;">
                                         {{ $row['exam_label'] ?? 'Exam' }}
                                     </td>
                                 @else
@@ -526,191 +535,206 @@
             @endif
         </div>
 
-        {{-- ============================================================
-             SECTION 11: COURSE EVALUATION (portrait)
-             ============================================================ --}}
         <div class="portrait">
             <h3 class="a4-section title-numbered">11. Course Evaluation</h3>
-
-            {{-- a. Course Requirements --}}
-            <p class="indent-level-1"><strong>a. Course Requirements</strong></p>
+            <br>
+            <p class="indent-level-1">a. Course Requirements</p>
             <p class="indent-level-2">The student performance in this course will be rated based on the following:</p>
 
-            <table border="1" style="width:100%; border-collapse:collapse;">
-                <thead>
-                    <tr>
-                        <th rowspan="2" style="text-align:center; width:90px;">CO</th>
-                        <th colspan="2" style="text-align:center;">
-                            {{ $syllabus->course->has_lec_lab ? 'LECTURE (67%)' : 'LECTURE' }}
-                        </th>
-                        @if ($syllabus->course->has_lec_lab)
-                            <th colspan="2" style="text-align:center;">LABORATORY (33%)</th>
-                        @endif
-                        <th rowspan="2" style="text-align:center; width:120px;">Performance Standard</th>
-                    </tr>
-                    <tr>
-                        <th style="text-align:center;">Assessment Task</th>
-                        <th style="text-align:center; width:90px;">Weight (%)</th>
-                        @if ($syllabus->course->has_lec_lab)
-                            <th style="text-align:center;">Assessment Task</th>
-                            <th style="text-align:center; width:90px;">Weight (%)</th>
-                        @endif
-                    </tr>
-                </thead>
-                <tbody>
-                    @php
-                        // Passing mark = performance_standard from the component (not a fixed 60%).
-                        $lecPassMark = $lecComponent?->performance_standard
-                            ? (int) round((float) str_replace('%', '', (string) $lecComponent->performance_standard))
-                            : 60;
-                        $labPassMark = $labComponent?->performance_standard
-                            ? (int) round((float) str_replace('%', '', (string) $labComponent->performance_standard))
-                            : 60;
-
-                        // Group Performance Standard by term (term ends at exam row).
-                        $termRowSpans = [];
-                        $isTermStart = [];
-                        $termStartIndex = null;
-
-                        foreach ($evaluationRows ?? [] as $index => $evaluationRow) {
-                            if ($termStartIndex === null) {
-                                $termStartIndex = $index;
-                                $isTermStart[$index] = true;
-                            } else {
-                                $isTermStart[$index] = false;
-                            }
-
-                            if (($evaluationRow['is_exam'] ?? false) === true) {
-                                $termRowSpans[$termStartIndex] = $index - $termStartIndex + 1;
-                                $termStartIndex = null;
-                            }
-                        }
-
-                        if ($termStartIndex !== null) {
-                            $termStart = (int) $termStartIndex;
-                            $termRowSpans[$termStart] = count($evaluationRows ?? []) - $termStart;
-                        }
-                    @endphp
-                    @forelse (($evaluationRows ?? []) as $index => $row)
+            <div class="table-indent">
+                <table class="evaluation-table">
+                    <thead>
                         <tr>
-                            <td style="text-align:center;">{{ $row['co_label'] ?? '' }}</td>
-                            <td>{{ $row['lec_task'] ?? '' }}</td>
-                            <td style="text-align:center;">{{ $row['lec_weight'] ?? '' }}</td>
+                            <th rowspan="2" style="text-align:center; white-space: normal;">Course Outcomes</th>
+                            <th colspan="2" style="text-align:center;">
+                                {{ $syllabus->course->has_lec_lab ? 'LECTURE (67%)' : 'LECTURE' }}
+                            </th>
                             @if ($syllabus->course->has_lec_lab)
-                                <td>{{ $row['lab_task'] ?? '' }}</td>
-                                <td style="text-align:center;">{{ $row['lab_weight'] ?? '' }}</td>
+                                <th colspan="2" style="text-align:center;">LABORATORY (33%)</th>
                             @endif
-                            @if ($isTermStart[$index] ?? false)
-                                <td rowspan="{{ $termRowSpans[$index] ?? 1 }}"
-                                    style="text-align:center; vertical-align:middle;">
-                                    <strong>{{ $lecPassMark }}%</strong>
+                            <th rowspan="2" style="text-align:center;">Performance Standard</th>
+                        </tr>
+                        <tr>
+                            <th style="text-align:center; white-space: nowrap;">Assessment Task</th>
+                            <th style="text-align:center; white-space: nowrap;">Weight (%)</th>
+                            @if ($syllabus->course->has_lec_lab)
+                                <th style="text-align:center; white-space: nowrap;">Assessment Task</th>
+                                <th style="text-align:center; white-space: nowrap;">Weight (%)</th>
+                            @endif
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @php
+                            // Passing mark = performance_standard from the component (not a fixed 60%).
+                            $lecPassMark = $lecComponent?->performance_standard
+                                ? (int) round(
+                                    (float) str_replace('%', '', (string) $lecComponent->performance_standard),
+                                )
+                                : 60;
+                            $labPassMark = $labComponent?->performance_standard
+                                ? (int) round(
+                                    (float) str_replace('%', '', (string) $labComponent->performance_standard),
+                                )
+                                : 60;
+
+                            // Group Performance Standard by term (term ends at exam row).
+                            $termRowSpans = [];
+                            $isTermStart = [];
+                            $termStartIndex = null;
+
+                            foreach ($evaluationRows ?? [] as $index => $evaluationRow) {
+                                if ($termStartIndex === null) {
+                                    $termStartIndex = $index;
+                                    $isTermStart[$index] = true;
+                                } else {
+                                    $isTermStart[$index] = false;
+                                }
+
+                                if (($evaluationRow['is_exam'] ?? false) === true) {
+                                    $termRowSpans[$termStartIndex] = $index - $termStartIndex + 1;
+                                    $termStartIndex = null;
+                                }
+                            }
+
+                            if ($termStartIndex !== null) {
+                                $termStart = (int) $termStartIndex;
+                                $termRowSpans[$termStart] = count($evaluationRows ?? []) - $termStart;
+                            }
+                        @endphp
+                        @forelse (($evaluationRows ?? []) as $index => $row)
+                            <tr>
+                                <td style="text-align:left;">{{ $row['co_label'] ?? '' }}</td>
+                                <td>{{ $row['lec_task'] ?? '' }}</td>
+                                <td style="text-align:center;">{{ $row['lec_weight'] ?? '' }}</td>
+                                @if ($syllabus->course->has_lec_lab)
+                                    <td>{{ $row['lab_task'] ?? '' }}</td>
+                                    <td style="text-align:center;">{{ $row['lab_weight'] ?? '' }}</td>
+                                @endif
+                                @if ($isTermStart[$index] ?? false)
+                                    <td rowspan="{{ $termRowSpans[$index] ?? 1 }}"
+                                        style="text-align:center; vertical-align:middle;">
+                                        <strong>{{ $lecPassMark }}%</strong>
+                                    </td>
+                                @endif
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="{{ $syllabus->course->has_lec_lab ? 6 : 4 }}"
+                                    style="text-align:center;">
+                                    No evaluation items found.
+                                </td>
+                            </tr>
+                        @endforelse
+                        <tr>
+                            <td style="text-align:left; font-weight:bold;">Total</td>
+                            <td></td>
+                            <td style="text-align:center; font-weight:bold;">{{ $evaluationTotals['lec'] ?? '' }}%
+                            </td>
+                            @if ($syllabus->course->has_lec_lab)
+                                <td></td>
+                                <td style="text-align:center; font-weight:bold;">{{ $evaluationTotals['lab'] ?? '' }}%
                                 </td>
                             @endif
+                            <td style="text-align:center; font-weight:bold;">{{ $lecPassMark }}%</td>
                         </tr>
-                    @empty
                         <tr>
-                            <td colspan="{{ $syllabus->course->has_lec_lab ? 6 : 4 }}" style="text-align:center;">
-                                No evaluation items found.
+                            <td colspan="5"><b>Minimum Average for Satisfactory Performance</b></td>
+                            <td style="text-align:center;"><b>{{ $lecPassMark }}%</b></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="indent-level-1">
+                <p style="margin-top: 14px;">b. Computation of Final Course Average Score (FCAS)</p>
+                <br>
+                @if ($syllabus->course->has_lec_lab)
+                    <p><strong>FCAS = (0.67) × LecAve + (0.33) × LabAve + APP</strong></p>
+                    <br>
+                    <table class="fcas">
+                        <tr>
+                            <td style="width: 120px;">Where:</td>
+                            <td>FCAS &nbsp;= Final Course Average Score <br>
+                                LecAve = Lecture Average Score <br>
+                                LabAve = Laboratory Average Score <br>
+                                APP = Additional point incentive for student athletes, performers and student
+                                delegates/representatives [CLSU BOR Resolution No. 32-09]
                             </td>
                         </tr>
-                    @endforelse
-                    <tr>
-                        <td style="text-align:left; font-weight:bold;">Total</td>
-                        <td></td>
-                        <td style="text-align:center; font-weight:bold;">{{ $evaluationTotals['lec'] ?? '' }}%</td>
-                        @if ($syllabus->course->has_lec_lab)
-                            <td></td>
-                            <td style="text-align:center; font-weight:bold;">{{ $evaluationTotals['lab'] ?? '' }}%
+                    </table>
+                @else
+                    <p class="indent-level-2">
+                        <strong>FCAS = LecAve + APP</strong>
+                    </p>
+                    <br>
+                    <table class="fcas">
+                        <tr>
+                            <td style="width: 120px;">Where:</td>
+                            <td>FCAS = Final Course Average Score <br>
+                                LecAve = Lecture Average Score
+                                APP = Additional point incentive for student athletes, performers and student
+                                delegates/representatives [CLSU BOR Resolution No. 32-09]
                             </td>
-                        @endif
-                        <td style="text-align:center; font-weight:bold;">{{ $lecPassMark }}%</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <p style="margin-top: 10px; font-weight:bold;">Minimum Average for Satisfactory Performance</p>
-            <p style="margin-top: 2px;">60%</p>
-
-            {{-- b. Computation of Final Course Average Score (FCAS) --}}
-            <p style="margin-top: 14px;" class="indent-level-1"><strong>b. Computation of Final Course Average Score
-                    (FCAS)</strong></p>
-            @if ($syllabus->course->has_lec_lab)
-                <p class="indent-level-2">
-                    <strong>FCAS = (0.67) × LecAve + (0.33) × LabAve + APP</strong>
+                        </tr>
+                    </table>
+                @endif
+                <p>c. Transmutation</p>
+                <p class="indent-level-2">The final grades will correspond to the weighted average scores shown below:
                 </p>
-                <p class="indent-level-2">Where:</p>
-                <div class="a4-list">
-                    <div class="indent-level-2">FCAS &nbsp;= Final Course Average Score</div>
-                    <div class="indent-level-2">LecAve = Lecture Average Score</div>
-                    <div class="indent-level-2">LabAve = Laboratory Average Score</div>
-                    <div class="indent-level-2">APP &nbsp;&nbsp;&nbsp;= Additional point incentive for student
-                        athletes, performers and student delegates/representatives [CLSU BOR Resolution No. 32-09]</div>
-                </div>
-            @else
-                <p class="indent-level-2">
-                    <strong>FCAS = LecAve + APP</strong>
-                </p>
-                <p class="indent-level-2">Where:</p>
-                <div class="a4-list">
-                    <div class="indent-level-2">FCAS &nbsp;= Final Course Average Score</div>
-                    <div class="indent-level-2">LecAve = Lecture Average Score</div>
-                    <div class="indent-level-2">APP &nbsp;&nbsp;&nbsp;= Additional point incentive for student
-                        athletes, performers and student delegates/representatives [CLSU BOR Resolution No. 32-09]</div>
-                </div>
-            @endif
+            </div>
 
-            {{-- c. Transmutation --}}
-            <p style="margin-top: 14px;" class="indent-level-1"><strong>c. Transmutation</strong></p>
-            <p class="indent-level-2">The final grades will correspond to the weighted average scores shown below:</p>
+            <div class="table-indent">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="text-align:center;">Average Score</th>
+                            <th style="text-align:center;">Grade</th>
+                            <th style="text-align:center;">Average Score</th>
+                            <th style="text-align:center;">Grade</th>
+                            <th style="text-align:center;">Average Score</th>
+                            <th style="text-align:center;">Grade</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="text-align:center;">95.60 – 100.00</td>
+                            <td style="text-align:center;">1.00</td>
+                            <td style="text-align:center;">77.80 – 82.24</td>
+                            <td style="text-align:center;">2.00</td>
+                            <td style="text-align:center;">60.00 – 64.44</td>
+                            <td style="text-align:center;">3.00</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;">91.15 – 95.59</td>
+                            <td style="text-align:center;">1.25</td>
+                            <td style="text-align:center;">73.35 – 77.79</td>
+                            <td style="text-align:center;">2.25</td>
+                            <td style="text-align:center;">Below 60</td>
+                            <td style="text-align:center;">5.00</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;">86.70 – 91.14</td>
+                            <td style="text-align:center;">1.50</td>
+                            <td style="text-align:center;">68.90 – 73.34</td>
+                            <td style="text-align:center;">2.50</td>
+                            <td style="text-align:center;"></td>
+                            <td style="text-align:center;"></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;">82.25 – 86.69</td>
+                            <td style="text-align:center;">1.75</td>
+                            <td style="text-align:center;">64.45 – 68.89</td>
+                            <td style="text-align:center;">2.75</td>
+                            <td style="text-align:center;"></td>
+                            <td style="text-align:center;"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: 4px;" class="indent-level-1">Passing Mark: {{ $lecPassMark }}%</p>
+            </div>
+        </div>
 
-            <table border="1" style="width:100%; border-collapse: collapse; margin-top: 6px;">
-                <thead>
-                    <tr>
-                        <th style="text-align:center;">Average Score</th>
-                        <th style="text-align:center;">Grade</th>
-                        <th style="text-align:center;">Average Score</th>
-                        <th style="text-align:center;">Grade</th>
-                        <th style="text-align:center;">Average Score</th>
-                        <th style="text-align:center;">Grade</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td style="text-align:center;">95.60 – 100.00</td>
-                        <td style="text-align:center;">1.00</td>
-                        <td style="text-align:center;">77.80 – 82.24</td>
-                        <td style="text-align:center;">2.00</td>
-                        <td style="text-align:center;">60.00 – 64.44</td>
-                        <td style="text-align:center;">3.00</td>
-                    </tr>
-                    <tr>
-                        <td style="text-align:center;">91.15 – 95.59</td>
-                        <td style="text-align:center;">1.25</td>
-                        <td style="text-align:center;">73.35 – 77.79</td>
-                        <td style="text-align:center;">2.25</td>
-                        <td style="text-align:center;">Below 60</td>
-                        <td style="text-align:center;">5.00</td>
-                    </tr>
-                    <tr>
-                        <td style="text-align:center;">86.70 – 91.14</td>
-                        <td style="text-align:center;">1.50</td>
-                        <td style="text-align:center;">68.90 – 73.34</td>
-                        <td style="text-align:center;">2.50</td>
-                        <td style="text-align:center;"></td>
-                        <td style="text-align:center;"></td>
-                    </tr>
-                    <tr>
-                        <td style="text-align:center;">82.25 – 86.69</td>
-                        <td style="text-align:center;">1.75</td>
-                        <td style="text-align:center;">64.45 – 68.89</td>
-                        <td style="text-align:center;">2.75</td>
-                        <td style="text-align:center;"></td>
-                        <td style="text-align:center;"></td>
-                    </tr>
-                </tbody>
-            </table>
-            <p style="margin-top: 4px;" class="indent-level-2"><strong>Passing Mark: 60%</strong></p>
-
+        <div class="portrait">
             <h3 class="a4-section title-numbered">12. References</h3>
 
             <div class="a4-list">
@@ -1067,636 +1091,300 @@
     </div>
 
     <div id="a4-container"></div>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-    const source    = document.getElementById("syllabus-content");
-    const container = document.getElementById("a4-container");
-    const pageCountEl = document.getElementById("page-count");
-
-    let currentOrientation = "portrait";
-    let page = makePage(currentOrientation);
-    container.appendChild(page);
-
-    // ── Counter for unique split IDs stored as JS properties ─────────────────
-    let _uid = 0;
-    function uid(node) {
-        if (!node.__sid) node.__sid = ++_uid;
-        return node.__sid;
-    }
-
-    // ── Walk every direct child of #syllabus-content ──────────────────────────
-    Array.from(source.children).forEach(el => {
-        const isLandscape = el.classList.contains("landscape");
-        const isPortrait  = el.classList.contains("portrait");
-
-        if (isLandscape || isPortrait) {
-            const orient = isLandscape ? "landscape" : "portrait";
-            if (pageHasContent() || orient !== currentOrientation) {
-                page = makePage(orient);
-                container.appendChild(page);
-            } else {
-                page.className = "a4-page " + orient;
-            }
-            currentOrientation = orient;
-            el.classList.remove("landscape", "portrait");
-        }
-
-        if (el.tagName === "TABLE") {
-            splitTable(el, () => page);
-        } else {
-            flow(el, []);          // [] = no ancestor wrapper chain yet
-        }
-    });
-
-    source.remove();
-    addPageNumbers();
-
-    // =========================================================================
-    //  flow(node, chain)
-    //
-    //  `chain` = ordered array of original ancestor elements whose shallow
-    //  clones must be present on the current page before `node` can be placed.
-    //
-    //  Algorithm:
-    //    1. Get (or create) the deepest wrapper on the current page.
-    //    2. Append `node`.
-    //    3. If it fits → done.
-    //    4. If it doesn't fit AND it has children → split it:
-    //         a. Remove it, put a shallow clone in its place.
-    //         b. Recurse over each child with `chain + [node]`.
-    //    5. If it doesn't fit AND it's atomic → push to a new page.
-    // =========================================================================
-    function flow(node, chain) {
-        // Tables always go through the specialised table splitter.
-        if (node.nodeType === Node.ELEMENT_NODE && node.tagName === "TABLE") {
-            splitTable(node, () => deepest(chain));
-            return;
-        }
-
-        const target = deepest(chain);
-        target.appendChild(node);
-
-        if (!overflows()) return;   // fits – nothing more to do
-
-        target.removeChild(node);
-
-        // Collect children (empty for text nodes / void elements)
-        const kids = (node.nodeType === Node.ELEMENT_NODE)
-            ? Array.from(node.childNodes)
-            : [];
-
-        if (kids.length === 0) {
-            // Atomic node – push to a fresh page, rebuild the chain there.
-            breakPage();
-            deepest(chain).appendChild(node);
-            return;
-        }
-
-        // Non-atomic – place a shallow clone as the wrapper and distribute kids.
-        uid(node);                          // ensure original has an ID
-        const clone = shallow(node);
-        clone.__sid = node.__sid;           // clone inherits same ID
-        target.appendChild(clone);
-
-        const deeper = [...chain, node];    // extend the ancestry
-        kids.forEach(kid => flow(kid, deeper));
-    }
-
-    // =========================================================================
-    //  deepest(chain)
-    //
-    //  Walk `page`, following last-children that match each level of `chain`
-    //  by __sid. If a level is missing on the current page, create it (and all
-    //  subsequent levels) by appending fresh shallow clones.
-    //
-    //  Returns the innermost live clone on the current page.
-    // =========================================================================
-    function deepest(chain) {
-        let node = page;
-        for (let i = 0; i < chain.length; i++) {
-            const orig = chain[i];
-            uid(orig);
-
-            // Search backwards through node's children for a matching __sid.
-            let found = null;
-            for (let j = node.children.length - 1; j >= 0; j--) {
-                if (node.children[j].__sid === orig.__sid) {
-                    found = node.children[j];
-                    break;
-                }
-            }
-
-            if (!found) {
-                // This level doesn't exist yet on the current page – create the
-                // rest of the chain from here.
-                for (let k = i; k < chain.length; k++) {
-                    const c = shallow(chain[k]);
-                    c.__sid = chain[k].__sid;   // same ID as the original
-                    node.appendChild(c);
-                    node = c;
-                }
-                return node;
-            }
-            node = found;
-        }
-        return node;   // page itself if chain is empty
-    }
-
-    // =========================================================================
-    //  breakPage
-    //  Start a new page.  Does NOT rebuild the wrapper chain – callers that
-    //  need the chain recreated should call deepest(chain) after this.
-    // =========================================================================
-    function breakPage() {
-        page = makePage(currentOrientation);
-        container.appendChild(page);
-    }
-
-    // =========================================================================
-    //  splitTable
-    //
-    //  Distributes <tbody> rows across pages.
-    //  • A colgroup mirroring the header's column widths is injected into every
-    //    shell so continuation tables have identical column proportions.
-    //  • Headers are NOT repeated on continuation pages (cleaner output).
-    //  • `getTarget` is a callback that returns the DOM node to append shells
-    //    to. On a new page this callback re-runs, picking up the freshly rebuilt
-    //    wrapper (if any).
-    // =========================================================================
-    function splitTable(table, getTarget) {
-        const thead = table.querySelector(":scope > thead");
-        const rows  = Array.from(table.querySelectorAll(":scope > tbody > tr"));
-
-        // Table has no body rows – treat as a plain block.
-        if (!rows.length) {
-            const t = getTarget();
-            t.appendChild(table);
-            if (overflows()) {
-                t.removeChild(table);
-                breakPage();
-                getTarget().appendChild(table);
-            }
-            return;
-        }
-
-        const cg = colgroup(table, thead);
-
-        // ── First shell (includes thead) ──────────────────────────────────────
-        let target = getTarget();
-        let shell  = shell_(table, thead, true, cg);
-        target.appendChild(shell);
-
-        if (overflows()) {
-            // Header alone overflows the current page → move to a new page.
-            target.removeChild(shell);
-            breakPage();
-            target = getTarget();
-            shell  = shell_(table, thead, true, cg);
-            target.appendChild(shell);
-            // If it STILL overflows on a blank page, accept it (can't split a header).
-        }
-
-        // ── Row-by-row distribution ───────────────────────────────────────────
-        rows.forEach(row => {
-            const tbody = shell.querySelector("tbody");
-            tbody.appendChild(row);
-
-            if (!overflows()) return;   // fits
-
-            tbody.removeChild(row);
-
-            // Edge-case: the row alone is taller than a full page.
-            if (tbody.children.length === 0) {
-                tbody.appendChild(row);   // accept the overflow, prevent infinite loop
-                return;
-            }
-
-            // Row doesn't fit – open a continuation page (no header).
-            breakPage();
-            target = getTarget();
-            shell  = shell_(table, thead, false, cg);
-            target.appendChild(shell);
-            shell.querySelector("tbody").appendChild(row);
-        });
-    }
-
-    // ── Table helpers ─────────────────────────────────────────────────────────
-
-    function colgroup(table, thead) {
-        const existing = table.querySelector(":scope > colgroup");
-        if (existing) return existing.cloneNode(true);
-        if (!thead) return null;
-
-        const headerRows = thead.querySelectorAll("tr");
-        const leaf = headerRows[headerRows.length - 1];
-        if (!leaf) return null;
-
-        const cg = document.createElement("colgroup");
-        Array.from(leaf.cells).forEach(cell => {
-            const col = document.createElement("col");
-            const sw = cell.style.width;
-            const aw = cell.getAttribute("width");
-            if (sw)      col.style.width = sw;
-            else if (aw) col.style.width = /^\d+$/.test(aw) ? aw + "px" : aw;
-            cg.appendChild(col);
-        });
-        return cg;
-    }
-
-    function shell_(orig, thead, withHeader, cg) {
-        const t = document.createElement("table");
-        t.className     = orig.className;
-        t.style.cssText = orig.style.cssText;
-        t.style.width   = "100%";
-        t.style.borderCollapse = "collapse";
-        const b = orig.getAttribute("border");
-        if (b) t.setAttribute("border", b);
-
-        if (cg)                  t.appendChild(cg.cloneNode(true));
-        if (withHeader && thead) t.appendChild(thead.cloneNode(true));
-        t.appendChild(document.createElement("tbody"));
-        return t;
-    }
-
-    // ── General helpers ───────────────────────────────────────────────────────
-
-    function overflows() {
-        return page.scrollHeight > page.clientHeight;
-    }
-
-    function pageHasContent() {
-        return page.children.length > 0;
-    }
-
-    function shallow(el) {
-        const c = el.cloneNode(false);
-        c.removeAttribute("id");
-        return c;
-    }
-
-    function makePage(orientation) {
-        const div = document.createElement("div");
-        div.className = "a4-page " + (orientation || "portrait");
-        return div;
-    }
-
-    function addPageNumbers() {
-        const pages = document.querySelectorAll(".a4-page");
-        pages.forEach((p, i) => {
-            const footer = document.createElement("div");
-            footer.style.cssText =
-                "position:absolute;bottom:20px;left:60px;right:60px;" +
-                "border-top:1px solid #808080;padding-top:6px;" +
-                "text-align:right;font-size:9pt;color:#808080;" +
-                "font-family:Tahoma,sans-serif;";
-            footer.innerText =
-                "Course Syllabus: {{ $syllabus->course->course_code }} | Page " +
-                (i + 1) + " of " + pages.length;
-            p.appendChild(footer);
-        });
-        if (pageCountEl) {
-            pageCountEl.textContent =
-                pages.length + " page" + (pages.length !== 1 ? "s" : "");
-        }
-    }
-});
-</script>
-    {{-- <script>
+    <script>
         document.addEventListener("DOMContentLoaded", function() {
             const source = document.getElementById("syllabus-content");
             const container = document.getElementById("a4-container");
-            const pageCount = document.getElementById("page-count");
-
-            // Usable content dimensions in px (page size minus padding)
-            // Portrait:  794 - 72 - 72 = 650 px tall content area
-            // Landscape: 794 - 56 - 56 = 682 px tall content area
-            const CONTENT_HEIGHT = {
-                portrait: 978, // 1122 - 72top - 72bottom
-                landscape: 682, //  794 - 56top - 56bottom
-            };
+            const pageCountEl = document.getElementById("page-count");
 
             let currentOrientation = "portrait";
-            let page = createNewPage(currentOrientation);
+            let page = makePage(currentOrientation);
             container.appendChild(page);
 
-            // ── Process each top-level child of #syllabus-content ──────────────────
-            Array.from(source.children).forEach(element => {
-                const wantsLandscape = element.classList.contains("landscape");
-                const wantsPortrait = element.classList.contains("portrait");
+            // ── Counter for unique split IDs stored as JS properties ─────────────────
+            let _uid = 0;
 
-                let targetOrientation;
-                if (wantsLandscape) targetOrientation = "landscape";
-                else if (wantsPortrait) targetOrientation = "portrait";
-                else targetOrientation = currentOrientation;
+            function uid(node) {
+                if (!node.__sid) node.__sid = ++_uid;
+                return node.__sid;
+            }
 
-                // FIX 1: Orientation-tagged elements ALWAYS start a new page.
-                if (wantsLandscape || wantsPortrait) {
-                    // Only start a new page if the current one isn't already empty
-                    // AND the orientation is changing (or it's a fresh section break)
-                    if (pageHasContent(page) || targetOrientation !== currentOrientation) {
-                        page = createNewPage(targetOrientation);
+            // ── Walk every direct child of #syllabus-content ──────────────────────────
+            Array.from(source.children).forEach(el => {
+                const isLandscape = el.classList.contains("landscape");
+                const isPortrait = el.classList.contains("portrait");
+
+                if (isLandscape || isPortrait) {
+                    const orient = isLandscape ? "landscape" : "portrait";
+                    if (pageHasContent() || orient !== currentOrientation) {
+                        page = makePage(orient);
                         container.appendChild(page);
                     } else {
-                        // Empty page but wrong orientation — just reclassify it
-                        page.classList.remove("portrait", "landscape");
-                        page.classList.add(targetOrientation);
+                        page.className = "a4-page " + orient;
                     }
-                    currentOrientation = targetOrientation;
-                    // Remove orientation classes so content isn't double-styled
-                    element.classList.remove("landscape", "portrait");
-                } else if (targetOrientation !== currentOrientation) {
-                    page = createNewPage(targetOrientation);
-                    container.appendChild(page);
-                    currentOrientation = targetOrientation;
+                    currentOrientation = orient;
+                    el.classList.remove("landscape", "portrait");
                 }
 
-                // Dispatch by element type
-                if (element.tagName === "TABLE") {
-                    splitTable(element);
+                if (el.tagName === "TABLE") {
+                    splitTable(el, () => page);
                 } else {
-                    appendElement(element);
+                    flow(el, []); // [] = no ancestor wrapper chain yet
                 }
             });
 
             source.remove();
             addPageNumbers();
 
-            // ── Helpers ─────────────────────────────────────────────────────────────
-
-            // True if the page already contains any element nodes.
-            // (scrollHeight/clientHeight is unreliable because scrollHeight can equal clientHeight
-            // even when the page contains content that doesn't overflow.)
-            function pageHasContent(p) {
-                return !!(p && p.children && p.children.length > 0);
-            }
-
-            // Measure actual used height inside a page (excludes padding via scrollHeight vs clientHeight gap)
-            function pageContentHeight(p) {
-                return p.scrollHeight - p.clientHeight;
-            }
-
-            // FIX 2 & 4: appendElement — use scrollHeight vs a stored baseline,
-            // NOT the entire page height as the limit.
-            function appendElement(el) {
-                page.appendChild(el);
-
-                if (page.scrollHeight > getMaxPageHeight()) {
-                    page.removeChild(el);
-
-                    // Try splitting containers before giving up and starting a new page
-                    if (canSplit(el)) {
-                        splitContainer(el);
-                    } else {
-                        page = createNewPage(currentOrientation);
-                        container.appendChild(page);
-                        page.appendChild(el);
-                    }
-                }
-            }
-
-            function canSplit(el) {
-                // Allow any element node with children to be split across pages
-                return el.nodeType === Node.ELEMENT_NODE && el.childNodes.length > 0;
-            }
-
-            function getMaxPageHeight() {
-                // Use the rendered page height so pagination stays correct in both
-                // on-screen preview and browser print preview.
-                return page ? page.clientHeight : (currentOrientation === "landscape" ? 794 : 1122);
-            }
-
-            // FIX 3 & 4: splitContainer — recursively splits a container element
-            // across pages, placing as much as fits on the current page first.
-            function splitContainer(el) {
-                if (!el.hasAttribute("data-split-id")) {
-                    el.setAttribute("data-split-id", Math.random().toString(36).substr(2, 9));
-                }
-
-                function ensureWrapperPath(path) {
-                    let current = page;
-                    path.forEach(node => {
-                        let wrapper = current.lastElementChild;
-                        const id = node.getAttribute("data-split-id");
-                        if (!wrapper || wrapper.getAttribute("data-split-id") !== id) {
-                            wrapper = node.cloneNode(false);
-                            wrapper.removeAttribute("id");
-                            wrapper.setAttribute("data-split-id", id);
-                            current.appendChild(wrapper);
-                        }
-                        current = wrapper;
-                    });
-                    return current;
-                }
-
-                function appendNodes(nodes, parentPath) {
-                    nodes.forEach(child => {
-                        // Special-case tables: split them across pages instead of moving the whole table.
-                        if (child.nodeType === Node.ELEMENT_NODE && child.tagName === "TABLE") {
-                            splitTable(child, () => ensureWrapperPath(parentPath));
-                            return;
-                        }
-
-                        let currentWrapper = ensureWrapperPath(parentPath);
-                        currentWrapper.appendChild(child);
-
-                        if (page.scrollHeight > getMaxPageHeight()) {
-                            currentWrapper.removeChild(child);
-
-                            // Clean up empty wrappers
-                            let w = currentWrapper;
-                            while (w && w !== page && !w.hasChildNodes()) {
-                                const parent = w.parentNode;
-                                if (parent) parent.removeChild(w);
-                                w = parent;
-                            }
-
-                            // Start new page
-                            page = createNewPage(currentOrientation);
-                            container.appendChild(page);
-
-                            // Recurse into child if splittable, otherwise place whole
-                            if (child.nodeType === Node.ELEMENT_NODE && canSplit(child)) {
-                                if (!child.hasAttribute("data-split-id")) {
-                                    child.setAttribute("data-split-id", Math.random().toString(36).substr(2,
-                                        9));
-                                }
-                                appendNodes(Array.from(child.childNodes), [...parentPath, child]);
-                            } else {
-                                currentWrapper = ensureWrapperPath(parentPath);
-                                currentWrapper.appendChild(child);
-                            }
-                        }
-                    });
-                }
-
-                appendNodes(Array.from(el.childNodes), [el]);
-
-                // Clean up split tracking attributes
-                document.querySelectorAll("[data-split-id]").forEach(e =>
-                    e.removeAttribute("data-split-id")
-                );
-            }
-
-            // FIX 3: splitTable — fill the current page first, then continue on next pages.
-            // Tables continue across pages WITHOUT repeating the header (cleaner for long tables).
-            function splitTable(table, getAppendTarget) {
-                const thead = table.querySelector("thead");
-                const rows = Array.from(table.querySelectorAll("tbody tr"));
-
-                if (!rows.length) {
-                    appendElement(table);
+            // =========================================================================
+            //  flow(node, chain)
+            //
+            //  `chain` = ordered array of original ancestor elements whose shallow
+            //  clones must be present on the current page before `node` can be placed.
+            //
+            //  Algorithm:
+            //    1. Get (or create) the deepest wrapper on the current page.
+            //    2. Append `node`.
+            //    3. If it fits → done.
+            //    4. If it doesn't fit AND it has children → split it:
+            //         a. Remove it, put a shallow clone in its place.
+            //         b. Recurse over each child with `chain + [node]`.
+            //    5. If it doesn't fit AND it's atomic → push to a new page.
+            // =========================================================================
+            function flow(node, chain) {
+                // Tables always go through the specialised table splitter.
+                if (node.nodeType === Node.ELEMENT_NODE && node.tagName === "TABLE") {
+                    splitTable(node, () => deepest(chain));
                     return;
                 }
 
-                // Extract colgroup ONCE at the start to ensure consistent column widths
-                // across all shells (first shell with header, continuation shells without)
-                let colgroup = null;
-                const existingCg = table.querySelector(":scope > colgroup");
-                if (existingCg) {
-                    colgroup = existingCg.cloneNode(true);
-                } else if (thead) {
-                    const hRows = thead.querySelectorAll("tr");
-                    const leafRow = hRows[hRows.length - 1];
-                    if (leafRow) {
-                        colgroup = document.createElement("colgroup");
-                        Array.from(leafRow.cells).forEach(cell => {
-                            const col = document.createElement("col");
-                            const sw = cell.style.width;
-                            if (sw && sw !== "") {
-                                col.style.width = sw;
-                            } else {
-                                const aw = cell.getAttribute("width");
-                                if (aw && aw !== "") {
-                                    col.style.width = /^\d+$/.test(aw) ? aw + "px" : aw;
-                                }
-                            }
-                            colgroup.appendChild(col);
-                        });
-                    }
+                const target = deepest(chain);
+                target.appendChild(node);
+
+                if (!overflows()) return; // fits – nothing more to do
+
+                target.removeChild(node);
+
+                // Collect children (empty for text nodes / void elements)
+                const kids = (node.nodeType === Node.ELEMENT_NODE) ?
+                    Array.from(node.childNodes) : [];
+
+                if (kids.length === 0) {
+                    // Atomic node – push to a fresh page, rebuild the chain there.
+                    breakPage();
+                    deepest(chain).appendChild(node);
+                    return;
                 }
 
-                const getTarget = (typeof getAppendTarget === "function") ?
-                    getAppendTarget :
-                    () => page;
+                // Non-atomic – place a shallow clone as the wrapper and distribute kids.
+                uid(node); // ensure original has an ID
+                const clone = shallow(node);
+                clone.__sid = node.__sid; // clone inherits same ID
+                target.appendChild(clone);
 
+                const deeper = [...chain, node]; // extend the ancestry
+                kids.forEach(kid => flow(kid, deeper));
+            }
+
+            // =========================================================================
+            //  deepest(chain)
+            //
+            //  Walk `page`, following last-children that match each level of `chain`
+            //  by __sid. If a level is missing on the current page, create it (and all
+            //  subsequent levels) by appending fresh shallow clones.
+            //
+            //  Returns the innermost live clone on the current page.
+            // =========================================================================
+            function deepest(chain) {
+                let node = page;
+                for (let i = 0; i < chain.length; i++) {
+                    const orig = chain[i];
+                    uid(orig);
+
+                    // Search backwards through node's children for a matching __sid.
+                    let found = null;
+                    for (let j = node.children.length - 1; j >= 0; j--) {
+                        if (node.children[j].__sid === orig.__sid) {
+                            found = node.children[j];
+                            break;
+                        }
+                    }
+
+                    if (!found) {
+                        // This level doesn't exist yet on the current page – create the
+                        // rest of the chain from here.
+                        for (let k = i; k < chain.length; k++) {
+                            const c = shallow(chain[k]);
+                            c.__sid = chain[k].__sid; // same ID as the original
+                            node.appendChild(c);
+                            node = c;
+                        }
+                        return node;
+                    }
+                    node = found;
+                }
+                return node; // page itself if chain is empty
+            }
+
+            // =========================================================================
+            //  breakPage
+            //  Start a new page.  Does NOT rebuild the wrapper chain – callers that
+            //  need the chain recreated should call deepest(chain) after this.
+            // =========================================================================
+            function breakPage() {
+                page = makePage(currentOrientation);
+                container.appendChild(page);
+            }
+
+            // =========================================================================
+            //  splitTable
+            //
+            //  Distributes <tbody> rows across pages.
+            //  • A colgroup mirroring the header's column widths is injected into every
+            //    shell so continuation tables have identical column proportions.
+            //  • Headers are NOT repeated on continuation pages (cleaner output).
+            //  • `getTarget` is a callback that returns the DOM node to append shells
+            //    to. On a new page this callback re-runs, picking up the freshly rebuilt
+            //    wrapper (if any).
+            // =========================================================================
+            function splitTable(table, getTarget) {
+                const thead = table.querySelector(":scope > thead");
+                const rows = Array.from(table.querySelectorAll(":scope > tbody > tr"));
+
+                // Table has no body rows – treat as a plain block.
+                if (!rows.length) {
+                    const t = getTarget();
+                    t.appendChild(table);
+                    if (overflows()) {
+                        t.removeChild(table);
+                        breakPage();
+                        getTarget().appendChild(table);
+                    }
+                    return;
+                }
+
+                const cg = colgroup(table, thead);
+
+                // ── First shell (includes thead) ──────────────────────────────────────
                 let target = getTarget();
-                const targetWasEmpty = !(target && target.children && target.children.length > 0);
-
-                let shell = createTableShell(table, thead, true, colgroup);
+                let shell = shell_(table, thead, true, cg);
                 target.appendChild(shell);
 
-                // IMPROVED: Only move table to new page if header alone is too large for a full page.
-                // Otherwise, let the row-by-row logic handle splitting naturally.
-                if (!targetWasEmpty && page.scrollHeight > getMaxPageHeight()) {
-                    // Check if header alone would fit on an empty page
-                    const testPage = createNewPage(currentOrientation);
-                    const testTarget = testPage; // Assume header goes directly on new page
-                    const testShell = createTableShell(table, thead, true, colgroup);
-                    testTarget.appendChild(testShell);
-                    const headerFitsOnEmptyPage = testTarget.scrollHeight <= getMaxPageHeight();
-                    
-                    if (headerFitsOnEmptyPage) {
-                        // Header CAN fit on a fresh page, so move to new page and continue splitting
-                        target.removeChild(shell);
-                        page = testPage;
-                        container.appendChild(page);
-                        target = getTarget();
-                        target.appendChild(testShell);
-                        shell = testShell;
-                    } else {
-                        // Header is too large even for empty page; just keep it where it is
-                        // and let row-by-row logic handle the overflow
-                    }
+                if (overflows()) {
+                    // Header alone overflows the current page → move to a new page.
+                    target.removeChild(shell);
+                    breakPage();
+                    target = getTarget();
+                    shell = shell_(table, thead, true, cg);
+                    target.appendChild(shell);
+                    // If it STILL overflows on a blank page, accept it (can't split a header).
                 }
 
+                // ── Row-by-row distribution ───────────────────────────────────────────
                 rows.forEach(row => {
-                    shell.querySelector("tbody").appendChild(row);
+                    const tbody = shell.querySelector("tbody");
+                    tbody.appendChild(row);
 
-                    if (page.scrollHeight > getMaxPageHeight()) {
-                        shell.querySelector("tbody").removeChild(row);
+                    if (!overflows()) return; // fits
 
-                        // Don't start a new page if shell is empty (very tall single row edge case)
-                        if (shell.querySelector("tbody").children.length === 0) {
-                            // Row is taller than a full page — just put it anyway to avoid infinite loop
-                            shell.querySelector("tbody").appendChild(row);
-                            return;
-                        }
+                    tbody.removeChild(row);
 
-                        page = createNewPage(currentOrientation);
-                        container.appendChild(page);
-
-                        // FIX 2: Continuation table — no header repeat, starts from top of new page
-                        target = getTarget();
-                        shell = createTableShell(table, thead, false, colgroup);
-                        target.appendChild(shell);
-                        shell.querySelector("tbody").appendChild(row);
+                    // Edge-case: the row alone is taller than a full page.
+                    if (tbody.children.length === 0) {
+                        tbody.appendChild(row); // accept the overflow, prevent infinite loop
+                        return;
                     }
+
+                    // Row doesn't fit – open a continuation page (no header).
+                    breakPage();
+                    target = getTarget();
+                    shell = shell_(table, thead, false, cg);
+                    target.appendChild(shell);
+                    shell.querySelector("tbody").appendChild(row);
                 });
             }
 
-            function createTableShell(original, thead, includeHeader, colgroup) {
-                const table = document.createElement("table");
+            // ── Table helpers ─────────────────────────────────────────────────────────
 
-                // Copy class names and inline styles so weekly-coverage-table etc. carry over
-                table.className = original.className;
-                table.style.cssText = original.style.cssText;
-                // FIX 2: Landscape tables must not exceed the content width.
-                // The CSS already constrains this via padding, but set width explicitly.
-                table.style.width = "100%";
-                table.style.borderCollapse = "collapse";
-                table.setAttribute("border", original.getAttribute("border") || "");
+            function colgroup(table, thead) {
+                const existing = table.querySelector(":scope > colgroup");
+                if (existing) return existing.cloneNode(true);
+                if (!thead) return null;
 
-                // Append the preserved colgroup to maintain consistent column widths across all shells
-                if (colgroup) {
-                    table.appendChild(colgroup.cloneNode(true));
-                }
+                const headerRows = thead.querySelectorAll("tr");
+                const leaf = headerRows[headerRows.length - 1];
+                if (!leaf) return null;
 
-                if (includeHeader && thead) {
-                    table.appendChild(thead.cloneNode(true));
-                }
-
-                const tbody = document.createElement("tbody");
-                table.appendChild(tbody);
-                return table;
+                const cg = document.createElement("colgroup");
+                Array.from(leaf.cells).forEach(cell => {
+                    const col = document.createElement("col");
+                    const sw = cell.style.width;
+                    const aw = cell.getAttribute("width");
+                    if (sw) col.style.width = sw;
+                    else if (aw) col.style.width = /^\d+$/.test(aw) ? aw + "px" : aw;
+                    cg.appendChild(col);
+                });
+                return cg;
             }
 
-            function createNewPage(orientation = "portrait") {
+            function shell_(orig, thead, withHeader, cg) {
+                const t = document.createElement("table");
+                t.className = orig.className;
+                t.style.cssText = orig.style.cssText;
+                t.style.width = "100%";
+                t.style.borderCollapse = "collapse";
+                const b = orig.getAttribute("border");
+                if (b) t.setAttribute("border", b);
+
+                if (cg) t.appendChild(cg.cloneNode(true));
+                if (withHeader && thead) t.appendChild(thead.cloneNode(true));
+                t.appendChild(document.createElement("tbody"));
+                return t;
+            }
+
+            // ── General helpers ───────────────────────────────────────────────────────
+
+            function overflows() {
+                return page.scrollHeight > page.clientHeight;
+            }
+
+            function pageHasContent() {
+                return page.children.length > 0;
+            }
+
+            function shallow(el) {
+                const c = el.cloneNode(false);
+                c.removeAttribute("id");
+                return c;
+            }
+
+            function makePage(orientation) {
                 const div = document.createElement("div");
-                div.className = "a4-page " + orientation;
+                div.className = "a4-page " + (orientation || "portrait");
                 return div;
             }
 
             function addPageNumbers() {
                 const pages = document.querySelectorAll(".a4-page");
-
-                pages.forEach((p, index) => {
+                pages.forEach((p, i) => {
                     const footer = document.createElement("div");
-                    footer.style.cssText = [
-                        "position: absolute",
-                        "bottom: 20px",
-                        "left: 60px",
-                        "right: 60px",
-                        "border-top: 1px solid #808080",
-                        "padding-top: 6px",
-                        "text-align: right",
-                        "font-size: 9pt",
-                        "color: #808080",
-                        "font-family: Tahoma, sans-serif",
-                    ].join(";");
-                    // Blade renders this as a literal string in the output HTML
+                    footer.style.cssText =
+                        "position:absolute;bottom:20px;left:60px;right:60px;" +
+                        "border-top:1px solid #808080;padding-top:6px;" +
+                        "text-align:right;font-size:9pt;color:#808080;" +
+                        "font-family:Tahoma,sans-serif;";
                     footer.innerText =
                         "Course Syllabus: {{ $syllabus->course->course_code }} | Page " +
-                        (index + 1) + " of " + pages.length;
+                        (i + 1) + " of " + pages.length;
                     p.appendChild(footer);
                 });
-
-                if (pageCount) {
-                    pageCount.textContent =
+                if (pageCountEl) {
+                    pageCountEl.textContent =
                         pages.length + " page" + (pages.length !== 1 ? "s" : "");
                 }
             }
         });
-    </script> --}}
+    </script>
 
     @if (empty($isSnapshot))
         @include('Syllabus.preview._versions_drawer', [
