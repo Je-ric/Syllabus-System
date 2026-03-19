@@ -214,6 +214,41 @@
                 $text = preg_replace('/\n{2,}/', "\n", $text) ?? $text;
                 return trim($text);
             };
+
+            // Helper to compute CO rowspans for weekly rows
+            $computeCoRowSpans = function ($rows) {
+                $coRowSpans = [];
+                $isCoGroupStart = [];
+                $previousCo = null;
+                $groupStartIndex = null;
+
+                foreach ($rows as $index => $row) {
+                    $currentCo = (string) ($row['co_no'] ?? '');
+                    if ($index === 0 || $currentCo !== $previousCo) {
+                        if ($groupStartIndex !== null) {
+                            $coRowSpans[$groupStartIndex] = $index - $groupStartIndex;
+                        }
+                        $groupStartIndex = $index;
+                        $isCoGroupStart[$index] = true;
+                    } else {
+                        $isCoGroupStart[$index] = false;
+                    }
+                    $previousCo = $currentCo;
+                }
+                if ($groupStartIndex !== null) {
+                    $coRowSpans[$groupStartIndex] = count($rows) - $groupStartIndex;
+                }
+
+                return compact('coRowSpans', 'isCoGroupStart');
+            };
+
+            $lecGrouping = $computeCoRowSpans($lecRows);
+            $lecCoRowSpans = $lecGrouping['coRowSpans'];
+            $lecIsCoGroupStart = $lecGrouping['isCoGroupStart'];
+
+            $labGrouping = $computeCoRowSpans($labRows);
+            $labCoRowSpans = $labGrouping['coRowSpans'];
+            $labIsCoGroupStart = $labGrouping['isCoGroupStart'];
         @endphp
 
         <div class="a4-section">
@@ -231,11 +266,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse ($lecRows as $row)
+                    @forelse ($lecRows as $index => $row)
                         @if ($row['is_exam'])
                             <tr>
-                                <td style="text-align:center; background-color:#d9d9d9;">
-                                    {{ $row['co_no'] ?? ($row['co_label'] ?? '-') }}</td>
+                                @if ($lecIsCoGroupStart[$index] ?? false)
+                                    <td rowspan="{{ $lecCoRowSpans[$index] ?? 1 }}"
+                                        style="text-align:center; background-color:#d9d9d9; vertical-align:middle;">
+                                        {{ $row['co_no'] ?? ($row['co_label'] ?? '-') }}</td>
+                                @endif
                                 <td style="text-align:center; background-color:#d9d9d9;">
                                     {{ $row['wk_label'] ?? ($row['week_label'] ?? ($row['week_no'] ?? '')) }}</td>
                                 <td colspan="3"
@@ -245,8 +283,11 @@
                             </tr>
                         @else
                             <tr>
-                                <td style="text-align:center; vertical-align:top;">
-                                    {{ blank($row['co_no'] ?? null) ? '---' : $row['co_no'] }}</td>
+                                @if ($lecIsCoGroupStart[$index] ?? false)
+                                    <td rowspan="{{ $lecCoRowSpans[$index] ?? 1 }}"
+                                        style="text-align:center; vertical-align:middle;">
+                                        {{ blank($row['co_no'] ?? null) ? '---' : $row['co_no'] }}</td>
+                                @endif
                                 <td style="text-align:center; vertical-align:top;">
                                     {{ $row['wk_label'] ?? ($row['week_label'] ?? ($row['week_no'] ?? '')) }}</td>
                                 <td style="vertical-align:top;">{!! nl2br(e($toMultilineCell($row['topics'] ?? '') !== '' ? $toMultilineCell($row['topics'] ?? '') : '---')) !!}</td>
@@ -278,11 +319,14 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($labRows as $row)
+                        @forelse ($labRows as $index => $row)
                             @if ($row['is_exam'])
                                 <tr>
-                                    <td style="text-align:center; background-color:#d9d9d9;">
-                                        {{ $row['co_no'] ?? ($row['co_label'] ?? '-') }}</td>
+                                    @if ($labIsCoGroupStart[$index] ?? false)
+                                        <td rowspan="{{ $labCoRowSpans[$index] ?? 1 }}"
+                                            style="text-align:center; background-color:#d9d9d9; vertical-align:middle;">
+                                            {{ $row['co_no'] ?? ($row['co_label'] ?? '-') }}</td>
+                                    @endif
                                     <td style="text-align:center; background-color:#d9d9d9;">
                                         {{ $row['wk_label'] ?? ($row['week_label'] ?? ($row['week_no'] ?? '')) }}</td>
                                     <td colspan="3"
@@ -292,8 +336,11 @@
                                 </tr>
                             @else
                                 <tr>
-                                    <td style="text-align:center; vertical-align:top;">
-                                        {{ blank($row['co_no'] ?? null) ? '---' : $row['co_no'] }}</td>
+                                    @if ($labIsCoGroupStart[$index] ?? false)
+                                        <td rowspan="{{ $labCoRowSpans[$index] ?? 1 }}"
+                                            style="text-align:center; vertical-align:middle;">
+                                            {{ blank($row['co_no'] ?? null) ? '---' : $row['co_no'] }}</td>
+                                    @endif
                                     <td style="text-align:center; vertical-align:top;">
                                         {{ $row['wk_label'] ?? ($row['week_label'] ?? ($row['week_no'] ?? '')) }}</td>
                                     <td style="vertical-align:top;">{!! nl2br(e($toMultilineCell($row['topics'] ?? '') !== '' ? $toMultilineCell($row['topics'] ?? '') : '---')) !!}</td>
@@ -476,9 +523,9 @@
                         <tr>
                             <td style="width:120px;">Where:</td>
                             <td>
-                                FCAS &nbsp;= Final Course Average Score <br>
+                                FCAS = Final Course Average Score <br>
                                 LecAve = Lecture Average Score <br>
-                                APP &nbsp;&nbsp;&nbsp;= Additional point incentive for student athletes, performers
+                                APP = Additional point incentive for student athletes, performers
                                 and student delegates/representatives [CLSU BOR Resolution No. 32-09]
                             </td>
                         </tr>
