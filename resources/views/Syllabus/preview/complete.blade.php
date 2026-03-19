@@ -790,13 +790,12 @@
                 <div class="indent-level-1-5">d. ITE Electives: {{ $syllabus->contribution_ite_electives ?? '0' }} %
                 </div>
             </div>
-            <br>
 
             <h3 class="a4-section title-lettered">E. Others</h3>
             <div class="a4-section">
                 <strong class="indent-level-1 title-numbered section-e-title">1. Life-long Learning
                     Opportunities</strong>
-                <p class="indent-level-2">
+                <p class="indent-level-2-text">
                     The course offers lifelong learning in network design, troubleshooting, security, and emerging
                     technologies, fostering expertise crucial for modern IT careers and adaptability in the
                     ever-evolving tech landscape.
@@ -805,8 +804,8 @@
             <br>
             <div class="a4-section">
                 <strong class="indent-level-1 title-numbered section-e-title">2. Course Policies</strong>
-                <p class="indent-level-2">The policies to be implemented in this course are based on the approved
-                    academic policies indicated in the University Code or Student Handbook.</p>
+                <p class="indent-level-2-text">The policies to be implemented in this course are
+                    based on the approved academic policies indicated in the University Code or Student Handbook.</p>
             </div>
             <br>
             <div class="a4-section">
