@@ -182,7 +182,7 @@
                                 <td class="px-4 py-3 align-middle {{ $courseHasLab ? 'border-r border-slate-200' : '' }}">
                                     <div class="flex items-center gap-1.5">
                                         <input type="number"
-                                            wire:model.blur="inputs.{{ $lecId }}.weight"
+                                            wire:model.live.debounce.250ms="inputs.{{ $lecId }}.weight"
                                             min="0" max="100" step="1" placeholder="0"
                                             class="w-20 text-sm text-right rounded-lg border border-slate-300 bg-white
                                                    px-2 py-1.5 focus:border-emerald-400 focus:ring-1
@@ -241,7 +241,7 @@
                                     <td class="px-4 py-3 align-middle border-r border-slate-200">
                                         <div class="flex items-center gap-1.5">
                                             <input type="number"
-                                                wire:model.blur="inputs.{{ $labId }}.weight"
+                                                wire:model.live.debounce.250ms="inputs.{{ $labId }}.weight"
                                                 min="0" max="100" step="1" placeholder="0"
                                                 class="w-20 text-sm text-right rounded-lg border border-slate-300 bg-white
                                                        px-2 py-1.5 focus:border-blue-400 focus:ring-1

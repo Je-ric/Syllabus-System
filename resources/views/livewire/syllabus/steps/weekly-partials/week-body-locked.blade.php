@@ -2,8 +2,7 @@
     Partial: weekly-partials/week-body-locked.blade.php
     ────────────────────────────────────────────────────
     Rendered when a week is locked (exam or non_teaching).
-    Shows a type-appropriate alert, the locking event(s), and any
-    other (non-locking) calendar events that fall in the same week.
+    Shows a type-appropriate alert and the locking event(s).
 
     Passed by week-accordion.blade.php:
         $week       SyllabusWeek

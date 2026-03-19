@@ -90,7 +90,6 @@
         <br>
         <div class="a4-subtitle a4-title">{{ $syllabus->course->course_code }} - {{ $syllabus->course->course_title }}
         </div>
-        <br>
         <h3 class="a4-section title-lettered">A. University Information</h3>
 
         <div class="a4-section">
@@ -185,7 +184,6 @@
                 @endforelse
             </div>
         </div>
-        <br>
 
         <h3 class="a4-section title-lettered">B. Program Information</h3>
         <div class="a4-section">
@@ -736,6 +734,7 @@
 
         <div class="portrait">
             <h3 class="a4-section title-numbered">12. References</h3>
+            <br>
 
             <div class="a4-list">
                 @forelse (($allReferences ?? []) as $refText)
@@ -743,7 +742,7 @@
                 @empty
                     <div class="indent-level-1-5">No references encoded.</div>
                 @endforelse
-
+                <br>
                 <div class="indent-level-1-5" style="margin-top:8px; font-weight: bold;">
                     <strong>Online materials:</strong>
                 </div>
@@ -763,8 +762,10 @@
                     <div class="indent-level-1-5">No online materials encoded.</div>
                 @endforelse
             </div>
+            <br>
 
             <h3 class="a4-section title-numbered">13. Course Materials Made Available</h3>
+            <br>
             <div class="a4-list">
                 @forelse (($syllabus->courseMaterials ?? []) as $material)
                     <div class="indent-level-1-5">{{ $loop->index + 1 }}. {{ $material->material_text }}</div>
@@ -775,8 +776,10 @@
                     <div class="indent-level-1-5">d. Lecture Notes and Slide Presentations</div>
                 @endforelse
             </div>
+            <br>
 
             <h3 class="a4-section title-numbered">14. Contribution of Course to Meeting the Professional Component</h3>
+            <br>
             <div class="a4-list">
                 <div class="indent-level-1-5">a. General Education: {{ $syllabus->contribution_general_ed ?? '0' }} %
                 </div>
@@ -787,50 +790,53 @@
                 <div class="indent-level-1-5">d. ITE Electives: {{ $syllabus->contribution_ite_electives ?? '0' }} %
                 </div>
             </div>
+            <br>
 
             <h3 class="a4-section title-lettered">E. Others</h3>
-
-            {{-- 1. Life-long Learning Opportunities --}}
             <div class="a4-section">
-                <strong class="indent-level-1 title-numbered">1. Life-long Learning Opportunities</strong>
+                <strong class="indent-level-1 title-numbered section-e-title">1. Life-long Learning
+                    Opportunities</strong>
                 <p class="indent-level-2">
-                    {{ $syllabus->lifelong_learning ?? 'The course offers lifelong learning in network design, troubleshooting, security, and emerging technologies, fostering expertise crucial for modern IT careers and adaptability in the ever-evolving tech landscape.' }}
+                    The course offers lifelong learning in network design, troubleshooting, security, and emerging
+                    technologies, fostering expertise crucial for modern IT careers and adaptability in the
+                    ever-evolving tech landscape.
                 </p>
             </div>
-
-            {{-- 2. Course Policies --}}
+            <br>
             <div class="a4-section">
-                <strong class="indent-level-1 title-numbered">2. Course Policies</strong>
+                <strong class="indent-level-1 title-numbered section-e-title">2. Course Policies</strong>
                 <p class="indent-level-2">The policies to be implemented in this course are based on the approved
                     academic policies indicated in the University Code or Student Handbook.</p>
             </div>
-
-            {{-- 3. Ethics and Conduct --}}
+            <br>
             <div class="a4-section">
-                <strong class="indent-level-1 title-numbered">3. Ethics and Conduct</strong>
+                <strong class="indent-level-1 title-numbered section-e-title">3. Ethics and Conduct</strong>
 
-                {{-- Class Conduct --}}
-                <p class="indent-level-2"><strong>Class Conduct</strong></p>
+                <p class="indent-level-2 section-e-subtitle"><strong>Class Conduct</strong></p>
 
-                <p class="indent-level-2"><em>Class Preparation:</em></p>
-                <p class="indent-level-2">It is essential that students come prepared to get the most out of a class
+                <p class="indent-level-2 section-e-em"><em>Class Preparation:</em></p>
+                <p class="indent-level-2-text section-e-description">It is essential that students come prepared to get
+                    the most out of a class
                     lecture and case discussions. Concepts covered in the class are easier to comprehend if a student
                     has completed assignments before coming to the class. Undivided commitment, attention and efforts
                     are key to better study and learning.</p>
 
-                <p class="indent-level-2"><em>Class Attendance:</em></p>
-                <p class="indent-level-2">Students must plan to maintain regular attendance in each course. They must
+                <p class="indent-level-2 section-e-em"><em>Class Attendance:</em></p>
+                <p class="indent-level-2-text section-e-description">Students must plan to maintain regular attendance
+                    in each course. They must
                     understand that regular attendance is essential for learning and maintaining good academic
                     performance. It is possible that a student may obtain an unofficially dropped grade of 5.00 if
                     he reaches a number of absences as indicated in the policy.</p>
 
-                <p class="indent-level-2"><em>Class Participation:</em></p>
-                <p class="indent-level-2">Class attendance is NOT class participation. It is essential that a student
+                <p class="indent-level-2 section-e-em"><em>Class Participation:</em></p>
+                <p class="indent-level-2-text section-e-description">Class attendance is NOT class participation. It is
+                    essential that a student
                     come prepared to get the most out of a class lecture and case discussion. Material is generally
                     not easily comprehensible if a student has not completed assignments prior to class session.</p>
 
-                <p class="indent-level-2"><em>Expected Study Habits:</em></p>
-                <p class="indent-level-2">The coursework is based on continuous teacher-student interaction, class
+                <p class="indent-level-2 section-e-em"><em>Expected Study Habits:</em></p>
+                <p class="indent-level-2-text section-e-description">The coursework is based on continuous
+                    teacher-student interaction, class
                     discussions and student participation. The course instructors make assignments of reading
                     materials prior to their discussion/lecture in the class. It is essential for a student to go
                     through the reading material prior to the class in order to interact effectively with the
@@ -838,109 +844,138 @@
                     textbooks, recommended books, and supplementary material, but where necessary, will also search
                     for relevant material elsewhere.</p>
 
-                {{-- Student Conduct --}}
-                <p class="indent-level-2"><strong>Student Conduct</strong></p>
+                <p class="indent-level-2 section-e-subtitle"><strong>Student Conduct</strong></p>
 
-                <p class="indent-level-2"><em>Awareness of Institution Policies:</em></p>
-                <p class="indent-level-2">It is the student's responsibility to keep informed about the College
+                <p class="indent-level-2 section-e-em"><em>Awareness of Institution Policies:</em></p>
+                <p class="indent-level-2-text section-e-description">It is the student's responsibility to keep
+                    informed
+                    about the College
                     policies and the deadlines for various activities. READING THE EMAIL COMMUNICATIONS will keep
                     student up to date on deadlines for various activities such as add/drop, withdraws, registration,
                     tuition fee payments, clearance from library and computer lab, etc.</p>
 
-                <p class="indent-level-2"><em>Punctuality:</em></p>
-                <p class="indent-level-2">Both students and instructors are expected to be in the class on time.
+                <p class="indent-level-2 section-e-em"><em>Punctuality:</em></p>
+                <p class="indent-level-2-text section-e-description">Both students and instructors are expected to be
+                    in
+                    the class on time.
                     Students should be in the class before the arrival of instructor. The instructor may take roll
                     call at the beginning of the class. Late comers may be marked as absent.</p>
 
-                <p class="indent-level-2"><em>Discipline:</em></p>
-                <p class="indent-level-2">The College admits students assuming mature conduct on the part of students.
+                <p class="indent-level-2 section-e-em"><em>Discipline:</em></p>
+                <p class="indent-level-2-text section-e-description">The College admits students assuming mature
+                    conduct
+                    on the part of students.
                     Regularity in class attendance, proper behavior in and out of the class rooms towards
                     instructors, colleagues and staff of the College are expected norms. Misbehavior towards faculty
                     members and staff may result in immediate separation from the program. Damage to Institution
                     property may result in appropriate penalty and/or in serious situations separation from the
                     program.</p>
 
-                <p class="indent-level-2"><em>Etiquettes:</em></p>
-                <p class="indent-level-2">Students are required to behave in a decent and socially acceptable manner
-                    towards their teachers, college administration and fellow students. It is recommended that all
+                <p class="indent-level-2 section-e-em"><em>Etiquettes:</em></p>
+                <p class="indent-level-2-text section-e-description">Students are required to behave in a decent and
+                    socially acceptable manner
+                    towards their teachers, coll ege administration and fellow students. It is recommended that all
                     students use English as the medium of communication on the campus, in general, and during class
                     sessions in particular.</p>
 
-                <p class="indent-level-2"><em>Meeting the Deadlines:</em></p>
-                <p class="indent-level-2">Students are provided an "Academic Calendar" for the program which indicates
+                <p class="indent-level-2 section-e-em"><em>Meeting the Deadlines:</em></p>
+                <p class="indent-level-2-text section-e-description">Students are provided an "Academic Calendar" for
+                    the
+                    program which indicates
                     "Important Dates to Remember". Dates for assignment presentations for particular courses are
                     given in the course outline or handouts. It is in students' own interest that these dates are
                     strictly observed and deadlines met. No relaxation is provided after due dates.</p>
 
-                <p class="indent-level-2"><em>Class Room Mannerisms:</em></p>
-                <p class="indent-level-2">Students are expected to conduct themselves as professionals in class and
+                <p class="indent-level-2 section-e-em"><em>Class Room Mannerisms:</em></p>
+                <p class="indent-level-2-text section-e-description">Students are expected to conduct themselves as
+                    professionals in class and
                     observe a disciplined atmosphere. Class attendance is taken regularly and may constitute a part
                     of the final course grade. Late arrival in the class distracts the instructor and other students.
                     Class participation by students is expected and strongly encouraged. However, to maintain class
                     discipline and effectiveness, it is recommended that a student asks permission from the
                     instructor before asking questions or entering a discussion.</p>
 
-                {{-- Attending Online Classes --}}
-                <p class="indent-level-2"><strong>Attending On-line Classes and Presentations</strong></p>
-                <ul>
-                    <li>Wear appropriate attire. See CLSU dress code for online meetings, classes, and online defenses
-                        and similar activities.</li>
-                    <li>Use appropriate background. A blank neat wall, well-organized book shelves, or clean office
-                        environment is acceptable. Avoid backgrounds that may show personal spaces such as bedrooms
-                        or kitchens unless it is part of the topic.</li>
-                    <li>As much as possible, say your name before you speak for the first time.</li>
-                    <li>Always mute your microphone when it is not your turn to speak.</li>
-                    <li>Often make eye contact with the camera. An appropriate photo of oneself may be used if there
-                        is no web camera.</li>
-                    <li>When appropriate, disable the audio announcement feature when someone exits or enters the
-                        meeting.</li>
-                    <li>Do not dominate the meeting by asking too many questions or providing too many responses.
-                        Give others a chance to speak.</li>
-                    <li>Be patient and expect technical issues to arise.</li>
-                    <li>Give the meeting your full attention. Avoid multi-tasking and distracting gestures.</li>
-                    <li>When posting messages on message boards, chat boxes, or sending emails, observe the University
-                        guidelines for this purpose.</li>
-                </ul>
+                <p class="indent-level-2 section-e-subtitle"><strong>Attending On-line Classes and
+                        Presentations</strong></p>
 
-                {{-- Dress Code --}}
-                <p class="indent-level-2"><em>Dress Code (online and face-to-face)</em></p>
-                <p class="indent-level-2">The students are required to be reasonably well dressed when coming to the
+                <div class="indent-level-2-text">
+                    <p class="section-e-description">On-line classes and presentations:</p>
+                    <p class="section-e-description">Wear appropriate attire. See CLSU dress code for online meetings,
+                        classes, and online defenses
+                        and similar activities.</p>
+                    <p class="section-e-description">Use appropriate background. A blank neat wall, well-organized book
+                        shelves, or clean office
+                        environment is acceptable. Avoid backgrounds that may show personal spaces such as bedrooms
+                        or kitchens unless it is part of the topic.</p>
+                    <p class="section-e-description">As much as possible, say your name before you speak for the first
+                        time.</p>
+                    <p class="section-e-description">Always mute your microphone when it is not your turn to speak.</p>
+                    <p class="section-e-description">Often make eye contact with the camera. An appropriate photo of
+                        oneself may be used if there
+                        is no web camera.</p>
+                    <p class="section-e-description">When appropriate, disable the audio announcement feature when
+                        someone exits or enters the
+                        meeting.</p>
+                    <p class="section-e-description">Do not dominate the meeting by asking too many questions or
+                        providing too many responses.
+                        Give others a chance to speak.</p>
+                    <p class="section-e-description">Be patient and expect technical issues to arise.</p>
+                    <p class="section-e-description">Give the meeting your full attention. Avoid multi-tasking and
+                        distracting gestures.</p>
+                    <p class="section-e-description">When posting messages on message boards, chat boxes, or sending
+                        emails, observe the University
+                        guidelines for this purpose.</p>
+                </div>
+
+                <p class="indent-level-2 section-e-subtitle"><strong>Dress Code (online and face-to-face)</strong></p>
+                <p class="indent-level-2-text section-e-description">The students are required to be reasonably well
+                    dressed when coming to the
                     university. The dress should conform to the academic environment and should be decent in
                     appearance.</p>
-                <p class="indent-level-2"><em>Meetings and classes:</em> Be well-groomed. Wear decent, simple or
+
+                <p class="indent-level-2 section-e-em"><em>Meetings and classes:</em> </p>
+                <p class="indent-level-2-text section-e-description">Be well-groomed. Wear decent, simple or
                     casual comfortable attire. Upper garment should be ample enough to cover the upper body. If the
                     lower half of the body will be shown, no skinny pants, boxer shorts, short shorts, or short
                     skirts.</p>
-                <p class="indent-level-2"><em>For presentations:</em> Wear corporate, formal, or smart casual attire.
+
+                <p class="indent-level-2 section-e-em"><em>For presentations:</em> </p>
+                <p class="indent-level-2-text section-e-description">Wear corporate, formal, or smart casual attire.
                     Do not hide inappropriate clothing with virtual garments.</p>
 
-                {{-- Mobile Phones --}}
-                <p class="indent-level-2"><em>Mobile Phones:</em></p>
-                <p class="indent-level-2">Mobile phones must be switched off when attending classes, library,
+                <p class="indent-level-2 section-e-em"><em>Mobile Phones:</em></p>
+                <p class="indent-level-2-text section-e-description">Mobile phones must be switched off when attending
+                    classes, library,
                     computer lab, and offices.</p>
             </div>
 
-            {{-- 4. Academic Integrity --}}
             <div class="a4-section">
-                <strong class="indent-level-1 title-numbered">4. Academic Integrity</strong>
-                <p class="indent-level-2">Maintaining academic integrity is essential for fostering learning,
+                <strong class="indent-level-1 title-numbered section-e-title">4. Academic Integrity</strong>
+                <p class="indent-level-2-text section-e-description">Maintaining academic integrity is essential for
+                    fostering learning,
                     assuring fair evaluation, and upholding the credibility and quality of education. Policies on
                     academic integrity are as follows:</p>
-                <div class="a4-list">
-                    <div class="indent-level-1-5">a. All are expected to be honest in all of their academic
-                        activities, including assignments, assessments, research, and other projects.</div>
-                    <div class="indent-level-1-5">b. The use of another person's work without giving proper credit is
+
+                <div class="indent-level-2-text section-e-description">
+                    <div>a. All are expected to be honest in all of their academic activities, including
+                        assignments, assessments, research, and other projects.
+                    </div>
+                    <div>b. The use of another person's work without giving proper credit is
                         known as plagiarism. In order to properly credit sources, proper citation and reference are
-                        required.</div>
-                    <div class="indent-level-1-5">c. Individual tasks and exams must be completed by each student on
-                        their own, without assistance from others.</div>
+                        required.
+                    </div>
+                    <div>c. Individual tasks and exams must be completed by each student on
+                        their own, without assistance from others.
+                    </div>
                 </div>
-                <p class="indent-level-2">Any documented case of dishonesty will be dealt with accordingly based on
+
+                <p class="indent-level-2-text section-e-description">Any documented case of dishonesty will be dealt
+                    with accordingly based on
                     the guidelines stipulated in the CLSU Code of Student Conduct and Discipline.</p>
             </div>
 
+            <br>
             <h3 class="a4-section title-lettered">F. Revision History</h3>
-
             <table border="1" style="width:100%; border-collapse:collapse;">
                 <thead>
                     <tr>

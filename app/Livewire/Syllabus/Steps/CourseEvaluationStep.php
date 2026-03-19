@@ -84,6 +84,17 @@ class CourseEvaluationStep extends Component
         return view('livewire.syllabus.steps.course-evaluation');
     }
 
+    public function updated($propertyName, $value = null): void
+    {
+        if (
+            is_string($propertyName)
+            && str_starts_with($propertyName, 'inputs.')
+            && str_ends_with($propertyName, '.weight')
+        ) {
+            $this->recomputeTotalsFromInputs();
+        }
+    }
+
     // ── Event listeners ───────────────────────────────────────────────────────
 
     #[On('syllabus-step-changed')]
@@ -124,12 +135,11 @@ class CourseEvaluationStep extends Component
         $this->labPerformanceStd = $payload['labPerformanceStd'];
         $this->lecStdNum         = $payload['lecStdNum']     ?? ($payload['courseHasLab'] ? 67 : 100);
         $this->labStdNum         = $payload['labStdNum']     ?? 33;
-        $this->lecTotal          = $payload['lecTotal']      ?? 0;
-        $this->labTotal          = $payload['labTotal']      ?? 0;
         $this->lecPassingMark    = $payload['lecPassingMark'] ?? 60;
         $this->labPassingMark    = $payload['labPassingMark'] ?? 60;
         $this->rows              = $payload['rows'];
         $this->inputs            = $payload['inputs'];
+        $this->recomputeTotalsFromInputs();
     }
 
     private function persistEvaluation(): void
@@ -140,5 +150,45 @@ class CourseEvaluationStep extends Component
             inputs:       $this->inputs,
             courseHasLab: $this->courseHasLab,
         );
+    }
+
+    private function recomputeTotalsFromInputs(): void
+    {
+        $lecTotal = 0;
+        $labTotal = 0;
+
+        $parseWeight = static function (mixed $raw): int {
+            if ($raw === null) {
+                return 0;
+            }
+
+            $raw = trim((string) $raw);
+            if ($raw === '') {
+                return 0;
+            }
+
+            if (! is_numeric($raw)) {
+                return 0;
+            }
+
+            return (int) round((float) $raw);
+        };
+
+        foreach ($this->rows as $row) {
+            $lecId = $row['lec']['week_content_id'] ?? null;
+            if ($lecId) {
+                $lecTotal += $parseWeight($this->inputs[$lecId]['weight'] ?? null);
+            }
+
+            if ($this->courseHasLab) {
+                $labId = $row['lab']['week_content_id'] ?? null;
+                if ($labId) {
+                    $labTotal += $parseWeight($this->inputs[$labId]['weight'] ?? null);
+                }
+            }
+        }
+
+        $this->lecTotal = $lecTotal;
+        $this->labTotal = $labTotal;
     }
 }

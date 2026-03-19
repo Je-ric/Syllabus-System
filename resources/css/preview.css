@@ -207,6 +207,7 @@ h3.a4-section {
 .indent-level-1-5     { padding-left: 45px; padding-bottom: 5px; }
 .indent-level-1-5-text{ padding-left: 35px; text-indent: 10px; }
 .indent-level-2       { padding-left: 45px; text-indent: 40px; }
+.indent-level-2-text  { padding-left: 85px; }
 
 .table-indent {
     margin-left: 25px;
@@ -285,7 +286,7 @@ p {
 }
 
 .title-numbered { text-transform: none; }
-.title-lettered { text-transform: uppercase; }
+.title-lettered { text-transform: uppercase; padding-top: 15px;}
 
 /* Lists */
 .a4-list {
@@ -354,6 +355,23 @@ th p {
 .abridged-table{
     margin-bottom: 15px;
 }
+
+.section-e-title{
+    padding-bottom: 8px;
+}
+
+.section-e-subtitle{
+    padding-bottom: 10px;
+    padding-top: 15px;
+    text-align: center;
+}
+
+.section-e-em,
+.section-e-description {
+    padding-bottom: 15px;
+    text-align: justify;
+}
+
 
 /* ═══════════════════════════════════════════════
    WEEKLY COVERAGE TABLE – Times New Roman, 9 pt
