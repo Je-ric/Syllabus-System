@@ -4,97 +4,131 @@
     <x-page-header
         icon="bx-book-add"
         title="Create Syllabus"
-        desc="Step 1: Select program, Step 2: Choose course, Step 3: Fill details" />
+        desc="Select a program and course to begin creating a syllabus" />
 
     <x-panel>
-        <div class="mb-8 border border-slate-200/80 rounded-2xl p-6 bg-white/90 shadow-sm">
-            <h2 class="text-sm uppercase tracking-[0.25em] text-slate-500 mb-4">Select Program</h2>
-            <livewire:programs.program-selector 
-                :program-id="optional($program)?->id" 
-                redirect-route="syllabus.create" 
+        {{-- Program selector --}}
+        <div class="border border-slate-200/80 rounded-2xl p-5 mb-6 bg-white/90 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 mb-3">Select Program</p>
+            <livewire:programs.program-selector
+                :program-id="optional($program)?->id"
+                redirect-route="syllabus.create"
                 :autoRedirect="true" />
         </div>
-    
+
         @if ($program)
-            <div class="mb-6 flex justify-between items-center">
-                <h2 class="text-lg font-semibold text-slate-800">
-                    Courses in <span class="text-emerald-700">{{ $program->name }}</span>
-                </h2>
-            </div>
-    
+
             @forelse ($groupedCourses as $year => $semesters)
-                <div class="mb-8">
-                    <h3 class="text-sm uppercase tracking-[0.25em] text-slate-500 mb-4 border-b border-slate-200 pb-2">
+
+                {{-- Year heading --}}
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-full
+                                 bg-emerald-600 text-white text-xs font-bold shrink-0">
+                        {{ $year ?? '?' }}
+                    </span>
+                    <h3 class="text-sm font-bold text-slate-700 uppercase tracking-[0.15em]">
                         Year {{ $year ?? 'N/A' }}
                     </h3>
-    
-                    @forelse ($semesters as $semester => $courses)
-                        <div class="mb-6 bg-white/90 border border-slate-200 rounded-2xl p-4 shadow-sm">
-                            <h4 class="font-medium text-slate-700 mb-3 border-b border-slate-200 pb-1">
+                    <div class="flex-1 h-px bg-slate-200"></div>
+                </div>
+
+                @forelse ($semesters as $semester => $courses)
+                    <div class="mb-5 rounded-2xl border border-slate-200/80 bg-white/90 shadow-sm overflow-hidden">
+
+                        {{-- Semester sub-header --}}
+                        <div class="px-5 py-2.5 border-b border-slate-100 bg-slate-50/60 flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
+                            <h4 class="text-xs font-semibold text-slate-600 uppercase tracking-[0.15em]">
                                 Semester {{ $semester ?? 'N/A' }}
                             </h4>
-    
-                            <x-table.container>
-                                <x-table.table>
-                                    <x-table.head>
-                                        <tr>
-                                            <x-table.th class="px-4 py-2">Code</x-table.th>
-                                            <x-table.th class="px-4 py-2">Course Title</x-table.th>
-                                            <x-table.th align="center" class="px-4 py-2">Units</x-table.th>
-                                            <x-table.th align="center" class="px-4 py-2">Type</x-table.th>
-                                            <x-table.th align="center" class="px-4 py-2">Action</x-table.th>
-                                        </tr>
-                                    </x-table.head>
-    
-                                    <x-table.body>
-                                        @foreach ($courses as $course)
-                                            <x-table.row striped hover class="border-b border-slate-200">
-                                                <x-table.td class="px-4 py-2 font-mono font-semibold text-slate-700">
-                                                    {{ $course->course_code }}
-                                                </x-table.td>
-                                                <x-table.td class="px-4 py-2 text-slate-700">
-                                                    {{ $course->course_title }}
-                                                </x-table.td>
-                                                <x-table.td align="center" class="px-4 py-2 text-slate-700">
-                                                    {{ $course->credit_units }}
-                                                </x-table.td>
-                                                <x-table.td align="center" class="px-4 py-2">
-                                                    @if ($course->has_lec_lab)
-                                                        <x-feedback-status.status-indicator status="lec_lab" label="LEC+LAB" />
-                                                    @else
-                                                        <x-feedback-status.status-indicator status="lec" label="LEC" />
-                                                    @endif
-                                                </x-table.td>
-                                                <x-table.td align="center" class="px-4 py-2">
-                                                    <x-button href="{{ route('syllabus.form', $course->id) }}"
-                                                        variant="table-confirm">
-                                                        Create Syllabus
-                                                    </x-button>
-                                                </x-table.td>
-                                            </x-table.row>
-                                        @endforeach
-                                    </x-table.body>
-                                </x-table.table>
-                            </x-table.container>
+                            <span class="ml-auto text-xs text-slate-400">
+                                {{ count($courses) }} course(s)
+                            </span>
                         </div>
-                    @empty
-                        <x-empty-state
-                            icon="bx-book"
-                            title="No courses found"
-                            message="There are no courses listed for this semester. Please contact the administrator to add courses." />
-                    @endforelse
-                </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50/70 text-slate-500 text-xs uppercase tracking-[0.12em]">
+                                        <th class="px-5 py-3 text-left font-semibold">Course</th>
+                                        <th class="px-4 py-3 text-center font-semibold w-16">Units</th>
+                                        <th class="px-4 py-3 text-center font-semibold w-24">Type</th>
+                                        <th class="px-4 py-3 text-center font-semibold">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    @foreach ($courses as $course)
+                                        <tr class="hover:bg-emerald-50/30 transition-colors group">
+
+                                            {{-- Course code + title --}}
+                                            <td class="px-5 py-3">
+                                                <span class="font-mono font-semibold text-slate-700 text-xs">
+                                                    {{ $course->course_code }}
+                                                </span>
+                                                <span class="text-slate-400 mx-1">—</span>
+                                                <span class="text-slate-600">{{ $course->course_title }}</span>
+                                            </td>
+
+                                            {{-- Units --}}
+                                            <td class="px-4 py-3 text-center">
+                                                <span class="inline-flex items-center justify-center w-7 h-7 rounded-full
+                                                             bg-slate-100 text-slate-700 text-xs font-bold">
+                                                    {{ $course->credit_units }}
+                                                </span>
+                                            </td>
+
+                                            {{-- LEC / LAB chip --}}
+                                            <td class="px-4 py-3 text-center">
+                                                @if ($course->has_lec_lab)
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full
+                                                                 bg-blue-50 text-blue-700 text-[10px] font-bold
+                                                                 ring-1 ring-blue-200/60 whitespace-nowrap">
+                                                        <span class="w-1 h-1 rounded-full bg-blue-500"></span> LEC+LAB
+                                                    </span>
+                                                @else
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full
+                                                                 bg-emerald-50 text-emerald-700 text-[10px] font-bold
+                                                                 ring-1 ring-emerald-200/60">
+                                                        <span class="w-1 h-1 rounded-full bg-emerald-500"></span> LEC
+                                                    </span>
+                                                @endif
+                                            </td>
+
+                                            {{-- Action --}}
+                                            <td class="px-4 py-3 text-center align-middle">
+                                                <x-button
+                                                    href="{{ route('syllabus.form', $course->id) }}"
+                                                    variant="table-confirm"
+                                                    class="whitespace-nowrap inline-flex">
+                                                    <i class="bx bx-plus"></i> Create Syllabus
+                                                </x-button>
+                                            </td>
+
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                @empty
+                    <x-empty-state
+                        icon="bx-book"
+                        title="No courses this semester"
+                        message="No courses have been added for this semester yet." />
+                @endforelse
+
             @empty
                 <x-empty-state
-                    icon="bx-book"
+                    icon="bx-book-open"
                     title="No courses found"
-                    message="There are no courses listed for this program. Please contact the administrator to add courses." />
+                    message="This program has no courses yet. Please contact the administrator to add courses." />
             @endforelse
+
         @else
             <x-empty-state
-                icon="bx-book"
+                icon="bx-book-open"
                 title="No program selected"
-                message="Please select a program from the dropdown above to view its courses." />
+                message="Select a program above to view its courses and begin creating a syllabus." />
         @endif
     </x-panel>
 
