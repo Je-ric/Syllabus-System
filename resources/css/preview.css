@@ -84,7 +84,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: var(--green-grad);
+    background: rgba(0, 129, 2, 1);
     padding: 0 24px;
     z-index: 9999;
     font-size: 12px;
@@ -92,31 +92,72 @@ body {
 }
 
 #toolbar .t-left {
-    color: #ccc;
+    color: #ffffff;
     display: flex;
     align-items: center;
     gap: 14px;
 }
 
 #toolbar .t-title {
-    color: #e0e0e0;
-    font-weight: 600;
+    color: #ffffff;
+    font-weight: 700;
+    letter-spacing: 0.05em;
 }
 
 #toolbar .t-pages {
-    color: #888;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 11px;
 }
 
 #toolbar button {
-    background: #1b3d6e;
+    background: rgba(255, 255, 255, 0.2);
     color: #fff;
-    border: none;
+    border: 1px solid rgba(255, 255, 255, 0.4);
     padding: 7px 20px;
     border-radius: 4px;
     font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.04em;
     cursor: pointer;
+    transition: all 150ms ease;
+}
+
+#toolbar button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+#toolbar button.is-active {
+    background: rgba(255, 255, 255, 0.95);
+    color: #0b1220;
+    border-color: rgba(255, 255, 255, 1);
+    font-weight: 800;
+}
+
+#toolbar .t-center {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex: 1;
+    justify-content: center;
+}
+
+#toolbar .t-center-label {
+    font-weight: 400;
+    color: white;
+    font-size: 11px;
+}
+
+#toolbar .t-center-divider {
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0;
+    font-size: 12px;
+}
+
+#toolbar .t-right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
 }
 
 /* ═══════════════════════════════════════════════

@@ -48,13 +48,18 @@
         <div class="t-left">
             <span class="t-title">
                 {{ $syllabus->course->course_code }} - {{ $syllabus->course->course_title }}
-                <span style="font-weight:400; color:#94a3b8; font-size:11px; margin-left:6px;">Complete</span>
             </span>
+        </div>
+
+        <div class="t-center">
+            <span class="t-center-label">Complete</span>
+            <p class="t-center-divider">–</p>
             <span class="t-pages" id="page-count"></span>
         </div>
+
         @if (empty($isSnapshot))
-            <div style="display:flex; gap:8px; align-items:center;">
-                <button type="button"
+            <div class="t-right">
+                <button type="button" class="is-active"
                     onclick="window.location.href='{{ route('syllabus.preview.complete', $syllabus) }}'">
                     Complete
                 </button>
@@ -680,6 +685,92 @@
                 <p class="indent-level-2">The final grades will correspond to the weighted average scores shown below:
                 </p>
             </div>
+
+            {{-- @php
+                /**
+                 * Build transmutation display rows for the given passing mark.
+                 *
+                 * All 9 standard grade bands are anchored to the passing mark.
+                 * Bands whose lower bound exceeds 100 are dropped (score can't exceed 100).
+                * The remaining valid bands are placed into the 4-row × 3-col-pair table
+                * layout left-to-right, top-to-bottom; empty slots get blank cells.
+                *
+                * The 5.00 / "Below X" row is appended right after the last valid band
+                * in column 3 (or wherever it falls in the sequence).
+                */
+                $buildTransmutation = function (int $pass): array {
+                    $fmt = fn(float $n): string => number_format($n, 2);
+
+                    // All 9 bands, highest grade first.
+                    $allBands = [
+                        ['grade' => '1.00', 'lo' => $pass + 35.6, 'hi' => 100.0],
+                        ['grade' => '1.25', 'lo' => $pass + 31.15, 'hi' => $pass + 35.59],
+                        ['grade' => '1.50', 'lo' => $pass + 26.7, 'hi' => $pass + 31.14],
+                        ['grade' => '1.75', 'lo' => $pass + 22.25, 'hi' => $pass + 26.69],
+                        ['grade' => '2.00', 'lo' => $pass + 17.8, 'hi' => $pass + 22.24],
+                        ['grade' => '2.25', 'lo' => $pass + 13.35, 'hi' => $pass + 17.79],
+                        ['grade' => '2.50', 'lo' => $pass + 8.9, 'hi' => $pass + 13.34],
+                        ['grade' => '2.75', 'lo' => $pass + 4.45, 'hi' => $pass + 8.89],
+                        ['grade' => '3.00', 'lo' => $pass + 0.0, 'hi' => $pass + 4.44],
+                    ];
+
+                    // Keep only bands whose lo ≤ 100; clamp hi to 100.
+                    $valid = [];
+                    foreach ($allBands as $b) {
+                        if ($b['lo'] <= 100) {
+                            $valid[] = [
+                                'grade' => $b['grade'],
+                                'range' => $fmt($b['lo']) . ' – ' . $fmt(min($b['hi'], 100.0)),
+                            ];
+                        }
+                    }
+
+                    // Append the "Below pass / 5.00" entry.
+                    $valid[] = ['grade' => '5.00', 'range' => 'Below ' . $pass];
+
+                    // Pad to exactly 12 slots (4 rows × 3 col-pairs).
+                    while (count($valid) < 12) {
+                        $valid[] = ['grade' => '', 'range' => ''];
+                    }
+
+                    // Slice into three columns of 4 rows each.
+                    return [
+                        array_slice($valid, 0, 4), // col 1
+                        array_slice($valid, 4, 4), // col 2
+                        array_slice($valid, 8, 4), // col 3
+                    ];
+                };
+
+                [$tCol1, $tCol2, $tCol3] = $buildTransmutation($lecPassMark);
+            @endphp
+
+            <div class="table-indent">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="text-align:center;">Average Score</th>
+                            <th style="text-align:center;">Grade</th>
+                            <th style="text-align:center;">Average Score</th>
+                            <th style="text-align:center;">Grade</th>
+                            <th style="text-align:center;">Average Score</th>
+                            <th style="text-align:center;">Grade</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for ($i = 0; $i < 4; $i++)
+                            <tr>
+                                <td style="text-align:center;">{{ $tCol1[$i]['range'] }}</td>
+                                <td style="text-align:center;">{{ $tCol1[$i]['grade'] }}</td>
+                                <td style="text-align:center;">{{ $tCol2[$i]['range'] }}</td>
+                                <td style="text-align:center;">{{ $tCol2[$i]['grade'] }}</td>
+                                <td style="text-align:center;">{{ $tCol3[$i]['range'] }}</td>
+                                <td style="text-align:center;">{{ $tCol3[$i]['grade'] }}</td>
+                            </tr>
+                        @endfor
+                    </tbody>
+                </table>
+                <p style="margin-top: 4px;" class="indent-level-1">Passing Mark: {{ $lecPassMark }}%</p>
+            </div> --}}
 
             <div class="table-indent">
                 <table>

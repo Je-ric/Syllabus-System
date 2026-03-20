@@ -21,7 +21,7 @@
         right: 18px;
         bottom: 18px;
         z-index: 100000;
-        background: #1b3d6e;
+        background: linear-gradient(135deg, #0e7490 0%, #0b556b 100%);
         color: #fff;
         border: none;
         padding: 10px 14px;
@@ -30,7 +30,13 @@
         font-weight: 700;
         letter-spacing: 0.04em;
         cursor: pointer;
-        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.25);
+        box-shadow: 0 10px 22px rgba(14, 116, 144, 0.35);
+        transition: all 150ms ease;
+    }
+
+    .versions-fab:hover {
+        box-shadow: 0 12px 28px rgba(14, 116, 144, 0.45);
+        transform: translateY(-2px);
     }
 
     .versions-backdrop {
@@ -66,15 +72,16 @@
         align-items: center;
         justify-content: space-between;
         padding: 14px 14px;
-        border-bottom: 1px solid #e5e7eb;
-        background: #f8fafc;
+        border-bottom: 2px solid #0e7490;
+        background: linear-gradient(90deg, rgba(14, 116, 144, 0.06) 0%, rgba(11, 85, 107, 0.06) 100%);
     }
 
     .vd-title {
-        font-weight: 800;
-        color: #0b1220;
+        font-weight: 900;
+        color: #0b556b;
         font-size: 13px;
-        letter-spacing: 0.02em;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
     }
 
     .vd-close {
@@ -140,6 +147,7 @@
         border-color: #0e7490;
         background: #ecfeff;
         color: #0b556b;
+        font-weight: 800;
     }
 
     .vd-version {
@@ -148,11 +156,18 @@
         padding: 10px 10px;
         background: #fff;
         margin-bottom: 10px;
+        transition: all 150ms ease;
+    }
+
+    .vd-version:hover {
+        border-color: #0e7490;
+        box-shadow: 0 2px 8px rgba(14, 116, 144, 0.12);
     }
 
     .vd-version.is-active {
         border-color: #0e7490;
         background: #ecfeff;
+        box-shadow: 0 4px 12px rgba(14, 116, 144, 0.18);
     }
 
     .vd-version-top {
@@ -188,9 +203,15 @@
 
     .vd-actions a.vd-download {
         grid-column: 1 / -1;
-        background: #1b3d6e;
+        background: linear-gradient(135deg, #0e7490 0%, #0b556b 100%);
         color: #fff;
-        border-color: #1b3d6e;
+        border-color: transparent;
+        font-weight: 800;
+        transition: all 150ms ease;
+    }
+
+    .vd-actions a.vd-download:hover {
+        box-shadow: 0 4px 12px rgba(14, 116, 144, 0.3);
     }
 
     .vd-empty {

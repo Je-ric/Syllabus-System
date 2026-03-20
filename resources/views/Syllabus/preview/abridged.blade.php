@@ -20,17 +20,21 @@
         <div class="t-left">
             <span class="t-title">
                 {{ $syllabus->course->course_code }} – {{ $syllabus->course->course_title }}
-                <span style="font-weight:400; color:#94a3b8; font-size:11px; margin-left:6px;">Abridged</span>
             </span>
+        </div>
+
+        <div class="t-center">
+            <span class="t-center-label">Abridged</span>
+            <p class="t-center-divider">–</p>
             <span class="t-pages" id="page-count"></span>
         </div>
         @if (empty($isSnapshot))
-            <div style="display:flex; gap:8px; align-items:center;">
+            <div class="t-right">
                 <button type="button"
                     onclick="window.location.href='{{ route('syllabus.preview.complete', $syllabus) }}'">
                     Complete
                 </button>
-                <button type="button"
+                <button type="button" class="is-active"
                     onclick="window.location.href='{{ route('syllabus.preview.abridged', $syllabus) }}'">
                     Abridged
                 </button>
@@ -98,54 +102,54 @@
 
         <div class="a4-section">
             <div class="table-indent">
-                <table class="kv-table">
+                <table class="abridged-table">
                     <tbody>
                         <tr>
-                            <td>1. Course Code</td>
+                            <td>Course Code</td>
                             <td>{{ $syllabus->course->course_code }}</td>
                         </tr>
                         <tr>
-                            <td>2. Course Title</td>
+                            <td>Course Title</td>
                             <td>{{ $syllabus->course->course_title ?? '' }}</td>
                         </tr>
                         <tr>
-                            <td>3. Course Description</td>
+                            <td>Course Description</td>
                             <td>{{ $syllabus->course->course_description ?? '' }}</td>
                         </tr>
                         <tr>
-                            <td>4. Prerequisite</td>
+                            <td>Prerequisite</td>
                             <td>{{ $syllabus->course->prerequisite ?? 'None' }}</td>
                         </tr>
                         <tr>
-                            <td>5. Co-requisite</td>
+                            <td>Co-requisite</td>
                             <td>{{ $syllabus->course->corequisite ?? 'None' }}</td>
                         </tr>
                         <tr>
-                            <td>6. Credit Units</td>
+                            <td>Credit Units</td>
                             <td>{{ $syllabus->course->credit_units }}</td>
                         </tr>
                         <tr>
-                            <td>7. Class Hours</td>
+                            <td>Class Hours</td>
                             <td>{!! $lecLabValue($lecComponent?->class_hours, $labComponent?->class_hours) !!}</td>
                         </tr>
                         <tr>
-                            <td>8. Class Schedule</td>
+                            <td>Class Schedule</td>
                             <td>{!! $lecLabValue($lecComponent?->schedule, $labComponent?->schedule) !!}</td>
                         </tr>
                         <tr>
-                            <td>9. Name of Instructor</td>
+                            <td>Name of Instructor</td>
                             <td>{!! $lecLabValue($lecComponent?->instructor_name, $labComponent?->instructor_name) !!}</td>
                         </tr>
                         <tr>
-                            <td>10. Office</td>
+                            <td>Office</td>
                             <td>{!! $lecLabValue($lecComponent?->office, $labComponent?->office) !!}</td>
                         </tr>
                         <tr>
-                            <td>11. Email Address</td>
+                            <td>Email Address</td>
                             <td>{!! $lecLabValue($lecComponent?->instructor_email, $labComponent?->instructor_email) !!}</td>
                         </tr>
                         <tr>
-                            <td>12. Consultation Hours</td>
+                            <td>Consultation Hours</td>
                             <td>{!! $lecLabValue($lecComponent?->consultation_hours, $labComponent?->consultation_hours) !!}</td>
                         </tr>
                     </tbody>
