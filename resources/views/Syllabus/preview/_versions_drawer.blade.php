@@ -51,8 +51,10 @@
         top: 0;
         right: 0;
         height: 100vh;
-        width: 360px;
-        max-width: calc(100vw - 28px);
+        width: 450px; 
+        /* 360px */
+        max-width: calc(100vw - 38px);
+        /* max-width: calc(100vw - 28px); */
         z-index: 100000;
         background: #ffffff;
         transform: translateX(110%);
@@ -192,8 +194,24 @@
 
     .vd-actions {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr 1fr 1fr;
         gap: 8px;
+    }
+
+    .vd-action-group {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+    }
+
+    .vd-action-group a {
+        flex: 1;
+        font-weight: 800;
+        justify-content: center;
+    }
+
+    .vd-action-group a.vd-download {
+        flex: 0 0 auto;
     }
 
     .vd-actions a {
@@ -202,7 +220,6 @@
     }
 
     .vd-actions a.vd-download {
-        grid-column: 1 / -1;
         background: linear-gradient(135deg, #0e7490 0%, #0b556b 100%);
         color: #fff;
         border-color: transparent;
@@ -258,12 +275,16 @@
                 href="{{ route('syllabus.preview.abridged', $syllabus) }}">
                 Live – Abridged
             </a>
+            <a class="vd-link {{ $previewMode === 'live' && $previewVariant === 'assessment' ? 'is-active' : '' }}"
+                href="{{ route('syllabus.preview.assessment', $syllabus) }}">
+                Live – Assessment Plan
+            </a>
         </div>
 
         <div class="vd-section-title">Saved Versions</div>
         @forelse ($savedVersions as $v)
             @php
-                $isActive = $isSaved && (int) $activeSavedVersion->id === (int) $v->id && $previewVariant !== 'assessment';
+                $isActive = $isSaved && (int) $activeSavedVersion->id === (int) $v->id;
             @endphp
             <div class="vd-version {{ $isActive ? 'is-active' : '' }}">
                 <div class="vd-version-top">
@@ -271,9 +292,18 @@
                     <div class="vd-date">{{ $v->created_at?->format('M d, Y g:i A') }}</div>
                 </div>
                 <div class="vd-actions">
-                    <a href="{{ route('syllabus.saved.complete.preview', $v) }}">Complete</a>
-                    <a href="{{ route('syllabus.saved.abridged.preview', $v) }}">Abridged</a>
-                    <a class="vd-download" href="{{ route('syllabus.saved.complete.download', $v) }}">Download HTML</a>
+                    <div class="vd-action-group">
+                        <a href="{{ route('syllabus.saved.complete.preview', $v) }}">Complete</a>
+                        <a class="vd-download" href="{{ route('syllabus.saved.complete.download', $v) }}">↓</a>
+                    </div>
+                    <div class="vd-action-group">
+                        <a href="{{ route('syllabus.saved.abridged.preview', $v) }}">Abridged</a>
+                        <a class="vd-download" href="{{ route('syllabus.saved.abridged.download', $v) }}">↓</a>
+                    </div>
+                    <div class="vd-action-group">
+                        <a href="{{ route('syllabus.saved.assessment.preview', $v) }}">Assessment</a>
+                        <a class="vd-download" href="{{ route('syllabus.preview.assessment.download', $syllabus) }}">↓</a>
+                    </div>
                 </div>
             </div>
         @empty

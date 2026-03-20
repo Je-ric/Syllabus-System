@@ -153,7 +153,7 @@ class SyllabusController extends Controller
     public function show(Syllabus $syllabus)
     {
         $this->authorizeSyllabusAccess($syllabus);
-        return redirect()->route('syllabus.preview', ['syllabus' => $syllabus->id]);
+        return redirect()->route('syllabus.preview.complete', ['syllabus' => $syllabus->id]);
     }
 
     // ── Previews ──────────────────────────────────────────────────────────────
@@ -197,6 +197,42 @@ class SyllabusController extends Controller
         ));
     }
 
+    public function downloadComplete(Syllabus $syllabus)
+    {
+        $this->authorizeSyllabusAccess($syllabus);
+        $html     = $this->generateCompleteHtmlSnapshot($syllabus);
+        $filename = 'syllabus-complete-' . $syllabus->course->course_code . '.html';
+
+        return response($html, 200, [
+            'Content-Type'        => 'text/html; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
+    public function downloadAbridged(Syllabus $syllabus)
+    {
+        $this->authorizeSyllabusAccess($syllabus);
+        $html     = $this->generateAbridgedHtmlSnapshot($syllabus);
+        $filename = 'syllabus-abridged-' . $syllabus->course->course_code . '.html';
+
+        return response($html, 200, [
+            'Content-Type'        => 'text/html; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
+    public function downloadAssessment(Syllabus $syllabus)
+    {
+        $this->authorizeSyllabusAccess($syllabus);
+        $html     = $this->generateAssessmentHtmlSnapshot($syllabus);
+        $filename = 'assessment-plan-' . $syllabus->course->course_code . '.html';
+
+        return response($html, 200, [
+            'Content-Type'        => 'text/html; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
     // ── Snapshot / PDF generation ─────────────────────────────────────────────
 
     public function generateCompleteHtmlSnapshot(Syllabus $syllabus): string
@@ -213,6 +249,22 @@ class SyllabusController extends Controller
             : null;
 
         return view('Syllabus.preview.complete', $data)->render();
+    }
+
+    public function generateAssessmentHtmlSnapshot(Syllabus $syllabus): string
+    {
+        $this->authorizeSyllabusAccess($syllabus);
+
+        $data = $this->previewService->buildCompleteData($syllabus);
+        $data['isSnapshot']       = true;
+        $data['inlinePreviewCss'] = @file_get_contents(resource_path('css/preview.css')) ?: null;
+
+        $logoPath = public_path('assets/clsu-logo-green.png');
+        $data['inlineLogoDataUri'] = is_file($logoPath)
+            ? ('data:image/png;base64,' . base64_encode((string) file_get_contents($logoPath)))
+            : null;
+
+        return view('Syllabus.preview.assessment', $data)->render();
     }
 
     public function generateAbridgedHtmlSnapshot(Syllabus $syllabus): string
@@ -237,6 +289,53 @@ class SyllabusController extends Controller
     }
 
     // ── Saved versions ────────────────────────────────────────────────────────
+
+    public function previewSavedAssessment(CompleteSyllabus $completeSyllabus)
+    {
+        $syllabus = $completeSyllabus->syllabus()->firstOrFail();
+        $this->authorizeSyllabusAccess($syllabus);
+
+        $path = trim((string) ($completeSyllabus->evaluation_path ?? ''));
+
+        if ($path === '') {
+            return $this->previewAssessment($syllabus);
+        }
+
+        if (preg_match('#^https?://#i', $path) || str_starts_with($path, '/')) {
+            return redirect()->away($path);
+        }
+
+        if (! Storage::disk('local')->exists($path)) {
+            abort(404, 'Assessment saved version file not found.');
+        }
+
+        $html = Storage::disk('local')->get($path);
+        $html = $this->injectVersionsDrawerIntoHtml($syllabus, $completeSyllabus, 'assessment', $html);
+
+        return response($html, 200, [
+            'Content-Type' => 'text/html; charset=UTF-8',
+        ]);
+    }
+
+    public function downloadSavedAssessment(CompleteSyllabus $completeSyllabus)
+    {
+        $syllabus = $completeSyllabus->syllabus()->firstOrFail();
+        $this->authorizeSyllabusAccess($syllabus);
+
+        $path = trim((string) ($completeSyllabus->evaluation_path ?? ''));
+
+        if ($path === '' || preg_match('#^https?://#i', $path) || str_starts_with($path, '/')) {
+            abort(400, 'This assessment version is not stored locally.');
+        }
+
+        if (! Storage::disk('local')->exists($path)) {
+            abort(404, 'Assessment saved version file not found.');
+        }
+
+        return Storage::disk('local')->download($path, basename($path), [
+            'Content-Type' => 'text/html; charset=UTF-8',
+        ]);
+    }
 
     public function previewSavedComplete(CompleteSyllabus $completeSyllabus)
     {

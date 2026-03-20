@@ -137,13 +137,24 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/syllabus/form/{courseId}', [SyllabusController::class, 'showForm'])->name('syllabus.form');
         Route::post('/syllabus', [SyllabusController::class, 'store'])->name('syllabus.store');
         Route::get('/syllabus/{syllabus}', [SyllabusController::class, 'show'])->name('syllabus.show');
+
+        // Preview live syllabus
         Route::get('/syllabus/{syllabus}/preview/complete', [SyllabusController::class, 'previewComplete'])->name('syllabus.preview.complete');
         Route::get('/syllabus/{syllabus}/preview/abridged', [SyllabusController::class, 'previewAbridged'])->name('syllabus.preview.abridged');
         Route::get('/syllabus/{syllabus}/preview/assessment-plan', [SyllabusController::class, 'previewAssessment'])->name('syllabus.preview.assessment');
+
         Route::get('/syllabus/saved/{completeSyllabus}/preview', [SyllabusController::class, 'previewSavedComplete'])->name('syllabus.saved.complete.preview');
-        Route::get('/syllabus/saved/{completeSyllabus}/download', [SyllabusController::class, 'downloadSavedComplete'])->name('syllabus.saved.complete.download');
         Route::get('/syllabus/saved/{completeSyllabus}/abridged/preview', [SyllabusController::class, 'previewSavedAbridged'])->name('syllabus.saved.abridged.preview');
+        Route::get('/syllabus/saved/{completeSyllabus}/assessment/preview', [SyllabusController::class, 'previewSavedAssessment'])->name('syllabus.saved.assessment.preview');;
+
+        Route::get('/syllabus/{syllabus}/preview/complete/download', [SyllabusController::class, 'downloadComplete'])->name('syllabus.preview.complete.download');
+        Route::get('/syllabus/{syllabus}/preview/abridged/download', [SyllabusController::class, 'downloadAbridged'])->name('syllabus.preview.abridged.download');
+        Route::get('/syllabus/{syllabus}/preview/assessment-plan/download', [SyllabusController::class, 'downloadAssessment'])->name('syllabus.preview.assessment.download');
+        
+        Route::get('/syllabus/saved/{completeSyllabus}/download', [SyllabusController::class, 'downloadSavedComplete'])->name('syllabus.saved.complete.download');
         Route::get('/syllabus/saved/{completeSyllabus}/abridged/download', [SyllabusController::class, 'downloadSavedAbridged'])->name('syllabus.saved.abridged.download');
+        Route::get('/syllabus/saved/{completeSyllabus}/assessment/download', [SyllabusController::class, 'downloadSavedAssessment'])->name('syllabus.saved.assessment.download');
+
         Route::get('/syllabus/{syllabus}/edit', [SyllabusController::class, 'edit'])->name('syllabus.edit');
         Route::put('/syllabus/{syllabus}', [SyllabusController::class, 'update'])->name('syllabus.update');
         Route::delete('/syllabus/{syllabus}', [SyllabusController::class, 'destroy'])->name('syllabus.destroy');

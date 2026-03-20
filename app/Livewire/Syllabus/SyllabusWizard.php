@@ -245,10 +245,12 @@ class SyllabusWizard extends Component
             return;
         }
 
-        // 1. Generate HTML snapshots (complete + abridged) ────────────────
+        // 1. Generate HTML snapshots (complete + abridged + assessment) ──────
         try {
-            $html         = app(SyllabusController::class)->generateCompleteHtmlSnapshot($syllabus);
-            $htmlAbridged = app(SyllabusController::class)->generateAbridgedHtmlSnapshot($syllabus);
+            $controller   = app(SyllabusController::class);
+            $html         = $controller->generateCompleteHtmlSnapshot($syllabus);
+            $htmlAbridged = $controller->generateAbridgedHtmlSnapshot($syllabus);
+            $htmlAssessment = $controller->generateAssessmentHtmlSnapshot($syllabus);
         } catch (Throwable $e) {
             report($e);
             $this->dispatch('lw-toast', type: 'error', message: 'Save-as-done failed: ' . $e->getMessage());
@@ -273,8 +275,9 @@ class SyllabusWizard extends Component
 
         $baseSlug    = Str::slug($courseCode . '-' . $academicYear . '-' . $semester . '-v' . $version);
         $baseDir     = implode('/', ['syllabus-snapshots', $collegeName, $departmentName, $programName, $facultyName]);
-        $storagePath         = $baseDir . '/' . $baseSlug . '.html';
-        $storagePathAbridged = $baseDir . '/' . $baseSlug . '-abridged.html';
+        $storagePath           = $baseDir . '/' . $baseSlug . '.html';
+        $storagePathAbridged   = $baseDir . '/' . $baseSlug . '-abridged.html';
+        $storagePathAssessment = $baseDir . '/' . $baseSlug . '-assessment.html';
 
         // 3. Write both to local disk ─────────────────────────────────────
         try {
@@ -284,6 +287,7 @@ class SyllabusWizard extends Component
                 return;
             }
             Storage::disk('local')->put($storagePathAbridged, $htmlAbridged);
+            Storage::disk('local')->put($storagePathAssessment, $htmlAssessment);
         } catch (Throwable $e) {
             report($e);
             $this->dispatch('lw-toast', type: 'error', message: 'Disk write error: ' . $e->getMessage());
@@ -299,11 +303,13 @@ class SyllabusWizard extends Component
                 'semester'             => $semester,
                 'pdf_path'             => $storagePath,
                 'abridged_path'        => $storagePathAbridged,
+                'evaluation_path'      => $storagePathAssessment,
                 'version'              => $version,
                 'approved_at'          => null,
                 'approved_by'          => null,
                 'checksum'             => hash('sha256', $html),
                 'checksum_abridged'    => hash('sha256', $htmlAbridged),
+                'checksum_evaluation'  => hash('sha256', $htmlAssessment),
             ]);
         } catch (Throwable $e) {
             report($e);

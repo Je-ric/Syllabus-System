@@ -52,6 +52,20 @@
                         $abridgedDownloadUrl = ($hasAbridged && ! $abridgedIsExt)
                             ? route('syllabus.saved.abridged.download', $version)
                             : null;
+
+                        // ── Assessment ───────────────────────────────────
+                        $assessmentPath = (string) ($version->evaluation_path ?? '');
+                        $hasAssessment  = $assessmentPath !== '';
+                        $assessmentIsExt = $hasAssessment && (
+                            preg_match('#^https?://#i', $assessmentPath)
+                            || str_starts_with($assessmentPath, '/')
+                        );
+                        $assessmentPreviewUrl  = $hasAssessment
+                            ? ($assessmentIsExt ? $assessmentPath : route('syllabus.saved.assessment.preview', $version))
+                            : null;
+                        $assessmentDownloadUrl = ($hasAssessment && ! $assessmentIsExt)
+                            ? route('syllabus.saved.assessment.download', $version)
+                            : null;
                     @endphp
 
                     <div class="rounded-xl border border-emerald-200 bg-white/70 p-3">
@@ -70,8 +84,8 @@
                             </div>
                         </div>
 
-                        {{-- ── Two columns: Complete | Abridged ─────────── --}}
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {{-- ── Two columns: Complete | Abridged | Assessment ── --}}
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
 
                             {{-- Complete --}}
                             <div class="rounded-lg border border-slate-200 bg-slate-50/60 p-2.5">
@@ -125,7 +139,39 @@
                                         @endif
                                     </div>
                                 @else
-                                    {{-- Older versions saved before abridged snapshots were introduced --}}
+                                    <p class="text-xs text-slate-400 italic">
+                                        Not available for this version.
+                                        Save a new version to generate one.
+                                    </p>
+                                @endif
+                            </div>
+
+                            {{-- Assessment Plan --}}
+                            <div class="rounded-lg border border-slate-200 bg-slate-50/60 p-2.5">
+                                <p class="text-[10px] font-semibold uppercase tracking-widest
+                                          text-slate-500 mb-2">
+                                    Assessment Plan
+                                </p>
+                                @if ($hasAssessment)
+                                    <div class="flex flex-wrap gap-1.5">
+                                        <a href="{{ $assessmentPreviewUrl }}"
+                                           target="_blank" rel="noopener"
+                                           class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg
+                                                  bg-violet-600 text-white text-xs font-semibold
+                                                  hover:bg-violet-700 transition-colors">
+                                            <i class="bx bx-link-external text-sm"></i> Open
+                                        </a>
+                                        @if ($assessmentDownloadUrl)
+                                            <a href="{{ $assessmentDownloadUrl }}"
+                                               class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg
+                                                      bg-white text-violet-700 text-xs font-semibold
+                                                      ring-1 ring-violet-200
+                                                      hover:bg-violet-50 transition-colors">
+                                                <i class="bx bx-download text-sm"></i> Download
+                                            </a>
+                                        @endif
+                                    </div>
+                                @else
                                     <p class="text-xs text-slate-400 italic">
                                         Not available for this version.
                                         Save a new version to generate one.

@@ -67,6 +67,10 @@
                     onclick="window.location.href='{{ route('syllabus.preview.abridged', $syllabus) }}'">
                     Abridged
                 </button>
+                <button type="button"
+                    onclick="window.location.href='{{ route('syllabus.preview.assessment', $syllabus) }}'">
+                    Assessment Plan
+                </button>
                 <button type="button" onclick="openSyllabusVersions()">Versions</button>
                 <button type="button" onclick="window.print()">Print / Save PDF</button>
             </div>
