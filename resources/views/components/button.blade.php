@@ -85,6 +85,8 @@
         'sm-info'    => $wizardBtn . 'bg-blue-50 text-blue-700 border border-blue-300 hover:bg-blue-100',
         'sm-success' => $wizardBtn . 'bg-emerald-50 text-emerald-700 border border-emerald-300 hover:bg-emerald-100',
         'sm-soft'    => $wizardBtn . 'bg-lime-50 text-lime-700 border border-lime-300 hover:bg-lime-100',
+        // sm-add: wizard-sized solid emerald — use when add-button is beside sm-* buttons
+        'sm-add'     => $wizardBtn . 'bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-300/50',
     ];
 
     $class = $styles[strval($variant)] ?? $styles['primary'];
@@ -159,9 +161,11 @@ Form (larger, scales on click):
   primary    save    add-button    cancel    danger
   secondary  outline add-dashed
 
-Small / wizard:
+Small / wizard (use when beside other sm-* buttons for size consistency):
   sm-primary  sm-cancel  sm-danger
   sm-warning  sm-info    sm-success  sm-soft
+  sm-add      ← solid emerald, same size as sm-* — use instead of add-button
+              when the button is beside sm-warning / sm-cancel etc.
 
 USAGE
 ────────────────────────────────────────────────────────────────────
@@ -171,6 +175,14 @@ USAGE
 
 <x-button href="{{ route('users.create') }}" variant="add-button">
     <i class="bx bx-plus"></i> Add User
+</x-button>
+
+{{-- Beside sm-warning / sm-cancel: use sm-add for matching height --}}
+{{-- <x-button variant="sm-warning" wire:click="regenerate" loading="Regenerating…">
+    <i class="bx bx-refresh"></i> Regenerate
+</x-button>
+<x-button variant="sm-add" wire:click="saveAll" loading="Saving…">
+    <i class="bx bx-save"></i> Save All
 </x-button>
 
 <x-button variant="save"
@@ -183,9 +195,4 @@ USAGE
 <x-button variant="table-edit"
     onclick="document.getElementById('editModal').showModal()">
     <i class="bx bx-edit"></i> Edit
-</x-button>
-
-<x-button variant="table-danger" disabled title="Cannot delete">
-    <i class="bx bx-trash"></i>
-</x-button>
---}}
+</x-button> --}}

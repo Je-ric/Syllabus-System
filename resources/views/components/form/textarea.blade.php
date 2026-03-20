@@ -4,17 +4,19 @@
 ])
 
 {{--
-    ROOT CAUSE FIX: {{ $slot }} must appear between <textarea> tags.
-    HTML textarea has no `value` attribute — content must be inner text.
+    x-form.textarea
+    ─────────────────────────────────────────────────────────────────────
+    Unified with x-form.input / x-form.select.
+    Padding: px-3 py-2 — consistent with all form controls.
 
-    Callers set existing value via slot content:
-      <x-form.textarea name="goal_text">{{ $goal->goal_text }}</x-form.textarea>
+    Value via slot (for Blade/old()):
+      <x-form.textarea name="text">{{ old('text', $model->text) }}</x-form.textarea>
 
-    For old() fallback in create forms:
-      <x-form.textarea name="goal_text">{{ old('goal_text') }}</x-form.textarea>
+    Value via Alpine x-model (leave slot empty):
+      <x-form.textarea x-model="draft.text" rows="4" />
 
-    For Alpine x-model — leave slot empty, Alpine manages inner content:
-      <x-form.textarea x-model="peo.peo_text" />
+    Value via Livewire wire:model:
+      <x-form.textarea wire:model.defer="field" rows="3" />
 --}}
 <textarea
     rows="{{ $rows }}"
@@ -22,7 +24,7 @@
     {{ $attributes->merge([
         'class' => '
             w-full rounded-lg border border-slate-300 bg-white
-            px-2.5 py-1.5 text-sm text-slate-700 shadow-sm
+            px-3 py-2 text-sm text-slate-700 shadow-sm
             placeholder:text-slate-400
             hover:border-slate-400
             focus:border-emerald-400 focus:ring-1 focus:ring-emerald-300 focus:outline-none

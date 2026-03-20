@@ -10,7 +10,7 @@
             icon="calendar-x"
             title="No weeks generated yet"
             message="Select an academic calendar in the previous step, then click Generate Weeks.">
-            <x-button variant="add-button"
+            <x-button variant="sm-add"
                 wire:click="generateWeeklyCoverage"
                 :disabled="! $academic_calendar_id"
                 wireTarget="generateWeeklyCoverage"

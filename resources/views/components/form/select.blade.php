@@ -3,33 +3,41 @@
 ])
 
 {{--
-    x-form.select — unified with input/textarea
-    Custom chevron via bg-[url()] SVG so appearance-none works cross-browser
---}}
-<select
-    name="{{ $name }}"
-    {{ $attributes->merge([
-        'class' => '
-            w-full appearance-none rounded-lg border border-slate-300 bg-white
-            px-2.5 py-1.5 pr-10 text-sm text-slate-700 shadow-sm
-            hover:border-slate-400
-            focus:border-emerald-400 focus:ring-1 focus:ring-emerald-300 focus:outline-none
-            disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed disabled:border-slate-200
-            transition-colors duration-150
-            bg-[url(\'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2716%27 height=%2716%27 viewBox=%270 0 24 24%27%3E%3Cpath fill=%27%23475569%27 d=%27M7 10l5 5 5-5z%27/%3E%3C/svg%3E\')]
-            bg-no-repeat
-            bg-[right_0.75rem_center]
-            bg-[length:1rem_1rem]
-        '
-    ]) }}
->
-    {{ $slot }}
-</select>
+    x-form.select
+    ─────────────────────────────────────────────────────────────────────
+    Unified with x-form.input / x-form.textarea.
+    Padding: px-3 py-2 — matches input/textarea exactly so heights align
+    when placed side-by-side.
 
-{{--
-Usage:
-<x-form.select name="type" class="mt-2">
-    <option value="">Select…</option>
-    <option value="exam">Exam</option>
-</x-form.select>
+    The chevron arrow is a wrapper div approach (more reliable than
+    bg-[url()] SVG data URIs which break in some Tailwind JIT builds).
+
+    USAGE:
+      <x-form.select wire:model="type">
+          <option value="">Select…</option>
+          <option value="exam">Exam</option>
+      </x-form.select>
 --}}
+
+<div class="relative">
+    <select
+        name="{{ $name }}"
+        {{ $attributes->merge([
+            'class' => '
+                w-full appearance-none rounded-lg border border-slate-300 bg-white
+                px-3 py-2 pr-9 text-sm text-slate-700 shadow-sm
+                hover:border-slate-400
+                focus:border-emerald-400 focus:ring-1 focus:ring-emerald-300 focus:outline-none
+                disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed disabled:border-slate-200
+                transition-colors duration-150
+            '
+        ]) }}
+    >
+        {{ $slot }}
+    </select>
+
+    {{-- Chevron icon — pointer-events-none so clicks pass through to select --}}
+    <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400">
+        <i class="bx bx-chevron-down text-base leading-none"></i>
+    </span>
+</div>

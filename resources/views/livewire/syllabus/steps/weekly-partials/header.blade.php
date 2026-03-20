@@ -13,7 +13,7 @@
 
         <div class="flex items-center gap-2 flex-wrap">
             @if (!$weeksGenerated)
-                <x-button variant="add-button"
+                <x-button variant="sm-add"
                     wire:click="generateWeeklyCoverage"
                     :disabled="!$academic_calendar_id"
                     wireTarget="generateWeeklyCoverage"
@@ -29,7 +29,7 @@
                     <i class="bx bx-refresh"></i> Regenerate
                 </x-button>
 
-                <x-button variant="add-button"
+                <x-button variant="sm-add"
                     wire:click="saveAllWeeklyEntries"
                     wireTarget="saveAllWeeklyEntries"
                     loading="Saving…">

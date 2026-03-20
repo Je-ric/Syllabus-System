@@ -111,7 +111,7 @@
             <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">
                 <i class="bx bx-book-open text-slate-400"></i> References
             </p>
-            <x-button variant="add-button"
+            <x-button variant="sm-add"
                 wire:click="addReference({{ $week->week_no }})">
                 <i class="bx bx-plus text-sm"></i> Add
             </x-button>
@@ -147,7 +147,7 @@
             <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">
                 <i class="bx bx-link text-slate-400"></i> Online Materials
             </p>
-            <x-button variant="add-button"
+            <x-button variant="sm-add"
                 wire:click="addMaterial({{ $week->week_no }})">
                 <i class="bx bx-plus text-sm"></i> Add
             </x-button>
@@ -204,7 +204,7 @@
             <i class="bx bx-reset"></i> Reset
         </x-button>
 
-        <x-button variant="add-button"
+        <x-button variant="sm-add"
             wire:click="saveWeek({{ $week->week_no }})"
             wireTarget="saveWeek({{ $week->week_no }})"
             loading="Saving…">
