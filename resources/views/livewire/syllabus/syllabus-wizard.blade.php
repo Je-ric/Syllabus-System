@@ -45,7 +45,7 @@
 
         {{-- ══ Step nav tabs ════════════════════════════════════════════════════════ --}}
         <div class="mb-6 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-            <nav class="flex border-b border-slate-200" aria-label="Wizard Steps">
+            <nav class="flex overflow-x-auto border-b border-slate-200 scrollbar-none" aria-label="Wizard Steps">
                 @foreach($steps as $step => $label)
                     @php
                         $index       = array_search($step, $stepsOrder, true);
@@ -56,23 +56,27 @@
                         wire:click="clickTab('{{ $step }}')"
                         wire:loading.attr="disabled"
                         wire:target="clickTab,goPreviousStep,goNextStep,submitForReview,saveAsDone"
-                        class="flex-1 flex flex-col items-center gap-1 px-2 py-3.5 text-xs font-medium
-                                transition-all duration-150 focus:outline-none border-b-2
+                        class="flex-1 min-w-[80px] flex flex-col items-center gap-1 px-3 py-3.5 text-xs font-medium
+                                transition-all duration-150 focus:outline-none border-b-2 whitespace-nowrap
                                 {{ $isCurrent
                                     ? 'border-emerald-600 text-emerald-700 bg-emerald-50'
                                     : ($isCompleted
-                                        ? 'border-emerald-500 text-emerald-700 hover:bg-emerald-50'
-                                        : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50') }}
+                                        ? 'border-emerald-400 text-emerald-600 hover:bg-emerald-50'
+                                        : 'border-transparent text-slate-400 hover:text-slate-600 hover:bg-slate-50') }}
                                 disabled:opacity-50 disabled:cursor-not-allowed">
-                        <span class="w-7 h-7 rounded-full flex items-center justify-center font-semibold text-xs shrink-0
-                                    {{ $isCurrent ? 'bg-emerald-600 text-white' : ($isCompleted ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-600') }}">
+                        <span class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs shrink-0
+                                    {{ $isCurrent
+                                        ? 'bg-emerald-600 text-white shadow-sm'
+                                        : ($isCompleted
+                                            ? 'bg-emerald-500 text-white'
+                                            : 'bg-slate-100 text-slate-500 ring-1 ring-slate-200') }}">
                             @if($isCompleted)
                                 <i class="bx bx-check text-sm"></i>
                             @else
                                 {{ $index + 1 }}
                             @endif
                         </span>
-                        <span class="hidden sm:block text-center leading-tight">{{ $label }}</span>
+                        <span class="hidden md:block text-center leading-tight mt-0.5">{{ $label }}</span>
                     </button>
                 @endforeach
             </nav>
@@ -122,14 +126,15 @@
         </div>
 
         {{-- ══ Bottom navigation ════════════════════════════════════════════════════ --}}
-        <div class="mt-6 flex justify-between items-center">
+        <div class="mt-6 flex justify-between items-center gap-3">
             <div>
                 @if($this->hasPreviousStep())
                     <x-button variant="cancel"
                         wire:click="goPreviousStep"
                         wire:loading.attr="disabled"
                         wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview,saveAsDone">
-                        <i class="bx bx-chevron-left"></i> Previous
+                        <i class="bx bx-chevron-left"></i>
+                        <span class="hidden sm:inline">Previous</span>
                     </x-button>
                 @endif
             </div>
@@ -139,18 +144,10 @@
                     <x-button variant="primary"
                         wire:click="goNextStep"
                         wire:loading.attr="disabled"
-                        wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview,saveAsDone">
-                        Next <i class="bx bx-chevron-right"></i>
+                        wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview,saveAsDone"
+                        loading="Saving…">
+                        <span class="hidden sm:inline">Next</span> <i class="bx bx-chevron-right"></i>
                     </x-button>
-                @else
-                    {{-- <x-button
-                        variant="save"
-                        type="button"
-                        wire:click="submitForReview"
-                        wire:loading.attr="disabled"
-                        wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview,saveAsDone">
-                        <i class="bx bx-check-double"></i> Submit for Review
-                    </x-button> --}}
                 @endif
             </div>
         </div>

@@ -188,29 +188,13 @@
                                     <option value="{{ $user->id }}">{{ $user->name }}</option>
                                 @endforeach
                             </x-form.select>
-                            <button type="button"
+                            <x-button type="button" variant="add-button"
                                 wire:click="saveApproved"
                                 wire:loading.attr="disabled"
                                 wire:target="saveApproved"
-                                class="shrink-0 inline-flex items-center gap-1.5 px-3 py-2
-                                       rounded-xl bg-emerald-600 text-white text-xs font-semibold
-                                       hover:bg-emerald-700 disabled:opacity-60 transition-colors">
-                                <span wire:loading.remove wire:target="saveApproved"
-                                      class="inline-flex items-center gap-1.5">
-                                    <i class="bx bx-check leading-none"></i> Set
-                                </span>
-                                <span wire:loading wire:target="saveApproved"
-                                      class="inline-flex items-center gap-1.5">
-                                    <svg class="animate-spin h-3.5 w-3.5 shrink-0"
-                                         viewBox="0 0 24 24" fill="none">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10"
-                                                stroke="currentColor" stroke-width="4"/>
-                                        <path class="opacity-75" fill="currentColor"
-                                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                                    </svg>
-                                    Saving…
-                                </span>
-                            </button>
+                                loading="Saving…">
+                                <i class="bx bx-check"></i> Set
+                            </x-button>
                         </div>
                     </div>
 
@@ -273,29 +257,13 @@
                                     </option>
                                 @endforeach
                             </x-form.select>
-                            <button type="button"
+                            <x-button type="button" variant="add-button"
                                 wire:click="saveConcurred"
                                 wire:loading.attr="disabled"
                                 wire:target="saveConcurred"
-                                class="shrink-0 inline-flex items-center gap-1.5 px-3 py-2
-                                       rounded-xl bg-emerald-600 text-white text-xs font-semibold
-                                       hover:bg-emerald-700 disabled:opacity-60 transition-colors">
-                                <span wire:loading.remove wire:target="saveConcurred"
-                                      class="inline-flex items-center gap-1.5">
-                                    <i class="bx bx-check leading-none"></i> Set
-                                </span>
-                                <span wire:loading wire:target="saveConcurred"
-                                      class="inline-flex items-center gap-1.5">
-                                    <svg class="animate-spin h-3.5 w-3.5 shrink-0"
-                                         viewBox="0 0 24 24" fill="none">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10"
-                                                stroke="currentColor" stroke-width="4"/>
-                                        <path class="opacity-75" fill="currentColor"
-                                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                                    </svg>
-                                    Saving…
-                                </span>
-                            </button>
+                                loading="Saving…">
+                                <i class="bx bx-check"></i> Set
+                            </x-button>
                         </div>
                     </div>
 
@@ -331,30 +299,20 @@
                                     <option value="{{ $user->id }}">{{ $user->name }}</option>
                                 @endforeach
                             </x-form.select>
-                            <button type="button"
+                            <x-button type="button" variant="add-button"
                                 x-on:click="addReviewer()"
-                                x-bind:disabled="addingReviewer || !selectedFaculty"
-                                class="shrink-0 inline-flex items-center gap-1.5 px-3 py-2
-                                       rounded-xl bg-emerald-600 text-white text-xs font-semibold
-                                       hover:bg-emerald-700 disabled:opacity-60 transition-colors">
-                                <template x-if="!addingReviewer">
-                                    <span class="inline-flex items-center gap-1.5">
-                                        <i class="bx bx-plus leading-none"></i> Add
-                                    </span>
-                                </template>
-                                <template x-if="addingReviewer">
-                                    <span class="inline-flex items-center gap-1.5">
-                                        <svg class="animate-spin h-3.5 w-3.5 shrink-0"
-                                             viewBox="0 0 24 24" fill="none">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10"
-                                                    stroke="currentColor" stroke-width="4"/>
-                                            <path class="opacity-75" fill="currentColor"
-                                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                                        </svg>
-                                        Adding…
-                                    </span>
-                                </template>
-                            </button>
+                                x-bind:disabled="addingReviewer || !selectedFaculty">
+                                <span x-show="!addingReviewer" class="inline-flex items-center gap-1.5">
+                                    <i class="bx bx-plus"></i> Add
+                                </span>
+                                <span x-show="addingReviewer" x-cloak class="inline-flex items-center gap-1.5">
+                                    <svg class="animate-spin h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                    </svg>
+                                    Adding…
+                                </span>
+                            </x-button>
                         </div>
                         <p class="text-xs text-slate-400 leading-relaxed">
                             Each reviewer appears in the printed syllabus signature section.

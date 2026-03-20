@@ -120,27 +120,30 @@
 
         @if ($shouldHandleLoading)
             @if (filled($loading))
-                <span wire:loading.remove @if($spinnerTarget) wire:target="{{ $spinnerTarget }}" @endif class="inline-flex items-center gap-1.5">{{ $slot }}</span>
-                <span wire:loading @if($spinnerTarget) wire:target="{{ $spinnerTarget }}" @endif class="inline-flex items-center gap-1.5">
-                    <svg class="animate-spin h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
+                {{-- Named loading text: hide slot, show spinner + label --}}
+                <span wire:loading.remove @if($spinnerTarget) wire:target="{{ $spinnerTarget }}" @endif
+                      class="inline-flex items-center gap-1.5 leading-none">{{ $slot }}</span>
+                <span wire:loading @if($spinnerTarget) wire:target="{{ $spinnerTarget }}" @endif
+                      class="inline-flex items-center gap-1.5 leading-none">
+                    <svg class="animate-spin h-3.5 w-3.5 shrink-0 leading-none" viewBox="0 0 24 24" fill="none">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                        <path class="opacity-75" fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                     </svg>
-                    {{ $loading }}
+                    <span class="leading-none">{{ $loading }}</span>
                 </span>
             @else
-                <span class="inline-flex items-center gap-1.5">
-                    <span class="inline-flex items-center gap-1.5">{{ $slot }}</span>
-                    <svg wire:loading @if($spinnerTarget) wire:target="{{ $spinnerTarget }}" @endif class="animate-spin h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
+                {{-- Append-spinner: slot stays, spinner appears beside it --}}
+                <span class="inline-flex items-center gap-1.5 leading-none">
+                    <span class="inline-flex items-center gap-1.5 leading-none">{{ $slot }}</span>
+                    <svg wire:loading @if($spinnerTarget) wire:target="{{ $spinnerTarget }}" @endif
+                         class="animate-spin h-3.5 w-3.5 shrink-0 leading-none" viewBox="0 0 24 24" fill="none">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                        <path class="opacity-75" fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                     </svg>
                 </span>
             @endif
         @else
-            {{ $slot }}
+            <span class="inline-flex items-center gap-1.5 leading-none">{{ $slot }}</span>
         @endif
     </button>
 @endif

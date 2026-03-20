@@ -20,7 +20,7 @@
         title="Course Components"
         icon="notepad"
         description="Fill in instructor details and class delivery info.">
-        <x-button variant="sm-success"
+        <x-button variant="add-button"
             wire:click="save"
             wireTarget="save"
             loading="Saving…">

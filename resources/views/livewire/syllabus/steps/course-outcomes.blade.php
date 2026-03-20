@@ -190,47 +190,29 @@
                         <div class="flex items-center gap-2 justify-end">
 
                             {{-- Cancel --}}
-                            <button type="button"
+                            <x-button type="button"
+                                variant="cancel"
                                 x-on:click="cancelEdit()"
-                                x-bind:disabled="savingId === {{ $co['id'] }}"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs
-                                       font-semibold rounded-lg border border-slate-200
-                                       bg-white text-slate-600
-                                       hover:bg-slate-50 disabled:opacity-50
-                                       transition-colors">
-                                <i class="bx bx-x leading-none"></i> Cancel
-                            </button>
+                                x-bind:disabled="savingId === {{ $co['id'] }}">
+                                <i class="bx bx-x"></i> Cancel
+                            </x-button>
 
                             {{-- Save --}}
-                            <button type="button"
+                            <x-button type="button"
+                                variant="add-button"
                                 x-on:click="saveEdit({{ $co['id'] }})"
-                                x-bind:disabled="!editDraft.trim() || savingId === {{ $co['id'] }}"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs
-                                       font-semibold rounded-lg
-                                       bg-emerald-600 text-white
-                                       hover:bg-emerald-700
-                                       disabled:opacity-50 disabled:pointer-events-none
-                                       transition-colors">
-
-                                {{-- Not saving --}}
-                                <span x-show="savingId !== {{ $co['id'] }}"
-                                      class="inline-flex items-center gap-1.5">
-                                    <i class="bx bx-save leading-none"></i> Save
+                                x-bind:disabled="!editDraft.trim() || savingId === {{ $co['id'] }}">
+                                <span x-show="savingId !== {{ $co['id'] }}" class="inline-flex items-center gap-1.5">
+                                    <i class="bx bx-save"></i> Save
                                 </span>
-
-                                {{-- Saving spinner --}}
-                                <span x-show="savingId === {{ $co['id'] }}" x-cloak
-                                      class="inline-flex items-center gap-1.5">
-                                    <svg class="animate-spin h-3.5 w-3.5 shrink-0"
-                                         viewBox="0 0 24 24" fill="none">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10"
-                                                stroke="currentColor" stroke-width="4"/>
-                                        <path class="opacity-75" fill="currentColor"
-                                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                <span x-show="savingId === {{ $co['id'] }}" x-cloak class="inline-flex items-center gap-1.5">
+                                    <svg class="animate-spin h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                                     </svg>
                                     Saving…
                                 </span>
-                            </button>
+                            </x-button>
                         </div>
                     </div>
                 </div>
@@ -291,61 +273,40 @@
                             Press <kbd class="px-1 py-0.5 rounded border border-slate-200 bg-white text-[10px]">Esc</kbd> to cancel
                         </p>
                         <div class="flex items-center gap-2">
-                            <button type="button"
+                            <x-button type="button" variant="cancel"
                                 x-on:click="cancelAdd()"
-                                x-bind:disabled="savingId === 'new'"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs
-                                       font-semibold rounded-lg border border-slate-200
-                                       bg-white text-slate-600
-                                       hover:bg-slate-50 disabled:opacity-50
-                                       transition-colors">
-                                <i class="bx bx-x leading-none"></i> Cancel
-                            </button>
+                                x-bind:disabled="savingId === 'new'">
+                                <i class="bx bx-x"></i> Cancel
+                            </x-button>
 
-                            <button type="button"
+                            <x-button type="button" variant="add-button"
                                 x-on:click="saveNew()"
-                                x-bind:disabled="!newDraft.trim() || savingId === 'new'"
-                                class="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs
-                                       font-semibold rounded-lg
-                                       bg-emerald-600 text-white
-                                       hover:bg-emerald-700
-                                       disabled:opacity-50 disabled:pointer-events-none
-                                       transition-colors">
-                                <span x-show="savingId !== 'new'"
-                                      class="inline-flex items-center gap-1.5">
-                                    <i class="bx bx-save leading-none"></i> Save Outcome
+                                x-bind:disabled="!newDraft.trim() || savingId === 'new'">
+                                <span x-show="savingId !== 'new'" class="inline-flex items-center gap-1.5">
+                                    <i class="bx bx-save"></i> Save Outcome
                                 </span>
-                                <span x-show="savingId === 'new'" x-cloak
-                                      class="inline-flex items-center gap-1.5">
-                                    <svg class="animate-spin h-3.5 w-3.5 shrink-0"
-                                         viewBox="0 0 24 24" fill="none">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10"
-                                                stroke="currentColor" stroke-width="4"/>
-                                        <path class="opacity-75" fill="currentColor"
-                                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                <span x-show="savingId === 'new'" x-cloak class="inline-flex items-center gap-1.5">
+                                    <svg class="animate-spin h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                                     </svg>
                                     Saving…
                                 </span>
-                            </button>
+                            </x-button>
                         </div>
                     </div>
                 </div>
             </div>
 
             {{-- Add button (shown when addingNew = false) --}}
-            <button type="button"
+            <x-button type="button" variant="add-dashed"
                 x-show="!addingNew"
                 x-on:click="openAdd()"
                 x-bind:disabled="deletingId !== null || savingId !== null"
-                class="flex w-full items-center justify-center gap-2 px-4 py-3.5
-                       border-2 border-dashed border-emerald-300 rounded-2xl
-                       text-sm font-semibold text-emerald-700
-                       hover:border-emerald-500 hover:bg-emerald-50
-                       disabled:opacity-40 disabled:pointer-events-none
-                       transition-colors duration-150">
-                <i class="bx bx-plus text-lg leading-none"></i>
+                class="w-full">
+                <i class="bx bx-plus text-lg"></i>
                 Add Course Outcome
-            </button>
+            </x-button>
 
     </div>
 

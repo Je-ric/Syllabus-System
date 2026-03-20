@@ -11,7 +11,7 @@
                      The 60% passing standard applies to every assessment per semester.">
 
     @if (count($rows) > 0)
-        <x-button variant="sm-success"
+        <x-button variant="add-button"
             wire:click="save"
             wireTarget="save"
             loading="Saving…">

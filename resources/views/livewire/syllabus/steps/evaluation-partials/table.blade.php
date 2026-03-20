@@ -163,14 +163,14 @@
                                 {{-- Kind selector: disabled for exam and MVGO rows --}}
                                 <td class="px-4 py-3 align-middle">
                                     @if ($isExam || $isMvgo)
-                                        <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium
-                                                     {{ $isExam ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700' }}">
+                                        <x-feedback-status.status-indicator
+                                            :variant="$isExam ? 'amber' : 'emerald'">
                                             {{ $isExam ? 'Exam' : 'Activity' }}
-                                        </span>
+                                        </x-feedback-status.status-indicator>
                                     @else
                                         <select
                                             wire:model.live="inputs.{{ $lecId }}.kind"
-                                            class="text-xs rounded-lg border border-slate-300 bg-white
+                                            class="text-xs rounded-lg border border-slate-200 bg-white
                                                    px-2 py-1.5 focus:border-emerald-400 focus:ring-1
                                                    focus:ring-emerald-300 focus:outline-none">
                                             <option value="activity">Activity</option>
@@ -222,14 +222,14 @@
 
                                     <td class="px-4 py-3 align-middle">
                                         @if ($isExam || $isMvgo)
-                                            <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium
-                                                         {{ $isExam ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700' }}">
+                                            <x-feedback-status.status-indicator
+                                                :variant="$isExam ? 'amber' : 'emerald'">
                                                 {{ $isExam ? 'Exam' : 'Activity' }}
-                                            </span>
+                                            </x-feedback-status.status-indicator>
                                         @else
                                             <select
                                                 wire:model.live="inputs.{{ $labId }}.kind"
-                                                class="text-xs rounded-lg border border-slate-300 bg-white
+                                                class="text-xs rounded-lg border border-slate-200 bg-white
                                                        px-2 py-1.5 focus:border-blue-400 focus:ring-1
                                                        focus:ring-blue-300 focus:outline-none">
                                                 <option value="activity">Activity</option>
@@ -294,44 +294,50 @@
                     @endphp
 
                     <tr class="bg-slate-100 border-t-2 border-slate-300 font-semibold text-sm">
-                        <td class="px-4 py-3 text-slate-600 border-r border-slate-200 text-xs uppercase tracking-wide">
-                            Total
+                        <td class="px-4 py-3 border-r border-slate-200 align-middle">
+                            <x-feedback-status.status-indicator variant="slate">Total</x-feedback-status.status-indicator>
                         </td>
-                        {{-- LEC task column (empty) --}}
                         <td class="px-4 py-3"></td>
-                        {{-- LEC kind column (empty) --}}
-                        <td class="px-4 py-3 {{ $courseHasLab ? 'border-r border-slate-200' : '' }}">
-                            <span class="{{ $lecWarn ? 'text-rose-600' : ($lecOk ? 'text-emerald-700' : 'text-slate-500') }}">
-                                {{ $lecTotal }} / {{ $lecStdNum }}%
-                            </span>
-                            @if ($lecWarn)
-                                <span class="text-xs text-rose-500 block font-normal">
+                        <td class="px-4 py-3 {{ $courseHasLab ? 'border-r border-slate-200' : '' }} align-middle">
+                            @if ($lecOk)
+                                <x-feedback-status.status-indicator variant="emerald" icon="bx bx-check-circle">
+                                    {{ $lecTotal }} / {{ $lecStdNum }}%
+                                </x-feedback-status.status-indicator>
+                            @elseif ($lecWarn)
+                                <x-feedback-status.status-indicator variant="rose" icon="bx bx-error-circle">
+                                    {{ $lecTotal }} / {{ $lecStdNum }}%
+                                </x-feedback-status.status-indicator>
+                                <span class="text-[11px] text-rose-500 block font-normal mt-0.5">
                                     Need {{ $lecStdNum - $lecTotal }}% more
                                 </span>
-                            @elseif ($lecOk)
-                                <span class="text-xs text-emerald-600 block font-normal">✓ Complete</span>
+                            @else
+                                <span class="text-xs text-slate-400">{{ $lecTotal }} / {{ $lecStdNum }}%</span>
                             @endif
                         </td>
                         @if ($courseHasLab)
                             <td class="px-4 py-3"></td>
                             <td class="px-4 py-3"></td>
-                            <td class="px-4 py-3 border-r border-slate-200">
-                                <span class="{{ $labWarn ? 'text-rose-600' : ($labOk ? 'text-blue-700' : 'text-slate-500') }}">
-                                    {{ $labTotal }} / {{ $labStdNum }}%
-                                </span>
-                                @if ($labWarn)
-                                    <span class="text-xs text-rose-500 block font-normal">
+                            <td class="px-4 py-3 border-r border-slate-200 align-middle">
+                                @if ($labOk)
+                                    <x-feedback-status.status-indicator variant="blue" icon="bx bx-check-circle">
+                                        {{ $labTotal }} / {{ $labStdNum }}%
+                                    </x-feedback-status.status-indicator>
+                                @elseif ($labWarn)
+                                    <x-feedback-status.status-indicator variant="rose" icon="bx bx-error-circle">
+                                        {{ $labTotal }} / {{ $labStdNum }}%
+                                    </x-feedback-status.status-indicator>
+                                    <span class="text-[11px] text-rose-500 block font-normal mt-0.5">
                                         Need {{ $labStdNum - $labTotal }}% more
                                     </span>
-                                @elseif ($labOk)
-                                    <span class="text-xs text-blue-600 block font-normal">✓ Complete</span>
+                                @else
+                                    <span class="text-xs text-slate-400">{{ $labTotal }} / {{ $labStdNum }}%</span>
                                 @endif
                             </td>
                         @endif
-                        <td class="px-4 py-3 text-center">
-                            <span class="text-xs text-slate-500 font-normal">
+                        <td class="px-4 py-3 text-center align-middle">
+                            <x-feedback-status.status-indicator variant="slate">
                                 Min: {{ $lecPassingMark ?? 60 }}%
-                            </span>
+                            </x-feedback-status.status-indicator>
                         </td>
                     </tr>
 

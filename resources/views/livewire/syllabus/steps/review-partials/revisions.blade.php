@@ -223,37 +223,27 @@
                             it causes double-rendering and the text disappearing bug.
                             Use x-show on plain <span>s instead.
                         --}}
-                        <button type="button"
+                        <x-button type="button" variant="add-button"
                             x-on:click="submit()"
                             x-bind:disabled="saving"
                             x-bind:class="editingId
-                                ? 'bg-amber-500 hover:bg-amber-600'
-                                : 'bg-emerald-600 hover:bg-emerald-700'"
-                            class="w-full inline-flex items-center justify-center gap-2
-                                   px-4 py-2.5 rounded-xl text-sm font-semibold text-white
-                                   transition-colors disabled:opacity-60
-                                   disabled:pointer-events-none">
-
+                                ? '!bg-amber-500 hover:!bg-amber-600'
+                                : ''">
                             {{-- Not saving: icon + label --}}
                             <span x-show="!saving" class="inline-flex items-center gap-2">
                                 <i x-show="editingId"  class="bx bx-save leading-none"></i>
                                 <i x-show="!editingId" class="bx bx-plus leading-none"></i>
                                 <span x-text="editingId ? 'Update Revision' : 'Add Revision'"></span>
                             </span>
-
                             {{-- Saving: spinner + label --}}
-                            <span x-show="saving" x-cloak
-                                  class="inline-flex items-center gap-2">
-                                <svg class="animate-spin h-4 w-4 shrink-0"
-                                     viewBox="0 0 24 24" fill="none">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10"
-                                            stroke="currentColor" stroke-width="4"/>
-                                    <path class="opacity-75" fill="currentColor"
-                                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                            <span x-show="saving" x-cloak class="inline-flex items-center gap-2">
+                                <svg class="animate-spin h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                                 </svg>
                                 Saving…
                             </span>
-                        </button>
+                        </x-button>
                     </div>
                 </div>
 
