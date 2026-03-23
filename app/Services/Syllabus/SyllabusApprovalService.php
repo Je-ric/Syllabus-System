@@ -2,6 +2,7 @@
 
 namespace App\Services\Syllabus;
 
+use App\Models\AuditLog;
 use App\Models\Syllabus;
 use Illuminate\Validation\ValidationException;
 
@@ -19,11 +20,27 @@ class SyllabusApprovalService
     public function setApprovedBy(Syllabus $syllabus, ?int $userId): void
     {
         $syllabus->update(['approved_by' => $userId ?: null]);
+
+        AuditLog::record(
+            action: $userId ? 'approved_by_set' : 'approved_by_cleared',
+            module: 'Syllabus',
+            referenceId: $syllabus->id,
+            description: $userId
+                ? "Set approved-by to user #{$userId} on syllabus #{$syllabus->id}."
+                : "Cleared approved-by on syllabus #{$syllabus->id}."
+        );
     }
 
     public function clearApprovedBy(Syllabus $syllabus): void
     {
         $syllabus->update(['approved_by' => null]);
+
+        AuditLog::record(
+            action: 'approved_by_cleared',
+            module: 'Syllabus',
+            referenceId: $syllabus->id,
+            description: "Cleared approved-by on syllabus #{$syllabus->id}."
+        );
     }
 
     // ── Concurred By ─────────────────────────────────────────────────────────
@@ -42,10 +59,26 @@ class SyllabusApprovalService
         }
 
         $syllabus->update(['concurred_by' => $userId ?: null]);
+
+        AuditLog::record(
+            action: $userId ? 'concurred_by_set' : 'concurred_by_cleared',
+            module: 'Syllabus',
+            referenceId: $syllabus->id,
+            description: $userId
+                ? "Set concurred-by to user #{$userId} on syllabus #{$syllabus->id}."
+                : "Cleared concurred-by on syllabus #{$syllabus->id}."
+        );
     }
 
     public function clearConcurredBy(Syllabus $syllabus): void
     {
         $syllabus->update(['concurred_by' => null]);
+
+        AuditLog::record(
+            action: 'concurred_by_cleared',
+            module: 'Syllabus',
+            referenceId: $syllabus->id,
+            description: "Cleared concurred-by on syllabus #{$syllabus->id}."
+        );
     }
 }

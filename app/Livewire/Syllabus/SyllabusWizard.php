@@ -3,6 +3,7 @@
 namespace App\Livewire\Syllabus;
 
 use App\Http\Controllers\SyllabusController;
+use App\Models\AuditLog;
 use App\Models\CompleteSyllabus;
 use App\Models\CourseComponent;
 use App\Models\CourseOutcome;
@@ -330,6 +331,13 @@ class SyllabusWizard extends Component
 
         $this->syllabus->refresh();
 
+        AuditLog::record(
+            action: 'saved_version',
+            module: 'Syllabus',
+            referenceId: $syllabus->id,
+            description: "Saved syllabus version v{$version} for course {$courseCode} ({$academicYear} {$semester})."
+        );
+
         $this->dispatch('lw-toast', type: 'success', message: "Syllabus version frozen (v{$version}).");
         $this->dispatch('wizard-save-done');
         $this->dispatch('syllabus-step-changed', step: 'review');
@@ -354,6 +362,13 @@ class SyllabusWizard extends Component
         }
 
         $this->syllabus->update(['status' => 'under_review', 'current_step' => 'review']);
+
+        AuditLog::record(
+            action: 'submitted',
+            module: 'Syllabus',
+            referenceId: $this->syllabus->id,
+            description: "Submitted syllabus #{$this->syllabus->id} for review."
+        );
 
         return redirect()->route('syllabus.show', $this->syllabus->id)
             ->with('toast', ['message' => 'Syllabus submitted for review successfully.', 'type' => 'success']);

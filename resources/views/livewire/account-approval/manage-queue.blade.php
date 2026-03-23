@@ -31,7 +31,7 @@
         <p class="text-xs text-slate-500">
             <span class="font-semibold text-slate-700">{{ $users->total() }}</span> user{{ $users->total() !== 1 ? 's' : '' }} found
         </p>
-        <x-form.select wire:model.live="sort" class="w-auto min-w-[12rem]">
+        <x-form.select wire:model.live="sort" class="w-auto min-w-48">
             <option value="newest">Newest First</option>
             <option value="oldest">Oldest First</option>
             <option value="name_asc">Name A–Z</option>

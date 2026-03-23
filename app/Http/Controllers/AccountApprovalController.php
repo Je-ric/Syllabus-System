@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\AuditLog;
 use App\Services\AccountApprovalService;
 use Illuminate\Support\Facades\Auth;
 
@@ -150,6 +151,13 @@ class AccountApprovalController extends Controller
 
         $user = \App\Models\User::findOrFail($request->input('user_id'));
         $user->update($request->only('name', 'email', 'phone_number', 'office'));
+
+        AuditLog::record(
+            action: 'updated',
+            module: 'Account Approval',
+            referenceId: $user->id,
+            description: "Admin edited user {$user->name} ({$user->email})."
+        );
 
         return redirect()->route('accounts.approval')
             ->with('toast', ['message' => "User {$user->name} updated successfully.", 'type' => 'success']);

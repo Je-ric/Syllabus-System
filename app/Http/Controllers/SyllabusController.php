@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditLog;
 use App\Models\CompleteSyllabus;
 use App\Models\Program;
 use App\Models\Syllabus;
@@ -118,6 +119,13 @@ class SyllabusController extends Controller
             'prepared_by'          => Auth::id(),
         ]);
 
+        AuditLog::record(
+            action: 'created',
+            module: 'Syllabus',
+            referenceId: $syllabus->id,
+            description: "Created syllabus for course #{$syllabus->course_id}."
+        );
+
         return redirect()->route('syllabus.edit', $syllabus->id)
             ->with('toast', [
                 'message' => 'Syllabus created successfully.',
@@ -138,6 +146,8 @@ class SyllabusController extends Controller
                     'type'    => 'error',
                 ]);
         }
+
+        $courseCode = $syllabus->course?->course_code ?? "#{$syllabus->course_id}";
 
         DB::transaction(function () use ($syllabus) {
             // #16 — delete CompleteSyllabus snapshots + disk files
@@ -168,6 +178,13 @@ class SyllabusController extends Controller
             $syllabus->reviewers()->delete();
             $syllabus->delete();
         });
+
+        AuditLog::record(
+            action: 'deleted',
+            module: 'Syllabus',
+            referenceId: $syllabus->id,
+            description: "Deleted draft syllabus for course {$courseCode}."
+        );
 
         return redirect()->route('syllabus.index')
             ->with('toast', ['message' => 'Syllabus deleted successfully.', 'type' => 'success']);

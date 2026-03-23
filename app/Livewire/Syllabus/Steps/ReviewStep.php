@@ -3,6 +3,7 @@
 namespace App\Livewire\Syllabus\Steps;
 
 use App\Models\AcademicCalendar;
+use App\Models\AuditLog;
 use App\Models\CompleteSyllabus;
 use App\Models\Syllabus;
 use App\Models\SyllabusRevision;
@@ -194,6 +195,13 @@ class ReviewStep extends Component
         $this->syllabus->load('revisions');
         $this->loadRevisions();
 
+        AuditLog::record(
+            action: $isEdit ? 'updated' : 'created',
+            module: 'Syllabus Revision',
+            referenceId: $this->syllabus->id,
+            description: ($isEdit ? 'Updated' : 'Added') . " revision #{$revisionNo} on syllabus #{$this->syllabus->id}."
+        );
+
         // 'revision-saved' tells Alpine to reset the form.
         $this->dispatch('revision-saved');
         $this->dispatch('lw-toast', type: 'success',
@@ -244,6 +252,14 @@ class ReviewStep extends Component
 
         $this->syllabus->load('revisions');
         $this->loadRevisions();
+
+        AuditLog::record(
+            action: 'deleted',
+            module: 'Syllabus Revision',
+            referenceId: $this->syllabus->id,
+            description: "Removed revision #{$revisionId} from syllabus #{$this->syllabus->id}."
+        );
+
         $this->dispatch('revision-deleted', id: $revisionId);
         $this->dispatch('lw-toast', type: 'success', message: 'Revision removed.');
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditLog;
 use App\Models\User;
 use App\Services\OtpService;
 use Illuminate\Http\Request;
@@ -52,6 +53,13 @@ class AuthController extends Controller
             'office'         => $request->office,
         ]);
 
+        AuditLog::record(
+            action: 'registered',
+            module: 'Authentication',
+            referenceId: $user->id,
+            description: "New user registered: {$user->name} ({$user->email})."
+        );
+
         $this->otpService->issueForUser($user, OtpService::PURPOSE_EMAIL_VERIFICATION);
 
         // Store email in session for OTP verification form
@@ -74,6 +82,13 @@ class AuthController extends Controller
 
             /** @var \App\Models\User $user */
             $user = Auth::user();
+
+            AuditLog::record(
+                action: 'login',
+                module: 'Authentication',
+                referenceId: $user->id,
+                description: "User {$user->name} ({$user->email}) logged in."
+            );
 
             if (!$user->email_verified_at) {
                 Auth::logout();
@@ -123,6 +138,17 @@ class AuthController extends Controller
     // Logout
     public function logout(Request $request)
     {
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        if ($user) {
+            AuditLog::record(
+                action: 'logout',
+                module: 'Authentication',
+                referenceId: $user->id,
+                description: "User {$user->name} ({$user->email}) logged out."
+            );
+        }
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
