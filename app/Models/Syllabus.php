@@ -97,6 +97,13 @@ class Syllabus extends Model
         return $this->hasMany(OnlineMaterial::class);
     }
 
+    // CompleteSyllabus snapshots (saved PDF/HTML versions)
+    // Used in: deleteCourse() - CourseService
+    public function completeSyllabi()
+    {
+        return $this->hasMany(CompleteSyllabus::class);
+    }
+
     // Helper: Get LEC component
     // Used in: loadExistingData() - SyllabusWizard
     public function getLecComponent()

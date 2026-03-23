@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AcademicCalendar;
 use App\Models\AuditLog;
+use App\Models\Syllabus;
 use Illuminate\Support\Facades\DB;
 
 class AcademicCalendarController extends Controller
@@ -56,6 +57,20 @@ class AcademicCalendarController extends Controller
 
     public function destroy(string $academic_year)
     {
+        // #4 — block if any syllabus is linked to this academic year's calendars
+        $calendarIds = AcademicCalendar::where('academic_year', $academic_year)
+            ->pluck('id');
+
+        $linkedSyllabi = Syllabus::whereIn('academic_calendar_id', $calendarIds)->count();
+
+        if ($linkedSyllabi > 0) {
+            return redirect()->route('academic.calendars.index')
+                ->with('toast', [
+                    'message' => "Cannot delete {$academic_year}: {$linkedSyllabi} syllabus/syllabi are linked to this academic year. Remove them first.",
+                    'type' => 'error',
+                ]);
+        }
+
         DB::beginTransaction();
 
         try {

@@ -125,6 +125,14 @@ class AccountApprovalService
                     ->delete();
             }
 
+            // #6 — faculty role is always kept (pushed above), but if it were ever
+            // removed (e.g. future role changes), clean up faculty assignments too.
+            if (in_array('faculty', $oldRoleNames) && !in_array('faculty', $newRoleNames)) {
+                UserAssignment::where('user_id', $user->id)
+                    ->where('context', 'faculty')
+                    ->delete();
+            }
+
             $user->roles()->sync($roleIds);
 
             AuditLog::record(

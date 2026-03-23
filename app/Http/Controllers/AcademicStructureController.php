@@ -9,6 +9,7 @@ use App\Models\College;
 use App\Models\Department;
 use App\Models\Program;
 use App\Models\AuditLog;
+use App\Models\Course;
 use Illuminate\Support\Facades\DB;
 
 class AcademicStructureController extends Controller
@@ -70,6 +71,49 @@ class AcademicStructureController extends Controller
         ]);
     }
 
+    public function destroyCollege(College $college)
+    {
+        // #1 — block if any course or syllabus exists under this college
+        $programIds = $college->departments()
+            ->with('programs')
+            ->get()
+            ->flatMap(fn($d) => $d->programs->pluck('id'));
+
+        $courseCount = Course::whereIn('program_id', $programIds)->count();
+        if ($courseCount > 0) {
+            return back()->with('toast', [
+                'message' => "Cannot delete \"{$college->name}\": {$courseCount} course(s) exist under its programs. Delete all courses first.",
+                'type' => 'error',
+            ]);
+        }
+
+        DB::beginTransaction();
+        try {
+            // Detach programs from departments, delete objectives, departments, goals, then college
+            foreach ($college->departments as $department) {
+                $department->programs()->detach();
+                $department->objectives()->delete();
+                $department->delete();
+            }
+            $college->goals()->delete();
+            $college->delete();
+
+            AuditLog::record(
+                action: 'deleted',
+                module: 'Academic Structure',
+                referenceId: $college->id,
+                description: "Deleted college {$college->name} and its departments."
+            );
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return back()->with('toast', ['message' => 'Failed to delete college. Please try again.', 'type' => 'error']);
+        }
+
+        return back()->with('toast', ['message' => 'College deleted successfully.', 'type' => 'success']);
+    }
+
     // =======================
     //  DEPARTMENT
     // =======================
@@ -118,6 +162,41 @@ class AcademicStructureController extends Controller
             'message' => 'Department updated successfully.',
             'type' => 'success'
         ]);
+    }
+
+    public function destroyDepartment(Department $department)
+    {
+        // #1 — block if any course exists under this department's programs
+        $programIds = $department->programs->pluck('id');
+        $courseCount = Course::whereIn('program_id', $programIds)->count();
+
+        if ($courseCount > 0) {
+            return back()->with('toast', [
+                'message' => "Cannot delete \"{$department->name}\": {$courseCount} course(s) exist under its programs. Delete all courses first.",
+                'type' => 'error',
+            ]);
+        }
+
+        DB::beginTransaction();
+        try {
+            $department->programs()->detach();
+            $department->objectives()->delete();
+            $department->delete();
+
+            AuditLog::record(
+                action: 'deleted',
+                module: 'Academic Structure',
+                referenceId: $department->id,
+                description: "Deleted department {$department->name}."
+            );
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return back()->with('toast', ['message' => 'Failed to delete department. Please try again.', 'type' => 'error']);
+        }
+
+        return back()->with('toast', ['message' => 'Department deleted successfully.', 'type' => 'success']);
     }
 
     // =======================
@@ -198,5 +277,43 @@ class AcademicStructureController extends Controller
             'message' => 'Program updated successfully.',
             'type' => 'success'
         ]);
+    }
+
+    public function destroyProgram(Program $program)
+    {
+        // #1 — block if any course exists under this program
+        $courseCount = $program->courses()->count();
+        if ($courseCount > 0) {
+            return back()->with('toast', [
+                'message' => "Cannot delete \"{$program->name}\": {$courseCount} course(s) are assigned to it. Delete all courses first.",
+                'type' => 'error',
+            ]);
+        }
+
+        DB::beginTransaction();
+        try {
+            // Detach PEO-PO mappings, then delete POs, PEOs, department pivot, program
+            foreach ($program->outcomes as $po) {
+                $po->peos()->detach();
+                $po->delete();
+            }
+            $program->peos()->delete();
+            $program->departments()->detach();
+            $program->delete();
+
+            AuditLog::record(
+                action: 'deleted',
+                module: 'Academic Structure',
+                referenceId: $program->id,
+                description: "Deleted program {$program->name} and its PEOs/POs."
+            );
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return back()->with('toast', ['message' => 'Failed to delete program. Please try again.', 'type' => 'error']);
+        }
+
+        return back()->with('toast', ['message' => 'Program deleted successfully.', 'type' => 'success']);
     }
 }

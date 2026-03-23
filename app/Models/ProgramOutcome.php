@@ -48,4 +48,12 @@ class ProgramOutcome extends Model
         ->withTimestamps();
     }
 
+    // POs are mapped to many Courses via course_curriculum_maps
+    // Used in: deletePo() - ProgramController
+    public function courses()
+    {
+        return $this->belongsToMany(Course::class, 'course_curriculum_maps')
+                    ->withPivot('ied');
+    }
+
 }

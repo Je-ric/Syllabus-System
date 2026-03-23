@@ -5,8 +5,10 @@ namespace App\Services;
 use App\Models\Course;
 use App\Models\Program;
 use App\Models\AuditLog;
+use App\Models\CompleteSyllabus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class CourseService
 {
@@ -113,14 +115,33 @@ class CourseService
     public function deleteCourse(Course $course): void
     {
         DB::transaction(function () use ($course) {
-            // Detach PO mappings (pivot table)
+            // Detach PO mappings (course_curriculum_maps pivot)
             $course->programOutcomes()->detach();
 
-            // Delete all syllabi and their children
             foreach ($course->syllabi as $syllabus) {
+                // #5 — delete CompleteSyllabus snapshots + their disk files
+                foreach ($syllabus->completeSyllabi as $snapshot) {
+                    foreach (['pdf_path', 'abridged_path', 'evaluation_path'] as $field) {
+                        $path = $snapshot->$field ?? '';
+                        if ($path !== '' && Storage::disk('local')->exists($path)) {
+                            Storage::disk('local')->delete($path);
+                        }
+                    }
+                    $snapshot->delete();
+                }
+
                 $syllabus->components()->delete();
                 $syllabus->courseOutcomes()->delete();
-                $syllabus->weeks()->delete();
+
+                // Delete week contents and their evaluation items before deleting weeks
+                foreach ($syllabus->weeks as $week) {
+                    $week->contents()->each(function ($content) {
+                        $content->evaluation()->delete();
+                        $content->delete();
+                    });
+                    $week->delete();
+                }
+
                 $syllabus->references()->delete();
                 $syllabus->onlineMaterials()->delete();
                 $syllabus->revisions()->delete();

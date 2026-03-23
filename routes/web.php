@@ -64,10 +64,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/academic-structure', [AcademicStructureController::class, 'index'])->name('academic.structure.index');
         Route::post('/academic-structure/college', [AcademicStructureController::class, 'storeCollege'])->name('college.store');
         Route::put('/academic-structure/college/{college}', [AcademicStructureController::class, 'updateCollege'])->name('college.update');
+        Route::delete('/academic-structure/college/{college}', [AcademicStructureController::class, 'destroyCollege'])->name('college.destroy');
         Route::post('/academic-structure/department', [AcademicStructureController::class, 'storeDepartment'])->name('department.store');
         Route::put('/academic-structure/department/{department}', [AcademicStructureController::class, 'updateDepartment'])->name('department.update');
+        Route::delete('/academic-structure/department/{department}', [AcademicStructureController::class, 'destroyDepartment'])->name('department.destroy');
         Route::post('/academic-structure/program', [AcademicStructureController::class, 'storeProgram'])->name('program.store');
         Route::put('/academic-structure/program/{program}', [AcademicStructureController::class, 'updateProgram'])->name('program.update');
+        Route::delete('/academic-structure/program/{program}', [AcademicStructureController::class, 'destroyProgram'])->name('program.destroy');
 
         Route::get('/academic-calendars', [AcademicCalendarController::class, 'index'])->name('academic.calendars.index');
         Route::get('/academic-calendars/create', [AcademicCalendarController::class, 'create'])->name('academic.calendars.create');
