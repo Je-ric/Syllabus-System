@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\AccountApprovalService;
+use Illuminate\Support\Facades\Auth;
 
 
 class AccountApprovalController extends Controller
@@ -137,6 +138,15 @@ class AccountApprovalController extends Controller
             'phone_number' => 'nullable|string|max:30',
             'office'       => 'nullable|string|max:255',
         ]);
+
+        // Only admins may edit other users' accounts (route is already admin-only,
+        // but guard explicitly so it can never be reached by non-admins even if
+        // middleware is misconfigured).
+        /** @var \App\Models\User $admin */
+        $admin = Auth::user();
+        if (! $admin->hasRole('admin')) {
+            abort(403);
+        }
 
         $user = \App\Models\User::findOrFail($request->input('user_id'));
         $user->update($request->only('name', 'email', 'phone_number', 'office'));

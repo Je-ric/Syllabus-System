@@ -41,10 +41,10 @@ class UserController extends Controller
         }
 
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'name'         => ['required', 'string', 'max:255'],
+            'email'        => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
             'phone_number' => ['nullable', 'string', 'max:30'],
-            'office' => ['nullable', 'string', 'max:255'],
+            'office'       => ['nullable', 'string', 'max:255'],
         ]);
 
         $user->update($validated);
