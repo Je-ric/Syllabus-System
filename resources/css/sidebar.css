@@ -1,38 +1,44 @@
+/* ─── Sidebar nav links ──────────────────────────────────────────────────── */
 aside a {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.5rem 0.75rem;
-    color: #374151;
+    gap: 0.65rem;
+    padding: 0.5rem 1rem;
+    color: white;
     text-decoration: none;
+    font-size: 0.8125rem;
     font-weight: 500;
-    border-right: 5px solid transparent;
-    transition: all 0.3s ease;
-    background: white;
+    border-left: 3px solid transparent;
+    border-radius: 0 0.5rem 0.5rem 0;
+    margin-left: 0.75rem;
+    transition: all 0.18s ease;
+    background: transparent;
+}
+
+aside a i {
+    font-size: 1.1rem;
+    opacity: 0.75;
+    transition: opacity 0.18s ease;
+    flex-shrink: 0;
 }
 
 aside a:hover {
-    color: var(--clsu-green);
-    border-right-color: var(--clsu-green);
-    transition: all 0.3s ease;
-    background: linear-gradient(
-        to left,
-        rgba(0, 150, 57, 0.25) 0%,
-        rgba(0, 150, 57, 0.12) 30%,
-        rgba(0, 150, 57, 0.05) 60%,
-        white 100%
-    );
+    color: #ffffff;
+    border-left-color: rgba(255, 215, 0, 0.5);
+    background: rgba(255, 255, 255, 0.07);
+}
+
+aside a:hover i {
+    opacity: 1;
 }
 
 aside a.active {
+    color: #ffd700;
     font-weight: 700;
-    color: var(--clsu-green);
-    border-right: 5px solid var(--clsu-green);
-    background: linear-gradient(
-        to left,
-        rgba(0, 150, 57, 0.25) 0%,
-        rgba(0, 150, 57, 0.12) 30%,
-        rgba(0, 150, 57, 0.05) 60%,
-        white 100%
-    );
+    border-left: 3px solid #ffd700;
+    background: rgba(255, 215, 0, 0.08);
+}
+
+aside a.active i {
+    opacity: 1;
 }
