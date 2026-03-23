@@ -21,16 +21,11 @@
             <span class="t-title">
                 {{ $syllabus->course->course_code }} – {{ $syllabus->course->course_title }}
             </span>
-        </div>
-
-        <div class="t-center">
-            <span class="t-center-label">Assessment Plan</span>
-            <p class="t-center-divider">–</p>
             <span class="t-pages" id="page-count"></span>
         </div>
 
         @if (empty($isSnapshot))
-            <div class="t-right">
+            <div class="t-center">
                 <button type="button"
                     onclick="window.location.href='{{ route('syllabus.preview.complete', $syllabus) }}'">
                     Complete
@@ -43,11 +38,18 @@
                     onclick="window.location.href='{{ route('syllabus.preview.assessment', $syllabus) }}'">
                     Assessment Plan
                 </button>
+            </div>
+
+            <div class="t-right">
                 <button type="button" onclick="openSyllabusVersions()">Versions</button>
-                <button type="button" onclick="window.print()">Print / Save PDF</button>
+                <button type="button"
+                    onclick="window.location.href='{{ route('syllabus.wizard', ['syllabusId' => $syllabus->id]) }}'">
+                    Edit
+                </button>
+                <button type="button" onclick="window.print()">Print</button>
             </div>
         @else
-            <button type="button" onclick="window.print()">Print / Save PDF</button>
+            <button type="button" onclick="window.print()">Print</button>
         @endif
     </div>
 
