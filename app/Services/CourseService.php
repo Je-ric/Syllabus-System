@@ -59,18 +59,30 @@ class CourseService
     {
         return DB::transaction(function () use ($course, $data, $poMapping) {
             $prerequisite = $this->normalizeRequisite($data['prerequisite'] ?? null);
-            $corequisite = $this->normalizeRequisite($data['corequisite'] ?? null);
+            $corequisite  = $this->normalizeRequisite($data['corequisite'] ?? null);
+
+            $newHasLecLab = (bool) ($data['has_lec_lab'] ?? false);
+
+            // Block has_lec_lab change if syllabi already exist — LAB components
+            // would become orphaned (Yes→No) or missing (No→Yes).
+            if ($course->has_lec_lab !== $newHasLecLab && $course->syllabi()->exists()) {
+                $direction = $newHasLecLab ? 'No → Yes' : 'Yes → No';
+                throw new \RuntimeException(
+                    "Cannot change \"Has Laboratory\" ({$direction}) because this course already has syllabi. " .
+                    "Delete all syllabi for this course first, then change this setting."
+                );
+            }
 
             $course->update([
-                'course_code' => $data['code'],
-                'course_title' => $data['name'],
+                'course_code'        => $data['code'],
+                'course_title'       => $data['name'],
                 'course_description' => $data['description'] ?? null,
-                'prerequisite' => $prerequisite,
-                'corequisite' => $corequisite,
-                'credit_units' => $data['credits'],
-                'year_level' => $data['year_level'] ?? null,
-                'semester' => $data['semester'] ?? null,
-                'has_lec_lab' => $data['has_lec_lab'] ?? false,
+                'prerequisite'       => $prerequisite,
+                'corequisite'        => $corequisite,
+                'credit_units'       => $data['credits'],
+                'year_level'         => $data['year_level'] ?? null,
+                'semester'           => $data['semester'] ?? null,
+                'has_lec_lab'        => $newHasLecLab,
             ]);
 
             // Sync PO mappings with IED levels
@@ -95,6 +107,33 @@ class CourseService
      * @param Course $course The course model
      * @return void
      */
+    /**
+     * Delete a course and all its related data
+     */
+    public function deleteCourse(Course $course): void
+    {
+        DB::transaction(function () use ($course) {
+            // Detach PO mappings (pivot table)
+            $course->programOutcomes()->detach();
+
+            // Delete all syllabi and their children
+            foreach ($course->syllabi as $syllabus) {
+                $syllabus->components()->delete();
+                $syllabus->courseOutcomes()->delete();
+                $syllabus->weeks()->delete();
+                $syllabus->references()->delete();
+                $syllabus->onlineMaterials()->delete();
+                $syllabus->revisions()->delete();
+                $syllabus->reviewers()->delete();
+                $syllabus->delete();
+            }
+
+            $this->logAction('deleted', $course);
+
+            $course->delete();
+        });
+    }
+
     protected function logAction(string $action, Course $course)
     {
         $program = Program::with('departments.college')->find($course->program_id);

@@ -168,6 +168,15 @@
                                                             title="View details">
                                                             <i class="bx bx-show"></i> View
                                                         </x-button>
+                                                        @if (auth()->user()->hasRole('admin'))
+                                                            <x-button
+                                                                type="button"
+                                                                variant="table-danger"
+                                                                onclick="document.getElementById('deleteCourseModal_{{ $course->id }}').showModal()"
+                                                                title="Delete course">
+                                                                <i class="bx bx-trash"></i> Delete
+                                                            </x-button>
+                                                        @endif
                                                     </div>
                                                 </td>
 
@@ -199,6 +208,9 @@
     {{-- Modals --}}
     @foreach ($modalCourses as $course)
         @include('Course.modals.viewCourseModal', ['course' => $course])
+        @if (auth()->user()->hasRole('admin'))
+            @include('Course.modals.deleteCourseModal', ['course' => $course])
+        @endif
     @endforeach
 
 @endsection

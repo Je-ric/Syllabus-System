@@ -6,6 +6,7 @@ use App\Models\Course;
 use App\Models\Program;
 use App\Services\CourseService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 
@@ -138,6 +139,10 @@ class CourseController extends Controller
                 $validatedData,
                 $request->input('po_mapping', [])
             );
+        } catch (\RuntimeException $e) {
+            return redirect()->back()->withErrors([
+                'has_lec_lab' => $e->getMessage(),
+            ])->withInput();
         } catch (\Throwable $e) {
             return redirect()->back()->withErrors([
                 'error' => 'An error occurred while updating the course. Please try again.',
@@ -152,21 +157,29 @@ class CourseController extends Controller
             ]);
     }
 
-    // public function destroy(Course $course)
-    // {
-    //     $programId = $course->program_id;
-    //     $user = Auth();
+    public function destroy(Course $course)
+    {
+        if (!Auth::user()->hasRole('admin')) {
+            abort(403);
+        }
 
-    //     $course->programOutcomes()->detach();
-    //     $course->delete();
+        $programId = $course->program_id;
 
-    //     return redirect()
-    //         ->route('courses.index', ['program_id' => $programId])
-    //         ->with('toast', [
-    //             'message' => 'Course deleted successfully.',
-    //             'type'    => 'success',
-    //         ]);
-    // }
+        try {
+            $this->courseService->deleteCourse($course);
+        } catch (\Throwable $e) {
+            return redirect()
+                ->route('courses.index', ['program_id' => $programId])
+                ->withErrors(['error' => 'Failed to delete the course. Please try again.']);
+        }
+
+        return redirect()
+            ->route('courses.index', ['program_id' => $programId])
+            ->with('toast', [
+                'message' => 'Course deleted successfully.',
+                'type'    => 'success',
+            ]);
+    }
 
     protected function courseRules(?Course $course = null): array
     {

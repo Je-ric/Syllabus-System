@@ -92,11 +92,28 @@
                         <x-form.label variant="title" isRequired>Has Laboratory</x-form.label>
                         @php
                             $labValue = old('has_lec_lab', isset($course) ? ($course->has_lec_lab ? '1' : '0') : '');
+                            $hasSyllabi = isset($course) && $course->syllabi()->exists();
                         @endphp
+                        @if ($hasSyllabi)
+                            <div class="mb-1.5 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+                                <i class="bx bx-lock text-amber-500 text-sm mt-0.5 shrink-0"></i>
+                                <p class="text-xs text-amber-700 leading-snug">Locked — this course has existing syllabi. Delete all syllabi first to change this.</p>
+                            </div>
+                        @endif
                         <x-form.radio
                             name="has_lec_lab"
                             :options="['1' => 'Yes', '0' => 'No']"
-                            :value="$labValue" />
+                            :value="$labValue"
+                            :disabled="$hasSyllabi ?? false" />
+                        {{-- Preserve value when locked (disabled inputs are not submitted) --}}
+                        @if ($hasSyllabi ?? false)
+                            <input type="hidden" name="has_lec_lab" value="{{ $labValue }}">
+                        @endif
+                        @error('has_lec_lab')
+                            <p class="text-xs text-rose-600 flex items-center gap-1 mt-1">
+                                <i class="bx bx-error-circle"></i> {{ $message }}
+                            </p>
+                        @enderror
                     </div>
         
                     <div class="space-y-1.5">
