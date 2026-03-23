@@ -75,11 +75,19 @@ Note:
     - Then force `academic_calendar` and update DB.
 
 - If `syllabusId` is missing but `courseId` is present:
-  - Then create a new syllabus row immediately:
-    - `status = draft`
-    - `current_step = academic_calendar`
-    - `prepared_by = current user`
-    - `academic_calendar_id = null`
+  - If the course has no PO mappings (`course_curriculum_maps` is empty):
+    - Then redirect back to course selection with an error toast.
+    - Then no syllabus row is created.
+  - If the course has PO mappings:
+    - If a syllabus already exists for this course by this user:
+      - Then redirect to the existing syllabus wizard with an info toast.
+    - If no existing syllabus:
+      - Then create a new syllabus row immediately:
+        - `status = draft`
+        - `current_step = academic_calendar`
+        - `prepared_by = current user`
+        - `academic_calendar_id = null`
+  - Note: Any faculty user can create a syllabus for any course regardless of department assignment.
 
 - If neither `syllabusId` nor `courseId` is provided:
   - Then stop with `404`.

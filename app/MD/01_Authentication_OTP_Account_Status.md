@@ -1,4 +1,4 @@
-﻿# Authentication, OTP, and Account Status
+# Authentication, OTP, and Account Status
 
 Beginner-friendly summary of what happens in registration, verification (OTP), login, and admin approval.
 
@@ -8,11 +8,14 @@ Beginner-friendly summary of what happens in registration, verification (OTP), l
   - `app/Http/Controllers/AuthController.php`
   - `app/Http/Controllers/OTPController.php`
   - `app/Http/Controllers/AccountApprovalController.php`
+  - `app/Http/Controllers/UserController.php`
 - Service
+  - `app/Services/AccountApprovalService.php`
   - `app/Services/OtpService.php`
 - Models
   - `app/Models/User.php`
   - `app/Models/UserOtp.php`
+  - `app/Models/UserAssignment.php`
 - Mail
   - `app/Mail/OtpMail.php`
   - `app/Mail/AccountStatusUpdated.php`
@@ -113,14 +116,42 @@ Related docs:
 
 - If `approve`:
   - Then set user to `active`.
-  - Then ensure `faculty` role exists.
+  - Then ensure `faculty` role exists and is attached.
   - Then send status email.
 - If `reject`:
-  - Then set user to `rejected` and send status email.
+  - Then set user to `rejected`.
+  - Then delete all `user_assignments` for that user.
+  - Then send status email.
 - If `restore`:
   - Then set user to `pending`.
+  - Then no assignment cleanup (user has no active assignments at this point).
 - If `disable`:
-  - Then set user to `disabled` and send status email.
+  - Then set user to `disabled`.
+  - Then delete all `user_assignments` for that user.
+  - Then send status email.
+
+### Admin Edit User (AccountApprovalController)
+
+- If editing a user's profile as admin:
+  - Then the acting user must have role `admin` (explicit check, not just middleware).
+  - Then `user_id` must exist.
+  - Then `name` is required, max 255.
+  - Then `email` is required, valid, max 255, unique in `users` excluding the target user's own id.
+  - Then `phone_number` is optional, max 30.
+  - Then `office` is optional, max 255.
+  - If all checks pass:
+    - Then update the target user's profile fields directly.
+
+### User Self-Update (UserController)
+
+- If a user updates their own profile:
+  - Then the update always applies to `Auth::id()` only (cannot update another user).
+  - If the user has role `admin`:
+    - Then update is blocked with a warning toast (admin profiles are not editable here).
+  - Then `name` is required, max 255.
+  - Then `email` is required, valid, max 255, unique in `users` excluding own id.
+  - Then `phone_number` is optional, max 30.
+  - Then `office` is optional, max 255.
 
 ### Role Assignment (Admin)
 
@@ -129,10 +160,14 @@ Related docs:
   - Then allowed roles are: `admin`, `chair`, `dean`, `faculty`.
   - Then `faculty` is always forced into role set.
   - Then roles are synced (unselected roles removed).
+  - If the new role set contains both `dean` and `chair`:
+    - Then assignment is blocked with 422 (a user cannot hold both simultaneously).
   - If `dean` is removed:
-    - Then dean assignments are deleted.
+    - Then all `user_assignments` with `context = dean` are deleted for that user.
   - If `chair` is removed:
-    - Then chair assignments are deleted.
+    - Then all `user_assignments` with `context = chair` are deleted for that user.
+  - If `faculty` is removed (future scenario):
+    - Then all `user_assignments` with `context = faculty` are deleted for that user.
 
 ## Sequences (Typical Flow)
 
@@ -142,6 +177,14 @@ Related docs:
 2. System issues OTP for email verification.
 3. User verifies OTP → email becomes verified.
 4. User waits for admin approval (account still `pending`).
-5. Admin approves user → account becomes `active`.
-6. Admin assigns roles and organizational assignments.
+5. Admin approves user → account becomes `active`, faculty role attached.
+6. Admin assigns additional roles and organizational assignments.
 7. User can log in and use the system.
+
+### Disable / Reject Lifecycle
+
+1. Admin disables or rejects a user.
+2. System sets account status.
+3. System deletes all `user_assignments` for that user.
+4. User is removed from all dean/chair/faculty hierarchy positions.
+5. Status email is sent.

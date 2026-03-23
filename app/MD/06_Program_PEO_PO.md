@@ -1,4 +1,4 @@
-﻿# Program, PEO, and PO
+# Program, PEO, and PO
 
 Rules for program-level PEO/PO management, code sequencing, and PO↔PEO mapping.
 
@@ -16,10 +16,14 @@ Rules for program-level PEO/PO management, code sequencing, and PO↔PEO mapping
 - Models
   - `app/Models/ProgramEducationalObjective.php`
   - `app/Models/ProgramOutcome.php`
-- Mapping pivot
-  - `program_outcome_peo`
+  - `app/Models/CourseOutcome.php`
+- Mapping pivots
+  - `program_outcome_peo` (PO ↔ PEO)
+  - `course_curriculum_maps` (PO ↔ Course)
+- Helper
+  - `app/Helpers/ProgramCodeHelper.php`
 - Routes
-  - `routes/web.php` (program + PEO + PO routes)
+  - `routes/web.php` (program + PEO + PO routes — `role:admin,chair`)
 
 ## Conditions (If / Then)
 
@@ -39,7 +43,9 @@ Rules for program-level PEO/PO management, code sequencing, and PO↔PEO mapping
   - Then existing PEOs are updated via `updateOrCreate`.
   - Then removed PEOs are deleted (diff vs submitted ids).
   - Then PEO codes are resequenced using `ProgramCodeHelper::resequencePeoCodes($programId)`.
-- If deleting a PEO from controller routes:
+- If deleting a PEO via controller route:
+  - Then detach all PO mappings from `program_outcome_peo` before deleting.
+  - Then delete the PEO.
   - Then codes are resequenced after delete.
 
 ### PO Rules (Livewire)
@@ -50,8 +56,14 @@ Rules for program-level PEO/PO management, code sequencing, and PO↔PEO mapping
   - Then existing POs are updated via `updateOrCreate`.
   - Then removed POs are deleted (diff vs submitted ids).
   - Then PO codes are resequenced using `ProgramCodeHelper::resequencePoCodes($programId)`.
-- If deleting a PO from controller routes:
-  - Then codes are resequenced after delete.
+- If deleting a PO via controller route:
+  - If the PO is mapped in any existing syllabus course outcomes:
+    - Then delete is blocked with an error message showing the count of affected course outcomes.
+  - If not mapped in any syllabus:
+    - Then detach all PEO mappings from `program_outcome_peo`.
+    - Then detach all course curriculum mappings from `course_curriculum_maps`.
+    - Then delete the PO.
+    - Then codes are resequenced after delete.
 
 ### PO ↔ PEO Mapping
 
@@ -71,8 +83,8 @@ Rules for program-level PEO/PO management, code sequencing, and PO↔PEO mapping
   - Then it can be removed client-side.
 - If a row is saved (has id):
   - Then it uses delete routes:
-    - `/programs/peo/{id}`
-    - `/programs/po/{id}`
+    - `DELETE /programs/peo/{id}`
+    - `DELETE /programs/po/{id}`
 
 ## Sequences (Typical Flow)
 
@@ -83,6 +95,20 @@ Rules for program-level PEO/PO management, code sequencing, and PO↔PEO mapping
 3. Component upserts rows (update existing + create new).
 4. Component deletes removed rows.
 5. Component resequences codes.
+
+### Delete PEO
+
+1. User clicks delete on a PEO row.
+2. System detaches all PO mappings for that PEO.
+3. System deletes the PEO.
+4. System resequences remaining PEO codes.
+
+### Delete PO
+
+1. User clicks delete on a PO row.
+2. System checks if the PO is mapped in any syllabus course outcomes.
+3. If mapped → blocked with error.
+4. If not mapped → system detaches PEO and course mappings, deletes PO, resequences codes.
 
 ### Toggle PO↔PEO Mapping
 
