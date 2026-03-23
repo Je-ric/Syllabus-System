@@ -119,7 +119,6 @@ class AccountApprovalController extends Controller
                     'error' => 'Failed to assign roles. Please try again.',
                 ]);
         }
-        // means any roles not in the list will be removed
 
         return redirect()
             ->route('accounts.approval')
@@ -127,5 +126,22 @@ class AccountApprovalController extends Controller
                 'message' => "Roles assigned to {$user->name} successfully.",
                 'type' => 'success'
             ]);
+    }
+
+    public function editUser(Request $request)
+    {
+        $request->validate([
+            'user_id'      => 'required|exists:users,id',
+            'name'         => 'required|string|max:255',
+            'email'        => 'required|email|max:255|unique:users,email,' . $request->input('user_id'),
+            'phone_number' => 'nullable|string|max:30',
+            'office'       => 'nullable|string|max:255',
+        ]);
+
+        $user = \App\Models\User::findOrFail($request->input('user_id'));
+        $user->update($request->only('name', 'email', 'phone_number', 'office'));
+
+        return redirect()->route('accounts.approval')
+            ->with('toast', ['message' => "User {$user->name} updated successfully.", 'type' => 'success']);
     }
 }

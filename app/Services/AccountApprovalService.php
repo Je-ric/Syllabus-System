@@ -119,6 +119,10 @@ class AccountApprovalService
 
             $newRoleNames = $roleNames->toArray();
 
+            if (in_array('dean', $newRoleNames) && in_array('chair', $newRoleNames)) {
+                abort(422, 'A user cannot hold both Dean and Chair roles simultaneously.');
+            }
+
             if (in_array('dean', $oldRoleNames) && !in_array('dean', $newRoleNames)) {
                 UserAssignment::where('user_id', $user->id)
                     ->where('context', 'dean')

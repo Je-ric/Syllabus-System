@@ -57,9 +57,21 @@ class AcademicCalendarController extends Controller
 
     public function destroy(string $academic_year)
     {
+        // #20 — validate format and confirm existence before touching DB
+        if (! preg_match('/^\d{4}-\d{4}$/', $academic_year)) {
+            return redirect()->route('academic.calendars.index')
+                ->with('toast', ['message' => 'Invalid academic year format.', 'type' => 'error']);
+        }
+
+        $calendars = AcademicCalendar::where('academic_year', $academic_year)->get();
+
+        if ($calendars->isEmpty()) {
+            return redirect()->route('academic.calendars.index')
+                ->with('toast', ['message' => 'Academic year not found.', 'type' => 'error']);
+        }
+
         // #4 — block if any syllabus is linked to this academic year's calendars
-        $calendarIds = AcademicCalendar::where('academic_year', $academic_year)
-            ->pluck('id');
+        $calendarIds = $calendars->pluck('id');
 
         $linkedSyllabi = Syllabus::whereIn('academic_calendar_id', $calendarIds)->count();
 
@@ -74,7 +86,7 @@ class AcademicCalendarController extends Controller
         DB::beginTransaction();
 
         try {
-            AcademicCalendar::where('academic_year', $academic_year)->delete();
+            AcademicCalendar::whereIn('id', $calendarIds)->delete();
 
             AuditLog::record(
                 action: 'deleted',

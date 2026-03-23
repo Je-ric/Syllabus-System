@@ -9,6 +9,7 @@ use App\Services\SyllabusPreviewService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class SyllabusController extends Controller
@@ -122,6 +123,54 @@ class SyllabusController extends Controller
                 'message' => 'Syllabus created successfully.',
                 'type'    => 'success',
             ]);
+    }
+
+    public function destroy(Syllabus $syllabus)
+    {
+        if ($syllabus->prepared_by !== Auth::id()) {
+            abort(403, 'Unauthorized');
+        }
+
+        if ($syllabus->status !== 'draft') {
+            return redirect()->route('syllabus.index')
+                ->with('toast', [
+                    'message' => 'Only draft syllabi can be deleted.',
+                    'type'    => 'error',
+                ]);
+        }
+
+        DB::transaction(function () use ($syllabus) {
+            // #16 — delete CompleteSyllabus snapshots + disk files
+            foreach ($syllabus->completeSyllabi as $snapshot) {
+                foreach (['pdf_path', 'abridged_path', 'evaluation_path'] as $field) {
+                    $path = $snapshot->$field ?? '';
+                    if ($path !== '' && Storage::disk('local')->exists($path)) {
+                        Storage::disk('local')->delete($path);
+                    }
+                }
+                $snapshot->delete();
+            }
+
+            $syllabus->components()->delete();
+            $syllabus->courseOutcomes()->delete();
+
+            foreach ($syllabus->weeks as $week) {
+                $week->contents()->each(function ($content) {
+                    $content->evaluation()->delete();
+                    $content->delete();
+                });
+                $week->delete();
+            }
+
+            $syllabus->references()->delete();
+            $syllabus->onlineMaterials()->delete();
+            $syllabus->revisions()->delete();
+            $syllabus->reviewers()->delete();
+            $syllabus->delete();
+        });
+
+        return redirect()->route('syllabus.index')
+            ->with('toast', ['message' => 'Syllabus deleted successfully.', 'type' => 'success']);
     }
 
     public function edit(Syllabus $syllabus)

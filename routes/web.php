@@ -60,6 +60,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/account-approval/restore', [AccountApprovalController::class, 'restore'])->name('account-approval.restore');
         Route::post('/account-approval/disable', [AccountApprovalController::class, 'disable'])->name('account-approval.disable');
         Route::post('/account-approval/assign-role', [AccountApprovalController::class, 'assignRole'])->name('account-approval.assign-role');
+        Route::put('/account-approval/edit-user', [AccountApprovalController::class, 'editUser'])->name('account-approval.edit-user');
 
         Route::get('/academic-structure', [AcademicStructureController::class, 'index'])->name('academic.structure.index');
         Route::post('/academic-structure/college', [AcademicStructureController::class, 'storeCollege'])->name('college.store');

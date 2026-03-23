@@ -133,6 +133,11 @@
                                     </x-button>
                                 @endif
 
+                                <x-button variant="table-confirm"
+                                    onclick="document.getElementById('editUserModal-{{ $user->id }}').showModal()">
+                                    <i class="bx bx-edit"></i>
+                                </x-button>
+
                             </div>
                         </x-table.td>
                     </x-table.row>
@@ -152,6 +157,8 @@
                     @if ($user->account_status === 'active')
                         @include('AccountApproval.modals.assignRolesModal', ['modalId' => 'assignRoleModal-' . $user->id, 'user' => $user])
                     @endif
+
+                    @include('AccountApproval.modals.editUserModal', ['modalId' => 'editUserModal-' . $user->id, 'user' => $user])
 
                 @empty
                     <x-table.empty :colspan="7" message="No users match your filters." />

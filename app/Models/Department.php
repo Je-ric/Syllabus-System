@@ -66,25 +66,30 @@ class Department extends Model
 
     // Helper: Get next objective code
     // Used in: objective_store() - ObjectiveController
-    public function getNextObjectiveCode()
+    public function getNextObjectiveCode(): string
     {
         $count = $this->objectives()->count();
-        return chr(ord('a') + $count);
+        if ($count < 26) {
+            return chr(ord('a') + $count);
+        }
+        $first  = chr(ord('a') + intdiv($count, 26) - 1);
+        $second = chr(ord('a') + ($count % 26));
+        return $first . $second;
     }
 
     // Helper: Resequence objective codes after deletion
     // Used in: objective_destroy() - ObjectiveController
-    public function resequenceObjectiveCodes()
+    public function resequenceObjectiveCodes(): void
     {
-        $objectives = $this->objectives()->orderBy('dept_obj_code')->get();
+        $objectives = $this->objectives()->orderBy('id')->lockForUpdate()->get();
 
-        $count = 0;
-        foreach ($objectives as $objective) {
-            $newCode = chr(ord('a') + $count);
+        foreach ($objectives as $i => $objective) {
+            $newCode = $i < 26
+                ? chr(ord('a') + $i)
+                : chr(ord('a') + intdiv($i, 26) - 1) . chr(ord('a') + ($i % 26));
             if ($objective->dept_obj_code !== $newCode) {
                 $objective->update(['dept_obj_code' => $newCode]);
             }
-            $count++;
         }
     }
 }

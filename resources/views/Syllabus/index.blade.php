@@ -89,7 +89,7 @@
                         </div>
                     </div>
     
-                    {{-- Card actions — x-button instead of bare <a> tags --}}
+                    {{-- Card actions --}}
                     <div class="p-3 pt-0 flex gap-2">
                         <x-button
                             href="{{ route('syllabus.wizard', ['syllabusId' => $syllabus->id]) }}"
@@ -97,13 +97,25 @@
                             class="flex-1 justify-center">
                             {{ $syllabus->status === 'draft' ? 'Continue' : 'View' }}
                         </x-button>
-    
+
                         <x-button
                             href="{{ route('syllabus.preview.complete', ['syllabus' => $syllabus->id]) }}"
                             variant="cancel"
                             class="flex-1 justify-center">
                             Preview
                         </x-button>
+
+                        @if ($syllabus->status === 'draft')
+                            <form method="POST"
+                                action="{{ route('syllabus.destroy', $syllabus->id) }}"
+                                onsubmit="return confirm('Delete this draft syllabus? This cannot be undone.')">
+                                @csrf
+                                @method('DELETE')
+                                <x-button type="submit" variant="danger">
+                                    <i class="bx bx-trash"></i>
+                                </x-button>
+                            </form>
+                        @endif
                     </div>
     
                 </div>
