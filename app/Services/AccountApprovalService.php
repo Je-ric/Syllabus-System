@@ -44,6 +44,8 @@ class AccountApprovalService
             $user->account_status = 'rejected';
             $user->save();
 
+            UserAssignment::where('user_id', $user->id)->delete();
+
             Mail::to($user->email)->send(new AccountStatusUpdated($user, 'rejected'));
 
             AuditLog::record(
@@ -75,9 +77,12 @@ class AccountApprovalService
 
     public function disable(int $userId): User
     {
+        return DB::transaction(function () use ($userId) {
         $user = User::findOrFail($userId);
         $user->account_status = 'disabled';
         $user->save();
+
+        UserAssignment::where('user_id', $user->id)->delete();
 
         Mail::to($user->email)->send(new AccountStatusUpdated($user, 'disabled'));
 
@@ -89,6 +94,7 @@ class AccountApprovalService
         );
 
         return $user;
+        }); // end DB::transaction
     }
 
     public function assignRoles(int $userId, array $roles): User

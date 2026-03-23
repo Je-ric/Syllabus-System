@@ -55,6 +55,17 @@ class SyllabusController extends Controller
         }
 
         if (! $syllabusId) {
+            $course = \App\Models\Course::findOrFail($courseId);
+
+            // #10 — block if course has no PO mappings
+            if (! $course->programOutcomes()->exists()) {
+                return redirect()->route('syllabus.create', ['program_id' => $course->program_id])
+                    ->with('toast', [
+                        'message' => "Course {$course->course_code} has no Program Outcome mappings. Ask the chair to map POs to this course before creating a syllabus.",
+                        'type'    => 'error',
+                    ]);
+            }
+
             $existing = Syllabus::where('course_id', $courseId)
                 ->where('prepared_by', Auth::id())
                 ->first();

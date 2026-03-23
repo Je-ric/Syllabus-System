@@ -10,6 +10,7 @@ use App\Models\Department;
 use App\Models\Program;
 use App\Models\AuditLog;
 use App\Models\Course;
+use App\Models\UserAssignment;
 use Illuminate\Support\Facades\DB;
 
 class AcademicStructureController extends Controller
@@ -91,10 +92,12 @@ class AcademicStructureController extends Controller
         try {
             // Detach programs from departments, delete objectives, departments, goals, then college
             foreach ($college->departments as $department) {
+                UserAssignment::where('department_id', $department->id)->delete();
                 $department->programs()->detach();
                 $department->objectives()->delete();
                 $department->delete();
             }
+            UserAssignment::where('college_id', $college->id)->delete();
             $college->goals()->delete();
             $college->delete();
 
@@ -179,6 +182,7 @@ class AcademicStructureController extends Controller
 
         DB::beginTransaction();
         try {
+            UserAssignment::where('department_id', $department->id)->delete();
             $department->programs()->detach();
             $department->objectives()->delete();
             $department->delete();
@@ -244,6 +248,15 @@ class AcademicStructureController extends Controller
     public function updateProgram(SaveProgramRequest $request, Program $program)
     {
         $validated = $request->validated();
+
+        // #9 — block department change if courses exist (would silently break faculty context)
+        $currentDeptId = $program->departments()->wherePivot('role', 'primary')->value('departments.id');
+        if ((int) $validated['department_id'] !== (int) $currentDeptId && $program->courses()->exists()) {
+            return back()->with('toast', [
+                'message' => 'Cannot change department: this program has courses assigned to it. Remove all courses first.',
+                'type' => 'error',
+            ]);
+        }
 
         DB::beginTransaction();
 

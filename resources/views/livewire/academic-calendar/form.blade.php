@@ -20,6 +20,28 @@
         </div>
     @endif
 
+    {{-- ── #11 Stale weeks warning ─────────────────────────────────────────── --}}
+    @if ($showStaleWeeksWarning)
+        <div class="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-4 text-sm text-red-800">
+            <i class="bx bx-error text-red-500 text-xl shrink-0 mt-0.5"></i>
+            <div class="flex-1">
+                <p class="font-semibold">Syllabi with generated weeks exist for this calendar.</p>
+                <p class="text-red-700 text-xs mt-1">Changing the semester dates will make existing weekly coverage dates stale. Faculty will need to regenerate their weeks manually inside the syllabus wizard.</p>
+                <div class="flex gap-2 mt-3">
+                    <x-button type="button" variant="danger"
+                        wire:click="update"
+                        wire:loading.attr="disabled">
+                        <i class="bx bx-check"></i> Proceed Anyway
+                    </x-button>
+                    <x-button type="button" variant="cancel"
+                        wire:click="cancelStaleWarning">
+                        Cancel
+                    </x-button>
+                </div>
+            </div>
+        </div>
+    @endif
+
     {{-- ── Academic Year ───────────────────────────────────────────────────── --}}
     <div class="mb-5 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <x-form.label for="academic_year" isRequired variant="title">Academic Year</x-form.label>

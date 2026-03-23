@@ -4,6 +4,8 @@ namespace App\Livewire\AcademicCalendar;
 
 use App\Models\AcademicCalendar;
 use App\Models\AuditLog;
+use App\Models\Syllabus;
+use App\Models\SyllabusWeek;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 // use Livewire\Attributes\Validate;
@@ -33,6 +35,7 @@ class AcademicCalendarForm extends Component
 
     // Controls the confirm-create modal visibility (Alpine listens to this)
     public bool $showConfirmModal = false;
+    public bool $showStaleWeeksWarning = false;
 
     // ── Mount ─────────────────────────────────────────────────────────────────
 
@@ -158,6 +161,28 @@ class AcademicCalendarForm extends Component
             return;
         }
 
+        // #11 — warn if date change would make existing syllabus weeks stale
+        if (! $this->showStaleWeeksWarning) {
+            $calendarIds = $semesters->pluck('id');
+            $syllabusIds = Syllabus::whereIn('academic_calendar_id', $calendarIds)->pluck('id');
+            $hasWeeks    = $syllabusIds->isNotEmpty() &&
+                SyllabusWeek::whereIn('syllabus_id', $syllabusIds)->exists();
+
+            $sem1 = $semesters->firstWhere('semester', '1st');
+            $sem2 = $semesters->firstWhere('semester', '2nd');
+            $datesChanged = $validated['start_date_1'] !== ($sem1?->start_date ?? '')
+                || $validated['end_date_1']   !== ($sem1?->end_date   ?? '')
+                || $validated['start_date_2'] !== ($sem2?->start_date ?? '')
+                || $validated['end_date_2']   !== ($sem2?->end_date   ?? '');
+
+            if ($hasWeeks && $datesChanged) {
+                $this->showStaleWeeksWarning = true;
+                return; // pause — blade will show the warning banner
+            }
+        }
+
+        $this->showStaleWeeksWarning = false;
+
         DB::beginTransaction();
         try {
             $sem1 = $semesters->where('semester', '1st')->first();
@@ -190,6 +215,11 @@ class AcademicCalendarForm extends Component
 
         $this->dispatch('lw-toast', type: 'success', message: 'Academic year updated successfully.');
         $this->redirectRoute('academic.calendars.index');
+    }
+
+    public function cancelStaleWarning(): void
+    {
+        $this->showStaleWeeksWarning = false;
     }
 
     public function cancelConfirm(): void

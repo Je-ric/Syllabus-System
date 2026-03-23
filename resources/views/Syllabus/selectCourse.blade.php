@@ -58,6 +58,7 @@
                                 </thead>
                                 <tbody class="divide-y divide-slate-100">
                                     @foreach ($courses as $course)
+                                        @php $hasPo = $course->programOutcomes()->exists(); @endphp
                                         <tr class="hover:bg-emerald-50/30 transition-colors group">
 
                                             {{-- Course code + title --}}
@@ -96,12 +97,20 @@
 
                                             {{-- Action --}}
                                             <td class="px-4 py-3 text-center align-middle">
-                                                <x-button
-                                                    href="{{ route('syllabus.form', $course->id) }}"
-                                                    variant="table-confirm"
-                                                    class="whitespace-nowrap inline-flex">
-                                                    <i class="bx bx-plus"></i> Create Syllabus
-                                                </x-button>
+                                                @if (! $hasPo)
+                                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg
+                                                                 bg-amber-50 text-amber-700 text-xs font-medium
+                                                                 ring-1 ring-amber-200/60">
+                                                        <i class="bx bx-error-circle"></i> No PO mapped
+                                                    </span>
+                                                @else
+                                                    <x-button
+                                                        href="{{ route('syllabus.form', $course->id) }}"
+                                                        variant="table-confirm"
+                                                        class="whitespace-nowrap inline-flex">
+                                                        <i class="bx bx-plus"></i> Create Syllabus
+                                                    </x-button>
+                                                @endif
                                             </td>
 
                                         </tr>
