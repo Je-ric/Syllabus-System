@@ -1,42 +1,59 @@
-<x-modal.dialog :id="$modalId" maxWidth="max-w-xl" width="w-full" maxHeight="max-h-[90vh]">
+<x-modal.dialog :id="$modalId" maxWidth="max-w-md" width="w-full">
     <x-modal.header>
-        <h3 class="text-lg font-semibold text-slate-800">
-            Assign Roles to {{ $user->name }}
-        </h3>
+        <span class="inline-flex items-center gap-2">
+            <i class="bx bx-shield text-slate-600 text-lg leading-none"></i>
+            Assign Roles
+        </span>
+        <x-modal.x-button :modalId="$modalId" />
     </x-modal.header>
 
-    <form method="POST" action="{{ route('account-approval.assign-role') }}" class="flex flex-col h-full">
+    <form method="POST" action="{{ route('account-approval.assign-role') }}" class="flex flex-col">
         @csrf
         <input type="hidden" name="user_id" value="{{ $user->id }}">
 
         <x-modal.body>
             <div class="space-y-3">
+
+                {{-- User info --}}
+                <div class="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 mb-1">
+                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-600 font-bold text-sm uppercase">
+                        {{ substr($user->name, 0, 1) }}
+                    </div>
+                    <div class="min-w-0">
+                        <p class="font-semibold text-slate-800 text-sm truncate">{{ $user->name }}</p>
+                        <p class="text-xs text-slate-400 truncate">{{ $user->email }}</p>
+                    </div>
+                </div>
+
                 @php
                     $roles = [
-                        ['name'=>'admin','label'=>'Admin','desc'=>'Full system access'],
-                        ['name'=>'dean','label'=>'College Dean','desc'=>'Manage college-level operations'],
-                        ['name'=>'chair','label'=>'Department Chair','desc'=>'Manage department operations'],
+                        ['name' => 'admin', 'label' => 'Admin',            'desc' => 'Full system access',              'icon' => 'bx-crown',    'color' => 'text-purple-600'],
+                        ['name' => 'dean',  'label' => 'College Dean',     'desc' => 'Manage college-level operations', 'icon' => 'bx-medal',    'color' => 'text-indigo-600'],
+                        ['name' => 'chair', 'label' => 'Department Chair', 'desc' => 'Manage department operations',    'icon' => 'bx-user-pin', 'color' => 'text-blue-600'],
                     ];
                 @endphp
 
                 @foreach ($roles as $role)
-                    <label class="flex items-center gap-3 p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
-                        <input type="checkbox" name="roles[]" value="{{ $role['name'] }}" class="w-4 h-4 text-blue-600"
+                    <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 cursor-pointer transition-colors">
+                        <input type="checkbox" name="roles[]" value="{{ $role['name'] }}"
+                            class="w-4 h-4 rounded text-emerald-600 border-slate-300 focus:ring-emerald-400"
                             {{ $user->roles->contains('name', $role['name']) ? 'checked' : '' }}>
-                        <div class="flex-1">
-                            <span class="font-medium text-slate-800">{{ $role['label'] }}</span>
+                        <i class="bx {{ $role['icon'] }} {{ $role['color'] }} text-lg leading-none shrink-0"></i>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-semibold text-slate-800">{{ $role['label'] }}</p>
                             <p class="text-xs text-slate-500">{{ $role['desc'] }}</p>
                         </div>
                     </label>
                 @endforeach
 
-                {{-- Faculty always assigned --}}
-                <div class="flex items-center gap-3 p-3 border border-slate-200 rounded-lg bg-slate-50 opacity-75">
-                    <input type="checkbox" checked disabled class="w-4 h-4">
+                {{-- Faculty — always assigned --}}
+                <div class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50 opacity-60 cursor-not-allowed">
+                    <input type="checkbox" checked disabled class="w-4 h-4 rounded">
                     <input type="hidden" name="roles[]" value="faculty">
-                    <div class="flex-1">
-                        <span class="font-medium text-slate-600">Faculty</span>
-                        <p class="text-xs text-slate-500">Default role (Always assigned)</p>
+                    <i class="bx bx-user text-green-600 text-lg leading-none shrink-0"></i>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold text-slate-700">Faculty</p>
+                        <p class="text-xs text-slate-500">Default role — always assigned</p>
                     </div>
                 </div>
 
@@ -46,10 +63,10 @@
         </x-modal.body>
 
         <x-modal.footer>
-            <x-modal.close-button :modalId="$modalId" text="Cancel" variant="cancel" />
-            <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-yellow-500 rounded-lg hover:bg-yellow-600 transition-colors">
-                Save Roles
-            </button>
+            <x-modal.close-button :modalId="$modalId" text="Cancel" />
+            <x-button type="submit" variant="save">
+                <i class="bx bx-save"></i> Save Roles
+            </x-button>
         </x-modal.footer>
     </form>
 </x-modal.dialog>

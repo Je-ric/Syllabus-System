@@ -5,6 +5,7 @@ namespace App\Livewire\AcademicCalendar;
 use App\Models\AcademicCalendar;
 use App\Models\AcademicCalendarEvent;
 use App\Models\AuditLog;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 
@@ -43,7 +44,7 @@ class AcademicCalendarEventForm extends Component
             $dateUnique->ignore($editingId);
         }
 
-        $validated = $this->validate([
+        $validator = Validator::make(compact('type', 'name', 'date'), [
             'type' => ['required', Rule::in(AcademicCalendarEvent::TYPES)],
             'name' => ['required', 'string', 'max:255'],
             'date' => [
@@ -61,7 +62,14 @@ class AcademicCalendarEventForm extends Component
             'date.after_or_equal'  => 'Date must be within the semester range.',
             'date.before_or_equal' => 'Date must be within the semester range.',
             'date.unique'          => 'An event already exists on this date.',
-        ], compact('type', 'name', 'date'));
+        ]);
+
+        if ($validator->fails()) {
+            $this->dispatch('lw-toast', type: 'error', message: $validator->errors()->first());
+            return;
+        }
+
+        $validated = $validator->validated();
 
         if ($editingId) {
             $event = AcademicCalendarEvent::findOrFail($editingId);

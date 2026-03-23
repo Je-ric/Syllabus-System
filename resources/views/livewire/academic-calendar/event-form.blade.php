@@ -71,7 +71,7 @@
         </div>
 
         {{-- Form card — border changes when editing --}}
-        <div class="rounded-xl border p-4 space-y-3.5 transition-colors duration-150"
+        <div class="rounded-xl border p-4 flex flex-col gap-3.5 transition-colors duration-150"
             x-bind:class="editingId
                 ? 'border-amber-200 bg-amber-50/60'
                 : 'border-slate-200 bg-slate-50/60'">
@@ -135,6 +135,7 @@
             @enderror
 
             {{-- Submit button --}}
+            <div class="flex justify-end mt-auto">
             <x-button type="button" variant="add-button"
                 x-on:click="submit()"
                 x-bind:disabled="saving"
@@ -152,6 +153,7 @@
                     Saving…
                 </span>
             </x-button>
+            </div>
         </div>
     </div>
 

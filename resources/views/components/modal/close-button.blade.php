@@ -20,6 +20,7 @@
     </button>
 @else
     <button
+        type="button"
         onclick="document.getElementById('{{ $modalId }}').close()"
         {{ $attributes->merge(['class' => $finalClasses]) }}
     >

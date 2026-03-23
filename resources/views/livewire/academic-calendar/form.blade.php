@@ -48,7 +48,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
 
         {{-- 1st Semester --}}
-        <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+        <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col gap-4">
             <h3 class="font-semibold text-slate-800 flex items-center gap-2 text-sm">
                 <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold shrink-0">1</span>
                 1st Semester
@@ -84,7 +84,7 @@
             </div>
 
             @if ($start_date_1 && $end_date_1 && !$errors->has('start_date_1') && !$errors->has('end_date_1'))
-                <p class="text-xs text-emerald-600 flex items-center gap-1">
+                <p class="text-xs text-emerald-600 flex items-center gap-1 mt-auto">
                     <i class="bx bx-check-circle"></i>
                     {{ \Carbon\Carbon::parse($start_date_1)->format('M j') }} – {{ \Carbon\Carbon::parse($end_date_1)->format('M j, Y') }}
                 </p>
@@ -92,7 +92,7 @@
         </div>
 
         {{-- 2nd Semester --}}
-        <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+        <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col gap-4">
             <h3 class="font-semibold text-slate-800 flex items-center gap-2 text-sm">
                 <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-700 text-xs font-bold shrink-0">2</span>
                 2nd Semester
@@ -127,7 +127,7 @@
             </div>
 
             @if ($start_date_2 && $end_date_2 && !$errors->has('start_date_2') && !$errors->has('end_date_2'))
-                <p class="text-xs text-emerald-600 flex items-center gap-1">
+                <p class="text-xs text-emerald-600 flex items-center gap-1 mt-auto">
                     <i class="bx bx-check-circle"></i>
                     {{ \Carbon\Carbon::parse($start_date_2)->format('M j') }} – {{ \Carbon\Carbon::parse($end_date_2)->format('M j, Y') }}
                 </p>
@@ -136,7 +136,7 @@
     </div>
 
     {{-- ── Actions ─────────────────────────────────────────────────────────── --}}
-    <div class="flex flex-wrap gap-2">
+    <div class="flex flex-wrap justify-end gap-2">
         @if ($isEdit)
             <x-button type="button" variant="save"
                 wire:click="update"
