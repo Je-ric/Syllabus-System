@@ -66,7 +66,26 @@ class AcademicCalendarForm extends Component
 
     public function updated(string $property): void
     {
+        // For academic_year: only check format while typing, not DB uniqueness
+        // (uniqueness is checked on submit — avoids a DB hit on every keystroke)
+        if ($property === 'academic_year') {
+            $this->validateOnly('academic_year', [
+                'academic_year' => ['required', 'string', 'regex:/^\d{4}-\d{4}$/'],
+            ]);
+            return;
+        }
+
         $this->validateOnly($property, $this->rules());
+
+        if ($property === 'start_date_1' && $this->end_date_1 !== '') {
+            $this->validateOnly('end_date_1', $this->rules());
+        }
+        if ($property === 'end_date_1' && $this->start_date_2 !== '') {
+            $this->validateOnly('start_date_2', $this->rules());
+        }
+        if ($property === 'start_date_2' && $this->end_date_2 !== '') {
+            $this->validateOnly('end_date_2', $this->rules());
+        }
     }
 
     // ── Actions ───────────────────────────────────────────────────────────────
