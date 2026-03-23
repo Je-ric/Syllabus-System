@@ -9,9 +9,9 @@
         @csrf
         <input type="hidden" name="college_id" value="{{ $collegeId }}">
 
-        <x-modal.header>
-            <h3 class="text-lg font-semibold text-slate-900">Assign Dean</h3>
-            <p class="text-sm text-slate-600 mt-1">{{ $collegeName }}</p>
+        <x-modal.header :modalId="'assignDeanModal-' . $collegeId">
+            <h3 class="text-base font-semibold text-slate-900">Assign Dean</h3>
+            <p class="text-sm text-slate-500 mt-0.5">{{ $collegeName }}</p>
         </x-modal.header>
 
         <x-modal.body>

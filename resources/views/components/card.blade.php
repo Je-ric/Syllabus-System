@@ -8,12 +8,16 @@
 
 @php
     $palette = [
-        'slate'   => ['strip' => 'bg-slate-50 border-slate-100',    'icon' => 'bg-slate-100 text-slate-500',    'title' => 'text-slate-800'],
-        'emerald' => ['strip' => 'bg-emerald-50 border-emerald-100','icon' => 'bg-emerald-100 text-emerald-700','title' => 'text-emerald-900'],
-        'blue'    => ['strip' => 'bg-blue-50 border-blue-100',      'icon' => 'bg-blue-100 text-blue-700',      'title' => 'text-blue-900'],
-        'amber'   => ['strip' => 'bg-amber-50 border-amber-100',    'icon' => 'bg-amber-100 text-amber-700',    'title' => 'text-amber-900'],
-        'rose'    => ['strip' => 'bg-rose-50 border-rose-100',      'icon' => 'bg-rose-100 text-rose-700',      'title' => 'text-rose-900'],
-        'violet'  => ['strip' => 'bg-violet-50 border-violet-100',  'icon' => 'bg-violet-100 text-violet-700',  'title' => 'text-violet-900'],
+        'slate'   => ['strip' => 'bg-slate-50 border-slate-100',       'icon' => 'bg-slate-100 text-slate-500',       'title' => 'text-slate-700'],
+        'emerald' => ['strip' => 'bg-emerald-50 border-emerald-100',   'icon' => 'bg-emerald-100 text-emerald-700',   'title' => 'text-emerald-900'],
+        'blue'    => ['strip' => 'bg-blue-50 border-blue-100',         'icon' => 'bg-blue-100 text-blue-700',         'title' => 'text-blue-900'],
+        'amber'   => ['strip' => 'bg-amber-50 border-amber-100',       'icon' => 'bg-amber-100 text-amber-700',       'title' => 'text-amber-900'],
+        'rose'    => ['strip' => 'bg-rose-50 border-rose-100',         'icon' => 'bg-rose-100 text-rose-700',         'title' => 'text-rose-900'],
+        'violet'  => ['strip' => 'bg-violet-50 border-violet-100',     'icon' => 'bg-violet-100 text-violet-700',     'title' => 'text-violet-900'],
+        // CLSU brand: dark navy strip — complements the green-grad page/card headers
+        'navy'    => ['strip' => 'bg-[#1a2235] border-[#1a2235]',      'icon' => 'bg-white/10 text-[#ffb51b]',        'title' => 'text-white'],
+        // Soft gold tint — for secondary info sections beside navy
+        'gold'    => ['strip' => 'bg-[#fffbeb] border-[#fde68a]',      'icon' => 'bg-[#fef3c7] text-[#92400e]',      'title' => 'text-[#78350f]'],
     ];
     $p = $palette[$color] ?? $palette['slate'];
 @endphp
