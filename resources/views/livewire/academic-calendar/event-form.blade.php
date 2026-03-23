@@ -14,6 +14,7 @@
         date:      '',
         saving:    false,
         deletingId: null,
+        confirmDeleteId: null,
 
         loadForm(e) {
             this.editingId = e.detail.id;
@@ -38,6 +39,7 @@
         },
 
         async remove(id) {
+            this.confirmDeleteId = null;
             this.deletingId = id;
             await $wire.deleteEvent(id);
             this.deletingId = null;
