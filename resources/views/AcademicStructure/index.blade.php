@@ -23,11 +23,18 @@
                             <span class="font-semibold text-slate-800 truncate">{{ $college->name }}</span>
                         </div>
                         {{-- table-edit: compact blue button — correct for an inline edit toggle --}}
-                        <x-button type="button" variant="table-confirm" class="shrink-0 ml-3"
-                            onclick="event.stopPropagation(); toggle('editCollege{{ $college->id }}')"
-                            title="Edit college">
-                            <i class="bx bx-edit"></i>
-                        </x-button>
+                        <div class="flex gap-1 shrink-0 ml-3">
+                            <x-button type="button" variant="table-confirm"
+                                onclick="event.stopPropagation(); toggle('editCollege{{ $college->id }}')"
+                                title="Edit college">
+                                <i class="bx bx-edit"></i>
+                            </x-button>
+                            <x-button type="button" variant="danger"
+                                onclick="event.stopPropagation(); document.getElementById('deleteCollegeModal_{{ $college->id }}').showModal()"
+                                title="Delete college">
+                                <i class="bx bx-trash"></i>
+                            </x-button>
+                        </div>
                     </summary>
     
                     <div class="px-4 pb-4 space-y-4">
@@ -80,11 +87,18 @@
                                             <i class="bx bx-building text-lg text-slate-600 shrink-0"></i>
                                             <span class="font-medium text-slate-700 truncate">{{ $dept->name }}</span>
                                         </div>
-                                        <x-button type="button" variant="table-confirm" class="shrink-0 ml-3"
-                                            onclick="event.stopPropagation(); toggle('editDept{{ $dept->id }}')"
-                                            title="Edit department">
-                                            <i class="bx bx-edit"></i>
-                                        </x-button>
+                                        <div class="flex gap-1 shrink-0 ml-3">
+                                            <x-button type="button" variant="table-confirm"
+                                                onclick="event.stopPropagation(); toggle('editDept{{ $dept->id }}')"
+                                                title="Edit department">
+                                                <i class="bx bx-edit"></i>
+                                            </x-button>
+                                            <x-button type="button" variant="danger"
+                                                onclick="event.stopPropagation(); document.getElementById('deleteDepartmentModal_{{ $dept->id }}').showModal()"
+                                                title="Delete department">
+                                                <i class="bx bx-trash"></i>
+                                            </x-button>
+                                        </div>
                                     </summary>
     
                                     <div class="px-3 pb-3 space-y-4">
@@ -151,11 +165,18 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <x-button type="button" variant="table-confirm" class="shrink-0"
-                                                            onclick="toggle('editProgram{{ $program->id }}')"
-                                                            title="Edit program">
-                                                            <i class="bx bx-edit"></i>
-                                                        </x-button>
+                                                        <div class="flex gap-1 shrink-0">
+                                                            <x-button type="button" variant="table-confirm"
+                                                                onclick="toggle('editProgram{{ $program->id }}')"
+                                                                title="Edit program">
+                                                                <i class="bx bx-edit"></i>
+                                                            </x-button>
+                                                            <x-button type="button" variant="danger"
+                                                                onclick="document.getElementById('deleteProgramModal_{{ $program->id }}').showModal()"
+                                                                title="Delete program">
+                                                                <i class="bx bx-trash"></i>
+                                                            </x-button>
+                                                        </div>
                                                     </div>
     
                                                     {{-- Edit program form — same amber cue --}}
@@ -249,6 +270,16 @@
     @include('AcademicStructure.modals.addCollegeModal')
     @include('AcademicStructure.modals.addDepartmentModal')
     @include('AcademicStructure.modals.addProgramModal')
+
+    @foreach ($colleges as $college)
+        @include('AcademicStructure.modals.deleteCollegeModal', ['college' => $college])
+        @foreach ($departments->where('college_id', $college->id) as $dept)
+            @include('AcademicStructure.modals.deleteDepartmentModal', ['dept' => $dept])
+            @foreach ($dept->programs as $program)
+                @include('AcademicStructure.modals.deleteProgramModal', ['program' => $program])
+            @endforeach
+        @endforeach
+    @endforeach
 
 @endsection
 
