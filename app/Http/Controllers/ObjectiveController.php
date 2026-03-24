@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\College;
 use App\Models\Department;
 use App\Models\DepartmentObjective;
-use App\Models\AuditLog;
-use Illuminate\Validation\Rule;
+use App\Services\GoalObjectiveService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class ObjectiveController extends Controller
 {
+    public function __construct(private GoalObjectiveService $service) {}
+
     public function objective_index(Request $request)
     {
         $colleges = College::orderBy('name')->get();
@@ -32,15 +33,13 @@ class ObjectiveController extends Controller
         }
 
         $departments = collect();
-        $objectives = collect();
+        $objectives  = collect();
 
-        if ($selectedCollegeId) { // If a college is selected
-            $departments = Department::where('college_id', $selectedCollegeId) // Fetch departments for that college
-                ->orderBy('name')
-                ->get();
+        if ($selectedCollegeId) {
+            $departments = Department::where('college_id', $selectedCollegeId)->orderBy('name')->get();
 
-            if ($selectedDepartmentId) { // If a department is selected
-                $objectives = DepartmentObjective::where('department_id', $selectedDepartmentId) // Fetch objectives for that department
+            if ($selectedDepartmentId) {
+                $objectives = DepartmentObjective::where('department_id', $selectedDepartmentId)
                     ->with('department')
                     ->orderBy('dept_obj_code')
                     ->get();
@@ -68,19 +67,7 @@ class ObjectiveController extends Controller
         ]);
 
         $department = Department::findOrFail($request->department_id);
-
-        $objective = DepartmentObjective::create([
-            'department_id'  => $request->department_id,
-            'dept_obj_code'  => $department->getNextObjectiveCode(),
-            'objective_text' => $request->objective_text,
-        ]);
-
-        AuditLog::record(
-            action: 'created',
-            module: 'Objective',
-            referenceId: $objective->id,
-            description: "Created objective {$objective->dept_obj_code} for department {$department->name}, college {$department->college?->name}."
-        );
+        $this->service->storeObjective($department, $request->objective_text);
 
         return redirect()
             ->route('objective.index', [
@@ -92,21 +79,9 @@ class ObjectiveController extends Controller
 
     public function objective_update(Request $request, DepartmentObjective $objective)
     {
-        $request->validate([
-            'objective_text' => ['required', 'string'],
-        ]);
+        $request->validate(['objective_text' => ['required', 'string']]);
 
-        $objective->update(['objective_text' => $request->objective_text]);
-
-        $department  = $objective->department;
-        $collegeName = $department?->college?->name ?? 'N/A';
-
-        AuditLog::record(
-            action: 'updated',
-            module: 'Objective',
-            referenceId: $objective->id,
-            description: "Updated objective {$objective->dept_obj_code} for department {$department?->name}, college {$collegeName}."
-        );
+        $this->service->updateObjective($objective, $request->objective_text);
 
         return redirect()
             ->route('objective.index', [
@@ -118,35 +93,19 @@ class ObjectiveController extends Controller
 
     public function objective_destroy(DepartmentObjective $objective)
     {
-        DB::beginTransaction();
+        $collegeId    = $objective->department->college_id;
+        $departmentId = $objective->department_id;
 
         try {
-            $department    = $objective->department;
-            $objectiveCode = $objective->dept_obj_code;
-
-            $objective->delete();
-            $department->resequenceObjectiveCodes(); // Department.php
-
-            AuditLog::record(
-                action: 'deleted',
-                module: 'Objective',
-                referenceId: $objective->id,
-                description: "Deleted objective {$objectiveCode} for department {$department->name}, college {$department->college?->name}."
-            );
-
-            DB::commit();
-        } catch (\Throwable $e) {
-            DB::rollBack();
-
-            return redirect()->back()->withErrors([
-                'error' => 'Failed to delete objective. Please try again.',
-            ]);
+            $this->service->destroyObjective($objective);
+        } catch (\Throwable) {
+            return redirect()->back()->withErrors(['error' => 'Failed to delete objective. Please try again.']);
         }
 
         return redirect()
             ->route('objective.index', [
-                'college_id'    => $department->college_id,
-                'department_id' => $department->id,
+                'college_id'    => $collegeId,
+                'department_id' => $departmentId,
             ])
             ->with('toast', ['message' => 'Objective deleted and codes re-sequenced.', 'type' => 'success']);
     }

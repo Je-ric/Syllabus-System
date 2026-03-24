@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\College;
 use App\Models\CollegeGoal;
-use App\Models\AuditLog;
+use App\Services\GoalObjectiveService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class GoalController extends Controller
 {
+    public function __construct(private GoalObjectiveService $service) {}
+
     public function goal_index(Request $request)
     {
         $colleges = College::orderBy('name')->get();
@@ -19,14 +20,14 @@ class GoalController extends Controller
 
         if (!$selectedCollegeId) {
             /** @var \App\Models\User|null $user */
-            $user = Auth::user();
-            $assignment = $user?->getPrimaryCollegeAssignment();
+            $user              = Auth::user();
+            $assignment        = $user?->getPrimaryCollegeAssignment();
             $selectedCollegeId = $assignment?->college_id;
         }
 
         $goals = collect();
-        if ($selectedCollegeId) { // If a college is selected
-            $goals = CollegeGoal::where('college_id', $selectedCollegeId) // Fetch goals for that college
+        if ($selectedCollegeId) {
+            $goals = CollegeGoal::where('college_id', $selectedCollegeId)
                 ->orderBy('college_goals_code')
                 ->get();
         }
@@ -42,19 +43,7 @@ class GoalController extends Controller
         ]);
 
         $college = College::findOrFail($request->college_id);
-
-        $goal = CollegeGoal::create([
-            'college_id' => $request->college_id,
-            'college_goals_code' => $college->getNextGoalCode(), // use model helper (College.php)
-            'goal_text' => $request->goal_text,
-        ]);
-
-        AuditLog::record(
-            action: 'created',
-            module: 'Goal',
-            referenceId: $goal->id,
-            description: "Created goal {$goal->college_goals_code} for college {$college->name}."
-        );
+        $this->service->storeGoal($college, $request->goal_text);
 
         return redirect()
             ->route('goal.index', ['college_id' => $request->college_id])
@@ -63,20 +52,9 @@ class GoalController extends Controller
 
     public function goal_update(Request $request, CollegeGoal $goal)
     {
-        $request->validate([
-            'goal_text' => ['required', 'string'],
-        ]);
+        $request->validate(['goal_text' => ['required', 'string']]);
 
-        $goal->update(['goal_text' => $request->goal_text]);
-
-        $college = $goal->college;
-
-        AuditLog::record(
-            action: 'updated',
-            module: 'Goal',
-            referenceId: $goal->id,
-            description: "Updated goal {$goal->college_goals_code} for college {$college?->name}."
-        );
+        $this->service->updateGoal($goal, $request->goal_text);
 
         return redirect()
             ->route('goal.index', ['college_id' => $goal->college_id])
@@ -85,33 +63,16 @@ class GoalController extends Controller
 
     public function goal_destroy(Request $request, CollegeGoal $goal)
     {
-        DB::beginTransaction();
+        $collegeId = $goal->college_id;
 
         try {
-            $college  = $goal->college;
-            $goalCode = $goal->college_goals_code;
-
-            $goal->delete();
-            $college->resequenceGoalCodes();
-
-            AuditLog::record(
-                action: 'deleted',
-                module: 'Goal',
-                referenceId: $goal->id,
-                description: "Deleted goal {$goalCode} for college {$college->name}."
-            );
-
-            DB::commit();
-        } catch (\Throwable $e) {
-            DB::rollBack();
-
-            return redirect()->back()->withErrors([
-                'error' => 'Failed to delete goal. Please try again.',
-            ]);
+            $this->service->destroyGoal($goal);
+        } catch (\Throwable) {
+            return redirect()->back()->withErrors(['error' => 'Failed to delete goal. Please try again.']);
         }
 
         return redirect()
-            ->route('goal.index', ['college_id' => $college->id])
+            ->route('goal.index', ['college_id' => $collegeId])
             ->with('toast', ['message' => 'Goal deleted and codes re-sequenced.', 'type' => 'success']);
     }
 }
