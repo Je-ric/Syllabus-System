@@ -13,21 +13,18 @@ use Illuminate\Support\Collection;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
-/**
- * WeeklyCoverageStep
- *
- * Thin Livewire component — all business logic lives in four services:
- *
- *   WeekGenerationService  generate() / regenerate() / deleteAllWeeks()
- *   WeekLockService        computeLockedWeeks()
- *   WeekContentService     populateInputs() / save() / reset()
- *   WeekResourceService    addReference() / removeReference() / addMaterial() / removeMaterial()
- *
- * This class is responsible only for:
- *   • Holding reactive Livewire state ($weekInputs, $activeComponent, …)
- *   • Bridging wire:click calls to service methods
- *   • Dispatching toast / event notifications
- */
+// WeeklyCoverageStep
+//
+// Thin Livewire component — all business logic lives in four services:
+//   WeekGenerationService  generate() / regenerate() / deleteAllWeeks()
+//   WeekLockService        computeLockedWeeks()
+//   WeekContentService     populateInputs() / save() / reset()
+//   WeekResourceService    addReference() / removeReference() / addMaterial() / removeMaterial()
+//
+// This class is responsible only for:
+//   • Holding reactive Livewire state ($weekInputs, $activeComponent, …)
+//   • Bridging wire:click calls to service methods
+//   • Dispatching toast / event notifications
 class WeeklyCoverageStep extends Component
 {
     // ── Reactive state (serialised into Livewire snapshot) ────────────────────
@@ -148,10 +145,8 @@ class WeeklyCoverageStep extends Component
 
     // ── Week content ──────────────────────────────────────────────────────────
 
-    /**
-     * Auto-save triggered by the Alpine $watch when a week is collapsed.
-     * Only shows a toast when something actually changed.
-     */
+    // Auto-save triggered by the Alpine $watch when a week is collapsed.
+    // Only shows a toast when something actually changed.
     public function saveWeek(int $weekNo): void
     {
         if ($weekNo <= 0 || isset($this->lockedWeeks[$weekNo])) {
@@ -187,10 +182,8 @@ class WeeklyCoverageStep extends Component
         $this->dispatch('syllabus-step-saved', step: 'weekly_coverage');
     }
 
-    /**
-     * Reset one editable week — clears all content from DB and blanks the
-     * form inputs in memory. Locked weeks are silently rejected.
-     */
+    // Reset one editable week — clears all content from DB and blanks the
+    // form inputs in memory. Locked weeks are silently rejected.
     public function resetWeek(int $weekNo): void
     {
         $blank = app(WeekContentService::class)->reset(
@@ -286,10 +279,8 @@ class WeeklyCoverageStep extends Component
             ->toArray();
     }
 
-    /**
-     * Full data reload — called on mount, step-changed, and calendar-updated.
-     * Never called from save paths to avoid overwriting in-flight edits.
-     */
+    // Full data reload — called on mount, step-changed, and calendar-updated.
+    // Never called from save paths to avoid overwriting in-flight edits.
     private function loadData(): void
     {
         $syllabus = $this->freshSyllabus();

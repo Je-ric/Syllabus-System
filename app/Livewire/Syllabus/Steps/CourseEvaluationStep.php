@@ -12,61 +12,43 @@ class CourseEvaluationStep extends Component
 
     public int  $syllabusId;
 
-    /** True when the course has both LEC and LAB components. */
+    // True when the course has both LEC and LAB components.
     public bool $courseHasLab = false;
 
-    /**
-     * Performance standard strings pulled from the saved CourseComponent rows.
-     * Used in the notes partial to show what the selected standard is and
-     * compare it against the running weight total.
-     * e.g. '67%' for LEC, '33%' for LAB
-     */
+    // Performance standard strings pulled from the saved CourseComponent rows.
+    // Used in the notes partial to show what the selected standard is.
+    // e.g. '67%' for LEC, '33%' for LAB
     public ?string $lecPerformanceStd = null;
     public ?string $labPerformanceStd = null;
 
-    /** Pre-computed weight total targets (structural: 67/33/100). */
+    // Pre-computed weight total targets (structural: 67/33/100).
     public int $lecStdNum = 100;
     public int $labStdNum = 33;
-    /** Running totals from saved weights. */
+    // Running totals from saved weights.
     public int $lecTotal  = 0;
     public int $labTotal  = 0;
-    /** Passing mark from performance_standard (e.g. 60, 75). */
+    // Passing mark from performance_standard (e.g. 60, 75).
     public int $lecPassingMark = 60;
     public int $labPassingMark = 60;
 
-    /**
-     * Rows shown in the evaluation table.
-     *
-     * Shape (one entry per week that has at least one assessable task):
-     * [
-     *   'week_no'     => int,
-     *   'is_exam'     => bool,
-     *   'is_mvgo'     => bool,          // true only for week 1
-     *   'term_label'  => string|null,   // '1st Term' / '2nd Term' / 'Final Term'
-     *   'co_coverage' => string,        // auto-resolved CO code for exam rows (read-only)
-     *   'lec' => [
-     *     'week_content_id' => int,
-     *     'co_code'         => string|null,
-     *     'task_label'      => string,
-     *   ] | null,
-     *   'lab' => [...same...] | null,
-     * ]
-     *
-     * For exam rows, 'co_coverage' is the CO code of the last non-exam week
-     * before this exam — resolved automatically in CourseEvaluationService.
-     * It is NOT user-editable in the blade; a read-only badge is shown instead.
-     */
+    // Rows shown in the evaluation table.
+    // Shape (one entry per week that has at least one assessable task):
+    // [
+    //   'week_no'     => int,
+    //   'is_exam'     => bool,
+    //   'is_mvgo'     => bool,
+    //   'term_label'  => string|null,
+    //   'co_coverage' => string,  // auto-resolved CO code for exam rows (read-only)
+    //   'lec'         => ['week_content_id' => int, 'co_code' => string|null, 'task_label' => string] | null,
+    //   'lab'         => [...same...] | null,
+    // ]
     public array $rows = [];
 
-    /**
-     * Weight (and outcome label) inputs keyed by week_content_id.
-     * wire:model.lazy in the blade binds directly to these slots.
-     *
-     * Shape: [ week_content_id => ['weight' => '10', 'outcome_label' => 'CO1'] ]
-     *
-     * For MVGO rows, 'outcome_label' is pre-set to 'MVGO' and never editable.
-     * For exam rows, 'outcome_label' is auto-filled from co_coverage on save.
-     */
+    // Weight and outcome label inputs keyed by week_content_id.
+    // wire:model.lazy in the blade binds directly to these slots.
+    // Shape: [ week_content_id => ['weight' => '10', 'outcome_label' => 'CO1'] ]
+    // For MVGO rows, 'outcome_label' is pre-set to 'MVGO' and never editable.
+    // For exam rows, 'outcome_label' is auto-filled from co_coverage on save.
     public array $inputs = [];
 
     // ── Mount ─────────────────────────────────────────────────────────────────

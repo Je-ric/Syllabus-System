@@ -8,21 +8,19 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
-/**
- * ComponentsStep
- *
- * wire:model.live is used in the blade so every field change is immediately
- * synced to PHP state. The save runs on navigation (syllabus-save-step) or
- * the manual Save button. Because the wizard never remounts child components,
- * onStepChanged always reloads fresh DB data when navigating back to this step.
- *
- * DB schema (course_components):
- *   performance_standard  DECIMAL(5,2)  DEFAULT 50.00
- *   instructor_name       VARCHAR        NOT NULL
- *   instructor_email      VARCHAR        NOT NULL
- *   class_hours           VARCHAR        NOT NULL
- *   phone / office / schedule / consultation_hours  NULLABLE
- */
+// ComponentsStep
+//
+// wire:model.live is used in the blade so every field change is immediately
+// synced to PHP state. The save runs on navigation (syllabus-save-step) or
+// the manual Save button. Because the wizard never remounts child components,
+// onStepChanged always reloads fresh DB data when navigating back to this step.
+//
+// DB schema (course_components):
+//   performance_standard  DECIMAL(5,2)  DEFAULT 50.00
+//   instructor_name       VARCHAR        NOT NULL
+//   instructor_email      VARCHAR        NOT NULL
+//   class_hours           VARCHAR        NOT NULL
+//   phone / office / schedule / consultation_hours  NULLABLE
 class ComponentsStep extends Component
 {
     // ── Public state ──────────────────────────────────────────────────────────
@@ -206,17 +204,10 @@ class ComponentsStep extends Component
         }
     }
 
-    /**
-     * Build the DB column array from the Livewire public properties.
-     *
-     * Rules:
-     *   - instructor_name, instructor_email, class_hours  → NOT NULL in DB.
-     *     Save whatever the user typed; if blank, save NULL and let the DB default
-     *     or the completeness check catch it — do NOT substitute 'None/NA'.
-     *   - phone, office, schedule, consultation_hours     → NULLABLE. Blank → null.
-     *   - performance_standard                            → DECIMAL. Parse the
-     *     select option value (e.g. "50.00" or "67.00") to float.
-     */
+    // Build the DB column array from the Livewire public properties.
+    // instructor_name, instructor_email, class_hours — NOT NULL in DB.
+    // phone, office, schedule, consultation_hours   — NULLABLE. Blank → null.
+    // performance_standard                          — DECIMAL. Parse the select option value.
     private function buildPayload(string $prefix): array
     {
         $get = fn (string $field) => $this->{$prefix . '_' . $field};
@@ -235,40 +226,31 @@ class ComponentsStep extends Component
 
     // ── Value helpers ─────────────────────────────────────────────────────────
 
-    /**
-     * Return trimmed string or null for nullable DB columns.
-     */
+    // Return trimmed string or null for nullable DB columns.
     private function nullable(mixed $v): ?string
     {
         $s = trim((string) ($v ?? ''));
         return $s === '' ? null : $s;
     }
 
-    /**
-     * Return trimmed string; fall back to $fallback when blank.
-     * Used for NOT NULL columns so the DB never complains.
-     */
+    // Return trimmed string; fall back to $fallback when blank.
+    // Used for NOT NULL columns so the DB never complains.
     private function str(mixed $v, ?string $fallback = null): ?string
     {
         $s = trim((string) ($v ?? ''));
         return $s !== '' ? $s : $fallback;
     }
 
-    /**
-     * Convert a select option value like "50.00", "67.00", "50", "50%"
-     * to a float for the DECIMAL(5,2) DB column.
-     */
+    // Convert a select option value like "50.00", "67.00", "50", "50%"
+    // to a float for the DECIMAL(5,2) DB column.
     private function toDecimal(mixed $v, float $fallback): float
     {
         $s = str_replace('%', '', trim((string) ($v ?? '')));
         return is_numeric($s) ? round((float) $s, 2) : $fallback;
     }
 
-    /**
-     * Convert a DB DECIMAL value (e.g. 50.00 / "67.00") to the string
-     * that matches the blade <option value="..."> attribute exactly.
-     * We store option values as "50.00", "67.00" etc. in the blade.
-     */
+    // Convert a DB DECIMAL value (e.g. 50.00 / "67.00") to the string
+    // that matches the blade <option value="..."> attribute exactly.
     private function toOptionValue(mixed $v, string $fallback): string
     {
         $s = trim((string) ($v ?? ''));

@@ -7,23 +7,20 @@ use App\Services\Syllabus\CourseOutcomeService;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
-/**
- * Course Outcomes step — individual CRUD per outcome.
- *
- * UI contract (enforced by Alpine in the blade):
- *  • editingId  = int|null — which saved CO card is in edit mode
- *  • addingNew  = bool     — whether the "Add" form is open
- *  • savingId   = int|null — which card is mid-save (shows spinner on that card only)
- *  • deletingId = int|null — which card is mid-delete
- *
- * Livewire owns: $outcomes (the authoritative list), $programOutcomes (read-only).
- * Alpine owns: all transient UI state (editingId, draft text, etc).
- *
- * Why individual save/delete instead of saveAll?
- *  → Instant per-row feedback. Users know exactly which CO saved.
- *  → No "unsaved" ambiguity — every card is either persisted or clearly in draft.
- *  → Beginner-friendly: buttons live on each card, not in a distant header.
- */
+// Course Outcomes step — individual CRUD per outcome.
+//
+// UI contract (enforced by Alpine in the blade):
+//   editingId  = int|null — which saved CO card is in edit mode
+//   addingNew  = bool     — whether the "Add" form is open
+//   savingId   = int|null — which card is mid-save (shows spinner on that card only)
+//   deletingId = int|null — which card is mid-delete
+//
+// Livewire owns: $outcomes (the authoritative list), $programOutcomes (read-only).
+// Alpine owns: all transient UI state (editingId, draft text, etc).
+//
+// Individual save/delete instead of saveAll:
+//   → Instant per-row feedback. Users know exactly which CO saved.
+//   → No "unsaved" ambiguity — every card is either persisted or clearly in draft.
 class CourseOutcomesStep extends Component
 {
     // ── Identity ───────────────────────────────────────────────────────────────
@@ -64,10 +61,8 @@ class CourseOutcomesStep extends Component
         }
     }
 
-    /**
-     * Auto-save on step navigation.
-     * Individual-save model means there is nothing pending — just signal done.
-     */
+    // Auto-save on step navigation.
+    // Individual-save model means there is nothing pending — just signal done.
     #[On('syllabus-save-step')]
     public function onSaveRequested(string $step): void
     {
@@ -83,12 +78,7 @@ class CourseOutcomesStep extends Component
     // CRUD — called from Alpine via $wire.*
     // ══════════════════════════════════════════════════════════════════════════
 
-    /**
-     * Create a new CO.
-     * Called by Alpine: await $wire.createOutcome(draftText)
-     * Returns the new outcome so Alpine can clear the draft and close the form.
-     * Dispatches 'co-created' with the new list so Alpine can update its mirror.
-     */
+    // Create a new CO. Called by Alpine: await $wire.createOutcome(draftText)
     public function createOutcome(string $description): void
     {
         try {
@@ -108,11 +98,7 @@ class CourseOutcomesStep extends Component
         $this->dispatch('syllabus-course-outcomes-updated');
     }
 
-    /**
-     * Update an existing CO's description.
-     * Called by Alpine: await $wire.updateOutcome(id, draftText)
-     * Dispatches 'co-saved' so Alpine closes the edit form.
-     */
+    // Update an existing CO's description. Called by Alpine: await $wire.updateOutcome(id, draftText)
     public function updateOutcome(int $outcomeId, string $description): void
     {
         try {
@@ -132,11 +118,7 @@ class CourseOutcomesStep extends Component
         $this->dispatch('syllabus-course-outcomes-updated');
     }
 
-    /**
-     * Delete a CO by id.
-     * Called by Alpine: await $wire.deleteOutcome(id)
-     * Dispatches 'co-deleted' so Alpine clears deletingId.
-     */
+    // Delete a CO by id. Called by Alpine: await $wire.deleteOutcome(id)
     public function deleteOutcome(int $outcomeId): void
     {
         try {

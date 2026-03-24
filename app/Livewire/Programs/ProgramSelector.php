@@ -155,15 +155,9 @@ class ProgramSelector extends Component
         $this->redirect(route($this->redirectRoute, ['program_id' => $programId]), navigate: true);
     }
 
-    /**
-     * Preselect college, department, and optionally program based on user's assignments
-     * Priority: Department assignment (chair/faculty) > College assignment (dean)
-     * Returns the preselected program ID if one was preselected, null otherwise
-     */
-
-    // This function checks the authenticated user's assignments to determine if they should have a program preselected.
-    // It first checks if the user has a department assignment (either as chair or faculty).
-    // If so, it preselects the college and department associated with that assignment, and loads the programs
+    // Preselect college, department, and optionally program based on user's assignments.
+    // Priority: Department assignment (chair/faculty) > College assignment (dean).
+    // Returns the preselected program ID if one was preselected, null otherwise.
     private function preselectFromUserAssignments(): ?int
     {
         /** @var \App\Models\User|null $user */

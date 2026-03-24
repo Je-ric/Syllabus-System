@@ -78,10 +78,8 @@ class ReviewStep extends Component
         }
     }
 
-    /**
-     * Fired by SyllabusWizard after addReviewer/removeReviewer mutations.
-     * Refreshes the Eloquent relation — accordion stays open.
-     */
+    // Fired by SyllabusWizard after addReviewer/removeReviewer mutations.
+    // Refreshes the Eloquent relation — accordion stays open.
     #[On('syllabus-reviewers-updated')]
     public function onReviewersUpdated(): void
     {
@@ -141,11 +139,9 @@ class ReviewStep extends Component
     // REVISION HISTORY
     // ══════════════════════════════════════════════════════════════════════
 
-    /**
-     * Called from Alpine with all form values as typed arguments.
-     * Zero wire:model round-trips while typing — single network call on submit.
-     * Dispatches 'revision-saved' so Alpine can reset the form.
-     */
+    // Called from Alpine with all form values as typed arguments.
+    // Zero wire:model round-trips while typing — single network call on submit.
+    // Dispatches 'revision-saved' so Alpine can reset the form.
     public function saveRevision(
         ?int   $editingId,
         int    $revisionNo,
@@ -208,10 +204,8 @@ class ReviewStep extends Component
             message: $isEdit ? 'Revision updated.' : 'Revision added.');
     }
 
-    /**
-     * Renumber all revisions 0, 1, 2, … by their current revision_no order.
-     * Dispatches 'revisions-resequenced' so Alpine knows to reload display.
-     */
+    // Renumber all revisions 0, 1, 2, … by their current revision_no order.
+    // Dispatches 'revisions-resequenced' so Alpine knows to reload display.
     public function resequenceRevisions(): void
     {
         if (! $this->syllabus) {
@@ -231,10 +225,8 @@ class ReviewStep extends Component
         $this->dispatch('lw-toast', type: 'success', message: 'Revisions renumbered 0, 1, 2, …');
     }
 
-    /**
-     * Delete revision by DB id.
-     * Dispatches 'revision-deleted' so Alpine clears its deletingId flag.
-     */
+    // Delete revision by DB id.
+    // Dispatches 'revision-deleted' so Alpine clears its deletingId flag.
     public function removeRevision(int $revisionId): void
     {
         if (! $this->syllabus) {
