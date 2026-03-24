@@ -280,19 +280,29 @@ class SyllabusWizard extends Component
         $storagePathAbridged   = $baseDir . '/' . $baseSlug . '-abridged.html';
         $storagePathAssessment = $baseDir . '/' . $baseSlug . '-assessment.html';
 
-        // 3. Write both to local disk ─────────────────────────────────────
+        // 3. Write to Google Drive (primary) ──────────────────────────────────
+        $driveSuccess = false;
         try {
-            $ok = Storage::disk('local')->put($storagePath, $html);
-            if (! $ok) {
-                $this->dispatch('lw-toast', type: 'error', message: 'Snapshot write failed — storage returned false.');
-                return;
-            }
-            Storage::disk('local')->put($storagePathAbridged, $htmlAbridged);
+            Storage::disk('google')->put($storagePath,           $html);
+            Storage::disk('google')->put($storagePathAbridged,   $htmlAbridged);
+            Storage::disk('google')->put($storagePathAssessment, $htmlAssessment);
+            $driveSuccess = true;
+        } catch (Throwable $e) {
+            report($e);
+            $this->dispatch('lw-toast', type: 'warning', message: 'Google Drive upload failed: ' . $e->getMessage());
+        }
+
+        // 3b. Always mirror to local disk as backup ───────────────────────────
+        try {
+            Storage::disk('local')->put($storagePath,           $html);
+            Storage::disk('local')->put($storagePathAbridged,   $htmlAbridged);
             Storage::disk('local')->put($storagePathAssessment, $htmlAssessment);
         } catch (Throwable $e) {
             report($e);
-            $this->dispatch('lw-toast', type: 'error', message: 'Disk write error: ' . $e->getMessage());
-            return;
+            if (! $driveSuccess) {
+                $this->dispatch('lw-toast', type: 'error', message: 'Both Drive and local write failed: ' . $e->getMessage());
+                return;
+            }
         }
 
         // 4. Persist version record ──────────────────────────────────────
@@ -338,7 +348,11 @@ class SyllabusWizard extends Component
             description: "Saved syllabus version v{$version} for course {$courseCode} ({$academicYear} {$semester})."
         );
 
-        $this->dispatch('lw-toast', type: 'success', message: "Syllabus version frozen (v{$version}).");
+        $message = "Syllabus version frozen (v{$version}).";
+        if ($driveSuccess) {
+            $message .= ' Backed up to Google Drive.';
+        }
+        $this->dispatch('lw-toast', type: 'success', message: $message);
         $this->dispatch('wizard-save-done');
         $this->dispatch('syllabus-step-changed', step: 'review');
     }

@@ -16,8 +16,17 @@ class SyllabusDeleteService
         foreach ($syllabus->completeSyllabi as $snapshot) {
             foreach (['pdf_path', 'abridged_path', 'evaluation_path'] as $field) {
                 $path = $snapshot->$field ?? '';
-                if ($path !== '' && Storage::disk('local')->exists($path)) {
-                    Storage::disk('local')->delete($path);
+                if ($path === '') {
+                    continue;
+                }
+                foreach (['local', 'google'] as $disk) {
+                    try {
+                        if (Storage::disk($disk)->exists($path)) {
+                            Storage::disk($disk)->delete($path);
+                        }
+                    } catch (\Throwable) {
+                        // non-fatal — continue cleanup
+                    }
                 }
             }
             $snapshot->delete();

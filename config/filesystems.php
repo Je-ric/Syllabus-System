@@ -59,12 +59,13 @@ return [
             'throw' => false,
             'report' => false,
         ],
+
         'google' => [
-            'driver' => 'google',
-            'clientId' => env('GOOGLE_DRIVE_CLIENT_ID'),
-            'clientSecret' => env('GOOGLE_DRIVE_CLIENT_SECRET'),
-            'refreshToken' => env('GOOGLE_DRIVE_REFRESH_TOKEN'),
-            'folder' => env('GOOGLE_DRIVE_FOLDER'),
+            'driver'             => 'google',
+            'serviceAccountJson' => env('GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON', 'storage/app/csms-489705-0132f004c56b.json'),
+            'oauthCredentials'   => env('GOOGLE_DRIVE_OAUTH_CREDENTIALS', 'storage/app/oauth-credentials.json'),
+            'refreshToken'       => env('GOOGLE_DRIVE_REFRESH_TOKEN', ''),
+            'folder'             => env('GOOGLE_DRIVE_FOLDER', ''),
         ]
 
     ],

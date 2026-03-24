@@ -318,15 +318,18 @@ class SyllabusController extends Controller
         $path = trim((string) ($completeSyllabus->evaluation_path ?? ''));
 
         if ($path === '' || preg_match('#^https?://#i', $path) || str_starts_with($path, '/')) {
-            abort(400, 'This assessment version is not stored locally.');
+            abort(400, 'This assessment version is not stored on Drive.');
         }
 
-        if (! Storage::disk('local')->exists($path)) {
+        $disk = Storage::disk('google')->exists($path) ? 'google' : 'local';
+
+        if (! Storage::disk($disk)->exists($path)) {
             abort(404, 'Assessment saved version file not found.');
         }
 
-        return Storage::disk('local')->download($path, basename($path), [
-            'Content-Type' => 'text/html; charset=UTF-8',
+        return response(Storage::disk($disk)->get($path), 200, [
+            'Content-Type'        => 'text/html; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . basename($path) . '"',
         ]);
     }
 
@@ -358,15 +361,18 @@ class SyllabusController extends Controller
         $path = trim((string) $completeSyllabus->pdf_path);
 
         if ($path === '' || preg_match('#^https?://#i', $path) || str_starts_with($path, '/')) {
-            abort(400, 'This saved version is not stored locally.');
+            abort(400, 'This saved version is not stored on Drive.');
         }
 
-        if (! Storage::disk('local')->exists($path)) {
+        $disk = Storage::disk('google')->exists($path) ? 'google' : 'local';
+
+        if (! Storage::disk($disk)->exists($path)) {
             abort(404, 'Saved version file not found.');
         }
 
-        return Storage::disk('local')->download($path, basename($path), [
-            'Content-Type' => 'text/html; charset=UTF-8',
+        return response(Storage::disk($disk)->get($path), 200, [
+            'Content-Type'        => 'text/html; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . basename($path) . '"',
         ]);
     }
 
@@ -402,15 +408,18 @@ class SyllabusController extends Controller
         $path = trim((string) ($completeSyllabus->abridged_path ?? ''));
 
         if ($path === '' || preg_match('#^https?://#i', $path) || str_starts_with($path, '/')) {
-            abort(400, 'This abridged version is not stored locally.');
+            abort(400, 'This abridged version is not stored on Drive.');
         }
 
-        if (! Storage::disk('local')->exists($path)) {
+        $disk = Storage::disk('google')->exists($path) ? 'google' : 'local';
+
+        if (! Storage::disk($disk)->exists($path)) {
             abort(404, 'Abridged saved version file not found.');
         }
 
-        return Storage::disk('local')->download($path, basename($path), [
-            'Content-Type' => 'text/html; charset=UTF-8',
+        return response(Storage::disk($disk)->get($path), 200, [
+            'Content-Type'        => 'text/html; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . basename($path) . '"',
         ]);
     }
 
