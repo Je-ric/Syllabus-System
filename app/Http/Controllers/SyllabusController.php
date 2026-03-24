@@ -6,7 +6,8 @@ use App\Models\AuditLog;
 use App\Models\CompleteSyllabus;
 use App\Models\Program;
 use App\Models\Syllabus;
-use App\Services\SyllabusPreviewService;
+use App\Services\Syllabus\SyllabusPreviewService;
+use App\Services\Syllabus\SyllabusSnapshotService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -16,7 +17,8 @@ use Illuminate\Support\Facades\Storage;
 class SyllabusController extends Controller
 {
     public function __construct(
-        private readonly SyllabusPreviewService $previewService
+        private readonly SyllabusPreviewService  $previewService,
+        private readonly SyllabusSnapshotService $snapshotService,
     ) {}
 
     // ── Syllabus CRUD / wizard ────────────────────────────────────────────────
@@ -277,7 +279,7 @@ class SyllabusController extends Controller
     public function downloadComplete(Syllabus $syllabus)
     {
         $this->authorizeSyllabusAccess($syllabus);
-        $html     = $this->generateCompleteHtmlSnapshot($syllabus);
+        $html     = $this->snapshotService->generateCompleteHtml($syllabus);
         $filename = 'syllabus-complete-' . $syllabus->course->course_code . '.html';
 
         return response($html, 200, [
@@ -289,7 +291,7 @@ class SyllabusController extends Controller
     public function downloadAbridged(Syllabus $syllabus)
     {
         $this->authorizeSyllabusAccess($syllabus);
-        $html     = $this->generateAbridgedHtmlSnapshot($syllabus);
+        $html     = $this->snapshotService->generateAbridgedHtml($syllabus);
         $filename = 'syllabus-abridged-' . $syllabus->course->course_code . '.html';
 
         return response($html, 200, [
@@ -301,68 +303,13 @@ class SyllabusController extends Controller
     public function downloadAssessment(Syllabus $syllabus)
     {
         $this->authorizeSyllabusAccess($syllabus);
-        $html     = $this->generateAssessmentHtmlSnapshot($syllabus);
-        $filename = 'assessment-plan-' . $syllabus->course->course_code . '.html';
+        $html     = $this->snapshotService->generateAssessmentHtml($syllabus);
+        $filename = 'syllabus-assessment-' . $syllabus->course->course_code . '.html';
 
         return response($html, 200, [
             'Content-Type'        => 'text/html; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ]);
-    }
-
-    // ── Snapshot / PDF generation ─────────────────────────────────────────────
-
-    public function generateCompleteHtmlSnapshot(Syllabus $syllabus): string
-    {
-        $this->authorizeSyllabusAccess($syllabus);
-
-        $data = $this->previewService->buildCompleteData($syllabus);
-        $data['isSnapshot']       = true;
-        $data['inlinePreviewCss'] = @file_get_contents(resource_path('css/preview.css')) ?: null;
-
-        $logoPath = public_path('assets/clsu-logo-green.png');
-        $data['inlineLogoDataUri'] = is_file($logoPath)
-            ? ('data:image/png;base64,' . base64_encode((string) file_get_contents($logoPath)))
-            : null;
-
-        return view('Syllabus.preview.complete', $data)->render();
-    }
-
-    public function generateAssessmentHtmlSnapshot(Syllabus $syllabus): string
-    {
-        $this->authorizeSyllabusAccess($syllabus);
-
-        $data = $this->previewService->buildCompleteData($syllabus);
-        $data['isSnapshot']       = true;
-        $data['inlinePreviewCss'] = @file_get_contents(resource_path('css/preview.css')) ?: null;
-
-        $logoPath = public_path('assets/clsu-logo-green.png');
-        $data['inlineLogoDataUri'] = is_file($logoPath)
-            ? ('data:image/png;base64,' . base64_encode((string) file_get_contents($logoPath)))
-            : null;
-
-        return view('Syllabus.preview.assessment', $data)->render();
-    }
-
-    public function generateAbridgedHtmlSnapshot(Syllabus $syllabus): string
-    {
-        $this->authorizeSyllabusAccess($syllabus);
-
-        $data = $this->previewService->buildAbridgedData($syllabus);
-        $data['isSnapshot'] = true;
-
-        // Inline both shared (preview.css) and abridged-specific (abridged.css) stylesheets.
-        $sharedCss   = @file_get_contents(resource_path('css/preview.css'))  ?: '';
-        $abridgedCss = @file_get_contents(resource_path('css/abridged.css')) ?: '';
-        $data['inlinePreviewCss'] = $sharedCss . "
-" . $abridgedCss ?: null;
-
-        $logoPath = public_path('assets/clsu-logo-green.png');
-        $data['inlineLogoDataUri'] = is_file($logoPath)
-            ? ('data:image/png;base64,' . base64_encode((string) file_get_contents($logoPath)))
-            : null;
-
-        return view('Syllabus.preview.abridged', $data)->render();
     }
 
     // ── Saved versions ────────────────────────────────────────────────────────
@@ -378,20 +325,13 @@ class SyllabusController extends Controller
             return $this->previewAssessment($syllabus);
         }
 
-        if (preg_match('#^https?://#i', $path) || str_starts_with($path, '/')) {
-            return redirect()->away($path);
-        }
+        $html = $this->snapshotService->getSavedHtml($path)
+            ?? abort(404, 'Assessment saved version file not found.');
 
-        if (! Storage::disk('local')->exists($path)) {
-            abort(404, 'Assessment saved version file not found.');
-        }
-
-        $html = Storage::disk('local')->get($path);
-        $html = $this->injectVersionsDrawerIntoHtml($syllabus, $completeSyllabus, 'assessment', $html);
-
-        return response($html, 200, [
-            'Content-Type' => 'text/html; charset=UTF-8',
-        ]);
+        return response(
+            $this->snapshotService->injectVersionsDrawer($syllabus, $completeSyllabus, 'assessment', $html),
+            200, ['Content-Type' => 'text/html; charset=UTF-8']
+        );
     }
 
     public function downloadSavedAssessment(CompleteSyllabus $completeSyllabus)
@@ -425,16 +365,13 @@ class SyllabusController extends Controller
             return redirect()->away($path);
         }
 
-        if ($path === '' || ! Storage::disk('local')->exists($path)) {
-            abort(404, 'Saved version file not found.');
-        }
+        $html = $this->snapshotService->getSavedHtml($path)
+            ?? abort(404, 'Saved version file not found.');
 
-        $html = Storage::disk('local')->get($path);
-        $html = $this->injectVersionsDrawerIntoHtml($syllabus, $completeSyllabus, 'complete', $html);
-
-        return response($html, 200, [
-            'Content-Type' => 'text/html; charset=UTF-8',
-        ]);
+        return response(
+            $this->snapshotService->injectVersionsDrawer($syllabus, $completeSyllabus, 'complete', $html),
+            200, ['Content-Type' => 'text/html; charset=UTF-8']
+        );
     }
 
     public function downloadSavedComplete(CompleteSyllabus $completeSyllabus)
@@ -465,7 +402,6 @@ class SyllabusController extends Controller
         $path = trim((string) ($completeSyllabus->abridged_path ?? ''));
 
         if ($path === '') {
-            // No abridged snapshot saved yet — fall back to live render
             return $this->previewAbridged($syllabus);
         }
 
@@ -473,45 +409,13 @@ class SyllabusController extends Controller
             return redirect()->away($path);
         }
 
-        if (! Storage::disk('local')->exists($path)) {
-            abort(404, 'Abridged saved version file not found.');
-        }
+        $html = $this->snapshotService->getSavedHtml($path)
+            ?? abort(404, 'Abridged saved version file not found.');
 
-        $html = Storage::disk('local')->get($path);
-        $html = $this->injectVersionsDrawerIntoHtml($syllabus, $completeSyllabus, 'abridged', $html);
-
-        return response($html, 200, [
-            'Content-Type' => 'text/html; charset=UTF-8',
-        ]);
-    }
-
-    private function injectVersionsDrawerIntoHtml(
-        Syllabus $syllabus,
-        CompleteSyllabus $activeSavedVersion,
-        string $previewVariant,
-        string $html
-    ): string {
-        $savedVersions = CompleteSyllabus::query()
-            ->where('syllabus_id', $syllabus->id)
-            ->orderByDesc('version')
-            ->orderByDesc('created_at')
-            ->get();
-
-        $drawer = view('Syllabus.preview._versions_drawer', [
-            'syllabus'           => $syllabus,
-            'savedVersions'      => $savedVersions,
-            'previewMode'        => 'saved',
-            'previewVariant'     => $previewVariant,
-            'activeSavedVersion' => $activeSavedVersion,
-            'openButton'         => 'floating',
-        ])->render();
-
-        $pos = stripos($html, '</body>');
-        if ($pos === false) {
-            return $html . $drawer;
-        }
-
-        return substr($html, 0, $pos) . $drawer . substr($html, $pos);
+        return response(
+            $this->snapshotService->injectVersionsDrawer($syllabus, $completeSyllabus, 'abridged', $html),
+            200, ['Content-Type' => 'text/html; charset=UTF-8']
+        );
     }
 
     public function downloadSavedAbridged(CompleteSyllabus $completeSyllabus)

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Syllabus;
 
 use App\Models\CompleteSyllabus;
 use App\Models\Syllabus;

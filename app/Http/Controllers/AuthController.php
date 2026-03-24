@@ -103,6 +103,9 @@ class AuthController extends Controller
                 case 'active':
                     return redirect()->intended(route('syllabus.index'));
                 case 'pending':
+                    Auth::logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
                     return redirect()->route('waiting.approval');
                 case 'rejected':
                     Auth::logout();

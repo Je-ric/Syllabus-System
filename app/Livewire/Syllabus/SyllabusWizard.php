@@ -2,23 +2,23 @@
 
 namespace App\Livewire\Syllabus;
 
-use App\Http\Controllers\SyllabusController;
-use App\Models\AuditLog;
-use App\Models\CompleteSyllabus;
-use App\Models\CourseComponent;
-use App\Models\CourseOutcome;
-use App\Models\Course;
-use App\Models\Syllabus;
-use App\Models\SyllabusWeek;
-use App\Models\WeekContent;
-use App\Models\SyllabusEvaluationItem;
 use App\Services\Syllabus\SyllabusReviewService;
+use App\Services\Syllabus\SyllabusSnapshotService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use App\Models\Syllabus;
+use App\Models\Course;
+use App\Models\CompleteSyllabus;
+use App\Models\AuditLog;
+use App\Models\SyllabusWeek;
+use App\Models\CourseOutcome;
+use App\Models\CourseComponent;
+use App\Models\WeekContent;
+use App\Models\SyllabusEvaluationItem;
 use Throwable;
 
 class SyllabusWizard extends Component
@@ -248,10 +248,10 @@ class SyllabusWizard extends Component
 
         // 1. Generate HTML snapshots (complete + abridged + assessment) ──────
         try {
-            $controller   = app(SyllabusController::class);
-            $html         = $controller->generateCompleteHtmlSnapshot($syllabus);
-            $htmlAbridged = $controller->generateAbridgedHtmlSnapshot($syllabus);
-            $htmlAssessment = $controller->generateAssessmentHtmlSnapshot($syllabus);
+            $snapshot       = app(SyllabusSnapshotService::class);
+            $html           = $snapshot->generateCompleteHtml($syllabus);
+            $htmlAbridged   = $snapshot->generateAbridgedHtml($syllabus);
+            $htmlAssessment = $snapshot->generateAssessmentHtml($syllabus);
         } catch (Throwable $e) {
             report($e);
             $this->dispatch('lw-toast', type: 'error', message: 'Save-as-done failed: ' . $e->getMessage());

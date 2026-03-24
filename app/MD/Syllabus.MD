@@ -10,6 +10,9 @@ High-level documentation for the Syllabus feature in CSMS (wizard-based creation
 - Steps
   - `app/Livewire/Syllabus/Steps/*`
   - `resources/views/livewire/syllabus/steps/*`
+- Services
+  - `app/Services/SyllabusPreviewService.php` — builds view data arrays for all preview variants
+  - `app/Services/Syllabus/SyllabusSnapshotService.php` — generates self-contained HTML snapshots; serves and injects drawer into saved-version files
 - Models
   - `app/Models/Syllabus.php`
   - `app/Models/CourseComponent.php`

@@ -6,6 +6,9 @@ Rules for the syllabus listing page, creation entry point, and deletion. For wiz
 
 - Controller
   - `app/Http/Controllers/SyllabusController.php`
+- Services
+  - `app/Services/Syllabus/SyllabusPreviewService.php` — builds view data for all preview variants
+  - `app/Services/Syllabus/SyllabusSnapshotService.php` — generates self-contained HTML snapshots and serves saved-version files
 - Models
   - `app/Models/Syllabus.php`
   - `app/Models/CompleteSyllabus.php`
