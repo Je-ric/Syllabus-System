@@ -44,7 +44,10 @@ class AppServiceProvider extends ServiceProvider
             $adapter = new \Masbug\Flysystem\GoogleDriveAdapter(
                 $service,
                 $folderId,
-                ['useDisplayPaths' => true]
+                [
+                    'useDisplayPaths' => true,
+                    'rootId'          => $folderId,
+                ]
             );
             $driver = new \League\Flysystem\Filesystem($adapter);
 

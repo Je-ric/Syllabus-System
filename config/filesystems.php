@@ -67,7 +67,9 @@ return [
             'refreshToken'       => env('GOOGLE_DRIVE_REFRESH_TOKEN', ''),
             'folder'             => env('GOOGLE_DRIVE_FOLDER', ''),
         ]
-
+        // The adapter is treating the folder ID as a display name and creating a new folder with that ID string as the name,
+        // instead of using it as the root.
+        // This is because useDisplayPaths => true resolves paths by name.
     ],
 
     /*
