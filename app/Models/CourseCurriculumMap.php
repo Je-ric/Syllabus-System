@@ -12,15 +12,13 @@ class CourseCurriculumMap extends Model
         'ied',
     ];
 
-    // many curriculum maps to one course
-    // Used in:
+    // Used in: (pivot model — direct queries via Course::programOutcomes() or ProgramOutcome::courses())
     public function course()
     {
         return $this->belongsTo(Course::class);
     }
 
-    // courses map to many program outcomes
-    // Used in:
+    // Used in: (pivot model — direct queries via Course::programOutcomes() or ProgramOutcome::courses())
     public function programOutcome()
     {
         return $this->belongsTo(ProgramOutcome::class);

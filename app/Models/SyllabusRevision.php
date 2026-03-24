@@ -24,6 +24,9 @@ class SyllabusRevision extends Model
         'syllabus_id'   => 'integer',
     ];
 
+    // Used in: delete() - SyllabusDeleteService; 
+    //          eagerLoad() - SyllabusPreviewService; 
+    //          mount() - SyllabusRevisionHistoryService
     public function syllabus()
     {
         return $this->belongsTo(Syllabus::class);

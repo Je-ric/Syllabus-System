@@ -25,16 +25,21 @@ class CompleteSyllabus extends Model
         'checksum_evaluation',
     ];
 
+    // Used in: previewSaved*() - SyllabusController; 
+    //          injectVersionsDrawer() - SyllabusSnapshotService; 
+    //          sharedData() - SyllabusPreviewService
     public function syllabus()
     {
         return $this->belongsTo(Syllabus::class);
     }
 
+    // Used in: (available for future use — course context on snapshot)
     public function course()
     {
         return $this->belongsTo(Course::class);
     }
 
+    // Used in: (available for future use — who approved the snapshot)
     public function approver()
     {
         return $this->belongsTo(User::class, 'approved_by');

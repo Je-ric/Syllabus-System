@@ -14,6 +14,10 @@ class Reference extends Model
         'reference_text',
     ];
 
+    // Used in: save() - WeekContentService; 
+    //          reset() - WeekContentService; 
+    //          buildReferences() - SyllabusPreviewService; 
+    //          delete() - SyllabusDeleteService
     public function syllabus()
     {
         return $this->belongsTo(Syllabus::class);

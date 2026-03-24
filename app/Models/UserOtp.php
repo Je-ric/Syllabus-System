@@ -23,6 +23,10 @@ class UserOtp extends Model
         ];
     }
 
+    // Used in: issueForUser() - OtpService; 
+    //          validate() - OtpService; 
+    //          clear() - OtpService; 
+    //          migrateLegacyOtp() - OtpService
     public function user()
     {
         return $this->belongsTo(User::class);

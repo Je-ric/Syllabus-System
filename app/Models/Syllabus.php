@@ -24,157 +24,142 @@ class Syllabus extends Model
         'approved_at' => 'datetime',
     ];
 
-    // Used in:
+    // Used in: eagerLoad() - SyllabusPreviewService; 
+    //          loadRows() - CourseEvaluationService; 
+    //          wizard() - SyllabusController
     public function course()
     {
         return $this->belongsTo(Course::class);
     }
 
-    // Used in:
+    // Used in: eagerLoad() - SyllabusPreviewService; 
+    //          mount() - AcademicCalendarStep (Livewire)
     public function academicCalendar()
     {
         return $this->belongsTo(AcademicCalendar::class, 'academic_calendar_id');
     }
 
-    // Used in:
+    // Used in: eagerLoad() - SyllabusPreviewService
     public function preparer()
     {
         return $this->belongsTo(User::class, 'prepared_by');
     }
 
-    // Used in:
-    // this is also a dean
+    // Used in: eagerLoad() - SyllabusPreviewService; 
+    //          setConcurredBy() - SyllabusApprovalService
     public function deanConcurred()
     {
         return $this->belongsTo(User::class, 'concurred_by');
     }
 
-    // Used in:
+    // Used in: eagerLoad() - SyllabusPreviewService
     public function dean()
     {
         return $this->belongsTo(User::class, 'approved_by');
     }
 
-    // Used in:
+    // Used in: delete() - SyllabusDeleteService; 
+    //          getCurrentRevisionNumber() - Syllabus; 
+    //          mount() - SyllabusRevisionHistoryService
     public function revisions()
     {
         return $this->hasMany(SyllabusRevision::class);
     }
 
-    // Used in:
+    // Used in: delete() - SyllabusDeleteService; 
+    //          eagerLoad() - SyllabusPreviewService; 
+    //          mount() - SyllabusReviewService
     public function reviewers()
     {
         return $this->hasMany(SyllabusReviewer::class);
     }
 
-    // Direct relationship to components (now tied to syllabus)
-    // Used in:
+    // Used in: delete() - SyllabusDeleteService; 
+    //          eagerLoad() - SyllabusPreviewService; 
+    //          loadRows() - CourseEvaluationService
     public function components()
     {
         return $this->hasMany(CourseComponent::class);
     }
 
-    // Direct relationship to course outcomes
-    // Used in:
+    // Used in: delete() - SyllabusDeleteService; 
+    //          eagerLoad() - SyllabusPreviewService; 
+    //          all() - CourseOutcomeService
     public function courseOutcomes()
     {
         return $this->hasMany(CourseOutcome::class);
     }
 
-    // Used in:
+    // Used in: delete() - SyllabusDeleteService; 
+    //          eagerLoad() - SyllabusPreviewService; 
+    //          populateInputs() - WeekContentService; 
+    //          save() - WeekContentService
     public function weeks()
     {
         return $this->hasMany(SyllabusWeek::class);
     }
 
+    // Used in: delete() - SyllabusDeleteService; 
+    //          buildReferences() - SyllabusPreviewService; 
+    //          save() - WeekContentService
     public function references()
     {
         return $this->hasMany(Reference::class);
     }
 
+    // Used in: delete() - SyllabusDeleteService; 
+    //          buildReferences() - SyllabusPreviewService; 
+    //          save() - WeekContentService
     public function onlineMaterials()
     {
         return $this->hasMany(OnlineMaterial::class);
     }
 
-    // CompleteSyllabus snapshots (saved PDF/HTML versions)
-    // Used in: deleteCourse() - CourseService
+    // Used in: delete() - SyllabusDeleteService; 
+    //          sharedData() - SyllabusPreviewService; 
+    //          injectVersionsDrawer() - SyllabusSnapshotService
     public function completeSyllabi()
     {
         return $this->hasMany(CompleteSyllabus::class);
     }
 
-    // Helper: Get LEC component
-    // Used in: loadExistingData() - SyllabusWizard
+    // Used in: getLecComponent() - Syllabus; 
+    //          getLabComponent() - Syllabus; 
+    //          eagerLoad() - SyllabusPreviewService
     public function getLecComponent()
     {
         return $this->components()->where('type', 'LEC')->first();
     }
 
-    // Helper: Get LAB component
-    // Used in: loadExistingData() - SyllabusWizard
+    // Used in: mount() - ComponentsStep (Livewire)
     public function getLabComponent()
     {
         return $this->components()->where('type', 'LAB')->first();
     }
 
-    // Helper: Check if course has lab
-    // Used in:
-    public function hasLab()
-    {
-        return $this->course->has_lec_lab;
-    }
-
-    // Scope: Load syllabus with all related data
-    // Used in:
-    public function scopeWithFullDetails($query)
-    {
-        return $query->with([
-            'course.program',
-            'components',
-            'courseOutcomes',
-            'academicCalendar',
-            'preparer',
-            'deanConcurred',
-            'dean',
-            'revisions'
-        ]);
-    }
-
-    // Helper: Check if syllabus is approved
-    // Used in:
-    public function isApproved()
-    {
-        return $this->status === 'approved';
-    }
-
-    // Helper: Check if syllabus is editable
-    // Used in: edit() - SyllabusController; update() - SyllabusController
-    public function isEditable()
+    // Used in: edit() - SyllabusController; 
+    //          update() - SyllabusController
+    public function isEditable(): bool
     {
         return in_array($this->status, ['draft', 'for_revision']);
     }
 
+    // Used in: mount() - SyllabusRevisionHistoryService
     public function getCurrentRevisionNumber(): int
     {
         return (int) ($this->revisions()->max('revision_no') ?? 0);
     }
 
-    // Helper: Get wizard steps based on course type
-    // Used in:
-    public function getWizardSteps()
+    // Used in: (available — wizard step list for UI rendering)
+    public function getWizardSteps(): array
     {
-        $steps = [
+        return [
             'academic_calendar' => 'Academic Calendar',
             'course_components' => 'Course Components',
-            'course_outcomes' => 'Course Outcomes',
-            'weekly_coverage' => 'Weekly Coverage',
+            'course_outcomes'   => 'Course Outcomes',
+            'weekly_coverage'   => 'Weekly Coverage',
             'course_evaluation' => 'Course Evaluation',
-            'review' => 'Review',
+            'review'            => 'Review',
         ];
-
-        return $steps;
     }
-
 }
-

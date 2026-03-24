@@ -15,15 +15,17 @@ class CourseOutcome extends Model
         'description',
     ];
 
-    // many outcomes to one syllabus
-    // Used in:
+    // Used in: all() - CourseOutcomeService; 
+    //          create() - CourseOutcomeService; 
+    //          delete() - CourseOutcomeService; 
+    //          eagerLoad() - SyllabusPreviewService
     public function syllabus()
     {
         return $this->belongsTo(Syllabus::class);
     }
 
-    // course outcomes map to many program outcomes
-    // Used in:
+    // Used in: buildCoPoLetterMap() - SyllabusPreviewService;
+    //          deletePo() - ProgramController (existence check)
     public function programOutcomes()
     {
         return $this->belongsToMany(

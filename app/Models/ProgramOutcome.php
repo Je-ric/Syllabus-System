@@ -15,17 +15,17 @@ class ProgramOutcome extends Model
         'po_text',
     ];
 
-    // many POs to one program
-    // Used in:
+    // Used in: deletePo() - ProgramController; 
+    //          eagerLoad() - SyllabusPreviewService
     public function program()
     {
         return $this->belongsTo(Program::class);
     }
 
-    // POs belong to many PEOs
-    // Used in:
-        // loadPeos() - ManagePos;
-        // savePos() - ManagePos
+    // Used in: loadPeos() - ManagePos; 
+    //          savePos() - ManagePos; 
+    //          toggleMapping() - ManagePos; 
+    //          deletePo() - ProgramController (detach before delete)
     public function peos()
     {
         return $this->belongsToMany(
@@ -36,8 +36,7 @@ class ProgramOutcome extends Model
         );
     }
 
-    // POs belong to many COs
-    // Used in:
+    // Used in: buildCoPoLetterMap() - SyllabusPreviewService
     public function courseOutcomes()
     {
         return $this->belongsToMany(
@@ -48,12 +47,10 @@ class ProgramOutcome extends Model
         ->withTimestamps();
     }
 
-    // POs are mapped to many Courses via course_curriculum_maps
-    // Used in: deletePo() - ProgramController
+    // Used in: deletePo() - ProgramController (detach before delete)
     public function courses()
     {
         return $this->belongsToMany(Course::class, 'course_curriculum_maps')
                     ->withPivot('ied');
     }
-
 }

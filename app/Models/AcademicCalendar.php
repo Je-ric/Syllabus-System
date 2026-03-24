@@ -18,30 +18,26 @@ class AcademicCalendar extends Model
 
     protected $casts = [
         'start_date' => 'date',
-        'end_date' => 'date',
+        'end_date'   => 'date',
     ];
 
-    // calendar has many events
-    // Used in:
-            // store() - AcademicCalendarEventController;
-            // update() - AcademicCalendarEventController
+    // Used in: index() - AcademicCalendarController; 
+    //          index() - AcademicCalendarEventController; 
+    //          destroy() - AcademicCalendarController; 
+    //          mount() - AcademicCalendarForm (Livewire)
     public function events()
     {
         return $this->hasMany(AcademicCalendarEvent::class);
     }
 
-    // calendar has many syllabi
-    // Used in:
-            // store() - SyllabusController;
-            // update() - SyllabusController
+    // Used in: destroy() - AcademicCalendarController (checks linked syllabi)
     public function syllabi()
     {
         return $this->hasMany(Syllabus::class, 'academic_calendar_id');
     }
 
-    // Helper: Get formatted semester display
-    // Used in:
-    public function getFormattedSemester()
+    // Used in: mount() - AcademicCalendarStep (Livewire)
+    public function getFormattedSemester(): string
     {
         return $this->semester . ' Sem ' . $this->academic_year;
     }

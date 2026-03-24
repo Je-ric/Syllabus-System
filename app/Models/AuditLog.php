@@ -25,11 +25,13 @@ class AuditLog extends Model
 
     public $timestamps = true;
 
+    // Used in: logs() - AuditLog (Livewire)
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
+    // Static helper used everywhere to record an audit entry
     public static function record(
         string $action,
         string $module,
@@ -38,12 +40,12 @@ class AuditLog extends Model
         ?int $userId = null
     ): self {
         return static::create([
-            'user_id' => $userId ?? Auth::id(),
-            'action' => $action,
-            'module' => $module,
+            'user_id'      => $userId ?? Auth::id(),
+            'action'       => $action,
+            'module'       => $module,
             'reference_id' => $referenceId,
-            'description' => $description,
-            'timestamp' => now(),
+            'description'  => $description,
+            'timestamp'    => now(),
         ]);
     }
 }

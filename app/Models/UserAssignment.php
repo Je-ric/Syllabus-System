@@ -13,22 +13,28 @@ class UserAssignment extends Model
         'user_id',
         'college_id',
         'department_id',
-        'context',
+        'context', // dean | chair | faculty
     ];
 
-    // Used in:
+    // Used in: collegesIndexData() - OrganizationalHierarchyService; 
+    //          departmentsIndexData() - OrganizationalHierarchyService; 
+    //          hierarchyView() - OrganizationalHierarchyController; 
+    //          preselectFromUserAssignments() - ProgramSelector
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // Used in:
+    // Used in: getPrimaryCollegeAssignment() - User; 
+    //          preselectFromUserAssignments() - ProgramSelector
     public function college()
     {
         return $this->belongsTo(College::class);
     }
 
-    // Used in:
+    // Used in: getPrimaryDepartmentAssignment() - User; 
+    //          hierarchyView() - OrganizationalHierarchyController; 
+    //          preselectFromUserAssignments() - ProgramSelector
     public function department()
     {
         return $this->belongsTo(Department::class);

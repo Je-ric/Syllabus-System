@@ -15,6 +15,10 @@ class OnlineMaterial extends Model
         'url',
     ];
 
+    // Used in: save() - WeekContentService; 
+    //          reset() - WeekContentService; 
+    //          buildReferences() - SyllabusPreviewService; 
+    //          delete() - SyllabusDeleteService
     public function syllabus()
     {
         return $this->belongsTo(Syllabus::class);

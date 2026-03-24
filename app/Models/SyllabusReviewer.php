@@ -17,15 +17,17 @@ class SyllabusReviewer extends Model
 
     protected $casts = [
         'syllabus_id' => 'integer',
-        'user_id' => 'integer',
+        'user_id'     => 'integer',
     ];
 
-    // Relationships
+    // Used in: delete() - SyllabusDeleteService; 
+    //          eagerLoad() - SyllabusPreviewService
     public function syllabus()
     {
         return $this->belongsTo(Syllabus::class);
     }
 
+    // Used in: eagerLoad() - SyllabusPreviewService
     public function user()
     {
         return $this->belongsTo(User::class);

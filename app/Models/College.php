@@ -11,24 +11,25 @@ class College extends Model
 
     protected $fillable = ['name'];
 
-    // college has many goals
-    // Used in:
+    // Used in: goal_index() - GoalController;
+    //          destroyCollege() - AcademicStructureController
+    //          sharedData() - SyllabusPreviewService;
     public function goals()
     {
         return $this->hasMany(CollegeGoal::class);
     }
 
-    // college has many departments
-    // Used in:
-        // storeProgram() - AcademicStructureController;
-        // updateProgram() - AcademicStructureController
+    // Used in: index() - AcademicStructureController;
+    //          storeProgram() - AcademicStructureController;
+    //          updateProgram() - AcademicStructureController;
+    //          destroyCollege() - AcademicStructureController;
+    //          collegesIndexData() - OrganizationalHierarchyService
     public function departments()
     {
         return $this->hasMany(Department::class);
     }
 
-    // college has one dean through user assignments
-    // Used in:
+    // Used in: collegesIndexData() - OrganizationalHierarchyService
     public function deanAssignment()
     {
         return UserAssignment::where('college_id', $this->id)
@@ -37,24 +38,19 @@ class College extends Model
             ->first();
     }
 
-    // Helper: Get next goal code
-    // Used in:
-        // goal_store() - GoalController
+    // Used in: goal_store() - GoalController
     public function getNextGoalCode(): string
     {
         $count = $this->goals()->count();
         if ($count < 26) {
             return chr(ord('a') + $count);
         }
-        // 26+ goals: aa, ab, ac, ...
         $first  = chr(ord('a') + intdiv($count, 26) - 1);
         $second = chr(ord('a') + ($count % 26));
         return $first . $second;
     }
 
-    // Helper: Resequence goal codes after deletion
-    // Used in:
-        // goal_destroy() - GoalController
+    // Used in: goal_destroy() - GoalController
     public function resequenceGoalCodes(): void
     {
         $goals = $this->goals()->orderBy('id')->lockForUpdate()->get();

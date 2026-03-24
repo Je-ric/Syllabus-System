@@ -10,13 +10,14 @@ class DepartmentObjective extends Model
     use HasFactory;
 
     protected $fillable = [
-                'department_id',
-                'dept_obj_code',
-                'objective_text'
-                ];
+        'department_id',
+        'dept_obj_code',
+        'objective_text',
+    ];
 
-    // many objectives to one department
-    // Used in:
+    // Used in: objective_update() - ObjectiveController; 
+    //          objective_destroy() - ObjectiveController; 
+    //          sharedData() - SyllabusPreviewService
     public function department()
     {
         return $this->belongsTo(Department::class);

@@ -10,43 +10,42 @@ class Department extends Model
     use HasFactory;
 
     protected $fillable = [
-                'college_id',
-                'name',
-                'chair_user_id',
-                ];
+        'college_id',
+        'name',
+        'chair_user_id',
+    ];
 
-    // many departments to one college
-    // Used in:
+    // Used in: index() - AcademicStructureController; 
+    //          sharedData() - SyllabusPreviewService; 
+    //          preselectFromProgram() - ProgramSelector; 
+    //          preselectFromUserAssignments() - ProgramSelector
     public function college()
     {
         return $this->belongsTo(College::class);
     }
 
-    // department has many objectives
-    // Used in:
+    // Used in: objective_index() - ObjectiveController; 
+    //          objective_store() - ObjectiveController; 
+    //          destroyDepartment() - AcademicStructureController; 
+    //          resequenceObjectiveCodes() - Department
     public function objectives()
     {
         return $this->hasMany(DepartmentObjective::class);
     }
 
-    // department belongs to many programs, pero ideally 1 - 1
-    // Used in:
+    // Used in: index() - AcademicStructureController; 
+    //          destroyDepartment() - AcademicStructureController; 
+    //          destroyCollege() - AcademicStructureController; 
+    //          updateProgram() - AcademicStructureController
     public function programs()
     {
         return $this->belongsToMany(Program::class, 'program_departments')
-                    ->withPivot('role') // there are cases na programs can belong to multiple departments with different roles
+                    ->withPivot('role')
                     ->withTimestamps();
     }
 
-    // each department has one chair (user), pero unused since not sure sa approach
-    // Used in:
-    public function chair()
-    {
-        return $this->belongsTo(User::class, 'chair_user_id');
-    }
-
-    // department has one chair through user assignments
-    // Used in:
+    // Used in: departmentsIndexData() - OrganizationalHierarchyService
+    // Returns the chair User via UserAssignment (context = 'chair'); chair_user_id column is not used
     public function deptChair()
     {
         $assignment = UserAssignment::where('department_id', $this->id)
@@ -57,14 +56,12 @@ class Department extends Model
         return $assignment ? $assignment->user : null;
     }
 
-    // Query scope: Load department with relationships
-    // Used in:
+    // Used in: index() - AcademicStructureController
     public function scopeWithRelations($query)
     {
         return $query->with('college', 'programs');
     }
 
-    // Helper: Get next objective code
     // Used in: objective_store() - ObjectiveController
     public function getNextObjectiveCode(): string
     {
@@ -77,7 +74,6 @@ class Department extends Model
         return $first . $second;
     }
 
-    // Helper: Resequence objective codes after deletion
     // Used in: objective_destroy() - ObjectiveController
     public function resequenceObjectiveCodes(): void
     {
