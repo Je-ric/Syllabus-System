@@ -225,7 +225,6 @@ class SyllabusWizard extends Component
 
     // ── Save as Done ──────────────────────────────────────────────────────────
 
-    #[On('wizard-save-as-done')]
     public function saveAsDone(): void
     {
         if (! $this->syllabus) {

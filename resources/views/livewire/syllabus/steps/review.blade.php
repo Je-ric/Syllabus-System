@@ -29,13 +29,13 @@
     </div>
 
     <div class="mt-6 flex flex-wrap items-center gap-4">
-        <x-button
+        {{-- <x-button
             type="button"
             variant="add-button"
             wire:click="$dispatch('wizard-save-as-done')"
             loading="Freezing version…">
             <i class="bx bx-save text-base"></i> Save as Done
-        </x-button>
+        </x-button> --}}
     </div>
 
     <div class="mt-6">
