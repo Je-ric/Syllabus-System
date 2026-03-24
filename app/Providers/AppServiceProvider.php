@@ -41,13 +41,20 @@ class AppServiceProvider extends ServiceProvider
             }
 
             $service = new \Google\Service\Drive($client);
+
+            // Verify the folder exists and get its ID directly to avoid
+            // the adapter resolving it by name and creating a duplicate folder.
+            try {
+                $folder = $service->files->get($folderId, ['fields' => 'id,name']);
+                $resolvedId = $folder->getId();
+            } catch (\Throwable $e) {
+                throw new \RuntimeException("Google Drive folder '{$folderId}' not found or not accessible: " . $e->getMessage());
+            }
+
             $adapter = new \Masbug\Flysystem\GoogleDriveAdapter(
                 $service,
-                $folderId,
-                [
-                    'useDisplayPaths' => true,
-                    'rootId'          => $folderId,
-                ]
+                $resolvedId,
+                ['useDisplayPaths' => true]
             );
             $driver = new \League\Flysystem\Filesystem($adapter);
 

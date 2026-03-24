@@ -264,21 +264,48 @@ class SyllabusWizard extends Component
         $college    = $department?->college;
         $faculty    = $syllabus->preparer;
 
-        $collegeName    = Str::slug($college?->name    ?? 'unknown-college');
-        $departmentName = Str::slug($department?->name ?? 'unknown-department');
-        $programName    = Str::slug($program?->program_name ?? $program?->name ?? 'unknown-program');
-        $facultyName    = Str::slug($faculty?->name    ?? 'user-' . ($syllabus->prepared_by ?? 'unknown'));
+        $collegeName    = $college?->name    ?? 'Unknown College';
+        $departmentName = $department?->name ?? 'Unknown Department';
+        $programName    = $program?->program_name ?? $program?->name ?? 'Unknown Program';
+        $facultyName    = $faculty?->name    ?? 'User ' . ($syllabus->prepared_by ?? 'Unknown');
 
         $version      = (int) (CompleteSyllabus::where('syllabus_id', $syllabus->id)->max('version') ?? 0) + 1;
         $academicYear = $syllabus->academicCalendar?->academic_year ?? 'N-A';
         $semester     = $syllabus->academicCalendar?->semester      ?? 'N-A';
         $courseCode   = $syllabus->course?->course_code             ?? 'COURSE';
+        $courseName   = $syllabus->course?->course_name             ?? $courseCode;
 
-        $baseSlug    = Str::slug($courseCode . '-' . $academicYear . '-' . $semester . '-v' . $version);
-        $baseDir     = implode('/', ['syllabus-snapshots', $collegeName, $departmentName, $programName, $facultyName]);
-        $storagePath           = $baseDir . '/' . $baseSlug . '.html';
-        $storagePathAbridged   = $baseDir . '/' . $baseSlug . '-abridged.html';
-        $storagePathAssessment = $baseDir . '/' . $baseSlug . '-assessment.html';
+        // Folder: College / Department / Program / Faculty / Course Code / v{n} (AY Sem)
+        $versionFolder = "v{$version} ({$academicYear} {$semester})";
+        $baseDir = implode('/', [
+            'Syllabus Snapshots',
+            $collegeName,
+            $departmentName,
+            $programName,
+            $facultyName,
+            $courseCode,
+            $versionFolder,
+        ]);
+
+        // File names: Complete - COURSE CODE.html, etc.
+        $storagePath           = $baseDir . '/Complete - ' . $courseCode . '.html';
+        $storagePathAbridged   = $baseDir . '/Abridged - ' . $courseCode . '.html';
+        $storagePathAssessment = $baseDir . '/Assessment - ' . $courseCode . '.html';
+
+        // Local paths use slugified names (filesystem-safe)
+        $baseSlug      = Str::slug($courseCode . '-' . $academicYear . '-' . $semester . '-v' . $version);
+        $baseDirLocal  = implode('/', [
+            'syllabus-snapshots',
+            Str::slug($collegeName),
+            Str::slug($departmentName),
+            Str::slug($programName),
+            Str::slug($facultyName),
+            Str::slug($courseCode),
+            'v' . $version,
+        ]);
+        $localPath           = $baseDirLocal . '/' . $baseSlug . '.html';
+        $localPathAbridged   = $baseDirLocal . '/' . $baseSlug . '-abridged.html';
+        $localPathAssessment = $baseDirLocal . '/' . $baseSlug . '-assessment.html';
 
         // 3. Write to Google Drive (primary) ──────────────────────────────────
         $driveSuccess = false;
@@ -294,9 +321,9 @@ class SyllabusWizard extends Component
 
         // 3b. Always mirror to local disk as backup ───────────────────────────
         try {
-            Storage::disk('local')->put($storagePath,           $html);
-            Storage::disk('local')->put($storagePathAbridged,   $htmlAbridged);
-            Storage::disk('local')->put($storagePathAssessment, $htmlAssessment);
+            Storage::disk('local')->put($localPath,           $html);
+            Storage::disk('local')->put($localPathAbridged,   $htmlAbridged);
+            Storage::disk('local')->put($localPathAssessment, $htmlAssessment);
         } catch (Throwable $e) {
             report($e);
             if (! $driveSuccess) {
@@ -312,9 +339,9 @@ class SyllabusWizard extends Component
                 'course_id'            => $syllabus->course_id,
                 'academic_year'        => $academicYear,
                 'semester'             => $semester,
-                'pdf_path'             => $storagePath,
-                'abridged_path'        => $storagePathAbridged,
-                'evaluation_path'      => $storagePathAssessment,
+                'pdf_path'             => $driveSuccess ? $storagePath           : $localPath,
+                'abridged_path'        => $driveSuccess ? $storagePathAbridged   : $localPathAbridged,
+                'evaluation_path'      => $driveSuccess ? $storagePathAssessment : $localPathAssessment,
                 'version'              => $version,
                 'approved_at'          => null,
                 'approved_by'          => null,
