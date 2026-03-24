@@ -47,83 +47,61 @@
             </div>
         </div>
 
-        {{-- ══ Save-as-Done overlay ════════════════════════════════════════════════
-            wire:loading.style avoids the Tailwind `hidden` (!important) conflict.
-            Alpine cycles step labels every 2.8 s while the request is in-flight.
-        ──────────────────────────────────────────────────────────────────────────── --}}
+        {{-- ══ Save-as-Done overlay ════════════════════════════════════════════════ --}}
         <div
-            x-data="{
-                steps: [
-                    { icon: 'bx-code-alt',     label: 'Rendering syllabus…'        },
-                    { icon: 'bx-cloud-upload', label: 'Uploading to Google Drive…'  },
-                    { icon: 'bx-hdd',          label: 'Saving local backup…'        },
-                    { icon: 'bx-data',         label: 'Freezing version record…'    },
-                ],
-                current: 0,
-                timer: null,
-                start() { this.current = 0; this.timer = setInterval(() => { if (this.current < this.steps.length - 1) this.current++; }, 2800); },
-                stop()  { clearInterval(this.timer); this.current = 0; }
-            }"
             wire:loading.style="display:flex"
             wire:target="saveAsDone"
             style="display:none"
-            x-on:livewire:request-start.window="$event.detail?.call === 'saveAsDone' && start()"
-            x-on:livewire:request-finish.window="stop()"
             class="fixed inset-0 z-50 items-center justify-center"
             >
-            {{-- backdrop --}}
             <div class="absolute inset-0" style="background: rgba(11,18,32,0.65); backdrop-filter: blur(8px);"></div>
-            {{-- card --}}
-            <div class="relative flex flex-col items-center gap-5 px-12 py-9 rounded-2xl shadow-2xl border border-white/10 min-w-80"
-                 style="background: linear-gradient(135deg, #1a2235 0%, #0b1220 100%);">
+            <div class="relative flex flex-col items-center gap-6 px-10 py-8 rounded-2xl shadow-2xl border border-white/10"
+                 style="background: linear-gradient(135deg, #1a2235 0%, #0b1220 100%); min-width: 300px;">
 
-                {{-- dual-ring spinner with icon --}}
-                <div class="relative w-16 h-16">
-                    <svg class="absolute inset-0 animate-spin" viewBox="0 0 64 64" fill="none"
-                         style="color: #ffd700;">
-                        <circle cx="32" cy="32" r="26" stroke="currentColor" stroke-width="3"
-                                stroke-linecap="round" stroke-dasharray="130" stroke-dashoffset="80" />
+                {{-- spinner --}}
+                <div class="relative w-14 h-14">
+                    <svg class="absolute inset-0 animate-spin" viewBox="0 0 56 56" fill="none" style="color:#ffd700;">
+                        <circle cx="28" cy="28" r="22" stroke="currentColor" stroke-width="3"
+                                stroke-linecap="round" stroke-dasharray="110" stroke-dashoffset="70"/>
                     </svg>
-                    <svg class="absolute inset-0" viewBox="0 0 64 64" fill="none"
-                         style="color: rgba(255,215,0,0.12);">
-                        <circle cx="32" cy="32" r="26" stroke="currentColor" stroke-width="3" />
+                    <svg class="absolute inset-0" viewBox="0 0 56 56" fill="none" style="color:rgba(255,215,0,0.12);">
+                        <circle cx="28" cy="28" r="22" stroke="currentColor" stroke-width="3"/>
                     </svg>
-                    {{-- inner accent ring --}}
-                    <svg class="absolute inset-0 animate-spin" viewBox="0 0 64 64" fill="none"
-                         style="color: #009639; animation-direction: reverse; animation-duration: 1.4s;">
-                        <circle cx="32" cy="32" r="18" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-dasharray="60" stroke-dashoffset="40" />
+                    <svg class="absolute inset-0 animate-spin" viewBox="0 0 56 56" fill="none"
+                         style="color:#009639; animation-direction:reverse; animation-duration:1.4s;">
+                        <circle cx="28" cy="28" r="14" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-dasharray="50" stroke-dashoffset="32"/>
                     </svg>
                     <span class="absolute inset-0 flex items-center justify-center">
-                        <i x-bind:class="'bx text-2xl ' + steps[current].icon"
-                           style="color: #ffd700;"></i>
+                        <i class="bx bx-save text-xl" style="color:#ffd700;"></i>
                     </span>
                 </div>
 
-                {{-- step label --}}
+                {{-- title --}}
                 <div class="text-center">
-                    <p class="text-sm font-semibold" style="color: #ffffff;"
-                       x-text="steps[current].label"></p>
-                    <p class="text-xs mt-1" style="color: rgba(255,255,255,0.45);">This may take a few seconds</p>
+                    <p class="text-sm font-bold tracking-wide" style="color:#ffffff;">Saving Syllabus…</p>
+                    <p class="text-xs mt-1" style="color:rgba(255,255,255,0.4);">This may take a few seconds</p>
                 </div>
 
-                {{-- progress dots --}}
-                <div class="flex items-center gap-2.5">
-                    <template x-for="(s, i) in steps" :key="i">
-                        <span class="rounded-full transition-all duration-300"
-                              x-bind:style="i === current
-                                  ? 'width:10px;height:10px;background:#ffd700;'
-                                  : (i < current
-                                      ? 'width:8px;height:8px;background:#009639;'
-                                      : 'width:6px;height:6px;background:rgba(255,255,255,0.2);')"
-                        ></span>
-                    </template>
+                {{-- static step list --}}
+                <div class="w-full space-y-2">
+                    <div class="flex items-center justify-center gap-3 px-3 py-2 rounded-lg" style="background:rgba(255,255,255,0.05);">
+                        <i class="bx bx-code-alt text-base shrink-0" style="color:#ffd700;"></i>
+                        <span class="text-xs" style="color:rgba(255,255,255,0.75);">Rendering syllabus…</span>
+                    </div>
+                    <div class="flex items-center justify-center gap-3 px-3 py-2 rounded-lg" style="background:rgba(255,255,255,0.05);">
+                        <i class="bx bx-cloud-upload text-base shrink-0" style="color:#ffd700;"></i>
+                        <span class="text-xs" style="color:rgba(255,255,255,0.75);">Uploading to Google Drive…</span>
+                    </div>
+                    <div class="flex items-center justify-center gap-3 px-3 py-2 rounded-lg" style="background:rgba(255,255,255,0.05);">
+                        <i class="bx bx-hdd text-base shrink-0" style="color:#ffd700;"></i>
+                        <span class="text-xs" style="color:rgba(255,255,255,0.75);">Saving local backup…</span>
+                    </div>
+                    <div class="flex items-center justify-center gap-3 px-3 py-2 rounded-lg" style="background:rgba(255,255,255,0.05);">
+                        <i class="bx bx-data text-base shrink-0" style="color:#ffd700;"></i>
+                        <span class="text-xs" style="color:rgba(255,255,255,0.75);">Freezing version record…</span>
+                    </div>
                 </div>
-
-                {{-- step counter --}}
-                <p class="text-[11px]" style="color: rgba(255,255,255,0.3);">
-                    Step <span x-text="current + 1"></span> of <span x-text="steps.length"></span>
-                </p>
 
             </div>
         </div>
