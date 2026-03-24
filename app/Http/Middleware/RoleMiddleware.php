@@ -5,8 +5,6 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
-use App\Models\Role;
 
 class RoleMiddleware
 {
@@ -16,7 +14,7 @@ class RoleMiddleware
 
         // if auth
         if (!$user) {
-            abort(403, 'Unauthorized'); 
+            return redirect()->route('login');
         }
 
         // Check if user has any of the required roles
