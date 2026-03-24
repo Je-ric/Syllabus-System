@@ -9,7 +9,6 @@ use App\Models\AuditLog;
 use App\Models\CourseOutcome;
 use App\Helpers\ProgramCodeHelper;
 use Illuminate\Support\Facades\DB;
-// use Illuminate\Http\Request;
 
 class ProgramController extends Controller
 {
@@ -42,7 +41,7 @@ class ProgramController extends Controller
             $programName = $peo->program?->name ?? 'Unknown Program';
             $peoCode = $peo->peo_code;
 
-            // #3 — detach PO mappings before deleting to avoid orphaned program_outcome_peo rows
+            // Detach PO mappings before deleting to avoid orphaned program_outcome_peo rows
             $peo->outcomes()->detach();
 
             $peo->delete();
@@ -84,7 +83,7 @@ class ProgramController extends Controller
             $programName = $po->program?->name ?? 'Unknown Program';
             $poCode = $po->po_code;
 
-            // #2 — block deletion if any course already has this PO mapped in a syllabus
+            // Block deletion if any course already has this PO mapped in a syllabus
             $syllabusCount = CourseOutcome::whereHas('programOutcomes', fn($q) => $q->where('program_outcomes.id', $po->id))
                 ->count();
             if ($syllabusCount > 0) {
@@ -94,7 +93,7 @@ class ProgramController extends Controller
                 ]);
             }
 
-            // Detach from PEOs (program_outcome_peo) and course curriculum maps (course_curriculum_maps)
+            // Detach from PEOs and course curriculum maps before deleting
             $po->peos()->detach();
             $po->courses()->detach();
 

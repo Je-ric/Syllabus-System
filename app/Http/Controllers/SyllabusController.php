@@ -6,6 +6,7 @@ use App\Models\AuditLog;
 use App\Models\CompleteSyllabus;
 use App\Models\Program;
 use App\Models\Syllabus;
+use App\Services\Syllabus\SyllabusDeleteService;
 use App\Services\Syllabus\SyllabusPreviewService;
 use App\Services\Syllabus\SyllabusSnapshotService;
 use Illuminate\Http\Request;
@@ -19,6 +20,7 @@ class SyllabusController extends Controller
     public function __construct(
         private readonly SyllabusPreviewService  $previewService,
         private readonly SyllabusSnapshotService $snapshotService,
+        private readonly SyllabusDeleteService   $deleteService,
     ) {}
 
     // ── Syllabus CRUD / wizard ────────────────────────────────────────────────
@@ -152,33 +154,7 @@ class SyllabusController extends Controller
         $courseCode = $syllabus->course?->course_code ?? "#{$syllabus->course_id}";
 
         DB::transaction(function () use ($syllabus) {
-            // #16 — delete CompleteSyllabus snapshots + disk files
-            foreach ($syllabus->completeSyllabi as $snapshot) {
-                foreach (['pdf_path', 'abridged_path', 'evaluation_path'] as $field) {
-                    $path = $snapshot->$field ?? '';
-                    if ($path !== '' && Storage::disk('local')->exists($path)) {
-                        Storage::disk('local')->delete($path);
-                    }
-                }
-                $snapshot->delete();
-            }
-
-            $syllabus->components()->delete();
-            $syllabus->courseOutcomes()->delete();
-
-            foreach ($syllabus->weeks as $week) {
-                $week->contents()->each(function ($content) {
-                    $content->evaluation()->delete();
-                    $content->delete();
-                });
-                $week->delete();
-            }
-
-            $syllabus->references()->delete();
-            $syllabus->onlineMaterials()->delete();
-            $syllabus->revisions()->delete();
-            $syllabus->reviewers()->delete();
-            $syllabus->delete();
+            $this->deleteService->delete($syllabus);
         });
 
         AuditLog::record(

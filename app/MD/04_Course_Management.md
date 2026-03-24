@@ -8,6 +8,7 @@ Rules for creating, updating, deleting, and PO mapping of Courses.
   - `app/Http/Controllers/CourseController.php`
 - Service
   - `app/Services/CourseService.php`
+  - `app/Services/Syllabus/SyllabusDeleteService.php` — cascade-delete per syllabus (shared with `SyllabusController`)
 - Models
   - `app/Models/Course.php`
   - `app/Models/CourseCurriculumMap.php` (PO mapping pivot)
@@ -87,22 +88,9 @@ Rules for creating, updating, deleting, and PO mapping of Courses.
   - Then the acting user must have role `admin` (explicit check via `abort(403)`).
   - Then `CourseService::deleteCourse()` runs inside a DB transaction:
     - Then detach all PO mappings (`course_curriculum_maps`).
-    - Then for each syllabus:
-      - Then for each `CompleteSyllabus` snapshot:
-        - Then delete disk files for `pdf_path`, `abridged_path`, `evaluation_path`.
-        - Then delete the `complete_syllabi` DB row.
-      - Then delete all `course_components`.
-      - Then delete all `course_outcomes`.
-      - Then for each `syllabus_week`:
-        - Then for each `week_content`:
-          - Then delete `syllabus_evaluation_items` for that content.
-          - Then delete the `week_content`.
-        - Then delete the `syllabus_week`.
-      - Then delete all `references`.
-      - Then delete all `online_materials`.
-      - Then delete all `syllabus_revisions`.
-      - Then delete all `syllabus_reviewers`.
-      - Then delete the `syllabus`.
+    - Then for each syllabus, `SyllabusDeleteService::delete()` handles the full cascade:
+      - Disk files for `pdf_path`, `abridged_path`, `evaluation_path` on each `CompleteSyllabus` snapshot.
+      - `complete_syllabi`, `course_components`, `course_outcomes`, `syllabus_evaluation_items`, `week_contents`, `syllabus_weeks`, `references`, `online_materials`, `syllabus_revisions`, `syllabus_reviewers`, and the `syllabus` row.
     - Then delete the course.
 
 ### Syllabus Creation Gate (from Course Selection)

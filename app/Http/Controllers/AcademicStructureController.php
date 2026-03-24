@@ -74,7 +74,7 @@ class AcademicStructureController extends Controller
 
     public function destroyCollege(College $college)
     {
-        // #1 — block if any course or syllabus exists under this college
+        // Block if any course or syllabus exists under this college
         $programIds = $college->departments()
             ->with('programs')
             ->get()
@@ -169,7 +169,7 @@ class AcademicStructureController extends Controller
 
     public function destroyDepartment(Department $department)
     {
-        // #1 — block if any course exists under this department's programs
+        // Block if any course exists under this department's programs
         $programIds = $department->programs->pluck('id');
         $courseCount = Course::whereIn('program_id', $programIds)->count();
 
@@ -249,7 +249,7 @@ class AcademicStructureController extends Controller
     {
         $validated = $request->validated();
 
-        // #9 — block department change if courses exist (would silently break faculty context)
+        // Block department change if courses exist (would silently break faculty context)
         $currentDeptId = $program->departments()->wherePivot('role', 'primary')->value('departments.id');
         if ((int) $validated['department_id'] !== (int) $currentDeptId && $program->courses()->exists()) {
             return back()->with('toast', [
@@ -294,7 +294,7 @@ class AcademicStructureController extends Controller
 
     public function destroyProgram(Program $program)
     {
-        // #1 — block if any course exists under this program
+        // Block if any course exists under this program
         $courseCount = $program->courses()->count();
         if ($courseCount > 0) {
             return back()->with('toast', [

@@ -140,9 +140,8 @@ class AccountApprovalController extends Controller
             'office'       => 'nullable|string|max:255',
         ]);
 
-        // Only admins may edit other users' accounts (route is already admin-only,
-        // but guard explicitly so it can never be reached by non-admins even if
-        // middleware is misconfigured).
+        // Only admins may edit other users' accounts
+        // Route is already admin-only, but guard explicitly as a safety net
         /** @var \App\Models\User $admin */
         $admin = Auth::user();
         if (! $admin->hasRole('admin')) {

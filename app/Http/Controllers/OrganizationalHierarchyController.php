@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 
-// MOSTLY: this controller should be just small, pero naging mahaba siya because of if conditions checker.
+// This controller is thin — all business logic lives in OrganizationalHierarchyService and OrganizationalHierarchyChecker.
 class OrganizationalHierarchyController extends Controller
 {
     public function __construct(
@@ -155,7 +155,7 @@ class OrganizationalHierarchyController extends Controller
     // Redirect role entry point directly to management pages.
     public function hierarchyView()
     {
-        /** @var \App\Models\User|null $user */ // this is just for IDE type hinting, can be removed without affecting functionality (linted)
+        /** @var \App\Models\User|null $user */
         $user = Auth::user();
 
         if (!$user) {
