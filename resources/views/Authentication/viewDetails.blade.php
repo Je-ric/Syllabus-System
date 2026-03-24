@@ -256,19 +256,37 @@
                                 class="grid md:grid-cols-2 gap-4 text-sm">
                                 @csrf
     
-                                <div class="md:col-span-2">
-                                    <x-form.label>Current Password</x-form.label>
-                                    <x-form.input type="password" name="current_password" class="mt-2" required />
-                                </div>
+                        <div class="md:col-span-2">
+                            <x-form.label>Current Password</x-form.label>
+                            <div x-data="{ show: false }" class="relative mt-2">
+                                <x-form.input :type="'password'" name="current_password" x-bind:type="show ? 'text' : 'password'" class="pr-11" required />
+                                <button type="button" @click="show = !show"
+                                        class="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-600 transition-colors">
+                                    <i :class="show ? 'bx bx-hide' : 'bx bx-show'" class="text-lg leading-none"></i>
+                                </button>
+                            </div>
+                        </div>
     
                                 <div>
                                     <x-form.label>New Password</x-form.label>
-                                    <x-form.input type="password" name="password" class="mt-2" required />
+                                    <div x-data="{ show: false }" class="relative mt-2">
+                                        <x-form.input :type="'password'" name="password" x-bind:type="show ? 'text' : 'password'" class="pr-11" required />
+                                        <button type="button" @click="show = !show"
+                                                class="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-600 transition-colors">
+                                            <i :class="show ? 'bx bx-hide' : 'bx bx-show'" class="text-lg leading-none"></i>
+                                        </button>
+                                    </div>
                                 </div>
     
                                 <div>
                                     <x-form.label>Confirm New Password</x-form.label>
-                                    <x-form.input type="password" name="password_confirmation" class="mt-2" required />
+                                    <div x-data="{ show: false }" class="relative mt-2">
+                                        <x-form.input :type="'password'" name="password_confirmation" x-bind:type="show ? 'text' : 'password'" class="pr-11" required />
+                                        <button type="button" @click="show = !show"
+                                                class="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-600 transition-colors">
+                                            <i :class="show ? 'bx bx-hide' : 'bx bx-show'" class="text-lg leading-none"></i>
+                                        </button>
+                                    </div>
                                 </div>
     
                                 <div class="md:col-span-2 flex justify-end mt-2">

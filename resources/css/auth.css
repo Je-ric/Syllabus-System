@@ -1,18 +1,24 @@
 .auth-input {
     width: 100%;
     border: 1px solid #cbd5e1;
-    border-radius: 0.85rem;
+    border-radius: 0.75rem;
     padding: 0.65rem 0.9rem;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     color: #334155;
-    background: #ffffff;
+    background: #f8fafc;
     transition: all 0.2s ease;
 }
 
 .auth-input:focus {
     outline: none;
     border-color: #10b981;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+/* room for the eye-toggle button */
+.auth-input.pr-11 {
+    padding-right: 2.75rem;
 }
 
 .auth-primary {
@@ -21,23 +27,25 @@
         var(--clsu-cobra) 0%,
         var(--clsu-green) 100%
     );
+    transition: opacity 0.2s ease;
 }
 
 .auth-primary:hover {
-    background: linear-gradient(90deg, #046c66 0%, #0d9f6e 100%);
+    opacity: 0.9;
 }
 
 .auth-secondary {
     background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%);
+    transition: opacity 0.2s ease;
 }
 
 .auth-secondary:hover {
-    background: linear-gradient(90deg, #1e40af 0%, #1d4ed8 100%);
+    opacity: 0.9;
 }
 
 .green-grad {
     background: linear-gradient(
-        90deg,
+        135deg,
         rgba(0, 129, 2, 1) 0%,
         rgba(149, 210, 45, 1) 100%
     );

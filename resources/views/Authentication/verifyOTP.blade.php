@@ -1,60 +1,92 @@
-@extends('layouts.app')
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    @include('includes.head-assets')
+</head>
+<body>
+<div class="flex justify-center items-center min-h-screen px-4 py-8">
+    <div class="w-full max-w-md">
 
-@section('content')
-    <div class="flex justify-center items-center min-h-screen">
-        <div class="bg-white shadow-lg rounded-lg w-full max-w-md p-8">
-            <h2 class="text-2xl font-bold mb-4 text-center">Verify Your Email</h2>
+        {{-- Card --}}
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden">
 
-            <p class="text-gray-600 text-center mb-6">
-                We sent a 6-digit OTP to<br>
-                <strong class="text-blue-600">{{ session('verify_email') }}</strong>
-            </p>
+            {{-- Top accent --}}
+            <div class="h-1.5 w-full green-grad"></div>
 
-            @include('includes.error-lists')
-            @include('includes.session-success')
+            <div class="p-8">
 
-            <form method="POST" action="{{ route('otp.verify') }}" class="space-y-4">
-                @csrf
-                <input type="hidden" name="email" value="{{ session('verify_email') }}">
+                {{-- Icon + heading --}}
+                <div class="flex flex-col items-center text-center mb-7">
+                    <div class="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center mb-4">
+                        <i class="bx bx-envelope-open text-3xl text-emerald-600"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-slate-800">Check your email</h1>
+                    <p class="text-sm text-slate-500 mt-2 leading-relaxed">
+                        We sent a 6-digit verification code to<br>
+                        <strong class="text-slate-700">{{ session('verify_email', 'your email') }}</strong>
+                    </p>
+                </div>
 
-                <input type="text" name="otp" maxlength="6" placeholder="Enter 6-digit OTP"
-                    class="w-full border border-gray-300 rounded px-3 py-2 text-center tracking-widest text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required autofocus>
+                @include('includes.error-lists')
+                @include('includes.session-success')
 
-                <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
-                    Verify OTP
-                </button>
-            </form>
+                {{-- OTP form --}}
+                <form method="POST" action="{{ route('otp.verify') }}" class="space-y-4">
+                    @csrf
+                    <input type="hidden" name="email" value="{{ session('verify_email') }}">
 
-            <form method="POST" 
-                    action="{{ route('otp.resend.email') }}" 
-                    class="mt-4">
-                @csrf
-                <input type="hidden" 
-                        name="email" 
-                        value="{{ session('verify_email') }}">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5 text-center">
+                            Enter 6-digit OTP
+                        </label>
+                        <input type="text" name="otp" maxlength="6"
+                               placeholder="• • • • • •"
+                               class="auth-input text-center tracking-[0.5em] text-xl font-bold"
+                               required autofocus autocomplete="one-time-code">
+                        <p class="text-[11px] text-slate-400 text-center mt-1.5">
+                            Code expires in 10 minutes. Check your spam folder if not received.
+                        </p>
+                    </div>
 
-                <button class="text-blue-600 underline">
-                    Resend OTP
-                </button>
-            </form>
+                    <button type="submit"
+                            class="w-full auth-secondary text-white py-2.5 rounded-xl font-semibold shadow-sm transition">
+                        Verify Email
+                    </button>
+                </form>
 
+                {{-- Resend --}}
+                <div class="mt-5 pt-5 border-t border-slate-100 text-center space-y-2">
+                    <p class="text-sm text-slate-500">Didn't receive the code?</p>
+                    <form method="POST" action="{{ route('otp.resend.email') }}" class="inline">
+                        @csrf
+                        <input type="hidden" name="email" value="{{ session('verify_email') }}">
+                        <button type="submit"
+                                class="text-sm text-emerald-700 font-semibold hover:underline">
+                            Resend OTP
+                        </button>
+                    </form>
+                    <span class="text-slate-300 mx-2">·</span>
+                    <a href="{{ route('otp.resend') }}"
+                       class="text-sm text-emerald-700 font-semibold hover:underline">
+                        Use a different email
+                    </a>
+                </div>
 
-            <p class="text-xs text-gray-500 text-center mt-6">
-                Didn't receive the code? Check your spam folder or resend.
-            </p>
+                <div class="mt-4 text-center">
+                    <a href="{{ route('auth.show') }}"
+                       class="text-xs text-slate-400 hover:text-slate-600 transition-colors">
+                        ← Back to Login
+                    </a>
+                </div>
 
-            <div class="mt-2 text-center">
-                <a href="{{ route('otp.resend') }}" class="text-sm text-blue-600 hover:underline">
-                    Resend using your email
-                </a>
-            </div>
-
-            <div class="mt-6 text-center">
-                <a href="{{ route('auth.show') }}" class="text-sm text-gray-600 hover:text-gray-800">
-                    <- Back to Login
-                </a>
             </div>
         </div>
+
+        <p class="text-center text-xs text-slate-400 mt-5">
+            Central Luzon State University · CSMS
+        </p>
     </div>
-@endsection
+</div>
+@livewireScripts
+</body>
+</html>
