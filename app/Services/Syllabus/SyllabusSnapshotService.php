@@ -4,23 +4,17 @@ namespace App\Services\Syllabus;
 
 use App\Models\CompleteSyllabus;
 use App\Models\Syllabus;
-use App\Services\Syllabus\SyllabusPreviewService;
 use Illuminate\Support\Facades\Storage;
 
-/**
- * SyllabusSnapshotService
- *
- * Handles HTML snapshot generation and saved-version file serving for syllabi.
- * Extracted from SyllabusController to keep the controller thin and allow
- * reuse from Livewire components or console commands.
- *
- * Public API:
- *   generateCompleteHtml(Syllabus)    — render complete preview as a self-contained HTML string
- *   generateAbridgedHtml(Syllabus)    — render abridged preview as a self-contained HTML string
- *   generateAssessmentHtml(Syllabus)  — render assessment preview as a self-contained HTML string
- *   getSavedHtml(CompleteSyllabus, string $field)  — read stored HTML from disk
- *   injectVersionsDrawer(Syllabus, CompleteSyllabus, string $variant, string $html) — inject drawer into saved HTML
- */
+// Handles HTML snapshot generation and saved-version file serving.
+// Used by SyllabusController for downloads and saved-version previews.
+//
+// Public API:
+//   generateCompleteHtml(Syllabus)   — render complete preview as self-contained HTML
+//   generateAbridgedHtml(Syllabus)   — render abridged preview as self-contained HTML
+//   generateAssessmentHtml(Syllabus) — render assessment preview as self-contained HTML
+//   getSavedHtml(string $path)       — read stored HTML from disk
+//   injectVersionsDrawer(...)        — inject versions drawer into saved HTML before </body>
 class SyllabusSnapshotService
 {
     public function __construct(
@@ -32,8 +26,8 @@ class SyllabusSnapshotService
     public function generateCompleteHtml(Syllabus $syllabus): string
     {
         $data = $this->previewService->buildCompleteData($syllabus);
-        $data['isSnapshot']       = true;
-        $data['inlinePreviewCss'] = $this->readCss('preview.css');
+        $data['isSnapshot']        = true;
+        $data['inlinePreviewCss']  = $this->readCss('preview.css');
         $data['inlineLogoDataUri'] = $this->logoDataUri();
 
         return view('Syllabus.preview.complete', $data)->render();
@@ -42,8 +36,8 @@ class SyllabusSnapshotService
     public function generateAbridgedHtml(Syllabus $syllabus): string
     {
         $data = $this->previewService->buildAbridgedData($syllabus);
-        $data['isSnapshot']       = true;
-        $data['inlinePreviewCss'] = ($this->readCss('preview.css') ?? '') . "\n" . ($this->readCss('abridged.css') ?? '') ?: null;
+        $data['isSnapshot']        = true;
+        $data['inlinePreviewCss']  = ($this->readCss('preview.css') ?? '') . "\n" . ($this->readCss('abridged.css') ?? '') ?: null;
         $data['inlineLogoDataUri'] = $this->logoDataUri();
 
         return view('Syllabus.preview.abridged', $data)->render();
@@ -52,8 +46,8 @@ class SyllabusSnapshotService
     public function generateAssessmentHtml(Syllabus $syllabus): string
     {
         $data = $this->previewService->buildCompleteData($syllabus);
-        $data['isSnapshot']       = true;
-        $data['inlinePreviewCss'] = $this->readCss('preview.css');
+        $data['isSnapshot']        = true;
+        $data['inlinePreviewCss']  = $this->readCss('preview.css');
         $data['inlineLogoDataUri'] = $this->logoDataUri();
 
         return view('Syllabus.preview.assessment', $data)->render();
@@ -61,10 +55,8 @@ class SyllabusSnapshotService
 
     // ── Saved version file access ─────────────────────────────────────────────
 
-    /**
-     * Read a saved HTML snapshot from local disk.
-     * Returns null if the path is empty, external, or the file does not exist.
-     */
+    // Read a saved HTML snapshot from local disk.
+    // Returns null if the path is empty, external, or the file does not exist.
     public function getSavedHtml(string $path): ?string
     {
         $path = trim($path);
@@ -80,9 +72,7 @@ class SyllabusSnapshotService
         return Storage::disk('local')->get($path);
     }
 
-    /**
-     * Inject the versions drawer partial into a saved HTML string just before </body>.
-     */
+    // Inject the versions drawer partial into a saved HTML string just before </body>.
     public function injectVersionsDrawer(
         Syllabus $syllabus,
         CompleteSyllabus $activeSavedVersion,

@@ -12,28 +12,17 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
-/**
- * WeekGenerationService
- *
- * Owns the full lifecycle of SyllabusWeek rows for a syllabus:
- *   generate()       — first-time creation (idempotent guard included).
- *   regenerate()     — wipe all existing rows then recreate from scratch.
- *   deleteAllWeeks() — delete weeks + dependent rows (used by regenerate).
- *
- * Break weeks are SKIPPED (no row created, week numbers stay sequential).
- * Exam / non-teaching weeks ARE created; WeekLockService labels them later.
- */
+// Owns the full lifecycle of SyllabusWeek rows for a syllabus.
+//   generate()       — first-time creation (idempotent guard included)
+//   regenerate()     — wipe all existing rows then recreate from scratch
+//   deleteAllWeeks() — delete weeks + dependent rows (used by regenerate)
+//
+// Break weeks are SKIPPED (no row created, week numbers stay sequential).
+// Exam / non-teaching weeks ARE created; WeekLockService labels them later.
 class WeekGenerationService
 {
-    /**
-     * Generate weeks for the first time.
-     * Idempotent — exits cleanly if rows already exist.
-     *
-     * @param  Syllabus   $syllabus
-     * @param  array      $courseComponents  Keyed 'LEC' / 'LAB'.
-     * @param  Component  $livewire          For dispatching error toasts.
-     * @return bool  true = rows now exist (created or already present).
-     */
+    // Generate weeks for the first time.
+    // Idempotent — exits cleanly if rows already exist.
     public function generate(Syllabus $syllabus, array $courseComponents, Component $livewire): bool
     {
         if (! $syllabus->academic_calendar_id) {
@@ -44,18 +33,14 @@ class WeekGenerationService
         return $this->createWeekRows($syllabus, $courseComponents, $livewire);
     }
 
-    /**
-     * Delete every existing week then regenerate fresh from the calendar.
-     */
+    // Delete every existing week then regenerate fresh from the calendar.
     public function regenerate(Syllabus $syllabus, array $courseComponents, Component $livewire): bool
     {
         $this->deleteAllWeeks($syllabus);
         return $this->createWeekRows($syllabus, $courseComponents, $livewire);
     }
 
-    /**
-     * Hard-delete all SyllabusWeek rows and their dependent data for a syllabus.
-     */
+    // Hard-delete all SyllabusWeek rows and their dependent data for a syllabus.
     public function deleteAllWeeks(Syllabus $syllabus): void
     {
         $weekIds = SyllabusWeek::where('syllabus_id', $syllabus->id)->pluck('id')->all();
@@ -70,17 +55,11 @@ class WeekGenerationService
         SyllabusWeek::whereIn('id', $weekIds)->delete();
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
+    // ── Private ───────────────────────────────────────────────────────────────
 
-    /**
-     * Core week-row creation loop.
-     * Idempotent: exits immediately if rows already exist for this syllabus.
-     *
-     * Break weeks are SKIPPED — no row created, no week-number gap.
-     * Exam / non-teaching weeks are created; WeekLockService labels them later.
-     *
-     * @return bool  true when at least one week was created (or already existed).
-     */
+    // Core week-row creation loop.
+    // Idempotent: exits immediately if rows already exist for this syllabus.
+    // Break weeks are SKIPPED — no row created, no week-number gap.
     private function createWeekRows(Syllabus $syllabus, array $courseComponents, Component $livewire): bool
     {
         if (SyllabusWeek::where('syllabus_id', $syllabus->id)->exists()) {
@@ -101,7 +80,7 @@ class WeekGenerationService
             return false;
         }
 
-        // Pre-load break-event dates so we can skip break weeks in the loop.
+        // Pre-load break-event dates so we can skip break weeks in the loop
         $breakDates = AcademicCalendarEvent::where('academic_calendar_id', $syllabus->academic_calendar_id)
             ->where('type', 'break')
             ->orderBy('date')
@@ -121,7 +100,7 @@ class WeekGenerationService
                 $weekEnd = $end->copy();
             }
 
-            // Skip break weeks — institution closed, no coverage row needed.
+            // Skip break weeks — institution closed, no coverage row needed
             $isBreak = $breakDates->contains(fn ($d) => $d->between($weekStart, $weekEnd));
             if ($isBreak) {
                 $cursor = $weekEnd->copy()->addDay();

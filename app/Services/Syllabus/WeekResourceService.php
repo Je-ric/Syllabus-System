@@ -2,25 +2,20 @@
 
 namespace App\Services\Syllabus;
 
-/**
- * WeekResourceService
- *
- * Pure in-memory array mutations for the references and materials
- * sub-arrays inside $weekInputs.
- *
- * Zero database interaction — DB writes happen in WeekContentService
- * when the week is explicitly saved.
- *
- * Every method accepts the full $weekInputs array, mutates it, and
- * returns the updated array so the Livewire component can assign:
- *
- *   $this->weekInputs = $this->weekResourceService->addReference(…);
- */
+// Pure in-memory array mutations for the references and materials
+// sub-arrays inside $weekInputs.
+//
+// Zero database interaction — DB writes happen in WeekContentService
+// when the week is explicitly saved.
+//
+// Every method accepts the full $weekInputs array, mutates it, and
+// returns the updated array so the Livewire component can assign:
+//   $this->weekInputs = $this->weekResourceService->addReference(…);
 class WeekResourceService
 {
     // ── References ────────────────────────────────────────────────────────────
 
-    /** Append a blank reference row. */
+    // Append a blank reference row.
     public function addReference(array $weekInputs, int $weekNo, array $lockedWeeks): array
     {
         if (isset($lockedWeeks[$weekNo])) {
@@ -32,10 +27,8 @@ class WeekResourceService
         return $weekInputs;
     }
 
-    /**
-     * Remove a reference row by index.
-     * Always keeps at least one blank row so the input field renders.
-     */
+    // Remove a reference row by index.
+    // Always keeps at least one blank row so the input field renders.
     public function removeReference(array $weekInputs, int $weekNo, int $index, array $lockedWeeks): array
     {
         if (isset($lockedWeeks[$weekNo])) {
@@ -59,7 +52,7 @@ class WeekResourceService
 
     // ── Materials ─────────────────────────────────────────────────────────────
 
-    /** Append a blank material row. */
+    // Append a blank material row.
     public function addMaterial(array $weekInputs, int $weekNo, array $lockedWeeks): array
     {
         if (isset($lockedWeeks[$weekNo])) {
@@ -71,10 +64,8 @@ class WeekResourceService
         return $weekInputs;
     }
 
-    /**
-     * Remove a material row by index.
-     * Always keeps at least one blank row so the input pair renders.
-     */
+    // Remove a material row by index.
+    // Always keeps at least one blank row so the input pair renders.
     public function removeMaterial(array $weekInputs, int $weekNo, int $index, array $lockedWeeks): array
     {
         if (isset($lockedWeeks[$weekNo])) {

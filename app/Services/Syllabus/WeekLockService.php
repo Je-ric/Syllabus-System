@@ -8,24 +8,17 @@ use App\Models\WeekContent;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
-/**
- * WeekLockService
- *
- * Reads calendar events for every SyllabusWeek, decides which weeks are
- * locked (exam or non_teaching), writes the correct assessment_task labels
- * into WeekContent rows, and returns two arrays the Livewire component
- * stores as reactive state:
- *
- *   lockedWeeks  — [ weekNo => 'exam' | 'non_teaching' ]
- *   weekEvents   — [ weekNo => [ ['name', 'type', 'date_display'], … ] ]
- */
+// Reads calendar events for every SyllabusWeek, decides which weeks are
+// locked (exam or non_teaching), writes the correct assessment_task labels
+// into WeekContent rows, and returns two arrays the Livewire component
+// stores as reactive state:
+//
+//   lockedWeeks — [ weekNo => 'exam' | 'non_teaching' ]
+//   weekEvents  — [ weekNo => [ ['name', 'type', 'date_display'], … ] ]
 class WeekLockService
 {
-    /**
-     * @param  Syllabus    $syllabus
-     * @param  Collection  $syllabusWeeks  Ordered SyllabusWeek models.
-     * @return array{ lockedWeeks: array<int,string>, weekEvents: array<int,array> }
-     */
+    // @param  Collection  $syllabusWeeks  Ordered SyllabusWeek models.
+    // @return array{ lockedWeeks: array<int,string>, weekEvents: array<int,array> }
     public function computeLockedWeeks(Syllabus $syllabus, Collection $syllabusWeeks): array
     {
         $lockedWeeks = [];
@@ -39,7 +32,7 @@ class WeekLockService
             ->orderBy('date')
             ->get();
 
-        // Exam labels are assigned in the order exams are encountered across weeks.
+        // Exam labels are assigned in the order exams are encountered across weeks
         $examTermLabels = ['1st Term', '2nd Term', 'Final Term'];
         $examsSeen      = 0;
 
@@ -68,8 +61,7 @@ class WeekLockService
 
             $lockedWeeks[$week->week_no] = $lockingEvent->type;
 
-            // Write the exam label into both LEC and LAB WeekContent rows
-            // so the print/export view can pick them up directly.
+            // Write exam label into both LEC and LAB WeekContent rows
             if ($lockingEvent->type === 'exam') {
                 $termLabel = $examTermLabels[min($examsSeen, 2)];
                 $examsSeen++;

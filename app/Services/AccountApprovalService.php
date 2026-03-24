@@ -94,7 +94,7 @@ class AccountApprovalService
         );
 
         return $user;
-        }); // end DB::transaction
+        }); // end transaction
     }
 
     public function assignRoles(int $userId, array $roles): User
@@ -135,8 +135,7 @@ class AccountApprovalService
                     ->delete();
             }
 
-            // #6 — faculty role is always kept (pushed above), but if it were ever
-            // removed (e.g. future role changes), clean up faculty assignments too.
+            // faculty role is always kept (pushed above); clean up assignments if ever removed
             if (in_array('faculty', $oldRoleNames) && !in_array('faculty', $newRoleNames)) {
                 UserAssignment::where('user_id', $user->id)
                     ->where('context', 'faculty')

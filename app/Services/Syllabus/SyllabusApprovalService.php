@@ -6,16 +6,14 @@ use App\Models\AuditLog;
 use App\Models\Syllabus;
 use Illuminate\Validation\ValidationException;
 
-/**
- * Handles all approved_by / concurred_by mutations on a syllabus.
- *
- * Business rules:
- *  • approved_by  — any dean; nullable
- *  • concurred_by — any dean; nullable; MUST differ from approved_by when both are set
- */
+// Handles all approved_by / concurred_by mutations on a syllabus.
+//
+// Business rules:
+//   approved_by  — any dean; nullable
+//   concurred_by — any dean; nullable; must differ from approved_by when both are set
 class SyllabusApprovalService
 {
-    // ── Approved By ──────────────────────────────────────────────────────────
+    // ── Approved By ───────────────────────────────────────────────────────────
 
     public function setApprovedBy(Syllabus $syllabus, ?int $userId): void
     {
@@ -43,11 +41,9 @@ class SyllabusApprovalService
         );
     }
 
-    // ── Concurred By ─────────────────────────────────────────────────────────
+    // ── Concurred By ──────────────────────────────────────────────────────────
 
-    /**
-     * @throws ValidationException when concurred_by === approved_by
-     */
+    // @throws ValidationException when concurred_by === approved_by
     public function setConcurredBy(Syllabus $syllabus, ?int $userId): void
     {
         $approvedBy = $syllabus->fresh()->approved_by;

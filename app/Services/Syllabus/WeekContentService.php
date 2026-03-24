@@ -8,36 +8,25 @@ use App\Models\SyllabusWeek;
 use App\Models\WeekContent;
 use Illuminate\Support\Collection;
 
-/**
- * WeekContentService
- *
- * All read/write operations for WeekContent, Reference, and OnlineMaterial
- * rows, keyed to the Livewire component's $weekInputs array.
- *
- * $weekInputs shape per key "w{n}":
- * [
- *   'course_outcome_id'   => int|null,
- *   'learning_outcomes'   => string,
- *   'assessment_task'     => string,
- *   'topic'               => string,
- *   'teaching_activities' => string,
- *   'references'          => [['text' => string], …],
- *   'materials'           => [['name' => string, 'url' => string], …],
- * ]
- */
+// All read/write operations for WeekContent, Reference, and OnlineMaterial
+// rows, keyed to the Livewire component's $weekInputs array.
+//
+// $weekInputs shape per key "w{n}":
+// [
+//   'course_outcome_id'   => int|null,
+//   'learning_outcomes'   => string,
+//   'assessment_task'     => string,
+//   'topic'               => string,
+//   'teaching_activities' => string,
+//   'references'          => [['text' => string], …],
+//   'materials'           => [['name' => string, 'url' => string], …],
+// ]
 class WeekContentService
 {
     // ── Read ──────────────────────────────────────────────────────────────────
 
-    /**
-     * Build the full $weekInputs array from the database for a given
-     * syllabus / component-type combination.
-     *
-     * @param  int        $syllabusId
-     * @param  string     $activeComponent  'LEC' | 'LAB'
-     * @param  Collection $syllabusWeeks    Ordered SyllabusWeek models.
-     * @return array
-     */
+    // Build the full $weekInputs array from the database for a given
+    // syllabus / component-type combination.
     public function populateInputs(int $syllabusId, string $activeComponent, Collection $syllabusWeeks): array
     {
         if ($syllabusWeeks->isEmpty()) {
@@ -99,18 +88,9 @@ class WeekContentService
 
     // ── Write ─────────────────────────────────────────────────────────────────
 
-    /**
-     * Persist one or all unlocked weeks using dirty-checking.
-     * Only rows that actually changed are written — prevents noise toasts
-     * when the user saves an unmodified week.
-     *
-     * @param  int      $syllabusId
-     * @param  string   $activeComponent  'LEC' | 'LAB'
-     * @param  array    $weekInputs       The component's $weekInputs array.
-     * @param  array    $lockedWeeks      [ weekNo => lockType ]
-     * @param  int|null $onlyWeekNo       null = save all, int = save one.
-     * @return bool  true when at least one row was written.
-     */
+    // Persist one or all unlocked weeks using dirty-checking.
+    // Only rows that actually changed are written.
+    // Returns true when at least one row was written.
     public function save(
         int $syllabusId,
         string $activeComponent,
@@ -159,7 +139,7 @@ class WeekContentService
                 'tla'                => trim((string) ($payload['teaching_activities'] ?? '')),
             ];
 
-            // ── Dirty-check content fields ────────────────────────────────────
+            // Dirty-check content fields
             $existing = WeekContent::where('syllabus_week_id', $week->id)
                 ->where('component_type', $activeComponent)
                 ->first();
@@ -171,7 +151,7 @@ class WeekContentService
                 false
             );
 
-            // ── Dirty-check references (sort both sides — order is irrelevant) ─
+            // Dirty-check references (sort both sides — order is irrelevant)
             $existingRefs = Reference::where('syllabus_id', $syllabusId)
                 ->where('syllabus_week_id', $week->id)
                 ->pluck('reference_text')
@@ -252,11 +232,8 @@ class WeekContentService
         return $changed;
     }
 
-    /**
-     * Reset one editable week: clear all content fields and delete refs/materials.
-     * Returns the blank $weekInputs entry to replace in-memory state,
-     * or null if the week is locked or not found.
-     */
+    // Reset one editable week: clear all content fields and delete refs/materials.
+    // Returns the blank $weekInputs entry, or null if the week is locked or not found.
     public function reset(int $syllabusId, string $activeComponent, int $weekNo, array $lockedWeeks): ?array
     {
         if (isset($lockedWeeks[$weekNo])) {

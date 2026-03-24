@@ -8,56 +8,29 @@ use App\Models\SyllabusEvaluationItem;
 use App\Models\SyllabusWeek;
 use App\Models\WeekContent;
 
-/**
- * CourseEvaluationService
- *
- * Owns all read/write logic for the Course Evaluation wizard step so that
- * CourseEvaluationStep (Livewire) stays thin.
- *
- * Public API:
- *   loadRows(int $syllabusId): array          — rows + inputs + meta for the blade
- *   persist(int $syllabusId, array $rows, array $inputs): void
- *
- * The returned array from loadRows() has shape:
- * [
- *   'courseHasLab'         => bool,
- *   'lecPerformanceStd'    => string|null,   // e.g. '67%'
- *   'labPerformanceStd'    => string|null,   // e.g. '33%'
- *   'rows'                 => [...],
- *   'inputs'               => [...],
- * ]
- *
- * ── Row shape ────────────────────────────────────────────────────────────────
- * [
- *   'week_no'    => int,
- *   'is_exam'    => bool,
- *   'is_mvgo'    => bool,           // true only for week 1
- *   'term_label' => string|null,    // '1st Term' / '2nd Term' / 'Final Term'
- *   'co_coverage'=> string,         // auto-resolved CO code for exam rows
- *   'lec' => [
- *     'week_content_id' => int,
- *     'co_code'         => string|null,
- *     'task_label'      => string,
- *   ] | null,
- *   'lab' => [...same...] | null,
- * ]
- *
- * ── Exam CO resolution ───────────────────────────────────────────────────────
- * For exam rows, the CO is NOT user input — it is auto-resolved from the week
- * immediately before the exam.  If that week also has no CO (e.g. it is itself
- * MVGO or an earlier exam) we walk backwards until we find a real CO or give up.
- * The resolved code is stored in 'co_coverage' on the row and is read-only in
- * the blade.
- */
+// Owns all read/write logic for the Course Evaluation wizard step.
+// CourseEvaluationStep (Livewire) stays thin by delegating here.
+//
+// Public API:
+//   loadRows(int $syllabusId): array                              — rows + inputs + meta for the blade
+//   persist(int $syllabusId, array $rows, array $inputs): void
+//
+// Row shape:
+// [
+//   'week_no'     => int,
+//   'is_exam'     => bool,
+//   'is_mvgo'     => bool,         // true only for week 1
+//   'term_label'  => string|null,  // '1st Term' / '2nd Term' / 'Final Term'
+//   'co_coverage' => string,       // auto-resolved CO code for exam rows (read-only)
+//   'lec'         => ['week_content_id' => int, 'co_code' => string|null, 'task_label' => string] | null,
+//   'lab'         => [...same...] | null,
+// ]
+//
+// For exam rows, CO is auto-resolved by walking backwards from the exam week
+// until a non-null CO is found. Stored in 'co_coverage', read-only in the blade.
 class CourseEvaluationService
 {
-    // ══════════════════════════════════════════════════════════════════════════
-    // PUBLIC
-    // ══════════════════════════════════════════════════════════════════════════
-
-    /**
-     * Load everything the blade needs.
-     */
+    // Load everything the blade needs.
     public function loadRows(int $syllabusId): array
     {
         $syllabus = Syllabus::with('course')->find($syllabusId);
@@ -67,7 +40,7 @@ class CourseEvaluationService
 
         $courseHasLab = (bool) $syllabus->course?->has_lec_lab;
 
-        // ── Performance standards from the saved component records ────────────
+        // Performance standards from the saved component records
         $lecComp = CourseComponent::where('syllabus_id', $syllabusId)
             ->where('type', 'LEC')
             ->first();
@@ -78,7 +51,6 @@ class CourseEvaluationService
         $lecPerformanceStd = $lecComp?->performance_standard;
         $labPerformanceStd = $labComp?->performance_standard;
 
-        // ── Weeks ─────────────────────────────────────────────────────────────
         $weeks = SyllabusWeek::where('syllabus_id', $syllabusId)
             ->orderBy('week_no')
             ->get();
@@ -103,9 +75,9 @@ class CourseEvaluationService
             ->get()
             ->keyBy('week_content_id');
 
-        // ── Pass 1: build a quick lookup of week_no → LEC CO code for exam
-        //            CO auto-resolution.  Only non-exam, non-MVGO weeks fill this.
-        $weekNoCo = [];   // week_no => co_code (string|null)
+        // Pass 1: build week_no → LEC CO code lookup for exam CO auto-resolution
+        // Only non-exam, non-MVGO weeks fill this
+        $weekNoCo = [];
         foreach ($weeks as $w) {
             $lc = $contentMap[$w->id]['LEC'] ?? null;
             if ($lc && ! $w->is_exam_week && (int) $w->week_no !== 1) {
@@ -113,11 +85,11 @@ class CourseEvaluationService
             }
         }
 
-        // ── Pass 2: build rows ────────────────────────────────────────────────
-        $rows            = [];
-        $inputs          = [];
-        $examTermLabels  = ['1st Term', '2nd Term', 'Final Term'];
-        $examCount       = 0;
+        // Pass 2: build rows
+        $rows           = [];
+        $inputs         = [];
+        $examTermLabels = ['1st Term', '2nd Term', 'Final Term'];
+        $examCount      = 0;
 
         foreach ($weeks as $week) {
             $lecContent = $contentMap[$week->id]['LEC'] ?? null;
@@ -144,14 +116,13 @@ class CourseEvaluationService
 
             $isMvgo = ((int) $week->week_no === 1);
 
-            // ── Auto-resolve CO coverage for exam rows ────────────────────────
-            // Walk backwards from (this exam week − 1) to find the last assigned CO.
+            // Auto-resolve CO coverage for exam rows by walking backwards
             $coCoverage = '';
             if ($isExam) {
                 $coCoverage = $this->resolveExamCo((int) $week->week_no, $weekNoCo);
             }
 
-            // ── LEC side ──────────────────────────────────────────────────────
+            // LEC side
             $lecRow = null;
             if ($lecTask !== '') {
                 $lecEval = $evalMap->get($lecContent->id);
@@ -163,12 +134,11 @@ class CourseEvaluationService
                 $inputs[$lecContent->id] = [
                     'weight'        => $lecEval?->weight !== null ? (string) $lecEval->weight : '',
                     'outcome_label' => $isMvgo ? 'MVGO' : ($lecEval?->outcome_label ?? ''),
-                    // kind: 'activity', 'quiz', or 'exam' — user-selectable for regular rows
                     'kind'          => $isMvgo ? 'activity' : ($lecEval?->kind ?? 'activity'),
                 ];
             }
 
-            // ── LAB side ──────────────────────────────────────────────────────
+            // LAB side
             $labRow = null;
             if ($courseHasLab && $labTask !== '') {
                 $labEval = $evalMap->get($labContent->id);
@@ -193,36 +163,32 @@ class CourseEvaluationService
                 'is_exam'     => $isExam,
                 'is_mvgo'     => $isMvgo,
                 'term_label'  => $termLabel,
-                'co_coverage' => $coCoverage,   // read-only auto-resolved CO for exam rows
+                'co_coverage' => $coCoverage,
                 'lec'         => $lecRow,
                 'lab'         => $labRow,
             ];
         }
 
-        // ── Compute totals in PHP so the blade just displays, never calculates ──
+        // Compute totals in PHP so the blade just displays, never calculates
         $lecTotal = 0;
         $labTotal = 0;
         foreach ($rows as $row) {
             if (isset($row['lec']['week_content_id'])) {
-                $w = (int) ($inputs[$row['lec']['week_content_id']]['weight'] ?? 0);
-                $lecTotal += $w;
+                $lecTotal += (int) ($inputs[$row['lec']['week_content_id']]['weight'] ?? 0);
             }
             if ($courseHasLab && isset($row['lab']['week_content_id'])) {
-                $w = (int) ($inputs[$row['lab']['week_content_id']]['weight'] ?? 0);
-                $labTotal += $w;
+                $labTotal += (int) ($inputs[$row['lab']['week_content_id']]['weight'] ?? 0);
             }
         }
 
-        // ── Weight total targets (structural, not configurable) ─────────────────
-        // LEC+LAB courses: LEC must sum to 67, LAB must sum to 33.
-        // LEC-only courses: LEC must sum to 100.
-        // These are fixed academic standards — NOT the performance/passing standard.
+        // Weight total targets (fixed academic standards, not configurable):
+        // LEC+LAB: LEC must sum to 67, LAB must sum to 33.
+        // LEC-only: LEC must sum to 100.
         $lecStdNum = $courseHasLab ? 67 : 100;
         $labStdNum = 33;
 
-        // ── Passing mark (from performance_standard on the component) ─────────
-        // This is the minimum score a student must achieve (e.g. 60, 75).
-        // Raw score is always out of 100; this is a threshold, not a weight target.
+        // Passing mark from performance_standard on the component (e.g. 60, 75).
+        // This is a threshold, not a weight target.
         $parseDecimal = static fn (mixed $v, int $fb): int =>
             is_numeric(str_replace('%', '', (string) ($v ?? '')))
                 ? (int) round((float) str_replace('%', '', (string) $v))
@@ -235,23 +201,18 @@ class CourseEvaluationService
             'courseHasLab'      => $courseHasLab,
             'lecPerformanceStd' => $lecPerformanceStd,
             'labPerformanceStd' => $labPerformanceStd,
-            'lecStdNum'         => $lecStdNum,     // weight total target (67 or 100)
-            'labStdNum'         => $labStdNum,     // weight total target (33)
-            'lecTotal'          => $lecTotal,      // running sum of saved weights
+            'lecStdNum'         => $lecStdNum,
+            'labStdNum'         => $labStdNum,
+            'lecTotal'          => $lecTotal,
             'labTotal'          => $labTotal,
-            'lecPassingMark'    => $lecPassingMark, // passing threshold (e.g. 60, 75)
+            'lecPassingMark'    => $lecPassingMark,
             'labPassingMark'    => $labPassingMark,
             'rows'              => $rows,
             'inputs'            => $inputs,
         ];
     }
 
-    /**
-     * Persist evaluation items to the DB.
-     *
-     * @param  array  $rows    The same rows array returned by loadRows()
-     * @param  array  $inputs  The current wire:model inputs (keyed by week_content_id)
-     */
+    // Persist evaluation items to the DB.
     public function persist(int $syllabusId, array $rows, array $inputs, bool $courseHasLab): void
     {
         $syllabus = Syllabus::with('course')->find($syllabusId);
@@ -263,44 +224,36 @@ class CourseEvaluationService
         foreach ($rows as $row) {
             if (isset($row['lec']['week_content_id'])) {
                 $this->saveOneItem(
-                    syllabusId:   $syllabusId,
-                    courseId:     $courseId,
-                    weekContentId:(int) $row['lec']['week_content_id'],
-                    isExam:       $row['is_exam'],
-                    isMvgo:       $row['is_mvgo'],
-                    termLabel:    $row['term_label'],
-                    coCoverage:   $row['co_coverage'] ?? '',
-                    inputs:       $inputs,
+                    syllabusId:    $syllabusId,
+                    courseId:      $courseId,
+                    weekContentId: (int) $row['lec']['week_content_id'],
+                    isExam:        $row['is_exam'],
+                    isMvgo:        $row['is_mvgo'],
+                    termLabel:     $row['term_label'],
+                    coCoverage:    $row['co_coverage'] ?? '',
+                    inputs:        $inputs,
                 );
             }
 
             if ($courseHasLab && isset($row['lab']['week_content_id'])) {
                 $this->saveOneItem(
-                    syllabusId:   $syllabusId,
-                    courseId:     $courseId,
-                    weekContentId:(int) $row['lab']['week_content_id'],
-                    isExam:       $row['is_exam'],
-                    isMvgo:       $row['is_mvgo'],
-                    termLabel:    $row['term_label'],
-                    coCoverage:   $row['co_coverage'] ?? '',
-                    inputs:       $inputs,
+                    syllabusId:    $syllabusId,
+                    courseId:      $courseId,
+                    weekContentId: (int) $row['lab']['week_content_id'],
+                    isExam:        $row['is_exam'],
+                    isMvgo:        $row['is_mvgo'],
+                    termLabel:     $row['term_label'],
+                    coCoverage:    $row['co_coverage'] ?? '',
+                    inputs:        $inputs,
                 );
             }
         }
     }
 
-    // ══════════════════════════════════════════════════════════════════════════
-    // PRIVATE
-    // ══════════════════════════════════════════════════════════════════════════
+    // ── Private ───────────────────────────────────────────────────────────────
 
-    /**
-     * Walk backwards from ($examWeekNo - 1) to find the last non-null CO code.
-     * Returns the CO code string or '' when nothing is found.
-     *
-     * Example:
-     *   Weeks: 1(MVGO) 2(CO1) 3(CO1) 4(CO2) 5(EXAM)
-     *   → resolveExamCo(5, map) returns 'CO2'  (week 4 was the last assigned CO)
-     */
+    // Walk backwards from ($examWeekNo - 1) to find the last non-null CO code.
+    // Returns the CO code string or '' when nothing is found.
     private function resolveExamCo(int $examWeekNo, array $weekNoCo): string
     {
         for ($w = $examWeekNo - 1; $w >= 1; $w--) {
@@ -326,7 +279,7 @@ class CourseEvaluationService
         $weightRaw = trim((string) ($data['weight'] ?? ''));
         $weight    = $weightRaw !== '' ? (int) $weightRaw : null;
 
-        // MVGO → always 'MVGO'; exam → auto-resolved CO code (read-only in blade)
+        // MVGO → always 'MVGO'; exam → auto-resolved CO code
         if ($isMvgo) {
             $outcomeLabel = 'MVGO';
         } elseif ($isExam && $coCoverage !== '') {
@@ -336,10 +289,11 @@ class CourseEvaluationService
             $outcomeLabel = $outcomeLabel !== '' ? $outcomeLabel : null;
         }
 
-        // kind: exam rows are always 'exam'; regular rows respect user selection
+        // Exam rows are always kind='exam'; regular rows respect user selection
         $kind = $isExam
             ? 'exam'
             : (in_array($data['kind'] ?? '', ['activity', 'quiz']) ? $data['kind'] : 'activity');
+
         $examType = $isExam
             ? match ($termLabel) {
                 '1st Term'   => 'first_term',

@@ -5,20 +5,16 @@ namespace App\Services;
 use App\Models\Course;
 use App\Models\Program;
 use App\Models\AuditLog;
-use App\Models\CompleteSyllabus;
+use App\Services\Syllabus\SyllabusDeleteService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class CourseService
 {
-    /**
-     * Create a new course with PO mappings and audit logging
-     *
-     * @param array $data Course data (program_id, code, name, description, etc.)
-     * @param array $poMapping PO mapping data (outcome_id => ied_level)
-     * @return Course
-     */
+    public function __construct(
+        private readonly SyllabusDeleteService $syllabusDeleteService
+    ) {}
+    // Create a new course with PO mappings and audit logging
     public function createCourse(array $data, array $poMapping = [])
     {
         return DB::transaction(function () use ($data, $poMapping) {
@@ -49,14 +45,7 @@ class CourseService
         });
     }
 
-    /**
-     * Update an existing course with PO mappings and audit logging
-     *
-     * @param Course $course The course to update
-     * @param array $data Update data
-     * @param array $poMapping PO mapping data (outcome_id => ied_level)
-     * @return Course
-     */
+    // Update an existing course with PO mappings and audit logging
     public function updateCourse(Course $course, array $data, array $poMapping = [])
     {
         return DB::transaction(function () use ($course, $data, $poMapping) {
@@ -102,51 +91,14 @@ class CourseService
         });
     }
 
-    /**
-     * Log course action to audit log
-     *
-     * @param string $action The action performed (created, updated, deleted)
-     * @param Course $course The course model
-     * @return void
-     */
-    /**
-     * Delete a course and all its related data
-     */
+    // Delete a course and all its related data
     public function deleteCourse(Course $course): void
     {
         DB::transaction(function () use ($course) {
-            // Detach PO mappings (course_curriculum_maps pivot)
             $course->programOutcomes()->detach();
 
             foreach ($course->syllabi as $syllabus) {
-                // #5 — delete CompleteSyllabus snapshots + their disk files
-                foreach ($syllabus->completeSyllabi as $snapshot) {
-                    foreach (['pdf_path', 'abridged_path', 'evaluation_path'] as $field) {
-                        $path = $snapshot->$field ?? '';
-                        if ($path !== '' && Storage::disk('local')->exists($path)) {
-                            Storage::disk('local')->delete($path);
-                        }
-                    }
-                    $snapshot->delete();
-                }
-
-                $syllabus->components()->delete();
-                $syllabus->courseOutcomes()->delete();
-
-                // Delete week contents and their evaluation items before deleting weeks
-                foreach ($syllabus->weeks as $week) {
-                    $week->contents()->each(function ($content) {
-                        $content->evaluation()->delete();
-                        $content->delete();
-                    });
-                    $week->delete();
-                }
-
-                $syllabus->references()->delete();
-                $syllabus->onlineMaterials()->delete();
-                $syllabus->revisions()->delete();
-                $syllabus->reviewers()->delete();
-                $syllabus->delete();
+                $this->syllabusDeleteService->delete($syllabus);
             }
 
             $this->logAction('deleted', $course);

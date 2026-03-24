@@ -6,30 +6,15 @@ use App\Models\CompleteSyllabus;
 use App\Models\Syllabus;
 use Carbon\Carbon;
 
-/**
- * SyllabusPreviewService
- *
- * Centralises all data-building logic for every syllabus preview variant.
- * The SyllabusController delegates to this service instead of carrying the
- * logic in its own private method.
- *
- * Public API:
- *   buildCompleteData(Syllabus)  — full OBTL preview (all sections)
- *   buildAbridgedData(Syllabus)  — student-facing abridged version
- *
- * Both methods return an array that can be passed directly to view().
- */
+// Centralises all data-building logic for every syllabus preview variant.
+// Used by SyllabusController and SyllabusSnapshotService.
+//
+// Public API:
+//   buildCompleteData(Syllabus)  — full OBTL preview (all sections)
+//   buildAbridgedData(Syllabus)  — student-facing abridged version
 class SyllabusPreviewService
 {
-    // ══════════════════════════════════════════════════════════════════════════
-    // PUBLIC ENTRY POINTS
-    // ══════════════════════════════════════════════════════════════════════════
-
-    /**
-     * Build data for the complete OBTL preview (complete.blade.php).
-     * Extracted verbatim from SyllabusController::buildPreviewData() so the
-     * controller can stay thin.
-     */
+    // Build data for the complete OBTL preview (complete.blade.php).
     public function buildCompleteData(Syllabus $syllabus): array
     {
         $this->eagerLoad($syllabus);
@@ -40,36 +25,22 @@ class SyllabusPreviewService
         $refs    = $this->buildReferences($syllabus);
 
         return array_merge($shared['export'], [
-            'weeklyCoverageRows' => $weekly,
-            'allReferences'      => $refs['allReferences'],
-            'onlineMaterialLinks'=> $refs['onlineMaterialLinks'],
-            'evaluationRows'     => $evalOut['evaluationRows'],
-            'evaluationTotals'   => $evalOut['evaluationTotals'],
+            'weeklyCoverageRows'  => $weekly,
+            'allReferences'       => $refs['allReferences'],
+            'onlineMaterialLinks' => $refs['onlineMaterialLinks'],
+            'evaluationRows'      => $evalOut['evaluationRows'],
+            'evaluationTotals'    => $evalOut['evaluationTotals'],
         ]);
     }
 
-    /**
-     * Build data for the abridged preview (abridged.blade.php).
-     *
-     * Extends the complete data with:
-     *   abridgedWeeklyRows  — portrait-only weekly coverage with co_code + co_no
-     *   coPoLetterMap       — [ co_id => 'A, B, D, …' ]  (letter codes per CO)
-     */
+    // Build data for the abridged preview (abridged.blade.php).
+    // Extends complete data with abridgedWeeklyRows and coPoLetterMap.
     public function buildAbridgedData(Syllabus $syllabus): array
     {
         $base = $this->buildCompleteData($syllabus);
 
-        // ── CO → PO letter codes ──────────────────────────────────────────────
-        // Each CourseOutcome maps to program outcomes through the weekly content
-        // CO relationship. The PO letter codes (po_code values) come from the
-        // program outcomes that the *course* addresses (coursePoIedMap keys).
-        // We derive per-CO PO codes from the CO->outcome relationship if it
-        // exists, otherwise fall back to showing the course-level PO codes.
         $coPoLetterMap = $this->buildCoPoLetterMap($syllabus);
 
-        // ── Portrait-optimised weekly rows ────────────────────────────────────
-        // Uses the LEC component (primary) — same as the sample abridged PDF.
-        // Adds co_code and co_no to every row for the CO No. column.
         $weeks = $base['weeks'] ?? null;
 
         $abridgedWeeklyRows = [
@@ -86,9 +57,7 @@ class SyllabusPreviewService
         ]);
     }
 
-    // ══════════════════════════════════════════════════════════════════════════
-    // PRIVATE HELPERS — shared
-    // ══════════════════════════════════════════════════════════════════════════
+    // ── Private helpers ───────────────────────────────────────────────────────
 
     private function eagerLoad(Syllabus $syllabus): void
     {
@@ -111,10 +80,8 @@ class SyllabusPreviewService
         ]);
     }
 
-    /**
-     * Returns shared computed values + the weeks collection (not exported to view).
-     * 'export' key contains everything safe to spread into view data.
-     */
+    // Returns shared computed values + the weeks collection.
+    // 'export' key contains everything safe to spread into view data.
     private function sharedData(Syllabus $syllabus): array
     {
         $program              = $syllabus->course->program;
@@ -161,17 +128,12 @@ class SyllabusPreviewService
             default => 'N/A',
         };
 
-        // Revision history — uses the service field names:
         // revision_no, revision_date, implementation_semester, highlights, contributors
-        $syllabusRevisions = $syllabus->revisions
-            ?->sortBy('revision_no')
-            ?? collect();
-
-        // Reviewers — each SyllabusReviewer has a user() relationship
+        $syllabusRevisions = $syllabus->revisions?->sortBy('revision_no') ?? collect();
         $syllabusReviewers = $syllabus->reviewers ?? collect();
 
-        // approved_by → dean() relationship; concurred_by → chair() relationship.
-        $approvedByUser  = $syllabus->dean  ?? null;
+        // approved_by → dean(); concurred_by → deanConcurred()
+        $approvedByUser  = $syllabus->dean ?? null;
         $concurredByUser = $syllabus->deanConcurred ?? null;
 
         $weeks = $syllabus->weeks?->sortBy('week_no') ?? collect();
@@ -206,8 +168,6 @@ class SyllabusPreviewService
             ),
         ];
     }
-
-    // ── Weekly coverage rows (complete view) ──────────────────────────────────
 
     private function buildWeeklyCoverageRows(Syllabus $syllabus, $weeks): array
     {
@@ -304,27 +264,19 @@ class SyllabusPreviewService
         return $weeklyCoverageRows;
     }
 
-    // ── Abridged weekly rows ──────────────────────────────────────────────────
-
-    /**
-     * Portrait-only weekly rows for the abridged view.
-     * Accepts a component type (`LEC` or `LAB`).
-     * Columns: CO No., Wk No., Topics, Learning Activities, Assessment.
-     * Exam rows span all columns.
-     * Consecutive weeks with the same CO are merged into one grouped row.
-     */
+    // Portrait-only weekly rows for the abridged view.
+    // Consecutive weeks with the same CO are merged into one grouped row.
     private function buildAbridgedWeeklyRows(Syllabus $syllabus, $weeks, string $componentType = 'LEC'): array
     {
         $weeks     = $weeks ?? $syllabus->weeks?->sortBy('week_no') ?? collect();
         $examLabel = $this->examLabelFn();
         $rows      = [];
-
-        // For displaying "Activity 1", "Quiz 1", etc. in the Assessment column
         $counters  = ['activity' => 0, 'quiz' => 0];
 
-        // Pass 1: build one raw row per week (per component)
-        $rawRows = [];
+        // Pass 1: build one raw row per week
+        $rawRows       = [];
         $lastKnownCoNo = '';
+
         foreach ($weeks as $week) {
             $weekContents = $week->contents ?? collect();
             $weekExamTask = $weekContents->first(function ($c) {
@@ -340,21 +292,21 @@ class SyllabusPreviewService
                 );
             });
 
-            $isExam = $weekExamTask !== null
+            $isExam    = $weekExamTask !== null
                 || trim((string) ($week->exam_type ?? '')) !== ''
                 || (bool) $week->is_exam_week;
-
             $isNoClass = $weekNoClassTask !== null;
 
-            $resolvedExamLabel = $weekExamTask
+            $resolvedExamLabel    = $weekExamTask
                 ? trim((string) $weekExamTask->assessment_task)
                 : $examLabel($week->exam_type);
             $resolvedNoClassLabel = $weekNoClassTask
                 ? trim((string) $weekNoClassTask->assessment_task)
                 : 'Non-Teaching Week / No Class';
+
             $content = $week->contents?->where('component_type', $componentType)?->first();
 
-            // CO is shared per week; if LAB has no CO selected, fall back to LEC's CO
+            // If LAB has no CO, fall back to LEC's CO
             $coContent = $content;
             if ((int) $week->week_no !== 1 && ! $coContent?->course_outcome_id) {
                 $lecContent = $week->contents?->where('component_type', 'LEC')?->first();
@@ -371,7 +323,6 @@ class SyllabusPreviewService
                 } elseif ($coCode !== '') {
                     $coNo = preg_replace('/^[A-Za-z]+/', '', $coCode); // strip 'CO' prefix
                 }
-
                 if ($coNo === '') {
                     $coNo = $lastKnownCoNo;
                 }
@@ -390,7 +341,6 @@ class SyllabusPreviewService
                 continue;
             }
 
-            // Assessment label with Activity/Quiz numbering when kind is set
             $taskRaw    = trim((string) ($content?->assessment_task ?? ''));
             $taskLabel  = $taskRaw;
             $isTaskExam = str_contains(strtolower($taskRaw), 'exam');
@@ -402,7 +352,6 @@ class SyllabusPreviewService
                 $taskLabel = ucfirst($k) . ' ' . $counters[$k];
             }
 
-            // Extract numeric part of CO code for the CO No. column
             $coCode = $coContent?->courseOutcome?->co_code ?? '';
             $coNo   = '';
             if ((int) $week->week_no === 1) {
@@ -410,7 +359,6 @@ class SyllabusPreviewService
             } elseif ($coCode !== '') {
                 $coNo = preg_replace('/^[A-Za-z]+/', '', $coCode); // strip 'CO' prefix
             }
-
             if ($coNo !== '') {
                 $lastKnownCoNo = $coNo;
             }
@@ -427,7 +375,7 @@ class SyllabusPreviewService
             ];
         }
 
-        // Pass 2: merge consecutive non-exam rows with same CO into one
+        // Pass 2: merge consecutive non-exam rows with the same CO
         $i = 0;
         while ($i < count($rawRows)) {
             $row = $rawRows[$i];
@@ -438,7 +386,6 @@ class SyllabusPreviewService
                 continue;
             }
 
-            // Look ahead: collect consecutive weeks with same co_id
             $group = [$row];
             $j     = $i + 1;
             while (
@@ -455,17 +402,17 @@ class SyllabusPreviewService
             $endWk   = end($group)['week_no'];
             $wkLabel = $startWk === $endWk ? (string) $startWk : $startWk . ' – ' . $endWk;
 
-            $topics     = collect($group)->pluck('topics')->filter()->implode("\n");
-            $tla        = collect($group)->pluck('tla')->filter()->unique()->implode(', ');
-            $assessment = collect($group)->pluck('assessment')->filter()->unique()->implode('; ');
+            // $topics     = collect($group)->pluck('topics')->filter()->implode("\n");
+            // $tla        = collect($group)->pluck('tla')->filter()->unique()->implode(', ');
+            // $assessment = collect($group)->pluck('assessment')->filter()->unique()->implode('; ');
 
             $rows[] = [
                 'is_exam'    => false,
                 'wk_label'   => $wkLabel,
                 'co_no'      => $row['co_no'],
-                'topics'     => $topics,
-                'tla'        => $tla,
-                'assessment' => $assessment,
+                'topics'     => collect($group)->pluck('topics')->filter()->implode("\n"),
+                'tla'        => collect($group)->pluck('tla')->filter()->unique()->implode(', '),
+                'assessment' => collect($group)->pluck('assessment')->filter()->unique()->implode('; '),
             ];
 
             $i = $j;
@@ -473,9 +420,6 @@ class SyllabusPreviewService
 
         return $rows;
     }
-
-
-    // ── Evaluation rows ───────────────────────────────────────────────────────
 
     private function buildEvaluationRows(Syllabus $syllabus, $weeks): array
     {
@@ -494,7 +438,6 @@ class SyllabusPreviewService
             if ($lecTaskRaw === '' && $labTaskRaw === '') {
                 continue;
             }
-
             if ($lecTaskRaw === 'Non-Teaching Week' || $labTaskRaw === 'Non-Teaching Week') {
                 continue;
             }
@@ -512,9 +455,7 @@ class SyllabusPreviewService
                 $lecTaskLabel = ucfirst($k) . ' ' . $evalCounters['LEC'][$k];
             }
 
-            $labTaskLabel = $labTaskRaw;
-            // Remove "Term" from lab tasks (e.g., "1st Term Practical Exam" → "1st Practical Exam")
-            $labTaskLabel = preg_replace('/\s*Term\s*/i', ' ', trim($labTaskLabel));
+            $labTaskLabel = preg_replace('/\s*Term\s*/i', ' ', trim($labTaskRaw));
             if (! $isExam && $labTaskRaw !== '' && in_array($labEval?->kind, ['activity', 'quiz'], true)) {
                 $k = $labEval->kind;
                 $evalCounters['LAB'][$k]++;
@@ -550,8 +491,6 @@ class SyllabusPreviewService
         return compact('evaluationRows', 'evaluationTotals');
     }
 
-    // ── References ────────────────────────────────────────────────────────────
-
     private function buildReferences(Syllabus $syllabus): array
     {
         $lower = static fn (string $t): string => mb_strtolower($t);
@@ -575,16 +514,8 @@ class SyllabusPreviewService
         return compact('allReferences', 'onlineMaterialLinks');
     }
 
-    // ── CO → PO letter codes ──────────────────────────────────────────────────
-
-    /**
-     * Build a map of [ co_id => 'A, B, D, …' ] for the abridged CO table.
-     *
-     * Strategy: if CourseOutcome has a direct relationship to ProgramOutcomes,
-     * use that. Otherwise fall back to the course-level PO map (same POs for
-     * all COs) — which matches the sample syllabus where all COs share the same
-     * letter codes.
-     */
+    // Build [ co_id => 'A, B, D, …' ] for the abridged CO table.
+    // Falls back to course-level PO codes if no per-CO pivot table exists.
     private function buildCoPoLetterMap(Syllabus $syllabus): array
     {
         $courseOutcomes = $syllabus->courseOutcomes ?? collect();
@@ -593,10 +524,7 @@ class SyllabusPreviewService
             return [];
         }
 
-        $map = [];
-
-        // Try per-CO PO relationship (requires course_outcome_po pivot table).
-        // Catch QueryException so a missing table falls through to the safe fallback.
+        $map     = [];
         $hasCoPo = method_exists($courseOutcomes->first(), 'programOutcomes');
 
         if ($hasCoPo) {
@@ -609,13 +537,12 @@ class SyllabusPreviewService
                 }
                 return $map;
             } catch (\Illuminate\Database\QueryException) {
-                // Pivot table does not exist yet — fall through to course-level fallback.
+                // Pivot table does not exist yet — fall through to course-level fallback
                 $map = [];
             }
         }
 
-        // Fallback: course-level PO codes shared across all COs.
-        // Matches the sample abridged syllabus where every CO lists the same POs.
+        // Fallback: course-level PO codes shared across all COs
         $coursePoCodes = collect($syllabus->course?->programOutcomes ?? collect())
             ->sortBy('po_code')
             ->pluck('po_code')
@@ -627,8 +554,6 @@ class SyllabusPreviewService
 
         return $map;
     }
-
-    // ── Utilities ─────────────────────────────────────────────────────────────
 
     private function examLabelFn(): \Closure
     {

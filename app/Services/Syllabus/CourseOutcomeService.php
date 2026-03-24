@@ -5,23 +5,18 @@ namespace App\Services\Syllabus;
 use App\Models\CourseOutcome;
 use App\Models\Syllabus;
 
-/**
- * All database operations for CourseOutcome records.
- *
- * co_code is always derived from the row's position (1-based) among all saved
- * outcomes for the syllabus — not stored as a fixed value on create. It is
- * re-synced on every create/delete so the codes stay sequential (CO1, CO2, …).
- *
- * The service is intentionally free of Livewire — it has no knowledge of
- * component state, dispatching, or $this. The component keeps that logic.
- */
+// All database operations for CourseOutcome records.
+//
+// co_code is always derived from the row's position (1-based) among all saved
+// outcomes for the syllabus — not stored as a fixed value on create. It is
+// re-synced on every create/delete so the codes stay sequential (CO1, CO2, …).
+//
+// The service is intentionally free of Livewire — it has no knowledge of
+// component state, dispatching, or $this. The component keeps that logic.
 class CourseOutcomeService
 {
-    /**
-     * Return all outcomes for a syllabus as plain arrays, ordered by co_code.
-     *
-     * @return list<array{id:int,co_code:string,description:string}>
-     */
+    // Return all outcomes for a syllabus as plain arrays, ordered by co_code.
+    // @return list<array{id:int,co_code:string,description:string}>
     public function all(int $syllabusId): array
     {
         return CourseOutcome::where('syllabus_id', $syllabusId)
@@ -36,13 +31,10 @@ class CourseOutcomeService
             ->all();
     }
 
-    /**
-     * Create a new outcome and re-sync all codes.
-     * Returns the new row as a plain array.
-     *
-     * @throws \InvalidArgumentException on blank description
-     * @return array{id:int,co_code:string,description:string}
-     */
+    // Create a new outcome and re-sync all codes.
+    // Returns the new row as a plain array.
+    // @throws \InvalidArgumentException on blank description
+    // @return array{id:int,co_code:string,description:string}
     public function create(int $syllabusId, string $description): array
     {
         $description = trim($description);
@@ -64,12 +56,9 @@ class CourseOutcomeService
         return $this->findAsArray($syllabusId, $outcome->id);
     }
 
-    /**
-     * Update an existing outcome's description and re-sync codes.
-     *
-     * @throws \InvalidArgumentException on blank description or not found
-     * @return array{id:int,co_code:string,description:string}
-     */
+    // Update an existing outcome's description and re-sync codes.
+    // @throws \InvalidArgumentException on blank description or not found
+    // @return array{id:int,co_code:string,description:string}
     public function update(int $syllabusId, int $outcomeId, string $description): array
     {
         $description = trim($description);
@@ -89,11 +78,8 @@ class CourseOutcomeService
         return $this->findAsArray($syllabusId, $outcome->id);
     }
 
-    /**
-     * Delete an outcome and re-sync codes so remaining rows stay sequential.
-     *
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
-     */
+    // Delete an outcome and re-sync codes so remaining rows stay sequential.
+    // @throws \Illuminate\Database\Eloquent\ModelNotFoundException
     public function delete(int $syllabusId, int $outcomeId): void
     {
         CourseOutcome::where('syllabus_id', $syllabusId)
@@ -104,10 +90,8 @@ class CourseOutcomeService
         $this->resyncCodes($syllabusId);
     }
 
-    /**
-     * Renumber all outcomes CO1, CO2, … in their current DB order.
-     * Called after every create/delete to keep codes sequential.
-     */
+    // Renumber all outcomes CO1, CO2, … in their current DB order.
+    // Called after every create/delete to keep codes sequential.
     public function resyncCodes(int $syllabusId): void
     {
         $outcomes = CourseOutcome::where('syllabus_id', $syllabusId)
