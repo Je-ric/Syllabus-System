@@ -6,6 +6,7 @@ use App\Mail\OtpMail;
 use App\Models\User;
 use App\Models\UserOtp;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class OtpService
@@ -34,7 +35,12 @@ class OtpService
             ]
         );
 
-        Mail::to($user->email)->send(new OtpMail($otp));
+        try {
+            Mail::to($user->email)->send(new OtpMail($otp));
+        } catch (\Exception $e) {
+            Log::error('OTP mail failed: ' . $e->getMessage());
+            throw $e;
+        }
     }
 
     public function validate(User $user, string $otp, string $purpose): ?string

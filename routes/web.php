@@ -154,7 +154,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/syllabus/{syllabus}/preview/complete/download', [SyllabusController::class, 'downloadComplete'])->name('syllabus.preview.complete.download');
         Route::get('/syllabus/{syllabus}/preview/abridged/download', [SyllabusController::class, 'downloadAbridged'])->name('syllabus.preview.abridged.download');
         Route::get('/syllabus/{syllabus}/preview/assessment-plan/download', [SyllabusController::class, 'downloadAssessment'])->name('syllabus.preview.assessment.download');
-        
+
         Route::get('/syllabus/saved/{completeSyllabus}/download', [SyllabusController::class, 'downloadSavedComplete'])->name('syllabus.saved.complete.download');
         Route::get('/syllabus/saved/{completeSyllabus}/abridged/download', [SyllabusController::class, 'downloadSavedAbridged'])->name('syllabus.saved.abridged.download');
         Route::get('/syllabus/saved/{completeSyllabus}/assessment/download', [SyllabusController::class, 'downloadSavedAssessment'])->name('syllabus.saved.assessment.download');

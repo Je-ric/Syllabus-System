@@ -14,7 +14,7 @@ class RoleMiddleware
 
         // if auth
         if (!$user) {
-            return redirect()->route('login');
+            return redirect()->route('auth.show');
         }
 
         // Check if user has any of the required roles
