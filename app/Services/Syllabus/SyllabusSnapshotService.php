@@ -55,8 +55,8 @@ class SyllabusSnapshotService
 
     // ── Saved version file access ─────────────────────────────────────────────
 
-    // Read a saved HTML snapshot — checks Google Drive first, falls back to local.
-    // Returns null if the path is empty, external, or the file does not exist.
+    // Read a saved HTML snapshot from Google Drive.
+    // Returns null if the path is empty or an external/absolute URL.
     public function getSavedHtml(string $path): ?string
     {
         $path = trim($path);
@@ -65,17 +65,11 @@ class SyllabusSnapshotService
             return null;
         }
 
-        // Try Google Drive first
-        if (Storage::disk('google')->exists($path)) {
-            return Storage::disk('google')->get($path);
+        if (! Storage::disk('google')->exists($path)) {
+            return null;
         }
 
-        // Fall back to local (legacy snapshots)
-        if (Storage::disk('local')->exists($path)) {
-            return Storage::disk('local')->get($path);
-        }
-
-        return null;
+        return Storage::disk('google')->get($path);
     }
 
     // Inject the versions drawer partial into a saved HTML string just before </body>.

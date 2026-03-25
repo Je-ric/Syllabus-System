@@ -321,13 +321,11 @@ class SyllabusController extends Controller
             abort(400, 'This assessment version is not stored on Drive.');
         }
 
-        $disk = Storage::disk('google')->exists($path) ? 'google' : 'local';
-
-        if (! Storage::disk($disk)->exists($path)) {
+        if (! Storage::disk('google')->exists($path)) {
             abort(404, 'Assessment saved version file not found.');
         }
 
-        return response(Storage::disk($disk)->get($path), 200, [
+        return response(Storage::disk('google')->get($path), 200, [
             'Content-Type'        => 'text/html; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="' . basename($path) . '"',
         ]);
@@ -364,13 +362,11 @@ class SyllabusController extends Controller
             abort(400, 'This saved version is not stored on Drive.');
         }
 
-        $disk = Storage::disk('google')->exists($path) ? 'google' : 'local';
-
-        if (! Storage::disk($disk)->exists($path)) {
+        if (! Storage::disk('google')->exists($path)) {
             abort(404, 'Saved version file not found.');
         }
 
-        return response(Storage::disk($disk)->get($path), 200, [
+        return response(Storage::disk('google')->get($path), 200, [
             'Content-Type'        => 'text/html; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="' . basename($path) . '"',
         ]);
@@ -411,13 +407,11 @@ class SyllabusController extends Controller
             abort(400, 'This abridged version is not stored on Drive.');
         }
 
-        $disk = Storage::disk('google')->exists($path) ? 'google' : 'local';
-
-        if (! Storage::disk($disk)->exists($path)) {
+        if (! Storage::disk('google')->exists($path)) {
             abort(404, 'Abridged saved version file not found.');
         }
 
-        return response(Storage::disk($disk)->get($path), 200, [
+        return response(Storage::disk('google')->get($path), 200, [
             'Content-Type'        => 'text/html; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="' . basename($path) . '"',
         ]);
