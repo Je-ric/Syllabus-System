@@ -20,7 +20,7 @@ class OtpService
         User $user,
         string $purpose,
         int $expiresInMinutes = self::DEFAULT_EXPIRY_MINUTES
-    ): void
+    ): bool
     {
         $otp = (string) random_int(100000, 999999);
 
@@ -37,9 +37,10 @@ class OtpService
 
         try {
             Mail::to($user->email)->send(new OtpMail($otp));
+            return true;
         } catch (\Exception $e) {
-            Log::error('OTP mail failed: ' . $e->getMessage());
-            throw $e;
+            Log::error('OTP mail failed for user ' . $user->id . ': ' . $e->getMessage());
+            return false;
         }
     }
 

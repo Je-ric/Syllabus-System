@@ -81,7 +81,7 @@ class UserController extends Controller
             ]);
         }
 
-        $this->otpService->issueForUser($user, OtpService::PURPOSE_PASSWORD_CHANGE);
+        $mailSent = $this->otpService->issueForUser($user, OtpService::PURPOSE_PASSWORD_CHANGE);
 
         $request->session()->put(self::PASSWORD_CHANGE_OTP_SESSION_KEY, [
             'user_id' => $user->id,
@@ -91,8 +91,10 @@ class UserController extends Controller
         return redirect()
             ->route('profile.index')
             ->with('toast', [
-                'message' => 'OTP sent to your email. Enter it below to confirm password change.',
-                'type' => 'info',
+                'message' => $mailSent
+                    ? 'OTP sent to your email. Enter it below to confirm password change.'
+                    : 'Could not send OTP email. Please try resending.',
+                'type' => $mailSent ? 'info' : 'warning',
             ]);
     }
 
@@ -161,13 +163,15 @@ class UserController extends Controller
                 ]);
         }
 
-        $this->otpService->issueForUser($user, OtpService::PURPOSE_PASSWORD_CHANGE);
+        $mailSent = $this->otpService->issueForUser($user, OtpService::PURPOSE_PASSWORD_CHANGE);
 
         return redirect()
             ->route('profile.index')
             ->with('toast', [
-                'message' => 'A new OTP has been sent to your email.',
-                'type' => 'success',
+                'message' => $mailSent
+                    ? 'A new OTP has been sent to your email.'
+                    : 'Could not send OTP email. Please check your mail settings.',
+                'type' => $mailSent ? 'success' : 'warning',
             ]);
     }
 }

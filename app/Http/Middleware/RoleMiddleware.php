@@ -10,14 +10,13 @@ class RoleMiddleware
 {
     public function handle(Request $request, Closure $next, ...$roles)
     {
+        /** @var \App\Models\User|null $user */
         $user = Auth::user();
 
-        // if auth
         if (!$user) {
             return redirect()->route('auth.show');
         }
 
-        // Check if user has any of the required roles
         if (!$user->roles()->whereIn('name', $roles)->exists()) {
             abort(403, 'Unauthorized');
         }

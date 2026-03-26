@@ -38,6 +38,15 @@ class ProgramController extends Controller
         try {
             $peo = ProgramEducationalObjective::findOrFail($peoId);
             $programId = $peo->program_id;
+
+            /** @var \App\Models\User $user */
+            $user = auth()->user();
+            if (!$user->hasRole('admin')) {
+                if ($redirect = $this->abortIfNotAssignedToProgram($user, $programId)) {
+                    return $redirect;
+                }
+            }
+
             $programName = $peo->program?->name ?? 'Unknown Program';
             $peoCode = $peo->peo_code;
 
@@ -80,6 +89,15 @@ class ProgramController extends Controller
         try {
             $po = ProgramOutcome::findOrFail($poId);
             $programId = $po->program_id;
+
+            /** @var \App\Models\User $user */
+            $user = auth()->user();
+            if (!$user->hasRole('admin')) {
+                if ($redirect = $this->abortIfNotAssignedToProgram($user, $programId)) {
+                    return $redirect;
+                }
+            }
+
             $programName = $po->program?->name ?? 'Unknown Program';
             $poCode = $po->po_code;
 
@@ -124,5 +142,20 @@ class ProgramController extends Controller
                 'message' => 'PO deleted and codes re-sequenced!',
                 'type' => 'success'
             ]);
+    }
+
+    private function abortIfNotAssignedToProgram($user, int $programId): ?\Illuminate\Http\RedirectResponse
+    {
+        $assignment = $user->getPrimaryDepartmentAssignment();
+        $allowed = $assignment && Program::whereHas('departments', fn($q) =>
+            $q->where('department_id', $assignment->department_id)
+        )->where('id', $programId)->exists();
+
+        if (!$allowed) {
+            return redirect()->route('programs.index')
+                ->with('toast', ['message' => 'You can only manage PEOs/POs for programs in your assigned department.', 'type' => 'warning']);
+        }
+
+        return null;
     }
 }

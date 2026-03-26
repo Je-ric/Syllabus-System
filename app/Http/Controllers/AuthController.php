@@ -57,16 +57,20 @@ class AuthController extends Controller
             action: 'registered',
             module: 'Authentication',
             referenceId: $user->id,
-            description: "New user registered: {$user->name} ({$user->email})."
+            description: "New user registered: {$user->name} ({$user->email}).",
+            userId: $user->id
         );
 
-        $this->otpService->issueForUser($user, OtpService::PURPOSE_EMAIL_VERIFICATION);
+        $mailSent = $this->otpService->issueForUser($user, OtpService::PURPOSE_EMAIL_VERIFICATION);
 
-        // Store email in session for OTP verification form
+        $message = $mailSent
+            ? 'Account created. Please verify your email.'
+            : 'Account created but we could not send the OTP email. Use "Resend OTP" on the next page to try again.';
+
         return redirect()
             ->route('otp.show')
             ->with('verify_email', $user->email)
-            ->with('success', 'Account created. Please verify your email.');
+            ->with('success', $message);
     }
 
     // Login

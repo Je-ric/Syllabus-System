@@ -42,12 +42,16 @@ class OTPController extends Controller
             ]);
         }
 
-        $this->otpService->issueForUser($user, OtpService::PURPOSE_EMAIL_VERIFICATION);
+        $mailSent = $this->otpService->issueForUser($user, OtpService::PURPOSE_EMAIL_VERIFICATION);
+
+        $message = $mailSent
+            ? 'A new OTP has been sent to your email.'
+            : 'Could not send the OTP email. Please check your email address or try again later.';
 
         return redirect()
             ->route('otp.show')
             ->with('verify_email', $user->email)
-            ->with('success', 'A new OTP has been sent to your email.');
+            ->with('success', $message);
     }
 
 
@@ -67,21 +71,16 @@ class OTPController extends Controller
 
         $user = User::where('email', $email)->firstOrFail();
         $this->otpService->migrateLegacyOtp($user, OtpService::PURPOSE_EMAIL_VERIFICATION);
-        
+
         $otpError = $this->otpService->validate($user, $validated['otp'], OtpService::PURPOSE_EMAIL_VERIFICATION);
         if ($otpError) {
-            return back()->withErrors([
-                'otp' => $otpError,
-            ]);
+            return back()
+                ->withErrors(['otp' => $otpError])
+                ->with('verify_email', $email);
         }
 
-        // Mark email verified and clear OTP values
-        $user->update([
-            'email_verified_at' => now(),
-        ]);
+        $user->update(['email_verified_at' => now()]);
         $this->otpService->clear($user, OtpService::PURPOSE_EMAIL_VERIFICATION);
-
-        // Clear session
         $request->session()->forget('verify_email');
 
         return redirect()
