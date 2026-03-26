@@ -109,16 +109,28 @@ class AccountApprovalController extends Controller
             'roles.*' => 'in:admin,chair,dean,faculty',
         ]);
 
+        $roles = $request->input('roles', []);
+
+        if (in_array('dean', $roles) && in_array('chair', $roles)) {
+            return redirect()
+                ->route('accounts.approval')
+                ->with('toast', [
+                    'message' => 'A user cannot hold both Dean and Chair roles simultaneously.',
+                    'type' => 'error',
+                ]);
+        }
+
         try {
             $user = $this->accountApprovalService->assignRoles(
                 (int) $request->input('user_id'),
-                $request->input('roles', [])
+                $roles
             );
         } catch (\Throwable $e) {
             return redirect()
                 ->route('accounts.approval')
-                ->withErrors([
-                    'error' => 'Failed to assign roles. Please try again.',
+                ->with('toast', [
+                    'message' => 'Failed to assign roles. Please try again.',
+                    'type' => 'error',
                 ]);
         }
 

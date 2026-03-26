@@ -16,14 +16,14 @@ class ObjectiveController extends Controller
 
     public function objective_index(Request $request)
     {
-        $colleges = College::orderBy('name')->get();
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        $isAdmin = $user?->hasRole('admin');
 
         $selectedCollegeId    = $request->input('college_id');
         $selectedDepartmentId = $request->input('department_id');
 
         if (!$selectedCollegeId || !$selectedDepartmentId) {
-            /** @var \App\Models\User|null $user */
-            $user       = Auth::user();
             $assignment = $user?->getPrimaryDepartmentAssignment();
 
             if ($assignment?->department) {
@@ -32,11 +32,31 @@ class ObjectiveController extends Controller
             }
         }
 
+        // Non-admin: restrict to assigned department only
+        if (!$isAdmin && $selectedDepartmentId) {
+            $assignment = $user?->getPrimaryDepartmentAssignment();
+            if (!$assignment || (int) $assignment->department_id !== (int) $selectedDepartmentId) {
+                $selectedDepartmentId = $assignment?->department_id;
+                $selectedCollegeId    = $assignment?->department?->college_id;
+            }
+        }
+
+        $colleges = $isAdmin
+            ? College::orderBy('name')->get()
+            : College::whereHas('departments.userAssignments', fn($q) =>
+                $q->where('user_id', $user->id)->whereIn('context', ['chair', 'faculty']))
+                ->orderBy('name')->get();
+
         $departments = collect();
         $objectives  = collect();
 
         if ($selectedCollegeId) {
-            $departments = Department::where('college_id', $selectedCollegeId)->orderBy('name')->get();
+            $departments = $isAdmin
+                ? Department::where('college_id', $selectedCollegeId)->orderBy('name')->get()
+                : Department::where('college_id', $selectedCollegeId)
+                    ->whereHas('userAssignments', fn($q) =>
+                        $q->where('user_id', $user->id)->whereIn('context', ['chair', 'faculty']))
+                    ->orderBy('name')->get();
 
             if ($selectedDepartmentId) {
                 $objectives = DepartmentObjective::where('department_id', $selectedDepartmentId)
@@ -66,6 +86,16 @@ class ObjectiveController extends Controller
             'objective_text' => ['required', 'string'],
         ]);
 
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        if (!$user->hasRole('admin')) {
+            $assignment = $user->getPrimaryDepartmentAssignment();
+            if (!$assignment || (int) $assignment->department_id !== (int) $request->department_id) {
+                return redirect()->route('objective.index')
+                    ->with('toast', ['message' => 'You can only manage objectives for your assigned department.', 'type' => 'warning']);
+            }
+        }
+
         $department = Department::findOrFail($request->department_id);
         $this->service->storeObjective($department, $request->objective_text);
 
@@ -81,6 +111,16 @@ class ObjectiveController extends Controller
     {
         $request->validate(['objective_text' => ['required', 'string']]);
 
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        if (!$user->hasRole('admin')) {
+            $assignment = $user->getPrimaryDepartmentAssignment();
+            if (!$assignment || (int) $assignment->department_id !== (int) $objective->department_id) {
+                return redirect()->route('objective.index')
+                    ->with('toast', ['message' => 'You can only manage objectives for your assigned department.', 'type' => 'warning']);
+            }
+        }
+
         $this->service->updateObjective($objective, $request->objective_text);
 
         return redirect()
@@ -95,6 +135,16 @@ class ObjectiveController extends Controller
     {
         $collegeId    = $objective->department->college_id;
         $departmentId = $objective->department_id;
+
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        if (!$user->hasRole('admin')) {
+            $assignment = $user->getPrimaryDepartmentAssignment();
+            if (!$assignment || (int) $assignment->department_id !== (int) $departmentId) {
+                return redirect()->route('objective.index')
+                    ->with('toast', ['message' => 'You can only manage objectives for your assigned department.', 'type' => 'warning']);
+            }
+        }
 
         try {
             $this->service->destroyObjective($objective);

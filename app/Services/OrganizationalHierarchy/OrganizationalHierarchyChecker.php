@@ -31,8 +31,8 @@ class OrganizationalHierarchyChecker
             $college->setRelation('departments', $college->departments->where('id', $chairDepartmentId)->values());
         }
 
-        $canManageChair = $isAdmin || $isDean;
-        $canManageFaculty = $isAdmin || $isDean || $isChair;
+        $canManageChair = $isAdmin;
+        $canManageFaculty = $isAdmin;
 
         return [
             'college' => $college,
@@ -47,23 +47,12 @@ class OrganizationalHierarchyChecker
     public function checkActorCanManageChair(?User $actor, Department $department, string $verb): ?array
     {
         $actorIsAdmin = $actor?->hasRole('admin') ?? false;
-        $actorIsDean = $actor?->isDean() ?? false;
 
-        if (!$actorIsAdmin && !$actorIsDean) {
+        if (!$actorIsAdmin) {
             return [
-                'message' => "Only admin or dean can {$verb} chairs.",
+                'message' => "Only admin can {$verb} chairs.",
                 'type' => 'error',
             ];
-        }
-
-        if ($actorIsDean && !$actorIsAdmin) {
-            $deanAssignment = $actor?->getPrimaryCollegeAssignment();
-            if (!$deanAssignment || (int) $deanAssignment->college_id !== (int) $department->college_id) {
-                return [
-                    'message' => "Dean can only {$verb} chairs within their college.",
-                    'type' => 'error',
-                ];
-            }
         }
 
         return null;
@@ -72,33 +61,16 @@ class OrganizationalHierarchyChecker
     public function checkActorCanManageFaculty(?User $actor, Department $department, string $action): ?array
     {
         $actorIsAdmin = $actor?->hasRole('admin') ?? false;
-        $actorIsDean = $actor?->isDean() ?? false;
-        $actorChairAssignment = $actor?->assignments()->where('context', 'chair')->first();
-        $actorIsChairOfDepartment = $actorChairAssignment && (int) $actorChairAssignment->department_id === (int) $department->id;
 
-        if (!$actorIsAdmin && !$actorIsDean && !$actorIsChairOfDepartment) {
+        if (!$actorIsAdmin) {
             $message = $action === 'remove'
-                ? 'Unauthorized faculty removal action.'
-                : 'Unauthorized faculty assignment action.';
+                ? 'Only admin can remove faculty assignments.'
+                : 'Only admin can assign faculty.';
 
             return [
                 'message' => $message,
                 'type' => 'error',
             ];
-        }
-
-        if ($actorIsDean && !$actorIsAdmin) {
-            $deanAssignment = $actor?->getPrimaryCollegeAssignment();
-            if (!$deanAssignment || (int) $deanAssignment->college_id !== (int) $department->college_id) {
-                $message = $action === 'remove'
-                    ? 'Dean can only remove faculty within their college.'
-                    : 'Dean can only assign faculty within their college.';
-
-                return [
-                    'message' => $message,
-                    'type' => 'error',
-                ];
-            }
         }
 
         return null;
@@ -193,6 +165,9 @@ class OrganizationalHierarchyChecker
         $query = User::whereHas('roles', function ($query) use ($roles) {
             $query->whereIn('name', $roles);
         })
+            ->whereDoesntHave('roles', function ($query) {
+                $query->where('name', 'admin');
+            })
             ->where('account_status', 'active');
 
         if ($excludeContext) {

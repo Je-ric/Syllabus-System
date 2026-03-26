@@ -33,13 +33,49 @@ class ProgramSelector extends Component
 
     public function mount($programId = null, $redirectRoute = null, $autoRedirect = true)
     {
-        $this->colleges = College::orderBy('name')->get();
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        $isAdmin = $user?->hasRole('admin');
+
+        if ($isAdmin) {
+            $this->colleges = College::orderBy('name')->get();
+        } elseif (in_array($redirectRoute, ['programs.show', 'courses.index'])) {
+            // Restrict to assigned college/department only for program/course management
+            $deptAssignment = $user?->getPrimaryDepartmentAssignment();
+            $collegeAssignment = $user?->getPrimaryCollegeAssignment();
+
+            if ($deptAssignment?->department) {
+                $this->colleges = College::where('id', $deptAssignment->department->college_id)->get();
+            } elseif ($collegeAssignment?->college) {
+                $this->colleges = College::where('id', $collegeAssignment->college_id)->get();
+            } else {
+                $this->colleges = collect();
+            }
+        } else {
+            // Syllabus and other contexts: show all colleges
+            $this->colleges = College::orderBy('name')->get();
+        }
+
         $this->redirectRoute = $redirectRoute;
         $this->autoRedirect = $autoRedirect;
 
         // If programId is explicitly provided via query param, use that (highest priority)
         if ($programId) {
             $this->programId = $programId;
+            // Non-admin: verify program scope only for program/course management contexts
+            if (!$isAdmin && in_array($redirectRoute, ['programs.show', 'courses.index'])) {
+                $deptAssignment = $user?->getPrimaryDepartmentAssignment();
+                if ($deptAssignment) {
+                    $allowed = Program::whereHas('departments', fn($q) =>
+                        $q->where('department_id', $deptAssignment->department_id)
+                    )->where('id', $programId)->exists();
+                    if (!$allowed) {
+                        session()->flash('toast', ['message' => 'You can only view programs in your assigned department.', 'type' => 'warning']);
+                        $this->redirect(route('programs.index'));
+                        return;
+                    }
+                }
+            }
             $this->preselectFromProgram($this->programId);
         } else {
             // Otherwise, try to preselect based on user assignments
@@ -60,10 +96,20 @@ class ProgramSelector extends Component
 
     public function updatedCollegeId()
     {
-        $this->departments = Department::where('college_id', $this->collegeId)
-            ->orderBy('name')
-            ->get();
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        $isAdmin = $user?->hasRole('admin');
 
+        $query = Department::where('college_id', $this->collegeId)->orderBy('name');
+
+        if (!$isAdmin && in_array($this->redirectRoute, ['programs.show', 'courses.index'])) {
+            $assignment = $user?->getPrimaryDepartmentAssignment();
+            if ($assignment) {
+                $query->where('id', $assignment->department_id);
+            }
+        }
+
+        $this->departments = $query->get();
         $this->reset(['departmentId', 'programId', 'programs']);
         $this->dispatch('programSelected', programId: null);
     }

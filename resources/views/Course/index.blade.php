@@ -2,7 +2,21 @@
 
 @section('content')
 
-@php $modalCourses = collect(); @endphp
+@php
+    $modalCourses = collect();
+    $authUser = auth()->user();
+    $isAdmin = $authUser->hasRole('admin');
+    $isChair = $authUser->hasRole('chair');
+    $chairDeptId = null;
+    if ($isChair && $program) {
+        $chairAssignment = $authUser->assignments()->where('context', 'chair')->first();
+        $chairDeptId = $chairAssignment?->department_id;
+        $programDeptIds = $program->departments->pluck('id')->toArray();
+        $canDelete = in_array($chairDeptId, $programDeptIds);
+    } else {
+        $canDelete = $isAdmin;
+    }
+@endphp
 
     <x-page-header
         icon="bx-book"
@@ -29,30 +43,37 @@
 
         @if ($program)
 
-            {{-- ── Program Outcomes reference ───────────────────────────────── --}}
+            {{-- ── Program Outcomes reference (accordion) ───────────────────── --}}
             @if ($program->outcomes->isNotEmpty())
-                <div class="mb-6 rounded-2xl border border-slate-200/80 bg-white/90 shadow-sm overflow-hidden">
-                    <div class="px-5 py-3 border-b border-slate-100 flex items-center justify-between">
+                <div x-data="{ open: false }" class="mb-6 rounded-2xl border border-slate-200/80 bg-white/90 shadow-sm overflow-hidden">
+                    <button type="button" @click="open = !open"
+                        class="w-full px-5 py-3 border-b border-slate-100 flex items-center justify-between hover:bg-slate-50/60 transition-colors">
                         <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
                             Program Outcomes Reference
                         </p>
-                        <span class="text-xs text-slate-400">{{ $program->outcomes->count() }} outcome(s)</span>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
-                            <tbody class="divide-y divide-slate-100">
-                                @foreach ($program->outcomes as $outcome)
-                                    <tr class="hover:bg-slate-50/60 transition-colors">
-                                        <td class="px-5 py-2.5 whitespace-nowrap w-px font-mono text-xs font-bold text-emerald-700">
-                                            {{ $outcome->po_code }}
-                                        </td>
-                                        <td class="px-4 py-2.5 text-slate-600 leading-relaxed text-sm">
-                                            {{ $outcome->po_text }}
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-slate-400">{{ $program->outcomes->count() }} outcome(s)</span>
+                            <i class="bx text-slate-400 text-base transition-transform duration-200"
+                                :class="open ? 'bx-chevron-up' : 'bx-chevron-down'"></i>
+                        </div>
+                    </button>
+                    <div x-show="open" x-collapse>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <tbody class="divide-y divide-slate-100">
+                                    @foreach ($program->outcomes as $outcome)
+                                        <tr class="hover:bg-slate-50/60 transition-colors">
+                                            <td class="px-5 py-2.5 whitespace-nowrap w-px font-mono text-xs font-bold text-emerald-700">
+                                                {{ $outcome->po_code }}
+                                            </td>
+                                            <td class="px-4 py-2.5 text-slate-600 leading-relaxed text-sm">
+                                                {{ $outcome->po_text }}
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             @endif
@@ -168,7 +189,7 @@
                                                             title="View details">
                                                             <i class="bx bx-show"></i> View
                                                         </x-button>
-                                                        @if (auth()->user()->hasRole('admin'))
+                                                        @if ($canDelete)
                                                             <x-button
                                                                 type="button"
                                                                 variant="table-danger"
@@ -208,7 +229,7 @@
     {{-- Modals --}}
     @foreach ($modalCourses as $course)
         @include('Course.modals.viewCourseModal', ['course' => $course])
-        @if (auth()->user()->hasRole('admin'))
+        @if ($canDelete)
             @include('Course.modals.deleteCourseModal', ['course' => $course])
         @endif
     @endforeach

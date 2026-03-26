@@ -38,7 +38,7 @@ class ManageQueue extends Component
         };
 
         $users = User::query()
-            ->select(['id', 'name', 'email', 'phone_number', 'office', 'account_status', 'created_at'])
+            ->select(['id', 'name', 'email', 'email_verified_at', 'phone_number', 'office', 'account_status', 'created_at'])
             ->with('roles:id,name')
             ->when(trim($this->search) !== '', function ($q) {
                 $term = '%' . trim($this->search) . '%';

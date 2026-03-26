@@ -38,6 +38,12 @@ class College extends Model
             ->first();
     }
 
+    // Used in: goal_index() - GoalController
+    public function userAssignments()
+    {
+        return $this->hasMany(UserAssignment::class);
+    }
+
     // Used in: goal_store() - GoalController
     public function getNextGoalCode(): string
     {

@@ -56,6 +56,12 @@ class Department extends Model
         return $assignment ? $assignment->user : null;
     }
 
+    // Used in: objective_index() - ObjectiveController
+    public function userAssignments()
+    {
+        return $this->hasMany(UserAssignment::class);
+    }
+
     // Used in: index() - AcademicStructureController
     public function scopeWithRelations($query)
     {

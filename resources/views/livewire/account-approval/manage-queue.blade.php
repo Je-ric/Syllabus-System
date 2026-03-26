@@ -67,7 +67,18 @@
 
                         <x-table.td>
                             <div class="font-semibold text-slate-800 text-sm">{{ $user->name }}</div>
-                            <div class="text-xs text-slate-400 mt-0.5">{{ $user->email }}</div>
+                            <div class="flex items-center gap-1.5 mt-0.5">
+                                <span class="text-xs text-slate-400">{{ $user->email }}</span>
+                                @if ($user->email_verified_at)
+                                    <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-semibold" title="Email verified">
+                                        <i class="bx bx-check text-xs leading-none"></i> Verified
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-semibold" title="Email not verified">
+                                        <i class="bx bx-time text-xs leading-none"></i> Unverified
+                                    </span>
+                                @endif
+                            </div>
                         </x-table.td>
 
                         <x-table.td class="hidden md:table-cell text-sm text-slate-600">

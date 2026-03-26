@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Course;
 use App\Models\Program;
+use App\Models\UserAssignment;
 use App\Services\CourseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,8 +24,9 @@ class CourseController extends Controller
         $groupedCourses = collect();
 
         if ($request->filled('program_id')) {
-            $program = Program::withOrderedOutcomes()->findOrFail($request->program_id); // helper
-            $groupedCourses = $program->getCoursesGroupedByYearAndSemester(); // helper
+            $program = Program::withOrderedOutcomes()->findOrFail($request->program_id);
+            if ($redirect = $this->authorizeProgram($program)) return $redirect;
+            $groupedCourses = $program->getCoursesGroupedByYearAndSemester();
         }
 
         return view('Course.index', compact('program', 'groupedCourses'));
@@ -38,6 +40,7 @@ class CourseController extends Controller
 
         if ($programId) {
             $program = Program::findOrFail($programId);
+            if ($redirect = $this->authorizeProgram($program)) return $redirect;
             $programOutcomes = $program->outcomes()
                 ->orderBy('po_code')
                 ->get();
@@ -64,6 +67,7 @@ class CourseController extends Controller
     public function edit(Course $course)
     {
         $course->loadMissing(['program', 'programOutcomes']);
+        if ($redirect = $this->authorizeProgram($course->program)) return $redirect;
 
         $program = $course->program;
         $programOutcomes = $program->outcomes()
@@ -93,6 +97,9 @@ class CourseController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate($this->courseRules());
+
+        $program = Program::findOrFail($validatedData['program_id']);
+        if ($redirect = $this->authorizeProgram($program)) return $redirect;
 
         try {
             $this->courseService->createCourse(
@@ -132,6 +139,7 @@ class CourseController extends Controller
     public function update(Request $request, Course $course)
     {
         $validatedData = $request->validate($this->courseRules($course));
+        if ($redirect = $this->authorizeProgram($course->program)) return $redirect;
 
         try {
             $this->courseService->updateCourse(
@@ -159,8 +167,22 @@ class CourseController extends Controller
 
     public function destroy(Course $course)
     {
-        if (!Auth::user()->hasRole('admin')) {
-            abort(403);
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $canDelete = $user->hasRole('admin');
+
+        if (!$canDelete && $user->hasRole('chair')) {
+            $chairAssignment = $user->assignments()->where('context', 'chair')->first();
+            if ($chairAssignment) {
+                $course->loadMissing('program.departments');
+                $programDeptIds = $course->program?->departments->pluck('id')->toArray() ?? [];
+                $canDelete = in_array($chairAssignment->department_id, $programDeptIds);
+            }
+        }
+
+        if (!$canDelete) {
+            return redirect()->route('courses.index', ['program_id' => $course->program_id])
+                ->with('toast', ['message' => 'Only admins or the department chair can delete courses.', 'type' => 'warning']);
         }
 
         $programId = $course->program_id;
@@ -179,6 +201,25 @@ class CourseController extends Controller
                 'message' => 'Course deleted successfully.',
                 'type'    => 'success',
             ]);
+    }
+
+    protected function authorizeProgram(?Program $program): ?\Illuminate\Http\RedirectResponse
+    {
+        if (!$program) return null;
+        $user = Auth::user();
+        if ($user->hasRole('admin')) return null;
+
+        $assignment = $user->getPrimaryDepartmentAssignment();
+        $allowed = $assignment && Program::whereHas('departments', fn($q) =>
+            $q->where('department_id', $assignment->department_id)
+        )->where('id', $program->id)->exists();
+
+        if (!$allowed) {
+            return redirect()->route('courses.index')
+                ->with('toast', ['message' => 'You can only manage courses for programs in your assigned department.', 'type' => 'warning']);
+        }
+
+        return null;
     }
 
     protected function courseRules(?Course $course = null): array

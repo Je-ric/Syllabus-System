@@ -15,7 +15,8 @@
             {{-- ── Left: Selector + Add Form ──────────────────────────────────── --}}
             <div class="lg:col-span-2 space-y-4">
 
-                {{-- College selector card --}}
+                {{-- College selector card (hidden if only one college available) --}}
+                @if ($colleges->count() > 1)
                 <div class="rounded-2xl border border-slate-200/80 bg-white/90 shadow-sm overflow-hidden">
                     <div class="px-5 py-3 border-b border-slate-100 bg-slate-50/60 flex items-center gap-2">
                         <i class="bx bx-buildings text-emerald-600 text-base"></i>
@@ -34,6 +35,7 @@
                         </form>
                     </div>
                 </div>
+                @endif
 
                 {{-- Add Goal form --}}
                 @if ($selectedCollegeId)

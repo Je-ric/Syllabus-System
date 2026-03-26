@@ -25,6 +25,6 @@ class AccountStatusUpdated extends Mailable
     public function build()
     {
         return $this->subject('CSMS Account Status Update')
-            ->view('emails.accountStatus');
+            ->view('Emails.accountStatus');
     }
 }

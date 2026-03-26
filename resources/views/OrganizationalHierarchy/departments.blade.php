@@ -4,17 +4,16 @@
     @php
         $canManageChair   = $canManageChair   ?? false;
         $canManageFaculty = $canManageFaculty ?? false;
+        $isAdmin = auth()->user()?->hasRole('admin') ?? false;
     @endphp
 
     <x-page-header
         icon="bx-buildings"
         title="{{ $college->name }}"
         desc="Manage department leadership, faculty assignments, and academic structure">
-        @if ($canManageChair)
-            <x-button variant="cancel" href="{{ route('organizational.colleges.index') }}">
-                <i class="bx bx-left-arrow-alt"></i> Back to Colleges
-            </x-button>
-        @endif
+        <x-button variant="cancel" href="{{ $isAdmin ? route('organizational.colleges.index') : route('organizational.hierarchy') }}">
+            <i class="bx bx-left-arrow-alt"></i> Back
+        </x-button>
     </x-page-header>
 
     <x-panel>

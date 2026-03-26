@@ -18,6 +18,20 @@ class ManagePos extends Component
 
     public function mount(Program $program): void
     {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        if (!$user->hasRole('admin')) {
+            $assignment = $user->getPrimaryDepartmentAssignment();
+            $allowed = $assignment && Program::whereHas('departments', fn($q) =>
+                $q->where('department_id', $assignment->department_id)
+            )->where('id', $program->id)->exists();
+            if (!$allowed) {
+                session()->flash('toast', ['message' => 'You can only manage POs for programs in your assigned department.', 'type' => 'warning']);
+                $this->redirect(route('programs.index'));
+                return;
+            }
+        }
+
         $this->program = $program;
         $this->loadPos();
         $this->loadPeos();
