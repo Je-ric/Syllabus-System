@@ -74,8 +74,9 @@ class OTPController extends Controller
 
         $otpError = $this->otpService->validate($user, $validated['otp'], OtpService::PURPOSE_EMAIL_VERIFICATION);
         if ($otpError) {
-            return back()
+            return redirect()->route('otp.show')
                 ->withErrors(['otp' => $otpError])
+                ->withInput()
                 ->with('verify_email', $email);
         }
 

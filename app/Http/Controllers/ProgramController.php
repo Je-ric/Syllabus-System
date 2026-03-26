@@ -8,6 +8,8 @@ use App\Models\ProgramOutcome;
 use App\Models\AuditLog;
 use App\Models\CourseOutcome;
 use App\Helpers\ProgramCodeHelper;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class ProgramController extends Controller
@@ -40,7 +42,8 @@ class ProgramController extends Controller
             $programId = $peo->program_id;
 
             /** @var \App\Models\User $user */
-            $user = auth()->user();
+            // $user = auth()->user();
+            $user = Auth::user();
             if (!$user->hasRole('admin')) {
                 if ($redirect = $this->abortIfNotAssignedToProgram($user, $programId)) {
                     return $redirect;
@@ -91,7 +94,8 @@ class ProgramController extends Controller
             $programId = $po->program_id;
 
             /** @var \App\Models\User $user */
-            $user = auth()->user();
+            // $user = auth()->user();
+            $user = Auth::user();
             if (!$user->hasRole('admin')) {
                 if ($redirect = $this->abortIfNotAssignedToProgram($user, $programId)) {
                     return $redirect;
@@ -144,7 +148,7 @@ class ProgramController extends Controller
             ]);
     }
 
-    private function abortIfNotAssignedToProgram($user, int $programId): ?\Illuminate\Http\RedirectResponse
+    private function abortIfNotAssignedToProgram($user, int $programId): ?RedirectResponse
     {
         $assignment = $user->getPrimaryDepartmentAssignment();
         $allowed = $assignment && Program::whereHas('departments', fn($q) =>

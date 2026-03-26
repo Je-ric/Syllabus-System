@@ -6,6 +6,7 @@ use App\Models\Course;
 use App\Models\Program;
 use App\Models\UserAssignment;
 use App\Services\CourseService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -203,7 +204,7 @@ class CourseController extends Controller
             ]);
     }
 
-    protected function authorizeProgram(?Program $program): ?\Illuminate\Http\RedirectResponse
+    protected function authorizeProgram(?Program $program): ?RedirectResponse
     {
         if (!$program) return null;
         $user = Auth::user();

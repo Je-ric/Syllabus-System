@@ -4,6 +4,9 @@
     @include('includes.head-assets')
 </head>
 <body>
+@if (session('toast'))
+    <x-feedback-status.toast :message="session('toast')['message']" :type="session('toast')['type']" />
+@endif
 <div class="flex justify-center items-center min-h-screen px-4 py-8"
      x-data="{ mode: '{{ old('_mode', 'login') }}' }">
 

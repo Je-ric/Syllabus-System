@@ -98,9 +98,12 @@ class AuthController extends Controller
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
-                return back()->withErrors([
-                    'email' => 'Please verify your email first. You can request a new OTP if needed.',
-                ])->withInput($request->only('email'));
+                return redirect()->route('auth.show')
+                    ->with('toast', [
+                        'message' => 'Please verify your email first. Use "Resend OTP" to get a new code.',
+                        'type' => 'warning',
+                    ])
+                    ->withInput($request->only('email'));
             }
 
             switch ($user->account_status) {
@@ -110,34 +113,47 @@ class AuthController extends Controller
                     Auth::logout();
                     $request->session()->invalidate();
                     $request->session()->regenerateToken();
-                    return redirect()->route('waiting.approval');
+                    return redirect()->route('waiting.approval')
+                        ->with('toast', [
+                            'message' => 'Your account is pending admin approval.',
+                            'type' => 'info',
+                        ]);
                 case 'rejected':
                     Auth::logout();
                     $request->session()->invalidate();
                     $request->session()->regenerateToken();
-                    return back()->withErrors([
-                        'email' => 'Your account registration was rejected.',
-                    ])->withInput($request->only('email'));
+                    return redirect()->route('auth.show')
+                        ->with('toast', [
+                            'message' => 'Your account registration was rejected.',
+                            'type' => 'error',
+                        ])
+                        ->withInput($request->only('email'));
                 case 'disabled':
                     Auth::logout();
                     $request->session()->invalidate();
                     $request->session()->regenerateToken();
-                    return back()->withErrors([
-                        'email' => 'Your account has been disabled by an administrator.',
-                    ])->withInput($request->only('email'));
+                    return redirect()->route('auth.show')
+                        ->with('toast', [
+                            'message' => 'Your account has been disabled by an administrator.',
+                            'type' => 'error',
+                        ])
+                        ->withInput($request->only('email'));
                 default:
                     Auth::logout();
                     $request->session()->invalidate();
                     $request->session()->regenerateToken();
-                    return back()->withErrors([
-                        'email' => 'Your account is in an unrecognized state. Please contact support.',
-                    ])->withInput($request->only('email'));
+                    return redirect()->route('auth.show')
+                        ->with('toast', [
+                            'message' => 'Your account is in an unrecognized state. Please contact support.',
+                            'type' => 'error',
+                        ])
+                        ->withInput($request->only('email'));
             }
         }
 
-        return back()->withErrors([
-            'email' => 'Invalid credentials.',
-        ])->withInput($request->only('email'));
+        return redirect()->route('auth.show')
+            ->with('toast', ['message' => 'Invalid email or password.', 'type' => 'error'])
+            ->withInput($request->only('email'));
     }
 
 
