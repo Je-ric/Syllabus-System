@@ -70,7 +70,7 @@
 
                         @if ($user->hasRole('admin') || $user->hasRole('faculty'))
                             <a href="{{ route('syllabus.index') }}"
-                                class="{{ request()->routeIs('syllabus.index') ? 'active' : '' }}">
+                                class="{{ request()->routeIs('syllabus.*') ? 'active' : '' }}">
                                 <i class="bx bxs-notepad"></i>
                                 Syllabi
                             </a>
@@ -83,22 +83,22 @@
                                 User Management
                             </a>
                             <a href="{{ route('organizational.colleges.index') }}"
-                                class="{{ request()->routeIs('organizational.colleges.index') ? 'active' : '' }}">
+                                class="{{ request()->routeIs('organizational.*') ? 'active' : '' }}">
                                 <i class="bx bx-sitemap"></i>
                                 University Faculties
                             </a>
                             <a href="{{ route('academic.structure.index') }}"
-                                class="{{ request()->routeIs('academic.structure.index') ? 'active' : '' }}">
+                                class="{{ request()->routeIs('academic.structure.*') ? 'active' : '' }}">
                                 <i class="bx bxs-layer"></i>
                                 Academic Structure
                             </a>
                             <a href="{{ route('academic.calendars.index') }}"
-                                class="{{ request()->routeIs('academic.calendars.index') ? 'active' : '' }}">
+                                class="{{ request()->routeIs('academic.calendars.*', 'academic.calendar.*') ? 'active' : '' }}">
                                 <i class="bx bxs-calendar"></i>
                                 Academic Calendars
                             </a>
                             <a href="{{ route('audit.logs.index') }}"
-                                class="{{ request()->routeIs('audit.logs.index') ? 'active' : '' }}">
+                                class="{{ request()->routeIs('audit.logs.*') ? 'active' : '' }}">
                                 <i class="bx bx-history"></i>
                                 Audit Logs
                             </a>
@@ -106,7 +106,7 @@
 
                         @if ($user->hasRole('admin') || $user->hasRole('dean'))
                             <a href="{{ route('goal.index') }}"
-                                class="{{ request()->routeIs('goal.index') ? 'active' : '' }}">
+                                class="{{ request()->routeIs('goal.*') ? 'active' : '' }}">
                                 <i class="bx bxs-bullseye"></i>
                                 College Goals
                             </a>
@@ -114,17 +114,17 @@
 
                         @if ($user->hasRole('admin') || $user->hasRole('chair'))
                             <a href="{{ route('objective.index') }}"
-                                class="{{ request()->routeIs('objective.index') ? 'active' : '' }}">
+                                class="{{ request()->routeIs('objective.*') ? 'active' : '' }}">
                                 <i class="bx bx-list-check"></i>
                                 Department Objectives
                             </a>
                             <a href="{{ route('programs.index') }}"
-                                class="{{ request()->routeIs('programs.index') ? 'active' : '' }}">
+                                class="{{ request()->routeIs('programs.*') ? 'active' : '' }}">
                                 <i class="bx bxs-network-chart"></i>
                                 PEOs &amp; POs
                             </a>
                             <a href="{{ route('courses.index') }}"
-                                class="{{ request()->routeIs('courses.index') ? 'active' : '' }}">
+                                class="{{ request()->routeIs('courses.*') ? 'active' : '' }}">
                                 <i class="bx bxs-book-content"></i>
                                 Courses
                             </a>

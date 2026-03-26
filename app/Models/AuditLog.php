@@ -38,14 +38,19 @@ class AuditLog extends Model
         ?int $referenceId = null,
         ?string $description = null,
         ?int $userId = null
-    ): self {
-        return static::create([
-            'user_id'      => $userId ?? Auth::id(),
-            'action'       => $action,
-            'module'       => $module,
-            'reference_id' => $referenceId,
-            'description'  => $description,
-            'timestamp'    => now(),
-        ]);
+    ): ?self {
+        try {
+            return static::create([
+                'user_id'      => $userId ?? Auth::id(),
+                'action'       => $action,
+                'module'       => $module,
+                'reference_id' => $referenceId,
+                'description'  => $description,
+                'timestamp'    => now(),
+            ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('AuditLog::record failed: ' . $e->getMessage());
+            return null;
+        }
     }
 }
