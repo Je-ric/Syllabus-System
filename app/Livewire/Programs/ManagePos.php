@@ -5,8 +5,9 @@ namespace App\Livewire\Programs;
 use App\Models\Program;
 use App\Models\ProgramOutcome;
 use App\Models\AuditLog;
-use App\Models\User;
+// use App\Models\User;
 use Livewire\Component;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use App\Helpers\ProgramCodeHelper;
 
@@ -20,7 +21,8 @@ class ManagePos extends Component
     public function mount(Program $program): void
     {
         /** @var \App\Models\User $user */
-        $user = auth()->user();
+        // $user = auth()->user();
+        $user = Auth::user();
         if (!$user->hasRole('admin')) {
             $assignment = $user->getPrimaryDepartmentAssignment();
             $allowed = $assignment && Program::whereHas('departments', fn($q) =>

@@ -197,7 +197,7 @@
                             class="flex items-center gap-2.5 shrink-0
                                   rounded-xl bg-white/10 border border-white/15
                                   px-3 py-1.5 hover:bg-white/20 hover:border-white/25
-                                  transition-all duration-150 group">
+                                  transition-all duration-150 group {{ $isWizardRoute ? 'hidden lg:hidden' : '' }}">
 
                             {{-- Avatar --}}
                             <div
