@@ -26,7 +26,7 @@
             });
         }
      }"
-     class="rounded-xl border border-slate-200 bg-white shadow-sm divide-y divide-slate-100">
+     class="rounded-xl border border-emerald-200 bg-white shadow-sm divide-y divide-emerald-100/60">
 
     @foreach ($syllabusWeeks as $week)
         @php
@@ -66,14 +66,14 @@
             }
 
             // UI accents
-            $accentClosed = $isLocked ? 'bg-rose-200' : 'bg-slate-200';
-            $accentOpen   = $isLocked ? 'bg-rose-500' : 'bg-emerald-500';
+            $accentClosed = $isLocked ? 'bg-rose-300' : 'bg-emerald-300';
+            $accentOpen   = $isLocked ? 'bg-rose-600' : 'bg-emerald-600';
 
             $openHeaderClass = $isLocked
-                ? 'bg-rose-50/30 ring-1 ring-inset ring-rose-200'
-                : 'bg-slate-50 ring-1 ring-inset ring-slate-200';
+                ? 'bg-rose-50 ring-1 ring-inset ring-rose-300'
+                : 'bg-emerald-50 ring-1 ring-inset ring-emerald-200';
 
-            $bodyBgClass = $isLocked ? 'bg-rose-50/10' : 'bg-slate-50/40';
+            $bodyBgClass = $isLocked ? 'bg-rose-50/20' : 'bg-emerald-50/10';
         @endphp
 
         <div wire:key="week-{{ $week->week_no }}-{{ $activeComponent }}" class="relative">
@@ -88,21 +88,21 @@
                 :class="openWeek === {{ $week->week_no }} ? '{{ $openHeaderClass }}' : ''"
                 @class([
                     'w-full flex items-center pl-6 pr-5 py-3.5 transition-colors duration-100 focus:outline-none text-left',
-                    'hover:bg-rose-50/30 bg-rose-50/10' => $isLocked,
-                    'hover:bg-slate-50'                  => ! $isLocked,
+                    'hover:bg-rose-50 bg-rose-50/20'     => $isLocked,
+                    'hover:bg-emerald-50/40'              => ! $isLocked,
                 ])>
 
                 <div class="flex items-center gap-3 min-w-0 flex-1">
 
-                    {{-- Week number circle — rose = locked, slate = normal --}}
+                    {{-- Week number circle — rose = locked, emerald = normal --}}
                     <span @class([
                         'inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold shrink-0',
-                        'bg-rose-100 text-rose-700 ring-1 ring-rose-200' => $isLocked,
-                        'bg-slate-100 text-slate-600'                    => ! $isLocked,
+                        'bg-rose-100 text-rose-700 ring-1 ring-rose-300'       => $isLocked,
+                        'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200' => ! $isLocked,
                     ])>{{ $week->week_no }}</span>
 
                     <div class="flex items-center gap-2 flex-wrap min-w-0">
-                        <span class="font-semibold text-sm shrink-0 {{ $isLocked ? 'text-rose-700' : 'text-slate-800' }}">
+                        <span class="font-semibold text-sm shrink-0 {{ $isLocked ? 'text-rose-700' : 'text-emerald-800' }}">
                             Week {{ $week->week_no }}
                         </span>
                         <span class="text-xs text-slate-400 shrink-0">

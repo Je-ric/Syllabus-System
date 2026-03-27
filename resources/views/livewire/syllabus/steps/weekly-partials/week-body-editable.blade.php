@@ -40,10 +40,10 @@
 @endif
 
 {{-- ── Outcome selector ────────────────────────────────────────────────────── --}}
-<div class="mb-3 rounded-lg border border-slate-200 bg-white px-3 py-2.5">
+<div class="mb-3 rounded-lg border border-emerald-200 bg-white px-3 py-2.5">
     @if ($isMvgo)
         <x-form.label class="mb-1">Outcome</x-form.label>
-        <div class="flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-100 bg-slate-50">
+        <div class="flex items-center gap-2 px-3 py-2 rounded-lg border border-emerald-100 bg-emerald-50">
             <x-feedback-status.status-indicator variant="emerald" icon="bx bx-star">MVGO</x-feedback-status.status-indicator>
             <span class="text-xs text-slate-500">Mission-Vision-Goals-Objectives</span>
         </div>
@@ -62,8 +62,10 @@
 </div>
 
 {{-- ── Content fields ──────────────────────────────────────────────────────── --}}
-<div class="rounded-lg border border-slate-200 bg-white p-3 mb-3">
-    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Coverage Details</p>
+<div class="rounded-lg border border-emerald-200 bg-white p-3 mb-3">
+    <p class="text-[10px] font-bold uppercase tracking-widest text-emerald-700 mb-3 flex items-center gap-1.5">
+        <i class="bx bx-edit-alt text-emerald-500"></i> Coverage Details
+    </p>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 
         <div>
@@ -106,10 +108,10 @@
 <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
 
     {{-- References --}}
-    <div class="rounded-lg border border-slate-200 bg-white p-3">
+    <div class="rounded-lg border border-emerald-200 bg-white p-3">
         <div class="flex items-center justify-between mb-2">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                <i class="bx bx-book-open text-slate-400"></i> References
+            <p class="text-[10px] font-bold uppercase tracking-widest text-emerald-700">
+                <i class="bx bx-book-open text-emerald-500"></i> References
             </p>
             <x-button variant="sm-add"
                 wire:click="addReference({{ $week->week_no }})">
@@ -142,10 +144,10 @@
     </div>
 
     {{-- Online Materials --}}
-    <div class="rounded-lg border border-slate-200 bg-white p-3">
+    <div class="rounded-lg border border-blue-200 bg-white p-3">
         <div class="flex items-center justify-between mb-2">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                <i class="bx bx-link text-slate-400"></i> Online Materials
+            <p class="text-[10px] font-bold uppercase tracking-widest text-blue-700">
+                <i class="bx bx-link text-blue-500"></i> Online Materials
             </p>
             <x-button variant="sm-add"
                 wire:click="addMaterial({{ $week->week_no }})">
@@ -188,10 +190,10 @@
 </div>
 
 {{-- ── Footer: autosave hint + reset + save ───────────────────────────────── --}}
-<div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
+<div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-emerald-100">
 
-    <p class="text-[11px] text-slate-400 flex items-center gap-1">
-        <i class="bx bx-info-circle text-slate-300"></i>
+    <p class="text-[11px] text-emerald-700/70 flex items-center gap-1">
+        <i class="bx bx-info-circle text-emerald-400"></i>
         Auto-saved when you collapse this week or click Save All.
     </p>
 

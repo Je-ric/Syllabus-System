@@ -192,6 +192,15 @@ Save behavior:
 Purpose:
 - Create and maintain CO list for the syllabus.
 
+Save model: **Batch Save All** (same as PEOs/POs in program management).
+
+Why batch save (not individual per-card):
+- COs in the syllabus wizard are a flat ordered list with no inter-row dependencies (unlike PO→PEO mapping).
+- Users typically add several COs at once before saving — batch save reduces round trips.
+- The "Save All" pattern is consistent with PEOs and POs, reducing cognitive load.
+- Individual save was removed because it created ambiguity: users weren't sure if clicking "Add" also saved, or if they needed to save each card separately.
+- Delete remains individual (immediate, with confirm) because deleting a saved CO has DB consequences (re-sequencing) that should be explicit and instant.
+
 Conditions:
 - Course Outcomes are stored in a Livewire-owned `rows` array:
   - Each row is `['id' => int|null, 'description' => string]`.

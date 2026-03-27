@@ -58,9 +58,9 @@
     {{-- ── Header ── --}}
     <button type="button" x-on:click="open = !open"
         class="w-full flex items-center justify-between px-5 py-4 text-left
-               hover:bg-slate-50 transition-colors focus:outline-none">
+               hover:bg-emerald-50/40 transition-colors focus:outline-none">
         <div class="flex items-center gap-3">
-            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-100 text-blue-500">
+            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600">
                 <i class="bx bx-user-check text-lg leading-none"></i>
             </span>
             <div>
@@ -82,11 +82,11 @@
 
     {{-- ── Body ── --}}
     <div x-show="open" x-collapse>
-        <div class="border-t border-slate-100 divide-y divide-slate-100">
+        <div class="border-t border-emerald-100 divide-y divide-emerald-100/60">
 
             {{-- SECTION 1 — Signatories --}}
             <div class="px-5 py-4">
-                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">
+                <p class="text-[10px] font-bold uppercase tracking-widest text-emerald-700 mb-3">
                     Signatories
                 </p>
                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
@@ -232,9 +232,9 @@
 
             {{-- SECTION 2 — Additional Reviewers --}}
             <div class="px-5 py-4">
-                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">
+                <p class="text-[10px] font-bold uppercase tracking-widest text-emerald-700 mb-3">
                     Additional Reviewers
-                    <span class="text-slate-300 font-normal normal-case tracking-normal ml-1">(Faculty)</span>
+                    <span class="text-slate-400 font-normal normal-case tracking-normal ml-1">(Faculty)</span>
                 </p>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
