@@ -12,7 +12,7 @@
     {{-- ── Header ── --}}
     <button type="button" x-on:click="open = !open"
         class="w-full flex items-center justify-between px-5 py-4 text-left
-               hover:bg-slate-50 transition-colors focus:outline-none">
+               hover:bg-emerald-50/40 transition-colors focus:outline-none">
         <div class="flex items-center gap-3">
             <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600">
                 <i class="bx bx-cloud-upload text-lg leading-none"></i>
@@ -34,7 +34,7 @@
 
     {{-- ── Body ── --}}
     <div x-show="open" x-collapse>
-        <div class="border-t border-slate-100 p-4 space-y-2">
+        <div class="border-t border-emerald-100/60 p-4 space-y-2">
 
             @if (isset($completeVersions) && $completeVersions->count() > 0)
                 @foreach ($completeVersions as $sv)
@@ -68,10 +68,10 @@
 
                         <button type="button" x-on:click="vopen = !vopen"
                             class="w-full flex items-center justify-between px-4 py-3 text-left
-                                   bg-slate-50 hover:bg-slate-100 transition-colors focus:outline-none">
+                                   bg-white hover:bg-emerald-50/40 transition-colors focus:outline-none border-b border-slate-100">
                             <div class="flex items-center gap-3">
                                 <span class="inline-flex items-center justify-center w-6 h-6 rounded-md
-                                             bg-emerald-100 text-emerald-700 text-[11px] font-bold shrink-0">
+                                             bg-emerald-600 text-white text-[11px] font-bold shrink-0">
                                     v{{ $sv->version }}
                                 </span>
                                 <div>
@@ -94,7 +94,7 @@
                             <div class="p-3 grid grid-cols-1 sm:grid-cols-3 gap-2 bg-white">
 
                                 {{-- Complete --}}
-                                <div class="rounded-lg border border-slate-200 bg-slate-50/60 p-2.5">
+                                <div class="rounded-lg border border-emerald-100 bg-emerald-50/40 p-2.5">
                                     <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mb-2">
                                         Complete (OBTL)
                                     </p>
@@ -117,7 +117,7 @@
                                 </div>
 
                                 {{-- Abridged --}}
-                                <div class="rounded-lg border border-slate-200 bg-slate-50/60 p-2.5">
+                                <div class="rounded-lg border border-blue-100 bg-blue-50/40 p-2.5">
                                     <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mb-2">
                                         Abridged (Student)
                                     </p>
@@ -144,7 +144,7 @@
                                 </div>
 
                                 {{-- Assessment --}}
-                                <div class="rounded-lg border border-slate-200 bg-slate-50/60 p-2.5">
+                                <div class="rounded-lg border border-violet-100 bg-violet-50/40 p-2.5">
                                     <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mb-2">
                                         Assessment Plan
                                     </p>
@@ -185,7 +185,7 @@
         </div>
 
         {{-- ── Footer: Save as Done — bottom-right ── --}}
-        <div class="border-t border-slate-100 px-5 py-3 flex justify-end">
+        <div class="border-t border-emerald-100 px-5 py-3 flex justify-end">
             <x-button
                 type="button"
                 variant="add-button"

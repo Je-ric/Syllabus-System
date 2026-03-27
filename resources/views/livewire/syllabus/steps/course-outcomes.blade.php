@@ -113,16 +113,17 @@
                         'opacity-50 pointer-events-none':        deletingId === {{ $co['id'] }}
                     }"
                     class="rounded-2xl border border-slate-200 bg-white shadow-sm
-                           transition-all duration-150 overflow-hidden">
+                           transition-all duration-150 overflow-hidden
+                           hover:border-emerald-200 hover:shadow-md">
 
                     {{-- ── READ mode ─────────────────────────────────────────── --}}
-                    <div x-show="editingId !== {{ $co['id'] }}" class="flex items-start gap-4 p-4">
+                    <div x-show="editingId !== {{ $co['id'] }}" class="flex items-start gap-4 p-4 border-l-4 border-emerald-400">
 
                         {{-- CO badge --}}
                         <span class="shrink-0 mt-0.5 inline-flex items-center justify-center
                                      w-11 h-11 rounded-xl
-                                     bg-emerald-100 text-emerald-700
-                                     text-sm font-bold ring-1 ring-emerald-200">
+                                     bg-emerald-600 text-white
+                                     text-sm font-bold shadow-sm">
                             {{ $co['co_code'] }}
                         </span>
 

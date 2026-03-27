@@ -26,7 +26,7 @@
             });
         }
      }"
-     class="rounded-xl border border-emerald-200 bg-white shadow-sm divide-y divide-emerald-100/60">
+     class="rounded-xl border border-emerald-200 bg-white shadow-sm divide-y divide-slate-100">
 
     @foreach ($syllabusWeeks as $week)
         @php
@@ -66,14 +66,16 @@
             }
 
             // UI accents
-            $accentClosed = $isLocked ? 'bg-rose-300' : 'bg-emerald-300';
+            $accentClosed = $isLocked ? 'bg-rose-400' : 'bg-emerald-400';
             $accentOpen   = $isLocked ? 'bg-rose-600' : 'bg-emerald-600';
 
             $openHeaderClass = $isLocked
-                ? 'bg-rose-50 ring-1 ring-inset ring-rose-300'
-                : 'bg-emerald-50 ring-1 ring-inset ring-emerald-200';
+                ? 'bg-rose-50 ring-1 ring-inset ring-rose-200'
+                : 'bg-emerald-50/80 ring-1 ring-inset ring-emerald-200';
 
-            $bodyBgClass = $isLocked ? 'bg-rose-50/20' : 'bg-emerald-50/10';
+            $closedRowClass = $isLocked ? 'bg-rose-50/30' : ($isMvgo ? 'bg-amber-50/30' : 'bg-white');
+
+            $bodyBgClass = $isLocked ? 'bg-rose-50/30' : 'bg-emerald-50/20';
         @endphp
 
         <div wire:key="week-{{ $week->week_no }}-{{ $activeComponent }}" class="relative">
@@ -85,24 +87,25 @@
             {{-- Accordion Header --}}
             <button type="button"
                 @click="openWeek = openWeek === {{ $week->week_no }} ? null : {{ $week->week_no }}"
-                :class="openWeek === {{ $week->week_no }} ? '{{ $openHeaderClass }}' : ''"
+                :class="openWeek === {{ $week->week_no }} ? '{{ $openHeaderClass }}' : '{{ $closedRowClass }}'"
                 @class([
                     'w-full flex items-center pl-6 pr-5 py-3.5 transition-colors duration-100 focus:outline-none text-left',
-                    'hover:bg-rose-50 bg-rose-50/20'     => $isLocked,
-                    'hover:bg-emerald-50/40'              => ! $isLocked,
+                    'hover:bg-rose-50'     => $isLocked,
+                    'hover:bg-emerald-50/60'              => ! $isLocked,
                 ])>
 
                 <div class="flex items-center gap-3 min-w-0 flex-1">
 
-                    {{-- Week number circle — rose = locked, emerald = normal --}}
+                    {{-- Week number circle — rose = locked, amber = MVGO, emerald = normal --}}
                     <span @class([
                         'inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold shrink-0',
-                        'bg-rose-100 text-rose-700 ring-1 ring-rose-300'       => $isLocked,
-                        'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200' => ! $isLocked,
+                        'bg-rose-100 text-rose-700 ring-1 ring-rose-300'          => $isLocked,
+                        'bg-amber-100 text-amber-700 ring-1 ring-amber-200'        => ! $isLocked && $isMvgo,
+                        'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200'  => ! $isLocked && ! $isMvgo,
                     ])>{{ $week->week_no }}</span>
 
                     <div class="flex items-center gap-2 flex-wrap min-w-0">
-                        <span class="font-semibold text-sm shrink-0 {{ $isLocked ? 'text-rose-700' : 'text-emerald-800' }}">
+                        <span class="font-semibold text-sm shrink-0 {{ $isLocked ? 'text-rose-700' : ($isMvgo ? 'text-amber-800' : 'text-slate-700') }}">
                             Week {{ $week->week_no }}
                         </span>
                         <span class="text-xs text-slate-400 shrink-0">
@@ -161,7 +164,7 @@
 
             {{-- Accordion Body --}}
             <div x-show="openWeek === {{ $week->week_no }}" x-cloak
-                class="pl-6 pr-5 pb-5 pt-4 border-t border-slate-100 {{ $bodyBgClass }}">
+                class="pl-6 pr-5 pb-5 pt-4 border-t {{ $isLocked ? 'border-rose-100' : 'border-emerald-100' }} {{ $bodyBgClass }}">
 
                 @if ($isLocked)
                     @include('livewire.syllabus.steps.weekly-partials.week-body-locked', [

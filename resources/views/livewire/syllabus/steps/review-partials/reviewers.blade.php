@@ -277,10 +277,10 @@
                                 <div wire:key="reviewer-{{ $reviewer['id'] }}"
                                     x-bind:class="removingId === {{ $reviewer['id'] }} ? 'opacity-40 pointer-events-none' : ''"
                                     class="flex items-center justify-between px-3.5 py-2.5
-                                           rounded-xl border border-slate-200 bg-white transition-opacity duration-150">
+                                           rounded-xl border border-slate-200 bg-slate-50/60 transition-opacity duration-150">
                                     <div class="flex items-center gap-2.5 min-w-0">
                                         <span class="inline-flex items-center justify-center w-7 h-7 rounded-full
-                                                     bg-slate-100 text-slate-600 text-xs font-bold shrink-0">
+                                                     bg-blue-100 text-blue-700 text-xs font-bold shrink-0">
                                             {{ strtoupper(substr($reviewer['user_name'], 0, 1)) }}
                                         </span>
                                         <div class="min-w-0">

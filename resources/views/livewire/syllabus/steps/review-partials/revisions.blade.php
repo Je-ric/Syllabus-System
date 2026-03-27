@@ -27,10 +27,10 @@
     {{-- ── Header ── --}}
     <button type="button" x-on:click="open = !open"
         class="w-full flex items-center justify-between px-5 py-4 text-left
-               hover:bg-slate-50 transition-colors">
+               hover:bg-slate-50/80 transition-colors">
         <div class="flex items-center gap-3">
             <span class="flex items-center justify-center w-8 h-8 rounded-lg
-                         bg-slate-100 text-slate-500">
+                         bg-amber-100 text-amber-600">
                 <i class="bx bx-history text-lg leading-none"></i>
             </span>
             <div>
@@ -50,7 +50,7 @@
 
     {{-- ── Body ── --}}
     <div x-show="open" x-collapse>
-        <div class="border-t border-slate-100 p-5">
+        <div class="border-t border-amber-100/60 p-5">
 
             {{--
                 x-data owns form state + delete state.
