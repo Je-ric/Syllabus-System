@@ -104,18 +104,6 @@
                             class="flex-1 justify-center">
                             Preview
                         </x-button>
-
-                        @if ($syllabus->status === 'draft')
-                            <form method="POST"
-                                action="{{ route('syllabus.destroy', $syllabus->id) }}"
-                                onsubmit="return confirm('Delete this draft syllabus? This cannot be undone.')">
-                                @csrf
-                                @method('DELETE')
-                                <x-button type="submit" variant="danger">
-                                    <i class="bx bx-trash"></i>
-                                </x-button>
-                            </form>
-                        @endif
                     </div>
     
                 </div>

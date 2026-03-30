@@ -29,8 +29,8 @@ Rules for the syllabus listing page, creation entry point, and deletion. For wiz
   - Then syllabi are split into two tabs:
     - Draft tab: all syllabi where `status != approved`.
     - Approved tab: all syllabi where `status = approved`.
-  - Then each draft card shows a delete button.
-  - Then approved cards do not show a delete button.
+  - Then draft cards show Continue and Preview buttons only — no delete button.
+  - Then approved cards show View and Preview buttons.
 
 ### Create Entry Point (Course Selection)
 
@@ -71,29 +71,9 @@ Rules for the syllabus listing page, creation entry point, and deletion. For wiz
 
 ### Delete (SyllabusController::destroy)
 
-- If deleting a syllabus:
-  - If `prepared_by != Auth::id()`:
-    - Then stop with `403 Unauthorized`.
-  - If `status != draft`:
-    - Then redirect back with error toast: "Only draft syllabi can be deleted."
-  - If all checks pass:
-    - Then run inside a DB transaction:
-      - Then for each `CompleteSyllabus` snapshot:
-        - Then delete disk files for `pdf_path`, `abridged_path`, `evaluation_path`.
-        - Then delete the `complete_syllabi` DB row.
-      - Then delete all `course_components`.
-      - Then delete all `course_outcomes`.
-      - Then for each `syllabus_week`:
-        - Then for each `week_content`:
-          - Then delete `syllabus_evaluation_items` for that content.
-          - Then delete the `week_content`.
-        - Then delete the `syllabus_week`.
-      - Then delete all `references`.
-      - Then delete all `online_materials`.
-      - Then delete all `syllabus_revisions`.
-      - Then delete all `syllabus_reviewers`.
-      - Then delete the `syllabus`.
-    - Then redirect to syllabus index with success toast.
+- Syllabus deletion by faculty is **not allowed** — the destroy route returns a warning toast.
+- Only admins can delete syllabi (via course deletion cascade or direct DB management).
+- Rationale: syllabi represent academic records; accidental deletion of in-progress work is prevented by design.
 
 ### Access Control (authorizeSyllabusAccess)
 
@@ -118,8 +98,6 @@ Rules for the syllabus listing page, creation entry point, and deletion. For wiz
 
 ### Delete a Draft Syllabus
 
-1. Faculty clicks trash button on a draft card.
-2. Browser shows native confirm dialog.
-3. Faculty confirms.
-4. System verifies ownership and draft status.
-5. System cascades delete: disk files → snapshots → components → outcomes → weeks → contents → evaluations → references → materials → revisions → reviewers → syllabus.
+- Faculty **cannot** delete syllabi. The delete button has been removed from the UI.
+- The destroy route returns a warning toast if called directly.
+- Syllabi are permanent academic records once created.

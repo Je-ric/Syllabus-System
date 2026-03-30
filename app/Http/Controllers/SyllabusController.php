@@ -139,33 +139,11 @@ class SyllabusController extends Controller
 
     public function destroy(Syllabus $syllabus)
     {
-        if ($syllabus->prepared_by !== Auth::id()) {
-            abort(403, 'Unauthorized');
-        }
-
-        if ($syllabus->status !== 'draft') {
-            return redirect()->route('syllabus.index')
-                ->with('toast', [
-                    'message' => 'Only draft syllabi can be deleted.',
-                    'type'    => 'error',
-                ]);
-        }
-
-        $courseCode = $syllabus->course?->course_code ?? "#{$syllabus->course_id}";
-
-        DB::transaction(function () use ($syllabus) {
-            $this->deleteService->delete($syllabus);
-        });
-
-        AuditLog::record(
-            action: 'deleted',
-            module: 'Syllabus',
-            referenceId: $syllabus->id,
-            description: "Deleted draft syllabus for course {$courseCode}."
-        );
-
         return redirect()->route('syllabus.index')
-            ->with('toast', ['message' => 'Syllabus deleted successfully.', 'type' => 'success']);
+            ->with('toast', [
+                'message' => 'Syllabus deletion is not allowed.',
+                'type'    => 'warning',
+            ]);
     }
 
     public function edit(Syllabus $syllabus)
