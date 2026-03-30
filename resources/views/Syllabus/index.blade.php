@@ -8,10 +8,14 @@
         desc="Manage and continue working on your course syllabi" />
 
     @php
-        $draftSyllabi = $syllabi->filter(fn ($s) => $s->status !== 'approved');
+        $draftSyllabi = $syllabi->filter(fn ($s) => $s->status === 'draft');
+        $underReviewSyllabi = $syllabi->filter(fn ($s) => $s->status === 'under_review');
+        $forRevisionSyllabi = $syllabi->filter(fn ($s) => $s->status === 'for_revision');
         $approvedSyllabi = $syllabi->filter(fn ($s) => $s->status === 'approved');
         $tabs = [
             ['id' => 'draft', 'label' => 'Draft'],
+            ['id' => 'under_review', 'label' => 'Under Review'],
+            ['id' => 'for_revision', 'label' => 'For Revision'],
             ['id' => 'approved', 'label' => 'Approved'],
         ];
     @endphp
@@ -23,7 +27,7 @@
             :stateKey="'syllabi-index'">
             <x-slot name="slot_draft">
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-    
+
             {{-- Create Syllabus card --}}
             <a href="{{ route('syllabus.create') }}"
                 class="group flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300
@@ -37,11 +41,11 @@
                     </span>
                 </div>
             </a>
-    
+
             {{-- Existing syllabi --}}
             @forelse ($draftSyllabi as $syllabus)
                 <div class="flex flex-col rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
-    
+
                     {{-- Card header — bg-gradient-to-r (was bg-linear-to-r, invalid Tailwind) --}}
                     <div class="px-4 py-3 bg-linear-to-r from-slate-50 to-emerald-50/60 border-b border-slate-200">
                         <h3 class="font-bold text-slate-800 font-mono">
@@ -51,10 +55,10 @@
                             {{ Str::limit($syllabus->course->course_title, 55) }}
                         </p>
                     </div>
-    
+
                     {{-- Card body --}}
                     <div class="flex-1 p-4 space-y-2.5 text-sm text-slate-600">
-    
+
                         {{-- Step progress + status --}}
                         <div class="flex items-center justify-between gap-2">
                             <span class="text-xs text-slate-400">
@@ -62,7 +66,7 @@
                                 {{ array_search($syllabus->current_step, array_keys($syllabus->getWizardSteps())) + 1 }}
                                 / {{ count($syllabus->getWizardSteps()) }}
                             </span>
-    
+
                             {{--
                                 Status badge — amber for draft, emerald for published.
                                 Was: yellow-*/green-* (wrong app tokens)
@@ -75,20 +79,20 @@
                                 {{ ucfirst($syllabus->status) }}
                             </span>
                         </div>
-    
+
                         @if ($syllabus->academic_calendar)
                             <div class="flex items-center gap-1.5 text-xs text-slate-500">
                                 <i class="bx bx-calendar text-slate-400"></i>
                                 {{ $syllabus->academic_calendar->academic_year }}
                             </div>
                         @endif
-    
+
                         <div class="flex items-start gap-1.5 text-xs text-slate-500">
                             <i class="bx bx-book text-slate-400 mt-0.5 shrink-0"></i>
                             <span class="leading-relaxed">{{ $syllabus->course->program->name }}</span>
                         </div>
                     </div>
-    
+
                     {{-- Card actions --}}
                     <div class="p-3 pt-0 flex gap-2">
                         <x-button
@@ -105,7 +109,7 @@
                             Preview
                         </x-button>
                     </div>
-    
+
                 </div>
             @empty
                 {{-- Spans all columns in the grid --}}
@@ -117,8 +121,130 @@
                     </x-empty-state>
                 </div>
             @endforelse
-    
+
         </div>
+            </x-slot>
+
+            <x-slot name="slot_under_review">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                    @forelse ($underReviewSyllabi as $syllabus)
+                        <div class="flex flex-col rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                            <div class="px-4 py-3 bg-linear-to-r from-slate-50 to-emerald-50/60 border-b border-slate-200">
+                                <h3 class="font-bold text-slate-800 font-mono">
+                                    {{ $syllabus->course->course_code }}
+                                </h3>
+                                <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">
+                                    {{ Str::limit($syllabus->course->course_title, 55) }}
+                                </p>
+                            </div>
+
+                            <div class="flex-1 p-4 space-y-2.5 text-sm text-slate-600">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="text-xs text-slate-400">Under review</span>
+                                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[0.65rem] font-semibold ring-1 bg-sky-50 text-sky-700 ring-sky-200">
+                                        Under Review
+                                    </span>
+                                </div>
+
+                                @if ($syllabus->academic_calendar)
+                                    <div class="flex items-center gap-1.5 text-xs text-slate-500">
+                                        <i class="bx bx-calendar text-slate-400"></i>
+                                        {{ $syllabus->academic_calendar->academic_year }}
+                                    </div>
+                                @endif
+
+                                <div class="flex items-start gap-1.5 text-xs text-slate-500">
+                                    <i class="bx bx-book text-slate-400 mt-0.5 shrink-0"></i>
+                                    <span class="leading-relaxed">{{ $syllabus->course->program->name }}</span>
+                                </div>
+                            </div>
+
+                            <div class="p-3 pt-0 flex gap-2">
+                                <x-button
+                                    href="{{ route('syllabus.wizard', ['syllabusId' => $syllabus->id]) }}"
+                                    variant="primary"
+                                    class="flex-1 justify-center">
+                                    View
+                                </x-button>
+
+                                <x-button
+                                    href="{{ route('syllabus.preview.complete', ['syllabus' => $syllabus->id]) }}"
+                                    variant="cancel"
+                                    class="flex-1 justify-center">
+                                    Preview
+                                </x-button>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="col-span-full">
+                            <x-empty-state
+                                icon="bx-time-five"
+                                title="No syllabi under review"
+                                message="Syllabi submitted for review will appear here." />
+                        </div>
+                    @endforelse
+                </div>
+            </x-slot>
+
+            <x-slot name="slot_for_revision">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                    @forelse ($forRevisionSyllabi as $syllabus)
+                        <div class="flex flex-col rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                            <div class="px-4 py-3 bg-linear-to-r from-slate-50 to-emerald-50/60 border-b border-slate-200">
+                                <h3 class="font-bold text-slate-800 font-mono">
+                                    {{ $syllabus->course->course_code }}
+                                </h3>
+                                <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">
+                                    {{ Str::limit($syllabus->course->course_title, 55) }}
+                                </p>
+                            </div>
+
+                            <div class="flex-1 p-4 space-y-2.5 text-sm text-slate-600">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="text-xs text-slate-400">For revision</span>
+                                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[0.65rem] font-semibold ring-1 bg-rose-50 text-rose-700 ring-rose-200">
+                                        For Revision
+                                    </span>
+                                </div>
+
+                                @if ($syllabus->academic_calendar)
+                                    <div class="flex items-center gap-1.5 text-xs text-slate-500">
+                                        <i class="bx bx-calendar text-slate-400"></i>
+                                        {{ $syllabus->academic_calendar->academic_year }}
+                                    </div>
+                                @endif
+
+                                <div class="flex items-start gap-1.5 text-xs text-slate-500">
+                                    <i class="bx bx-book text-slate-400 mt-0.5 shrink-0"></i>
+                                    <span class="leading-relaxed">{{ $syllabus->course->program->name }}</span>
+                                </div>
+                            </div>
+
+                            <div class="p-3 pt-0 flex gap-2">
+                                <x-button
+                                    href="{{ route('syllabus.wizard', ['syllabusId' => $syllabus->id]) }}"
+                                    variant="primary"
+                                    class="flex-1 justify-center">
+                                    Continue
+                                </x-button>
+
+                                <x-button
+                                    href="{{ route('syllabus.preview.complete', ['syllabus' => $syllabus->id]) }}"
+                                    variant="cancel"
+                                    class="flex-1 justify-center">
+                                    Preview
+                                </x-button>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="col-span-full">
+                            <x-empty-state
+                                icon="bx-revision"
+                                title="No syllabi for revision"
+                                message="Syllabi returned by reviewers will appear here." />
+                        </div>
+                    @endforelse
+                </div>
             </x-slot>
 
             <x-slot name="slot_approved">

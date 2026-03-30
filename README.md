@@ -7,7 +7,7 @@ This document is the single source of truth for understanding the full system: w
 
 ## What Is CSMS?
 
-CSMS is CLSU's official platform for creating, reviewing, and archiving course syllabi across all colleges and departments. It enforces a structured workflow: faculty create syllabi, chairs review them, deans approve them, and admins manage the entire structure.
+CSMS is CLSU's official platform for creating and reviewing course syllabi across all colleges and departments. It enforces a structured workflow: faculty create syllabi, chairs review them, deans approve them, and admins manage the entire structure.
 
 ---
 

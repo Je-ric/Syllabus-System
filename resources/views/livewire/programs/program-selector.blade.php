@@ -8,6 +8,48 @@
 --}}
 
 <div>
+    @if ($locked ?? false)
+        @php
+            $lockedCollege = $colleges->firstWhere('id', (int)$collegeId);
+            $lockedDept    = $departments->firstWhere('id', (int)$departmentId);
+            $lockedProgram = $programs->firstWhere('id', (int)$programId);
+        @endphp
+
+        {{-- Same breadcrumb as unlocked, all steps filled --}}
+        <div class="flex items-center gap-2 mb-4 text-xs text-slate-400 select-none">
+            @foreach ([['College', 1], ['Department', 2], ['Program', 3]] as [$step, $num])
+                <span class="flex items-center gap-1.5 font-semibold text-emerald-600">
+                    <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold bg-emerald-500 text-white">{{ $num }}</span>
+                    {{ $step }}
+                </span>
+                @if ($num < 3)<i class="bx bx-chevron-right text-slate-300"></i>@endif
+            @endforeach
+        </div>
+
+        {{-- Same grid as unlocked, but read-only fields --}}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            @foreach ([
+                ['bx-buildings',     $lockedCollege?->name ?? '—', 'College'],
+                ['bx-sitemap',       $lockedDept?->name    ?? '—', 'Department'],
+                ['bx-network-chart', $lockedProgram?->name ?? '—', 'Program'],
+            ] as [$icon, $value, $hint])
+                <div class="space-y-1.5">
+                    <label class="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-slate-500">
+                        <i class="bx {{ $icon }} text-emerald-500"></i>
+                        {{ $hint }}
+                    </label>
+                    <div class="relative">
+                        <div class="w-full rounded-xl border border-slate-100 bg-slate-50 px-4 py-2.5 pr-9 text-sm text-slate-500 shadow-sm cursor-not-allowed truncate">
+                            {{ $value }}
+                        </div>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                            <i class="bx bx-lock-alt text-slate-300 text-base"></i>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    @else
     {{-- Step breadcrumb: shows how far along the selection is --}}
     <div class="flex items-center gap-2 mb-4 text-xs text-slate-400 select-none">
         <span @class([
@@ -172,4 +214,5 @@
             </div>
         @endif
     @endif
+    @endif {{-- end @else (not locked) --}}
 </div>
