@@ -53,14 +53,6 @@
                         </div>
                     </div>
 
-                    <div class="flex items-center justify-between">
-                        <label class="flex items-center gap-2 cursor-pointer select-none">
-                            <input id="remember" name="remember" type="checkbox"
-                                   class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
-                            <span class="text-sm text-slate-600">Remember me</span>
-                        </label>
-                    </div>
-
                     <button type="submit" class="w-full auth-secondary text-white py-2.5 rounded-xl font-semibold shadow-sm transition">
                         Sign In
                     </button>

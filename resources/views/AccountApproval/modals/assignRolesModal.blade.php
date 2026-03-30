@@ -1,7 +1,15 @@
-<x-modal.dialog :id="$modalId" maxWidth="xl:max-w-xl lg:max-w-lg md:max-w-md sm:max-w-sm max-w-xs" width="w-full" maxHeight="max-h-[90vh]">
+<x-modal.dialog :id="$modalId" maxWidth="xl:max-w-xl lg:max-w-lg md:max-w-md sm:max-w-sm max-w-xs" width="w-full" maxHeight="max-h-[90vh]"
+    onclose="this.querySelector('form')?.reset()">
     <form method="POST" action="{{ route('account-approval.assign-role') }}" class="flex flex-col"
-        x-data="{ dean: {{ $user->roles->contains('name','dean') ? 'true' : 'false' }}, chair: {{ $user->roles->contains('name','chair') ? 'true' : 'false' }} }"
-        @submit.prevent="if(dean && chair){ alert('A user cannot hold both Dean and Chair roles simultaneously.'); } else { $el.submit(); }">
+        onsubmit="
+            const dean = this.querySelector('input[name=&quot;roles[]&quot;][value=&quot;dean&quot;]')?.checked;
+            const chair = this.querySelector('input[name=&quot;roles[]&quot;][value=&quot;chair&quot;]')?.checked;
+            if (dean && chair) {
+                alert('A user cannot hold both Dean and Chair roles simultaneously.');
+                return false;
+            }
+            return true;
+        ">
         @csrf
         <input type="hidden" name="user_id" value="{{ $user->id }}">
 
@@ -36,9 +44,7 @@
                         <div class="flex items-center h-5">
                             <input type="checkbox" name="roles[]" value="{{ $role['name'] }}"
                                 class="w-4 h-4 rounded text-emerald-600 border-slate-300 focus:ring-emerald-400"
-                                {{ $user->roles->contains('name', $role['name']) ? 'checked' : '' }}
-                                @if($role['name'] === 'dean') x-model="dean" :value="'dean'" @endif
-                                @if($role['name'] === 'chair') x-model="chair" :value="'chair'" @endif>
+                                {{ $user->roles->contains('name', $role['name']) ? 'checked' : '' }}>
                         </div>
                         <div class="ml-3 flex-1 min-w-0">
                             <div class="flex items-center gap-2">
@@ -65,10 +71,6 @@
                     </div>
                 </div>
 
-                <div x-show="dean && chair" x-cloak class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 flex items-center gap-2">
-                    <i class="bx bx-error-circle text-base shrink-0"></i>
-                    Dean and Chair cannot be assigned at the same time.
-                </div>
                 <x-feedback-status.alert type="warning" title="Dean and Chair roles cannot be assigned at the same time." />
                 <x-feedback-status.alert type="info" title="Role changes will be notified to the user via email." />
             </div>
