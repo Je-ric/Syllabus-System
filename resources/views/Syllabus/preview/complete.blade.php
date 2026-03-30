@@ -67,7 +67,7 @@
                     Assessment Plan
                 </button>
             </div>
-            
+
             <div class="t-right">
                 <button type="button" onclick="openSyllabusVersions()">Versions</button>
                 <button type="button"
@@ -692,7 +692,7 @@
                 </p>
             </div>
 
-            {{-- @php
+            @php
                 /**
                  * Build transmutation display rows for the given passing mark.
                  *
@@ -776,9 +776,9 @@
                     </tbody>
                 </table>
                 <p style="margin-top: 4px;" class="indent-level-1">Passing Mark: {{ $lecPassMark }}%</p>
-            </div> --}}
+            </div>
 
-            <div class="table-indent">
+            {{-- <div class="table-indent">
                 <table>
                     <thead>
                         <tr>
@@ -826,7 +826,7 @@
                     </tbody>
                 </table>
                 <p style="margin-top: 4px;" class="indent-level-1">Passing Mark: {{ $lecPassMark }}%</p>
-            </div>
+            </div> --}}
         </div>
 
         <div class="portrait">
