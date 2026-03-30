@@ -159,6 +159,6 @@ php artisan vendor:publish --tag=heroicons
 npm install -D daisyui
 npm i -D daisyui@latest
 composer require barryvdh/laravel-dompdf
-npm install laravel-precognition-alpine
+npm install laravel-precognition-alpine (unused)
 composer require laravel/precognition
 ```

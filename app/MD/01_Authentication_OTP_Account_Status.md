@@ -2,6 +2,22 @@
 
 Beginner-friendly summary of what happens in registration, verification (OTP), login, and admin approval.
 
+## Why OTP + Admin Approval (Design Rationale)
+
+### Why OTP Email Verification?
+- Registration is restricted to `@clsu.edu.ph` and `@clsu2.edu.ph` only.
+- OTP confirms the registrant actually owns that CLSU email address.
+- Without OTP, anyone who knows the email format could register with a fake CLSU email.
+- OTP expires in 10 minutes. Users can resend from the OTP page or the resend page.
+- If mail sending fails, the OTP record is still saved in DB — user can resend manually.
+
+### Why Admin Approval After OTP?
+- Verifying the email only proves ownership of a CLSU email — not faculty status.
+- CLSU students also have `@clsu.edu.ph` emails. Email verification alone cannot distinguish faculty from students.
+- Admin approval is the human gate that confirms the registrant is an actual faculty member.
+- Only after admin approval does the account become `active` and receive the `Faculty` role.
+- This two-step process (OTP → Admin Approval) ensures only verified, authorized faculty access the system.
+
 ## Files Used (Source of Truth)
 
 - Controllers
