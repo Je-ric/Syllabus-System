@@ -68,7 +68,7 @@
                             Navigation
                         </p>
 
-                        @if ($user->hasRole('admin') || $user->hasRole('faculty'))
+                        @if ($user->hasRole('admin') || $user->hasRole('faculty') || $user->hasRole('ovpaa'))
                             <a href="{{ route('syllabus.index') }}"
                                 class="{{ request()->routeIs('syllabus.*') ? 'active' : '' }}">
                                 <i class="bx bxs-notepad"></i>
@@ -92,15 +92,18 @@
                                 <i class="bx bxs-layer"></i>
                                 Academic Structure
                             </a>
-                            <a href="{{ route('academic.calendars.index') }}"
-                                class="{{ request()->routeIs('academic.calendars.*', 'academic.calendar.*') ? 'active' : '' }}">
-                                <i class="bx bxs-calendar"></i>
-                                Academic Calendars
-                            </a>
                             <a href="{{ route('audit.logs.index') }}"
                                 class="{{ request()->routeIs('audit.logs.*') ? 'active' : '' }}">
                                 <i class="bx bx-history"></i>
                                 Audit Logs
+                            </a>
+                        @endif
+
+                        @if ($user->hasRole('admin') || $user->hasRole('ovpaa'))
+                            <a href="{{ route('academic.calendars.index') }}"
+                                class="{{ request()->routeIs('academic.calendars.*', 'academic.calendar.*') ? 'active' : '' }}">
+                                <i class="bx bxs-calendar"></i>
+                                Academic Calendars
                             </a>
                         @endif
 
@@ -220,7 +223,7 @@
                 </div>
             </header>
 
-            <main class="flex-1 w-full overflow-y-auto">
+            <main class="flex-1 w-full {{ $isWizardRoute ? '' : 'overflow-y-auto' }}">
                 @yield('content')
             </main>
         </div>

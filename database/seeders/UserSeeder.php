@@ -36,6 +36,12 @@ class UserSeeder extends Seeder
                 'password' => 'password123',
                 'role' => 'faculty',
             ],
+            [
+                'name' => 'OVPAA User',
+                'email' => 'ovpaa@csms.local',
+                'password' => 'password123',
+                'role' => 'ovpaa',
+            ]
         ];
 
         foreach ($users as $data) {

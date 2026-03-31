@@ -14,6 +14,7 @@ class RoleSeeder extends Seeder
             'chair',
             'dean',
             'faculty',
+            'ovpaa'
         ];
 
         foreach ($roles as $role) {

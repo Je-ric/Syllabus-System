@@ -73,6 +73,15 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/academic-structure/program/{program}', [AcademicStructureController::class, 'updateProgram'])->name('program.update');
         Route::delete('/academic-structure/program/{program}', [AcademicStructureController::class, 'destroyProgram'])->name('program.destroy');
 
+        Route::get('/organizational/colleges', [OrganizationalHierarchyController::class, 'collegesIndex'])->name('organizational.colleges.index');
+        Route::post('/organizational/assign-dean', [OrganizationalHierarchyController::class, 'assignDean'])->name('organizational.assign-dean');
+        Route::post('/organizational/remove-dean', [OrganizationalHierarchyController::class, 'removeDean'])->name('organizational.remove-dean');
+
+        Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit.logs.index');
+
+    });
+
+    Route::middleware(['role:admin,ovpaa'])->group(function () {
         Route::get('/academic-calendars', [AcademicCalendarController::class, 'index'])->name('academic.calendars.index');
         Route::get('/academic-calendars/create', [AcademicCalendarController::class, 'create'])->name('academic.calendars.create');
         Route::post('/academic-calendars', [AcademicCalendarController::class, 'store'])
@@ -88,16 +97,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/academic-calendars/{semester}/events', [AcademicCalendarEventController::class, 'store'])->name('academic.calendar.events.store');
         Route::put('/academic-calendars/events/{event}', [AcademicCalendarEventController::class, 'update'])->name('academic.calendar.events.update');
         Route::delete('/academic-calendars/events/{event}', [AcademicCalendarEventController::class, 'destroy'])->name('academic.calendar.events.destroy');
-
-        Route::get('/organizational/colleges', [OrganizationalHierarchyController::class, 'collegesIndex'])->name('organizational.colleges.index');
-        Route::post('/organizational/assign-dean', [OrganizationalHierarchyController::class, 'assignDean'])->name('organizational.assign-dean');
-        Route::post('/organizational/remove-dean', [OrganizationalHierarchyController::class, 'removeDean'])->name('organizational.remove-dean');
-
-        Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit.logs.index');
-
     });
 
-    Route::middleware(['role:admin,dean,chair'])->group(function () {
+    Route::middleware(['role:admin'])->group(function () {
         Route::get('/organizational/hierarchy', [OrganizationalHierarchyController::class, 'hierarchyView'])->name('organizational.hierarchy');
         Route::get('/organizational/college/{collegeId}/departments', [OrganizationalHierarchyController::class, 'departmentsIndex'])->name('organizational.departments.index');
         Route::post('/organizational/assign-chair', [OrganizationalHierarchyController::class, 'assignChair'])->name('organizational.assign-chair');
@@ -133,7 +135,7 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/courses/{course}', [CourseController::class, 'destroy'])->name('courses.destroy');
     });
 
-    Route::middleware(['role:admin,faculty'])->group(function () {
+    Route::middleware(['role:admin,faculty,ovpaa'])->group(function () {
         Route::get('/syllabus', [SyllabusController::class, 'index'])->name('syllabus.index');
         Route::get('/syllabus/create', [SyllabusController::class, 'create'])->name('syllabus.create');
         Route::get('/syllabus/courses/{programId}', [SyllabusController::class, 'showCourses'])->name('syllabus.courses');
