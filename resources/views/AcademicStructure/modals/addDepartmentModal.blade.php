@@ -1,31 +1,31 @@
-<x-modal.dialog id="addDepartmentModal" maxWidth="xl:max-w-xl lg:max-w-lg md:max-w-md sm:max-w-sm max-w-xs" width="w-full" maxHeight="max-h-[90vh]">
-    <x-modal.header>
-        <div>
-            <h3 class="text-lg sm:text-xl font-bold text-slate-800">Add New Department</h3>
-            <p class="text-gray-500 text-sm mt-1">This department will be created under the selected college.</p>
+<x-modal.dialog id="addDepartmentModal" maxWidth="max-w-md" width="w-11/12">
+    <x-modal.header modalId="addDepartmentModal">
+        <div class="flex items-center gap-3">
+            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#dcfce7] text-[#16a34a] shrink-0">
+                <i class="bx bx-plus text-base leading-none"></i>
+            </span>
+            <div>
+                <p class="text-[15px] font-bold text-[#0f172a]">Add New Department</p>
+                <p class="text-[13px] text-[#94a3b8]">Will be created under the selected college.</p>
+            </div>
         </div>
     </x-modal.header>
 
     <form method="POST" action="{{ route('department.store') }}" class="flex flex-col">
         @csrf
         <input type="hidden" name="college_id" id="addDepartment_college_id" value="">
-
         <x-modal.body>
-            <div class="space-y-4">
-                <div>
-                    <x-form.label>Department Name</x-form.label>
-                    <x-form.input type="text" name="name" placeholder="e.g. Department of Computer Science" required />
-                </div>
+            <div>
+                <x-form.label isRequired>Department Name</x-form.label>
+                <x-form.input type="text" name="name" placeholder="e.g. Department of Computer Science" required />
             </div>
         </x-modal.body>
 
         <x-modal.footer>
-            <div class="flex gap-2 w-full justify-end flex-col sm:flex-row">
-                <x-modal.close-button :modalId="'addDepartmentModal'" text="Cancel" variant="cancel" />
-                <x-button type="submit" variant="save" class="w-full sm:w-auto">
-                    <i class="bx bx-save"></i> Create Department
-                </x-button>
-            </div>
+            <x-modal.close-button modalId="addDepartmentModal" text="Cancel" />
+            <x-button type="submit" variant="save">
+                <i class="bx bx-save"></i> Create Department
+            </x-button>
         </x-modal.footer>
     </form>
 </x-modal.dialog>

@@ -15,12 +15,12 @@
     <x-panel>
         <div id="collegeAccordions" class="space-y-3">
             @forelse ($colleges as $college)
-                <details class="bg-white/90 border border-slate-200/80 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
-                    <summary class="flex items-center justify-between p-4 cursor-pointer select-none list-none">
+                <details class="bg-white border border-[#e2e8f0] rounded-xl overflow-hidden" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
+                    <summary class="flex items-center justify-between p-4 cursor-pointer select-none list-none hover:bg-[#f8fafc] transition-colors">
                         <div class="flex items-center gap-3 flex-1 min-w-0">
-                            <i class="bx bx-chevron-right text-xl text-slate-400 chevron-icon transition-transform duration-200"></i>
-                            <i class="bx bxs-school text-xl text-emerald-600 shrink-0"></i>
-                            <span class="font-semibold text-slate-800 truncate">{{ $college->name }}</span>
+                            <i class="bx bx-chevron-right text-xl text-[#94a3b8] chevron-icon transition-transform duration-200"></i>
+                            <i class="bx bxs-school text-xl text-[#16a34a] shrink-0"></i>
+                            <span class="text-[13px] font-bold text-[#0f172a] truncate">{{ $college->name }}</span>
                         </div>
                         {{-- table-edit: compact blue button — correct for an inline edit toggle --}}
                         <div class="flex gap-1 shrink-0 ml-3">
@@ -29,20 +29,20 @@
                                 title="Edit college">
                                 <i class="bx bx-edit"></i>
                             </x-button>
-                            <x-button type="button" variant="danger"
+                            <x-button type="button" variant="table-danger"
                                 onclick="event.stopPropagation(); document.getElementById('deleteCollegeModal_{{ $college->id }}').showModal()"
                                 title="Delete college">
                                 <i class="bx bx-trash"></i>
                             </x-button>
                         </div>
                     </summary>
-    
+
                     <div class="px-4 pb-4 space-y-4">
-    
+
                         {{-- Edit college form — amber "editing" cue (same across all levels) --}}
                         <div id="editCollege{{ $college->id }}"
-                            class="hidden rounded-xl border border-amber-200 bg-amber-50/80 p-4">
-                            <p class="text-xs font-semibold uppercase tracking-[0.15em] text-amber-700 mb-3">
+                            class="hidden rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-4">
+                            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-3">
                                 Edit College
                             </p>
                             <form method="POST" action="{{ route('college.update', $college) }}" class="space-y-3">
@@ -70,22 +70,21 @@
                                 </div>
                             </form>
                         </div>
-    
+
                         {{-- Add department — outline variant: lighter than add-button, appropriate inside an accordion --}}
                         <x-button variant="outline" onclick="openAddDepartmentModal({{ $college->id }})">
                             <i class="bx bx-plus"></i> Add Department
                         </x-button>
-    
+
                         {{-- Departments --}}
                         <div class="ml-6 space-y-3">
                             @forelse ($departments->where('college_id', $college->id) as $dept)
-                                <details class="bg-slate-50/80 border border-slate-200 rounded-xl shadow-sm">
-                                    <summary class="flex items-center justify-between p-3 cursor-pointer select-none list-none">
+                                <details class="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl overflow-hidden">
+                                    <summary class="flex items-center justify-between p-3 cursor-pointer select-none list-none hover:bg-[#f0fdf4] transition-colors">
                                         <div class="flex items-center gap-3 flex-1 min-w-0">
-                                            <i class="bx bx-chevron-right text-lg text-slate-400 chevron-icon transition-transform duration-200"></i>
-                                            {{-- Consistent icon color: slate-600 (neutral, not rose) --}}
-                                            <i class="bx bx-building text-lg text-slate-600 shrink-0"></i>
-                                            <span class="font-medium text-slate-700 truncate">{{ $dept->name }}</span>
+                                            <i class="bx bx-chevron-right text-lg text-[#94a3b8] chevron-icon transition-transform duration-200"></i>
+                                            <i class="bx bx-building text-lg text-[#475569] shrink-0"></i>
+                                            <span class="text-[13px] font-semibold text-[#0f172a] truncate">{{ $dept->name }}</span>
                                         </div>
                                         <div class="flex gap-1 shrink-0 ml-3">
                                             <x-button type="button" variant="table-confirm"
@@ -93,20 +92,20 @@
                                                 title="Edit department">
                                                 <i class="bx bx-edit"></i>
                                             </x-button>
-                                            <x-button type="button" variant="danger"
+                                            <x-button type="button" variant="table-danger"
                                                 onclick="event.stopPropagation(); document.getElementById('deleteDepartmentModal_{{ $dept->id }}').showModal()"
                                                 title="Delete department">
                                                 <i class="bx bx-trash"></i>
                                             </x-button>
                                         </div>
                                     </summary>
-    
+
                                     <div class="px-3 pb-3 space-y-4">
-    
+
                                         {{-- Edit department form — same amber cue as college --}}
                                         <div id="editDept{{ $dept->id }}"
-                                            class="hidden rounded-xl border border-amber-200 bg-amber-50/80 p-4">
-                                            <p class="text-xs font-semibold uppercase tracking-[0.15em] text-amber-700 mb-3">
+                                            class="hidden rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-4">
+                                            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-3">
                                                 Edit Department
                                             </p>
                                             <form method="POST" action="{{ route('department.update', $dept) }}" class="space-y-3">
@@ -135,25 +134,25 @@
                                                 </div>
                                             </form>
                                         </div>
-    
+
                                         {{-- Add program --}}
                                         <x-button variant="outline" onclick="openAddProgramModal({{ $dept->id }})">
                                             <i class="bx bx-plus"></i> Add Program
                                         </x-button>
-    
+
                                         {{-- Programs --}}
                                         <div class="ml-6 space-y-2">
                                             @forelse ($dept->programs as $program)
-                                                <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-    
+                                                <div class="bg-white border border-[#e2e8f0] rounded-xl overflow-hidden" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
+
                                                     <div class="flex items-start justify-between p-3 gap-3">
                                                         <div class="flex gap-3 flex-1 min-w-0">
-                                                            <i class="bx bx-book-open text-lg text-sky-600 mt-0.5 shrink-0"></i>
+                                                            <i class="bx bx-book-open text-lg text-[#16a34a] mt-0.5 shrink-0"></i>
                                                             <div class="min-w-0">
-                                                                <p class="font-medium text-slate-800 truncate">
+                                                                <p class="text-[13px] font-semibold text-[#0f172a] truncate">
                                                                     {{ $program->name }}
                                                                 </p>
-                                                                <div class="mt-1.5 flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-slate-500">
+                                                                <div class="mt-1.5 flex flex-wrap gap-x-4 gap-y-0.5 text-[13px] text-[#475569]">
                                                                     <span>
                                                                         <span class="font-medium text-slate-600">BOR No:</span>
                                                                         {{ $program->bor_approval_no }}
@@ -171,18 +170,18 @@
                                                                 title="Edit program">
                                                                 <i class="bx bx-edit"></i>
                                                             </x-button>
-                                                            <x-button type="button" variant="danger"
+                                                            <x-button type="button" variant="table-danger"
                                                                 onclick="document.getElementById('deleteProgramModal_{{ $program->id }}').showModal()"
                                                                 title="Delete program">
                                                                 <i class="bx bx-trash"></i>
                                                             </x-button>
                                                         </div>
                                                     </div>
-    
+
                                                     {{-- Edit program form — same amber cue --}}
                                                     <div id="editProgram{{ $program->id }}"
-                                                        class="hidden border-t border-amber-200 bg-amber-50/80 p-4">
-                                                        <p class="text-xs font-semibold uppercase tracking-[0.15em] text-amber-700 mb-3">
+                                                        class="hidden border-t border-[#e2e8f0] bg-[#f8fafc] p-4">
+                                                        <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-3">
                                                             Edit Program
                                                         </p>
                                                         <form method="POST" action="{{ route('program.update', $program) }}" class="space-y-3">
@@ -234,24 +233,24 @@
                                                             </div>
                                                         </form>
                                                     </div>
-    
+
                                                 </div>
                                             @empty
-                                                <p class="text-xs text-slate-400 italic py-1 pl-1">
+                                                <p class="text-[13px] text-[#94a3b8] italic py-1 pl-1">
                                                     No programs yet — add one above.
                                                 </p>
                                             @endforelse
                                         </div>
-    
+
                                     </div>
                                 </details>
                             @empty
-                                <p class="text-xs text-slate-400 italic py-1 pl-1">
+                                <p class="text-[13px] text-[#94a3b8] italic py-1 pl-1">
                                     No departments yet — add one above.
                                 </p>
                             @endforelse
                         </div>
-    
+
                     </div>
                 </details>
             @empty
