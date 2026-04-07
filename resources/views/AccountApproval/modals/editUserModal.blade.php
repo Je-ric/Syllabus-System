@@ -1,20 +1,17 @@
-<x-modal.dialog :id="$modalId" maxWidth="xl:max-w-xl lg:max-w-lg md:max-w-md sm:max-w-sm max-w-xs" width="w-full" maxHeight="max-h-[90vh]">
+<x-modal.dialog :id="$modalId" maxWidth="max-w-md" width="w-11/12">
     <form method="POST" action="{{ route('account-approval.edit-user') }}" class="flex flex-col">
         @csrf
         @method('PUT')
         <input type="hidden" name="user_id" value="{{ $user->id }}">
 
-        <x-modal.header>
+        <x-modal.header :modalId="$modalId">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
-                    <span class="text-slate-600 font-bold text-sm uppercase">{{ substr($user->name, 0, 1) }}</span>
-                </div>
-                <div>
-                    <h3 class="text-lg sm:text-xl font-bold text-slate-800 flex items-center gap-2">
-                        <i class="bx bx-edit text-slate-500 text-2xl"></i>
-                        Edit User
-                    </h3>
-                    <p class="text-sm text-gray-500">{{ $user->email }}</p>
+                <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#e2e8f0] text-[#475569] shrink-0">
+                    <i class="bx bx-edit text-base leading-none"></i>
+                </span>
+                <div class="min-w-0">
+                    <p class="text-[15px] font-bold text-[#0f172a]">Edit User</p>
+                    <p class="text-[13px] text-[#94a3b8] truncate">{{ $user->email }}</p>
                 </div>
             </div>
         </x-modal.header>
@@ -37,18 +34,15 @@
                     <x-form.label>Office</x-form.label>
                     <x-form.input type="text" name="office" value="{{ old('office', $user->office) }}" />
                 </div>
-
-                <x-feedback-status.alert type="info" title="Changes take effect immediately." class="w-full" />
+                <x-feedback-status.alert type="info" :showTitle="false">Changes take effect immediately.</x-feedback-status.alert>
             </div>
         </x-modal.body>
 
         <x-modal.footer>
-            <div class="flex gap-2 w-full justify-end flex-col sm:flex-row">
-                <x-modal.close-button :modalId="$modalId" text="Cancel" variant="cancel" />
-                <x-button type="submit" variant="save">
-                    <i class="bx bx-save"></i> Save Changes
-                </x-button>
-            </div>
+            <x-modal.close-button :modalId="$modalId" text="Cancel" />
+            <x-button type="submit" variant="save">
+                <i class="bx bx-save"></i> Save Changes
+            </x-button>
         </x-modal.footer>
     </form>
 </x-modal.dialog>

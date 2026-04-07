@@ -3,7 +3,7 @@
     {{-- ── Filters ─────────────────────────────────────────────────────────── --}}
     <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
         <div class="md:col-span-2 relative">
-            <i class="bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base pointer-events-none"></i>
+            <i class="bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-[#94a3b8] text-base pointer-events-none"></i>
             <x-form.input
                 type="text"
                 wire:model.live.debounce.250ms="search"
@@ -28,8 +28,9 @@
 
     {{-- ── Sort + count ────────────────────────────────────────────────────── --}}
     <div class="flex items-center justify-between gap-3">
-        <p class="text-xs text-slate-500">
-            <span class="font-semibold text-slate-700">{{ $users->total() }}</span> user{{ $users->total() !== 1 ? 's' : '' }} found
+        <p class="text-[13px] text-[#475569]">
+            <span class="font-semibold text-[#0f172a]">{{ $users->total() }}</span>
+            user{{ $users->total() !== 1 ? 's' : '' }} found
         </p>
         <x-form.select wire:model.live="sort" class="w-auto min-w-48">
             <option value="newest">Newest First</option>
@@ -48,51 +49,68 @@
         <x-table.table>
             <x-table.head :sticky="true">
                 <x-table.row>
-                    <x-table.th class="w-10">#</x-table.th>
-                    <x-table.th>Name & Email</x-table.th>
-                    <x-table.th class="hidden md:table-cell">Phone</x-table.th>
-                    <x-table.th class="hidden lg:table-cell">Office</x-table.th>
+                    <x-table.th class="w-8">#</x-table.th>
+                    <x-table.th>User</x-table.th>
+                    <x-table.th class="hidden lg:table-cell">Contact & Office</x-table.th>
                     <x-table.th>Status</x-table.th>
                     <x-table.th>Roles</x-table.th>
-                    <x-table.th class="text-right">Actions</x-table.th>
+                    <x-table.th align="right">Actions</x-table.th>
                 </x-table.row>
             </x-table.head>
 
             <x-table.body>
                 @forelse ($users as $user)
                     <x-table.row striped hover>
-                        <x-table.td class="text-slate-500 text-xs font-medium">
+
+                        {{-- # --}}
+                        <x-table.td class="text-[#94a3b8] font-medium w-8">
                             {{ ($users->firstItem() ?? 0) + $loop->index }}
                         </x-table.td>
 
+                        {{-- User: avatar + name + email + verified badge --}}
                         <x-table.td>
-                            <div class="font-semibold text-slate-800 text-sm">{{ $user->name }}</div>
-                            <div class="flex items-center gap-1.5 mt-0.5">
-                                <span class="text-xs text-slate-400">{{ $user->email }}</span>
-                                @if ($user->email_verified_at)
-                                    <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-semibold" title="Email verified">
-                                        <i class="bx bx-check text-xs leading-none"></i> Verified
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-semibold" title="Email not verified">
-                                        <i class="bx bx-time text-xs leading-none"></i> Unverified
-                                    </span>
-                                @endif
+                            <div class="flex items-center gap-3 min-w-0">
+                                {{-- Avatar --}}
+                                <span class="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full
+                                             bg-[#dcfce7] text-[#166534] text-[13px] font-bold">
+                                    {{ strtoupper(substr($user->name, 0, 1)) }}
+                                </span>
+                                <div class="min-w-0">
+                                    <p class="text-[13px] font-semibold text-[#0f172a] truncate">{{ $user->name }}</p>
+                                    <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                                        <span class="text-[13px] text-[#475569] truncate">{{ $user->email }}</span>
+                                        @if ($user->email_verified_at)
+                                            <x-feedback-status.status-indicator variant="brand">
+                                                <i class="bx bx-check text-[11px]"></i> Verified
+                                            </x-feedback-status.status-indicator>
+                                        @else
+                                            <x-feedback-status.status-indicator variant="amber">
+                                                <i class="bx bx-time text-[11px]"></i> Unverified
+                                            </x-feedback-status.status-indicator>
+                                        @endif
+                                    </div>
+                                </div>
                             </div>
                         </x-table.td>
 
-                        <x-table.td class="hidden md:table-cell text-sm text-slate-600">
-                            {{ $user->phone_number ?: '—' }}
+                        {{-- Contact & Office (grouped) --}}
+                        <x-table.td class="hidden lg:table-cell">
+                            <div class="space-y-0.5">
+                                <p class="text-[13px] text-[#0f172a]">
+                                    {{ $user->phone_number ?: '—' }}
+                                </p>
+                                <p class="text-[13px] text-[#475569]">
+                                    {{ $user->office ?: '—' }}
+                                </p>
+                            </div>
                         </x-table.td>
 
-                        <x-table.td class="hidden lg:table-cell text-sm text-slate-600">
-                            {{ $user->office ?: '—' }}
-                        </x-table.td>
-
+                        {{-- Status --}}
                         <x-table.td>
                             <x-feedback-status.status-indicator :status="$user->account_status" />
                         </x-table.td>
 
+                        {{-- Roles --}}
                         <x-table.td>
                             <div class="flex flex-wrap gap-1">
                                 @forelse ($user->roles as $role)
@@ -100,12 +118,13 @@
                                         :status="$role->name"
                                         :label="ucfirst($role->name)" />
                                 @empty
-                                    <span class="text-xs text-slate-400 italic">No role</span>
+                                    <span class="text-[13px] text-[#94a3b8] italic">No role</span>
                                 @endforelse
                             </div>
                         </x-table.td>
 
-                        <x-table.td>
+                        {{-- Actions --}}
+                        <x-table.td align="right">
                             <div class="flex items-center justify-end gap-1.5 flex-wrap">
 
                                 @if ($user->account_status === 'pending')
@@ -144,7 +163,7 @@
                                     </x-button>
                                 @endif
 
-                                <x-button variant="table-confirm"
+                                <x-button variant="table-edit"
                                     onclick="document.getElementById('editUserModal-{{ $user->id }}').showModal()">
                                     <i class="bx bx-edit"></i>
                                 </x-button>
@@ -153,7 +172,7 @@
                         </x-table.td>
                     </x-table.row>
 
-                    {{-- Modals for this user --}}
+                    {{-- Modals --}}
                     @if ($user->account_status === 'pending')
                         @include('AccountApproval.modals.approvalModal', ['modalId' => 'approveModal-' . $user->id, 'user' => $user, 'action' => 'approve'])
                         @include('AccountApproval.modals.approvalModal', ['modalId' => 'rejectModal-'  . $user->id, 'user' => $user, 'action' => 'reject'])
@@ -172,7 +191,7 @@
                     @include('AccountApproval.modals.editUserModal', ['modalId' => 'editUserModal-' . $user->id, 'user' => $user])
 
                 @empty
-                    <x-table.empty :colspan="7" message="No users match your filters." />
+                    <x-table.empty :colspan="6" message="No users match your filters." />
                 @endforelse
             </x-table.body>
         </x-table.table>
@@ -181,7 +200,7 @@
     {{-- ── Pagination ──────────────────────────────────────────────────────── --}}
     @if ($users->hasPages())
         <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <p class="text-xs text-slate-500">
+            <p class="text-[13px] text-[#475569]">
                 Showing {{ $users->firstItem() }}–{{ $users->lastItem() }} of {{ $users->total() }}
             </p>
             {{ $users->links() }}
