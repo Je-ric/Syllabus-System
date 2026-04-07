@@ -548,7 +548,7 @@
                 </p>
             </div>
 
-            {{-- <div class="table-indent">
+            <div class="table-indent">
                 <table>
                     <thead>
                         <tr>
@@ -597,8 +597,8 @@
                 </table>
                 <p style="margin-top:4px;" class="indent-level-1">Passing Mark: {{ $lecPassMark }}%</p>
             </div>
-        </div> --}}
-        @php
+        </div>
+        {{-- @php
                 /**
                  * Build transmutation display rows for the given passing mark.
                  *
@@ -682,7 +682,7 @@
                     </tbody>
                 </table>
                 <p style="margin-top: 4px;" class="indent-level-1">Passing Mark: {{ $lecPassMark }}%</p>
-            </div>
+            </div> --}}
 
         {{-- ═══════════════════════════════════════════════════════════════════
              SECTION V — REQUIRED READING MATERIALS
