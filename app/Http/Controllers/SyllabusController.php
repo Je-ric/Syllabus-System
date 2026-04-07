@@ -12,7 +12,6 @@ use App\Services\Syllabus\SyllabusSnapshotService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class SyllabusController extends Controller
@@ -295,15 +294,13 @@ class SyllabusController extends Controller
 
         $path = trim((string) ($completeSyllabus->evaluation_path ?? ''));
 
-        if ($path === '' || preg_match('#^https?://#i', $path) || str_starts_with($path, '/')) {
-            abort(400, 'This assessment version is not stored on Drive.');
+        if ($path === '') {
+            abort(400, 'No assessment path stored.');
         }
 
-        if (! Storage::disk('google')->exists($path)) {
-            abort(404, 'Assessment saved version file not found.');
-        }
+        $html = $this->readSavedFile($path) ?? abort(404, 'Assessment saved version file not found.');
 
-        return response(Storage::disk('google')->get($path), 200, [
+        return response($html, 200, [
             'Content-Type'        => 'text/html; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="' . basename($path) . '"',
         ]);
@@ -316,8 +313,8 @@ class SyllabusController extends Controller
 
         $path = trim((string) $completeSyllabus->pdf_path);
 
-        if (preg_match('#^https?://#i', $path) || str_starts_with($path, '/')) {
-            return redirect()->away($path);
+        if ($path === '') {
+            return $this->previewComplete($syllabus);
         }
 
         $html = $this->snapshotService->getSavedHtml($path)
@@ -336,15 +333,13 @@ class SyllabusController extends Controller
 
         $path = trim((string) $completeSyllabus->pdf_path);
 
-        if ($path === '' || preg_match('#^https?://#i', $path) || str_starts_with($path, '/')) {
-            abort(400, 'This saved version is not stored on Drive.');
+        if ($path === '') {
+            abort(400, 'No complete path stored.');
         }
 
-        if (! Storage::disk('google')->exists($path)) {
-            abort(404, 'Saved version file not found.');
-        }
+        $html = $this->readSavedFile($path) ?? abort(404, 'Saved version file not found.');
 
-        return response(Storage::disk('google')->get($path), 200, [
+        return response($html, 200, [
             'Content-Type'        => 'text/html; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="' . basename($path) . '"',
         ]);
@@ -359,10 +354,6 @@ class SyllabusController extends Controller
 
         if ($path === '') {
             return $this->previewAbridged($syllabus);
-        }
-
-        if (preg_match('#^https?://#i', $path) || str_starts_with($path, '/')) {
-            return redirect()->away($path);
         }
 
         $html = $this->snapshotService->getSavedHtml($path)
@@ -381,15 +372,13 @@ class SyllabusController extends Controller
 
         $path = trim((string) ($completeSyllabus->abridged_path ?? ''));
 
-        if ($path === '' || preg_match('#^https?://#i', $path) || str_starts_with($path, '/')) {
-            abort(400, 'This abridged version is not stored on Drive.');
+        if ($path === '') {
+            abort(400, 'No abridged path stored.');
         }
 
-        if (! Storage::disk('google')->exists($path)) {
-            abort(404, 'Abridged saved version file not found.');
-        }
+        $html = $this->readSavedFile($path) ?? abort(404, 'Abridged saved version file not found.');
 
-        return response(Storage::disk('google')->get($path), 200, [
+        return response($html, 200, [
             'Content-Type'        => 'text/html; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="' . basename($path) . '"',
         ]);
@@ -408,6 +397,34 @@ class SyllabusController extends Controller
         }
 
         return compact('program', 'groupedCourses');
+    }
+
+    // Read a saved snapshot from local disk first, Google Drive fallback.
+    private function readSavedFile(string $path): ?string
+    {
+        if (Storage::disk('syllabus_snapshots')->exists($path)) {
+            return Storage::disk('syllabus_snapshots')->get($path);
+        }
+        try {
+            if (Storage::disk('google')->exists($path)) {
+                return Storage::disk('google')->get($path);
+            }
+        } catch (\Throwable) {
+            // Google Drive unavailable
+        }
+        return null;
+    }
+
+    private function savedFileExists(string $path): bool
+    {
+        if (Storage::disk('syllabus_snapshots')->exists($path)) {
+            return true;
+        }
+        try {
+            return Storage::disk('google')->exists($path);
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     /**

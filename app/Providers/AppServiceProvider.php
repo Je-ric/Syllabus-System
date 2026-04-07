@@ -21,19 +21,11 @@ class AppServiceProvider extends ServiceProvider
             $client = new \Google\Client();
             $client->setApplicationName('CSMS');
 
-            $refreshToken = $config['refreshToken'] ?? null;
-
-            if ($refreshToken) {
-                // OAuth2 — files owned by the authorizing Gmail user (no quota issue)
-                $client->setAuthConfig(base_path($config['oauthCredentials']));
-                $client->setScopes([\Google\Service\Drive::DRIVE]);
-                $client->setAccessType('offline');
-                $client->fetchAccessTokenWithRefreshToken($refreshToken);
-            } else {
-                // Service account fallback
-                $client->setAuthConfig(base_path($config['serviceAccountJson']));
-                $client->setScopes([\Google\Service\Drive::DRIVE]);
-            }
+            // Service account auth — never expires, correct for server deployments.
+            // The service account email must be shared as Editor on the Drive folder.
+            // To find the email: open storage/app/csms-*.json and read 'client_email'.
+            $client->setAuthConfig(base_path($config['serviceAccountJson']));
+            $client->setScopes([\Google\Service\Drive::DRIVE]);
 
             $folderId = $config['folder'] ?? null;
             if (! $folderId) {
@@ -53,8 +45,11 @@ class AppServiceProvider extends ServiceProvider
 
             $adapter = new \Masbug\Flysystem\GoogleDriveAdapter(
                 $service,
-                $resolvedId,
-                ['useDisplayPaths' => true]
+                null,
+                [
+                    'useDisplayPaths' => true,
+                    'sharedFolderId'  => $resolvedId,
+                ]
             );
             $driver = new \League\Flysystem\Filesystem($adapter);
 

@@ -290,39 +290,26 @@ class SyllabusWizard extends Component
         $storagePathAbridged   = $baseDir . '/Abridged - ' . $courseCode . '.html';
         $storagePathAssessment = $baseDir . '/Assessment - ' . $courseCode . '.html';
 
-        // 3. Write to Google Drive (primary) ──────────────────────────────────
-        // DB always stores the GDrive path. Retrieval reads from GDrive only.
-        $driveSuccess = false;
+        // 3. Write to local disk (primary) ────────────────────────────────────
+        try {
+            Storage::disk('syllabus_snapshots')->put($storagePath,           $html);
+            Storage::disk('syllabus_snapshots')->put($storagePathAbridged,   $htmlAbridged);
+            Storage::disk('syllabus_snapshots')->put($storagePathAssessment, $htmlAssessment);
+        } catch (Throwable $e) {
+            report($e);
+            $this->dispatch('lw-toast', type: 'error', message: 'Failed to save snapshot locally: ' . $e->getMessage());
+            return;
+        }
+
+        // 3b. Mirror to Google Drive (secondary, silent — never blocks save) ──
         try {
             Storage::disk('google')->put($storagePath,           $html);
             Storage::disk('google')->put($storagePathAbridged,   $htmlAbridged);
             Storage::disk('google')->put($storagePathAssessment, $htmlAssessment);
-            $driveSuccess = true;
         } catch (Throwable $e) {
             report($e);
-            $this->dispatch('lw-toast', type: 'error', message: 'Google Drive upload failed: ' . $e->getMessage());
-            return;
+            // Non-fatal — local copy is the source of truth
         }
-
-        // 3b. Local backup (commented out — GDrive is the sole retrieval source)
-        // Uncomment to re-enable local mirroring if needed.
-        //
-        // $baseSlug     = \Illuminate\Support\Str::slug($courseCode . '-' . $academicYear . '-' . $semester . '-v' . $version);
-        // $baseDirLocal = implode('/', [
-        //     'syllabus-snapshots',
-        //     \Illuminate\Support\Str::slug($collegeName),
-        //     \Illuminate\Support\Str::slug($departmentName),
-        //     \Illuminate\Support\Str::slug($programName),
-        //     \Illuminate\Support\Str::slug($facultyName),
-        //     \Illuminate\Support\Str::slug($courseCode),
-        //     'v' . $version,
-        // ]);
-        // $localPath           = $baseDirLocal . '/' . $baseSlug . '.html';
-        // $localPathAbridged   = $baseDirLocal . '/' . $baseSlug . '-abridged.html';
-        // $localPathAssessment = $baseDirLocal . '/' . $baseSlug . '-assessment.html';
-        // Storage::disk('local')->put($localPath,           $html);
-        // Storage::disk('local')->put($localPathAbridged,   $htmlAbridged);
-        // Storage::disk('local')->put($localPathAssessment, $htmlAssessment);
 
         // 4. Persist version record — always store the GDrive path ────────────
         try {
@@ -367,7 +354,7 @@ class SyllabusWizard extends Component
             description: "Saved syllabus version v{$version} for course {$courseCode} ({$academicYear} {$semester})."
         );
 
-        $this->dispatch('lw-toast', type: 'success', message: "Syllabus version frozen (v{$version}). Saved to Google Drive.");
+        $this->dispatch('lw-toast', type: 'success', message: "Syllabus version frozen (v{$version}). Saved locally" . (config('filesystems.disks.google') ? ' + Google Drive.' : '.'));
         $this->dispatch('wizard-save-done');
         $this->dispatch('syllabus-step-changed', step: 'review');
     }

@@ -38,6 +38,13 @@ return [
             'report' => false,
         ],
 
+        'syllabus_snapshots' => [
+            'driver' => 'local',
+            'root'   => storage_path('app/private/syllabus-snapshots'),
+            'throw'  => false,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
@@ -63,10 +70,8 @@ return [
         'google' => [
             'driver'             => 'google',
             'serviceAccountJson' => env('GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON', 'storage/app/csms-489705-0132f004c56b.json'),
-            'oauthCredentials'   => env('GOOGLE_DRIVE_OAUTH_CREDENTIALS', 'storage/app/oauth-credentials.json'),
-            'refreshToken'       => env('GOOGLE_DRIVE_REFRESH_TOKEN', ''),
             'folder'             => env('GOOGLE_DRIVE_FOLDER', ''),
-        ]
+        ],
         // The adapter is treating the folder ID as a display name and creating a new folder with that ID string as the name,
         // instead of using it as the root.
         // This is because useDisplayPaths => true resolves paths by name.
