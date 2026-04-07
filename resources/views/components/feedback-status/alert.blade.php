@@ -1,41 +1,41 @@
 @props([
-    'type'    => 'info',
-    'title'   => null,
-    'message' => null,
-    'showTitle' => true,
-    'dismissable' => false,
-    'class'   => '',
+    'type'       => 'info',
+    'title'      => null,
+    'message'    => null,
+    'showTitle'  => true,
+    'dismissable'=> false,
+    'class'      => '',
 ])
 
 @php
     $styles = [
         'success' => [
-            'container' => 'border-emerald-200 bg-emerald-50 text-emerald-900',
-            'iconWrap'  => 'bg-emerald-100 text-emerald-600',
+            'container' => 'border-[#bbf7d0] bg-[#f0fdf4] text-[#166534]',
+            'iconWrap'  => 'bg-[#dcfce7] text-[#16a34a]',
             'icon'      => 'bx-check-circle',
             'title'     => 'Success',
         ],
         'error' => [
-            'container' => 'border-rose-200 bg-rose-50 text-rose-900',
-            'iconWrap'  => 'bg-rose-100 text-rose-600',
+            'container' => 'border-[#fda4af] bg-[#fff1f2] text-[#9f1239]',
+            'iconWrap'  => 'bg-[#ffe4e6] text-[#f43f5e]',
             'icon'      => 'bx-error-circle',
             'title'     => 'Error',
         ],
         'warning' => [
-            'container' => 'border-amber-200 bg-amber-50 text-amber-900',
-            'iconWrap'  => 'bg-amber-100 text-amber-600',
+            'container' => 'border-[#fcd34d] bg-[#fffbeb] text-[#92400e]',
+            'iconWrap'  => 'bg-[#fef3c7] text-[#f59e0b]',
             'icon'      => 'bx-error',
             'title'     => 'Warning',
         ],
         'info' => [
-            'container' => 'border-sky-200 bg-sky-50 text-sky-900',
-            'iconWrap'  => 'bg-sky-100 text-sky-600',
+            'container' => 'border-[#e2e8f0] bg-[#f8fafc] text-[#0f172a]',
+            'iconWrap'  => 'bg-[#e2e8f0] text-[#475569]',
             'icon'      => 'bx-info-circle',
             'title'     => 'Information',
         ],
     ];
 
-    $alert        = $styles[$type] ?? $styles['info'];
+    $alert         = $styles[$type] ?? $styles['info'];
     $resolvedTitle = $showTitle ? ($title ?: $alert['title']) : null;
 @endphp
 
@@ -45,24 +45,22 @@
     role="alert">
 
     <div class="flex items-start gap-3">
-        <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center
-                     rounded-full {{ $alert['iconWrap'] }}">
-            <i class="bx {{ $alert['icon'] }} text-lg leading-none"></i>
+        <span class="inline-flex h-7 w-7 shrink-0 items-center justify-center
+                     rounded-lg {{ $alert['iconWrap'] }}">
+            <i class="bx {{ $alert['icon'] }} text-base leading-none"></i>
         </span>
 
         <div class="min-w-0 flex-1">
             @if ($resolvedTitle)
-                <p class="font-semibold leading-5">{{ $resolvedTitle }}</p>
+                <p class="text-[13px] font-semibold leading-5">{{ $resolvedTitle }}</p>
             @endif
 
             @if ($message)
-                {{-- break-words: valid Tailwind utility (wrap-break-words is not) --}}
-                <p class="mt-1 text-sm leading-relaxed wrap-break-words">{{ $message }}</p>
+                <p class="mt-0.5 text-[13px] leading-relaxed">{{ $message }}</p>
             @endif
 
-            {{-- Slot for richer content (lists, links, etc.) --}}
             @if ($slot->isNotEmpty())
-                <div class="mt-1 text-sm leading-relaxed wrap-break-words">
+                <div class="mt-0.5 text-[13px] leading-relaxed">
                     {{ $slot }}
                 </div>
             @endif
@@ -70,7 +68,7 @@
 
         @if ($dismissable)
             <button @click="show = false" type="button"
-                class="shrink-0 mt-0.5 p-0.5 rounded-md opacity-60
+                class="shrink-0 mt-0.5 p-0.5 rounded-md opacity-50
                     hover:opacity-100 transition-opacity focus:outline-none"
                 aria-label="Dismiss alert">
                 <i class="bx bx-x text-base" aria-hidden="true"></i>

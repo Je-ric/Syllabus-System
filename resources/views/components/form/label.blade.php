@@ -22,27 +22,16 @@
     }
 @endphp
 
-{{--
-    x-form.label
-    ─────────────────────────────────────────────────────────────────────
-    Compact uppercase label. Pair with x-form.field for automatic
-    label + input + error grouping, or use standalone.
-
-    USAGE:
-      <x-form.label for="name">Full Name</x-form.label>
-      <x-form.label for="email" :isRequired="true">Email</x-form.label>
-      <x-form.label for="date" variant="date">Date</x-form.label>
---}}
 <label
     @if($for) for="{{ $for }}" @endif
     {{ $attributes->class([
         'inline-flex items-center gap-1.5',
-        'text-xs font-semibold uppercase tracking-[0.12em] text-slate-500',
+        'text-[11px] font-700 uppercase tracking-[0.12em] text-[#475569]',
         'mb-1 leading-none',
     ]) }}
 >
     @if($icon)
-        <i class="bx {{ $icon }} text-emerald-600 text-sm leading-none shrink-0"></i>
+        <i class="bx {{ $icon }} text-[#16a34a] text-sm leading-none shrink-0"></i>
     @endif
 
     {{ $slot }}

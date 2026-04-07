@@ -4,40 +4,37 @@
     'icon'        => null,
 ])
 
-<div class="mb-5 pb-4 border-b border-slate-100" role="region" aria-label="{{ $title }}">
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+<div class="mb-6 pb-5 border-b border-[#e2e8f0]" role="region" aria-label="{{ $title }}">
 
-        {{-- Left: icon + text ──────────────────────────────────────────────── --}}
-        <div class="flex items-start gap-3 min-w-0 flex-1">
+    {{-- Row 1: icon + title + action buttons (all on one line, no wrap) --}}
+    <div class="flex items-center justify-between gap-4 min-w-0">
 
+        <div class="flex items-center gap-3 min-w-0 flex-1">
             @if ($icon)
                 <div aria-hidden="true"
-                    class="shrink-0 mt-0.5 flex items-center justify-center
-                           w-9 h-9 rounded-xl
-                           bg-gradient-to-br from-emerald-500 to-[#009639]
-                           text-white shadow-sm">
+                    class="shrink-0 flex items-center justify-center w-9 h-9 rounded-xl text-white"
+                    style="background: linear-gradient(90deg, #003a10 0%, #009639 100%); box-shadow: 0 2px 8px rgba(22,163,74,0.2);">
                     <i class="bx bx-{{ $icon }} text-lg leading-none"></i>
                 </div>
             @endif
-
-            <div class="min-w-0">
-                <h3 class="text-lg font-bold tracking-tight text-slate-900 leading-snug">
-                    {{ $title }}
-                </h3>
-                @if ($description)
-                    <p class="mt-0.5 text-xs text-slate-500 leading-relaxed max-w-2xl">
-                        {{ $description }}
-                    </p>
-                @endif
-            </div>
+            <h3 class="text-[15px] font-bold text-[#0f172a] leading-snug truncate">
+                {{ $title }}
+            </h3>
         </div>
 
-        {{-- Right: action slot — only rendered when caller provides content ── --}}
         @if ($slot->isNotEmpty())
-            <div class="flex items-center flex-wrap gap-2 shrink-0 sm:pt-0.5 sm:pl-4">
+            <div class="flex items-center gap-2 shrink-0">
                 {{ $slot }}
             </div>
         @endif
 
     </div>
+
+    {{-- Row 2: description (only if present) --}}
+    @if ($description)
+        <p class="mt-2 text-[13px] text-[#475569] leading-relaxed max-w-2xl {{ $icon ? 'pl-12' : '' }}">
+            {{ $description }}
+        </p>
+    @endif
+
 </div>

@@ -1,35 +1,17 @@
 @props([
     'modalId' => null,
-    'text' => 'Close',
-    'class' => '',
-    'variant' => 'close', // 'close' or 'cancel'
+    'text'    => 'Close',
+    'class'   => '',
+    'variant' => 'close',
 ])
 
-@php
-    $baseClasses = 'px-6 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 hover:border-slate-400 hover:text-slate-900 active:bg-slate-100 active:border-slate-400 transition-all duration-200';
-    $finalClasses = $class ? "{$baseClasses} {$class}" : $baseClasses;
-@endphp
-
-@if($variant === 'cancel')
-    <button
-        type="button"
-        onclick="document.getElementById('{{ $modalId }}').close()"
-        {{ $attributes->merge(['class' => $finalClasses]) }}
-    >
-        {{ $text }}
-    </button>
-@else
-    <button
-        type="button"
-        onclick="document.getElementById('{{ $modalId }}').close()"
-        {{ $attributes->merge(['class' => $finalClasses]) }}
-    >
-        {{ $text }}
-    </button>
-@endif
-
-{{--
-Usage: <x-modal.close-button :modalId="'myModal'" text="Cancel" variant="cancel" />
-       <x-modal.close-button :modalId="'myModal'" text="Close" class="bg-red-500 text-white" />
-
---}}
+<button
+    type="button"
+    onclick="document.getElementById('{{ $modalId }}').close()"
+    {{ $attributes->merge(['class' => "inline-flex items-center gap-2 px-4 py-2 text-[13px] font-semibold
+        rounded-lg border border-[#e2e8f0] bg-white text-[#475569]
+        hover:bg-[#f8fafc] hover:border-[#94a3b8] hover:text-[#0f172a]
+        transition-colors duration-150 $class"]) }}
+>
+    {{ $text }}
+</button>

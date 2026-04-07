@@ -1,23 +1,13 @@
 @props([
     'id',
-    'maxWidth' => 'max-w-2xl',
-    'width' => 'w-11/12',
-    'class' => '',
+    'maxWidth' => 'max-w-lg',
+    'width'    => 'w-11/12',
+    'class'    => '',
 ])
 
 <dialog id="{{ $id }}" class="modal backdrop-blur-sm" {{ $attributes }}>
-    <div class="modal-box {{ $width }} {{ $maxWidth }} max-h-[85vh] p-0 overflow-hidden rounded-xl bg-white shadow-xl flex flex-col {{ $class }}">
+    <div class="modal-box {{ $width }} {{ $maxWidth }} max-h-[88vh] p-0 overflow-hidden rounded-xl bg-white flex flex-col {{ $class }}"
+         style="box-shadow: 0 8px 32px rgba(22,163,74,0.13);">
         {{ $slot }}
     </div>
 </dialog>
-
-{{--
-Usage: <x-modal.dialog id="myModal" maxWidth="max-w-lg">
-            <x-modal.header>Modal Title</x-modal.header>
-            <div class="p-6">Modal content here</div>
-            <x-modal.footer>
-                <x-modal.close-button :modalId="'myModal'" text="Cancel" />
-                <button type="submit">Save</button>
-            </x-modal.footer>
-        </x-modal.dialog>
---}}

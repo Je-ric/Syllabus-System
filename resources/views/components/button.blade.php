@@ -7,86 +7,101 @@
 ])
 
 @php
-    // [&_i] targets ALL descendant <i> tags (Boxicons) anywhere inside the button,
-    // including those wrapped in a <span> slot — fixes alignment in all usage patterns.
-    // - leading-none   → removes line-height that pushes icons upward
-    // - text-[1.1em]   → makes icon scale with the button's font size
-    // - translate-y-px → 1 px nudge to optically center against cap-height text
     $iconFix = '[&_i]:leading-none [&_i]:text-[1.1em] [&_i]:translate-y-px ';
 
-    // Table buttons: compact, no scale animation (jarring on small targets), disabled support
-    $tableBtn = 'inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg
-                transition-colors duration-150
-                disabled:opacity-50 disabled:pointer-events-none ' . $iconFix;
+    $tableBtn  = 'inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg
+                  transition-colors duration-150
+                  disabled:opacity-50 disabled:pointer-events-none ' . $iconFix;
 
-    // Form / CRUD buttons: larger, scale animation is fine on full-size buttons
-    $formBtn  = 'inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg
-                shadow-sm transition-all duration-150 active:scale-95
-                focus:ring-2 focus:outline-none
-                disabled:opacity-50 disabled:pointer-events-none ' . $iconFix;
+    $formBtn   = 'inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg
+                  shadow-sm transition-all duration-150 active:scale-95
+                  focus:ring-2 focus:outline-none
+                  disabled:opacity-50 disabled:pointer-events-none ' . $iconFix;
 
-    // Livewire / wizard buttons: small inline buttons used in Livewire steps
     $wizardBtn = 'inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg
-                transition-colors duration-150 disabled:opacity-50 disabled:pointer-events-none ' . $iconFix;
+                  transition-colors duration-150
+                  disabled:opacity-50 disabled:pointer-events-none ' . $iconFix;
 
     $styles = [
-        // ── Table buttons ──────────────────────────────────────────────────────
-        'table-restore' => $tableBtn . 'text-white bg-indigo-600 hover:bg-indigo-700',
-        'table-confirm' => $tableBtn . 'text-white bg-emerald-600 hover:bg-emerald-700',
-        'table-disable' => $tableBtn . 'text-white bg-slate-500 hover:bg-slate-600',
-        'table-danger'  => $tableBtn . 'text-white bg-rose-600 hover:bg-rose-700',
-        'table-manage'  => $tableBtn . 'text-white bg-slate-600 hover:bg-slate-700',
-        'table-edit'    => $tableBtn . 'text-white bg-blue-600 hover:bg-blue-700',
-        'table-view'    => $tableBtn . 'text-white bg-cyan-600 hover:bg-cyan-700',
-        'table-cancel'  => $tableBtn . 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 hover:border-slate-400',
 
-        // ── Form / CRUD buttons ────────────────────────────────────────────────
-        'cancel' => $formBtn . 'bg-white text-slate-700 border border-slate-300
-                                hover:bg-slate-50 hover:border-slate-400
-                                focus:ring-slate-400/30',
+        // ── Table buttons (compact, no scale) ──────────────────────────────────
+        'table-confirm'  => $tableBtn . 'text-white bg-emerald-600 hover:bg-emerald-700',
+        'table-edit'     => $tableBtn . 'text-white bg-blue-600 hover:bg-blue-700',
+        'table-view'     => $tableBtn . 'text-white bg-cyan-600 hover:bg-cyan-700',
+        'table-manage'   => $tableBtn . 'text-white bg-slate-600 hover:bg-slate-700',
+        'table-danger'   => $tableBtn . 'text-white bg-rose-600 hover:bg-rose-700',
+        'table-disable'  => $tableBtn . 'text-white bg-slate-500 hover:bg-slate-600',
+        'table-restore'  => $tableBtn . 'text-white bg-indigo-600 hover:bg-indigo-700',
+        'table-cancel'   => $tableBtn . 'bg-white text-slate-700 border border-slate-300
+                                         hover:bg-slate-50 hover:border-slate-400',
 
-        'danger' => $formBtn . 'bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-600/30',
-
-        // ── CLSU-branded buttons ───────────────────────────────────────────────
-        'add-button' => $formBtn . 'focus:ring-[#009639]/30 bg-emerald-600 text-white hover:bg-emerald-700',
-
-        'save' => $formBtn . '
-            bg-[linear-gradient(90deg,#009639_0%,#92d12c_100%)]
-            text-white
-            hover:brightness-110
-            focus:ring-[#009639]/30',
-
-        'primary' => $formBtn . '
+        // ── Form / CRUD buttons (larger, scales on click) ──────────────────────
+        'primary'    => $formBtn . '
             bg-[linear-gradient(90deg,#003a10_0%,#009639_100%)]
-            text-white
-            hover:brightness-110
+            text-white hover:brightness-110
             focus:ring-[#009639]/30',
 
-        'secondary' => $formBtn . '
+        'save'       => $formBtn . '
+            bg-[linear-gradient(90deg,#009639_0%,#92d12c_100%)]
+            text-white hover:brightness-110
+            focus:ring-[#009639]/30',
+
+        'secondary'  => $formBtn . '
             bg-[linear-gradient(90deg,#ffd700_0%,#e0a70d_100%)]
-            text-[#1a5f30]
-            hover:brightness-105
+            text-[#1a5f30] hover:brightness-105
             focus:ring-[#e0a70d]/30',
 
-        'outline' => $formBtn . '
+        // FIX: on hover, keep the border visible by only filling bg, not swallowing border color.
+        // border-[#1a5f30] stays, bg fills to a slightly lighter green so the border still reads.
+        'outline'    => $formBtn . '
             bg-white text-[#1a5f30]
             border-2 border-[#1a5f30]
-            hover:bg-[#1a5f30] hover:text-white
+            hover:bg-[#f0fdf4]
             focus:ring-[#1a5f30]/30',
 
-        'add-dashed' => $formBtn . 'justify-center bg-white text-emerald-700 border-2 border-dashed border-emerald-300
-            hover:border-emerald-500 hover:bg-emerald-50 focus:ring-emerald-500/20',
+        'add-button' => $formBtn . '
+            bg-emerald-600 text-white hover:bg-emerald-700
+            focus:ring-[#009639]/30',
+
+        'add-dashed' => $formBtn . '
+            justify-center bg-white text-emerald-700
+            border-2 border-dashed border-emerald-300
+            hover:border-emerald-500 hover:bg-emerald-50
+            focus:ring-emerald-500/20',
+
+        'cancel'     => $formBtn . '
+            bg-white text-[#475569]
+            border border-[#e2e8f0]
+            hover:bg-[#f8fafc] hover:border-[#94a3b8]
+            focus:ring-[#94a3b8]/20',
+
+        'back'       => $formBtn . '
+            bg-white text-[#475569]
+            border border-[#e2e8f0]
+            hover:bg-[#f8fafc] hover:border-[#94a3b8]
+            focus:ring-[#94a3b8]/20',
+
+        'danger'     => $formBtn . '
+            bg-rose-600 text-white hover:bg-rose-700
+            focus:ring-rose-600/30',
 
         // ── Small / wizard buttons ─────────────────────────────────────────────
-        'sm-primary' => $wizardBtn . 'bg-emerald-50 text-emerald-700 border border-emerald-300 hover:bg-emerald-50 hover:border-emerald-400',
-        'sm-cancel'  => $wizardBtn . 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 hover:border-slate-400',
+        // FIX: sm-primary hover was repeating base bg instead of darkening it.
+        'sm-primary' => $wizardBtn . 'bg-emerald-50 text-emerald-700 border border-emerald-300
+                                       hover:bg-emerald-100 hover:border-emerald-400',
+        'sm-cancel'  => $wizardBtn . 'bg-white text-[#475569] border border-[#e2e8f0]
+                                       hover:bg-[#f8fafc] hover:border-[#94a3b8]',
         'sm-danger'  => $wizardBtn . 'bg-rose-600 text-white hover:bg-rose-700',
-        'sm-warning' => $wizardBtn . 'bg-amber-50 text-amber-700 border border-amber-300 hover:bg-amber-100',
-        'sm-info'    => $wizardBtn . 'bg-blue-50 text-blue-700 border border-blue-300 hover:bg-blue-100',
-        'sm-success' => $wizardBtn . 'bg-emerald-50 text-emerald-700 border border-emerald-300 hover:bg-emerald-100',
-        'sm-soft'    => $wizardBtn . 'bg-lime-50 text-lime-700 border border-lime-300 hover:bg-lime-100',
-        // sm-add: wizard-sized solid emerald — use when add-button is beside sm-* buttons
-        'sm-add'     => $wizardBtn . 'bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-300/50',
+        'sm-warning' => $wizardBtn . 'bg-amber-50 text-amber-700 border border-amber-300
+                                       hover:bg-amber-100 hover:border-amber-400',
+        'sm-info'    => $wizardBtn . 'bg-blue-50 text-blue-700 border border-blue-300
+                                       hover:bg-blue-100 hover:border-blue-400',
+        'sm-success' => $wizardBtn . 'bg-emerald-50 text-emerald-700 border border-emerald-300
+                                       hover:bg-emerald-100 hover:border-emerald-400',
+        'sm-soft'    => $wizardBtn . 'bg-lime-50 text-lime-700 border border-lime-300
+                                       hover:bg-lime-100 hover:border-lime-400',
+        'sm-add'     => $wizardBtn . 'bg-emerald-600 text-white hover:bg-emerald-700
+                                       focus:ring-2 focus:ring-emerald-300/50',
     ];
 
     $class = $styles[strval($variant)] ?? $styles['primary'];
@@ -107,7 +122,7 @@
         $parsedTarget = $m[1];
     }
 
-    $autoTarget = $wireTarget ?: $parsedTarget;
+    $autoTarget   = $wireTarget ?: $parsedTarget;
     $spinnerTarget = $autoTarget ?: $existingTargetAttr;
     $shouldHandleLoading = filled($loading) || filled($spinnerTarget);
 @endphp
@@ -122,7 +137,6 @@
 
         @if ($shouldHandleLoading)
             @if (filled($loading))
-                {{-- Named loading text: hide slot, show spinner + label --}}
                 <span wire:loading.remove @if($spinnerTarget) wire:target="{{ $spinnerTarget }}" @endif
                       class="inline-flex items-center gap-1.5 leading-none">{{ $slot }}</span>
                 <span wire:loading @if($spinnerTarget) wire:target="{{ $spinnerTarget }}" @endif
@@ -134,7 +148,6 @@
                     <span class="leading-none">{{ $loading }}</span>
                 </span>
             @else
-                {{-- Append-spinner: slot stays, spinner appears beside it --}}
                 <span class="inline-flex items-center gap-1.5 leading-none">
                     <span class="inline-flex items-center gap-1.5 leading-none">{{ $slot }}</span>
                     <svg wire:loading @if($spinnerTarget) wire:target="{{ $spinnerTarget }}" @endif
@@ -154,45 +167,27 @@
 VARIANTS
 ────────────────────────────────────────────────────────────────────
 Table (compact, no scale):
-  table-confirm  table-edit    table-view    table-manage
-  table-danger   table-disable table-restore table-cancel
+  table-confirm   → emerald  — Approve, Activate, generic confirm
+  table-edit      → blue     — Edit (✏) — use this instead of table-confirm for edit actions
+  table-view      → cyan     — View / Preview
+  table-manage    → slate-600 — Roles, Settings
+  table-danger    → rose     — Reject, Delete
+  table-disable   → slate-500 — Disable, Pause
+  table-restore   → indigo   — Restore, Undo
+  table-cancel    → white/border — Cancel inline action
 
 Form (larger, scales on click):
-  primary    save    add-button    cancel    danger
-  secondary  outline add-dashed
+  primary     → dark-to-green gradient — main submit action
+  save        → green-to-lime gradient — save / update
+  secondary   → gold gradient          — secondary / accent action
+  outline     → white + green border   — ghost / secondary confirm
+  add-button  → solid emerald          — add new record
+  add-dashed  → dashed border          — add optional / inline item
+  cancel      → white + slate border   — cancel / dismiss
+  danger      → solid rose             — destructive action
 
-Small / wizard (use when beside other sm-* buttons for size consistency):
+Small / wizard (match height when beside sm-* buttons):
   sm-primary  sm-cancel  sm-danger
   sm-warning  sm-info    sm-success  sm-soft
-  sm-add      ← solid emerald, same size as sm-* — use instead of add-button
-              when the button is beside sm-warning / sm-cancel etc.
-
-USAGE
-────────────────────────────────────────────────────────────────────
-<x-button variant="primary" type="submit">
-    <i class="bx bx-save"></i> Save
-</x-button>
-
-<x-button href="{{ route('users.create') }}" variant="add-button">
-    <i class="bx bx-plus"></i> Add User
-</x-button>
-
-{{-- Beside sm-warning / sm-cancel: use sm-add for matching height --}}
-{{-- <x-button variant="sm-warning" wire:click="regenerate" loading="Regenerating…">
-    <i class="bx bx-refresh"></i> Regenerate
-</x-button>
-<x-button variant="sm-add" wire:click="saveAll" loading="Saving…">
-    <i class="bx bx-save"></i> Save All
-</x-button>
-
-<x-button variant="save"
-    wire:click="saveForm"
-    wire:target="saveForm"
-    loading="Saving…">
-    <i class="bx bx-save"></i> Save
-</x-button>
-
-<x-button variant="table-edit"
-    onclick="document.getElementById('editModal').showModal()">
-    <i class="bx bx-edit"></i> Edit
-</x-button> --}}
+  sm-add      ← solid emerald, same height as sm-* variants
+--}}

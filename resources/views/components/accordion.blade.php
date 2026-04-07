@@ -2,66 +2,34 @@
     'title',
     'icon'         => null,
     'open'         => false,
-    'color'        => 'slate',   // slate | emerald | blue | amber | rose
-    'badge'        => null,      // optional pill text shown in header
-    'badgeVariant' => 'slate',   // status-indicator variant for the badge
-    'noPadding'    => false,     // skip body padding (for tables, full-bleed content)
+    'color'        => 'slate',
+    'badge'        => null,
+    'badgeVariant' => 'slate',
+    'noPadding'    => false,
 ])
 
 @php
     $palette = [
-        'slate'   => ['icon_bg' => 'bg-slate-100 text-slate-500',   'title' => 'text-slate-800'],
-        'emerald' => ['icon_bg' => 'bg-emerald-100 text-emerald-600','title' => 'text-emerald-900'],
-        'blue'    => ['icon_bg' => 'bg-blue-100 text-blue-600',      'title' => 'text-blue-900'],
-        'amber'   => ['icon_bg' => 'bg-amber-100 text-amber-600',    'title' => 'text-amber-900'],
-        'rose'    => ['icon_bg' => 'bg-rose-100 text-rose-600',      'title' => 'text-rose-900'],
+        'slate'   => ['icon_bg' => 'bg-[#e2e8f0] text-[#475569]',   'title' => 'text-[#0f172a]'],
+        'emerald' => ['icon_bg' => 'bg-[#dcfce7] text-[#16a34a]',   'title' => 'text-[#166534]'],
+        'blue'    => ['icon_bg' => 'bg-[#dbeafe] text-[#1d4ed8]',   'title' => 'text-[#1e40af]'],
+        'amber'   => ['icon_bg' => 'bg-[#fef3c7] text-[#d97706]',   'title' => 'text-[#92400e]'],
+        'rose'    => ['icon_bg' => 'bg-[#ffe4e6] text-[#e11d48]',   'title' => 'text-[#9f1239]'],
     ];
     $p = $palette[$color] ?? $palette['slate'];
 @endphp
 
-{{--
-    x-accordion
-    ─────────────────────────────────────────────────────────────────────
-    Pure Alpine accordion. Safe to use inside or outside Livewire — no
-    wire:loading or $wire calls. Collapses/expands with x-collapse.
-
-    USAGE:
-      <x-accordion title="Revision History" icon="history" :open="true">
-          <p>Body content here.</p>
-      </x-accordion>
-
-      <x-accordion title="Reviewers" icon="user-check" color="blue"
-                   badge="3 reviewers" badgeVariant="blue">
-          …
-      </x-accordion>
-
-      {{-- Full-bleed (e.g. a table inside) --}}
-      {{-- <x-accordion title="Evaluation Items" :noPadding="true">
-          <table>…</table>
-      </x-accordion>
-
-    NAMED SLOT — extra header actions (buttons etc.):
-      <x-accordion title="Notes">
-          <x-slot name="actions">
-              <x-button variant="sm-primary">Edit</x-button>
-          </x-slot>
-          Body…
-      </x-accordion> --}}
-
-
 <div
     x-data="{ open: {{ $open ? 'true' : 'false' }} }"
-    {{ $attributes->class([
-        'rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden',
-    ]) }}
+    {{ $attributes->class(['rounded-xl border border-[#e2e8f0] bg-white overflow-hidden']) }}
+    style="box-shadow: 0 2px 16px rgba(0,0,0,.07);"
 >
-    {{-- Header ──────────────────────────────────────────────────────────── --}}
+    {{-- Header --}}
     <button
         type="button"
         x-on:click="open = !open"
         class="w-full flex items-center justify-between px-5 py-4 text-left
-               hover:bg-slate-50 transition-colors duration-100 focus:outline-none
-               focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-inset"
+               hover:bg-[#f8fafc] transition-colors duration-100 focus:outline-none"
         :aria-expanded="open"
     >
         <div class="flex items-center gap-3 min-w-0">
@@ -72,11 +40,7 @@
             @endif
 
             <div class="min-w-0">
-                <p class="text-sm font-semibold {{ $p['title'] }} leading-snug">{{ $title }}</p>
-
-                @if ($slot->hasNamedSlot('subtitle') ?? false)
-                    <p class="text-xs text-slate-400 mt-0.5">{{ $subtitle }}</p>
-                @endif
+                <p class="text-[13px] font-bold {{ $p['title'] }} leading-snug">{{ $title }}</p>
             </div>
 
             @if ($badge)
@@ -93,14 +57,14 @@
                 </div>
             @endif
 
-            <i class="bx text-slate-400 text-xl transition-transform duration-200"
+            <i class="bx text-[#94a3b8] text-lg transition-transform duration-200"
                :class="open ? 'bx-chevron-up' : 'bx-chevron-down'"></i>
         </div>
     </button>
 
-    {{-- Body ────────────────────────────────────────────────────────────── --}}
+    {{-- Body --}}
     <div x-show="open" x-collapse x-cloak>
-        <div class="border-t border-slate-100 {{ $noPadding ? '' : 'p-5' }}">
+        <div class="border-t border-[#e2e8f0] {{ $noPadding ? '' : 'p-5' }}">
             {{ $slot }}
         </div>
     </div>

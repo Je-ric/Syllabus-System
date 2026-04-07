@@ -1,35 +1,22 @@
-@props([
-    'rows'        => 3,
-    'placeholder' => '',
-])
+{{-- x-form.textarea --}}
+@props(['rows' => 3, 'placeholder' => ''])
 
-{{--
-    x-form.textarea
-    ─────────────────────────────────────────────────────────────────────
-    Unified with x-form.input / x-form.select.
-    Padding: px-3 py-2 — consistent with all form controls.
-
-    Value via slot (for Blade/old()):
-      <x-form.textarea name="text">{{ old('text', $model->text) }}</x-form.textarea>
-
-    Value via Alpine x-model (leave slot empty):
-      <x-form.textarea x-model="draft.text" rows="4" />
-
-    Value via Livewire wire:model:
-      <x-form.textarea wire:model.defer="field" rows="3" />
---}}
 <textarea
     rows="{{ $rows }}"
     placeholder="{{ $placeholder }}"
     {{ $attributes->merge([
         'class' => '
-            w-full rounded-lg border border-slate-300 bg-white
-            px-3 py-2 text-sm text-slate-700 shadow-sm
-            placeholder:text-slate-400
-            hover:border-slate-400
-            focus:border-emerald-400 focus:ring-1 focus:ring-emerald-300 focus:outline-none
-            disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed disabled:border-slate-200
+            w-full rounded-lg bg-white
+            border border-[#e2e8f0]
+            px-3 py-2 text-[13px] text-[#0f172a]
+            placeholder:text-[#94a3b8]
+            hover:border-[#bbf7d0]
+            focus:border-[#16a34a] focus:outline-none
+            disabled:bg-[#f8fafc] disabled:text-[#94a3b8] disabled:cursor-not-allowed disabled:border-[#e2e8f0]
             resize-y transition-colors duration-150
         '
     ]) }}
+    style="box-shadow: none;"
+    onfocus="this.style.boxShadow='0 0 0 3px rgba(22,163,74,0.25)'"
+    onblur="this.style.boxShadow='none'"
 >{{ $slot }}</textarea>

@@ -1,43 +1,28 @@
-@props([
-    'name' => null,
-])
-
-{{--
-    x-form.select
-    ─────────────────────────────────────────────────────────────────────
-    Unified with x-form.input / x-form.textarea.
-    Padding: px-3 py-2 — matches input/textarea exactly so heights align
-    when placed side-by-side.
-
-    The chevron arrow is a wrapper div approach (more reliable than
-    bg-[url()] SVG data URIs which break in some Tailwind JIT builds).
-
-    USAGE:
-      <x-form.select wire:model="type">
-          <option value="">Select…</option>
-          <option value="exam">Exam</option>
-      </x-form.select>
---}}
+{{-- x-form.select --}}
+@props(['name' => null])
 
 <div class="relative">
     <select
-        name="{{ $name }}"
+        @if($name) name="{{ $name }}" @endif
         {{ $attributes->merge([
             'class' => '
-                w-full appearance-none rounded-lg border border-slate-300 bg-white
-                px-3 py-2 pr-9 text-sm text-slate-700 shadow-sm
-                hover:border-slate-400
-                focus:border-emerald-400 focus:ring-1 focus:ring-emerald-300 focus:outline-none
-                disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed disabled:border-slate-200
+                w-full appearance-none rounded-lg bg-white
+                border border-[#e2e8f0]
+                px-3 py-2 pr-9 text-[13px] text-[#0f172a]
+                hover:border-[#bbf7d0]
+                focus:border-[#16a34a] focus:outline-none
+                disabled:bg-[#f8fafc] disabled:text-[#94a3b8] disabled:cursor-not-allowed disabled:border-[#e2e8f0]
                 transition-colors duration-150
             '
         ]) }}
+        style="box-shadow: none;"
+        onfocus="this.style.boxShadow='0 0 0 3px rgba(22,163,74,0.25)'"
+        onblur="this.style.boxShadow='none'"
     >
         {{ $slot }}
     </select>
 
-    {{-- Chevron icon — pointer-events-none so clicks pass through to select --}}
-    <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400">
+    <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-[#94a3b8]">
         <i class="bx bx-chevron-down text-base leading-none"></i>
     </span>
 </div>

@@ -1,13 +1,7 @@
-@props([
-    'sticky' => false,
-    'class' => '',
-])
+@props(['sticky' => false, 'class' => ''])
 
-@php
-    $base = 'bg-emerald-50 text-emerald-800';
-    $stickyClass = $sticky ? 'sticky top-0 z-10' : '';
-@endphp
+@php $stickyClass = $sticky ? 'sticky top-0 z-10' : ''; @endphp
 
-<thead {{ $attributes->merge(['class' => "$base $stickyClass $class"]) }}>
+<thead {{ $attributes->merge(['class' => "bg-[#f8fafc] border-b border-[#e2e8f0] $stickyClass $class"]) }}>
     {{ $slot }}
 </thead>

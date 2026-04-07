@@ -1,29 +1,21 @@
-@props([
-    'type' => 'text',
-])
+{{-- x-form.input --}}
+@props(['type' => 'text'])
 
-{{--
-    x-form.input
-    ─────────────────────────────────────────────────────────────────────
-    Unified with x-form.select / x-form.textarea.
-    Padding: px-3 py-2 — all three form controls share the same height.
-
-    USAGE:
-      <x-form.input wire:model="name" placeholder="Enter name…" />
-      <x-form.input type="email" wire:model="email" />
-      <x-form.input type="number" min="0" max="100" />
---}}
 <input
     type="{{ $type }}"
     {{ $attributes->merge([
         'class' => '
-            w-full rounded-lg border border-slate-300 bg-white
-            px-3 py-2 text-sm text-slate-700 shadow-sm
-            placeholder:text-slate-400
-            hover:border-slate-400
-            focus:border-emerald-400 focus:ring-1 focus:ring-emerald-300 focus:outline-none
-            disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed disabled:border-slate-200
+            w-full rounded-lg bg-white
+            border border-[#e2e8f0]
+            px-3 py-2 text-[13px] text-[#0f172a]
+            placeholder:text-[#94a3b8]
+            hover:border-[#bbf7d0]
+            focus:border-[#16a34a] focus:outline-none
+            disabled:bg-[#f8fafc] disabled:text-[#94a3b8] disabled:cursor-not-allowed disabled:border-[#e2e8f0]
             transition-colors duration-150
         '
     ]) }}
+    style="box-shadow: none;"
+    onfocus="this.style.boxShadow='0 0 0 3px rgba(22,163,74,0.25)'"
+    onblur="this.style.boxShadow='none'"
 />

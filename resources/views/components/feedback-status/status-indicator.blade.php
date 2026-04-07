@@ -1,101 +1,87 @@
 @props([
-    // Semantic status mode (existing API)
-    'status' => null,
-    'label'  => null,
-
-    // UI variant mode (wizard-badge-like)
+    'status'  => null,
+    'label'   => null,
     'variant' => null,
     'dot'     => false,
-
-    // Icon class (pass full class string, e.g. "bx bx-check-circle")
-    'icon' => null,
-
-    // Appearance
-    // All indicators are pills (rounded-full). Use size to control padding.
-    // Kept for backward compatibility; padding is now consistent everywhere.
-    'size'  => 'md',
+    'icon'    => null,
+    'size'    => 'md',
 ])
 
 @php
+// Design-token aligned status styles
 $statusStyles = [
-    // General statuses
-    'success' => 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200',
-    'neutral' => 'bg-slate-50 text-slate-600 ring-1 ring-slate-200',
-    'info'    => 'bg-blue-50 text-blue-700 ring-1 ring-blue-200',
-    'warning' => 'bg-amber-50 text-amber-700 ring-1 ring-amber-200',
-    'danger'  => 'bg-rose-50 text-rose-700 ring-1 ring-rose-200',
-
-    // User Account Statuses
-    'active'   => 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-300',
-    'pending'  => 'bg-amber-50 text-amber-800 ring-1 ring-amber-300',
-    'rejected' => 'bg-rose-50 text-rose-800 ring-1 ring-rose-300',
-    'disabled' => 'bg-slate-100 text-slate-700 ring-1 ring-slate-300',
-
-    // User Roles
-    'admin'    => 'bg-purple-50 text-purple-800 ring-1 ring-purple-300',
-    'dean'     => 'bg-indigo-50 text-indigo-800 ring-1 ring-indigo-300',
-    'chair'    => 'bg-blue-50 text-blue-800 ring-1 ring-blue-300',
-    'faculty'  => 'bg-green-50 text-green-800 ring-1 ring-green-300',
-
-    // Course Components
-    'lec' => 'bg-sky-50 text-sky-700 ring-1 ring-sky-200',
-    'lec_lab' => 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200',
+    'success'  => 'bg-[#f0fdf4] text-[#166534] ring-1 ring-[#bbf7d0]',
+    'neutral'  => 'bg-[#f8fafc] text-[#475569] ring-1 ring-[#e2e8f0]',
+    'info'     => 'bg-[#eff6ff] text-[#1e40af] ring-1 ring-[#bfdbfe]',
+    'warning'  => 'bg-[#fffbeb] text-[#92400e] ring-1 ring-[#fcd34d]',
+    'danger'   => 'bg-[#fff1f2] text-[#9f1239] ring-1 ring-[#fda4af]',
+    'active'   => 'bg-[#f0fdf4] text-[#166534] ring-1 ring-[#bbf7d0]',
+    'pending'  => 'bg-[#fffbeb] text-[#92400e] ring-1 ring-[#fcd34d]',
+    'rejected' => 'bg-[#fff1f2] text-[#9f1239] ring-1 ring-[#fda4af]',
+    'disabled' => 'bg-[#f8fafc] text-[#475569] ring-1 ring-[#e2e8f0]',
+    'admin'    => 'bg-[#faf5ff] text-[#581c87] ring-1 ring-[#d8b4fe]',
+    'dean'     => 'bg-[#eef2ff] text-[#3730a3] ring-1 ring-[#a5b4fc]',
+    'chair'    => 'bg-[#eff6ff] text-[#1e40af] ring-1 ring-[#93c5fd]',
+    'faculty'  => 'bg-[#f0fdf4] text-[#166534] ring-1 ring-[#bbf7d0]',
+    'lec'      => 'bg-[#f0fdf4] text-[#166534] ring-1 ring-[#bbf7d0]',
+    'lec_lab'  => 'bg-[#f0fdf4] text-[#166534] ring-1 ring-[#bbf7d0]',
 ];
 
 $statusIcons = [
-    'success' => 'bx bx-check-circle',
-    'neutral' => 'bx bx-minus-circle',
-    'info' => 'bx bx-info-circle',
-    'warning' => 'bx bx-error-circle',
-    'danger' => 'bx bx-x-circle',
-    'active' => 'bx bx-check-shield',
-    'pending' => 'bx bx-time-five',
+    'success'  => 'bx bx-check-circle',
+    'neutral'  => 'bx bx-minus-circle',
+    'info'     => 'bx bx-info-circle',
+    'warning'  => 'bx bx-error-circle',
+    'danger'   => 'bx bx-x-circle',
+    'active'   => 'bx bx-check-shield',
+    'pending'  => 'bx bx-time-five',
     'rejected' => 'bx bx-block',
     'disabled' => 'bx bx-pause-circle',
-    'admin' => 'bx bx-crown',
-    'dean' => 'bx bx-medal',
-    'chair' => 'bx bx-user-pin',
-    'faculty' => 'bx bx-user',
-    'lec' => 'bx bx-book',
-    'lec_lab' => 'bx bx-flask',
+    'admin'    => 'bx bx-crown',
+    'dean'     => 'bx bx-medal',
+    'chair'    => 'bx bx-user-pin',
+    'faculty'  => 'bx bx-user',
+    'lec'      => 'bx bx-book',
+    'lec_lab'  => 'bx bx-flask',
 ];
 
+// Variant styles — brand=green, lab=sky-blue, rose=error, slate=neutral
 $variantStyles = [
-    // Matches (and extends) the old `x-wizard.badge` variants
-    'emerald' => ['pill' => 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200', 'dot' => 'bg-emerald-500'],
-    'blue'    => ['pill' => 'bg-blue-100 text-blue-700 ring-1 ring-blue-200',          'dot' => 'bg-blue-500'],
-    'amber'   => ['pill' => 'bg-amber-100 text-amber-700 ring-1 ring-amber-200',       'dot' => 'bg-amber-500'],
-    'rose'    => ['pill' => 'bg-rose-100 text-rose-700 ring-1 ring-rose-200',          'dot' => 'bg-rose-500'],
-    'slate'   => ['pill' => 'bg-slate-100 text-slate-600 ring-1 ring-slate-200',       'dot' => 'bg-slate-400'],
-    'violet'  => ['pill' => 'bg-violet-100 text-violet-700 ring-1 ring-violet-200',    'dot' => 'bg-violet-500'],
-    'indigo'  => ['pill' => 'bg-indigo-100 text-indigo-700 ring-1 ring-indigo-200',    'dot' => 'bg-indigo-500'],
-    'sky'     => ['pill' => 'bg-sky-100 text-sky-700 ring-1 ring-sky-200',             'dot' => 'bg-sky-500'],
+    'brand'   => ['pill' => 'bg-[#f0fdf4] text-[#166534] ring-1 ring-[#bbf7d0]',  'dot' => 'bg-[#16a34a]'],
+    'emerald' => ['pill' => 'bg-[#f0fdf4] text-[#166534] ring-1 ring-[#bbf7d0]',  'dot' => 'bg-[#16a34a]'],
+    'lab'     => ['pill' => 'bg-[#eff6ff] text-[#1e40af] ring-1 ring-[#bfdbfe]',  'dot' => 'bg-[#3b82f6]'],
+    'blue'    => ['pill' => 'bg-[#eff6ff] text-[#1e40af] ring-1 ring-[#bfdbfe]',  'dot' => 'bg-[#3b82f6]'],
+    'amber'   => ['pill' => 'bg-[#fffbeb] text-[#92400e] ring-1 ring-[#fcd34d]',  'dot' => 'bg-[#f59e0b]'],
+    'rose'    => ['pill' => 'bg-[#fff1f2] text-[#9f1239] ring-1 ring-[#fda4af]',  'dot' => 'bg-[#f43f5e]'],
+    'slate'   => ['pill' => 'bg-[#f8fafc] text-[#475569] ring-1 ring-[#e2e8f0]',  'dot' => 'bg-[#94a3b8]'],
+    'violet'  => ['pill' => 'bg-[#faf5ff] text-[#581c87] ring-1 ring-[#d8b4fe]',  'dot' => 'bg-[#8b5cf6]'],
+    'indigo'  => ['pill' => 'bg-[#eef2ff] text-[#3730a3] ring-1 ring-[#a5b4fc]',  'dot' => 'bg-[#6366f1]'],
+    'sky'     => ['pill' => 'bg-[#f0f9ff] text-[#075985] ring-1 ring-[#bae6fd]',  'dot' => 'bg-[#0ea5e9]'],
 ];
 
 $isStatusMode = filled($status);
 
 $style = $isStatusMode
-    ? ($statusStyles[$status] ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-300')
+    ? ($statusStyles[$status] ?? 'bg-[#f8fafc] text-[#475569] ring-1 ring-[#e2e8f0]')
     : ($variantStyles[$variant]['pill'] ?? $variantStyles['slate']['pill']);
 
 $defaultStatusIcon = $isStatusMode ? ($statusIcons[$status] ?? null) : null;
-$iconClass = $icon ?? $defaultStatusIcon;
-$padClass = '';
+$iconClass  = $icon ?? $defaultStatusIcon;
+$dotClass   = $variantStyles[$variant]['dot'] ?? 'bg-[#94a3b8]';
 
 $resolvedLabel = $label
     ?? ($slot->isNotEmpty() ? null : ($isStatusMode ? ucfirst(str_replace('_', ' ', (string) $status)) : null));
-$dotClass = $variantStyles[$variant]['dot'] ?? 'bg-slate-400';
 @endphp
 
 <span {{ $attributes->class([
-    'inline-flex items-center gap-1 text-xs font-semibold px-3 py-1',
-    'rounded-full',
+    'inline-flex items-center gap-1 font-semibold rounded-full',
+    'text-[11px] px-2.5 py-0.5',
     $style,
 ]) }}>
     @if ($dot)
         <span class="w-1.5 h-1.5 rounded-full shrink-0 {{ $dotClass }}" aria-hidden="true"></span>
     @elseif ($iconClass)
-        <i class="{{ $iconClass }} text-xs shrink-0" aria-hidden="true"></i>
+        <i class="{{ $iconClass }} text-[11px] shrink-0" aria-hidden="true"></i>
     @endif
 
     @if ($resolvedLabel)

@@ -1,31 +1,16 @@
-@props([
-    'align' => 'end',
-])
+@props(['align' => 'end'])
 
 @php
-    $alignmentClasses = [
-        'start' => 'justify-start',
+    $alignClass = match($align) {
+        'start'  => 'justify-start',
         'center' => 'justify-center',
-        'end' => 'justify-end',
-    ];
-
-    $alignmentClass = $alignmentClasses[$align] ?? $alignmentClasses['end'];
+        default  => 'justify-end',
+    };
 @endphp
 
 <footer {{ $attributes->class([
-    'border-t border-slate-200 px-6 py-4 flex gap-3 flex-shrink-0',
-    $alignmentClass,
+    'border-t border-[#e2e8f0] bg-[#f8fafc] px-6 py-4 flex gap-3 flex-shrink-0',
+    $alignClass,
 ]) }}>
     {{ $slot }}
 </footer>
-
-{{--
-Usage: <x-modal.footer align="end">
-            <x-modal.close-button :modalId="'myModal'" text="Cancel" />
-            <button type="submit" class="btn btn-primary">Save</button>
-        </x-modal.footer>
-       <x-modal.footer align="center">
-            <button type="button">OK</button>
-        </x-modal.footer>
-
---}}
