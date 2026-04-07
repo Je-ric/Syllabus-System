@@ -58,7 +58,10 @@
 
                 <a href="{{ route('auth.show') }}"
                    class="block w-full text-center auth-secondary text-white py-2.5 rounded-xl font-semibold shadow-sm transition">
-                    Back to Login
+                    <span class="inline-flex items-center justify-center gap-2">
+                        <i class="bx bx-arrow-back text-lg leading-none"></i>
+                        <span>Back to Login</span>
+                    </span>
                 </a>
 
             </div>

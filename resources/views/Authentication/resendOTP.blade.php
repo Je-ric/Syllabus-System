@@ -50,8 +50,9 @@
 
                 <div class="mt-5 text-center">
                     <a href="{{ route('auth.show') }}"
-                       class="text-xs text-slate-400 hover:text-slate-600 transition-colors">
-                        ← Back to Login
+                       class="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 transition-colors">
+                        <i class="bx bx-arrow-back text-sm leading-none"></i>
+                        <span>Back to Login</span>
                     </a>
                 </div>
 
@@ -59,7 +60,7 @@
         </div>
 
         <p class="text-center text-xs text-slate-400 mt-5">
-            Central Luzon State University · CSMS
+            Central Luzon State University &middot; CSMS
         </p>
     </div>
 </div>

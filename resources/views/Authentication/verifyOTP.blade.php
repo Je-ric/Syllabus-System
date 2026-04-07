@@ -42,7 +42,7 @@
                         <label class="block text-xs font-semibold text-slate-600 mb-1.5 text-center">
                             Enter 6-digit OTP
                         </label>
-                        <input type="text" name="otp" maxlength="6"
+                        <input type="number" name="otp" maxlength="6"
                                placeholder="• • • • • •"
                                class="auth-input text-center tracking-[0.5em] text-xl font-bold"
                                required autofocus autocomplete="one-time-code">
@@ -77,8 +77,9 @@
 
                 <div class="mt-4 text-center">
                     <a href="{{ route('auth.show') }}"
-                       class="text-xs text-slate-400 hover:text-slate-600 transition-colors">
-                        ← Back to Login
+                       class="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 transition-colors">
+                        <i class="bx bx-arrow-back text-sm leading-none"></i>
+                        <span>Back to Login</span>
                     </a>
                 </div>
 
