@@ -10,7 +10,7 @@
         <x-button
             variant="cancel"
             href="{{ $isAdmin ? route('organizational.colleges.index') : route('profile.index') }}">
-            <i class="bx bx-left-arrow-alt"></i>
+            <i class="bx bx-arrow-back"></i>
             {{ $isAdmin ? 'Back to Colleges' : 'Back to Profile' }}
         </x-button>
     </x-page-header>

@@ -12,7 +12,7 @@
         title="{{ $college->name }}"
         desc="Manage department leadership, faculty assignments, and academic structure">
         <x-button variant="cancel" href="{{ $isAdmin ? route('organizational.colleges.index') : route('organizational.hierarchy') }}">
-            <i class="bx bx-left-arrow-alt"></i> Back
+            <i class="bx bx-arrow-back"></i> Back
         </x-button>
     </x-page-header>
 
@@ -32,16 +32,16 @@
                         $facultyList = $facultyAssignments->get($department->id) ?? collect();
                     @endphp
 
-                    <div class="rounded-xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                    <div class="rounded-xl border border-[#e2e8f0] bg-white overflow-hidden" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
 
                         {{-- Department header --}}
-                        <div class="flex items-center justify-between gap-3 px-5 py-4 bg-slate-50 border-b border-slate-200">
+                        <div class="flex items-center justify-between gap-3 px-5 py-4 bg-[#f8fafc] border-b border-[#e2e8f0]">
                             <div class="flex items-center gap-3 min-w-0 flex-1">
-                                <span class="shrink-0 w-9 h-9 rounded-lg bg-emerald-800 flex items-center justify-center">
+                                <span class="shrink-0 w-9 h-9 rounded-lg bg-[#16a34a] flex items-center justify-center">
                                     <i class="bx bxs-buildings text-white text-lg leading-none"></i>
                                 </span>
                                 <div class="min-w-0">
-                                    <h2 class="text-sm font-bold text-slate-800 truncate" title="{{ $department->name }}">
+                                    <h2 class="text-[13px] font-bold text-[#0f172a] truncate" title="{{ $department->name }}">
                                         {{ $department->name }}
                                     </h2>
                                     <p class="text-xs text-slate-500 mt-0.5">

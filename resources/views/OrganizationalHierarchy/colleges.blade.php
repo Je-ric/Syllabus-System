@@ -20,15 +20,15 @@
                 @foreach ($colleges as $college)
                     @php $dean = $deanAssignments->get($college->id)?->first()?->user; @endphp
 
-                    <div class="flex flex-col rounded-xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                    <div class="flex flex-col rounded-xl border border-[#e2e8f0] bg-white overflow-hidden" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
 
                         {{-- Card header --}}
-                        <div class="flex items-center gap-3 px-5 py-4 bg-slate-50 border-b border-slate-200">
-                            <span class="shrink-0 w-9 h-9 rounded-lg bg-emerald-800 flex items-center justify-center">
+                        <div class="flex items-center gap-3 px-5 py-4 bg-[#f8fafc] border-b border-[#e2e8f0]">
+                            <span class="shrink-0 w-9 h-9 rounded-lg bg-[#16a34a] flex items-center justify-center">
                                 <i class="bx bxs-school text-white text-lg leading-none"></i>
                             </span>
                             <div class="flex-1 min-w-0">
-                                <h2 class="text-sm font-bold text-slate-800 truncate" title="{{ $college->name }}">
+                                <h2 class="text-[13px] font-bold text-[#0f172a] truncate" title="{{ $college->name }}">
                                     {{ $college->name }}
                                 </h2>
                                 <p class="text-xs text-slate-500 mt-0.5">
