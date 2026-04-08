@@ -1,98 +1,66 @@
-{{--
-    Partial: weekly-partials/tab-switcher.blade.php
-    ────────────────────────────────────────────────
-    • Both LEC + LAB → pill switcher with auto-save-on-switch.
-    • Only one component → static badge.
-    • Neither → nothing rendered.
-
-    Inherits from parent component view:
-        $hasLEC          bool
-        $hasLAB          bool
-        $activeComponent string  'LEC' | 'LAB'
---}}
+{{-- weekly-partials/tab-switcher.blade.php --}}
 
 @if ($hasLEC && $hasLAB)
 
-    <div class="mb-5 rounded-xl border border-slate-200 bg-white shadow-sm p-3">
-        <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2.5">
-            Weekly Component
-        </p>
-        <div class="inline-flex items-center gap-1 p-1 bg-slate-100/90 rounded-xl border border-slate-200">
+    <div class="mb-5">
+        <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-2">Component</p>
+        <div class="inline-flex items-center gap-1 p-1 rounded-xl border border-[#e2e8f0] bg-[#f8fafc]">
 
-            {{-- LEC tab --}}
+            {{-- LEC --}}
             <button type="button"
                 wire:click="setComponentType('LEC')"
                 wire:loading.attr="disabled"
                 wire:target="setComponentType"
                 @class([
-                    'relative flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150 min-w-[150px] justify-center',
-                    'bg-white text-emerald-700 shadow-sm ring-1 ring-emerald-200' => $activeComponent === 'LEC',
-                    'text-slate-500 hover:text-slate-700 hover:bg-white/70'        => $activeComponent !== 'LEC',
-                ])>
+                    'relative flex items-center gap-2 px-4 py-2 text-[13px] font-semibold rounded-lg transition-all duration-150 min-w-[140px] justify-center',
+                    'bg-white text-[#166534] ring-1 ring-[#bbf7d0]' => $activeComponent === 'LEC',
+                    'text-[#475569] hover:text-[#0f172a] hover:bg-white/70' => $activeComponent !== 'LEC',
+                ])
+                style="{{ $activeComponent === 'LEC' ? 'box-shadow: 0 2px 16px rgba(0,0,0,.07);' : '' }}">
                 <span wire:loading wire:target="setComponentType('LEC')" class="flex items-center gap-1.5">
-                    <i class="bx bx-loader-alt bx-spin text-emerald-600"></i> Switching…
+                    <i class="bx bx-loader-alt bx-spin text-[#16a34a]"></i> Switching…
                 </span>
                 <span wire:loading.remove wire:target="setComponentType('LEC')" class="flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full {{ $activeComponent === 'LEC' ? 'bg-emerald-500' : 'bg-slate-300' }}"></span>
+                    <span class="w-2 h-2 rounded-full {{ $activeComponent === 'LEC' ? 'bg-[#16a34a]' : 'bg-[#e2e8f0]' }}"></span>
                     Lecture (LEC)
                 </span>
-                {{-- "saving" mini-badge floats on the active tab while the other is loading --}}
-                @if ($activeComponent === 'LEC')
-                    <span wire:loading wire:target="setComponentType('LAB')"
-                        class="absolute -top-2 -right-2 flex items-center gap-0.5
-                               bg-amber-100 text-amber-700 text-[10px] font-semibold
-                               px-1.5 py-0.5 rounded-full border border-amber-200">
-                        <i class="bx bx-loader-alt bx-spin text-[10px]"></i> saving
-                    </span>
-                @endif
             </button>
 
-            {{-- LAB tab --}}
+            {{-- LAB --}}
             <button type="button"
                 wire:click="setComponentType('LAB')"
                 wire:loading.attr="disabled"
                 wire:target="setComponentType"
                 @class([
-                    'relative flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150 min-w-[150px] justify-center',
-                    'bg-white text-blue-700 shadow-sm ring-1 ring-blue-200' => $activeComponent === 'LAB',
-                    'text-slate-500 hover:text-slate-700 hover:bg-white/70' => $activeComponent !== 'LAB',
-                ])>
+                    'relative flex items-center gap-2 px-4 py-2 text-[13px] font-semibold rounded-lg transition-all duration-150 min-w-[140px] justify-center',
+                    'bg-white text-[#1e40af] ring-1 ring-[#bfdbfe]' => $activeComponent === 'LAB',
+                    'text-[#475569] hover:text-[#0f172a] hover:bg-white/70' => $activeComponent !== 'LAB',
+                ])
+                style="{{ $activeComponent === 'LAB' ? 'box-shadow: 0 2px 16px rgba(0,0,0,.07);' : '' }}">
                 <span wire:loading wire:target="setComponentType('LAB')" class="flex items-center gap-1.5">
-                    <i class="bx bx-loader-alt bx-spin text-blue-600"></i> Switching…
+                    <i class="bx bx-loader-alt bx-spin text-[#3b82f6]"></i> Switching…
                 </span>
                 <span wire:loading.remove wire:target="setComponentType('LAB')" class="flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full {{ $activeComponent === 'LAB' ? 'bg-blue-500' : 'bg-slate-300' }}"></span>
+                    <span class="w-2 h-2 rounded-full {{ $activeComponent === 'LAB' ? 'bg-[#3b82f6]' : 'bg-[#e2e8f0]' }}"></span>
                     Laboratory (LAB)
                 </span>
-                @if ($activeComponent === 'LAB')
-                    <span wire:loading wire:target="setComponentType('LEC')"
-                        class="absolute -top-2 -right-2 flex items-center gap-0.5
-                               bg-amber-100 text-amber-700 text-[10px] font-semibold
-                               px-1.5 py-0.5 rounded-full border border-amber-200">
-                        <i class="bx bx-loader-alt bx-spin text-[10px]"></i> saving
-                    </span>
-                @endif
             </button>
 
         </div>
 
-        {{-- Inline status shown while the request is in-flight --}}
         <div wire:loading wire:target="setComponentType"
-            class="mt-2 inline-flex items-center gap-1.5 text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5">
-            <i class="bx bx-loader-alt bx-spin text-slate-400"></i>
-            Saving current data and loading
-            {{ $activeComponent === 'LEC' ? 'Laboratory' : 'Lecture' }} content…
+            class="mt-2 inline-flex items-center gap-1.5 text-[13px] text-[#475569]">
+            <i class="bx bx-loader-alt bx-spin text-[#94a3b8]"></i>
+            Saving and loading {{ $activeComponent === 'LEC' ? 'Laboratory' : 'Lecture' }} content…
         </div>
     </div>
 
 @elseif ($hasLEC || $hasLAB)
 
-    {{-- Single-component static badge --}}
-    <div class="mb-4 rounded-xl border border-slate-200 bg-white shadow-sm px-3 py-2.5">
+    <div class="mb-4 flex items-center gap-2">
         <x-feedback-status.status-indicator
-            :variant="$hasLEC ? 'emerald' : 'blue'"
-            :dot="true"
-            size="sm">
+            :variant="$hasLEC ? 'brand' : 'lab'"
+            :dot="true">
             {{ $hasLEC ? 'Lecture (LEC)' : 'Laboratory (LAB)' }}
         </x-feedback-status.status-indicator>
     </div>

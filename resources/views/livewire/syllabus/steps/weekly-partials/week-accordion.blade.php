@@ -1,20 +1,5 @@
-﻿{{--
+{{--
     Partial: weekly-partials/week-accordion.blade.php
-
-    Alpine-driven accordion that wraps every week row.
-    Auto-saves the week that just collapsed via $watch.
-
-    Each body is delegated to:
-        week-body-locked.blade.php   — exam / non-teaching weeks
-        week-body-editable.blade.php — normal editable weeks
-
-    Inherits from parent component view:
-        $syllabusWeeks   Collection
-        $weekEvents      array
-        $lockedWeeks     array
-        $weekInputs      array
-        $courseOutcomes  array
-        $activeComponent string
 --}}
 <div x-data="{
         openWeek: {{ $syllabusWeeks->first()?->week_no ?? 1 }},
@@ -26,7 +11,7 @@
             });
         }
      }"
-     class="rounded-xl border border-emerald-200 bg-white shadow-sm divide-y divide-slate-100">
+     class="rounded-xl border border-[#e2e8f0] bg-white divide-y divide-[#e2e8f0]" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
 
     @foreach ($syllabusWeeks as $week)
         @php
@@ -36,9 +21,7 @@
             $events   = $weekEvents[$week->week_no] ?? [];
             $isLocked = isset($lockedWeeks[$week->week_no]);
             $lockType = $lockedWeeks[$week->week_no] ?? null;
-
-            // Week 1 is always the MVGO week
-            $isMvgo = ((int) $week->week_no === 1);
+            $isMvgo   = ((int) $week->week_no === 1);
 
             $savedTopic = $weekInputs[$wKey]['topic'] ?? '';
             $refCount   = count(array_filter(
@@ -56,7 +39,6 @@
                 default        => 'Locked',
             };
 
-            // Resolve the CO code badge for the header (not shown for MVGO)
             $coId   = $isMvgo ? null : ($weekInputs[$wKey]['course_outcome_id'] ?? null);
             $coCode = null;
             if ($coId) {
@@ -65,22 +47,19 @@
                 }
             }
 
-            // UI accents
-            $accentClosed = $isLocked ? 'bg-rose-400' : 'bg-emerald-400';
-            $accentOpen   = $isLocked ? 'bg-rose-600' : 'bg-emerald-600';
+            // Accent bar colors — rose = locked, brand green = normal
+            $accentClosed = $isLocked ? 'bg-rose-300' : 'bg-[#16a34a]';
+            $accentOpen   = $isLocked ? 'bg-rose-500' : 'bg-[#15803d]';
 
-            $openHeaderClass = $isLocked
-                ? 'bg-rose-50 ring-1 ring-inset ring-rose-200'
-                : 'bg-emerald-50/80 ring-1 ring-inset ring-emerald-200';
-
-            $closedRowClass = $isLocked ? 'bg-rose-50/30' : ($isMvgo ? 'bg-amber-50/30' : 'bg-white');
-
-            $bodyBgClass = $isLocked ? 'bg-rose-50/30' : 'bg-emerald-50/20';
+            $openHeaderClass  = $isLocked ? 'bg-rose-50 ring-1 ring-inset ring-rose-200' : 'bg-[#f0fdf4] ring-1 ring-inset ring-[#bbf7d0]';
+            $closedRowClass   = $isLocked ? 'bg-rose-50/20' : 'bg-white';
+            $bodyBgClass      = $isLocked ? 'bg-rose-50/20' : 'bg-[#f0fdf4]/20';
+            $bodyBorderClass  = $isLocked ? 'border-rose-100' : 'border-[#e2e8f0]';
         @endphp
 
         <div wire:key="week-{{ $week->week_no }}-{{ $activeComponent }}" class="relative">
 
-            {{-- Left accent bar (helps differentiate header vs body on open) --}}
+            {{-- Left accent bar --}}
             <span class="absolute left-0 top-0 bottom-0 w-1"
                 :class="openWeek === {{ $week->week_no }} ? '{{ $accentOpen }}' : '{{ $accentClosed }}'"></span>
 
@@ -90,46 +69,40 @@
                 :class="openWeek === {{ $week->week_no }} ? '{{ $openHeaderClass }}' : '{{ $closedRowClass }}'"
                 @class([
                     'w-full flex items-center pl-6 pr-5 py-3.5 transition-colors duration-100 focus:outline-none text-left',
-                    'hover:bg-rose-50'     => $isLocked,
-                    'hover:bg-emerald-50/60'              => ! $isLocked,
+                    'hover:bg-rose-50'    => $isLocked,
+                    'hover:bg-[#f0fdf4]' => ! $isLocked,
                 ])>
 
                 <div class="flex items-center gap-3 min-w-0 flex-1">
 
-                    {{-- Week number circle — rose = locked, amber = MVGO, emerald = normal --}}
+                    {{-- Week number circle --}}
                     <span @class([
                         'inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold shrink-0',
-                        'bg-rose-100 text-rose-700 ring-1 ring-rose-300'          => $isLocked,
-                        'bg-amber-100 text-amber-700 ring-1 ring-amber-200'        => ! $isLocked && $isMvgo,
-                        'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200'  => ! $isLocked && ! $isMvgo,
+                        'bg-rose-100 text-rose-700 ring-1 ring-rose-300'         => $isLocked,
+                        'bg-[#dcfce7] text-[#15803d] ring-1 ring-[#15803d]'     => ! $isLocked,
                     ])>{{ $week->week_no }}</span>
 
                     <div class="flex items-center gap-2 flex-wrap min-w-0">
-                        <span class="font-semibold text-sm shrink-0 {{ $isLocked ? 'text-rose-700' : ($isMvgo ? 'text-amber-800' : 'text-slate-700') }}">
+                        <span class="text-[13px] font-semibold shrink-0 {{ $isLocked ? 'text-rose-700' : 'text-[#0f172a]' }}">
                             Week {{ $week->week_no }}
                         </span>
-                        <span class="text-xs text-slate-400 shrink-0">
+                        <span class="text-[13px] text-[#94a3b8] shrink-0">
                             {{ $start->format('M d') }}–{{ $end->format('M d, Y') }}
                         </span>
 
                         @if ($isLocked)
-                            @if ($lockType === 'exam')
-                                <x-feedback-status.status-indicator variant="rose" icon="bx bx-clipboard" size="sm">
-                                    {{ $lockLabel }}
-                                </x-feedback-status.status-indicator>
-                            @else
-                                <x-feedback-status.status-indicator variant="rose" icon="bx bx-lock-alt" size="sm">
-                                    {{ $lockLabel }}
-                                </x-feedback-status.status-indicator>
-                            @endif
+                            <x-feedback-status.status-indicator variant="rose"
+                                icon="{{ $lockType === 'exam' ? 'bx bx-clipboard' : 'bx bx-lock-alt' }}" size="sm">
+                                {{ $lockLabel }}
+                            </x-feedback-status.status-indicator>
                         @else
                             @if ($isMvgo)
-                                <x-feedback-status.status-indicator variant="emerald" size="sm">MVGO</x-feedback-status.status-indicator>
+                                <x-feedback-status.status-indicator variant="brand" size="sm">MVGO</x-feedback-status.status-indicator>
                             @elseif ($coCode)
-                                <x-feedback-status.status-indicator variant="emerald" size="sm">{{ $coCode }}</x-feedback-status.status-indicator>
+                                <x-feedback-status.status-indicator variant="brand" size="sm">{{ $coCode }}</x-feedback-status.status-indicator>
                             @endif
                             @if ($savedTopic)
-                                <span class="text-xs text-slate-400 truncate max-w-xs hidden md:block">
+                                <span class="text-[13px] text-[#94a3b8] truncate max-w-xs hidden md:block">
                                     — {{ \Illuminate\Support\Str::limit($savedTopic, 55) }}
                                 </span>
                             @endif
@@ -141,22 +114,22 @@
                 <div class="flex items-center gap-1.5 shrink-0 ml-3">
                     @if (! $isLocked)
                         @if (count($events) > 0)
-                            <x-feedback-status.status-indicator variant="amber" size="sm">
+                            <x-feedback-status.status-indicator variant="brand" size="sm">
                                 {{ count($events) }} event{{ count($events) !== 1 ? 's' : '' }}
                             </x-feedback-status.status-indicator>
                         @endif
                         @if ($refCount > 0)
-                            <x-feedback-status.status-indicator variant="emerald" size="sm">
+                            <x-feedback-status.status-indicator variant="brand" size="sm">
                                 {{ $refCount }} ref{{ $refCount !== 1 ? 's' : '' }}
                             </x-feedback-status.status-indicator>
                         @endif
                         @if ($matCount > 0)
-                            <x-feedback-status.status-indicator variant="blue" size="sm">
+                            <x-feedback-status.status-indicator variant="brand" size="sm">
                                 {{ $matCount }} mat{{ $matCount !== 1 ? 's' : '' }}
                             </x-feedback-status.status-indicator>
                         @endif
                     @endif
-                    <i class="bx text-slate-400 text-lg transition-transform duration-200"
+                    <i class="bx text-[#94a3b8] text-lg transition-transform duration-200"
                         :class="openWeek === {{ $week->week_no }} ? 'bx-chevron-up' : 'bx-chevron-down'"></i>
                 </div>
 
@@ -164,7 +137,7 @@
 
             {{-- Accordion Body --}}
             <div x-show="openWeek === {{ $week->week_no }}" x-cloak
-                class="pl-6 pr-5 pb-5 pt-4 border-t {{ $isLocked ? 'border-rose-100' : 'border-emerald-100' }} {{ $bodyBgClass }}">
+                class="pl-6 pr-5 pb-5 pt-4 border-t {{ $bodyBorderClass }} {{ $bodyBgClass }}">
 
                 @if ($isLocked)
                     @include('livewire.syllabus.steps.weekly-partials.week-body-locked', [
