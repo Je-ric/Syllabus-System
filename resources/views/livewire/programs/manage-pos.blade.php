@@ -11,9 +11,10 @@
     <template x-for="(po, index) in pos" :key="po.id ?? ('new-' + index)">
 
         <div :class="po.id
-                ? 'border-slate-200 bg-white'
-                : 'border-amber-300 bg-amber-50/50'"
-            class="rounded-xl border shadow-sm transition-colors duration-200 overflow-hidden">
+                ? 'border-[#e2e8f0] bg-white'
+                : 'border-[#fcd34d] bg-[#fffbeb]/50'"
+            class="rounded-xl border overflow-hidden transition-colors duration-200"
+            style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
 
             {{-- ── Text row ──────────────────────────────────────────────── --}}
             <div class="flex items-start gap-3 p-4">
@@ -21,10 +22,10 @@
                 {{-- Code badge --}}
                 <div class="shrink-0 pt-0.5">
                     <span :class="po.id
-                            ? 'bg-blue-100 text-blue-700 ring-1 ring-blue-200'
-                            : 'bg-amber-100 text-amber-700 ring-1 ring-amber-300'"
+                            ? 'bg-[#eff6ff] text-[#1e40af] ring-1 ring-[#bfdbfe]'
+                            : 'bg-[#fef3c7] text-[#92400e] ring-1 ring-[#fcd34d]'"
                         class="inline-flex items-center justify-center
-                               w-10 h-10 rounded-xl text-xs font-bold
+                               w-10 h-10 rounded-xl text-[13px] font-bold
                                transition-colors duration-200">
                         <span x-text="'PO' + (index + 1)"></span>
                     </span>
@@ -38,7 +39,7 @@
                         placeholder="Describe the ability or competency graduates will have by the time of graduation…" />
 
                     <p x-show="!po.id" x-cloak
-                        class="mt-1.5 flex items-center gap-1.5 text-xs text-amber-600">
+                        class="mt-1.5 flex items-center gap-1.5 text-[13px] text-[#92400e]">
                         <i class="bx bx-error-circle text-sm shrink-0"></i>
                         Unsaved — <strong class="mx-0.5">Save All</strong> first before mapping PEOs.
                     </p>
@@ -76,14 +77,14 @@
             </div>
 
             {{-- ── PEO mapping section ───────────────────────────────────── --}}
-            <div :class="po.id ? 'border-slate-100 bg-slate-50/60' : 'border-amber-100 bg-amber-50/30'"
+            <div :class="po.id ? 'border-[#e2e8f0] bg-[#f8fafc]' : 'border-[#fcd34d] bg-[#fffbeb]/30'"
                 class="border-t px-4 py-3">
 
                 <div :class="!po.id ? 'opacity-40 pointer-events-none select-none' : ''"
                     class="transition-opacity duration-150">
 
                     <div class="flex items-center gap-2 mb-2">
-                        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                        <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569]">
                             Map to PEOs
                         </p>
                         <template x-if="peos.length === 0">
@@ -98,16 +99,16 @@
                             <label
                                 :title="peo.peo_text ? peo.peo_text.substring(0, 80) + (peo.peo_text.length > 80 ? '…' : '') : ''"
                                 :class="isPoMappedToPeo(po.id, peo.id)
-                                    ? 'border-emerald-400 bg-emerald-100 text-emerald-800 shadow-sm'
-                                    : 'border-slate-200 bg-white text-slate-500 hover:border-emerald-300 hover:bg-emerald-50'"
+                                    ? 'border-[#16a34a] bg-[#dcfce7] text-[#166534]'
+                                    : 'border-[#e2e8f0] bg-white text-[#475569] hover:border-[#bbf7d0] hover:bg-[#f0fdf4]'"
                                 class="inline-flex items-center gap-1.5 cursor-pointer
-                                       rounded-lg border px-2.5 py-1.5 text-xs font-semibold
+                                       rounded-lg border px-2.5 py-1.5 text-[13px] font-semibold
                                        transition-all duration-100 select-none">
                                 <input
                                     type="checkbox"
                                     :checked="isPoMappedToPeo(po.id, peo.id)"
                                     @change="toggleMapping(po.id, peo.id, $event.target.checked)"
-                                    class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-200 focus:ring-1">
+                                    class="rounded border-[#e2e8f0] text-[#16a34a] focus:ring-[#bbf7d0] focus:ring-1">
                                 <span x-text="peo.peo_code.toUpperCase()"></span>
                             </label>
                         </template>
@@ -116,7 +117,7 @@
                 </div>
 
                 <p x-show="!po.id" x-cloak
-                    class="mt-1.5 flex items-center gap-1.5 text-xs text-amber-600">
+                    class="mt-1.5 flex items-center gap-1.5 text-[13px] text-[#92400e]">
                     <i class="bx bx-lock-alt text-sm shrink-0"></i>
                     Save this PO first to enable PEO mapping.
                 </p>
@@ -127,10 +128,10 @@
 
     {{-- Empty state --}}
     <template x-if="pos.length === 0">
-        <div class="rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 py-10 text-center">
-            <i class="bx bx-target-lock text-4xl text-slate-300"></i>
-            <p class="mt-2 text-sm font-semibold text-slate-500">No POs yet</p>
-            <p class="text-xs text-slate-400 mt-0.5">Add the first one below.</p>
+        <div class="rounded-xl border-2 border-dashed border-[#e2e8f0] bg-[#f8fafc] py-10 text-center">
+            <i class="bx bx-target-lock text-4xl text-[#94a3b8]"></i>
+            <p class="mt-2 text-[13px] font-semibold text-[#475569]">No POs yet</p>
+            <p class="text-[13px] text-[#94a3b8] mt-0.5">Add the first one below.</p>
         </div>
     </template>
 

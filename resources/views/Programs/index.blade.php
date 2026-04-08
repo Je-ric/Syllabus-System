@@ -10,8 +10,8 @@
 
     <x-panel>
         {{-- Program selector — same card style as courses.index and syllabus.create --}}
-        <div class="border border-slate-200/80 rounded-2xl p-5 mb-6 bg-white/90 shadow-sm">
-            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 mb-3">
+        <div class="rounded-xl border border-[#e2e8f0] bg-white p-5 mb-6" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
+            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-3">
                 Select Program
             </p>
             <livewire:programs.program-selector
@@ -21,11 +21,11 @@
         </div>
     
         {{-- University mission --}}
-        <div class="mt-5 rounded-2xl border border-slate-300 bg-slate-50 px-5 py-4">
-            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400 mb-1">
+        <div class="mt-5 rounded-xl border border-[#e2e8f0] bg-[#f8fafc] px-5 py-4">
+            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#94a3b8] mb-1">
                 University Mission
             </p>
-            <p class="text-sm text-slate-600 leading-relaxed">
+            <p class="text-[13px] text-[#475569] leading-relaxed">
                 CLSU shall develop globally competitive, work-ready, socially-responsible
                 and empowered human resources who value life-long learning; and to generate,
                 disseminate, and apply knowledge and technologies for poverty alleviation,
@@ -40,8 +40,8 @@
     
                 {{-- Program name breadcrumb --}}
                 <div class="flex items-center gap-2 mb-4">
-                    <i class="bx bx-network-chart text-emerald-500 text-lg"></i>
-                    <h2 class="text-base font-semibold text-slate-800">
+                    <i class="bx bx-network-chart text-[#16a34a] text-lg"></i>
+                    <h2 class="text-[15px] font-bold text-[#0f172a]">
                         {{ $program->name }}
                     </h2>
                 </div>
@@ -61,7 +61,7 @@
                             icon="list-check"
                             color="emerald">
                             <div class="mb-4">
-                                <p class="mx-1 text-xs text-slate-500">
+                                <p class="mx-1 text-[13px] text-[#475569]">
                                     Three to five years after graduation, graduates of
                                     <strong>{{ $program->name }}</strong> are expected to be:
                                 </p>
@@ -74,7 +74,7 @@
                     <x-slot name="slot_po">
     
                         {{-- Reference panel: read-only PEOs shown at the top of the PO tab --}}
-                        <div class="rounded-2xl border border-slate-100 bg-slate-50 p-5">
+                        <div class="rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-5">
                             <livewire:programs.peo-display :program="$program" />
                         </div>
     
@@ -84,7 +84,7 @@
                                 icon="target-lock"
                                 color="blue">
                                 <div class="mb-4">
-                                    <p class="mt-0.5 text-xs text-slate-500">
+                                    <p class="mt-0.5 text-[13px] text-[#475569]">
                                         By the time of graduation, students of
                                         <strong>{{ $program->name }}</strong> have the ability to:
                                     </p>

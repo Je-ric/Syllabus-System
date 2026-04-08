@@ -11,19 +11,20 @@
     <template x-for="(peo, index) in peos" :key="peo.id ?? ('new-' + index)">
 
         <div :class="peo.id
-                ? 'border-slate-200 bg-white'
-                : 'border-amber-300 bg-amber-50/50'"
-            class="rounded-xl border shadow-sm p-4 transition-colors duration-200">
+                ? 'border-[#e2e8f0] bg-white'
+                : 'border-[#fcd34d] bg-[#fffbeb]/50'"
+            class="rounded-xl border overflow-hidden transition-colors duration-200"
+            style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
 
-            <div class="flex items-start gap-3">
+            <div class="flex items-start gap-3 p-4">
 
                 {{-- Code badge --}}
                 <div class="shrink-0 pt-0.5">
                     <span :class="peo.id
-                            ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200'
-                            : 'bg-amber-100 text-amber-700 ring-1 ring-amber-300'"
+                            ? 'bg-[#dcfce7] text-[#166534] ring-1 ring-[#bbf7d0]'
+                            : 'bg-[#fef3c7] text-[#92400e] ring-1 ring-[#fcd34d]'"
                         class="inline-flex items-center justify-center
-                                w-10 h-10 rounded-xl text-xs font-bold
+                                w-10 h-10 rounded-xl text-[13px] font-bold
                                 transition-colors duration-200">
                         <span x-text="'PEO' + (index + 1)"></span>
                     </span>
@@ -37,7 +38,7 @@
                         placeholder="Describe what graduates will be professionally three to five years after graduation…" />
 
                     <p x-show="!peo.id" x-cloak
-                        class="mt-1.5 flex items-center gap-1.5 text-xs text-amber-600">
+                        class="mt-1.5 flex items-center gap-1.5 text-[13px] text-[#92400e]">
                         <i class="bx bx-error-circle text-sm shrink-0"></i>
                         Unsaved — click <strong class="mx-0.5">Save All</strong> to persist this row.
                     </p>
