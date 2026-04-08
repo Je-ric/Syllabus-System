@@ -7,7 +7,7 @@
 <div>
     <x-page-header icon="bx-book-open" title="{{ $syllabus->id ? 'Edit' : 'Create' }} Syllabus"
         desc="{{ $course->course_code }} - {{ $course->course_title }}">
-        <x-button variant="cancel" href="{{ route('syllabus.index') }}">&larr; Back to Syllabi</x-button>
+        <x-button variant="cancel" href="{{ route('syllabus.index') }}"><i class="bx bx-arrow-back"></i> Back to Syllabi</x-button>
     </x-page-header>
 
     <x-panel>
@@ -102,108 +102,162 @@
             </div>
         </div>
 
-        {{-- ══ Step nav tabs ════════════════════════════════════════════════════════ --}}
-        <div class="mb-6 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-            <nav class="flex overflow-x-auto border-b border-slate-200 scrollbar-none" aria-label="Wizard Steps">
-                @foreach ($steps as $step => $label)
-                    @php
-                        $index = array_search($step, $stepsOrder, true);
-                        $isCurrent = $currentStep === $step;
-                        $isCompleted = $currentIndex !== false && $index !== false && $index < $currentIndex;
-                    @endphp
-                    <button type="button" wire:click="clickTab('{{ $step }}')" wire:loading.attr="disabled"
-                        wire:target="clickTab,goPreviousStep,goNextStep,submitForReview,saveAsDone"
-                        class="flex-1 min-w-20 flex flex-col items-center gap-1 px-3 py-3.5 text-xs font-medium
-                                transition-all duration-150 focus:outline-none border-b-2 whitespace-nowrap
-                                {{ $isCurrent
-                                    ? 'border-emerald-600 text-emerald-700 bg-emerald-50'
-                                    : ($isCompleted
-                                        ? 'border-emerald-400 text-emerald-600 hover:bg-emerald-50'
-                                        : 'border-transparent text-slate-400 hover:text-slate-600 hover:bg-slate-50') }}
-                                disabled:opacity-50 disabled:cursor-not-allowed">
-                        <span
-                            class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs shrink-0
-                                    {{ $isCurrent
-                                        ? 'bg-emerald-600 text-white shadow-sm'
-                                        : ($isCompleted
-                                            ? 'bg-emerald-500 text-white'
-                                            : 'bg-slate-100 text-slate-500 ring-1 ring-slate-200') }}">
-                            @if ($isCompleted)
-                                <i class="bx bx-check text-sm"></i>
-                            @else
-                                {{ $index + 1 }}
+        @php
+            $navSteps = [
+                'academic_calendar' => ['label' => 'Academic Calendar',  'icon' => 'bx-calendar'],
+                'course_components' => ['label' => 'Course Components',  'icon' => 'bx-notepad'],
+                'course_outcomes'   => ['label' => 'Course Outcomes',    'icon' => 'bx-book-open'],
+                'weekly_coverage'   => ['label' => 'Weekly Coverage',    'icon' => 'bx-calendar-week'],
+                'course_evaluation' => ['label' => 'Course Evaluation',  'icon' => 'bx-bar-chart-alt-2'],
+                'review'            => ['label' => 'Review & Submit',    'icon' => 'bx-check-shield'],
+            ];
+            $missingSteps = ['academic_calendar', 'course_components', 'course_outcomes', 'weekly_coverage'];
+        @endphp
+
+        {{-- ══ Two-column layout: content left, sticky nav right ══════════════ --}}
+        <div class="flex gap-6 items-start">
+
+            {{-- ── Main content ──────────────────────────────────────────────── --}}
+            <div class="flex-1 min-w-0">
+
+                {{-- Mobile step strip (visible only below lg) --}}
+                <div class="lg:hidden mb-4 overflow-x-auto">
+                    <div class="flex items-center gap-1 min-w-max">
+                        @foreach ($navSteps as $step => $meta)
+                            @php
+                                $idx       = array_search($step, $stepsOrder, true);
+                                $isCurrent = $currentStep === $step;
+                                $isDone    = $currentIndex !== false && $idx !== false && $idx < $currentIndex;
+                                $hasMiss   = in_array($step, $missingSteps) && $this->stepHasMissingRequired($step);
+                            @endphp
+                            <button type="button"
+                                wire:click="clickTab('{{ $step }}')"
+                                wire:loading.attr="disabled"
+                                wire:target="clickTab,goPreviousStep,goNextStep,submitForReview,saveAsDone"
+                                class="relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors
+                                       focus:outline-none disabled:opacity-50
+                                       {{ $isCurrent ? 'bg-[#f0fdf4] text-[#15803d] ring-1 ring-[#bbf7d0]' : 'text-slate-500 hover:bg-slate-50' }}">
+                                <span class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0
+                                             {{ $isCurrent ? 'bg-[#16a34a] text-white' : ($isDone ? 'bg-[#16a34a] text-white' : 'bg-slate-100 text-slate-400') }}">
+                                    @if ($isDone)<i class="bx bx-check text-[10px]"></i>@else{{ $idx + 1 }}@endif
+                                </span>
+                                <span class="whitespace-nowrap">{{ $meta['label'] }}</span>
+                                @if ($hasMiss)
+                                    <span class="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-amber-400"></span>
+                                @endif
+                            </button>
+                            @if (!$loop->last)
+                                <i class="bx bx-chevron-right text-slate-300 text-sm shrink-0"></i>
                             @endif
-                        </span>
-                        <span class="hidden md:block text-center leading-tight mt-0.5">{{ $label }}</span>
-                    </button>
-                @endforeach
-            </nav>
-        </div>
+                        @endforeach
+                    </div>
+                </div>
 
-        {{-- ══ Step content ════════════════════════════════════════════════════════
-            CRITICAL: No :key attribute on any child component.
-            Without :key, Livewire keeps the component mounted in memory for the
-            entire page session. Switching steps just shows/hides the wrapper div —
-            zero remount, zero cold-boot DB queries, instant perceived transition.
+                {{-- Step content --}}
+                <div class="bg-white border border-[#dedee2] rounded-xl shadow-sm" style="box-shadow: 0 1px 4px rgba(0,0,0,0.06);">
 
-            Each child listens to 'syllabus-save-step' and only acts on its own step.
-            The wizard's saveAndNavigate() dispatches the save event + changes
-            $currentStep in ONE round trip, so the UI updates immediately.
-        ──────────────────────────────────────────────────────────────────────────── --}}
-        <div class="bg-white border border-slate-200 rounded-xl shadow-sm">
+                    <div class="{{ $currentStep === 'academic_calendar' ? 'block' : 'hidden' }} p-5 sm:p-6">
+                        <livewire:syllabus.steps.academic-calendar-step :syllabus-id="$syllabus->id" />
+                    </div>
+                    <div class="{{ $currentStep === 'course_components' ? 'block' : 'hidden' }} p-5 sm:p-6">
+                        <livewire:syllabus.steps.components-step :syllabus-id="$syllabus->id" />
+                    </div>
+                    <div class="{{ $currentStep === 'course_outcomes' ? 'block' : 'hidden' }} p-5 sm:p-6">
+                        <livewire:syllabus.steps.course-outcomes-step :syllabus-id="$syllabus->id" />
+                    </div>
+                    <div class="{{ $currentStep === 'weekly_coverage' ? 'block' : 'hidden' }} p-5 sm:p-6">
+                        <livewire:syllabus.steps.weekly-coverage-step :syllabus-id="$syllabus->id" />
+                    </div>
+                    <div class="{{ $currentStep === 'course_evaluation' ? 'block' : 'hidden' }} p-5 sm:p-6">
+                        <livewire:syllabus.steps.course-evaluation-step :syllabus-id="$syllabus->id" />
+                    </div>
+                    <div class="{{ $currentStep === 'review' ? 'block' : 'hidden' }} p-5 sm:p-6">
+                        <livewire:syllabus.steps.review-step :syllabus-id="$syllabus->id" />
+                    </div>
 
-            {{-- Academic Calendar --}}
-            <div class="{{ $currentStep === 'academic_calendar' ? 'block' : 'hidden' }} p-5 sm:p-6">
-                <livewire:syllabus.steps.academic-calendar-step :syllabus-id="$syllabus->id" />
-            </div>
+                </div>
 
-            {{-- Course Components --}}
-            <div class="{{ $currentStep === 'course_components' ? 'block' : 'hidden' }} p-5 sm:p-6">
-                <livewire:syllabus.steps.components-step :syllabus-id="$syllabus->id" />
-            </div>
+                {{-- Bottom Prev / Next --}}
+                <div class="mt-4 flex justify-between items-center gap-3">
+                    <div>
+                        @if ($this->hasPreviousStep())
+                            <x-button variant="cancel" wire:click="goPreviousStep" wire:loading.attr="disabled"
+                                wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview,saveAsDone">
+                                <i class="bx bx-chevron-left"></i>
+                                <span class="hidden sm:inline">Previous</span>
+                            </x-button>
+                        @endif
+                    </div>
+                    <div>
+                        @if ($this->hasNextStep())
+                            <x-button variant="primary" wire:click="goNextStep" wire:loading.attr="disabled"
+                                wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview,saveAsDone"
+                                loading="Saving…">
+                                <span class="hidden sm:inline">Next</span> <i class="bx bx-chevron-right"></i>
+                            </x-button>
+                        @endif
+                    </div>
+                </div>
 
-            {{-- Course Outcomes --}}
-            <div class="{{ $currentStep === 'course_outcomes' ? 'block' : 'hidden' }} p-5 sm:p-6">
-                <livewire:syllabus.steps.course-outcomes-step :syllabus-id="$syllabus->id" />
-            </div>
+            </div>{{-- end main content --}}
 
-            {{-- Weekly Coverage --}}
-            <div class="{{ $currentStep === 'weekly_coverage' ? 'block' : 'hidden' }} p-5 sm:p-6">
-                <livewire:syllabus.steps.weekly-coverage-step :syllabus-id="$syllabus->id" />
-            </div>
+            {{-- ── Sticky right-side step navigator ──────────────────────────── --}}
+            <aside class="hidden lg:block w-60 shrink-0" style="position: sticky; top: 5rem; align-self: flex-start; max-height: calc(100vh - 6rem); overflow-y: auto;">
+                <div class="rounded-xl border border-[#dedee2] bg-white overflow-hidden" style="box-shadow: 0 1px 4px rgba(0,0,0,0.06);">
 
-            {{-- Course Evaluation --}}
-            <div class="{{ $currentStep === 'course_evaluation' ? 'block' : 'hidden' }} p-5 sm:p-6">
-                <livewire:syllabus.steps.course-evaluation-step :syllabus-id="$syllabus->id" />
-            </div>
+                    {{-- Nav header --}}
+                    <div class="px-4 py-3 border-b border-[#dedee2] bg-[#F5F5F6]">
+                        <p class="text-[11px] font-bold uppercase tracking-[0.15em] text-[#797980]">Steps</p>
+                    </div>
 
-            {{-- Review --}}
-            <div class="{{ $currentStep === 'review' ? 'block' : 'hidden' }} p-5 sm:p-6">
-                <livewire:syllabus.steps.review-step :syllabus-id="$syllabus->id" />
-            </div>
-        </div>
+                    {{-- Step list --}}
+                    <nav class="py-1" aria-label="Wizard Steps">
+                        @foreach ($navSteps as $step => $meta)
+                            @php
+                                $idx         = array_search($step, $stepsOrder, true);
+                                $isCurrent   = $currentStep === $step;
+                                $isCompleted = $currentIndex !== false && $idx !== false && $idx < $currentIndex;
+                                $hasMissing  = in_array($step, $missingSteps) && $this->stepHasMissingRequired($step);
+                            @endphp
+                            <button type="button"
+                                wire:click="clickTab('{{ $step }}')"
+                                wire:loading.attr="disabled"
+                                wire:target="clickTab,goPreviousStep,goNextStep,submitForReview,saveAsDone"
+                                class="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors
+                                       focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed
+                                       {{ $isCurrent
+                                            ? 'bg-[#f0fdf4] text-[#15803d] font-semibold border-l-[3px] border-[#16a34a]'
+                                            : 'text-[#58585e] hover:bg-[#F5F5F6] hover:text-[#36363b] border-l-[3px] border-transparent' }}">
 
-        {{-- ══ Bottom navigation ════════════════════════════════════════════════════ --}}
-        <div class="mt-6 flex justify-between items-center gap-3">
-            <div>
-                @if ($this->hasPreviousStep())
-                    <x-button variant="cancel" wire:click="goPreviousStep" wire:loading.attr="disabled"
-                        wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview,saveAsDone">
-                        <i class="bx bx-chevron-left"></i>
-                        <span class="hidden sm:inline">Previous</span>
-                    </x-button>
-                @endif
-            </div>
+                                {{-- Step number / check --}}
+                                <span class="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold
+                                             {{ $isCurrent
+                                                  ? 'bg-[#16a34a] text-white'
+                                                  : ($isCompleted
+                                                       ? 'bg-[#16a34a] text-white'
+                                                       : 'bg-slate-100 text-slate-400') }}">
+                                    @if ($isCompleted)
+                                        <i class="bx bx-check text-xs"></i>
+                                    @else
+                                        {{ $idx + 1 }}
+                                    @endif
+                                </span>
 
-            <div class="flex items-center gap-3">
-                @if ($this->hasNextStep())
-                    <x-button variant="primary" wire:click="goNextStep" wire:loading.attr="disabled"
-                        wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview,saveAsDone"
-                        loading="Saving…">
-                        <span class="hidden sm:inline">Next</span> <i class="bx bx-chevron-right"></i>
-                    </x-button>
-                @endif
-            </div>
-        </div>
+                                {{-- Label --}}
+                                <span class="flex-1 leading-tight text-[12px]">{{ $meta['label'] }}</span>
+
+                                {{-- Missing indicator --}}
+                                @if ($hasMissing)
+                                    <span class="shrink-0 w-2 h-2 rounded-full bg-amber-400" title="Incomplete"></span>
+                                @endif
+
+                            </button>
+                        @endforeach
+                    </nav>
+
+                </div>
+            </aside>
+
+        </div>{{-- end two-column --}}
     </x-panel>
 </div>
