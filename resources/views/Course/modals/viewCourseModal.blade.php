@@ -1,19 +1,19 @@
 <x-modal.dialog id="viewCourseModal_{{ $course->id }}" maxWidth="max-w-3xl" width="w-11/12">
-
     <x-modal.header modalId="viewCourseModal_{{ $course->id }}">
         <div class="flex items-center gap-3 min-w-0">
-            <div class="shrink-0 flex items-center justify-center w-9 h-9 rounded-xl text-emerald-700">
-                <i class="bx bx-book text-lg"></i>
-            </div>
+            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#dcfce7] text-[#16a34a] shrink-0">
+                <i class="bx bx-book text-base leading-none"></i>
+            </span>
             <div class="min-w-0">
-                <p class="font-bold text-slate-800 leading-tight truncate">{{ $course->course_title }}</p>
-                <div class="flex items-center gap-2 mt-0.5 flex-wrap">
-                    <span class="font-mono text-[11px] font-bold text-emerald-700 bg-emerald-50
-                                 px-1.5 py-0.5 rounded-md ring-1 ring-emerald-200/60">
+                <p class="text-[15px] font-bold text-[#0f172a] leading-tight truncate">
+                    {{ $course->course_title }}
+                </p>
+                <div class="flex items-center gap-2 mt-0.5 flex-wrap min-w-0">
+                    <span class="font-mono text-[11px] font-bold text-[#166534] bg-[#f0fdf4] border border-[#bbf7d0] px-2 py-0.5 rounded-md shrink-0">
                         {{ $course->course_code }}
                     </span>
                     @if ($course->program)
-                        <span class="text-xs text-slate-400">{{ $course->program->name }}</span>
+                        <span class="text-[13px] text-[#94a3b8] truncate">{{ $course->program->name }}</span>
                     @endif
                 </div>
             </div>
@@ -23,7 +23,7 @@
     <x-modal.body>
         <div class="space-y-5">
 
-            {{-- ── Key facts row ─────────────────────────────────────────────── --}}
+            {{-- Key facts --}}
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
 
                 <div class="rounded-xl bg-slate-50 border border-slate-200/80 px-4 py-3 text-center">
@@ -55,7 +55,7 @@
                 </div>
             </div>
 
-            {{-- ── Meta row (pre/co-req, created by) ────────────────────────── --}}
+            {{-- Meta (pre/co-req, created by) --}}
             @if ($course->prerequisite || $course->corequisite || $course->creator)
                 <div class="flex flex-wrap gap-3 text-sm">
                     @if ($course->prerequisite)
@@ -85,7 +85,7 @@
                 </div>
             @endif
 
-            {{-- ── Course description ─────────────────────────────────────────── --}}
+            {{-- Course description --}}
             @if ($course->course_description)
                 <div>
                     <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2">
@@ -98,7 +98,7 @@
                 </div>
             @endif
 
-            {{-- ── PO Mapping ─────────────────────────────────────────────────── --}}
+            {{-- PO mapping --}}
             <div>
                 <div class="flex items-center justify-between mb-2">
                     <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
@@ -150,8 +150,7 @@
     <x-modal.footer>
         <x-modal.close-button
             :modalId="'viewCourseModal_' . $course->id"
-            text="Close"
-            variant="cancel" />
+            text="Close" />
     </x-modal.footer>
 
 </x-modal.dialog>

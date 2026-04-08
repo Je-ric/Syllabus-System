@@ -33,8 +33,8 @@
 
     <x-panel>
         {{-- Program selector --}}
-        <div class="border border-slate-200/80 rounded-2xl p-5 mb-6 bg-white/90 shadow-sm">
-            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 mb-3">Select Program</p>
+        <div class="rounded-xl border border-[#e2e8f0] bg-white p-5 mb-6" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
+            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-3">Select Program</p>
             <livewire:programs.program-selector
                 :program-id="optional($program)?->id"
                 redirect-route="courses.index"
@@ -45,28 +45,28 @@
 
             {{-- ── Program Outcomes reference (accordion) ───────────────────── --}}
             @if ($program->outcomes->isNotEmpty())
-                <div x-data="{ open: false }" class="mb-6 rounded-2xl border border-slate-200/80 bg-white/90 shadow-sm overflow-hidden">
+                <div x-data="{ open: false }" class="mb-6 rounded-xl border border-[#e2e8f0] bg-white overflow-hidden" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
                     <button type="button" @click="open = !open"
-                        class="w-full px-5 py-3 border-b border-slate-100 flex items-center justify-between hover:bg-slate-50/60 transition-colors">
-                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                        class="w-full px-5 py-3 border-b border-[#e2e8f0] flex items-center justify-between hover:bg-[#f8fafc] transition-colors">
+                        <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569]">
                             Program Outcomes Reference
                         </p>
                         <div class="flex items-center gap-2">
-                            <span class="text-xs text-slate-400">{{ $program->outcomes->count() }} outcome(s)</span>
-                            <i class="bx text-slate-400 text-base transition-transform duration-200"
+                            <span class="text-[13px] text-[#94a3b8]">{{ $program->outcomes->count() }} outcome(s)</span>
+                            <i class="bx text-[#94a3b8] text-base transition-transform duration-200"
                                 :class="open ? 'bx-chevron-up' : 'bx-chevron-down'"></i>
                         </div>
                     </button>
                     <div x-show="open" x-collapse>
                         <div class="overflow-x-auto">
                             <table class="w-full text-sm">
-                                <tbody class="divide-y divide-slate-100">
+                                <tbody class="divide-y divide-[#e2e8f0]">
                                     @foreach ($program->outcomes as $outcome)
-                                        <tr class="hover:bg-slate-50/60 transition-colors">
-                                            <td class="px-5 py-2.5 whitespace-nowrap w-px font-mono text-xs font-bold text-emerald-700">
+                                        <tr class="hover:bg-[#f0fdf4] transition-colors">
+                                            <td class="px-5 py-2.5 whitespace-nowrap w-px font-mono text-[13px] font-bold text-[#166534]">
                                                 {{ $outcome->po_code }}
                                             </td>
-                                            <td class="px-4 py-2.5 text-slate-600 leading-relaxed text-sm">
+                                            <td class="px-4 py-2.5 text-[13px] text-[#475569] leading-relaxed">
                                                 {{ $outcome->po_text }}
                                             </td>
                                         </tr>
@@ -84,25 +84,25 @@
                     {{-- Year heading --}}
                     <div class="flex items-center gap-3 mb-4">
                         <span class="inline-flex items-center justify-center w-8 h-8 rounded-full
-                                     bg-emerald-600 text-white text-xs font-bold shrink-0">
+                                     bg-[#16a34a] text-white text-[13px] font-bold shrink-0">
                             {{ $year ?? '?' }}
                         </span>
-                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-[0.15em]">
+                        <h3 class="text-[13px] font-bold text-[#0f172a] uppercase tracking-[0.12em]">
                             Year {{ $year ?? 'N/A' }}
                         </h3>
-                        <div class="flex-1 h-px bg-slate-200"></div>
+                        <div class="flex-1 h-px bg-[#e2e8f0]"></div>
                     </div>
 
                     @forelse ($semesters as $semester => $courses)
-                        <div class="mb-5 rounded-2xl border border-slate-200/80 bg-white/90 shadow-sm overflow-hidden">
+                        <div class="mb-5 rounded-xl border border-[#e2e8f0] bg-white overflow-hidden" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
 
                             {{-- Semester sub-header --}}
-                            <div class="px-5 py-2.5 border-b border-slate-100 bg-slate-50/60 flex items-center gap-2">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
-                                <h4 class="text-xs font-semibold text-slate-600 uppercase tracking-[0.15em]">
+                            <div class="px-5 py-2.5 border-b border-[#e2e8f0] bg-[#f8fafc] flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-[#16a34a] shrink-0"></span>
+                                <h4 class="text-[11px] font-bold text-[#475569] uppercase tracking-[0.12em]">
                                     Semester {{ $semester ?? 'N/A' }}
                                 </h4>
-                                <span class="ml-auto text-xs text-slate-400">
+                                <span class="ml-auto text-[13px] text-[#94a3b8]">
                                     {{ count($courses) }} course(s)
                                 </span>
                             </div>
@@ -110,33 +110,31 @@
                             <div class="overflow-x-auto">
                                 <table class="w-full text-sm border-collapse">
                                     <thead>
-                                        <tr class="bg-slate-50/70 text-slate-500 text-xs uppercase tracking-[0.12em]">
-                                            <th class="px-5 py-3 text-left font-semibold">Course</th>
-                                            <th class="px-4 py-3 text-center font-semibold w-16">Units</th>
-                                            <th class="px-4 py-3 text-center font-semibold w-16">Type</th>
-
+                                        <tr class="bg-[#f8fafc] border-b border-[#e2e8f0]">
+                                            <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569]">Course</th>
+                                            <th class="px-4 py-3 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] w-16">Units</th>
+                                            <th class="px-4 py-3 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] w-16">Type</th>
                                             @foreach ($program->outcomes as $outcome)
-                                                <th class="px-2 py-3 text-center font-semibold w-14">
+                                                <th class="px-2 py-3 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] w-14">
                                                     {{ $outcome->po_code }}
                                                 </th>
                                             @endforeach
-
-                                            <th class="px-4 py-3 text-center font-semibold w-28">Actions</th>
+                                            <th class="px-4 py-3 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] w-28">Actions</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="divide-y divide-slate-100">
+                                    <tbody class="divide-y divide-[#e2e8f0]">
                                         @foreach ($courses as $course)
                                             @php $modalCourses->push($course); @endphp
-                                            <tr class="hover:bg-emerald-50/30 transition-colors group">
+                                            <tr class="hover:bg-[#f0fdf4] transition-colors group">
 
-                                                <td class="px-5 py-3">
+                                                <td class="px-5 py-3 text-[13px] text-[#0f172a]">
                                                     {{ $course->course_code }} - {{ $course->course_title }}
                                                 </td>
 
                                                 {{-- Units --}}
                                                 <td class="px-4 py-3 text-center">
                                                     <span class="inline-flex items-center justify-center w-7 h-7 rounded-full
-                                                                 bg-slate-100 text-slate-700 text-xs font-bold">
+                                                                 bg-[#f8fafc] text-[#0f172a] text-[13px] font-bold ring-1 ring-[#e2e8f0]">
                                                         {{ $course->credit_units }}
                                                     </span>
                                                 </td>
@@ -144,17 +142,9 @@
                                                 {{-- LEC / LAB chip --}}
                                                 <td class="px-4 py-3 text-center">
                                                     @if ($course->has_lec_lab)
-                                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full
-                                                                     bg-blue-50 text-blue-700 text-[10px] font-bold
-                                                                     ring-1 ring-blue-200/60 whitespace-nowrap">
-                                                            <span class="w-1 h-1 rounded-full bg-blue-500"></span> LEC+LAB
-                                                        </span>
+                                                        <x-feedback-status.status-indicator variant="lab" :dot="true">LEC+LAB</x-feedback-status.status-indicator>
                                                     @else
-                                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full
-                                                                     bg-emerald-50 text-emerald-700 text-[10px] font-bold
-                                                                     ring-1 ring-emerald-200/60">
-                                                            <span class="w-1 h-1 rounded-full bg-emerald-500"></span> LEC
-                                                        </span>
+                                                        <x-feedback-status.status-indicator variant="brand" :dot="true">LEC</x-feedback-status.status-indicator>
                                                     @endif
                                                 </td>
 

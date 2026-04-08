@@ -7,7 +7,7 @@
     title="{{ $pageTitle }}"
     desc="Fill in the course details and map program outcomes below.">
     <x-button href="{{ route('courses.index') }}" variant="cancel">
-        <i class="bx bx-chevron-left"></i> Back to Courses
+        <i class="bx bx-arrow-back"></i> Back to Courses
     </x-button>
 </x-page-header>
 
