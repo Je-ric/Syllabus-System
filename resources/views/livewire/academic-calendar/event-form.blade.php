@@ -1,10 +1,4 @@
-{{--
-    livewire/academic-calendar/event-form.blade.php
-    ────────────────────────────────────────────────
-    Two-column: form left, events table right.
-    Alpine owns all form state — edit loads instantly (zero server call).
-    Only saveEvent() and deleteEvent() hit the server.
---}}
+{{-- livewire/academic-calendar/event-form.blade.php --}}
 
 <div
     x-data="{
@@ -47,19 +41,21 @@
     }"
     x-on:event-load-form.window="loadForm($event)"
     x-on:event-saved.window="reset()"
-    class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+    class="grid grid-cols-1 lg:grid-cols-2 gap-6"
+    style="align-items: start;">
 
-    {{-- ══ LEFT: Add / Edit form ══════════════════════════════════════════ --}}
-    <div>
+    {{-- ══ LEFT: Add / Edit form (sticky) ══════════════════════════════════ --}}
+    <div style="position: sticky; top: 5rem; align-self: flex-start;">
+
         {{-- Form header --}}
         <div class="flex items-center justify-between mb-3">
             <div>
                 <span x-show="!editingId"
-                    class="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                    class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#94a3b8]">
                     New Event
                 </span>
                 <span x-show="editingId" x-cloak
-                    class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-amber-600">
+                    class="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569]">
                     <i class="bx bx-edit-alt text-xs leading-none"></i>
                     Editing Event
                 </span>
@@ -67,22 +63,24 @@
             <button type="button"
                 x-show="editingId" x-cloak
                 x-on:click="reset()"
-                class="text-xs text-slate-400 hover:text-slate-700 underline underline-offset-2 transition-colors">
+                class="text-[13px] text-[#94a3b8] hover:text-[#0f172a] underline underline-offset-2 transition-colors">
                 Cancel
             </button>
         </div>
 
-        {{-- Form card — border changes when editing --}}
-        <div class="rounded-xl border p-4 flex flex-col gap-3.5 transition-colors duration-150"
-            x-bind:class="editingId
-                ? 'border-amber-200 bg-amber-50/60'
-                : 'border-slate-200 bg-slate-50/60'">
+        {{-- Form card --}}
+        <div class="rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-4 flex flex-col gap-3.5"
+             style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
 
             {{-- Type --}}
             <div>
                 <x-form.label isRequired>Type</x-form.label>
                 <select x-model="type"
-                    class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-emerald-400 focus:ring-1 focus:ring-emerald-300 focus:outline-none transition-colors">
+                    class="mt-1.5 w-full rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-[13px] text-[#0f172a]
+                           focus:border-[#16a34a] focus:outline-none transition-colors"
+                    style="box-shadow:none"
+                    onfocus="this.style.boxShadow='0 0 0 3px rgba(22,163,74,0.25)'"
+                    onblur="this.style.boxShadow='none'">
                     <option value="holiday">Holiday</option>
                     <option value="exam">Exam</option>
                     <option value="break">Break</option>
@@ -95,7 +93,7 @@
             <div>
                 <x-form.label isRequired>Date</x-form.label>
                 @if($semester)
-                    <p class="text-[10px] text-slate-400 mb-1">
+                    <p class="text-[13px] text-[#94a3b8] mb-1">
                         {{ \Carbon\Carbon::parse($semester->start_date)->format('M j') }}
                         – {{ \Carbon\Carbon::parse($semester->end_date)->format('M j, Y') }}
                     </p>
@@ -103,12 +101,16 @@
                 <input type="date" x-model="date"
                     min="{{ $semester?->start_date }}"
                     max="{{ $semester?->end_date }}"
-                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm hover:border-slate-400 focus:border-emerald-400 focus:ring-1 focus:ring-emerald-300 focus:outline-none transition-colors" />
-                <p x-show="saving && !date" x-cloak class="mt-1 text-xs text-rose-500 flex items-center gap-1">
+                    class="w-full rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-[13px] text-[#0f172a]
+                           hover:border-[#bbf7d0] focus:border-[#16a34a] focus:outline-none transition-colors"
+                    style="box-shadow:none"
+                    onfocus="this.style.boxShadow='0 0 0 3px rgba(22,163,74,0.25)'"
+                    onblur="this.style.boxShadow='none'" />
+                <p x-show="saving && !date" x-cloak class="mt-1 text-[13px] text-rose-500 flex items-center gap-1">
                     <i class="bx bx-error-circle"></i> Date is required.
                 </p>
                 @error('date')
-                    <p class="mt-1 text-xs text-rose-500 flex items-center gap-1">
+                    <p class="mt-1 text-[13px] text-rose-500 flex items-center gap-1">
                         <i class="bx bx-error-circle"></i> {{ $message }}
                     </p>
                 @enderror
@@ -119,141 +121,140 @@
                 <x-form.label isRequired>Event Name</x-form.label>
                 <input x-model="name" type="text"
                     placeholder="e.g. Christmas Break"
-                    class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm placeholder:text-slate-400 hover:border-slate-400 focus:border-emerald-400 focus:ring-1 focus:ring-emerald-300 focus:outline-none transition-colors" />
-                <p x-show="saving && !name.trim()" x-cloak class="mt-1 text-xs text-rose-500 flex items-center gap-1">
+                    class="mt-1.5 w-full rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-[13px] text-[#0f172a]
+                           placeholder:text-[#94a3b8] hover:border-[#bbf7d0] focus:border-[#16a34a] focus:outline-none transition-colors"
+                    style="box-shadow:none"
+                    onfocus="this.style.boxShadow='0 0 0 3px rgba(22,163,74,0.25)'"
+                    onblur="this.style.boxShadow='none'" />
+                <p x-show="saving && !name.trim()" x-cloak class="mt-1 text-[13px] text-rose-500 flex items-center gap-1">
                     <i class="bx bx-error-circle"></i> Event name is required.
                 </p>
                 @error('name')
-                    <p class="mt-1 text-xs text-rose-500 flex items-center gap-1">
+                    <p class="mt-1 text-[13px] text-rose-500 flex items-center gap-1">
                         <i class="bx bx-error-circle"></i> {{ $message }}
                     </p>
                 @enderror
             </div>
 
             @error('type')
-                <p class="text-xs text-rose-500 flex items-center gap-1">
+                <p class="text-[13px] text-rose-500 flex items-center gap-1">
                     <i class="bx bx-error-circle"></i> {{ $message }}
                 </p>
             @enderror
 
-            {{-- Submit button --}}
+            {{-- Submit --}}
             <div class="flex justify-end mt-auto">
-            <x-button type="button" variant="add-button"
-                x-on:click="submit()"
-                x-bind:disabled="saving"
-                x-bind:class="editingId ? 'bg-amber-500! hover:!bg-amber-600! focus:!ring-amber-400/30!' : ''">
-                <span x-show="!saving" class="inline-flex items-center gap-2">
-                    <i x-show="editingId"  class="bx bx-save leading-none"></i>
-                    <i x-show="!editingId" class="bx bx-plus leading-none"></i>
-                    <span x-text="editingId ? 'Update Event' : 'Add Event'"></span>
-                </span>
-                <span x-show="saving" x-cloak class="inline-flex items-center gap-2">
-                    <svg class="animate-spin h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                    </svg>
-                    Saving…
-                </span>
-            </x-button>
+                <x-button type="button" variant="add-button"
+                    x-on:click="submit()"
+                    x-bind:disabled="saving">
+                    <span x-show="!saving" class="inline-flex items-center gap-2">
+                        <i x-show="editingId"  class="bx bx-save leading-none"></i>
+                        <i x-show="!editingId" class="bx bx-plus leading-none"></i>
+                        <span x-text="editingId ? 'Update Event' : 'Add Event'"></span>
+                    </span>
+                    <span x-show="saving" x-cloak class="inline-flex items-center gap-2">
+                        <svg class="animate-spin h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                        </svg>
+                        Saving…
+                    </span>
+                </x-button>
             </div>
         </div>
     </div>
 
-    {{-- ══ RIGHT: Events table ═════════════════════════════════════════════ --}}
+    {{-- ══ RIGHT: Events table ══════════════════════════════════════════════ --}}
     <div>
         <div class="flex items-center justify-between mb-3">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569]">
                 {{ $semester?->semester }} Semester Events
             </p>
             @if($semester)
-                <span class="text-xs text-slate-500">
+                <span class="text-[13px] text-[#94a3b8]">
                     {{ \Carbon\Carbon::parse($semester->start_date)->format('M j') }}
                     – {{ \Carbon\Carbon::parse($semester->end_date)->format('M j, Y') }}
                 </span>
             @endif
         </div>
 
-        <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <x-table.container>
-                <x-table.table>
-                    <x-table.head>
-                        <x-table.row>
-                            <x-table.th class="px-4 py-2.5">Date</x-table.th>
-                            <x-table.th class="px-4 py-2.5">Type</x-table.th>
-                            <x-table.th class="px-4 py-2.5">Name</x-table.th>
-                            <x-table.th class="px-4 py-2.5 text-right">Actions</x-table.th>
-                        </x-table.row>
-                    </x-table.head>
+        <x-table.container>
+            <x-table.table>
+                <x-table.head>
+                    <x-table.row>
+                        <x-table.th>Date</x-table.th>
+                        <x-table.th>Type</x-table.th>
+                        <x-table.th>Name</x-table.th>
+                        <x-table.th align="right">Actions</x-table.th>
+                    </x-table.row>
+                </x-table.head>
 
-                    <x-table.body>
-                        @forelse($semester?->events ?? [] as $event)
-                            @php
-                                $typeVariant = match($event->type) {
-                                    'holiday'      => 'emerald',
-                                    'exam'         => 'amber',
-                                    'break'        => 'blue',
-                                    'non_teaching' => 'rose',
-                                    default        => 'slate',
-                                };
-                            @endphp
+                <x-table.body>
+                    @forelse($semester?->events ?? [] as $event)
+                        @php
+                            $typeVariant = match($event->type) {
+                                'holiday'      => 'brand',
+                                'exam'         => 'amber',
+                                'break'        => 'lab',
+                                'non_teaching' => 'rose',
+                                default        => 'slate',
+                            };
+                        @endphp
 
-                            <x-table.row striped hover
-                                x-bind:class="editingId === {{ $event->id }} ? 'bg-amber-50!' : ''">
+                        <x-table.row striped hover
+                            x-bind:class="editingId === {{ $event->id }} ? 'bg-[#f0fdf4]' : ''">
 
-                                <x-table.td class="px-4 py-2.5 text-sm text-slate-700 whitespace-nowrap">
+                            <x-table.td class="whitespace-nowrap">
+                                <p class="text-[13px] font-medium text-[#0f172a]">
                                     {{ \Carbon\Carbon::parse($event->date)->format('M j, Y') }}
-                                    <span class="block text-[10px] text-slate-400">
-                                        {{ \Carbon\Carbon::parse($event->date)->format('l') }}
-                                    </span>
-                                </x-table.td>
+                                </p>
+                                <p class="text-[11px] text-[#94a3b8]">
+                                    {{ \Carbon\Carbon::parse($event->date)->format('l') }}
+                                </p>
+                            </x-table.td>
 
-                                <x-table.td class="px-4 py-2.5">
-                                    <x-feedback-status.status-indicator :variant="$typeVariant" size="sm" :dot="true">
-                                        {{ ucfirst(str_replace('_', ' ', $event->type)) }}
-                                    </x-feedback-status.status-indicator>
-                                </x-table.td>
+                            <x-table.td>
+                                <x-feedback-status.status-indicator :variant="$typeVariant" :dot="true">
+                                    {{ ucfirst(str_replace('_', ' ', $event->type)) }}
+                                </x-feedback-status.status-indicator>
+                            </x-table.td>
 
-                                <x-table.td class="px-4 py-2.5 text-sm text-slate-700">
-                                    {{ $event->name }}
-                                </x-table.td>
+                            <x-table.td class="text-[#475569]">
+                                {{ $event->name }}
+                            </x-table.td>
 
-                                <x-table.td class="px-4 py-2.5">
-                                    <div class="flex items-center justify-end gap-0.5">
-
-                                        {{-- Edit — pure Alpine, zero server call --}}
-                                        <button type="button"
-                                            x-on:click="$dispatch('event-load-form', @js(['id' => $event->id, 'type' => $event->type, 'name' => $event->name, 'date' => $event->date]))"
-                                            x-bind:disabled="deletingId !== null || saving"
-                                            title="Edit"
-                                            class="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 disabled:opacity-40 transition-colors">
-                                            <i class="bx bx-edit-alt text-sm leading-none"></i>
-                                        </button>
-
-                                        {{-- Delete --}}
-                                        <button type="button"
-                                            x-on:click="remove({{ $event->id }})"
-                                            x-bind:disabled="deletingId !== null || saving"
-                                            title="Delete"
-                                            class="p-1.5 rounded-lg disabled:opacity-40 transition-colors">
-                                            <i x-show="deletingId !== {{ $event->id }}"
-                                                class="bx bx-trash text-sm leading-none text-slate-400 hover:text-rose-600"></i>
-                                            <svg x-show="deletingId === {{ $event->id }}" x-cloak
-                                                class="animate-spin h-3.5 w-3.5 text-rose-400"
-                                                viewBox="0 0 24 24" fill="none">
-                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </x-table.td>
-                            </x-table.row>
-                        @empty
-                            <x-table.empty :colspan="4" message="No events added yet." class="py-8" />
-                        @endforelse
-                    </x-table.body>
-                </x-table.table>
-            </x-table.container>
-        </div>
+                            <x-table.td align="right">
+                                <div class="flex items-center justify-end gap-0.5">
+                                    <button type="button"
+                                        x-on:click="$dispatch('event-load-form', @js(['id' => $event->id, 'type' => $event->type, 'name' => $event->name, 'date' => $event->date]))"
+                                        x-bind:disabled="deletingId !== null || saving"
+                                        title="Edit"
+                                        class="p-1.5 rounded-lg text-[#94a3b8] hover:text-[#1e40af] hover:bg-[#eff6ff] disabled:opacity-40 transition-colors">
+                                        <i class="bx bx-edit-alt text-sm leading-none"></i>
+                                    </button>
+                                    <button type="button"
+                                        x-on:click="remove({{ $event->id }})"
+                                        x-bind:disabled="deletingId !== null || saving"
+                                        title="Delete"
+                                        class="p-1.5 rounded-lg disabled:opacity-40 transition-colors">
+                                        <i x-show="deletingId !== {{ $event->id }}"
+                                            class="bx bx-trash text-sm leading-none text-[#94a3b8] hover:text-rose-600"></i>
+                                        <svg x-show="deletingId === {{ $event->id }}" x-cloak
+                                            class="animate-spin h-3.5 w-3.5 text-rose-400"
+                                            viewBox="0 0 24 24" fill="none">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </x-table.td>
+                        </x-table.row>
+                    @empty
+                        <x-table.empty :colspan="4" message="No events added yet." />
+                    @endforelse
+                </x-table.body>
+            </x-table.table>
+        </x-table.container>
     </div>
 
 </div>
