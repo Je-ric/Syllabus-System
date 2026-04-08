@@ -53,42 +53,40 @@
             this.clearingConcurred = false;
         }
     }"
-    class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    class="rounded-xl border border-[#e2e8f0] bg-white overflow-hidden" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
 
     {{-- ── Header ── --}}
     <button type="button" x-on:click="open = !open"
         class="w-full flex items-center justify-between px-5 py-4 text-left
-               hover:bg-emerald-50/40 transition-colors focus:outline-none">
+               hover:bg-[#f8fafc] transition-colors focus:outline-none">
         <div class="flex items-center gap-3">
-            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600">
-                <i class="bx bx-user-check text-lg leading-none"></i>
+            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#dcfce7] text-[#16a34a]">
+                <i class="bx bx-user-check text-base leading-none"></i>
             </span>
             <div>
-                <p class="text-sm font-semibold text-slate-800">Review &amp; Approval</p>
-                <p class="text-xs text-slate-400 mt-0.5">
+                <p class="text-[13px] font-bold text-[#0f172a]">Review &amp; Approval</p>
+                <p class="text-[11px] text-[#94a3b8] mt-0.5">
                     Signatures, concurrence &amp; additional reviewers
                     @if (count($reviewers) > 0)
-                        ·
-                        <span class="text-blue-600 font-semibold">
+                        &middot;
+                        <span class="text-[#16a34a] font-semibold">
                             {{ count($reviewers) }} {{ Str::plural('reviewer', count($reviewers)) }}
                         </span>
                     @endif
                 </p>
             </div>
         </div>
-        <i class="bx text-slate-400 text-xl transition-transform duration-200"
+        <i class="bx text-[#94a3b8] text-lg transition-transform duration-200"
            x-bind:class="open ? 'bx-chevron-up' : 'bx-chevron-down'"></i>
     </button>
 
     {{-- ── Body ── --}}
     <div x-show="open" x-collapse>
-        <div class="border-t border-emerald-100 divide-y divide-emerald-100/60">
+        <div class="border-t border-[#e2e8f0] divide-y divide-[#e2e8f0]">
 
             {{-- SECTION 1 — Signatories --}}
             <div class="px-5 py-4">
-                <p class="text-[10px] font-bold uppercase tracking-widest text-emerald-700 mb-3">
-                    Signatories
-                </p>
+                <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-3">Signatories</p>
                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
 
                     {{-- Prepared By --}}
@@ -97,10 +95,10 @@
                             Prepared By
                             <span class="text-slate-300 font-normal normal-case tracking-normal">(Author)</span>
                         </x-form.label>
-                        <div class="flex items-center gap-3 rounded-xl border border-blue-100
-                                    bg-blue-50/60 px-4 py-3">
+                        <div class="flex items-center gap-3 rounded-xl border border-[#bbf7d0]
+                                    bg-[#f0fdf4]/60 px-4 py-3">
                             <span class="inline-flex items-center justify-center w-9 h-9 rounded-full
-                                         bg-blue-200 text-blue-700 text-xs font-bold shrink-0">
+                                         bg-[#dcfce7] text-[#15803d] text-xs font-bold shrink-0">
                                 {{ strtoupper(substr($syllabus->preparer->name ?? 'U', 0, 1)) }}
                             </span>
                             <div class="min-w-0">
@@ -111,7 +109,7 @@
                                     {{ $syllabus->preparer->email ?? '' }}
                                 </p>
                             </div>
-                            <x-feedback-status.status-indicator variant="blue" class="ml-auto shrink-0">
+                            <x-feedback-status.status-indicator variant="slate" class="ml-auto shrink-0">
                                 Author
                             </x-feedback-status.status-indicator>
                         </div>
@@ -126,10 +124,10 @@
 
                         <div x-show="getName(localApprovedBy)"
                             class="flex items-center justify-between gap-2 rounded-xl
-                                   border border-emerald-200 bg-emerald-50/70 px-3.5 py-2.5">
+                                   border border-[#bbf7d0] bg-[#f0fdf4]/70 px-3.5 py-2.5">
                             <div class="flex items-center gap-2 min-w-0">
                                 <span class="inline-flex items-center justify-center w-7 h-7 rounded-full
-                                             bg-emerald-200 text-emerald-700 text-xs font-bold shrink-0"
+                                             bg-[#dcfce7] text-[#15803d] text-xs font-bold shrink-0"
                                       x-text="getName(localApprovedBy)?.charAt(0)?.toUpperCase() ?? ''"></span>
                                 <p class="text-xs font-semibold text-slate-800 truncate"
                                    x-text="getName(localApprovedBy)"></p>
@@ -179,10 +177,10 @@
 
                         <div x-show="getName(localConcurredBy)"
                             class="flex items-center justify-between gap-2 rounded-xl
-                                   border border-emerald-200 bg-emerald-50/70 px-3.5 py-2.5">
+                                   border border-[#bbf7d0] bg-[#f0fdf4]/70 px-3.5 py-2.5">
                             <div class="flex items-center gap-2 min-w-0">
                                 <span class="inline-flex items-center justify-center w-7 h-7 rounded-full
-                                             bg-emerald-200 text-emerald-700 text-xs font-bold shrink-0"
+                                             bg-[#dcfce7] text-[#15803d] text-xs font-bold shrink-0"
                                       x-text="getName(localConcurredBy)?.charAt(0)?.toUpperCase() ?? ''"></span>
                                 <p class="text-xs font-semibold text-slate-800 truncate"
                                    x-text="getName(localConcurredBy)"></p>
@@ -232,9 +230,8 @@
 
             {{-- SECTION 2 — Additional Reviewers --}}
             <div class="px-5 py-4">
-                <p class="text-[10px] font-bold uppercase tracking-widest text-emerald-700 mb-3">
-                    Additional Reviewers
-                    <span class="text-slate-400 font-normal normal-case tracking-normal ml-1">(Faculty)</span>
+                <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-3">
+                    Additional Reviewers <span class="text-[#94a3b8] font-normal normal-case tracking-normal">(Faculty)</span>
                 </p>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -265,7 +262,7 @@
                                 </span>
                             </x-button>
                         </div>
-                        <p class="text-xs text-slate-400 leading-relaxed">
+                        <p class="text-[13px] text-[#94a3b8] leading-relaxed">
                             Each reviewer appears in the printed syllabus signature section.
                         </p>
                     </div>
@@ -277,17 +274,17 @@
                                 <div wire:key="reviewer-{{ $reviewer['id'] }}"
                                     x-bind:class="removingId === {{ $reviewer['id'] }} ? 'opacity-40 pointer-events-none' : ''"
                                     class="flex items-center justify-between px-3.5 py-2.5
-                                           rounded-xl border border-slate-200 bg-slate-50/60 transition-opacity duration-150">
+                                           rounded-lg border border-[#e2e8f0] bg-[#f8fafc] transition-opacity duration-150">
                                     <div class="flex items-center gap-2.5 min-w-0">
                                         <span class="inline-flex items-center justify-center w-7 h-7 rounded-full
-                                                     bg-blue-100 text-blue-700 text-xs font-bold shrink-0">
+                                                     bg-[#e2e8f0] text-[#475569] text-xs font-bold shrink-0">
                                             {{ strtoupper(substr($reviewer['user_name'], 0, 1)) }}
                                         </span>
                                         <div class="min-w-0">
-                                            <p class="text-xs font-medium text-slate-800 truncate">
+                                            <p class="text-[13px] font-medium text-[#0f172a] truncate">
                                                 {{ $reviewer['user_name'] }}
                                             </p>
-                                            <p class="text-[11px] text-slate-400 truncate">
+                                            <p class="text-[11px] text-[#94a3b8] truncate">
                                                 {{ $reviewer['user_email'] }}
                                             </p>
                                         </div>

@@ -22,35 +22,35 @@
 <div
     x-data="{ open: true }"
     x-on:revision-load-form.window="open = true"
-    class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    class="rounded-xl border border-[#e2e8f0] bg-white overflow-hidden"
+    style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
 
     {{-- ── Header ── --}}
     <button type="button" x-on:click="open = !open"
         class="w-full flex items-center justify-between px-5 py-4 text-left
-               hover:bg-slate-50/80 transition-colors">
+               hover:bg-[#f8fafc] transition-colors focus:outline-none">
         <div class="flex items-center gap-3">
-            <span class="flex items-center justify-center w-8 h-8 rounded-lg
-                         bg-amber-100 text-amber-600">
-                <i class="bx bx-history text-lg leading-none"></i>
+            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#e2e8f0] text-[#475569]">
+                <i class="bx bx-history text-base leading-none"></i>
             </span>
             <div>
-                <p class="text-sm font-semibold text-slate-800">Revision History</p>
-                <p class="text-xs text-slate-400 mt-0.5">
+                <p class="text-[13px] font-bold text-[#0f172a]">Revision History</p>
+                <p class="text-[11px] text-[#94a3b8] mt-0.5">
                     @if (count($revisions) > 0)
                         {{ count($revisions) }} {{ Str::plural('entry', count($revisions)) }} saved
                     @else
-                        No entries yet — use the form to add the first one
+                        No entries yet
                     @endif
                 </p>
             </div>
         </div>
-        <i class="bx text-slate-400 text-xl transition-transform duration-200"
+        <i class="bx text-[#94a3b8] text-lg transition-transform duration-200"
            x-bind:class="open ? 'bx-chevron-up' : 'bx-chevron-down'"></i>
     </button>
 
     {{-- ── Body ── --}}
     <div x-show="open" x-collapse>
-        <div class="border-t border-amber-100/60 p-5">
+        <div class="border-t border-[#e2e8f0] p-5">
 
             {{--
                 x-data owns form state + delete state.
@@ -130,7 +130,7 @@
                             </span>
                             <span x-show="editingId" x-cloak
                                   class="inline-flex items-center gap-1.5 text-[10px] font-bold
-                                         uppercase tracking-widest text-amber-600">
+                                         uppercase tracking-widest text-[#58585e]">
                                 <i class="bx bx-edit-alt text-xs leading-none"></i>
                                 Editing Rev.&nbsp;<span x-text="revisionNo"></span>
                             </span>
@@ -147,8 +147,8 @@
                     {{-- Form card --}}
                     <div class="rounded-xl border p-4 space-y-3.5 transition-colors duration-150"
                          x-bind:class="editingId
-                            ? 'border-amber-200 bg-amber-50/60'
-                            : 'border-slate-200 bg-slate-50/60'">
+                            ? 'border-[#dedee2] bg-[#F5F5F6]'
+                            : 'border-[#dedee2] bg-[#F5F5F6]/60'">
 
                         {{-- Date + Rev No row --}}
                         <div class="grid grid-cols-2 gap-3">
@@ -292,7 +292,7 @@
                                 <div
                                     wire:key="saved-rev-{{ $rev['id'] }}"
                                     x-bind:class="{
-                                        'border-amber-200 bg-amber-50/70':
+                                        'border-[#dedee2] bg-[#F5F5F6]/80':
                                             editingId  === {{ $rev['id'] }},
                                         'border-rose-100 bg-rose-50/50 opacity-50 pointer-events-none':
                                             deletingId === {{ $rev['id'] }},
@@ -342,8 +342,8 @@
                                                 x-on:click="$dispatch('revision-load-form', @js($rev))"
                                                 x-bind:disabled="deletingId !== null || saving"
                                                 title="Edit"
-                                                class="p-1.5 rounded-lg text-slate-400
-                                                       hover:text-amber-600 hover:bg-amber-50
+                                                class="p-1.5 rounded-lg text-[#9d9ea4]
+                                                       hover:text-[#36363b] hover:bg-[#F5F5F6]
                                                        disabled:opacity-40 transition-colors">
                                                 <i class="bx bx-edit-alt text-sm leading-none"></i>
                                             </button>
