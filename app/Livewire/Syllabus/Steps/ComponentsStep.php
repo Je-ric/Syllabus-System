@@ -213,14 +213,14 @@ class ComponentsStep extends Component
         $get = fn (string $field) => $this->{$prefix . '_' . $field};
 
         return [
-            'instructor_name'      => $this->str($get('instructor_name')),
-            'instructor_email'     => $this->str($get('instructor_email')),
+            'instructor_name'      => $this->str($get('instructor_name'))    ?? '',
+            'instructor_email'     => $this->str($get('instructor_email'))   ?? '',
             'phone'                => $this->nullable($get('phone')),
             'office'               => $this->nullable($get('office')),
-            'class_hours'          => $this->str($get('class_hours'), '1 hr'),
+            'class_hours'          => $this->str($get('class_hours'), '1 hr') ?? '1 hr',
             'schedule'             => $this->nullable($get('schedule')),
             'consultation_hours'   => $this->nullable($get('consultation_hours')),
-            'performance_standard' => $this->toDecimal($get('performance_standard'), 50.00),
+            'performance_standard' => $this->toDecimal($get('performance_standard'), 60.00),
         ];
     }
 

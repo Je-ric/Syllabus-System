@@ -158,13 +158,13 @@ class CourseEvaluationStep extends Component
 
         foreach ($this->rows as $row) {
             $lecId = $row['lec']['week_content_id'] ?? null;
-            if ($lecId) {
+            if ($lecId && isset($this->inputs[$lecId])) {
                 $lecTotal += $parseWeight($this->inputs[$lecId]['weight'] ?? null);
             }
 
             if ($this->courseHasLab) {
                 $labId = $row['lab']['week_content_id'] ?? null;
-                if ($labId) {
+                if ($labId && isset($this->inputs[$labId])) {
                     $labTotal += $parseWeight($this->inputs[$labId]['weight'] ?? null);
                 }
             }

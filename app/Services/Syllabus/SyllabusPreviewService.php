@@ -84,19 +84,19 @@ class SyllabusPreviewService
     // 'export' key contains everything safe to spread into view data.
     private function sharedData(Syllabus $syllabus): array
     {
-        $program              = $syllabus->course->program;
-        $department           = $program->departments->first();
+        $program              = $syllabus->course?->program;
+        $department           = $program?->departments?->first();
         $college              = $department?->college;
 
         $collegeName          = $college?->name ?? 'College';
         $departmentName       = $department?->name ?? 'Department';
         $collegeGoals         = $college?->goals?->sortBy('college_goals_code') ?? collect();
         $departmentObjectives = $department?->objectives?->sortBy('dept_obj_code') ?? collect();
-        $peos                 = $program->peos?->sortBy('peo_code') ?? collect();
-        $pos                  = $program->outcomes?->sortBy('po_code') ?? collect();
+        $peos                 = $program?->peos?->sortBy('peo_code') ?? collect();
+        $pos                  = $program?->outcomes?->sortBy('po_code') ?? collect();
         $courseOutcomes       = $syllabus->courseOutcomes?->sortBy('co_code') ?? collect();
-        $lecComponent         = $syllabus->components->firstWhere('type', 'LEC');
-        $labComponent         = $syllabus->components->firstWhere('type', 'LAB');
+        $lecComponent         = $syllabus->components?->firstWhere('type', 'LEC');
+        $labComponent         = $syllabus->components?->firstWhere('type', 'LAB');
 
         $coursePoIedMap = $syllabus->course?->programOutcomes
             ?->pluck('pivot.ied', 'id')
@@ -194,15 +194,15 @@ class SyllabusPreviewService
 
             $isExam = $weekExamTask !== null
                 || trim((string) ($week->exam_type ?? '')) !== ''
-                || (bool) $week->is_exam_week;
+                || (bool) ($week->is_exam_week ?? false);
 
             $isNoClass = $weekNoClassTask !== null;
 
             $resolvedExamLabel = $weekExamTask
-                ? trim((string) $weekExamTask->assessment_task)
-                : $examLabel($week->exam_type);
+                ? trim((string) ($weekExamTask->assessment_task ?? ''))
+                : $examLabel($week->exam_type ?? null);
             $resolvedNoClassLabel = $weekNoClassTask
-                ? trim((string) $weekNoClassTask->assessment_task)
+                ? trim((string) ($weekNoClassTask->assessment_task ?? ''))
                 : 'Non-Teaching Week / No Class';
             $dateRange = $this->formatDateRange($week);
 

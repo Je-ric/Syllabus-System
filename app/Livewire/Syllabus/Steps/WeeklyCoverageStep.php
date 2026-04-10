@@ -153,6 +153,11 @@ class WeeklyCoverageStep extends Component
             return;
         }
 
+        // Guard: if no inputs exist for this week yet, skip silently
+        if (! isset($this->weekInputs['w' . $weekNo])) {
+            return;
+        }
+
         $changed = app(WeekContentService::class)->save(
             $this->syllabusId,
             $this->activeComponent,
