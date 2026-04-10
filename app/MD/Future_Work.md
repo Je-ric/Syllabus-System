@@ -1,46 +1,42 @@
 # CSMS — Future Work & Known Issues
 
-## Missing / Planned
+Missing/Lacks
+    1. Add the approval process, from faculty, to submit for review to other faculties, to approved by chairs and deans.
+    2. Apply review form for reviewing submitted syllabus.
+    3. Dashboard (we focus in syllabus creation)
+    4. Add Additional Templates (Current 3 templates)
+    5. Notification In-app and email for approval workflow process
+    6. Collaboration of LEC & LAB Professor
+    7. Admin view lists of created syllabus of all faculties 
+        7.1 Use hierarchy From College -> Department -> Program -> Course -> Faculty to narrow. 
+        7.2 Because a single course can be created a syllabus by multiple faculties.
+        7.3 And each syllabus version has 3 templates with versions. So need to have like folder like structure.
 
-1. **Approval Workflow** — Full review chain: Faculty submits → peer review → Chair approves → Dean approves.
-2. **Review Form** — Dedicated form for reviewers to evaluate and annotate submitted syllabi.
-3. **Dashboard** — Summary view (currently focused on syllabus creation only).
-4. **Additional Syllabus Templates** — Expand beyond the current 3 templates.
-5. **Notifications** — In-app and email notifications for the approval workflow.
-6. **LEC & LAB Collaboration** — Allow LEC and LAB professors to co-author a single syllabus.
-7. **Admin Syllabus Browser** — Admin view of all faculty-created syllabi, navigable via:
-   - College → Department → Program → Course → Faculty
-   - A course can have multiple syllabi (one per faculty), each with multiple template versions — needs a folder-like structure.
+Critical
+    1. Improve Syllabus Creation 
+        1.1 Real-time input validations and real-time user feedbacks.
+    2. During signup, Add what office/department/college they are in.
+    3. Use Faculty ID instead of clsu/clsu2 (I think we can use either clsu or ID. ) 
+    4. Upload CSV calendar events
+    5. Auto requisites (additional tables)
+    6. Passing Mark, Class Hours included in course not in course components
+    7. PEO & PO indicator needed to save if theres update, add state. Since were using save all Dont update the unchange fields.
+    8. Schedule should also reflect the week generation, exam weeks and some events are just 3 days, it means theres a remaining days for that week that user can still fill some details.
 
----
+Normal
+    1. Apply real-time (livewire) for the account approval, goals and objectives.
+    2. Make the topics and learning outcomes using WYSIWYG Editor 
+        The current is textarea
+        (I recommend tiptap/summernote - no limit)
+    3. Course Archive, not delete
 
-## Critical
+Less Priority   
+    1. Improve validations for all inputs accross the system
+    2. UI improvements accross the system.
+    3. Add types in academic calendar events.
+    4. Course Number should be displayed in the Course Coverage (Weekly)
+    5. Legend in syllabus creation.
 
-1. **Syllabus Creation UX**
-   - 1.1 Real-time input validation and user feedback throughout the wizard.
-
----
-
-## Normal
-
-1. Apply Livewire real-time updates to account approval, goals, and objectives pages.
-2. Replace `<textarea>` for topics and learning outcomes with a WYSIWYG editor (TipTap or Summernote recommended — no character limit).
-
----
-
-## Less Priority
-
-1. Improve and standardize input validations across the entire system.
-2. General UI polish and consistency improvements across all pages.
-
----
-
-## Known Bugs
-
-_(none logged yet)_
-
-
-
-
-
+Known Bugs
+    1. Organizational Hierarchy not visible by the dean and chairs of their coverage.
 
