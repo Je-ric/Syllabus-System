@@ -6,10 +6,9 @@
 - **Livewire** ^4.0
 - **Laravel Tinker** ^2.10.1
 - **barryvdh/laravel-dompdf** ^3.1
-- **blade-ui-kit/blade-heroicons** ^2.6
+- **blade-ui-kit/blade-heroicons** ^2.6 (unused)
 - **google/apiclient** *
 - **masbug/flysystem-google-drive-ext** *
-- **predis/predis** ^3.3
 
 ## Backend (Dev)
 - **fakerphp/faker** ^1.23
@@ -25,9 +24,9 @@
 - **Tailwind CSS** ^4.1.18
 - **@tailwindcss/vite** ^4.1.18
 - **DaisyUI** ^5.5.14
-- **Alpine.js** (via laravel-precognition-alpine ^1.0.2)
+- **Alpine.js** (via laravel-precognition-alpine ^1.0.2) (unused)
 - **Axios** ^1.7.4
-- **Flatpickr** ^4.6.13
+- **Flatpickr** ^4.6.13 (unused)
 - **Boxicons** ^2.1.4
 - **autoprefixer** ^10.4.23
 - **postcss** ^8.5.6
@@ -35,9 +34,4 @@
 - **laravel-vite-plugin** ^1.2.0
 
 ## Database
-- **MySQL** (production)
-- **SQLite** (local/dev fallback)
-
-## Session / Cache / Queue
-- Driver: `database` (production) — requires `sessions`, `cache`, `jobs` tables
-- Fallback: `file` driver (local/Hostinger if tables missing)
+- **MySQL** (local/production)

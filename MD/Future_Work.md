@@ -29,6 +29,7 @@ Normal
         The current is textarea
         (I recommend tiptap/summernote - no limit)
     3. Course Archive, not delete
+    4. Calendar view in the Academic Year Events
 
 Less Priority   
     1. Improve validations for all inputs accross the system

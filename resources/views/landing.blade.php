@@ -14,10 +14,14 @@
             theme: {
                 extend: {
                     colors: {
-                        'clsu-green': '#002a0c',
-                        'clsu-mid': '#004d16',
+                        'clsu-green': '#1a5f30',
+                        'clsu-cobra': '#1a5f30',
+                        'clsu-mid': '#003a10',
                         'clsu-light': '#009639',
-                        'clsu-gold': '#ffd700',
+                        'clsu-gold': '#e0a70d',
+                        'green-50': '#4eab18',
+                        'green-100': '#038303',
+                        'green-150': '#003a10',
                     },
                     fontFamily: {
                         sans: ['"Source Sans 3"', 'system-ui', 'sans-serif'],
@@ -30,7 +34,7 @@
     <style>
         html { scroll-behavior: smooth; }
         .hero-bg {
-            background: linear-gradient(135deg, #002a0c 0%, #004d16 50%, #006b1e 100%);
+            background: linear-gradient(135deg, #003a10 0%, #1a5f30 50%, #009639 100%);
         }
         .gold-accent { color: #ffd700; }
         .step-line::after {
@@ -47,17 +51,17 @@
 <body class="font-sans bg-white text-gray-800">
 
     {{-- NAV --}}
-    <nav class="fixed top-0 inset-x-0 z-50 bg-clsu-green/95 backdrop-blur border-b border-white/10">
+    <nav class="fixed top-0 inset-x-0 z-50 bg-white shadow-sm border-b border-gray-100">
         <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <img src="/assets/clsu-logo-green.png" alt="CLSU" class="h-9 w-9 object-contain brightness-200">
+                <img src="/assets/clsu-logo-green.png" alt="CLSU" class="h-9 w-9 object-contain">
                 <div>
-                    <p class="font-display text-white text-sm leading-none tracking-widest">CSMS</p>
-                    <p class="text-white/50 text-[10px] leading-none mt-0.5">Course Syllabus Management</p>
+                    <p class="font-display text-clsu-green text-sm leading-none tracking-widest">CSMS</p>
+                    <p class="text-gray-400 text-[10px] leading-none mt-0.5">Course Syllabus Management</p>
                 </div>
             </div>
             <a href="{{ route('auth.show') }}"
-               class="inline-flex items-center gap-2 bg-clsu-gold text-clsu-green font-bold text-sm px-5 py-2 rounded-lg hover:bg-yellow-300 transition-colors">
+               class="inline-flex items-center gap-2 bg-clsu-green text-white font-bold text-sm px-5 py-2 rounded-lg hover:bg-clsu-mid transition-colors">
                 <i class="bx bx-log-in text-base"></i>
                 Login
             </a>
@@ -119,13 +123,14 @@
             </div>
             <div class="grid md:grid-cols-3 gap-8">
                 @foreach([
-                    ['bx-user-check', 'Role-Based Access', 'clsu-green', 'Faculty, Chairs, Deans, and Admins each have clearly defined access and responsibilities within the system.'],
-                    ['bx-git-branch', 'Structured Workflow', 'clsu-light', 'Syllabi follow a defined path: Draft → Under Review → Approved, ensuring accountability at every stage.'],
-                    ['bx-shield-quarter', 'OTP-Verified Accounts', 'clsu-gold', 'Registration is restricted to @clsu.edu.ph emails with OTP verification and admin approval for security.'],
+                    ['bx-user-check', 'Role-Based Access', 'Faculty, Chairs, Deans, and Admins each have clearly defined access and responsibilities within the system.', 'from-clsu-green to-clsu-light', '#1a5f30'],
+                    ['bx-git-branch', 'Structured Workflow', 'Syllabi follow a defined path: Draft → Under Review → Approved, ensuring accountability at every stage.', 'from-green-100 to-clsu-light', '#038303'],
+                    ['bx-shield-quarter', 'OTP-Verified Accounts', 'Registration is restricted to @clsu.edu.ph emails with OTP verification and admin approval for security.', 'from-clsu-mid to-clsu-green', '#003a10'],
                 ] as $f)
-                <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-                    <div class="w-12 h-12 rounded-xl bg-{{ $f[2] }}/10 flex items-center justify-center mb-5">
-                        <i class="bx {{ $f[0] }} text-2xl text-{{ $f[2] }}"></i>
+                <div class="rounded-2xl p-8 shadow-md border border-gray-100 overflow-hidden relative bg-white group hover:-translate-y-1 transition-transform duration-200">
+                    <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r {{ $f[3] }}"></div>
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-5" style="background: {{ $f[4] }}1a">
+                        <i class="bx {{ $f[0] }} text-2xl" style="color: {{ $f[4] }}"></i>
                     </div>
                     <h3 class="font-semibold text-gray-800 text-lg mb-2">{{ $f[1] }}</h3>
                     <p class="text-gray-500 text-sm leading-relaxed">{{ $f[2] }}</p>
