@@ -128,7 +128,7 @@
                     ['bx-shield-quarter', 'OTP-Verified Accounts', 'Registration is restricted to @clsu.edu.ph emails with OTP verification and admin approval for security.', 'from-clsu-mid to-clsu-green', '#003a10'],
                 ] as $f)
                 <div class="rounded-2xl p-8 shadow-md border border-gray-100 overflow-hidden relative bg-white group hover:-translate-y-1 transition-transform duration-200">
-                    <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r {{ $f[3] }}"></div>
+                    <div class="absolute top-0 left-0 right-0 h-1 bg-linear-to-r {{ $f[3] }}"></div>
                     <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-5" style="background: {{ $f[4] }}1a">
                         <i class="bx {{ $f[0] }} text-2xl" style="color: {{ $f[4] }}"></i>
                     </div>

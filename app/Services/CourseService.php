@@ -22,17 +22,20 @@ class CourseService
             $corequisite = $this->normalizeRequisite($data['corequisite'] ?? null);
 
             $course = Course::create([
-                'program_id' => $data['program_id'],
-                'course_code' => $data['code'],
-                'course_title' => $data['name'],
+                'program_id'       => $data['program_id'],
+                'course_code'      => $data['code'],
+                'course_title'     => $data['name'],
                 'course_description' => $data['description'] ?? null,
-                'prerequisite' => $prerequisite,
-                'corequisite' => $corequisite,
-                'credit_units' => $data['credits'],
-                'year_level' => $data['year_level'] ?? null,
-                'semester' => $data['semester'] ?? null,
-                'created_by' => Auth::id(),
-                'has_lec_lab' => $data['has_lec_lab'] ?? false,
+                'prerequisite'     => $prerequisite,
+                'corequisite'      => $corequisite,
+                'credit_units'     => $data['credits'],
+                'year_level'       => $data['year_level'] ?? null,
+                'semester'         => $data['semester'] ?? null,
+                'created_by'       => Auth::id(),
+                'has_lec_lab'      => $data['has_lec_lab'] ?? false,
+                'passing_mark'     => $data['passing_mark'] ?? 60.00,
+                'lec_class_hours'  => $data['lec_class_hours'] ?? '3 hr',
+                'lab_class_hours'  => ($data['has_lec_lab'] ?? false) ? ($data['lab_class_hours'] ?? '3 hr') : null,
             ]);
 
             if (!empty($poMapping)) {
@@ -54,8 +57,7 @@ class CourseService
 
             $newHasLecLab = (bool) ($data['has_lec_lab'] ?? false);
 
-            // Block has_lec_lab change if syllabi already exist — LAB components
-            // would become orphaned (Yes→No) or missing (No→Yes).
+            // Block has_lec_lab change if syllabi already exist
             if ($course->has_lec_lab !== $newHasLecLab && $course->syllabi()->exists()) {
                 $direction = $newHasLecLab ? 'No → Yes' : 'Yes → No';
                 throw new \RuntimeException(
@@ -74,6 +76,9 @@ class CourseService
                 'year_level'         => $data['year_level'] ?? null,
                 'semester'           => $data['semester'] ?? null,
                 'has_lec_lab'        => $newHasLecLab,
+                'passing_mark'       => $data['passing_mark'] ?? $course->passing_mark,
+                'lec_class_hours'    => $data['lec_class_hours'] ?? $course->lec_class_hours,
+                'lab_class_hours'    => $newHasLecLab ? ($data['lab_class_hours'] ?? $course->lab_class_hours ?? '3 hr') : null,
             ]);
 
             // Sync PO mappings with IED levels
@@ -89,6 +94,20 @@ class CourseService
 
             return $course;
         });
+    }
+
+    // Archive a course (soft-delete alternative)
+    public function archiveCourse(Course $course): void
+    {
+        $course->update(['status' => 'archived']);
+        $this->logAction('archived', $course);
+    }
+
+    // Restore an archived course
+    public function restoreCourse(Course $course): void
+    {
+        $course->update(['status' => 'active']);
+        $this->logAction('restored', $course);
     }
 
     // Delete a course and all its related data
@@ -115,8 +134,10 @@ class CourseService
         $departmentName = $primaryDepartment?->name ?? 'N/A';
 
         $description = match ($action) {
-            'updated' => "Updated course {$course->course_code} ({$course->course_title}); program {$program?->name}; college: {$collegeName}; department: {$departmentName}.",
-            default => ucfirst($action) . " course {$course->course_code} ({$course->course_title}) for program {$program?->name}; college: {$collegeName}; department: {$departmentName}.",
+            'updated'  => "Updated course {$course->course_code} ({$course->course_title}); program {$program?->name}; college: {$collegeName}; department: {$departmentName}.",
+            'archived' => "Archived course {$course->course_code} ({$course->course_title}) for program {$program?->name}.",
+            'restored' => "Restored course {$course->course_code} ({$course->course_title}) for program {$program?->name}.",
+            default    => ucfirst($action) . " course {$course->course_code} ({$course->course_title}) for program {$program?->name}; college: {$collegeName}; department: {$departmentName}.",
         };
 
         AuditLog::record(

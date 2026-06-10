@@ -132,6 +132,18 @@
                                 Courses
                             </a>
                         @endif
+
+                        {{-- @if ($user->hasRole('admin'))
+                            Manage Visibility
+                            <select
+                                class="w-full text-sm text-white/70 bg-transparent border border-white/20 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                <option value="admin">Admin</option>
+                                <option value="faculty">Faculty</option>
+                                <option value="chair">Chair</option>
+                                <option value="dean">Dean</option>
+                                <option value="ovpaa">OVPAA</option>
+                            </select>
+                        @endif --}}
                     </nav>
                 @endauth
 
@@ -154,8 +166,8 @@
                         <button type="submit"
                             class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg
                                         bg-red-600/70 border-red-600/50 hover:bg-red-600/90 hover:border-red-600/80
-                                       text-xs font-semibold text-white/90 border hover:text-white
-                                       transition-all duration-150">
+                                        text-xs font-semibold text-white/90 border hover:text-white
+                                        transition-all duration-150">
                             <i class="bx bxs-log-out text-sm"></i>
                             Sign Out
                         </button>
@@ -226,6 +238,27 @@
             <main class="flex-1 w-full {{ $isWizardRoute ? '' : 'overflow-y-auto' }}">
                 @yield('content')
             </main>
+
+            {{-- ── Footer ────────────────────────────────────────────── --}}
+            @if (!$isWizardRoute)
+                <footer class="border-t-2 border-green-700 bg-white">
+                    <div class="px-4 sm:px-6 py-3 flex flex-col sm:flex-row items-center justify-between gap-2">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                                 style="background: linear-gradient(135deg, #002a0c 0%, #009639 100%);">
+                                <i class="bx bxs-graduation text-[#ffd700] text-sm"></i>
+                            </div>
+                            <div class="leading-tight">
+                                <span class="text-[12px] font-bold text-[#0f172a]">CLSU</span>
+                                <span class="text-[11px] text-[#94a3b8] ml-1">Course Syllabus Management System</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 text-[11px] text-[#94a3b8]">
+                            <span><i class="bx bx-copyright mr-0.5"></i>{{ date('Y') }} Central Luzon State University</span>
+                        </div>
+                    </div>
+                </footer>
+            @endif
         </div>
     </div>
 

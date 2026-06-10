@@ -98,9 +98,12 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/academic-calendars/events/{event}', [AcademicCalendarEventController::class, 'destroy'])->name('academic.calendar.events.destroy');
     });
 
-    Route::middleware(['role:admin'])->group(function () {
+    Route::middleware(['role:admin,dean,chair'])->group(function () {
         Route::get('/organizational/hierarchy', [OrganizationalHierarchyController::class, 'hierarchyView'])->name('organizational.hierarchy');
         Route::get('/organizational/college/{collegeId}/departments', [OrganizationalHierarchyController::class, 'departmentsIndex'])->name('organizational.departments.index');
+    });
+
+    Route::middleware(['role:admin'])->group(function () {
         Route::post('/organizational/assign-chair', [OrganizationalHierarchyController::class, 'assignChair'])->name('organizational.assign-chair');
         Route::post('/organizational/remove-chair', [OrganizationalHierarchyController::class, 'removeChair'])->name('organizational.remove-chair');
         Route::post('/organizational/assign-faculty', [OrganizationalHierarchyController::class, 'assignFaculty'])->name('organizational.assign-faculty');
@@ -132,6 +135,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/courses/{course}/edit', [CourseController::class, 'edit'])->name('courses.edit');
         Route::put('/courses/{course}', [CourseController::class, 'update'])->name('courses.update');
         Route::delete('/courses/{course}', [CourseController::class, 'destroy'])->name('courses.destroy');
+        Route::post('/courses/{course}/archive', [CourseController::class, 'archive'])->name('courses.archive');
+        Route::post('/courses/{course}/restore', [CourseController::class, 'restore'])->name('courses.restore');
     });
 
     Route::middleware(['role:admin,faculty,ovpaa'])->group(function () {

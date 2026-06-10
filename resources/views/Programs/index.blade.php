@@ -72,25 +72,18 @@
     
                     {{-- ── PO Tab ─────────────────────────────────────────────────── --}}
                     <x-slot name="slot_po">
-    
-                        {{-- Reference panel: read-only PEOs shown at the top of the PO tab --}}
-                        <div class="rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-5">
-                            <livewire:programs.peo-display :program="$program" />
-                        </div>
-    
-                        {{-- Editable PO section below the reference --}}
-                            <x-wizard.section
-                                title="Program Outcomes (POs)"
-                                icon="target-lock"
-                                color="blue">
-                                <div class="mb-4">
-                                    <p class="mt-0.5 text-[13px] text-[#475569]">
-                                        By the time of graduation, students of
-                                        <strong>{{ $program->name }}</strong> have the ability to:
-                                    </p>
-                                </div>
-                                <livewire:programs.manage-pos :program="$program" />
-                            </x-wizard.section>
+                        <x-wizard.section
+                            title="Program Outcomes (POs)"
+                            icon="target-lock"
+                            color="blue">
+                            <div class="mb-4">
+                                <p class="mt-0.5 text-[13px] text-[#475569]">
+                                    By the time of graduation, students of
+                                    <strong>{{ $program->name }}</strong> have the ability to:
+                                </p>
+                            </div>
+                            <livewire:programs.manage-pos :program="$program" />
+                        </x-wizard.section>
                     </x-slot>
     
                 </x-navigation.tabs-modern>

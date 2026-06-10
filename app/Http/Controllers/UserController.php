@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditLog;
 use App\Models\User;
 use App\Services\OtpService;
 use Illuminate\Http\Request;
@@ -24,7 +25,12 @@ class UserController extends Controller
             'assignments.college',
         ])->findOrFail(Auth::id());
 
-        return view('Authentication.viewDetails', compact('user'));
+        $recentActivity = AuditLog::where('user_id', $user->id)
+            ->orderByDesc('timestamp')
+            ->limit(20)
+            ->get();
+
+        return view('Authentication.viewDetails', compact('user', 'recentActivity'));
     }
 
     public function update(Request $request)
