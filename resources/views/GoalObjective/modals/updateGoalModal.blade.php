@@ -1,4 +1,4 @@
-<x-modal.dialog id="updateGoalModal_{{ $goal->id }}" maxWidth="max-w-md" width="w-11/12">
+<x-modal.dialog id="updateGoalModal_{{ $goal->id }}" maxWidth="max-w-lg" width="w-11/12">
     <x-modal.header modalId="updateGoalModal_{{ $goal->id }}">
         <div class="flex items-center gap-3">
             <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#eff6ff] text-[#1d4ed8] shrink-0">
@@ -18,7 +18,7 @@
         @method('PUT')
         <x-modal.body>
             <div>
-                <x-form.label for="goal_text_{{ $goal->id }}" isRequired>Goal Description</x-form.label>
+                <x-modal.modal-label for="goal_text_{{ $goal->id }}" isRequired>Goal Description</x-modal.modal-label>
                 <x-form.textarea
                     id="goal_text_{{ $goal->id }}"
                     name="goal_text"

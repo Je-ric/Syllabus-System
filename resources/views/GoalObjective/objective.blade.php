@@ -21,55 +21,57 @@
 
         <div class="space-y-4">
 
-            {{-- College selector --}}
-            @if ($colleges->count() > 1)
-                <div class="rounded-xl border border-[#e2e8f0] bg-white overflow-hidden" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
-                    <div class="px-5 py-3 border-b border-[#e2e8f0] bg-[#f8fafc] flex items-center gap-2">
-                        <i class="bx bx-buildings text-[#16a34a] text-base"></i>
-                        <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569]">Select College</p>
-                    </div>
-                    <div class="p-4">
-                        <form method="GET" action="{{ route('objective.index') }}">
-                            <x-form.select id="collegeSelect" name="college_id" onchange="this.form.submit()">
-                                <option value="">— Choose College —</option>
-                                @foreach ($colleges as $college)
-                                    <option value="{{ $college->id }}" @selected($selectedCollegeId == $college->id)>
-                                        {{ $college->name }}
-                                    </option>
-                                @endforeach
-                            </x-form.select>
-                        </form>
-                    </div>
-                </div>
-            @endif
-
-            {{-- Department selector --}}
-            @if ($selectedCollegeId)
-                @if ($departments->count() > 1)
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {{-- College selector --}}
+                @if ($colleges->count() > 1)
                     <div class="rounded-xl border border-[#e2e8f0] bg-white overflow-hidden" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
                         <div class="px-5 py-3 border-b border-[#e2e8f0] bg-[#f8fafc] flex items-center gap-2">
-                            <i class="bx bx-sitemap text-[#16a34a] text-base"></i>
-                            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569]">Select Department</p>
+                            <i class="bx bx-buildings text-[#16a34a] text-base"></i>
+                            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569]">Select College</p>
                         </div>
                         <div class="p-4">
                             <form method="GET" action="{{ route('objective.index') }}">
-                                <input type="hidden" name="college_id" value="{{ $selectedCollegeId }}">
-                                <x-form.select id="departmentSelect" name="department_id" onchange="this.form.submit()">
-                                    <option value="">— Choose Department —</option>
-                                    @foreach ($departments as $dept)
-                                        <option value="{{ $dept->id }}" @selected($selectedDepartmentId == $dept->id)>
-                                            {{ $dept->name }}
+                                <x-form.select id="collegeSelect" name="college_id" onchange="this.form.submit()">
+                                    <option value="">— Choose College —</option>
+                                    @foreach ($colleges as $college)
+                                        <option value="{{ $college->id }}" @selected($selectedCollegeId == $college->id)>
+                                            {{ $college->name }}
                                         </option>
                                     @endforeach
                                 </x-form.select>
                             </form>
                         </div>
                     </div>
-                @elseif ($departments->count() === 0)
-                    <x-feedback-status.alert type="info" title="No departments found"
-                        message="This college has no departments configured yet." />
                 @endif
-            @endif
+
+                {{-- Department selector --}}
+                @if ($selectedCollegeId)
+                    @if ($departments->count() > 1)
+                        <div class="rounded-xl border border-[#e2e8f0] bg-white overflow-hidden" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
+                            <div class="px-5 py-3 border-b border-[#e2e8f0] bg-[#f8fafc] flex items-center gap-2">
+                                <i class="bx bx-sitemap text-[#16a34a] text-base"></i>
+                                <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569]">Select Department</p>
+                            </div>
+                            <div class="p-4">
+                                <form method="GET" action="{{ route('objective.index') }}">
+                                    <input type="hidden" name="college_id" value="{{ $selectedCollegeId }}">
+                                    <x-form.select id="departmentSelect" name="department_id" onchange="this.form.submit()">
+                                        <option value="">— Choose Department —</option>
+                                        @foreach ($departments as $dept)
+                                            <option value="{{ $dept->id }}" @selected($selectedDepartmentId == $dept->id)>
+                                                {{ $dept->name }}
+                                            </option>
+                                        @endforeach
+                                    </x-form.select>
+                                </form>
+                            </div>
+                        </div>
+                    @elseif ($departments->count() === 0)
+                        <x-feedback-status.alert type="info" title="No departments found"
+                            message="This college has no departments configured yet." />
+                    @endif
+                @endif
+            </div>
 
             {{-- Objectives table --}}
             <div class="rounded-xl border border-[#e2e8f0] bg-white overflow-hidden" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">

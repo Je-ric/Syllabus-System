@@ -24,7 +24,7 @@
         <x-modal.body>
             <div class="space-y-4">
                 <div>
-                    <x-form.label for="assignDeanUser{{ $collegeId }}" isRequired>Select Dean</x-form.label>
+                    <x-modal.modal-label for="assignDeanUser{{ $collegeId }}" isRequired>Select Dean</x-modal.modal-label>
                     <x-form.select id="assignDeanUser{{ $collegeId }}" name="user_id" class="mt-2" required>
                         <option value="">— Choose a user —</option>
                         @foreach ($potentialDeans as $user)

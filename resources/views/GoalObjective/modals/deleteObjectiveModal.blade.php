@@ -1,4 +1,4 @@
-<x-modal.dialog id="deleteObjectiveModal_{{ $objective->id }}" maxWidth="max-w-md" width="w-11/12">
+<x-modal.dialog id="deleteObjectiveModal_{{ $objective->id }}" maxWidth="max-w-lg" width="w-11/12">
     <x-modal.header modalId="deleteObjectiveModal_{{ $objective->id }}">
         <div class="flex items-center gap-3">
             <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#ffe4e6] text-[#e11d48] shrink-0">

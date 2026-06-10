@@ -1,4 +1,4 @@
-<x-modal.dialog id="addGoalModal" maxWidth="max-w-md" width="w-11/12">
+<x-modal.dialog id="addGoalModal" maxWidth="max-w-xl" width="w-11/12">
     <x-modal.header modalId="addGoalModal">
         <div class="flex items-center gap-3">
             <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#f0fdf4] text-[#16a34a] shrink-0">
@@ -13,7 +13,7 @@
         <input type="hidden" name="college_id" value="{{ $selectedCollegeId }}">
         <x-modal.body>
             <div>
-                <x-form.label for="add_goal_text" isRequired>Goal Description</x-form.label>
+                <x-modal.modal-label for="add_goal_text" isRequired>Goal Description</x-modal.modal-label>
                 <x-form.textarea
                     id="add_goal_text"
                     name="goal_text"
