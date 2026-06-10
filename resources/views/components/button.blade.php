@@ -55,7 +55,7 @@
         // border-[#1a5f30] stays, bg fills to a slightly lighter green so the border still reads.
         'outline'    => $formBtn . '
             bg-white text-[#1a5f30]
-            border-2 border-[#1a5f30]
+            border border-[#1a5f30]
             hover:bg-[#f0fdf4]
             focus:ring-[#1a5f30]/30',
 
