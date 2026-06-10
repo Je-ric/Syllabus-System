@@ -73,7 +73,7 @@
                     <ul class="w-full mt-4 space-y-2 border-t border-[#f1f5f9] pt-4 text-[12px]">
                         <li class="flex items-center justify-between gap-2">
                             <span class="text-[#94a3b8] flex items-center gap-1"><i class="bx bx-envelope text-sm"></i> Email</span>
-                            <span class="text-[#334155] font-medium truncate max-w-[160px]" title="{{ $user->email }}">{{ $user->email }}</span>
+                            <span class="text-[#334155] font-medium truncate max-w-40" title="{{ $user->email }}">{{ $user->email }}</span>
                         </li>
                         <li class="flex items-center justify-between gap-2">
                             <span class="text-[#94a3b8] flex items-center gap-1"><i class="bx bx-phone text-sm"></i> Phone</span>

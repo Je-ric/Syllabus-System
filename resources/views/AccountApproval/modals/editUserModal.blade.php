@@ -19,19 +19,19 @@
         <x-modal.body>
             <div class="space-y-4">
                 <div>
-                    <x-form.label isRequired>Full Name</x-form.label>
+                    <x-modal.modal-label isRequired>Full Name</x-modal.modal-label>
                     <x-form.input type="text" name="name" value="{{ old('name', $user->name) }}" required />
                 </div>
                 <div>
-                    <x-form.label isRequired>Email</x-form.label>
+                    <x-modal.modal-label isRequired>Email</x-modal.modal-label>
                     <x-form.input type="email" name="email" value="{{ old('email', $user->email) }}" required />
                 </div>
                 <div>
-                    <x-form.label>Phone Number</x-form.label>
+                    <x-modal.modal-label>Phone Number</x-modal.modal-label>
                     <x-form.input type="text" name="phone_number" value="{{ old('phone_number', $user->phone_number) }}" />
                 </div>
                 <div>
-                    <x-form.label>Office</x-form.label>
+                    <x-modal.modal-label>Office</x-modal.modal-label>
                     <x-form.input type="text" name="office" value="{{ old('office', $user->office) }}" />
                 </div>
                 <x-feedback-status.alert type="info" :showTitle="false">Changes take effect immediately.</x-feedback-status.alert>
