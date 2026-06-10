@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Course;
 use App\Models\Program;
-use App\Models\UserAssignment;
+// use App\Models\UserAssignment;
+use App\Models\User;
 use App\Services\CourseService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,7 +28,8 @@ class CourseController extends Controller
         if ($request->filled('program_id')) {
             $program = Program::withOrderedOutcomes()->findOrFail($request->program_id);
             if ($redirect = $this->authorizeProgram($program)) return $redirect;
-            $groupedCourses = $program->getCoursesGroupedByYearAndSemester();
+            $status = $request->boolean('archived') ? 'archived' : 'active';
+            $groupedCourses = $program->getCoursesGroupedByYearAndSemester($status);
         }
 
         return view('Course.index', compact('program', 'groupedCourses'));
@@ -168,7 +170,7 @@ class CourseController extends Controller
 
     public function destroy(Course $course)
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
         $canDelete = $user->hasRole('admin');
 
@@ -198,19 +200,37 @@ class CourseController extends Controller
 
         return redirect()
             ->route('courses.index', ['program_id' => $programId])
-            ->with('toast', [
-                'message' => 'Course deleted successfully.',
-                'type'    => 'success',
-            ]);
+            ->with('toast', ['message' => 'Course deleted successfully.', 'type' => 'success']);
+    }
+
+    public function archive(Course $course)
+    {
+        if ($redirect = $this->authorizeProgram($course->program)) return $redirect;
+        $this->courseService->archiveCourse($course);
+        return redirect()
+            ->route('courses.index', ['program_id' => $course->program_id])
+            ->with('toast', ['message' => 'Course archived.', 'type' => 'success']);
+    }
+
+    public function restore(Course $course)
+    {
+        if ($redirect = $this->authorizeProgram($course->program)) return $redirect;
+        $this->courseService->restoreCourse($course);
+        return redirect()
+            ->route('courses.index', ['program_id' => $course->program_id])
+            ->with('toast', ['message' => 'Course restored.', 'type' => 'success']);
     }
 
     protected function authorizeProgram(?Program $program): ?RedirectResponse
     {
         if (!$program) return null;
         $user = Auth::user();
+
+        /** @var User $user */
         if ($user->hasRole('admin')) return null;
 
         $assignment = $user->getPrimaryDepartmentAssignment();
+        // $assignment = User::getPrimaryDepartmentAssignment();
         $allowed = $assignment && Program::whereHas('departments', fn($q) =>
             $q->where('department_id', $assignment->department_id)
         )->where('id', $program->id)->exists();
@@ -232,19 +252,22 @@ class CourseController extends Controller
         }
 
         return [
-            'program_id' => [$course ? 'sometimes' : 'required', 'exists:programs,id'],
+            'program_id'           => [$course ? 'sometimes' : 'required', 'exists:programs,id'],
             'confirmed_submission' => ['accepted'],
-            'code' => ['required', 'string', $courseCodeRule],
-            'name' => ['required', 'string'],
-            'description' => ['nullable', 'string'],
-            'credits' => ['required', 'integer', 'min:1'],
-            'has_lec_lab' => ['nullable', 'boolean'],
-            'year_level' => ['nullable', 'integer', 'between:1,5'],
-            'semester' => ['nullable', 'integer', 'in:1,2'],
-            'prerequisite' => ['nullable', 'string'],
-            'corequisite' => ['nullable', 'string'],
-            'po_mapping' => ['nullable', 'array'],
-            'po_mapping.*' => ['nullable', 'in:I,E,D'],
+            'code'                 => ['required', 'string', $courseCodeRule],
+            'name'                 => ['required', 'string'],
+            'description'          => ['nullable', 'string'],
+            'credits'              => ['required', 'integer', 'min:1'],
+            'has_lec_lab'          => ['nullable', 'boolean'],
+            'passing_mark'         => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'lec_class_hours'      => ['nullable', 'string'],
+            'lab_class_hours'      => ['nullable', 'string'],
+            'year_level'           => ['nullable', 'integer', 'between:1,5'],
+            'semester'             => ['nullable', 'integer', 'in:1,2'],
+            'prerequisite'         => ['nullable', 'string'],
+            'corequisite'          => ['nullable', 'string'],
+            'po_mapping'           => ['nullable', 'array'],
+            'po_mapping.*'         => ['nullable', 'in:I,E,D'],
         ];
     }
 

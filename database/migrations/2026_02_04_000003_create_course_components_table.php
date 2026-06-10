@@ -14,7 +14,7 @@ return new class extends Migration
                 ->constrained('syllabi')
                 ->cascadeOnDelete();
             $table->enum('type', ['LEC', 'LAB']);
-            $table->string('class_hours');
+            $table->string('class_hours'); // drop?
             $table->text('schedule')->nullable(); // comma-separated days/times
 
             $table->string('instructor_name');
@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('consultation_hours')->nullable();
 
             // $table->enum('performance_standard', ['50%', '60%', '75%'])->default('50%');
-            $table->decimal('performance_standard', 5, 2)->default(50.00);
+            $table->decimal('performance_standard', 5, 2)->default(50.00); // passing mark
 
             $table->timestamps();
         });

@@ -29,26 +29,26 @@ class ComponentsStep extends Component
     public bool $courseHasLab = false;
     public bool $isLoaded     = false;
 
-    // LEC fields — defaults match the DB default and the first <option> value
+    // LEC fields
     public ?string $lec_instructor_name      = null;
     public ?string $lec_instructor_email     = null;
     public ?string $lec_phone                = null;
     public ?string $lec_office               = null;
-    public string  $lec_class_hours          = '1 hr';
     public ?string $lec_schedule             = null;
     public ?string $lec_consultation_hours   = null;
-    // Stored as bare number string to match <option value="50.00"> or value="50"
-    public string  $lec_performance_standard = '60.00'; // default passing mark
 
     // LAB fields
     public ?string $lab_instructor_name      = null;
     public ?string $lab_instructor_email     = null;
     public ?string $lab_phone                = null;
     public ?string $lab_office               = null;
-    public string  $lab_class_hours          = '1 hr';
     public ?string $lab_schedule             = null;
     public ?string $lab_consultation_hours   = null;
-    public string  $lab_performance_standard = '60.00'; // mirrors lec when has_lec_lab
+
+    // Read-only from course (not stored in course_components)
+    public string  $lec_class_hours          = '3 hr';
+    public string  $lec_performance_standard = '60.00';
+    public ?string $lab_class_hours          = null;
 
     // ── Mount ─────────────────────────────────────────────────────────────────
 
@@ -111,9 +111,7 @@ class ComponentsStep extends Component
         }
         // When has_lec_lab, the performance standard is a single shared field.
         // Keep lab in sync whenever lec_performance_standard changes.
-        if ($property === 'lec_performance_standard' && $this->courseHasLab) {
-            $this->lab_performance_standard = $this->lec_performance_standard;
-        }
+        // class_hours and performance_standard are now on the course, not editable here
         $this->dispatch('syllabus-step-dirty', step: 'course_components', dirty: true);
     }
 
@@ -128,20 +126,26 @@ class ComponentsStep extends Component
         $syllabus           = Syllabus::query()->with('course')->findOrFail($this->syllabusId);
         $this->courseHasLab = (bool) $syllabus->course?->has_lec_lab;
 
+        // Load passing_mark and class_hours from the course record
+        $course = $syllabus->course;
+        if ($course) {
+            $this->lec_performance_standard = $this->toOptionValue($course->passing_mark, '60.00');
+            $this->lec_class_hours          = $course->lec_class_hours ?? '3 hr';
+            $this->lab_class_hours          = $course->lab_class_hours;
+        }
+
         $lec = CourseComponent::query()
             ->where('syllabus_id', $this->syllabusId)
             ->where('type', 'LEC')
             ->first();
 
         if ($lec) {
-            $this->lec_instructor_name      = $lec->instructor_name;
-            $this->lec_instructor_email     = $lec->instructor_email;
-            $this->lec_phone                = $lec->phone;
-            $this->lec_office               = $lec->office;
-            $this->lec_class_hours          = $lec->class_hours          ?? '1 hr';
-            $this->lec_schedule             = $lec->schedule;
-            $this->lec_consultation_hours   = $lec->consultation_hours;
-            $this->lec_performance_standard = $this->toOptionValue($lec->performance_standard, '60.00');
+            $this->lec_instructor_name    = $lec->instructor_name;
+            $this->lec_instructor_email   = $lec->instructor_email;
+            $this->lec_phone              = $lec->phone;
+            $this->lec_office             = $lec->office;
+            $this->lec_schedule           = $lec->schedule;
+            $this->lec_consultation_hours = $lec->consultation_hours;
         } else {
             $this->prefillLecFromUser();
         }
@@ -152,17 +156,12 @@ class ComponentsStep extends Component
             ->first();
 
         if ($lab) {
-            $this->lab_instructor_name      = $lab->instructor_name;
-            $this->lab_instructor_email     = $lab->instructor_email;
-            $this->lab_phone                = $lab->phone;
-            $this->lab_office               = $lab->office;
-            $this->lab_class_hours          = $lab->class_hours          ?? '1 hr';
-            $this->lab_schedule             = $lab->schedule;
-            $this->lab_consultation_hours   = $lab->consultation_hours;
-            // Performance standard is shared — use LEC value as the canonical one.
-            // lab_performance_standard is kept in sync on save; we ignore the
-            // stored LAB value here so the blade only shows one input.
-            $this->lab_performance_standard = $this->lec_performance_standard;
+            $this->lab_instructor_name    = $lab->instructor_name;
+            $this->lab_instructor_email   = $lab->instructor_email;
+            $this->lab_phone              = $lab->phone;
+            $this->lab_office             = $lab->office;
+            $this->lab_schedule           = $lab->schedule;
+            $this->lab_consultation_hours = $lab->consultation_hours;
         }
 
         $this->isLoaded = true;
@@ -212,15 +211,19 @@ class ComponentsStep extends Component
     {
         $get = fn (string $field) => $this->{$prefix . '_' . $field};
 
+        // class_hours and performance_standard now live on the course record
+        $classHours = $prefix === 'lec' ? $this->lec_class_hours : ($this->lab_class_hours ?? '3 hr');
+        $perfStd    = $this->toDecimal($this->lec_performance_standard, 60.00);
+
         return [
-            'instructor_name'      => $this->str($get('instructor_name'))    ?? '',
-            'instructor_email'     => $this->str($get('instructor_email'))   ?? '',
+            'instructor_name'      => $this->str($get('instructor_name'))  ?? '',
+            'instructor_email'     => $this->str($get('instructor_email')) ?? '',
             'phone'                => $this->nullable($get('phone')),
             'office'               => $this->nullable($get('office')),
-            'class_hours'          => $this->str($get('class_hours'), '1 hr') ?? '1 hr',
+            'class_hours'          => $classHours,
             'schedule'             => $this->nullable($get('schedule')),
             'consultation_hours'   => $this->nullable($get('consultation_hours')),
-            'performance_standard' => $this->toDecimal($get('performance_standard'), 60.00),
+            'performance_standard' => $perfStd,
         ];
     }
 

@@ -145,6 +145,34 @@
                     </div>
                 </div>
         
+                {{-- Passing Mark + Class Hours --}}
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="space-y-1.5">
+                        <x-form.label for="passing_mark" variant="title">Passing Mark</x-form.label>
+                        <x-form.select id="passing_mark" name="passing_mark">
+                            @foreach(['50.00'=>'50%','55.00'=>'55%','60.00'=>'60%','65.00'=>'65%','70.00'=>'70%','75.00'=>'75%','80.00'=>'80%'] as $val => $label)
+                                <option value="{{ $val }}" {{ old('passing_mark', number_format($course->passing_mark ?? 60, 2, '.', '')) == $val ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
+                        </x-form.select>
+                    </div>
+                    <div class="space-y-1.5">
+                        <x-form.label for="lec_class_hours" variant="title">LEC Class Hours</x-form.label>
+                        <x-form.select id="lec_class_hours" name="lec_class_hours">
+                            @foreach(['1 hr','1 hr and 30 min','2 hr','2 hr and 30 min','3 hr'] as $h)
+                                <option value="{{ $h }}" {{ old('lec_class_hours', $course->lec_class_hours ?? '3 hr') == $h ? 'selected' : '' }}>{{ $h }}</option>
+                            @endforeach
+                        </x-form.select>
+                    </div>
+                    <div class="space-y-1.5" x-data x-show="document.querySelector('[name=has_lec_lab]:checked')?.value === '1'">
+                        <x-form.label for="lab_class_hours" variant="title">LAB Class Hours</x-form.label>
+                        <x-form.select id="lab_class_hours" name="lab_class_hours">
+                            @foreach(['1 hr','1 hr and 30 min','2 hr','2 hr and 30 min','3 hr'] as $h)
+                                <option value="{{ $h }}" {{ old('lab_class_hours', $course->lab_class_hours ?? '3 hr') == $h ? 'selected' : '' }}>{{ $h }}</option>
+                            @endforeach
+                        </x-form.select>
+                    </div>
+                </div>
+
                 {{-- Prerequisite + Corequisite --}}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="space-y-1.5">

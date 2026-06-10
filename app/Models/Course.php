@@ -15,8 +15,12 @@ class Course extends Model
         'year_level',
         'semester',
         'has_lec_lab',
+        'passing_mark',
+        'lec_class_hours',
+        'lab_class_hours',
         'prerequisite',
         'corequisite',
+        'status',
         'created_by',
     ];
 

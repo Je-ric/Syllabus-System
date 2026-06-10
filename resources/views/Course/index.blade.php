@@ -16,6 +16,7 @@
     } else {
         $canDelete = $isAdmin;
     }
+    $showArchived = request()->boolean('archived');
 @endphp
 
     <x-page-header
@@ -43,39 +44,27 @@
 
         @if ($program)
 
+            {{-- Active / Archived toggle --}}
+            <div class="flex items-center gap-2 mb-4">
+                <a href="{{ route('courses.index', ['program_id' => $program->id]) }}"
+                    class="px-3 py-1.5 rounded-lg text-[13px] font-medium transition-colors
+                            {{ !$showArchived ? 'bg-[#f0fdf4] text-[#15803d] ring-1 ring-[#bbf7d0]' : 'text-slate-500 hover:bg-slate-50' }}">
+                    Active
+                </a>
+                <a href="{{ route('courses.index', ['program_id' => $program->id, 'archived' => 1]) }}"
+                    class="px-3 py-1.5 rounded-lg text-[13px] font-medium transition-colors
+                            {{ $showArchived ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-200' : 'text-slate-500 hover:bg-slate-50' }}">
+                    <i class="bx bx-archive text-sm"></i> Archived
+                </a>
+            </div>
+
             {{-- ── Program Outcomes reference (accordion) ───────────────────── --}}
             @if ($program->outcomes->isNotEmpty())
-                <div x-data="{ open: false }" class="mb-6 rounded-xl border border-[#e2e8f0] bg-white overflow-hidden" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
-                    <button type="button" @click="open = !open"
-                        class="w-full px-5 py-3 border-b border-[#e2e8f0] flex items-center justify-between hover:bg-[#f8fafc] transition-colors">
-                        <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569]">
-                            Program Outcomes Reference
-                        </p>
-                        <div class="flex items-center gap-2">
-                            <span class="text-[13px] text-[#94a3b8]">{{ $program->outcomes->count() }} outcome(s)</span>
-                            <i class="bx text-[#94a3b8] text-base transition-transform duration-200"
-                                :class="open ? 'bx-chevron-up' : 'bx-chevron-down'"></i>
-                        </div>
-                    </button>
-                    <div x-show="open" x-collapse>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm">
-                                <tbody class="divide-y divide-[#e2e8f0]">
-                                    @foreach ($program->outcomes as $outcome)
-                                        <tr class="hover:bg-[#f0fdf4] transition-colors">
-                                            <td class="px-5 py-2.5 whitespace-nowrap w-px font-mono text-[13px] font-bold text-[#166534]">
-                                                {{ $outcome->po_code }}
-                                            </td>
-                                            <td class="px-4 py-2.5 text-[13px] text-[#475569] leading-relaxed">
-                                                {{ $outcome->po_text }}
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+                <label
+                    for="program-outcomes-drawer"
+                    class="btn btn-sm">
+                    Program Outcomes
+                </label>
             @endif
 
             {{-- ── Curriculum map ────────────────────────────────────────────── --}}
@@ -166,27 +155,52 @@
                                                 {{-- Actions --}}
                                                 <td class="px-4 py-3 text-center">
                                                     <div class="inline-flex items-center gap-1.5">
-                                                        <x-button
-                                                            href="{{ route('courses.edit', $course->id) }}"
-                                                            variant="table-edit"
-                                                            title="Edit course">
-                                                            <i class="bx bx-edit"></i> Edit
-                                                        </x-button>
-                                                        <x-button
-                                                            type="button"
-                                                            variant="table-view"
-                                                            onclick="document.getElementById('viewCourseModal_{{ $course->id }}').showModal()"
-                                                            title="View details">
-                                                            <i class="bx bx-show"></i> View
-                                                        </x-button>
-                                                        @if ($canDelete)
+                                                        @if (!$showArchived)
+                                                            <x-button
+                                                                href="{{ route('courses.edit', $course->id) }}"
+                                                                variant="table-edit"
+                                                                title="Edit course">
+                                                                <i class="bx bx-edit"></i> Edit
+                                                            </x-button>
                                                             <x-button
                                                                 type="button"
-                                                                variant="table-danger"
-                                                                onclick="document.getElementById('deleteCourseModal_{{ $course->id }}').showModal()"
-                                                                title="Delete course">
-                                                                <i class="bx bx-trash"></i> Delete
+                                                                variant="table-view"
+                                                                onclick="document.getElementById('viewCourseModal_{{ $course->id }}').showModal()"
+                                                                title="View details">
+                                                                <i class="bx bx-show"></i> View
                                                             </x-button>
+                                                            <x-button
+                                                                type="button"
+                                                                variant="table-manage"
+                                                                onclick="document.getElementById('archiveCourseModal_{{ $course->id }}').showModal()"
+                                                                title="Archive course">
+                                                                <i class="bx bx-archive"></i>
+                                                            </x-button>
+                                                            @if ($canDelete)
+                                                                <x-button
+                                                                    type="button"
+                                                                    variant="table-danger"
+                                                                    onclick="document.getElementById('deleteCourseModal_{{ $course->id }}').showModal()"
+                                                                    title="Delete course">
+                                                                    <i class="bx bx-trash"></i>
+                                                                </x-button>
+                                                            @endif
+                                                        @else
+                                                            <form action="{{ route('courses.restore', $course->id) }}" method="POST">
+                                                                @csrf
+                                                                <x-button type="submit" variant="table-edit" title="Restore course">
+                                                                    <i class="bx bx-undo"></i> Restore
+                                                                </x-button>
+                                                            </form>
+                                                            @if ($canDelete)
+                                                                <x-button
+                                                                    type="button"
+                                                                    variant="table-danger"
+                                                                    onclick="document.getElementById('deleteCourseModal_{{ $course->id }}').showModal()"
+                                                                    title="Delete course">
+                                                                    <i class="bx bx-trash"></i>
+                                                                </x-button>
+                                                            @endif
                                                         @endif
                                                     </div>
                                                 </td>
@@ -216,9 +230,14 @@
         @endif
     </x-panel>
 
+@include('Course.offcanvasReference')
+
     {{-- Modals --}}
     @foreach ($modalCourses as $course)
         @include('Course.modals.viewCourseModal', ['course' => $course])
+        @if (!$showArchived)
+            @include('Course.modals.archiveCourseModal', ['course' => $course])
+        @endif
         @if ($canDelete)
             @include('Course.modals.deleteCourseModal', ['course' => $course])
         @endif

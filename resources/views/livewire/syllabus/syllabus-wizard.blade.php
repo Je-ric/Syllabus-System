@@ -256,6 +256,32 @@
                     </nav>
 
                 </div>
+
+                {{-- Legend --}}
+                <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 rounded-xl border border-[#e2e8f0] bg-white text-[12px]" style="box-shadow:0 1px 4px rgba(0,0,0,.05);">
+                    <span class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#94a3b8] shrink-0">Legend</span>
+                    <span class="inline-flex items-center gap-1.5">
+                        <span class="w-3 h-3 rounded-full bg-[#16a34a] shrink-0"></span>
+                        <span class="text-[#475569]">Normal week</span>
+                    </span>
+                    <span class="inline-flex items-center gap-1.5">
+                        <span class="w-3 h-3 rounded-full bg-[#16a34a] ring-2 ring-[#bbf7d0] shrink-0"></span>
+                        <span class="text-[#475569]">MVGO (Week 1)</span>
+                    </span>
+                    <span class="inline-flex items-center gap-1.5">
+                        <span class="w-3 h-3 rounded-full bg-amber-400 shrink-0"></span>
+                        <span class="text-[#475569]">Exam week <span class="text-[#94a3b8]">(locked)</span></span>
+                    </span>
+                    <span class="inline-flex items-center gap-1.5">
+                        <span class="w-3 h-3 rounded-full bg-rose-400 shrink-0"></span>
+                        <span class="text-[#475569]">Non-teaching week <span class="text-[#94a3b8]">(locked)</span></span>
+                    </span>
+                    <span class="inline-flex items-center gap-1.5">
+                        <span class="w-3 h-3 rounded-full bg-slate-300 shrink-0"></span>
+                        <span class="text-[#475569]">Break <span class="text-[#94a3b8]">(skipped — no week row)</span></span>
+                    </span>
+                </div>
+
             </aside>
 
         </div>{{-- end two-column --}}

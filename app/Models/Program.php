@@ -69,9 +69,10 @@ class Program extends Model
     // Used in: index() - CourseController; 
     //          buildProgramSelectionData() - SyllabusController
     // Returns courses grouped as [ year_level => [ semester => [Course, ...] ] ]
-    public function getCoursesGroupedByYearAndSemester()
+    public function getCoursesGroupedByYearAndSemester(string $status = 'active')
     {
         return $this->courses()
+            ->where('status', $status)
             ->with([
                 'programOutcomes' => fn ($q) => $q
                     ->select('program_outcomes.id', 'po_code', 'po_text')
