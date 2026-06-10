@@ -17,15 +17,15 @@
         <x-modal.body>
             <div class="space-y-4">
                 <div>
-                    <x-form.label isRequired>Program Name</x-form.label>
+                    <x-modal.modal-label isRequired>Program Name</x-modal.modal-label>
                     <x-form.input type="text" name="name" placeholder="e.g. Bachelor of Science in Computer Science" required />
                 </div>
                 <div>
-                    <x-form.label isRequired>BOR Approval No.</x-form.label>
+                    <x-modal.modal-label isRequired>BOR Approval No.</x-modal.modal-label>
                     <x-form.input type="text" name="bor_approval_no" placeholder="e.g. BOR Resolution No. 123" required />
                 </div>
                 <div>
-                    <x-form.label isRequired>BOR Approval Date</x-form.label>
+                    <x-modal.modal-label isRequired>BOR Approval Date</x-modal.modal-label>
                     <x-form.input type="date" name="bor_approval_date" required />
                 </div>
             </div>

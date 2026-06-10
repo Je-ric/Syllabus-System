@@ -16,7 +16,7 @@
         <input type="hidden" name="college_id" id="addDepartment_college_id" value="">
         <x-modal.body>
             <div>
-                <x-form.label isRequired>Department Name</x-form.label>
+                <x-modal.modal-label isRequired>Department Name</x-modal.modal-label>
                 <x-form.input type="text" name="name" placeholder="e.g. Department of Computer Science" required />
             </div>
         </x-modal.body>

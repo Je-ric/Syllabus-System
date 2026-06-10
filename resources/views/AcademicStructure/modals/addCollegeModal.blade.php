@@ -15,7 +15,7 @@
         @csrf
         <x-modal.body>
             <div>
-                <x-form.label isRequired>College Name</x-form.label>
+                <x-modal.modal-label isRequired>College Name</x-modal.modal-label>
                 <x-form.input type="text" name="name" placeholder="e.g. College of Engineering" required />
             </div>
         </x-modal.body>

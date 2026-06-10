@@ -6,6 +6,12 @@
         icon="bx-buildings"
         title="Academic Structure Management"
         desc="Manage colleges, departments, and academic programs across the institution">
+        <x-button variant="outline" onclick="collapseAll()">
+            <i class="bx bx-collapse-vertical"></i> Collapse All
+        </x-button>
+        <x-button variant="outline" onclick="expandAll()">
+            <i class="bx bx-expand-vertical"></i> Expand All
+        </x-button>
         <x-button variant="add-button"
                 onclick="document.getElementById('addCollegeModal').showModal()">
             <i class="bx bx-plus"></i> Add College
@@ -16,16 +22,15 @@
         <div id="collegeAccordions" class="space-y-3">
             @forelse ($colleges as $college)
                 <details class="bg-white border border-[#e2e8f0] rounded-xl overflow-hidden" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
-                    <summary class="flex items-center justify-between p-4 cursor-pointer select-none list-none hover:bg-[#f8fafc] transition-colors">
+                    <summary class="group flex items-center justify-between p-4 cursor-pointer select-none list-none hover:bg-[#f8fafc] transition-colors">
                         <div class="flex items-center gap-3 flex-1 min-w-0">
                             <i class="bx bx-chevron-right text-xl text-[#94a3b8] chevron-icon transition-transform duration-200"></i>
                             <i class="bx bxs-school text-xl text-[#16a34a] shrink-0"></i>
                             <span class="text-[13px] font-bold text-[#0f172a] truncate">{{ $college->name }}</span>
                         </div>
-                        {{-- table-edit: compact blue button — correct for an inline edit toggle --}}
-                        <div class="flex gap-1 shrink-0 ml-3">
+                        <div class="flex gap-1 shrink-0 ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
                             <x-button type="button" variant="table-confirm"
-                                onclick="event.stopPropagation(); toggle('editCollege{{ $college->id }}')"
+                                onclick="event.stopPropagation(); document.getElementById('updateCollegeModal_{{ $college->id }}').showModal()"
                                 title="Edit college">
                                 <i class="bx bx-edit"></i>
                             </x-button>
@@ -39,56 +44,29 @@
 
                     <div class="px-4 pb-4 space-y-4">
 
-                        {{-- Edit college form — amber "editing" cue (same across all levels) --}}
-                        <div id="editCollege{{ $college->id }}"
-                            class="hidden rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-4">
-                            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-3">
-                                Edit College
-                            </p>
-                            <form method="POST" action="{{ route('college.update', $college) }}" class="space-y-3">
-                                @csrf
-                                @method('PUT')
-                                <div>
-                                    <x-form.label for="collegeName{{ $college->id }}" variant="title" isRequired>
-                                        College Name
-                                    </x-form.label>
-                                    <x-form.input
-                                        id="collegeName{{ $college->id }}"
-                                        name="name"
-                                        value="{{ $college->name }}"
-                                        class="mt-1"
-                                        required />
-                                </div>
-                                <div class="flex gap-2">
-                                    <x-button type="submit" variant="save">
-                                        <i class="bx bx-save"></i> Save
-                                    </x-button>
-                                    <x-button type="button" variant="cancel"
-                                        onclick="toggle('editCollege{{ $college->id }}')">
-                                        Cancel
-                                    </x-button>
-                                </div>
-                            </form>
+                        <div class="flex items-center justify-end gap-2 py-1">
+                            <button type="button"
+                                onclick="openAddDepartmentModal({{ $college->id }})"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold
+                                       text-[#16a34a] border border-dashed border-[#86efac]
+                                       bg-white hover:bg-[#f0fdf4] hover:border-[#16a34a] transition">
+                                <i class="bx bx-plus text-sm leading-none"></i> Add Department
+                            </button>
                         </div>
-
-                        {{-- Add department — outline variant: lighter than add-button, appropriate inside an accordion --}}
-                        <x-button variant="outline" onclick="openAddDepartmentModal({{ $college->id }})">
-                            <i class="bx bx-plus"></i> Add Department
-                        </x-button>
 
                         {{-- Departments --}}
                         <div class="ml-6 space-y-3">
                             @forelse ($departments->where('college_id', $college->id) as $dept)
                                 <details class="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl overflow-hidden">
-                                    <summary class="flex items-center justify-between p-3 cursor-pointer select-none list-none hover:bg-[#f0fdf4] transition-colors">
+                                    <summary class="group flex items-center justify-between p-3 cursor-pointer select-none list-none hover:bg-[#f0fdf4] transition-colors">
                                         <div class="flex items-center gap-3 flex-1 min-w-0">
                                             <i class="bx bx-chevron-right text-lg text-[#94a3b8] chevron-icon transition-transform duration-200"></i>
                                             <i class="bx bx-building text-lg text-[#475569] shrink-0"></i>
                                             <span class="text-[13px] font-semibold text-[#0f172a] truncate">{{ $dept->name }}</span>
                                         </div>
-                                        <div class="flex gap-1 shrink-0 ml-3">
+                                        <div class="flex gap-1 shrink-0 ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
                                             <x-button type="button" variant="table-confirm"
-                                                onclick="event.stopPropagation(); toggle('editDept{{ $dept->id }}')"
+                                                onclick="event.stopPropagation(); document.getElementById('updateDepartmentModal_{{ $dept->id }}').showModal()"
                                                 title="Edit department">
                                                 <i class="bx bx-edit"></i>
                                             </x-button>
@@ -102,50 +80,22 @@
 
                                     <div class="px-3 pb-3 space-y-4">
 
-                                        {{-- Edit department form — same amber cue as college --}}
-                                        <div id="editDept{{ $dept->id }}"
-                                            class="hidden rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-4">
-                                            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-3">
-                                                Edit Department
-                                            </p>
-                                            <form method="POST" action="{{ route('department.update', $dept) }}" class="space-y-3">
-                                                @csrf
-                                                @method('PUT')
-                                                <input type="hidden" name="college_id" value="{{ $college->id }}">
-                                                <div>
-                                                    <x-form.label for="deptName{{ $dept->id }}" variant="title" isRequired>
-                                                        Department Name
-                                                    </x-form.label>
-                                                    <x-form.input
-                                                        id="deptName{{ $dept->id }}"
-                                                        name="name"
-                                                        value="{{ $dept->name }}"
-                                                        class="mt-1"
-                                                        required />
-                                                </div>
-                                                <div class="flex gap-2">
-                                                    <x-button type="submit" variant="save">
-                                                        <i class="bx bx-save"></i> Save
-                                                    </x-button>
-                                                    <x-button type="button" variant="cancel"
-                                                        onclick="toggle('editDept{{ $dept->id }}')">
-                                                        Cancel
-                                                    </x-button>
-                                                </div>
-                                            </form>
+                                        <div class="flex items-center justify-end gap-2 py-1">
+                                            <button type="button"
+                                                onclick="openAddProgramModal({{ $dept->id }})"
+                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold
+                                                       text-[#16a34a] border border-dashed border-[#86efac]
+                                                       bg-white hover:bg-[#f0fdf4] hover:border-[#16a34a] transition">
+                                                <i class="bx bx-plus text-sm leading-none"></i> Add Program
+                                            </button>
                                         </div>
-
-                                        {{-- Add program --}}
-                                        <x-button variant="outline" onclick="openAddProgramModal({{ $dept->id }})">
-                                            <i class="bx bx-plus"></i> Add Program
-                                        </x-button>
 
                                         {{-- Programs --}}
                                         <div class="ml-6 space-y-2">
                                             @forelse ($dept->programs as $program)
                                                 <div class="bg-white border border-[#e2e8f0] rounded-xl overflow-hidden" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
 
-                                                    <div class="flex items-start justify-between p-3 gap-3">
+                                                <div class="flex items-start justify-between p-3 gap-3 group">
                                                         <div class="flex gap-3 flex-1 min-w-0">
                                                             <i class="bx bx-book-open text-lg text-[#16a34a] mt-0.5 shrink-0"></i>
                                                             <div class="min-w-0">
@@ -164,9 +114,9 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div class="flex gap-1 shrink-0">
+                                                        <div class="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
                                                             <x-button type="button" variant="table-confirm"
-                                                                onclick="toggle('editProgram{{ $program->id }}')"
+                                                                onclick="document.getElementById('updateProgramModal_{{ $program->id }}').showModal()"
                                                                 title="Edit program">
                                                                 <i class="bx bx-edit"></i>
                                                             </x-button>
@@ -176,63 +126,7 @@
                                                                 <i class="bx bx-trash"></i>
                                                             </x-button>
                                                         </div>
-                                                    </div>
-
-                                                    {{-- Edit program form — same amber cue --}}
-                                                    <div id="editProgram{{ $program->id }}"
-                                                        class="hidden border-t border-[#e2e8f0] bg-[#f8fafc] p-4">
-                                                        <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-3">
-                                                            Edit Program
-                                                        </p>
-                                                        <form method="POST" action="{{ route('program.update', $program) }}" class="space-y-3">
-                                                            @csrf
-                                                            @method('PUT')
-                                                            <input type="hidden" name="department_id" value="{{ $dept->id }}">
-                                                            <div>
-                                                                <x-form.label for="programName{{ $program->id }}" variant="title" isRequired>
-                                                                    Program Name
-                                                                </x-form.label>
-                                                                <x-form.input
-                                                                    id="programName{{ $program->id }}"
-                                                                    name="name"
-                                                                    value="{{ $program->name }}"
-                                                                    class="mt-1"
-                                                                    required />
-                                                            </div>
-                                                            <div>
-                                                                <x-form.label for="borNo{{ $program->id }}" variant="title" isRequired>
-                                                                    BOR Approval No.
-                                                                </x-form.label>
-                                                                <x-form.input
-                                                                    id="borNo{{ $program->id }}"
-                                                                    name="bor_approval_no"
-                                                                    value="{{ $program->bor_approval_no }}"
-                                                                    class="mt-1"
-                                                                    required />
-                                                            </div>
-                                                            <div>
-                                                                <x-form.label for="borDate{{ $program->id }}" variant="date" isRequired>
-                                                                    BOR Date Approval
-                                                                </x-form.label>
-                                                                <x-form.input
-                                                                    id="borDate{{ $program->id }}"
-                                                                    type="date"
-                                                                    name="bor_approval_date"
-                                                                    value="{{ $program->bor_approval_date }}"
-                                                                    class="mt-1"
-                                                                    required />
-                                                            </div>
-                                                            <div class="flex gap-2">
-                                                                <x-button type="submit" variant="save">
-                                                                    <i class="bx bx-save"></i> Save
-                                                                </x-button>
-                                                                <x-button type="button" variant="cancel"
-                                                                    onclick="toggle('editProgram{{ $program->id }}')">
-                                                                    Cancel
-                                                                </x-button>
-                                                            </div>
-                                                        </form>
-                                                    </div>
+                                                </div>
 
                                                 </div>
                                             @empty
@@ -271,10 +165,13 @@
     @include('AcademicStructure.modals.addProgramModal')
 
     @foreach ($colleges as $college)
+        @include('AcademicStructure.modals.updateCollegeModal', ['college' => $college])
         @include('AcademicStructure.modals.deleteCollegeModal', ['college' => $college])
         @foreach ($departments->where('college_id', $college->id) as $dept)
+            @include('AcademicStructure.modals.updateDepartmentModal', ['dept' => $dept])
             @include('AcademicStructure.modals.deleteDepartmentModal', ['dept' => $dept])
             @foreach ($dept->programs as $program)
+                @include('AcademicStructure.modals.updateProgramModal', ['program' => $program])
                 @include('AcademicStructure.modals.deleteProgramModal', ['program' => $program])
             @endforeach
         @endforeach
@@ -284,13 +181,14 @@
 
 @push('scripts')
 <script>
-function toggle(id) {
-    const el = document.getElementById(id);
-    if (el) el.classList.toggle('hidden');
+function expandAll() {
+    document.querySelectorAll('#collegeAccordions details').forEach(d => { d.open = true; });
 }
 
-function closeAllForms(parent) {
-    parent.querySelectorAll('div[id^="edit"]').forEach(el => el.classList.add('hidden'));
+function collapseAll() {
+    document.querySelectorAll('#collegeAccordions details').forEach(d => {
+        d.open = false;
+    });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -303,14 +201,11 @@ document.addEventListener('DOMContentLoaded', () => {
         details.addEventListener('toggle', function () {
             if (chevron) chevron.style.transform = this.open ? 'rotate(90deg)' : '';
 
-            if (!this.open) {
-                closeAllForms(this);
-            } else {
+            if (this.open) {
                 // Collapse sibling college accordions
                 collegeAccordions.forEach(other => {
                     if (other !== this && other.open) {
                         other.open = false;
-                        closeAllForms(other);
                     }
                 });
 
@@ -323,7 +218,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     deptDetails.addEventListener('toggle', function () {
                         if (deptChevron) deptChevron.style.transform = this.open ? 'rotate(90deg)' : '';
-                        if (!this.open) closeAllForms(this);
                     });
                 });
             }
