@@ -23,14 +23,17 @@
                 {{-- LEFT PANEL --}}
                 <div class="col-span-4">
 
-                    <div class="border border-slate-200 rounded-xl overflow-visible shadow-sm">
+                    <div class="relative isolate group rounded-xl hover:z-10 focus-within:z-10">
+                        <div class="pointer-events-none absolute inset-0 rounded-xl border border-slate-200 bg-white shadow-sm"></div>
 
-                        <div class="px-4 py-2.5 border-b bg-slate-50 flex items-center justify-between">
-                            <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500">Colleges</h3>
-                            <span class="text-xs text-slate-400">{{ $colleges->count() }}</span>
-                        </div>
+                        <div class="relative z-10">
 
-                        <div class="divide-y divide-slate-100">
+                            <div class="px-4 py-2.5 border-b bg-white flex items-center justify-between rounded-t-xl">
+                                <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Colleges</h3>
+                                <span class="text-sm text-slate-400">{{ $colleges->count() }}</span>
+                            </div>
+
+                            <div class="divide-y divide-slate-100">
 
                             @foreach($colleges as $college)
 
@@ -41,7 +44,7 @@
 
                                 <button
                                     @click="selectedCollege = {{ $college->id }}"
-                                    class="w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors duration-100 group"
+                                    class="w-full text-left px-4 py-3 bg-white hover:bg-green-100 transition-colors duration-100 group"
                                     :class="selectedCollege === {{ $college->id }}
                                         ? 'bg-green-50 border-l-[3px] border-green-600'
                                         : 'border-l-[3px] border-transparent'">
@@ -50,7 +53,7 @@
 
                                         <div class="flex items-center gap-2.5 min-w-0">
                                             <span class="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center"
-                                                :class="selectedCollege === {{ $college->id }} ? 'bg-green-100' : 'bg-slate-100'">
+                                                :class="selectedCollege === {{ $college->id }} ? 'bg-green-50' : 'bg-slate-100'">
                                                 <i class="bx bxs-school text-sm"
                                                    :class="selectedCollege === {{ $college->id }} ? 'text-green-700' : 'text-slate-500'"></i>
                                             </span>
@@ -68,7 +71,7 @@
 
                                         <div class="dropdown dropdown-end shrink-0" @click.stop>
                                             <label tabindex="0"
-                                                class="w-6 h-6 rounded flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-200 cursor-pointer transition-colors">
+                                                class="w-6 h-6 rounded flex items-center justify-center text-slate-400 group-hover:text-green-600 hover:bg-slate-200 cursor-pointer transition-colors">
                                                 <i class="bx bx-dots-vertical-rounded text-base"></i>
                                             </label>
                                             <ul tabindex="0"
@@ -94,6 +97,8 @@
 
                             @endforeach
 
+                            </div>
+
                         </div>
 
                     </div>
@@ -101,7 +106,7 @@
                 </div>
 
                 {{-- RIGHT PANEL --}}
-                <div class="col-span-8">
+                <div class="col-span-8 p-2 sm:p-4 md:p-6 bg-white border border-slate-200 rounded-xl shadow-sm">
 
                     @foreach($colleges as $college)
 
@@ -124,10 +129,13 @@
 
                                 @forelse($departments->where('college_id', $college->id) as $dept)
 
-                                    <div class="border border-slate-200 rounded-xl shadow-sm overflow-visible">
+                                    <div class="relative isolate group rounded-xl hover:z-10 focus-within:z-10">
+                                        <div class="pointer-events-none absolute inset-0 rounded-xl border border-slate-200 bg-white shadow-sm"></div>
+
+                                        <div class="relative z-10">
 
                                         {{-- Department Header --}}
-                                        <div class="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-200">
+                                        <div class="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-200 rounded-t-xl">
 
                                             <div class="flex items-center gap-2.5">
                                                 <span class="w-6 h-6 rounded-md bg-slate-200 flex items-center justify-center shrink-0">
@@ -143,14 +151,9 @@
 
                                             <div class="flex items-center gap-1.5">
 
-                                                <x-button variant="sm-primary"
-                                                    onclick="openAddProgramModal({{ $dept->id }})">
-                                                    <i class="bx bx-plus"></i> Add Program
-                                                </x-button>
-
                                                 <div class="dropdown dropdown-end">
                                                     <label tabindex="0"
-                                                        class="w-7 h-7 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-200 cursor-pointer transition-colors">
+                                                        class="w-7 h-7 rounded-md flex items-center justify-center text-slate-400 group-hover:text-green-600 hover:text-green-600 hover:bg-slate-200 cursor-pointer transition-colors">
                                                         <i class="bx bx-dots-vertical-rounded text-base"></i>
                                                     </label>
                                                     <ul tabindex="0"
@@ -199,7 +202,7 @@
 
                                                     <div class="dropdown dropdown-end shrink-0">
                                                         <label tabindex="0"
-                                                            class="w-6 h-6 rounded flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-200 cursor-pointer transition-colors">
+                                                            class="w-6 h-6 rounded flex items-center justify-center text-slate-400 group-hover:text-green-600 hover:text-green-600 hover:bg-slate-200 cursor-pointer transition-colors">
                                                             <i class="bx bx-dots-vertical-rounded text-base"></i>
                                                         </label>
                                                         <ul tabindex="0"
@@ -228,6 +231,31 @@
                                                 </div>
 
                                             @endforelse
+
+                                        </div>
+
+                                        <div class="border-t border-slate-200 bg-white rounded-b-xl
+                                                    opacity-0 pointer-events-none
+                                                    transition-all duration-150
+                                                    group-hover:opacity-100
+                                                    group-hover:pointer-events-auto
+                                                    group-focus-within:opacity-100
+                                                    group-focus-within:pointer-events-auto">
+
+                                            <button
+                                                type="button"
+                                                class="w-full flex items-center justify-center gap-2
+                                                       py-2 text-xs font-medium
+                                                       text-slate-500 hover:text-green-700
+                                                       hover:bg-green-50 transition-colors rounded-b-xl"
+                                                onclick="openAddProgramModal({{ $dept->id }})">
+
+                                                <i class="bx bx-plus text-base text-green-600"></i>
+                                                <span>Add Program</span>
+
+                                            </button>
+
+                                        </div>
 
                                         </div>
 
