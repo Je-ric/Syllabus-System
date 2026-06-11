@@ -3,6 +3,8 @@
     'icon' => null,
     'count' => null,
     'subtitle' => null,
+    'padded' => true,
+    'headerRight' => null,
 ])
 
 <div {{ $attributes->merge([
@@ -22,6 +24,12 @@
             @endif
         </div>
 
+        @if($headerRight)
+            <span class="ml-auto text-[11px] text-[#64748b]">
+                {{ $headerRight }}
+            </span>
+        @endif
+
         <div class="ml-auto flex items-center gap-2">
             {{ $actions ?? '' }}
 
@@ -34,7 +42,7 @@
 
     </div>
 
-    <div class="p-4">
+    <div class="{{ $padded ? 'p-4' : '' }}">
         {{ $slot }}
     </div>
 

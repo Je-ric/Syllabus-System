@@ -137,73 +137,66 @@
                 </div>
             @endif
 
-            {{-- Profile edit form --}}
-            <div class="rounded-xl border border-[#e2e8f0] bg-white overflow-hidden" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
-                <div class="px-5 py-3 border-b border-[#e2e8f0] bg-[#f8fafc] flex items-center gap-2">
-                    <i class="bx bx-user-circle text-[#16a34a] text-base"></i>
-                    <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569]">Profile Information</p>
-                </div>
-                <div class="p-5">
-                    <form method="POST" action="{{ route('profile.update') }}">
-                        @csrf
-                        @method('PUT')
-                        <div class="grid md:grid-cols-2 gap-4 text-sm text-[#334155]">
-                            <div>
-                                <x-form.label class="block">Name</x-form.label>
-                                <x-form.input type="text" name="name" class="mt-1.5"
-                                    :value="old('name', $user->name)" required :disabled="$isAdmin" />
-                                @error('name')<span class="text-rose-600 text-xs">{{ $message }}</span>@enderror
-                            </div>
-                            <div>
-                                <x-form.label class="block">Email</x-form.label>
-                                <x-form.input type="email" name="email" class="mt-1.5"
-                                    :value="old('email', $user->email)" required :disabled="$isAdmin" />
-                                @error('email')<span class="text-rose-600 text-xs">{{ $message }}</span>@enderror
-                            </div>
-                            <div>
-                                <x-form.label class="block">Phone</x-form.label>
-                                <x-form.input type="text" name="phone_number" class="mt-1.5"
-                                    :value="old('phone_number', $user->phone_number)" :disabled="$isAdmin" />
-                                @error('phone_number')<span class="text-rose-600 text-xs">{{ $message }}</span>@enderror
-                            </div>
-                            <div>
-                                <x-form.label class="block">Office</x-form.label>
-                                <x-form.input type="text" name="office" class="mt-1.5"
-                                    :value="old('office', $user->office)" :disabled="$isAdmin" />
-                                @error('office')<span class="text-rose-600 text-xs">{{ $message }}</span>@enderror
-                            </div>
-                            <div>
-                                <p class="text-[#94a3b8] text-xs uppercase tracking-wide font-semibold">Email Verified</p>
-                                <p class="font-medium text-[#334155] mt-1 text-sm">
-                                    {{ $user->email_verified_at ? $user->email_verified_at->format('F d, Y h:i A') : 'Not Verified' }}
-                                </p>
-                            </div>
-                        </div>
-                        @unless ($isAdmin)
-                            <div class="mt-4 flex justify-end">
-                                <x-button type="submit" variant="save">
-                                    <i class="bx bx-save mr-1"></i> Save Changes
-                                </x-button>
-                            </div>
-                        @endunless
-                    </form>
-                </div>
-            </div>
+            <x-card-section
+                title="Profile Information"
+                icon="bx-user-circle">
 
-            {{-- Recent Activity --}}
-            <div class="rounded-xl border border-[#e2e8f0] bg-white overflow-hidden" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
-                <div class="px-5 py-3 border-b border-[#e2e8f0] bg-[#f8fafc] flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <i class="bx bx-history text-[#16a34a] text-base"></i>
-                        <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569]">Recent Activity</p>
+                <form method="POST" action="{{ route('profile.update') }}">
+                    @csrf
+                    @method('PUT')
+                    <div class="grid md:grid-cols-2 gap-4 text-sm text-[#334155]">
+                        <div>
+                            <x-form.label class="block">Name</x-form.label>
+                            <x-form.input type="text" name="name" class="mt-1.5"
+                                :value="old('name', $user->name)" required :disabled="$isAdmin" />
+                            @error('name')<span class="text-rose-600 text-xs">{{ $message }}</span>@enderror
+                        </div>
+                        <div>
+                            <x-form.label class="block">Email</x-form.label>
+                            <x-form.input type="email" name="email" class="mt-1.5"
+                                :value="old('email', $user->email)" required :disabled="$isAdmin" />
+                            @error('email')<span class="text-rose-600 text-xs">{{ $message }}</span>@enderror
+                        </div>
+                        <div>
+                            <x-form.label class="block">Phone</x-form.label>
+                            <x-form.input type="text" name="phone_number" class="mt-1.5"
+                                :value="old('phone_number', $user->phone_number)" :disabled="$isAdmin" />
+                            @error('phone_number')<span class="text-rose-600 text-xs">{{ $message }}</span>@enderror
+                        </div>
+                        <div>
+                            <x-form.label class="block">Office</x-form.label>
+                            <x-form.input type="text" name="office" class="mt-1.5"
+                                :value="old('office', $user->office)" :disabled="$isAdmin" />
+                            @error('office')<span class="text-rose-600 text-xs">{{ $message }}</span>@enderror
+                        </div>
+                        <div>
+                            <p class="text-[#94a3b8] text-xs uppercase tracking-wide font-semibold">Email Verified</p>
+                            <p class="font-medium text-[#334155] mt-1 text-sm">
+                                {{ $user->email_verified_at ? $user->email_verified_at->format('F d, Y h:i A') : 'Not Verified' }}
+                            </p>
+                        </div>
                     </div>
-                    <span class="text-[11px] text-[#94a3b8]">Last 20 events</span>
-                </div>
+                    @unless ($isAdmin)
+                        <div class="mt-4 flex justify-end">
+                            <x-button type="submit" variant="save">
+                                <i class="bx bx-save mr-1"></i> Save Changes
+                            </x-button>
+                        </div>
+                    @endunless
+                </form>
+            </x-card-section>
+
+            <x-card-section
+                title="Recent Activity"
+                icon="bx-history"
+                :padded=false
+                headerRight="Last 20 event's">
+
                 <div class="overflow-y-auto" style="max-height: 360px;">
                     @if ($recentActivity->isEmpty())
-                        <div class="p-6 text-center text-[13px] text-[#94a3b8]">No activity recorded yet.</div>
+                        <div class="text-center text-[13px] text-[#94a3b8]">No activity recorded yet.</div>
                     @else
-                        <ul class="divide-y divide-[#f1f5f9]">
+                        <ul class="divide-[#f1f5f9]">
                             @foreach ($recentActivity as $log)
                                 @php
                                     $key = strtolower($log->action);
@@ -232,7 +225,8 @@
                         </ul>
                     @endif
                 </div>
-            </div>
+
+            </x-card-section>
 
             {{-- Change Password --}}
             @unless ($isAdmin)
