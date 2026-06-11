@@ -1,4 +1,14 @@
-<x-modal.dialog :id="$modalId" maxWidth="max-w-md" width="w-11/12">
+@php
+    $avatarColors = match($user->account_status) {
+        'active'   => 'bg-[#dcfce7] text-[#166534]',
+        'pending'  => 'bg-[#fef3c7] text-[#92400e]',
+        'rejected' => 'bg-[#ffe4e6] text-[#9f1239]',
+        'disabled' => 'bg-[#f1f5f9] text-[#475569]',
+        default    => 'bg-[#f1f5f9] text-[#475569]',
+    };
+@endphp
+
+<x-modal.dialog :id="$modalId" maxWidth="max-w-lg" width="w-11/12">
     <form method="POST" action="{{ route('account-approval.edit-user') }}" class="flex flex-col">
         @csrf
         @method('PUT')
@@ -7,36 +17,60 @@
         <x-modal.header :modalId="$modalId" variant="edit">
             <div class="min-w-0">
                 <p class="text-[15px] font-bold text-[#0f172a]">Edit User</p>
-                <p class="text-[13px] text-[#94a3b8] truncate">{{ $user->email }}</p>
+                <p class="text-[12px] text-[#94a3b8] truncate">ID #{{ $user->id }}</p>
             </div>
         </x-modal.header>
 
         <x-modal.body>
             <div class="space-y-4">
-                <div>
-                    <x-modal.modal-label isRequired>Full Name</x-modal.modal-label>
-                    <x-form.input type="text" name="name" value="{{ old('name', $user->name) }}" required />
+
+                {{-- Identity strip --}}
+                <div class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#f8fafc] border border-[#e2e8f0]">
+                    <span class="shrink-0 inline-flex items-center justify-center w-10 h-10 rounded-full font-bold text-base {{ $avatarColors }}">
+                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                    </span>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-[13px] font-semibold text-[#0f172a] truncate">{{ $user->name }}</p>
+                        <p class="text-[12px] text-[#94a3b8] truncate">{{ $user->email }}</p>
+                    </div>
+                    <x-feedback-status.status-indicator :status="$user->account_status" />
                 </div>
-                <div>
-                    <x-modal.modal-label isRequired>Email</x-modal.modal-label>
-                    <x-form.input type="email" name="email" value="{{ old('email', $user->email) }}" required />
+
+                {{-- Form fields --}}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="sm:col-span-2">
+                        <x-modal.modal-label isRequired>Full Name</x-modal.modal-label>
+                        <x-form.input type="text" name="name"
+                            value="{{ old('name', $user->name) }}" required />
+                    </div>
+                    <div class="sm:col-span-2">
+                        <x-modal.modal-label isRequired>Email Address</x-modal.modal-label>
+                        <x-form.input type="email" name="email"
+                            value="{{ old('email', $user->email) }}" required />
+                    </div>
+                    <div>
+                        <x-modal.modal-label>Phone Number</x-modal.modal-label>
+                        <x-form.input type="text" name="phone_number"
+                            value="{{ old('phone_number', $user->phone_number) }}"
+                            placeholder="e.g. 09XX XXX XXXX" />
+                    </div>
+                    <div>
+                        <x-modal.modal-label>Office / Department</x-modal.modal-label>
+                        <x-form.input type="text" name="office"
+                            value="{{ old('office', $user->office) }}"
+                            placeholder="e.g. College of Engineering" />
+                    </div>
                 </div>
-                <div>
-                    <x-modal.modal-label>Phone Number</x-modal.modal-label>
-                    <x-form.input type="text" name="phone_number" value="{{ old('phone_number', $user->phone_number) }}" />
-                </div>
-                <div>
-                    <x-modal.modal-label>Office</x-modal.modal-label>
-                    <x-form.input type="text" name="office" value="{{ old('office', $user->office) }}" />
-                </div>
-                <x-feedback-status.alert type="info" :showTitle="false">Changes take effect immediately.</x-feedback-status.alert>
+
+                <x-feedback-status.alert type="info" :showTitle="false"
+                    message="Changes take effect immediately. Email changes will update the user's login credentials." />
             </div>
         </x-modal.body>
 
         <x-modal.footer>
             <x-modal.close-button :modalId="$modalId" text="Cancel" />
             <x-button type="submit" variant="save">
-                <i class="bx bx-save"></i> Save Changes
+                <i class="bx bx-save leading-none"></i> Save Changes
             </x-button>
         </x-modal.footer>
     </form>

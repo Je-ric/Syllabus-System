@@ -8,12 +8,27 @@
 
         <x-slot:actions>
             <button wire:click="clearFilters"
-                class="text-[12px] text-slate-400 hover:text-rose-500 transition">
-                Clear all
+                class="text-xs text-[#94a3b8] hover:text-rose-500 transition flex items-center gap-1">
+                <i class="bx bx-reset text-sm leading-none"></i> Clear all
             </button>
         </x-slot:actions>
 
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
+
+            <div class="col-span-2 xl:col-span-1">
+                <label class="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-1">
+                    Keyword
+                </label>
+
+                <div class="xl:col-span-2 relative">
+                    <i class="bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base pointer-events-none"></i>
+                        <x-form.input
+                            type="text"
+                            wire:model.live.debounce.400ms="keyword"
+                            placeholder="Search…"
+                            class="pl-9"/>
+                    </div>
+            </div>
 
             <div>
                 <label class="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-1">
@@ -76,16 +91,6 @@
                 <x-form.input type="date" wire:model.live="dateTo" />
             </div>
 
-            <div class="col-span-2 xl:col-span-1">
-                <label class="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-1">
-                    Keyword
-                </label>
-                <x-form.input
-                    type="text"
-                    wire:model.live.debounce.400ms="keyword"
-                    placeholder="Search…" />
-            </div>
-
         </div>
 
     </x-card-section>
@@ -146,7 +151,7 @@
 
                         {{-- Module --}}
                         <x-table.td>
-                            <span class="inline-flex items-center rounded-lg bg-[#f8fafc] px-2 py-0.5 text-[13px] font-medium text-[#475569] ring-1 ring-[#e2e8f0] whitespace-nowrap">
+                            <span class="inline-flex items-center rounded-lg px-2 py-0.5 text-[13px] font-medium text-[#475569] whitespace-nowrap">
                                 {{ $log->module }}
                             </span>
                         </x-table.td>
