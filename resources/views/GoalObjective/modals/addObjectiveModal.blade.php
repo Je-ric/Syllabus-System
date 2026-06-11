@@ -1,11 +1,6 @@
 <x-modal.dialog id="addObjectiveModal" maxWidth="max-w-lg" width="w-11/12">
-    <x-modal.header modalId="addObjectiveModal">
-        <div class="flex items-center gap-3">
-            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#f0fdf4] text-[#16a34a] shrink-0">
-                <i class="bx bx-plus-circle text-base leading-none"></i>
-            </span>
-            <span class="text-[15px] font-bold text-[#0f172a]">Add New Objective</span>
-        </div>
+    <x-modal.header modalId="addObjectiveModal" variant="add">
+        Add New Objective
     </x-modal.header>
 
     <form action="{{ route('objective.store') }}" method="POST" class="flex flex-col">

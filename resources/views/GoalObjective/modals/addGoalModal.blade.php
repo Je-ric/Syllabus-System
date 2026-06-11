@@ -1,11 +1,6 @@
 <x-modal.dialog id="addGoalModal" maxWidth="max-w-xl" width="w-11/12">
-    <x-modal.header modalId="addGoalModal">
-        <div class="flex items-center gap-3">
-            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#f0fdf4] text-[#16a34a] shrink-0">
-                <i class="bx bx-plus-circle text-base leading-none"></i>
-            </span>
-            <span class="text-[15px] font-bold text-[#0f172a]">Add New Goal</span>
-        </div>
+    <x-modal.header modalId="addGoalModal" variant="add">
+        Add New Goal
     </x-modal.header>
 
     <form action="{{ route('goal.store') }}" method="POST" class="flex flex-col">

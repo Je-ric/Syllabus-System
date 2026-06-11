@@ -1,13 +1,8 @@
 <x-modal.dialog id="confirmEditCourseModal" maxWidth="max-w-md" width="w-11/12">
-    <x-modal.header modalId="confirmEditCourseModal">
-        <div class="flex items-center gap-3">
-            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#eff6ff] text-[#1d4ed8] shrink-0">
-                <i class="bx bx-edit-alt text-base leading-none"></i>
-            </span>
-            <div>
-                <p class="text-[15px] font-bold text-[#0f172a]">Confirm Course Update</p>
-                <p class="text-[13px] text-[#94a3b8]">Review the changes before saving.</p>
-            </div>
+    <x-modal.header modalId="confirmEditCourseModal" variant="confirm">
+        <div>
+            <p class="text-[15px] font-bold text-[#0f172a]">Confirm Course Update</p>
+            <p class="text-[13px] text-[#94a3b8]">Review the changes before saving.</p>
         </div>
     </x-modal.header>
 

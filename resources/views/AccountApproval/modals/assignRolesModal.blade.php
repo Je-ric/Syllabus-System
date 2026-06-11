@@ -10,15 +10,10 @@
         @csrf
         <input type="hidden" name="user_id" value="{{ $user->id }}">
 
-        <x-modal.header :modalId="$modalId">
-            <div class="flex items-center gap-3">
-                <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#e2e8f0] text-[#475569] shrink-0">
-                    <i class="bx bx-shield text-base leading-none"></i>
-                </span>
-                <div class="min-w-0">
-                    <p class="text-[15px] font-bold text-[#0f172a]">Assign Roles</p>
-                    <p class="text-[13px] text-[#94a3b8] truncate">{{ $user->name }}</p>
-                </div>
+        <x-modal.header :modalId="$modalId" variant="roles">
+            <div class="min-w-0">
+                <p class="text-[15px] font-bold text-[#0f172a]">Assign Roles</p>
+                <p class="text-[13px] text-[#94a3b8] truncate">{{ $user->name }}</p>
             </div>
         </x-modal.header>
 
@@ -26,9 +21,9 @@
             <div class="space-y-2">
                 @php
                     $roles = [
-                        ['name' => 'admin', 'label' => 'Admin',            'desc' => 'Full system access',              'icon' => 'bx-crown',    'color' => 'text-[#581c87]', 'bg' => 'bg-[#faf5ff]'],
-                        ['name' => 'dean',  'label' => 'College Dean',     'desc' => 'Manage college-level operations', 'icon' => 'bx-medal',    'color' => 'text-[#3730a3]', 'bg' => 'bg-[#eef2ff]'],
-                        ['name' => 'chair', 'label' => 'Department Chair', 'desc' => 'Manage department operations',    'icon' => 'bx-user-pin', 'color' => 'text-[#1e40af]', 'bg' => 'bg-[#eff6ff]'],
+                        ['name' => 'admin', 'label' => 'Admin',            'desc' => 'Full system access',              'icon' => 'bx-crown',    'color' => 'text-yellow-700', 'bg' => 'bg-yellow-50'],
+                        ['name' => 'dean',  'label' => 'College Dean',     'desc' => 'Manage college-level operations', 'icon' => 'bx-medal',    'color' => 'text-blue-700',   'bg' => 'bg-blue-50'],
+                        ['name' => 'chair', 'label' => 'Department Chair', 'desc' => 'Manage department operations',    'icon' => 'bx-user-pin', 'color' => 'text-blue-600',   'bg' => 'bg-blue-50'],
                     ];
                 @endphp
 

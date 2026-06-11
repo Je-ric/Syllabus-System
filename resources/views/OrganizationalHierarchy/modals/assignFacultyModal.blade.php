@@ -10,15 +10,10 @@
         @csrf
         <input type="hidden" name="department_id" value="{{ $departmentId }}">
 
-        <x-modal.header :modalId="'assignFacultyModal-' . $departmentId">
-            <div class="flex items-center gap-3">
-                <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#dcfce7] text-[#16a34a] shrink-0">
-                    <i class="bx bx-user-plus text-base leading-none"></i>
-                </span>
-                <div class="min-w-0">
-                    <p class="text-[15px] font-bold text-[#0f172a]">Assign Faculty</p>
-                    <p class="text-[13px] text-[#94a3b8] truncate">{{ $departmentName }}</p>
-                </div>
+        <x-modal.header :modalId="'assignFacultyModal-' . $departmentId" variant="assign">
+            <div class="min-w-0">
+                <p class="text-[15px] font-bold text-[#0f172a]">Assign Faculty</p>
+                <p class="text-[13px] text-[#94a3b8] truncate">{{ $departmentName }}</p>
             </div>
         </x-modal.header>
 

@@ -84,6 +84,10 @@
             bg-rose-600 text-white hover:bg-rose-700
             focus:ring-rose-600/30',
 
+        'warning'    => $formBtn . '
+            bg-amber-500 text-white hover:bg-amber-600
+            focus:ring-amber-500/30',
+
         // ── Small / wizard buttons ─────────────────────────────────────────────
         // FIX: sm-primary hover was repeating base bg instead of darkening it.
         'sm-primary' => $wizardBtn . 'bg-emerald-50 text-emerald-700 border border-emerald-300

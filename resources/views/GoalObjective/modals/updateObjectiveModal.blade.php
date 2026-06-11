@@ -1,22 +1,19 @@
 <x-modal.dialog id="updateObjectiveModal_{{ $objective->id }}" maxWidth="max-w-lg" width="w-11/12">
-    <x-modal.header modalId="updateObjectiveModal_{{ $objective->id }}">
-        <div class="flex items-center gap-3">
-            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#eff6ff] text-[#1d4ed8] shrink-0">
-                <i class="bx bx-edit text-base leading-none"></i>
-            </span>
-            <div class="flex items-center gap-2 min-w-0">
-                <span class="text-[15px] font-bold text-[#0f172a]">Edit Objective</span>
-                <span class="font-mono text-[11px] font-bold text-[#166534] bg-[#f0fdf4] border border-[#bbf7d0] px-2 py-0.5 rounded-md shrink-0">
-                    {{ $objective->dept_obj_code }}
-                </span>
-            </div>
-        </div>
+    <x-modal.header modalId="updateObjectiveModal_{{ $objective->id }}" variant="edit">
+        Edit Objective
     </x-modal.header>
 
     <form action="{{ route('objective.update', $objective->id) }}" method="POST" class="flex flex-col">
         @csrf
         @method('PUT')
         <x-modal.body>
+            <div class="space-y-4">
+            <div class="flex items-center gap-2">
+                <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#94a3b8]">Editing</p>
+                <span class="font-mono text-[11px] font-bold text-[#166534] bg-[#f0fdf4] border border-[#bbf7d0] px-2 py-0.5 rounded-md">
+                    {{ $objective->dept_obj_code }}
+                </span>
+            </div>
             <div>
                 <x-modal.modal-label for="objective_text_{{ $objective->id }}" isRequired>Objective Description</x-modal.modal-label>
                 <x-form.textarea
@@ -25,6 +22,7 @@
                     rows="5"
                     placeholder="Describe the department objective…"
                     required>{{ $objective->objective_text }}</x-form.textarea>
+            </div>
             </div>
         </x-modal.body>
 

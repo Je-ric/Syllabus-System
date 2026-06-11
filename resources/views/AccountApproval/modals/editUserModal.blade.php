@@ -4,15 +4,10 @@
         @method('PUT')
         <input type="hidden" name="user_id" value="{{ $user->id }}">
 
-        <x-modal.header :modalId="$modalId">
-            <div class="flex items-center gap-3">
-                <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#e2e8f0] text-[#475569] shrink-0">
-                    <i class="bx bx-edit text-base leading-none"></i>
-                </span>
-                <div class="min-w-0">
-                    <p class="text-[15px] font-bold text-[#0f172a]">Edit User</p>
-                    <p class="text-[13px] text-[#94a3b8] truncate">{{ $user->email }}</p>
-                </div>
+        <x-modal.header :modalId="$modalId" variant="edit">
+            <div class="min-w-0">
+                <p class="text-[15px] font-bold text-[#0f172a]">Edit User</p>
+                <p class="text-[13px] text-[#94a3b8] truncate">{{ $user->email }}</p>
             </div>
         </x-modal.header>
 

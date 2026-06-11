@@ -1,13 +1,8 @@
 <x-modal.dialog id="addProgramModal" maxWidth="max-w-md" width="w-11/12">
-    <x-modal.header modalId="addProgramModal">
-        <div class="flex items-center gap-3">
-            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#dcfce7] text-[#16a34a] shrink-0">
-                <i class="bx bx-plus text-base leading-none"></i>
-            </span>
-            <div>
-                <p class="text-[15px] font-bold text-[#0f172a]">Add New Program</p>
-                <p class="text-[13px] text-[#94a3b8]">Will be created under the selected department.</p>
-            </div>
+    <x-modal.header modalId="addProgramModal" variant="add">
+        <div>
+            <p class="text-[15px] font-bold text-[#0f172a]">Add New Program</p>
+            <p class="text-[13px] text-[#94a3b8]">Will be created under the selected department.</p>
         </div>
     </x-modal.header>
 
@@ -33,7 +28,7 @@
 
         <x-modal.footer>
             <x-modal.close-button modalId="addProgramModal" text="Cancel" />
-            <x-button type="submit" variant="save">
+            <x-button type="submit" variant="add-button">
                 <i class="bx bx-save"></i> Create Program
             </x-button>
         </x-modal.footer>

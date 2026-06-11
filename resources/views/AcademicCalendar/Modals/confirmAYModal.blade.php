@@ -1,11 +1,6 @@
 <x-modal.dialog id="confirmAYModal" maxWidth="max-w-md" width="w-11/12">
-    <x-modal.header modalId="confirmAYModal">
-        <div class="flex items-center gap-3">
-            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#dcfce7] text-[#16a34a] shrink-0">
-                <i class="bx bx-calendar-check text-base leading-none"></i>
-            </span>
-            <span class="text-[#166534]">Confirm Academic Year</span>
-        </div>
+    <x-modal.header modalId="confirmAYModal" variant="confirm">
+        <span class="text-green-800">Confirm Academic Year</span>
     </x-modal.header>
 
     <x-modal.body>
@@ -33,7 +28,7 @@
 
     <x-modal.footer>
         <x-modal.close-button modalId="confirmAYModal" text="Review Again" />
-        <x-button type="button" variant="save" onclick="document.getElementById('academicCalendarForm').submit()">
+        <x-button type="button" variant="add-button" onclick="document.getElementById('academicCalendarForm').submit()">
             <i class="bx bx-check"></i> Confirm &amp; Create
         </x-button>
     </x-modal.footer>

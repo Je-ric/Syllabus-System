@@ -1,22 +1,19 @@
 <x-modal.dialog id="updateGoalModal_{{ $goal->id }}" maxWidth="max-w-lg" width="w-11/12">
-    <x-modal.header modalId="updateGoalModal_{{ $goal->id }}">
-        <div class="flex items-center gap-3">
-            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#eff6ff] text-[#1d4ed8] shrink-0">
-                <i class="bx bx-edit text-base leading-none"></i>
-            </span>
-            <div class="flex items-center gap-2 min-w-0">
-                <span class="text-[15px] font-bold text-[#0f172a]">Edit Goal</span>
-                <span class="font-mono text-[11px] font-bold text-[#166534] bg-[#f0fdf4] border border-[#bbf7d0] px-2 py-0.5 rounded-md shrink-0">
-                    {{ $goal->college_goals_code }}
-                </span>
-            </div>
-        </div>
+    <x-modal.header modalId="updateGoalModal_{{ $goal->id }}" variant="edit">
+        Edit Goal
     </x-modal.header>
 
     <form action="{{ route('goal.update', $goal->id) }}" method="POST" class="flex flex-col">
         @csrf
         @method('PUT')
         <x-modal.body>
+            <div class="space-y-4">
+            <div class="flex items-center gap-2">
+                <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#94a3b8]">Editing</p>
+                <span class="font-mono text-[11px] font-bold text-[#166534] bg-[#f0fdf4] border border-[#bbf7d0] px-2 py-0.5 rounded-md">
+                    {{ $goal->college_goals_code }}
+                </span>
+            </div>
             <div>
                 <x-modal.modal-label for="goal_text_{{ $goal->id }}" isRequired>Goal Description</x-modal.modal-label>
                 <x-form.textarea
@@ -25,6 +22,7 @@
                     rows="5"
                     placeholder="Describe the college goal…"
                     required>{{ $goal->goal_text }}</x-form.textarea>
+            </div>
             </div>
         </x-modal.body>
 

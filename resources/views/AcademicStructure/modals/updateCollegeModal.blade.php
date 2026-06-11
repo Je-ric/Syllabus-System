@@ -1,13 +1,8 @@
 <x-modal.dialog id="updateCollegeModal_{{ $college->id }}" maxWidth="max-w-md" width="w-11/12">
-    <x-modal.header modalId="updateCollegeModal_{{ $college->id }}">
-        <div class="flex items-center gap-3">
-            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#eff6ff] text-[#1d4ed8] shrink-0">
-                <i class="bx bx-edit text-base leading-none"></i>
-            </span>
-            <div>
-                <p class="text-[15px] font-bold text-[#0f172a]">Edit College</p>
-                <p class="text-[13px] text-[#94a3b8] truncate">{{ $college->name }}</p>
-            </div>
+    <x-modal.header modalId="updateCollegeModal_{{ $college->id }}" variant="edit">
+        <div>
+            <p class="text-[15px] font-bold text-[#0f172a]">Edit College</p>
+            <p class="text-[13px] text-[#94a3b8] truncate">{{ $college->name }}</p>
         </div>
     </x-modal.header>
 

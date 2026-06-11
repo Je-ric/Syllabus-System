@@ -1,25 +1,20 @@
-<x-modal.dialog id="deleteObjectiveModal_{{ $objective->id }}" maxWidth="max-w-lg" width="w-11/12">
-    <x-modal.header modalId="deleteObjectiveModal_{{ $objective->id }}">
-        <div class="flex items-center gap-3">
-            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#ffe4e6] text-[#e11d48] shrink-0">
-                <i class="bx bx-trash text-base leading-none"></i>
-            </span>
-            <div class="flex items-center gap-2 min-w-0">
-                <span class="text-[#9f1239]">Delete Objective</span>
-                <span class="font-mono text-[11px] font-bold text-[#166534] bg-[#f0fdf4] border border-[#bbf7d0] px-2 py-0.5 rounded-md shrink-0">
-                    {{ $objective->dept_obj_code }}
-                </span>
-            </div>
-        </div>
+<x-modal.dialog id="deleteObjectiveModal_{{ $objective->id }}" maxWidth="max-w-lg" width="w-11/12" variant="delete">
+    <x-modal.header modalId="deleteObjectiveModal_{{ $objective->id }}" variant="delete">
+        <span class="text-[#9f1239]">Delete Objective</span>
     </x-modal.header>
 
     <x-modal.body>
         <div class="space-y-4">
             <p class="text-[13px] text-[#475569]">Are you sure you want to delete this objective?</p>
 
-            <div class="rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-4">
-                <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#94a3b8] mb-2">Objective to be deleted</p>
-                <p class="text-[13px] text-[#475569] leading-relaxed">{{ $objective->objective_text }}</p>
+            <div class="rounded-xl border border-rose-200 bg-rose-50 p-4">
+                <div class="flex items-center gap-2 mb-2">
+                    <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-red-700">Objective to be deleted</p>
+                    <span class="font-mono text-[11px] font-bold text-red-600 bg-rose-100 border border-rose-200 px-2 py-0.5 rounded-md shrink-0">
+                        {{ $objective->dept_obj_code }}
+                    </span>
+                </div>
+                <p class="text-[13px] text-red-700 leading-relaxed">{{ $objective->objective_text }}</p>
             </div>
 
             <x-feedback-status.alert type="warning" :showTitle="false">

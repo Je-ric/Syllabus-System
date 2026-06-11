@@ -1,11 +1,6 @@
-<x-modal.dialog id="deleteProgramModal_{{ $program->id }}" maxWidth="max-w-md" width="w-11/12">
-    <x-modal.header modalId="deleteProgramModal_{{ $program->id }}">
-        <div class="flex items-center gap-3">
-            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#ffe4e6] text-[#e11d48] shrink-0">
-                <i class="bx bx-trash text-base leading-none"></i>
-            </span>
-            <span class="text-[#9f1239]">Delete Program</span>
-        </div>
+<x-modal.dialog id="deleteProgramModal_{{ $program->id }}" maxWidth="max-w-md" width="w-11/12" variant="delete">
+    <x-modal.header modalId="deleteProgramModal_{{ $program->id }}" variant="delete">
+        <span class="text-[#9f1239]">Delete Program</span>
     </x-modal.header>
 
     <x-modal.body>

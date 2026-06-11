@@ -1,11 +1,6 @@
 <x-modal.dialog id="cancelEditModal" maxWidth="max-w-sm" width="w-11/12">
-    <x-modal.header modalId="cancelEditModal">
-        <div class="flex items-center gap-3">
-            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#fef3c7] text-[#d97706] shrink-0">
-                <i class="bx bx-error text-base leading-none"></i>
-            </span>
-            <span class="text-[#92400e]">Discard Changes?</span>
-        </div>
+    <x-modal.header modalId="cancelEditModal" variant="warning">
+        <span class="text-amber-800">Discard Changes?</span>
     </x-modal.header>
 
     <x-modal.body>
