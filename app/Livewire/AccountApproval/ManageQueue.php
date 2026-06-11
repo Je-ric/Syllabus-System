@@ -34,7 +34,23 @@ class ManageQueue extends Component
         $allowed = ['approve', 'reject', 'disable', 'restore'];
         if (!in_array($action, $allowed) || empty($ids)) return;
 
-        foreach (array_map('intval', $ids) as $id) {
+        $intIds = array_map('intval', $ids);
+
+        // Validate: all selected users must have the expected status for this action
+        $validStatuses = match ($action) {
+            'approve' => ['pending', 'disabled'],
+            'reject'  => ['pending'],
+            'disable' => ['active'],
+            'restore' => ['rejected'],
+        };
+
+        $allValid = User::whereIn('id', $intIds)
+            ->whereNotIn('account_status', $validStatuses)
+            ->doesntExist();
+
+        if (!$allValid) return;
+
+        foreach ($intIds as $id) {
             try {
                 match ($action) {
                     'approve' => $service->approve($id),
