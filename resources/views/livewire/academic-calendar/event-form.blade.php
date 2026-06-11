@@ -193,8 +193,8 @@
                     $startDow = $firstDay->dayOfWeek;
                 @endphp
 
-                <div class="rounded-xl border border-[#e2e8f0] bg-white overflow-hidden" style="box-shadow:0 2px 16px rgba(0,0,0,.07);">
-                    <div class="px-4 py-2.5 bg-[#f8fafc] border-b border-[#e2e8f0]">
+                <div class="rounded-xl border-t-2 border-green-700 bg-white overflow-hidden shadow-lg">
+                    <div class="px-4 py-2.5 bg-green-50 border-b border-[#e2e8f0]">
                         <p class="text-[13px] font-bold text-[#0f172a]">{{ $month->format('F Y') }}</p>
                     </div>
 

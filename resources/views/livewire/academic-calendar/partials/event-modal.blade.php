@@ -16,7 +16,7 @@
         x-transition:leave-start="opacity-100 scale-100"
         x-transition:leave-end="opacity-0 scale-95"
         x-on:click.outside="closeForm()"
-        class="w-full max-w-md rounded-2xl bg-white shadow-2xl overflow-hidden">
+        class="w-full max-w-xl rounded-2xl bg-white shadow-2xl overflow-hidden">
 
         <div class="flex items-center justify-between px-5 py-4 border-b border-[#e2e8f0] bg-[#f8fafc]">
             <div>
