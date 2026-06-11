@@ -21,11 +21,17 @@
                 </p>
             @endif
         </div>
-        @if ($count !== null)
-            <x-feedback-status.status-indicator variant="brand" class="ml-auto">
-                {{ $count }}
-            </x-feedback-status.status-indicator>
-        @endif
+
+        <div class="ml-auto flex items-center gap-2">
+            {{ $actions ?? '' }}
+
+            @if ($count !== null)
+                <x-feedback-status.status-indicator variant="brand" class="ml-auto">
+                    {{ $count }}
+                </x-feedback-status.status-indicator>
+         @endif
+        </div>
+    
     </div>
 
     <div class="p-4">

@@ -1,22 +1,24 @@
 <div @if($liveRefresh) wire:poll.10s="refresh" @endif>
 
     {{-- ── Filter panel ──────────────────────────────────────────────────── --}}
-    <div class="rounded-xl border border-[#e2e8f0] bg-white p-4 mb-4" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
+    <x-card-section
+        title="Filters"
+        icon="bx-filter-alt"
+        class="mb-4">
 
-        <div class="flex items-center justify-between mb-3">
-            <span class="text-[13px] font-semibold text-[#475569] flex items-center gap-1.5">
-                <i class="bx bx-filter-alt"></i> Filters
-            </span>
-            <button wire:click="clearFilters" type="button"
-                class="text-[13px] text-[#94a3b8] hover:text-rose-500 transition underline">
+        <x-slot:actions>
+            <button wire:click="clearFilters"
+                class="text-[12px] text-slate-400 hover:text-rose-500 transition">
                 Clear all
             </button>
-        </div>
+        </x-slot:actions>
 
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
 
             <div>
-                <label class="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-1">User</label>
+                <label class="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-1">
+                    User
+                </label>
                 <x-form.select wire:model.live="userId">
                     <option value="">All Users</option>
                     @foreach ($users as $user)
@@ -26,7 +28,9 @@
             </div>
 
             <div>
-                <label class="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-1">Module</label>
+                <label class="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-1">
+                    Module
+                </label>
                 <x-form.select wire:model.live="module">
                     <option value="">All Modules</option>
                     @foreach ($modules as $mod)
@@ -36,7 +40,9 @@
             </div>
 
             <div>
-                <label class="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-1">Action</label>
+                <label class="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-1">
+                    Action
+                </label>
                 <x-form.select wire:model.live="action">
                     <option value="">All Actions</option>
                     @foreach ($actions as $act)
@@ -46,27 +52,43 @@
             </div>
 
             <div>
-                <label class="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-1">Ref ID</label>
-                <x-form.input type="number" wire:model.live.debounce.500ms="referenceId" min="1" placeholder="e.g. 42" />
+                <label class="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-1">
+                    Ref ID
+                </label>
+                <x-form.input
+                    type="number"
+                    wire:model.live.debounce.500ms="referenceId"
+                    min="1"
+                    placeholder="e.g. 42" />
             </div>
 
             <div>
-                <label class="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-1">From</label>
+                <label class="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-1">
+                    From
+                </label>
                 <x-form.input type="date" wire:model.live="dateFrom" />
             </div>
 
             <div>
-                <label class="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-1">To</label>
+                <label class="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-1">
+                    To
+                </label>
                 <x-form.input type="date" wire:model.live="dateTo" />
             </div>
 
             <div class="col-span-2 xl:col-span-1">
-                <label class="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-1">Keyword</label>
-                <x-form.input type="text" wire:model.live.debounce.400ms="keyword" placeholder="Search…" />
+                <label class="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-1">
+                    Keyword
+                </label>
+                <x-form.input
+                    type="text"
+                    wire:model.live.debounce.400ms="keyword"
+                    placeholder="Search…" />
             </div>
 
         </div>
-    </div>
+
+    </x-card-section>
 
     {{-- ── Toolbar: count + live toggle ─────────────────────────────────── --}}
     <div class="flex flex-wrap items-center justify-between gap-2 mb-3">

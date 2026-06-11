@@ -10,7 +10,7 @@
         'add'     => ['icon' => 'bx-plus-circle',  'bg' => 'bg-green-600',  'color' => 'text-green-100'],
         'edit'    => ['icon' => 'bx-edit',          'bg' => 'bg-blue-600',   'color' => 'text-blue-100'],
         'delete'  => ['icon' => 'bx-trash',         'bg' => 'bg-red-600',    'color' => 'text-red-100'],
-        'assign'  => ['icon' => 'bx-user-check',    'bg' => 'bg-blue-600',   'color' => 'text-blue-100'],
+        'assign'  => ['icon' => 'bx-user-check',    'bg' => 'bg-green-600',   'color' => 'text-green-100'],
         'roles'   => ['icon' => 'bx-shield',        'bg' => 'bg-blue-600',   'color' => 'text-blue-100'],
         'confirm' => ['icon' => 'bx-check-circle',  'bg' => 'bg-green-600',  'color' => 'text-green-100'],
         'warning' => ['icon' => 'bx-error',         'bg' => 'bg-amber-600',  'color' => 'text-amber-100'],
