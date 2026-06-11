@@ -79,7 +79,7 @@
 
                     {{-- Card header with avatar --}}
                     <div class="flex items-center gap-3 px-4 py-3 border-b border-[#e2e8f0]">
-                        <span class="shrink-0 inline-flex items-center justify-center w-11 h-11 rounded-full text-lg font-bold {{ $avatarColors }}">
+                        <span class="shrink-0 inline-flex items-center justify-center w-11 h-11 border rounded-full text-lg font-bold {{ $avatarColors }}">
                             {{ strtoupper(substr($user->name, 0, 1)) }}
                         </span>
                         <div class="min-w-0">

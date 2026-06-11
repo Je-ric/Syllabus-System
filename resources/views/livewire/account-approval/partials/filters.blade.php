@@ -7,13 +7,13 @@
     </x-slot:actions>
 
     <div class="flex flex-wrap gap-2 items-center">
-        <div class="relative flex-1 min-w-[180px]">
+        <div class="relative flex-1 min-w-45">
             <i class="bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-[#94a3b8] text-base pointer-events-none"></i>
             <x-form.input type="text" wire:model.live.debounce.300ms="search"
-                placeholder="Search name, email, phone…" class="pl-9 !py-2 text-[13px]" />
+                placeholder="Search name, email, phone…" class="pl-9 py-2! text-[13px]" />
         </div>
 
-        <x-form.select wire:model.live="role" class="!py-2 text-[13px] min-w-[120px]">
+        <x-form.select wire:model.live="role" class="py-2! text-[13px] min-w-30">
             <option value="all">All Roles</option>
             <option value="admin">Admin</option>
             <option value="dean">Dean</option>
@@ -21,7 +21,7 @@
             <option value="faculty">Faculty</option>
         </x-form.select>
 
-        <x-form.select wire:model.live="status" class="!py-2 text-[13px] min-w-[130px]">
+        <x-form.select wire:model.live="status" class="py-2! text-[13px] min-w-32.5">
             <option value="all">All Statuses</option>
             <option value="pending">Pending</option>
             <option value="active">Active</option>
@@ -29,7 +29,7 @@
             <option value="rejected">Rejected</option>
         </x-form.select>
 
-        <x-form.select wire:model.live="sort" class="!py-2 text-[13px] min-w-[130px]">
+        <x-form.select wire:model.live="sort" class="py-2! text-[13px] min-w-32.5">
             <option value="newest">Newest First</option>
             <option value="oldest">Oldest First</option>
             <option value="name_asc">Name A–Z</option>

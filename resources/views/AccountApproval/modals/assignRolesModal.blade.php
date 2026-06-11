@@ -8,13 +8,13 @@
 <x-modal.dialog :id="$modalId" maxWidth="max-w-lg" width="w-11/12"
     onclose="this.querySelector('form')?.reset()">
     <form method="POST" action="{{ route('account-approval.assign-role') }}"
-          class="flex flex-col h-full"
-          onsubmit="
-              const dean  = this.querySelector('input[name=&quot;roles[]&quot;][value=&quot;dean&quot;]')?.checked;
-              const chair = this.querySelector('input[name=&quot;roles[]&quot;][value=&quot;chair&quot;]')?.checked;
-              if (dean && chair) { alert('A user cannot hold both Dean and Chair roles simultaneously.'); return false; }
-              return true;
-          ">
+            class="flex flex-col h-full"
+            onsubmit="
+                const dean  = this.querySelector('input[name=&quot;roles[]&quot;][value=&quot;dean&quot;]')?.checked;
+                const chair = this.querySelector('input[name=&quot;roles[]&quot;][value=&quot;chair&quot;]')?.checked;
+                if (dean && chair) { alert('A user cannot hold both Dean and Chair roles simultaneously.'); return false; }
+                return true;
+            ">
         @csrf
         <input type="hidden" name="user_id" value="{{ $user->id }}">
 
@@ -27,7 +27,7 @@
 
             {{-- Identity strip --}}
             <div class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-[#f8fafc] border border-[#e2e8f0]">
-                <span class="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full font-bold text-sm {{ $avatarColors }}">
+                <span class="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full border font-bold text-sm {{ $avatarColors }}">
                     {{ strtoupper(substr($user->name, 0, 1)) }}
                 </span>
                 <div class="min-w-0 flex-1">

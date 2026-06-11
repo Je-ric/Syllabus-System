@@ -29,9 +29,9 @@
                 <x-feedback-status.status-indicator variant="brand" class="ml-auto">
                     {{ $count }}
                 </x-feedback-status.status-indicator>
-         @endif
+            @endif
         </div>
-    
+
     </div>
 
     <div class="p-4">

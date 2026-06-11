@@ -51,7 +51,7 @@
 
                 {{-- Avatar + name --}}
                 <div class="flex items-center gap-3 min-w-0">
-                    <span class="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full font-bold text-[13px] {{ $avatarCls }}">
+                    <span class="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full border font-bold text-[13px] {{ $avatarCls }}">
                         {{ strtoupper(substr($user->name, 0, 1)) }}
                     </span>
                     <div class="min-w-0">
@@ -114,18 +114,17 @@
 
             {{-- Expanded detail --}}
             <div x-show="open"
-                 x-transition:enter="transition ease-out duration-150"
-                 x-transition:enter-start="opacity-0 -translate-y-1"
-                 x-transition:enter-end="opacity-100 translate-y-0"
-                 x-transition:leave="transition ease-in duration-100"
-                 x-transition:leave-end="opacity-0"
-                 class="px-4 pb-4 pt-1 border-t border-[#e8f5e9]"
-                 @click.stop>
+                x-transition:enter="transition ease-out duration-150"
+                x-transition:enter-start="opacity-0 -translate-y-1"
+                x-transition:enter-end="opacity-100 translate-y-0"
+                x-transition:leave="transition ease-in duration-100"
+                x-transition:leave-end="opacity-0"
+                class="px-4 py-3 border-t border-[#e8f5e9]"
+                @click.stop>
 
-                <div class="ml-12 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 py-2">
 
-                    <div class="rounded-lg bg-white border border-[#e2e8f0] px-3 py-2.5 space-y-1.5">
-                        <p class="text-[10px] font-bold uppercase tracking-[0.12em] text-[#94a3b8]">Contact</p>
+                    <x-card-section title="Contact" icon="bx-buildings">
                         <div class="flex items-center gap-2">
                             <i class="bx bx-phone text-[#64748b] text-sm shrink-0"></i>
                             <span class="text-[13px] text-[#0f172a]">{{ $user->phone_number ?: '—' }}</span>
@@ -134,10 +133,9 @@
                             <i class="bx bx-envelope text-[#64748b] text-sm shrink-0"></i>
                             <span class="text-[13px] text-[#475569] break-all">{{ $user->email }}</span>
                         </div>
-                    </div>
+                    </x-card-section>
 
-                    <div class="rounded-lg bg-white border border-[#e2e8f0] px-3 py-2.5 space-y-1.5">
-                        <p class="text-[10px] font-bold uppercase tracking-[0.12em] text-[#94a3b8]">Office & Verification</p>
+                    <x-card-section title="Office & Verification" icon="bx-buildings">
                         <div class="flex items-center gap-2">
                             <i class="bx bx-buildings text-[#64748b] text-sm shrink-0"></i>
                             <span class="text-[13px] text-[#0f172a]">{{ $user->office ?: '—' }}</span>
@@ -151,10 +149,9 @@
                                 <span class="text-[13px] text-[#92400e] font-medium">Not verified</span>
                             @endif
                         </div>
-                    </div>
+                    </x-card-section>
 
-                    <div class="rounded-lg bg-white border border-[#e2e8f0] px-3 py-2.5 space-y-1.5">
-                        <p class="text-[10px] font-bold uppercase tracking-[0.12em] text-[#94a3b8]">Account</p>
+                    <x-card-section title="Account" icon="bx-buildings">
                         <div class="flex items-center gap-2">
                             <i class="bx bx-calendar text-[#64748b] text-sm shrink-0"></i>
                             <span class="text-[13px] text-[#475569]">{{ $user->created_at->format('M d, Y') }}</span>
@@ -163,7 +160,7 @@
                             <i class="bx bx-id-card text-[#64748b] text-sm shrink-0"></i>
                             <span class="text-[13px] text-[#475569]">ID #{{ $user->id }}</span>
                         </div>
-                    </div>
+                    </x-card-section>
 
                 </div>
             </div>

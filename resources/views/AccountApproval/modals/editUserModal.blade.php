@@ -43,11 +43,6 @@
                         <x-form.input type="text" name="name"
                             value="{{ old('name', $user->name) }}" required />
                     </div>
-                    <div class="sm:col-span-2">
-                        <x-modal.modal-label isRequired>Email Address</x-modal.modal-label>
-                        <x-form.input type="email" name="email"
-                            value="{{ old('email', $user->email) }}" required />
-                    </div>
                     <div>
                         <x-modal.modal-label>Phone Number</x-modal.modal-label>
                         <x-form.input type="text" name="phone_number"
@@ -55,6 +50,11 @@
                             placeholder="e.g. 09XX XXX XXXX" />
                     </div>
                     <div>
+                        <x-modal.modal-label isRequired>Email Address</x-modal.modal-label>
+                        <x-form.input type="email" name="email"
+                            value="{{ old('email', $user->email) }}" required />
+                    </div>
+                    <div class="sm:col-span-2">
                         <x-modal.modal-label>Office / Department</x-modal.modal-label>
                         <x-form.input type="text" name="office"
                             value="{{ old('office', $user->office) }}"
@@ -62,7 +62,7 @@
                     </div>
                 </div>
 
-                <x-feedback-status.alert type="info" :showTitle="false"
+                <x-feedback-status.alert type="warning" :showTitle="false"
                     message="Changes take effect immediately. Email changes will update the user's login credentials." />
             </div>
         </x-modal.body>
