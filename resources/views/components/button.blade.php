@@ -41,11 +41,6 @@
             text-white hover:brightness-110
             focus:ring-[#009639]/30',
 
-        'save'       => $formBtn . '
-            bg-[linear-gradient(90deg,#009639_0%,#92d12c_100%)]
-            text-white hover:brightness-110
-            focus:ring-[#009639]/30',
-
         'secondary'  => $formBtn . '
             bg-[linear-gradient(90deg,#ffd700_0%,#e0a70d_100%)]
             text-[#1a5f30] hover:brightness-105
@@ -60,6 +55,10 @@
             focus:ring-[#1a5f30]/30',
 
         'add-button' => $formBtn . '
+            bg-emerald-600 text-white hover:bg-emerald-700
+            focus:ring-[#009639]/30',
+
+        'save' => $formBtn . '
             bg-emerald-600 text-white hover:bg-emerald-700
             focus:ring-[#009639]/30',
 
