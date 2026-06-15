@@ -10,34 +10,38 @@
 
     <x-panel>
         {{-- Program selector — same card style as courses.index and syllabus.create --}}
-        <div class="rounded-xl border border-[#e2e8f0] bg-white p-5 mb-6" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
-            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-3">
-                Select Program
-            </p>
+        <x-card-section
+            title="Select Program"
+            icon="bx-network-chart"
+            description="Choose a program to manage its PEOs and POs."
+            class="mb-6">
+
             <livewire:programs.program-selector
                 :program-id="optional($program)?->id"
                 redirect-route="programs.show"
                 :autoRedirect="true" />
-        </div>
-    
+
+        </x-card-section>
+
         {{-- University mission --}}
-        <div class="mt-5 rounded-xl border border-[#e2e8f0] bg-[#f8fafc] px-5 py-4">
-            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#94a3b8] mb-1">
-                University Mission
-            </p>
+        <x-card-section
+            title="University Missions"
+            icon="bx-flag">
+
             <p class="text-[13px] text-[#475569] leading-relaxed">
                 CLSU shall develop globally competitive, work-ready, socially-responsible
                 and empowered human resources who value life-long learning; and to generate,
                 disseminate, and apply knowledge and technologies for poverty alleviation,
                 environmental protection, and sustainable development.
             </p>
-        </div>
-    
+
+        </x-card-section>
+
         {{-- ── Program selected ─────────────────────────────────────────────── --}}
         @if ($program)
-    
+
             <div class="mt-6 border-t border-slate-200 pt-6">
-    
+
                 {{-- Program name breadcrumb --}}
                 <div class="flex items-center gap-2 mb-4">
                     <i class="bx bx-network-chart text-[#16a34a] text-lg"></i>
@@ -45,7 +49,7 @@
                         {{ $program->name }}
                     </h2>
                 </div>
-    
+
                 <x-navigation.tabs-modern
                     :tabs="[
                         ['id' => 'peo', 'label' => 'Program Educational Objectives (PEOs)', 'icon' => 'bx-graduation'],
@@ -53,7 +57,7 @@
                     ]"
                     defaultTab="peo"
                     stateKey="programs-{{ $program->id }}-tabs">
-    
+
                     {{-- ── PEO Tab ────────────────────────────────────────────────── --}}
                     <x-slot name="slot_peo">
                         <x-wizard.section
@@ -69,7 +73,7 @@
                             <livewire:programs.manage-peos :program="$program" />
                         </x-wizard.section>
                     </x-slot>
-    
+
                     {{-- ── PO Tab ─────────────────────────────────────────────────── --}}
                     <x-slot name="slot_po">
                         <x-wizard.section
@@ -85,10 +89,10 @@
                             <livewire:programs.manage-pos :program="$program" />
                         </x-wizard.section>
                     </x-slot>
-    
+
                 </x-navigation.tabs-modern>
             </div>
-    
+
         @else
             <x-empty-state
                 icon="bx-network-chart"

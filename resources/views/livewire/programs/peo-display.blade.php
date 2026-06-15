@@ -5,7 +5,7 @@
 <div>
     <div class="flex items-center gap-2 mb-3">
         <span class="inline-flex items-center justify-center w-6 h-6 rounded-md
-                     bg-emerald-100 text-emerald-600">
+                    bg-emerald-100 text-emerald-600">
             <i class="bx bx-graduation text-sm leading-none"></i>
         </span>
         <p class="text-xs font-bold uppercase tracking-widest text-slate-500">
@@ -22,8 +22,8 @@
                 <div class="flex items-start gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3
                             hover:border-emerald-200 hover:bg-emerald-50/30 transition-colors">
                     <span class="mt-0.5 shrink-0 inline-flex items-center justify-center
-                                 w-9 h-9 rounded-lg bg-emerald-100 text-emerald-700
-                                 text-xs font-bold ring-1 ring-emerald-200">
+                                w-9 h-9 rounded-lg bg-emerald-100 text-emerald-700
+                                text-xs font-bold ring-1 ring-emerald-200">
                         {{ strtoupper($peo['peo_code']) }}
                     </span>
                     <div class="min-w-0">
