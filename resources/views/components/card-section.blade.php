@@ -24,17 +24,17 @@
             @endif
         </div>
 
-        @if($headerRight)
-            <span class="ml-auto text-[11px] text-[#64748b]">
-                {{ $headerRight }}
-            </span>
-        @endif
+        <div class="ml-auto flex items-center gap-3">
+            @if($headerRight)
+                <span class="text-[11px] text-[#64748b]">
+                    {{ $headerRight }}
+                </span>
+            @endif
 
-        <div class="ml-auto flex items-center gap-2">
             {{ $actions ?? '' }}
 
             @if ($count !== null)
-                <x-feedback-status.status-indicator variant="brand" class="ml-auto">
+                <x-feedback-status.status-indicator variant="brand">
                     {{ $count }}
                 </x-feedback-status.status-indicator>
             @endif

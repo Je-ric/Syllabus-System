@@ -52,7 +52,7 @@
                         message="Select a college above to view its goals." />
                 @elseif ($goals->isEmpty())
                     <x-empty-state icon="bx-target-lock" title="No goals yet"
-                        message="No goals have been set for this college. Click \"Add Goal\" to create the first one." />
+                        message="No goals have been set for this college. "/>
                 @else
                     <x-table.container>
                         <x-table.table>

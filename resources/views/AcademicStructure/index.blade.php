@@ -38,7 +38,7 @@
                         </div>
 
                         {{-- College rows --}}
-                        <div class="divide-y divide-[#f0fdf4]">
+                        <div>
                             @foreach($colleges as $college)
                                 @php
                                     $deptCount    = $departments->where('college_id', $college->id)->count();
@@ -106,7 +106,8 @@
 
                             <x-card-section icon="bx-sitemap" title="Departments & Programs"
                                 :subtitle="$college->name"
-                                :count="$departments->where('college_id', $college->id)->count()">
+                                {{-- :count="$departments->where('college_id', $college->id)->count()" --}}
+                                >
 
                                 <x-slot name="actions">
                                     <x-button variant="sm-add"
@@ -171,7 +172,7 @@
                                                             <div class="min-w-0">
                                                                 <p class="text-sm font-medium text-[#0f172a] truncate">{{ $program->name }}</p>
                                                                 <p class="text-xs text-[#94a3b8] mt-0.5">
-                                                                    BOR {{ $program->bor_approval_no }}
+                                                                    {{ $program->bor_approval_no }}
                                                                     &middot;
                                                                     {{ \Carbon\Carbon::parse($program->bor_approval_date)->format('M d, Y') }}
                                                                 </p>

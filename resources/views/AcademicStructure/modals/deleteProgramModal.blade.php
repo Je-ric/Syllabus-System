@@ -13,7 +13,7 @@
                     <span class="text-[13px] font-semibold text-[#0f172a] text-right max-w-[60%]">{{ $program->name }}</span>
                 </div>
                 <div class="flex items-center justify-between">
-                    <span class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#94a3b8]">BOR No.</span>
+                    <span class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#94a3b8]">BOR Approval Resolution No. </span>
                     <span class="text-[13px] text-[#475569]">{{ $program->bor_approval_no }}</span>
                 </div>
                 @php $courseCount = $program->courses->count(); @endphp

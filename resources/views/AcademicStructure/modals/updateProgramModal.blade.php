@@ -22,7 +22,7 @@
                         required />
                 </div>
                 <div>
-                    <x-modal.modal-label for="editBorNo_{{ $program->id }}" isRequired>BOR Approval No.</x-modal.modal-label>
+                    <x-modal.modal-label for="editBorNo_{{ $program->id }}" isRequired>BOR Approval Resolution No. </x-modal.modal-label>
                     <x-form.input
                         id="editBorNo_{{ $program->id }}"
                         type="text"

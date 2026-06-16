@@ -16,8 +16,8 @@
                     <x-form.input type="text" name="name" placeholder="e.g. Bachelor of Science in Computer Science" required />
                 </div>
                 <div>
-                    <x-modal.modal-label isRequired>BOR Approval No.</x-modal.modal-label>
-                    <x-form.input type="text" name="bor_approval_no" placeholder="e.g. BOR Resolution No. 123" required />
+                    <x-modal.modal-label isRequired>BOR Approval Resolution No.</x-modal.modal-label>
+                    <x-form.input type="text" name="bor_approval_no" placeholder="e.g. BOR Approval Resolution No. 123" required />
                 </div>
                 <div>
                     <x-modal.modal-label isRequired>BOR Approval Date</x-modal.modal-label>

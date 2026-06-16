@@ -74,7 +74,7 @@
                         message="Select a department to view its objectives." />
                 @elseif ($objectives->isEmpty())
                     <x-empty-state icon="bx-list-check" title="No objectives yet"
-                        message="No objectives have been set for this department. Click \"Add Objective\" to create the first one." />
+                        message="No objectives have been set for this department. " />
                 @else
                     <x-table.container>
                         <x-table.table>
