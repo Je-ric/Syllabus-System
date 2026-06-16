@@ -33,14 +33,18 @@
     </x-page-header>
 
     <x-panel>
+        
         {{-- Program selector --}}
-        <div class="rounded-xl border border-[#e2e8f0] bg-white p-5 mb-6" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
-            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-3">Select Program</p>
+        <x-card-section
+            title="Select Program"
+            icon="bx-network-chart"
+            class="mb-6">
+
             <livewire:programs.program-selector
                 :program-id="optional($program)?->id"
                 redirect-route="courses.index"
                 :autoRedirect="true" />
-        </div>
+        </x-card-section>
 
         @if ($program)
 

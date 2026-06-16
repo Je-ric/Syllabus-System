@@ -84,7 +84,7 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->filled('remember'))) {
             $request->session()->regenerate();
 
-            /** @var \App\Models\User $user */
+            /** @var User $user */
             $user = Auth::user();
 
             AuditLog::record(
@@ -161,7 +161,7 @@ class AuthController extends Controller
     // Logout
     public function logout(Request $request)
     {
-        /** @var \App\Models\User|null $user */
+        /** @var User|null $user */
         $user = Auth::user();
         if ($user) {
             AuditLog::record(
