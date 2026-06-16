@@ -62,7 +62,6 @@ class ProgramSelector extends Component
         $this->redirectRoute = $redirectRoute;
         $this->autoRedirect = $autoRedirect;
         $this->locked = !$isAdmin && in_array($redirectRoute, ['programs.show', 'courses.index']);
-        $this->locked = !$isAdmin && in_array($redirectRoute, ['programs.show', 'courses.index']);
 
         // If programId is explicitly provided via query param, use that (highest priority)
         if ($programId) {

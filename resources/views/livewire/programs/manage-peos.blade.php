@@ -1,13 +1,13 @@
 {{--
-    manage-peos.blade.php — Editable PEO list for a program.
-    Livewire: ManagePeos  |  Alpine: peosManager()
+    manage-peos.blade.php — Editable, sortable PEO list.
+    Livewire: ManagePeos | Alpine: peosManager()
 --}}
-
 <div x-data="peosManager(@js($peos))" class="space-y-2.5">
 
+    @include('livewire.programs.partials.confirm-modal')
     @include('livewire.programs.include.flash-message')
 
-    {{-- ── Pending changes summary bar ──────────────────────────────────── --}}
+    {{-- Pending changes bar --}}
     <template x-if="pendingSummary().total > 0">
         <div class="flex flex-wrap items-center gap-2 px-4 py-2.5 rounded-xl border border-amber-200 bg-amber-50 text-[13px]">
             <i class="bx bx-info-circle text-amber-500 shrink-0"></i>
@@ -28,39 +28,32 @@
         </div>
     </template>
 
-    {{-- ── PEO rows ──────────────────────────────────────────────────────── --}}
-    <template x-for="(peo, index) in peos" :key="peo._key">
+    {{-- PEO rows (sortable) --}}
+    <div id="peo-sortable" class="space-y-2">
+        <template x-for="(peo, index) in peos" :key="peo._key">
+            <div class="flex items-start gap-3 px-4 py-3 rounded-xl border transition-colors duration-200"
+                :data-key="peo._key"
+                :class="{
+                    'border-emerald-300 bg-emerald-50/40': !peo.id,
+                    'border-amber-300 bg-amber-50/30':     peo.id && peo._dirty,
+                    'border-slate-200 bg-white':           peo.id && !peo._dirty
+                }"
+                style="box-shadow:0 1px 8px rgba(0,0,0,.06);">
 
-        <div class="rounded-xl border overflow-hidden transition-colors duration-200"
-            :class="{
-                'border-emerald-300 bg-emerald-50/40': !peo.id,
-                'border-amber-300 bg-amber-50/30':     peo.id && peo._dirty,
-                'border-[#e2e8f0] bg-white':           peo.id && !peo._dirty
-            }"
-            style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
+                {{-- Drag handle --}}
+                <span class="peo-drag-handle mt-2.5 cursor-grab text-slate-300 hover:text-slate-500 shrink-0">
+                    <i class="bx bx-grid-vertical text-lg"></i>
+                </span>
 
-            <div class="flex items-start gap-3 p-4">
-
-                {{-- Code badge + state indicator --}}
-                <div class="shrink-0 pt-0.5 flex flex-col items-center gap-1">
-                    <span class="inline-flex items-center justify-center w-10 h-10 rounded-xl text-[13px] font-bold transition-colors duration-200"
-                        :class="{
-                            'bg-[#dcfce7] text-[#166534] ring-1 ring-[#bbf7d0]': peo.id && !peo._dirty,
-                            'bg-amber-100 text-amber-700 ring-1 ring-amber-300':  peo.id && peo._dirty,
-                            'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-300': !peo.id
-                        }">
-                        <span x-text="'PEO' + (index + 1)"></span>
-                    </span>
-                    {{-- State pill --}}
-                    <span x-show="!peo.id" x-cloak
-                        class="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
-                        NEW
-                    </span>
-                    <span x-show="peo.id && peo._dirty" x-cloak
-                        class="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700">
-                        EDITED
-                    </span>
-                </div>
+                {{-- Code badge --}}
+                <span class="shrink-0 mt-1 inline-flex items-center justify-center w-9 h-9 rounded-lg text-[12px] font-bold transition-colors"
+                    :class="{
+                        'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-300': !peo.id,
+                        'bg-amber-100 text-amber-700 ring-1 ring-amber-300':       peo.id && peo._dirty,
+                        'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200':  peo.id && !peo._dirty
+                    }">
+                    <span x-text="'PEO' + (index + 1)"></span>
+                </span>
 
                 {{-- Textarea --}}
                 <div class="flex-1 min-w-0">
@@ -69,79 +62,64 @@
                         @input="markDirty(peo)"
                         rows="3"
                         placeholder="Describe what graduates will be professionally three to five years after graduation…"
-                        class="w-full rounded-lg border px-3 py-2 text-[13px] text-[#0f172a] placeholder:text-[#94a3b8]
+                        class="w-full rounded-lg border px-3 py-2 text-[13px] text-slate-900 placeholder:text-slate-400
                                focus:outline-none transition-colors resize-none"
                         :class="{
-                            'border-amber-300 bg-amber-50/50 focus:border-amber-400': peo.id && peo._dirty,
+                            'border-amber-300 bg-amber-50/50 focus:border-amber-400':   peo.id && peo._dirty,
                             'border-emerald-300 bg-emerald-50/50 focus:border-emerald-400': !peo.id,
-                            'border-[#e2e8f0] bg-white focus:border-[#16a34a]': peo.id && !peo._dirty
-                        }"
-                        style="box-shadow:none"
-                        onfocus="this.style.boxShadow='0 0 0 3px rgba(22,163,74,0.18)'"
-                        onblur="this.style.boxShadow='none'"></textarea>
+                            'border-slate-200 bg-white focus:border-emerald-500':       peo.id && !peo._dirty
+                        }"></textarea>
 
+                    <template x-if="!peo.id">
+                        <p class="mt-1 flex items-center gap-1 text-[12px] text-emerald-600">
+                            <i class="bx bx-plus-circle text-sm shrink-0"></i>
+                            New — click <strong class="mx-0.5">Save All</strong> to persist.
+                        </p>
+                    </template>
                     <template x-if="peo.id && peo._dirty">
                         <p class="mt-1 flex items-center gap-1 text-[12px] text-amber-600">
                             <i class="bx bx-edit-alt text-sm shrink-0"></i>
                             Modified — not saved yet.
                         </p>
                     </template>
-                    <template x-if="!peo.id">
-                        <p class="mt-1 flex items-center gap-1 text-[12px] text-emerald-700">
-                            <i class="bx bx-plus-circle text-sm shrink-0"></i>
-                            New row — click <strong class="mx-0.5">Save All</strong> to persist.
-                        </p>
-                    </template>
                 </div>
 
-                {{-- DELETE saved row --}}
-                <form x-show="peo.id"
-                    method="POST"
-                    :action="'/programs/peo/' + peo.id"
-                    @submit.prevent="
-                        if (confirm('Delete this PEO? All codes will be re-sequenced.')) {
-                            $el.submit();
-                        }
-                    ">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit"
-                        class="mt-0.5 p-2 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                        title="Delete saved PEO">
-                        <i class="bx bx-trash text-base"></i>
-                    </button>
-                </form>
+                {{-- Delete saved PEO --}}
+                <button x-show="peo.id" type="button"
+                    @click="requestDelete(peo)"
+                    class="mt-1 p-2 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                    title="Delete PEO">
+                    <i class="bx bx-trash text-base"></i>
+                </button>
 
-                {{-- REMOVE unsaved row --}}
-                <button x-show="!peo.id" x-cloak
+                {{-- Remove unsaved PEO --}}
+                <button x-show="!peo.id" x-cloak type="button"
                     @click="peos.splice(index, 1)"
-                    type="button"
-                    class="mt-0.5 p-2 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                    class="mt-1 p-2 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
                     title="Remove unsaved PEO">
                     <i class="bx bx-x text-lg"></i>
                 </button>
 
             </div>
-        </div>
-    </template>
+        </template>
+    </div>
 
     {{-- Empty state --}}
     <template x-if="peos.length === 0">
-        <div class="rounded-xl border-2 border-dashed border-[#e2e8f0] bg-[#f8fafc] py-10 text-center">
-            <i class="bx bx-graduation text-4xl text-[#94a3b8]"></i>
-            <p class="mt-2 text-[13px] font-semibold text-[#475569]">No PEOs yet</p>
-            <p class="text-[13px] text-[#94a3b8] mt-0.5">Add the first one below.</p>
+        <div class="rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 py-10 text-center">
+            <i class="bx bx-graduation text-4xl text-slate-300"></i>
+            <p class="mt-2 text-[13px] font-semibold text-slate-500">No PEOs yet</p>
+            <p class="text-[13px] text-slate-400 mt-0.5">Add the first one below.</p>
         </div>
     </template>
 
-    {{-- ── Action buttons ────────────────────────────────────────────────── --}}
+    {{-- Action buttons --}}
     <div class="flex items-center gap-2 pt-1">
-
         <x-button variant="add-dashed" type="button" @click="addPeo()" class="flex-1 w-full">
             <i class="bx bx-plus"></i> Add PEO
         </x-button>
 
-        <x-button variant="add-button" type="button" @click="savePeos()"
+        <x-button variant="add-button" type="button" @click="requestSave()"
             x-bind:disabled="isSaving" class="whitespace-nowrap relative">
             <template x-if="hasPending()">
                 <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400 ring-2 ring-white animate-pulse"></span>
@@ -158,14 +136,35 @@
             </span>
         </x-button>
     </div>
-</div>
 
 <script>
 function peosManager(initialPeos) {
     return {
-        peos:     initialPeos.map((p, i) => ({ ...p, _dirty: false, _original: p.peo_text, _key: p.id ?? ('new-' + i) })),
-        isSaving: false,
+        peos:        initialPeos.map((p, i) => ({ ...p, _dirty: false, _original: p.peo_text, _key: p.id ?? ('new-' + i) })),
+        isSaving:    false,
         _keyCounter: initialPeos.length,
+        _pendingDeletePeo: null,
+        _pendingDeleteFormKey: null,
+
+        init() {
+            this.$nextTick(() => this.initSortable());
+            window.addEventListener('confirmed-action', (e) => this.handleConfirmed(e.detail));
+        },
+
+        initSortable() {
+            const el = document.getElementById('peo-sortable');
+            if (!el || typeof Sortable === 'undefined') return;
+            Sortable.create(el, {
+                handle: '.peo-drag-handle',
+                animation: 150,
+                onEnd: (evt) => {
+                    const moved = this.peos.splice(evt.oldIndex, 1)[0];
+                    this.peos.splice(evt.newIndex, 0, moved);
+                    // Mark all as dirty so Save All syncs new order
+                    this.peos.forEach(p => { if (p.id) p._dirty = true; });
+                }
+            });
+        },
 
         markDirty(peo) {
             if (peo.id) peo._dirty = peo.peo_text !== peo._original;
@@ -182,8 +181,7 @@ function peosManager(initialPeos) {
         },
 
         addPeo() {
-            const hasBlank = this.peos.some(p => !p.peo_text || !p.peo_text.trim());
-            if (hasBlank) {
+            if (this.peos.some(p => !p.peo_text?.trim())) {
                 window.dispatchEvent(new CustomEvent('lw-toast', {
                     detail: { type: 'warning', message: 'Fill in the blank PEO before adding another.' }
                 }));
@@ -193,11 +191,48 @@ function peosManager(initialPeos) {
             this.peos.push({ id: null, peo_code: '', peo_text: '', _dirty: false, _original: '', _key: 'new-' + this._keyCounter });
         },
 
+        requestDelete(peo) {
+            this._pendingDeletePeo = peo;
+            window.dispatchEvent(new CustomEvent('confirm-action', { detail: {
+                key: 'delete-peo',
+                title: 'Delete PEO?',
+                message: 'This PEO will be permanently removed and codes will be re-sequenced.',
+                confirmLabel: 'Delete',
+                confirmClass: 'bg-rose-600 hover:bg-rose-700 text-white'
+            }}));
+        },
+
+        requestSave() {
+            if (!this.hasPending()) {
+                window.dispatchEvent(new CustomEvent('lw-toast', { detail: { type: 'info', message: 'No changes to save.' } }));
+                return;
+            }
+            window.dispatchEvent(new CustomEvent('confirm-action', { detail: {
+                key: 'save-peos',
+                title: 'Save all PEOs?',
+                message: 'This will save all new and modified PEOs.',
+                confirmLabel: 'Save All',
+                confirmClass: 'bg-emerald-600 hover:bg-emerald-700 text-white'
+            }}));
+        },
+
+        handleConfirmed({ key }) {
+            if (key === 'delete-peo' && this._pendingDeletePeo) {
+                this.submitDeleteForm(this._pendingDeletePeo.id);
+                this._pendingDeletePeo = null;
+            }
+            if (key === 'save-peos') this.savePeos();
+        },
+
+        submitDeleteForm(peoId) {
+            const form = document.getElementById('peo-delete-form-' + peoId);
+            if (form) form.submit();
+        },
+
         savePeos() {
             this.isSaving = true;
             @this.call('savePeos', this.peos)
                 .then(() => {
-                    // Livewire will re-entangle peos after save; reset dirty on next tick
                     this.$nextTick(() => {
                         this.peos = this.peos.map(p => ({ ...p, _dirty: false, _original: p.peo_text }));
                     });
@@ -207,3 +242,16 @@ function peosManager(initialPeos) {
     };
 }
 </script>
+
+{{-- Hidden delete forms for saved PEOs --}}
+@foreach($peos as $peo)
+    @if(!empty($peo['id']))
+        <form id="peo-delete-form-{{ $peo['id'] }}" method="POST"
+            action="/programs/peo/{{ $peo['id'] }}" class="hidden">
+            @csrf
+            @method('DELETE')
+        </form>
+    @endif
+@endforeach
+
+</div>

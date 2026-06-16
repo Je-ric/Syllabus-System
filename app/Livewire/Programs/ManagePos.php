@@ -43,51 +43,25 @@ class ManagePos extends Component
 
     private function loadPos(): void
     {
-        $dbPos = $this->program->outcomes()
-            ->orderBy('id')
-            ->get();
-
-        $this->pos = [];
-        foreach ($dbPos as $po) {
-            $this->pos[] = [
-                'id' => $po->id,
-                'po_code' => $po->po_code,
-                'po_text' => $po->po_text,
-            ];
-        }
+        $this->pos = $this->program->outcomes()
+            ->orderBy('po_code')
+            ->get(['id', 'po_code', 'po_text'])
+            ->toArray();
     }
 
     private function loadPeos(): void
     {
-        $dbPeos = $this->program->peos()
+        $this->peos = $this->program->peos()
             ->orderBy('peo_code')
-            ->get();
-
-        $this->peos = [];
-        foreach ($dbPeos as $peo) {
-            $this->peos[] = [
-                'id' => $peo->id,
-                'peo_code' => $peo->peo_code,
-                'peo_text' => $peo->peo_text,
-            ];
-        }
+            ->get(['id', 'peo_code', 'peo_text'])
+            ->toArray();
     }
 
-    // Load mapping (which PEOs are linked to which POs)
     private function loadMapping(): void
     {
-        $dbPos = $this->program->outcomes()
-            ->with('peos')
-            ->get();
-
-        $this->mapping = [];
-        foreach ($dbPos as $po) {
-            $peoIds = [];
-            foreach ($po->peos as $peo) {
-                $peoIds[] = $peo->id;
-            }
-            $this->mapping[$po->id] = $peoIds;
-        }
+        $this->mapping = $this->program->outcomes()->with('peos')->get()
+            ->mapWithKeys(fn($po) => [$po->id => $po->peos->pluck('id')->all()])
+            ->all();
     }
     public function savePos(array $posData, array $mappingData): void
     {
@@ -171,32 +145,16 @@ class ManagePos extends Component
     }
 
 
-    // Listen for PEO updates
     #[On('peosUpdated')]
     public function refreshPeos(int $programId): void
     {
-        // Only refresh if it's for this program
-        if ($this->program->id != $programId) {
-            return;
-        }
+        if ($this->program->id != $programId) return;
 
         $this->loadPeos();
 
-        // Clean up mappings - remove any PEO IDs that no longer exist
-        $validPeoIds = [];
-        foreach ($this->peos as $peo) {
-            $validPeoIds[] = $peo['id'];
-        }
-
-        // Check each PO's mappings
+        $validIds = array_column($this->peos, 'id');
         foreach ($this->mapping as $poId => $peoIds) {
-            $cleanedPeoIds = [];
-            foreach ($peoIds as $peoId) {
-                if (in_array($peoId, $validPeoIds)) {
-                    $cleanedPeoIds[] = $peoId;
-                }
-            }
-            $this->mapping[$poId] = $cleanedPeoIds;
+            $this->mapping[$poId] = array_values(array_intersect($peoIds, $validIds));
         }
     }
 

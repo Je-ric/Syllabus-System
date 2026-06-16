@@ -38,19 +38,10 @@ class ManagePeos extends Component
 
     private function loadPeos(): void
     {
-        $dbPeos = $this->program->peos()
-            ->orderBy('id')
-            ->get();
-
-        $this->peos = [];
-
-        foreach ($dbPeos as $peo) {
-            $this->peos[] = [
-                'id' => $peo->id,
-                'peo_code' => $peo->peo_code,
-                'peo_text' => $peo->peo_text,
-            ];
-        }
+        $this->peos = $this->program->peos()
+            ->orderBy('peo_code')
+            ->get(['id', 'peo_code', 'peo_text'])
+            ->toArray();
     }
 
     public function savePeos(array $peosData): void
