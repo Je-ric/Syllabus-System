@@ -32,7 +32,7 @@ class ObjectiveController extends Controller
             }
         }
 
-        // Non-admin: restrict to assigned department only
+        // Non-admin: keep the assigned department selected when one exists
         if (!$isAdmin && $selectedDepartmentId) {
             $assignment = $user?->getPrimaryDepartmentAssignment();
             if (!$assignment || (int) $assignment->department_id !== (int) $selectedDepartmentId) {
@@ -43,9 +43,7 @@ class ObjectiveController extends Controller
 
         $colleges = $isAdmin
             ? College::orderBy('name')->get()
-            : College::whereHas('departments.userAssignments', fn($q) =>
-                $q->where('user_id', $user->id)->whereIn('context', ['chair', 'faculty']))
-                ->orderBy('name')->get();
+            : $this->service->getAccessibleObjectiveColleges($user);
 
         $departments = collect();
         $objectives  = collect();
@@ -53,10 +51,7 @@ class ObjectiveController extends Controller
         if ($selectedCollegeId) {
             $departments = $isAdmin
                 ? Department::where('college_id', $selectedCollegeId)->orderBy('name')->get()
-                : Department::where('college_id', $selectedCollegeId)
-                    ->whereHas('userAssignments', fn($q) =>
-                        $q->where('user_id', $user->id)->whereIn('context', ['chair', 'faculty']))
-                    ->orderBy('name')->get();
+                : $this->service->getAccessibleDepartments($user, (int) $selectedCollegeId);
 
             if ($selectedDepartmentId) {
                 $objectives = DepartmentObjective::where('department_id', $selectedDepartmentId)
@@ -88,15 +83,13 @@ class ObjectiveController extends Controller
 
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
-        if (!$user->hasRole('admin')) {
-            $assignment = $user->getPrimaryDepartmentAssignment();
-            if (!$assignment || (int) $assignment->department_id !== (int) $request->department_id) {
-                return redirect()->route('objective.index')
-                    ->with('toast', ['message' => 'You can only manage objectives for your assigned department.', 'type' => 'warning']);
-            }
+        $department = Department::findOrFail($request->department_id);
+
+        if (!$this->service->canManageObjective($user, $department)) {
+            return redirect()->route('objective.index')
+                ->with('toast', ['message' => 'You can only manage objectives for your available department scope.', 'type' => 'warning']);
         }
 
-        $department = Department::findOrFail($request->department_id);
         $this->service->storeObjective($department, $request->objective_text);
 
         return redirect()
@@ -113,12 +106,9 @@ class ObjectiveController extends Controller
 
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
-        if (!$user->hasRole('admin')) {
-            $assignment = $user->getPrimaryDepartmentAssignment();
-            if (!$assignment || (int) $assignment->department_id !== (int) $objective->department_id) {
-                return redirect()->route('objective.index')
-                    ->with('toast', ['message' => 'You can only manage objectives for your assigned department.', 'type' => 'warning']);
-            }
+        if (!$this->service->canManageObjective($user, $objective->department)) {
+            return redirect()->route('objective.index')
+                ->with('toast', ['message' => 'You can only manage objectives for your available department scope.', 'type' => 'warning']);
         }
 
         $this->service->updateObjective($objective, $request->objective_text);
@@ -138,12 +128,9 @@ class ObjectiveController extends Controller
 
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
-        if (!$user->hasRole('admin')) {
-            $assignment = $user->getPrimaryDepartmentAssignment();
-            if (!$assignment || (int) $assignment->department_id !== (int) $departmentId) {
-                return redirect()->route('objective.index')
-                    ->with('toast', ['message' => 'You can only manage objectives for your assigned department.', 'type' => 'warning']);
-            }
+        if (!$this->service->canManageObjective($user, $objective->department)) {
+            return redirect()->route('objective.index')
+                ->with('toast', ['message' => 'You can only manage objectives for your available department scope.', 'type' => 'warning']);
         }
 
         try {

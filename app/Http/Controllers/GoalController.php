@@ -20,8 +20,7 @@ class GoalController extends Controller
 
         $colleges = $isAdmin
             ? College::orderBy('name')->get()
-            : College::whereHas('userAssignments', fn($q) => $q->where('user_id', $user->id)->where('context', 'dean'))
-                ->orderBy('name')->get();
+            : $this->service->getAccessibleGoalColleges($user);
 
         $selectedCollegeId = $request->input('college_id');
 
@@ -30,7 +29,7 @@ class GoalController extends Controller
             $selectedCollegeId = $assignment?->college_id;
         }
 
-        // Non-admin: restrict to assigned college only
+        // Non-admin: keep the assigned college selected when one exists
         if (!$isAdmin && $selectedCollegeId) {
             $assignment = $user?->getPrimaryCollegeAssignment();
             if (!$assignment || (int) $assignment->college_id !== (int) $selectedCollegeId) {
@@ -57,15 +56,13 @@ class GoalController extends Controller
 
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
-        if (!$user->hasRole('admin')) {
-            $assignment = $user->getPrimaryCollegeAssignment();
-            if (!$assignment || (int) $assignment->college_id !== (int) $request->college_id) {
-                return redirect()->route('goal.index')
-                    ->with('toast', ['message' => 'You can only manage goals for your assigned college.', 'type' => 'warning']);
-            }
+        $college = College::findOrFail($request->college_id);
+
+        if (!$this->service->canManageGoal($user, $college)) {
+            return redirect()->route('goal.index')
+                ->with('toast', ['message' => 'You can only manage goals for your available college scope.', 'type' => 'warning']);
         }
 
-        $college = College::findOrFail($request->college_id);
         $this->service->storeGoal($college, $request->goal_text);
 
         return redirect()
@@ -79,12 +76,9 @@ class GoalController extends Controller
 
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
-        if (!$user->hasRole('admin')) {
-            $assignment = $user->getPrimaryCollegeAssignment();
-            if (!$assignment || (int) $assignment->college_id !== (int) $goal->college_id) {
-                return redirect()->route('goal.index')
-                    ->with('toast', ['message' => 'You can only manage goals for your assigned college.', 'type' => 'warning']);
-            }
+        if (!$this->service->canManageGoal($user, $goal->college)) {
+            return redirect()->route('goal.index')
+                ->with('toast', ['message' => 'You can only manage goals for your available college scope.', 'type' => 'warning']);
         }
 
         $this->service->updateGoal($goal, $request->goal_text);
@@ -100,12 +94,9 @@ class GoalController extends Controller
 
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
-        if (!$user->hasRole('admin')) {
-            $assignment = $user->getPrimaryCollegeAssignment();
-            if (!$assignment || (int) $assignment->college_id !== (int) $collegeId) {
-                return redirect()->route('goal.index')
-                    ->with('toast', ['message' => 'You can only manage goals for your assigned college.', 'type' => 'warning']);
-            }
+        if (!$this->service->canManageGoal($user, $goal->college)) {
+            return redirect()->route('goal.index')
+                ->with('toast', ['message' => 'You can only manage goals for your available college scope.', 'type' => 'warning']);
         }
 
         try {

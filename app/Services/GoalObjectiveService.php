@@ -7,12 +7,95 @@ use App\Models\College;
 use App\Models\CollegeGoal;
 use App\Models\Department;
 use App\Models\DepartmentObjective;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 // Used in: GoalController, ObjectiveController
 
 class GoalObjectiveService
 {
+    public function getAccessibleGoalColleges(User $user)
+    {
+        $assignment = $user->getPrimaryCollegeAssignment();
+
+        if ($assignment?->college) {
+            return College::where('id', $assignment->college_id)
+                ->orderBy('name')
+                ->get();
+        }
+
+        if ($user->hasRole('dean')) {
+            return College::orderBy('name')->get();
+        }
+
+        return collect();
+    }
+
+    public function getAccessibleObjectiveColleges(User $user)
+    {
+        $assignment = $user->getPrimaryDepartmentAssignment();
+
+        if ($assignment?->department?->college) {
+            return College::where('id', $assignment->department->college_id)
+                ->orderBy('name')
+                ->get();
+        }
+
+        if ($user->hasRole('chair')) {
+            return College::orderBy('name')->get();
+        }
+
+        return collect();
+    }
+
+    public function getAccessibleDepartments(User $user, int $collegeId)
+    {
+        $assignment = $user->getPrimaryDepartmentAssignment();
+
+        if ($assignment?->department && (int) $assignment->department->college_id === (int) $collegeId) {
+            return Department::where('college_id', $collegeId)
+                ->whereHas('userAssignments', fn ($q) => $q->where('user_id', $user->id)->whereIn('context', ['chair', 'faculty']))
+                ->orderBy('name')
+                ->get();
+        }
+
+        if ($user->hasRole('chair')) {
+            return Department::where('college_id', $collegeId)
+                ->orderBy('name')
+                ->get();
+        }
+
+        return collect();
+    }
+
+    public function canManageGoal(User $user, College $college): bool
+    {
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+
+        $assignment = $user->getPrimaryCollegeAssignment();
+        if ($assignment) {
+            return (int) $assignment->college_id === (int) $college->id;
+        }
+
+        return $user->hasRole('dean');
+    }
+
+    public function canManageObjective(User $user, Department $department): bool
+    {
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+
+        $assignment = $user->getPrimaryDepartmentAssignment();
+        if ($assignment) {
+            return (int) $assignment->department_id === (int) $department->id;
+        }
+
+        return $user->hasRole('chair');
+    }
+
     // GOALS
 
     public function storeGoal(College $college, string $text): CollegeGoal

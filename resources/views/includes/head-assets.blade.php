@@ -7,7 +7,8 @@
 <link
     href="https://fonts.googleapis.com/css2?family=Anton&family=Libre+Franklin:ital,wght@0,100..900;1,100..900&family=Oswald:wght@200..700&family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap"
     rel="stylesheet">
-
+<script src="https://cdn.jsdelivr.net/gh/livewire/sortable@v1.x.x/dist/livewire-sortable.js"></script>
+<script src="/lib/jquery/dist/jquery.min.js"></script>
 
 @livewireStyles
 @vite(['resources/css/app.css', 'resources/js/app.js'])
