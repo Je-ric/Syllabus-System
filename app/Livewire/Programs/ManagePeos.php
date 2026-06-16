@@ -7,6 +7,7 @@ use App\Models\ProgramEducationalObjective;
 use App\Models\AuditLog;
 // use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use App\Helpers\ProgramCodeHelper;
 
@@ -46,51 +47,64 @@ class ManagePeos extends Component
 
     public function savePeos(array $peosData): void
     {
-        foreach ($peosData as $index => $peoData) {
-            if (trim((string) ($peoData['peo_text'] ?? '')) === '') {
-                $this->dispatch('lw-toast', type: 'warning', message: 'PEO row ' . ($index + 1) . ' is blank.');
-                return;
-            }
+        try {
+            DB::transaction(function () use ($peosData): void {
+                foreach ($peosData as $index => $row) {
+                    if (trim((string) ($row['peo_text'] ?? '')) === '') {
+                        throw new \RuntimeException('PEO row ' . ($index + 1) . ' is blank.');
+                    }
+                }
+
+                // Delete PEOs that were removed in Alpine (had an id but absent from submission)
+                $submittedIds = array_values(array_filter(array_column($peosData, 'id')));
+                $existingIds  = $this->program->peos()->pluck('id')->toArray();
+                $toDelete     = array_diff($existingIds, $submittedIds);
+                if ($toDelete) ProgramEducationalObjective::whereIn('id', $toDelete)->delete();
+
+                // Update text on existing rows (the submitted text is already in the visual order)
+                foreach ($peosData as $row) {
+                    if (empty($row['id'])) continue;
+                    ProgramEducationalObjective::where('id', $row['id'])
+                        ->where('program_id', $this->program->id)
+                        ->update(['peo_text' => trim($row['peo_text'])]);
+                }
+
+                // Insert new rows (no id)
+                $newIds = [];
+                foreach ($peosData as $row) {
+                    if (!empty($row['id'])) continue;
+                    $peo = ProgramEducationalObjective::create([
+                        'program_id' => $this->program->id,
+                        'peo_text'   => trim($row['peo_text']),
+                        'peo_code'   => null,
+                    ]);
+                    $newIds[] = $peo->id;
+                }
+
+                // Build final ordered ID list: existing in submitted order, then newly inserted
+                $orderedIds = array_merge($submittedIds, $newIds);
+
+                // Resequence codes from the saved order.
+                ProgramCodeHelper::resequencePeoCodesOrdered($this->program->id, $orderedIds);
+            });
+        } catch (\Throwable $e) {
+            report($e);
+            $this->dispatch('lw-toast', type: 'error', message: 'Failed to save PEOs. Please try again.');
+            return;
         }
 
-        $existingIds  = $this->program->peos()->pluck('id')->toArray();
-        $submittedIds = [];
-
-        // Save or update PEOs
-        foreach ($peosData as $peoData) {
-            if (empty(trim($peoData['peo_text'] ?? ''))) continue;
-
-            $peo = ProgramEducationalObjective::updateOrCreate(
-                ['id' => $peoData['id'] ?? null],
-                ['program_id' => $this->program->id, 'peo_text' => trim($peoData['peo_text'])]
-            );
-
-            $submittedIds[] = $peo->id;
-        }
-
-        // Delete removed PEOs
-        $idsToDelete = array_diff($existingIds, $submittedIds);
-        if ($idsToDelete) ProgramEducationalObjective::whereIn('id', $idsToDelete)->delete();
-
-        // Use helper
-        ProgramCodeHelper::resequencePeoCodes($this->program->id);
-
-        $primaryDepartment = $this->program->departments()->with('college')->first();
-        $collegeName = $primaryDepartment?->college?->name ?? 'N/A';
-        $departmentName = $primaryDepartment?->name ?? 'N/A';
-
-        // LOGS
+        $dept = $this->program->departments()->with('college')->first();
+        $collegeName = $dept?->college?->name ?? 'N/A';
+        $departmentName = $dept?->name ?? 'N/A';
         AuditLog::record(
-            action: 'saved',
-            module: 'PEO',
-            referenceId: $this->program->id,
+            action: 'saved', module: 'PEO', referenceId: $this->program->id,
             description: "Saved PEOs for {$this->program->name}; college: {$collegeName}; department: {$departmentName}."
         );
 
         $this->loadPeos();
-        session()->flash('message', 'PEOs saved and re-sequenced successfully!');
         $this->dispatch('lw-toast', type: 'success', message: 'PEOs saved.');
         $this->dispatch('peosUpdated', programId: $this->program->id);
+        $this->dispatch('peos-saved', peos: $this->peos);
     }
 
     public function render()

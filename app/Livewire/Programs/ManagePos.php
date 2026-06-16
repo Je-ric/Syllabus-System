@@ -5,9 +5,9 @@ namespace App\Livewire\Programs;
 use App\Models\Program;
 use App\Models\ProgramOutcome;
 use App\Models\AuditLog;
-// use App\Models\User;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
 use App\Helpers\ProgramCodeHelper;
 
@@ -21,7 +21,6 @@ class ManagePos extends Component
     public function mount(Program $program): void
     {
         /** @var \App\Models\User $user */
-        // $user = auth()->user();
         $user = Auth::user();
         if (!$user->hasRole('admin')) {
             $assignment = $user->getPrimaryDepartmentAssignment();
@@ -44,6 +43,7 @@ class ManagePos extends Component
     private function loadPos(): void
     {
         $this->pos = $this->program->outcomes()
+            ->orderByRaw("po_code IS NULL ASC")
             ->orderBy('po_code')
             ->get(['id', 'po_code', 'po_text'])
             ->toArray();
@@ -63,56 +63,74 @@ class ManagePos extends Component
             ->mapWithKeys(fn($po) => [$po->id => $po->peos->pluck('id')->all()])
             ->all();
     }
+
     public function savePos(array $posData, array $mappingData): void
     {
-        foreach ($posData as $index => $poData) {
-            if (trim((string) ($poData['po_text'] ?? '')) === '') {
-                $this->dispatch('lw-toast', type: 'warning', message: 'PO row ' . ($index + 1) . ' is blank.');
-                return;
-            }
+        try {
+            DB::transaction(function () use ($posData, $mappingData): void {
+                foreach ($posData as $index => $row) {
+                    if (trim((string) ($row['po_text'] ?? '')) === '') {
+                        throw new \RuntimeException('PO row ' . ($index + 1) . ' is blank.');
+                    }
+                }
+
+                // Delete POs removed in Alpine.
+                $submittedIds = array_values(array_filter(array_column($posData, 'id')));
+                $existingIds  = $this->program->outcomes()->pluck('id')->toArray();
+                $toDelete     = array_diff($existingIds, $submittedIds);
+                if ($toDelete) ProgramOutcome::whereIn('id', $toDelete)->delete();
+
+                // Update text on existing rows (the submitted text follows the dragged row order).
+                foreach ($posData as $row) {
+                    if (empty($row['id'])) continue;
+                    ProgramOutcome::where('id', $row['id'])
+                        ->where('program_id', $this->program->id)
+                        ->update(['po_text' => trim($row['po_text'])]);
+                }
+
+                // Insert new rows.
+                $newIds = [];
+                foreach ($posData as $row) {
+                    if (!empty($row['id'])) continue;
+                    $po = ProgramOutcome::create([
+                        'program_id' => $this->program->id,
+                        'po_text'    => trim($row['po_text']),
+                        'po_code'    => null,
+                    ]);
+                    $newIds[] = $po->id;
+                }
+
+                // Resequence codes from the saved order.
+                $orderedIds = array_merge($submittedIds, $newIds);
+                ProgramCodeHelper::resequencePoCodesOrdered($this->program->id, $orderedIds);
+
+                // Sync PEO mappings for existing POs after the save succeeds.
+                foreach ($posData as $row) {
+                    if (empty($row['id'])) continue;
+                    $po = ProgramOutcome::find($row['id']);
+                    if ($po && array_key_exists($po->id, $mappingData)) {
+                        $po->peos()->sync($mappingData[$po->id]);
+                    }
+                }
+            });
+        } catch (\Throwable $e) {
+            report($e);
+            $this->dispatch('lw-toast', type: 'error', message: 'Failed to save POs. Please try again.');
+            return;
         }
 
-        $existingIds  = $this->program->outcomes()->pluck('id')->toArray();
-        $submittedIds = [];
-
-        // Save or update POs
-        foreach ($posData as $poData) {
-            if (empty(trim($poData['po_text'] ?? ''))) continue;
-
-            $po = ProgramOutcome::updateOrCreate(
-                ['id' => $poData['id'] ?? null],
-                ['program_id' => $this->program->id, 'po_text' => trim($poData['po_text'])]
-            );
-
-            if (isset($mappingData[$po->id])) $po->peos()->sync($mappingData[$po->id]);
-
-            $submittedIds[] = $po->id;
-        }
-
-        // Delete removed POs
-        $idsToDelete = array_diff($existingIds, $submittedIds);
-        if ($idsToDelete) ProgramOutcome::whereIn('id', $idsToDelete)->delete();
-
-        // Use helper
-        ProgramCodeHelper::resequencePoCodes($this->program->id);
-
-        $primaryDepartment = $this->program->departments()->with('college')->first();
-        $collegeName = $primaryDepartment?->college?->name ?? 'N/A';
-        $departmentName = $primaryDepartment?->name ?? 'N/A';
-
-        // LOGS
+        $dept = $this->program->departments()->with('college')->first();
+        $collegeName = $dept?->college?->name ?? 'N/A';
+        $departmentName = $dept?->name ?? 'N/A';
         AuditLog::record(
-            action: 'saved',
-            module: 'PO',
-            referenceId: $this->program->id,
+            action: 'saved', module: 'PO', referenceId: $this->program->id,
             description: "Saved POs for {$this->program->name}; college: {$collegeName}; department: {$departmentName}."
         );
 
         $this->loadPos();
         $this->loadMapping();
-
-        session()->flash('message', 'POs saved and re-sequenced successfully!');
         $this->dispatch('lw-toast', type: 'success', message: 'POs saved.');
+        $this->dispatch('pos-saved', pos: $this->pos, mapping: $this->mapping);
     }
 
     public function toggleMapping(int $poId, int $peoId, bool $checked): void
@@ -143,7 +161,6 @@ class ManagePos extends Component
 
         $this->loadMapping();
     }
-
 
     #[On('peosUpdated')]
     public function refreshPeos(int $programId): void

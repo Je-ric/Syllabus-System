@@ -154,11 +154,17 @@
             peos:        initialPeos.map((p, i) => ({ ...p, _dirty: false, _original: p.peo_text, _key: p.id ?? ('new-' + i) })),
             isSaving:    false,
             _keyCounter: initialPeos.length,
-            _serverOrder: [],
 
             init() {
-                this._serverOrder = this.peos.filter(p => p.id).map(p => p.id);
                 this.$nextTick(() => this.initSortable());
+                this.$el.closest('[wire\\:id]')?.addEventListener('peos-saved', (e) => {
+                    const fresh = e.detail[0] ?? e.detail.peos ?? [];
+                    this.peos = fresh.map((p, i) => ({
+                        ...p, _dirty: false, _original: p.peo_text,
+                        _key: p.id ?? ('new-' + i)
+                    }));
+                    this.$nextTick(() => this.initSortable());
+                });
             },
 
             initSortable() {
@@ -169,13 +175,23 @@
                     animation: 150,
                     onEnd: (evt) => {
                         if (evt.oldIndex === evt.newIndex) return;
-                        const moved = this.peos.splice(evt.oldIndex, 1)[0];
-                        this.peos.splice(evt.newIndex, 0, moved);
-                        // Only mark dirty rows whose position changed vs server order
-                        const savedRows = this.peos.filter(p => p.id);
-                        savedRows.forEach((p, i) => {
-                            if (this._serverOrder[i] !== p.id) p._dirty = true;
-                        });
+                        // Swap text content between the two positions — keep ids in place
+                        // This avoids Alpine's keyed x-for undoing the DOM move
+                        const from = evt.oldIndex;
+                        const to   = evt.newIndex;
+                        const step = from < to ? 1 : -1;
+                        const tmp  = this.peos[from].peo_text;
+                        for (let i = from; i !== to; i += step) {
+                            this.peos[i].peo_text = this.peos[i + step].peo_text;
+                            if (this.peos[i].id) {
+                                this.peos[i]._dirty = true;
+                                this.peos[i]._original = this.peos[i]._original; // preserve original for dirty check
+                            }
+                        }
+                        this.peos[to].peo_text = tmp;
+                        if (this.peos[to].id) this.peos[to]._dirty = true;
+                        // Restore DOM to match Alpine's array order (Sortable moved it, Alpine will rediff)
+                        this.$nextTick(() => {});
                     }
                 });
             },
@@ -242,6 +258,7 @@
 
                 this.isSaving = true;
                 @this.call('savePeos', this.peos.map(p => ({ id: p.id, peo_text: p.peo_text })))
+                    .catch(() => {})
                     .finally(() => { this.isSaving = false; });
             }
         };

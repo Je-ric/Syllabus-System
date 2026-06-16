@@ -17,20 +17,45 @@ class ProgramCodeHelper
         return $letter;
     }
 
-    public static function resequencePoCodes(int $programId)
+    /**
+     * Resequence PO codes in the given ordered ID list.
+     * Nulls all codes first to avoid unique constraint collisions during swap.
+     */
+    public static function resequencePoCodesOrdered(int $programId, array $orderedIds): void
     {
-        $pos = ProgramOutcome::where('program_id', $programId)->orderBy('id')->get();
-        foreach ($pos as $index => $po) {
-            $po->update(['po_code' => ProgramCodeHelper::numberToLetter($index + 1)]); // 1 (a), 2 (b), 3 (c), ...
+        // Clear all codes first (nullable) to avoid unique constraint collisions
+        ProgramOutcome::where('program_id', $programId)->update(['po_code' => null]);
+        foreach ($orderedIds as $position => $id) {
+            ProgramOutcome::where('id', $id)
+                ->update(['po_code' => self::numberToLetter($position + 1)]);
         }
     }
 
-    public static function resequencePeoCodes(int $programId)
+    /**
+     * Resequence PEO codes in the given ordered ID list.
+     * Nulls all codes first to avoid unique constraint collisions during swap.
+     */
+    public static function resequencePeoCodesOrdered(int $programId, array $orderedIds): void
     {
-        $peos = ProgramEducationalObjective::where('program_id', $programId)->orderBy('id')->get();
-        foreach ($peos as $index => $peo) {
-            // $peo->update(['peo_code' => 'PEO' . ($index + 1)]); // PEO1, PEO2, ...
-            $peo->update(['peo_code' => ProgramCodeHelper::numberToLetter($index + 1)]); // PEO1, PEO2, ...
+        // Clear all codes first (nullable) to avoid unique constraint collisions
+        ProgramEducationalObjective::where('program_id', $programId)->update(['peo_code' => null]);
+        foreach ($orderedIds as $position => $id) {
+            ProgramEducationalObjective::where('id', $id)
+                ->update(['peo_code' => self::numberToLetter($position + 1)]);
         }
+    }
+
+    /** @deprecated Use resequencePoCodesOrdered instead */
+    public static function resequencePoCodes(int $programId): void
+    {
+        $ids = ProgramOutcome::where('program_id', $programId)->orderBy('id')->pluck('id')->all();
+        self::resequencePoCodesOrdered($programId, $ids);
+    }
+
+    /** @deprecated Use resequencePeoCodesOrdered instead */
+    public static function resequencePeoCodes(int $programId): void
+    {
+        $ids = ProgramEducationalObjective::where('program_id', $programId)->orderBy('id')->pluck('id')->all();
+        self::resequencePeoCodesOrdered($programId, $ids);
     }
 }

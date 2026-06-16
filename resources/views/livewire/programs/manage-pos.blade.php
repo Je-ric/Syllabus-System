@@ -250,11 +250,19 @@
                 _mappingPending: {},
                 isSaving: false,
                 _keyCounter: initialPos.length,
-                _serverOrder: [],
 
                 init() {
-                    this._serverOrder = this.pos.filter(p => p.id).map(p => p.id);
                     this.$nextTick(() => this.initSortable());
+                    this.$el.closest('[wire\\:id]')?.addEventListener('pos-saved', (e) => {
+                        const detail = e.detail[0] ?? e.detail;
+                        const fresh = detail.pos ?? [];
+                        this.pos = fresh.map((p, i) => ({
+                            ...p, _dirty: false, _original: p.po_text,
+                            _key: p.id ?? ('new-' + i)
+                        }));
+                        this.mapping = detail.mapping ?? this.mapping;
+                        this.$nextTick(() => this.initSortable());
+                    });
                 },
 
                 initSortable() {
@@ -265,13 +273,26 @@
                         animation: 150,
                         onEnd: (evt) => {
                             if (evt.oldIndex === evt.newIndex) return;
-                            const moved = this.pos.splice(evt.oldIndex, 1)[0];
-                            this.pos.splice(evt.newIndex, 0, moved);
-                            // Only mark dirty rows whose position changed vs server order
-                            const savedRows = this.pos.filter(p => p.id);
-                            savedRows.forEach((p, i) => {
-                                if (this._serverOrder[i] !== p.id) p._dirty = true;
-                            });
+                            const from = evt.oldIndex;
+                            const to   = evt.newIndex;
+                            const step = from < to ? 1 : -1;
+                            // Swap text AND mapping between positions, keep ids in place
+                            const tmpText    = this.pos[from].po_text;
+                            const tmpMapping = this.mapping[this.pos[from].id] ? [...this.mapping[this.pos[from].id]] : [];
+                            for (let i = from; i !== to; i += step) {
+                                this.pos[i].po_text = this.pos[i + step].po_text;
+                                if (this.pos[i].id && this.pos[i + step].id) {
+                                    this.mapping[this.pos[i].id] = this.mapping[this.pos[i + step].id]
+                                        ? [...this.mapping[this.pos[i + step].id]]
+                                        : [];
+                                }
+                                if (this.pos[i].id) this.pos[i]._dirty = true;
+                            }
+                            this.pos[to].po_text = tmpText;
+                            if (this.pos[to].id) {
+                                this.mapping[this.pos[to].id] = tmpMapping;
+                                this.pos[to]._dirty = true;
+                            }
                         }
                     });
                 },
@@ -394,6 +415,7 @@
 
                     this.isSaving = true;
                     @this.call('savePos', this.pos.map(p => ({ id: p.id, po_text: p.po_text })), this.mapping)
+                        .catch(() => {})
                         .finally(() => { this.isSaving = false; });
                 }
             };
