@@ -19,12 +19,18 @@
 
         <div class="space-y-4">
 
+            {{-- No-assignment notice for chair --}}
+            @if ($noAssignment)
+                <x-feedback-status.alert type="warning" title="No department assigned"
+                    message="You have the Chair role but are not assigned to any department. Contact an administrator to be assigned." />
+            @endif
+
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {{-- College selector --}}
                 @if ($colleges->count() > 1)
                     <x-card-section title="Select College" icon="bx-buildings">
                         <form method="GET" action="{{ route('objective.index') }}">
-                            <x-form.select id="collegeSelect" name="college_id" onchange="this.form.submit()">
+                            <x-form.select id="collegeSelect" name="college_id" onchange="this.form.submit()" :disabled="$noAssignment">
                                 <option value="">— Choose College —</option>
                                 @foreach ($colleges as $college)
                                     <option value="{{ $college->id }}" @selected($selectedCollegeId == $college->id)>
@@ -34,6 +40,12 @@
                             </x-form.select>
                         </form>
                     </x-card-section>
+                @elseif ($noAssignment)
+                    <x-card-section title="Select College" icon="bx-buildings">
+                        <x-form.select disabled>
+                            <option>— No department assigned —</option>
+                        </x-form.select>
+                    </x-card-section>
                 @endif
 
                 {{-- Department selector --}}
@@ -42,7 +54,7 @@
                         <x-card-section title="Select Department" icon="bx-sitemap">
                             <form method="GET" action="{{ route('objective.index') }}">
                                 <input type="hidden" name="college_id" value="{{ $selectedCollegeId }}">
-                                <x-form.select id="departmentSelect" name="department_id" onchange="this.form.submit()">
+                                <x-form.select id="departmentSelect" name="department_id" onchange="this.form.submit()" :disabled="$noAssignment">
                                     <option value="">— Choose Department —</option>
                                     @foreach ($departments as $dept)
                                         <option value="{{ $dept->id }}" @selected($selectedDepartmentId == $dept->id)>
@@ -66,7 +78,10 @@
                 :subtitle="$selectedDepartmentId ? $departments->firstWhere('id', $selectedDepartmentId)?->name : null"
                 :count="$selectedDepartmentId && $objectives->count() ? $objectives->count() : null">
 
-                @if (!$selectedCollegeId)
+                @if ($noAssignment)
+                    <x-empty-state icon="bx-list-check" title="No department assigned"
+                        message="You are not assigned to any department. Contact an administrator." />
+                @elseif (!$selectedCollegeId)
                     <x-empty-state icon="bx-list-check" title="No college selected"
                         message="Select a college above to begin." />
                 @elseif (!$selectedDepartmentId)

@@ -19,6 +19,12 @@
 
         <div class="space-y-4">
 
+            {{-- No-assignment notice for dean --}}
+            @if ($noAssignment)
+                <x-feedback-status.alert type="warning" title="No college assigned"
+                    message="You have the Dean role but are not assigned to any college. Contact an administrator to be assigned." />
+            @endif
+
             {{-- College selector (admin sees all; dean sees only theirs, hidden if single) --}}
             @if ($colleges->count() > 1)
                 <x-card-section title="Select College" icon="bx-buildings" class="max-w-md">
@@ -26,7 +32,8 @@
                         <x-form.select
                             id="collegeSelect"
                             name="college_id"
-                            onchange="this.form.submit()">
+                            onchange="this.form.submit()"
+                            :disabled="$noAssignment">
                             <option value="">— Choose College —</option>
                             @foreach ($colleges as $college)
                                 <option
@@ -38,6 +45,12 @@
                         </x-form.select>
                     </form>
                 </x-card-section>
+            @elseif ($noAssignment)
+                <x-card-section title="Select College" icon="bx-buildings" class="max-w-md">
+                    <x-form.select disabled>
+                        <option>— No college assigned —</option>
+                    </x-form.select>
+                </x-card-section>
             @endif
 
             {{-- Goals table --}}
@@ -47,7 +60,10 @@
                 :subtitle="$selectedCollegeId ? $colleges->firstWhere('id', $selectedCollegeId)?->name : null"
                 :count="$selectedCollegeId && $goals->count() ? $goals->count() : null">
 
-                @if (!$selectedCollegeId)
+                @if ($noAssignment)
+                    <x-empty-state icon="bx-target-lock" title="No college assigned"
+                        message="You are not assigned to any college. Contact an administrator." />
+                @elseif (!$selectedCollegeId)
                     <x-empty-state icon="bx-target-lock" title="No college selected"
                         message="Select a college above to view its goals." />
                 @elseif ($goals->isEmpty())

@@ -61,12 +61,16 @@ class ObjectiveController extends Controller
             }
         }
 
+        // Chair with no department assignment
+        $noAssignment = !$isAdmin && $user?->hasRole('chair') && !$user?->getPrimaryDepartmentAssignment();
+
         return view('GoalObjective.objective', compact(
             'colleges',
             'departments',
             'objectives',
             'selectedCollegeId',
-            'selectedDepartmentId'
+            'selectedDepartmentId',
+            'noAssignment'
         ));
     }
 

@@ -44,7 +44,10 @@ class GoalController extends Controller
                 ->get();
         }
 
-        return view('GoalObjective.goal', compact('colleges', 'goals', 'selectedCollegeId'));
+        // Dean with no college assignment
+        $noAssignment = !$isAdmin && $user?->hasRole('dean') && !$user?->getPrimaryCollegeAssignment();
+
+        return view('GoalObjective.goal', compact('colleges', 'goals', 'selectedCollegeId', 'noAssignment'));
     }
 
     public function goal_store(Request $request)
