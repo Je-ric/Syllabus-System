@@ -33,6 +33,12 @@
             'icon'      => 'bx-info-circle',
             'title'     => 'Information',
         ],
+        'default' => [
+            'container' => 'border-blue-100 bg-blue-50/60 text-blue-800',
+            'iconWrap'  => 'bg-blue-50 text-blue-500',
+            'icon'      => 'bx-info-circle',
+            'title'     => 'Notice',
+        ],
     ];
 
     $alert         = $styles[$type] ?? $styles['info'];
@@ -45,8 +51,8 @@
     role="alert">
 
     <div class="flex items-start gap-3">
-        <span class="inline-flex h-7 w-7 shrink-0 items-center justify-center
-                     rounded-lg {{ $alert['iconWrap'] }}">
+        <span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg
+                {{ $alert['iconWrap'] }}">
             <i class="bx {{ $alert['icon'] }} text-base leading-none"></i>
         </span>
 
@@ -55,13 +61,15 @@
                 <p class="text-[13px] font-semibold leading-5">{{ $resolvedTitle }}</p>
             @endif
 
-            @if ($message)
-                <p class="mt-0.5 text-[13px] leading-relaxed">{{ $message }}</p>
-            @endif
+            @if ($message || $slot->isNotEmpty())
+                <div class="{{ $resolvedTitle ? 'mt-0.5' : '' }} text-[13px] leading-relaxed">
+                    @if ($message)
+                        <p>{{ $message }}</p>
+                    @endif
 
-            @if ($slot->isNotEmpty())
-                <div class="mt-0.5 text-[13px] leading-relaxed">
-                    {{ $slot }}
+                    @if ($slot->isNotEmpty())
+                        {{ $slot }}
+                    @endif
                 </div>
             @endif
         </div>

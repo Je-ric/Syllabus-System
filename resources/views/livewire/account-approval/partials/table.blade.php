@@ -28,15 +28,22 @@
             'disabled' => 'bg-[#f1f5f9] text-[#475569]',
             default    => 'bg-[#f1f5f9] text-[#475569]',
         };
+        $borderCls = match($user->account_status) {
+            'active'   => 'border-l-emerald-400',
+            'pending'  => 'border-l-amber-400',
+            'rejected' => 'border-l-rose-400',
+            'disabled' => 'border-l-slate-300',
+            default    => 'border-l-slate-300',
+        };
         $uid = (string) $user->id;
     @endphp
 
         <div x-data="{ open: false }"
-             @click="open = !open"
-             class="cursor-pointer transition-colors select-none"
-             :class="open ? 'bg-[#f0fdf4]' : 'bg-white hover:bg-[#fafafa]'">
+            @click="open = !open"
+            class="cursor-pointer transition-colors select-none"
+            :class="open ? '{{ $avatarCls }}' : 'bg-white hover:bg-[#fafafa]'">
 
-            <div class="grid grid-cols-[2.5rem_1fr_auto] md:grid-cols-[2.5rem_2fr_1fr_1fr_auto] gap-x-3 items-center px-4 py-3">
+            <div class="grid grid-cols-[2.5rem_1fr_auto] md:grid-cols-[2.5rem_2fr_1fr_1fr_auto] {{ $borderCls }} gap-x-3 items-center px-4 py-3">
 
                 {{-- Checkbox --}}
                 <div class="flex items-center justify-center" @click.stop>
@@ -51,7 +58,7 @@
 
                 {{-- Avatar + name --}}
                 <div class="flex items-center gap-3 min-w-0">
-                    <span class="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full border font-bold text-[13px] {{ $avatarCls }}">
+                    <span class="{{ $avatarCls }} shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full border font-bold text-[13px] {{ $avatarCls }}">
                         {{ strtoupper(substr($user->name, 0, 1)) }}
                     </span>
                     <div class="min-w-0">

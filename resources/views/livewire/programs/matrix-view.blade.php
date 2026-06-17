@@ -30,7 +30,7 @@
                 <thead>
                     <tr class="bg-slate-50 border-b border-slate-200">
                         {{-- Corner cell --}}
-                        <th class="sticky left-0 z-10 bg-slate-50 px-4 py-3 text-left min-w-[220px] border-r border-slate-200">
+                        <th class="sticky left-0 z-10 bg-slate-50 px-4 py-3 text-left min-w-55 border-r border-slate-200">
                             <div class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-slate-400">
                                 <i class="bx bx-target-lock text-sm"></i>
                                 PO
@@ -40,7 +40,7 @@
                             </div>
                         </th>
                         @foreach($peos as $peo)
-                            <th class="px-3 py-3 text-center font-bold text-slate-600 whitespace-nowrap border-r border-slate-100 last:border-r-0 min-w-[64px]">
+                            <th class="px-3 py-3 text-center font-bold text-slate-600 whitespace-nowrap border-r border-slate-100 last:border-r-0 min-w-16">
                                 <div class="flex flex-col items-center gap-1">
                                     <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200 font-bold text-[11px]">
                                         {{ strtoupper($peo['peo_code']) }}
@@ -48,7 +48,7 @@
                                 </div>
                             </th>
                         @endforeach
-                        <th class="px-3 py-3 text-center font-bold text-slate-500 whitespace-nowrap min-w-[56px]">
+                        <th class="px-3 py-3 text-center font-bold text-slate-500 whitespace-nowrap min-w-14">
                             <div class="flex flex-col items-center gap-1">
                                 <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100 text-slate-500 ring-1 ring-slate-200 text-[10px] font-bold">
                                     <i class="bx bx-link text-sm"></i>

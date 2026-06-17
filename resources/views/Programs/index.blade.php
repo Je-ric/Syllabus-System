@@ -59,37 +59,38 @@
 
                     {{-- ── PEO Tab ─────────────────────────────────────────────── --}}
                     <x-slot name="slot_peo">
-                        <div class="flex items-start gap-3 mb-5 p-4 rounded-xl bg-emerald-50/60 border border-emerald-100">
-                            <i class="bx bx-info-circle text-emerald-500 text-base mt-0.5 shrink-0"></i>
-                            <p class="text-[13px] text-emerald-800 leading-relaxed">
-                                Three to five years after graduation, graduates of
-                                <strong>{{ $program->name }}</strong> are expected to be:
-                            </p>
-                        </div>
+                        <x-feedback-status.alert
+                            type="success"
+                            :show-title="false">
+                            Three to five years after graduation, graduates of
+                            <strong>{{ $program->name }}</strong> are expected to be:
+                        </x-feedback-status.alert>
+
                         <livewire:programs.manage-peos :program="$program" />
                     </x-slot>
 
                     {{-- ── PO + Mapping Tab ───────────────────────────────────── --}}
                     <x-slot name="slot_po">
-                        <div class="flex items-start gap-3 mb-5 p-4 rounded-xl bg-blue-50/60 border border-blue-100">
-                            <i class="bx bx-info-circle text-blue-500 text-base mt-0.5 shrink-0"></i>
-                            <p class="text-[13px] text-blue-800 leading-relaxed">
-                                By the time of graduation, students of
-                                <strong>{{ $program->name }}</strong> have the ability to:
-                            </p>
-                        </div>
+                        <x-feedback-status.alert
+                            type="default"
+                            :show-title="false">
+                            By the time of graduation, students of
+                            <strong>{{ $program->name }}</strong>
+                            have the ability to:
+                        </x-feedback-status.alert>
+
                         <livewire:programs.manage-pos :program="$program" />
                     </x-slot>
 
                     {{-- ── Matrix View Tab ────────────────────────────────────── --}}
                     <x-slot name="slot_matrix">
-                        <div class="flex items-start gap-3 mb-5 p-4 rounded-xl bg-slate-50 border border-slate-200">
-                            <i class="bx bx-info-circle text-slate-400 text-base mt-0.5 shrink-0"></i>
-                            <p class="text-[13px] text-slate-600 leading-relaxed">
-                                Read-only mapping matrix of Program Outcomes (POs) against Program Educational Objectives (PEOs)
-                                for <strong>{{ $program->name }}</strong>. Manage mappings in the POs & Mapping tab.
-                            </p>
-                        </div>
+                        <x-feedback-status.alert
+                            type="info"
+                            :show-title="false">
+                            Read-only mapping matrix of Program Outcomes (POs) against Program Educational Objectives (PEOs)
+                            for <strong>{{ $program->name }}</strong>. Manage mappings in the POs & Mapping tab.
+                        </x-feedback-status.alert>
+                    
                         <livewire:programs.matrix-view :program="$program" />
                     </x-slot>
 
