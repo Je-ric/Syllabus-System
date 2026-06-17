@@ -1,16 +1,10 @@
 {{--
     Partial: weekly-partials/week-accordion.blade.php
 --}}
-<div x-data="{
-        openWeek: {{ $syllabusWeeks->first()?->week_no ?? 1 }},
-        init() {
-            this.$watch('openWeek', (newVal, oldVal) => {
-                if (oldVal !== null && oldVal !== newVal) {
-                    $wire.saveWeek(oldVal);
-                }
-            });
-        }
-     }"
+{{-- Week edit modal (single instance, outside the loop) --}}
+@include('livewire.syllabus.steps.weekly-partials.week-edit-modal')
+
+<div x-data="{ openWeek: {{ $syllabusWeeks->first()?->week_no ?? 1 }} }"
      class="rounded-xl border border-[#e2e8f0] bg-white divide-y divide-[#e2e8f0]" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
 
     @foreach ($syllabusWeeks as $week)
@@ -23,7 +17,7 @@
             $lockType = $lockedWeeks[$week->week_no] ?? null;
             $isMvgo   = ((int) $week->week_no === 1);
 
-            $savedTopic = $weekInputs[$wKey]['topic'] ?? '';
+            $savedTopic = strip_tags($weekInputs[$wKey]['topic'] ?? '');
             $refCount   = count(array_filter(
                 $weekInputs[$wKey]['references'] ?? [],
                 fn ($r) => trim($r['text'] ?? '') !== ''

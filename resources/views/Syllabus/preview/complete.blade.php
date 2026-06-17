@@ -481,12 +481,10 @@
                             @else
                                 <td style="text-align:center;">{{ $row['week_label'] }}</td>
                                 <td>{{ blank($row['co_description'] ?? null) ? '---' : $row['co_description'] }}</td>
-                                <td>{{ blank($row['topics'] ?? null) ? '---' : $row['topics'] }}</td>
-                                <td>{{ blank($row['learning_outcomes'] ?? null) ? '---' : $row['learning_outcomes'] }}
-                                </td>
-                                <td>{{ blank($row['tla'] ?? null) ? '---' : $row['tla'] }}</td>
-                                <td style="text-align:center;">
-                                    {{ blank($row['assessment_task'] ?? null) ? '---' : $row['assessment_task'] }}</td>
+                                <td>{!! blank(strip_tags($row['topics'] ?? '')) ? '---' : $row['topics'] !!}</td>
+                                <td>{!! blank(strip_tags($row['learning_outcomes'] ?? '')) ? '---' : $row['learning_outcomes'] !!}</td>
+                                <td>{!! blank(strip_tags($row['tla'] ?? '')) ? '---' : $row['tla'] !!}</td>
+                                <td style="text-align:center;">{!! blank(strip_tags($row['assessment_task'] ?? '')) ? '---' : $row['assessment_task'] !!}</td>
                             @endif
                         </tr>
                     @empty
@@ -523,15 +521,11 @@
                                     </td>
                                 @else
                                     <td style="text-align:center;">{{ $row['week_label'] }}</td>
-                                    <td>{{ blank($row['co_description'] ?? null) ? '---' : $row['co_description'] }}
-                                    </td>
-                                    <td>{{ blank($row['topics'] ?? null) ? '---' : $row['topics'] }}</td>
-                                    <td>{{ blank($row['learning_outcomes'] ?? null) ? '---' : $row['learning_outcomes'] }}
-                                    </td>
-                                    <td>{{ blank($row['tla'] ?? null) ? '---' : $row['tla'] }}</td>
-                                    <td style="text-align:center;">
-                                        {{ blank($row['assessment_task'] ?? null) ? '---' : $row['assessment_task'] }}
-                                    </td>
+                                    <td>{{ blank($row['co_description'] ?? null) ? '---' : $row['co_description'] }}</td>
+                                    <td>{!! blank(strip_tags($row['topics'] ?? '')) ? '---' : $row['topics'] !!}</td>
+                                    <td>{!! blank(strip_tags($row['learning_outcomes'] ?? '')) ? '---' : $row['learning_outcomes'] !!}</td>
+                                    <td>{!! blank(strip_tags($row['tla'] ?? '')) ? '---' : $row['tla'] !!}</td>
+                                    <td style="text-align:center;">{!! blank(strip_tags($row['assessment_task'] ?? '')) ? '---' : $row['assessment_task'] !!}</td>
                                 @endif
                             </tr>
                         @empty

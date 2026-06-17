@@ -263,6 +263,7 @@
     </div>
 
     @livewireScripts
+    <script src="https://cdn.jsdelivr.net/gh/livewire/sortable@v1.x.x/dist/livewire-sortable.js"></script>
     @stack('scripts')
     <script>
         const sidebar = document.getElementById('app-sidebar');

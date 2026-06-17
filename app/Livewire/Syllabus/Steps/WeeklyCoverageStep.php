@@ -145,6 +145,38 @@ class WeeklyCoverageStep extends Component
 
     // ── Week content ──────────────────────────────────────────────────────────
 
+    // Save week content submitted from the edit modal (Quill HTML content).
+    public function saveWeekFromModal(int $weekNo, array $fields): void
+    {
+        if ($weekNo <= 0 || isset($this->lockedWeeks[$weekNo])) {
+            return;
+        }
+
+        $this->weekInputs['w' . $weekNo] = [
+            'course_outcome_id'   => $fields['course_outcome_id'] ?? null,
+            'learning_outcomes'   => $fields['learning_outcomes'] ?? '',
+            'assessment_task'     => $fields['assessment_task'] ?? '',
+            'topic'               => $fields['topic'] ?? '',
+            'teaching_activities' => $fields['teaching_activities'] ?? '',
+            'references'          => $fields['references'] ?? [['text' => '']],
+            'materials'           => $fields['materials'] ?? [['name' => '', 'url' => '']],
+        ];
+
+        $changed = app(WeekContentService::class)->save(
+            $this->syllabusId,
+            $this->activeComponent,
+            $this->weekInputs,
+            $this->lockedWeeks,
+            $weekNo
+        );
+
+        if ($changed) {
+            $this->dispatch('lw-toast', type: 'success', message: "Week {$weekNo} saved.");
+        }
+
+        $this->dispatch('week-modal-saved');
+    }
+
     // Auto-save triggered by the Alpine $watch when a week is collapsed.
     // Only shows a toast when something actually changed.
     public function saveWeek(int $weekNo): void

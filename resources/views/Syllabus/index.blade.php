@@ -28,20 +28,6 @@
             <x-slot name="slot_draft">
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
 
-            {{-- Create Syllabus card --}}
-            <a href="{{ route('syllabus.create') }}"
-                class="group flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300
-                        min-h-56 bg-white hover:bg-emerald-50/50 hover:border-emerald-400 transition-colors shadow-sm">
-                <div class="flex flex-col items-center text-center px-4">
-                    <div class="w-12 h-12 rounded-full bg-slate-100 group-hover:bg-emerald-100 flex items-center justify-center transition-colors mb-3">
-                        <i class="bx bx-plus text-2xl text-slate-400 group-hover:text-emerald-600 transition-colors"></i>
-                    </div>
-                    <span class="text-sm font-semibold text-slate-500 group-hover:text-emerald-600 transition-colors">
-                        Create Syllabus
-                    </span>
-                </div>
-            </a>
-
             {{-- Existing syllabi --}}
             @forelse ($draftSyllabi as $syllabus)
                 <div class="flex flex-col rounded-xl bg-white border border-[#e2e8f0] overflow-hidden transition-shadow"
@@ -93,6 +79,15 @@
                         icon="bx-file-blank"
                         title="No draft syllabi"
                         message="Create a new syllabus to start working on it.">
+
+                        <a href="{{ route('syllabus.create') }}"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg
+                                    bg-emerald-600 text-white text-sm font-medium
+                                    hover:bg-emerald-700 transition-colors shadow-sm">
+                                <i class="bx bx-plus text-base"></i>
+                                Create Syllabus
+                            </a>
+
                     </x-empty-state>
                 </div>
             @endforelse
