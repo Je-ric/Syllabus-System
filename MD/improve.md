@@ -99,7 +99,7 @@
 ### 7. `ovpaa` role in routes but not defined anywhere
 **File:** `routes/web.php`
 **What's wrong:** Routes for academic calendars and syllabi use `role:admin,ovpaa` middleware — but `ovpaa` is not a defined role in `RoleSeeder`, `AccountApprovalService::assignRoles()` allowed list (`'roles.*' => 'in:admin,chair,dean,faculty'`), or the README. Any user with role `ovpaa` would have to be inserted manually in the DB.
-**Fix needed:** Either add `ovpaa` to the allowed roles in `assignRole()` validation and the seeder, or remove it from the route middleware if it's unused.
+**Fix needed:** Either add `ovpaa` to the allowed roles in `assignRole()` validation and the seeder, or remove it from the route middleware if it's unused. (OVPAA is responsible for the academic calendar and semester dates and events)
 
 ---
 

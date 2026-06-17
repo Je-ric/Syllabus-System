@@ -7,20 +7,19 @@ use App\Services\Syllabus\CourseOutcomeService;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
-// Course Outcomes step — individual CRUD per outcome.
+// Course Outcomes step — Batch / Draft-first model.
 //
-// UI contract (enforced by Alpine in the blade):
-//   editingId  = int|null — which saved CO card is in edit mode
-//   addingNew  = bool     — whether the "Add" form is open
-//   savingId   = int|null — which card is mid-save (shows spinner on that card only)
-//   deletingId = int|null — which card is mid-delete
+// UI contract:
+//   Alpine owns all transient state (drafts[], deletedIds[], editingIdx, saving).
+//   Livewire owns $outcomes (authoritative) and $programOutcomes (read-only).
 //
-// Livewire owns: $outcomes (the authoritative list), $programOutcomes (read-only).
-// Alpine owns: all transient UI state (editingId, draft text, etc).
+//   Alpine calls ONE method: saveAll(drafts, deletedIds)
+//     drafts[]     — [{ id: int|null, description: string, isNew: bool }]
+//     deletedIds[] — int[] of persisted CO ids to remove
 //
-// Individual save/delete instead of saveAll:
-//   → Instant per-row feedback. Users know exactly which CO saved.
-//   → No "unsaved" ambiguity — every card is either persisted or clearly in draft.
+//   Livewire dispatches:
+//     co-all-saved   → payload: { outcomes: [...] }  → Alpine re-syncs clean
+//     co-save-failed → Alpine resets saving flag, preserves drafts
 class CourseOutcomesStep extends Component
 {
     // ── Identity ───────────────────────────────────────────────────────────────
@@ -62,7 +61,9 @@ class CourseOutcomesStep extends Component
     }
 
     // Auto-save on step navigation.
-    // Individual-save model means there is nothing pending — just signal done.
+    // Alpine is responsible for warning the user about unsaved drafts before
+    // navigation (via isDirty guard in the wizard). If they navigate away
+    // anyway, we signal done without saving — drafts are intentionally lost.
     #[On('syllabus-save-step')]
     public function onSaveRequested(string $step): void
     {
@@ -75,64 +76,57 @@ class CourseOutcomesStep extends Component
     }
 
     // ══════════════════════════════════════════════════════════════════════════
-    // CRUD — called from Alpine via $wire.*
+    // BATCH SAVE — single entry point called from Alpine
     // ══════════════════════════════════════════════════════════════════════════
 
-    // Create a new CO. Called by Alpine: await $wire.createOutcome(draftText)
-    public function createOutcome(string $description): void
+    /**
+     * Persist all pending changes in one shot.
+     *
+     * @param  array  $drafts      [{ id: int|null, description: string, isNew: bool }]
+     * @param  array  $deletedIds  int[] — IDs of persisted COs to remove
+     */
+    public function saveAll(array $drafts, array $deletedIds): void
     {
+        $service = app(CourseOutcomeService::class);
+
         try {
-            app(CourseOutcomeService::class)->create($this->syllabusId, $description);
+            // 1. Deletions first — avoids co_code collisions on re-numbering
+            foreach ($deletedIds as $id) {
+                $service->delete($this->syllabusId, (int) $id);
+            }
+
+            // 2. Updates for existing, dirty COs
+            foreach ($drafts as $draft) {
+                $description = trim($draft['description'] ?? '');
+
+                if (empty($description)) {
+                    continue; // skip empty drafts silently
+                }
+
+                if (!empty($draft['isNew'])) {
+                    // 3. Creates for new drafts
+                    $service->create($this->syllabusId, $description);
+                } else {
+                    $service->update($this->syllabusId, (int) $draft['id'], $description);
+                }
+            }
         } catch (\InvalidArgumentException $e) {
             $this->dispatch('lw-toast', type: 'error', message: $e->getMessage());
+            $this->dispatch('co-save-failed');
             return;
         } catch (\Throwable $e) {
             report($e);
-            $this->dispatch('lw-toast', type: 'error', message: 'Unable to save Course Outcome.');
+            $this->dispatch('lw-toast', type: 'error', message: 'Unable to save Course Outcomes. Please try again.');
+            $this->dispatch('co-save-failed');
             return;
         }
 
-        $this->outcomes = app(CourseOutcomeService::class)->all($this->syllabusId);
-        $this->dispatch('co-saved');
-        $this->dispatch('lw-toast', type: 'success', message: 'Course Outcome added.');
-        $this->dispatch('syllabus-course-outcomes-updated');
-    }
+        // Reload authoritative list and push back to Alpine
+        $this->outcomes = $service->all($this->syllabusId);
 
-    // Update an existing CO's description. Called by Alpine: await $wire.updateOutcome(id, draftText)
-    public function updateOutcome(int $outcomeId, string $description): void
-    {
-        try {
-            app(CourseOutcomeService::class)->update($this->syllabusId, $outcomeId, $description);
-        } catch (\InvalidArgumentException $e) {
-            $this->dispatch('lw-toast', type: 'error', message: $e->getMessage());
-            return;
-        } catch (\Throwable $e) {
-            report($e);
-            $this->dispatch('lw-toast', type: 'error', message: 'Unable to update Course Outcome.');
-            return;
-        }
-
-        $this->outcomes = app(CourseOutcomeService::class)->all($this->syllabusId);
-        $this->dispatch('co-saved');
-        $this->dispatch('lw-toast', type: 'success', message: 'Course Outcome updated.');
-        $this->dispatch('syllabus-course-outcomes-updated');
-    }
-
-    // Delete a CO by id. Called by Alpine: await $wire.deleteOutcome(id)
-    public function deleteOutcome(int $outcomeId): void
-    {
-        try {
-            app(CourseOutcomeService::class)->delete($this->syllabusId, $outcomeId);
-        } catch (\Throwable $e) {
-            report($e);
-            $this->dispatch('lw-toast', type: 'error', message: 'Unable to delete Course Outcome.');
-            $this->dispatch('co-delete-failed');
-            return;
-        }
-
-        $this->outcomes = app(CourseOutcomeService::class)->all($this->syllabusId);
-        $this->dispatch('co-deleted');
-        $this->dispatch('lw-toast', type: 'success', message: 'Course Outcome removed.');
+        $this->dispatch('co-all-saved', outcomes: $this->outcomes);
+        $this->dispatch('lw-toast', type: 'success', message: 'Course Outcomes saved.');
+        $this->dispatch('syllabus-step-saved', step: 'course_outcomes');
         $this->dispatch('syllabus-course-outcomes-updated');
     }
 
