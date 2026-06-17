@@ -20,12 +20,12 @@
             <span>
                 &mdash;
                 <span class="font-semibold text-[#0f172a]" x-text="selected.length"></span> selected
-                <span class="inline-flex items-center gap-1 ml-1 text-[11px] font-bold px-2 py-0.5 rounded-full"
+                <span class="inline-flex items-center gap-1 ml-1 text-[11px] font-semibold px-2 py-0.5 rounded-full ring-1"
                     :class="{
-                        'bg-[#fef3c7] text-[#92400e]': selectedStatus === 'pending',
-                        'bg-[#dcfce7] text-[#166534]': selectedStatus === 'active',
-                        'bg-[#f1f5f9] text-[#475569]': selectedStatus === 'disabled',
-                        'bg-[#ffe4e6] text-[#9f1239]': selectedStatus === 'rejected',
+                        'bg-[#fef3c7] text-[#92400e] ring-[#fcd34d]': selectedStatus === 'pending',
+                        'bg-[#dcfce7] text-[#166534] ring-[#bbf7d0]': selectedStatus === 'active',
+                        'bg-[#f1f5f9] text-[#475569] ring-[#e2e8f0]': selectedStatus === 'disabled',
+                        'bg-[#ffe4e6] text-[#9f1239] ring-[#fda4af]': selectedStatus === 'rejected',
                     }">
                     <span x-text="selectedStatus"></span>
                 </span>

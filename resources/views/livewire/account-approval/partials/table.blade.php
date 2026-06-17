@@ -17,7 +17,7 @@
     </div>
 
     {{-- Rows --}}
-    <div class="divide-y divide-[#f1f5f9]">
+    <div class="divide-y divide-[#f1f5f9] empty:py-12">
 
     @forelse($users as $user)
     @php
@@ -28,22 +28,15 @@
             'disabled' => 'bg-[#f1f5f9] text-[#475569]',
             default    => 'bg-[#f1f5f9] text-[#475569]',
         };
-        $borderCls = match($user->account_status) {
-            'active'   => 'border-l-emerald-400',
-            'pending'  => 'border-l-amber-400',
-            'rejected' => 'border-l-rose-400',
-            'disabled' => 'border-l-slate-300',
-            default    => 'border-l-slate-300',
-        };
         $uid = (string) $user->id;
     @endphp
 
         <div x-data="{ open: false }"
             @click="open = !open"
             class="cursor-pointer transition-colors select-none"
-            :class="open ? '{{ $avatarCls }}' : 'bg-white hover:bg-[#fafafa]'">
+            :class="open ? 'bg-[#f0fdf4]' : 'bg-white hover:bg-[#fafafa]'">
 
-            <div class="grid grid-cols-[2.5rem_1fr_auto] md:grid-cols-[2.5rem_2fr_1fr_1fr_auto] {{ $borderCls }} gap-x-3 items-center px-4 py-3">
+            <div class="grid grid-cols-[2.5rem_1fr_auto] md:grid-cols-[2.5rem_2fr_1fr_1fr_auto] gap-x-3 items-center px-4 py-3">
 
                 {{-- Checkbox --}}
                 <div class="flex items-center justify-center" @click.stop>
@@ -58,12 +51,23 @@
 
                 {{-- Avatar + name --}}
                 <div class="flex items-center gap-3 min-w-0">
-                    <span class="{{ $avatarCls }} shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full border font-bold text-[13px] {{ $avatarCls }}">
+                    <span class="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full border font-bold text-[13px] {{ $avatarCls }}">
                         {{ strtoupper(substr($user->name, 0, 1)) }}
                     </span>
                     <div class="min-w-0">
                         <p class="text-[13px] font-semibold text-[#0f172a] truncate">{{ $user->name }}</p>
-                        <p class="text-[12px] text-[#94a3b8] truncate">{{ $user->email }}</p>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <p class="text-[12px] text-[#94a3b8] truncate">{{ $user->email }}</p>
+                            @if($user->email_verified_at)
+                                <x-feedback-status.status-indicator variant="emerald" class="text-[10px] px-1.5 py-0.5">
+                                    <i class="bx bx-check-circle text-[10px]"></i> Verified
+                                </x-feedback-status.status-indicator>
+                            @else
+                                <x-feedback-status.status-indicator variant="amber" class="text-[10px] px-1.5 py-0.5">
+                                    <i class="bx bx-time text-[10px]"></i> Unverified
+                                </x-feedback-status.status-indicator>
+                            @endif
+                        </div>
                     </div>
                     <i class="bx text-[#94a3b8] text-base shrink-0 ml-2 hidden sm:block transition-transform duration-200"
                        :class="open ? 'bx-chevron-up' : 'bx-chevron-down'"></i>
@@ -126,46 +130,52 @@
                 x-transition:enter-end="opacity-100 translate-y-0"
                 x-transition:leave="transition ease-in duration-100"
                 x-transition:leave-end="opacity-0"
-                class="px-4 py-3 border-t border-[#e8f5e9]"
+                class="px-4 pb-4 pt-2 border-t border-[#e8f5e9] bg-[#f8fafc]"
                 @click.stop>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 py-2">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2">
 
-                    <x-card-section title="Contact" icon="bx-buildings">
-                        <div class="flex items-center gap-2">
-                            <i class="bx bx-phone text-[#64748b] text-sm shrink-0"></i>
-                            <span class="text-[13px] text-[#0f172a]">{{ $user->phone_number ?: '—' }}</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <i class="bx bx-envelope text-[#64748b] text-sm shrink-0"></i>
-                            <span class="text-[13px] text-[#475569] break-all">{{ $user->email }}</span>
+                    <x-card-section title="Contact" icon="bx-phone">
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                <i class="bx bx-phone text-[#94a3b8] text-sm shrink-0"></i>
+                                <span class="text-[13px] text-[#0f172a]">{{ $user->phone_number ?: '—' }}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i class="bx bx-envelope text-[#94a3b8] text-sm shrink-0"></i>
+                                <span class="text-[13px] text-[#475569] break-all">{{ $user->email }}</span>
+                            </div>
                         </div>
                     </x-card-section>
 
-                    <x-card-section title="Office & Verification" icon="bx-buildings">
-                        <div class="flex items-center gap-2">
-                            <i class="bx bx-buildings text-[#64748b] text-sm shrink-0"></i>
-                            <span class="text-[13px] text-[#0f172a]">{{ $user->office ?: '—' }}</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            @if($user->email_verified_at)
-                                <i class="bx bx-check-circle text-[#16a34a] text-sm shrink-0"></i>
-                                <span class="text-[13px] text-[#16a34a] font-medium">Email verified</span>
-                            @else
-                                <i class="bx bx-time text-[#f59e0b] text-sm shrink-0"></i>
-                                <span class="text-[13px] text-[#92400e] font-medium">Not verified</span>
-                            @endif
+                    <x-card-section title="Office" icon="bx-buildings">
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                <i class="bx bx-buildings text-[#94a3b8] text-sm shrink-0"></i>
+                                <span class="text-[13px] text-[#0f172a]">{{ $user->office ?: '—' }}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                @if($user->email_verified_at)
+                                    <i class="bx bx-check-circle text-[#16a34a] text-sm shrink-0"></i>
+                                    <span class="text-[13px] text-[#16a34a] font-medium">Email verified</span>
+                                @else
+                                    <i class="bx bx-time text-[#f59e0b] text-sm shrink-0"></i>
+                                    <span class="text-[13px] text-[#92400e] font-medium">Not verified</span>
+                                @endif
+                            </div>
                         </div>
                     </x-card-section>
 
-                    <x-card-section title="Account" icon="bx-buildings">
-                        <div class="flex items-center gap-2">
-                            <i class="bx bx-calendar text-[#64748b] text-sm shrink-0"></i>
-                            <span class="text-[13px] text-[#475569]">{{ $user->created_at->format('M d, Y') }}</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <i class="bx bx-id-card text-[#64748b] text-sm shrink-0"></i>
-                            <span class="text-[13px] text-[#475569]">ID #{{ $user->id }}</span>
+                    <x-card-section title="Account" icon="bx-id-card">
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                <i class="bx bx-calendar text-[#94a3b8] text-sm shrink-0"></i>
+                                <span class="text-[13px] text-[#475569]">{{ $user->created_at->format('M d, Y') }}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i class="bx bx-id-card text-[#94a3b8] text-sm shrink-0"></i>
+                                <span class="text-[13px] text-[#475569]">ID #{{ $user->id }}</span>
+                            </div>
                         </div>
                     </x-card-section>
 
@@ -175,12 +185,8 @@
         </div>
 
     @empty
-        <div class="py-12 text-center">
-            <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-[#f0fdf4] text-[#16a34a]">
-                <i class="bx bx-user-x text-2xl leading-none"></i>
-            </div>
-            <p class="text-[14px] font-semibold text-[#0f172a]">No users found</p>
-            <p class="text-[13px] text-[#94a3b8] mt-0.5">Try adjusting your filters.</p>
+        <div class="px-4 py-8">
+            <x-empty-state icon="bx-user-x" title="No users found" message="Try adjusting your filters." />
         </div>
     @endforelse
 
