@@ -1,121 +1,137 @@
 <div>
-    {{--
-        manage-peos.blade.php — Editable, sortable PEO list.
-        Livewire: ManagePeos | Alpine: peosManager()
-    --}}
-    <div x-data="peosManager(@js($peos))" class="space-y-2.5">
+    {{-- manage-peos.blade.php --}}
+    <div x-data="peosManager(@js($peos))" class="space-y-4">
 
         @include('livewire.programs.partials.confirm-modal', ['confirmNs' => 'peo'])
         @include('livewire.programs.include.flash-message')
 
+        {{-- Section header --}}
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-emerald-100 ring-1 ring-emerald-200">
+                    <i class="bx bx-medal text-emerald-700 text-sm"></i>
+                </span>
+                <h3 class="text-[13px] font-bold text-slate-700">Program Educational Objectives</h3>
+                <span class="inline-flex items-center justify-center min-w-[1.4rem] h-5 px-1.5 rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-bold ring-1 ring-emerald-200"
+                    x-text="peos.filter(p => p.id).length"></span>
+            </div>
+        </div>
+
         {{-- Pending changes bar --}}
         <template x-if="pendingSummary().total > 0">
             <div class="flex flex-wrap items-center gap-2 px-4 py-2.5 rounded-xl border border-amber-200 bg-amber-50 text-[13px]">
-                <i class="bx bx-info-circle text-amber-500 shrink-0"></i>
-                <span class="text-amber-700 font-medium">Unsaved changes:</span>
+                <i class="bx bx-error-circle text-amber-500 shrink-0"></i>
+                <span class="text-amber-700 font-semibold">Unsaved changes:</span>
                 <template x-if="pendingSummary().added > 0">
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[12px] font-semibold">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-semibold">
                         <i class="bx bx-plus text-xs"></i>
                         <span x-text="pendingSummary().added + ' new'"></span>
                     </span>
                 </template>
                 <template x-if="pendingSummary().modified > 0">
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[12px] font-semibold">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[11px] font-semibold">
                         <i class="bx bx-edit-alt text-xs"></i>
                         <span x-text="pendingSummary().modified + ' modified'"></span>
                     </span>
                 </template>
-                <span class="ml-auto text-[12px] text-amber-600">Click <strong>Save All</strong> to apply.</span>
+                <span class="ml-auto text-[11px] text-amber-600">Click <strong>Save All</strong> to apply.</span>
             </div>
         </template>
 
-        {{-- PEO rows (sortable) --}}
-        <div id="peo-sortable" class="space-y-2">
+        {{-- PEO rows --}}
+        <div class="space-y-2">
             <template x-for="(peo, index) in peos" :key="peo._key">
-                <div class="flex items-start gap-3 px-4 py-3 rounded-xl border transition-colors duration-200"
+                <div class="rounded-xl border transition-all duration-200"
                     :class="{
-                        'border-emerald-300 bg-emerald-50/40': !peo.id,
-                        'border-amber-300 bg-amber-50/30':     peo.id && peo._dirty,
-                        'border-slate-200 bg-white':           peo.id && !peo._dirty
+                        'border-emerald-300 bg-emerald-50/40 shadow-emerald-100': !peo.id,
+                        'border-amber-300 bg-amber-50/30 shadow-amber-100':       peo.id && peo._dirty,
+                        'border-slate-200 bg-white shadow-slate-100':             peo.id && !peo._dirty
                     }"
-                    style="box-shadow:0 1px 8px rgba(0,0,0,.06);">
+                    style="box-shadow:0 1px 8px rgba(0,0,0,.05);">
 
-                    {{-- Drag handle --}}
-                    <span class="peo-drag-handle mt-2.5 cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 shrink-0">
-                        <i class="bx bx-grid-vertical text-lg"></i>
-                    </span>
+                    <div class="flex items-start gap-3 px-4 py-3 border-l-4 border-green-700 rounded-xl shadow-lg">
 
-                    {{-- Code badge --}}
-                    <span class="shrink-0 mt-1 inline-flex items-center justify-center w-9 h-9 rounded-lg text-[12px] font-bold transition-colors"
-                        :class="{
-                            'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-300': !peo.id,
-                            'bg-amber-100 text-amber-700 ring-1 ring-amber-300':       peo.id && peo._dirty,
-                            'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200':  peo.id && !peo._dirty
-                        }">
-                        <span x-text="'PEO' + (index + 1)"></span>
-                    </span>
+                        {{-- Code badge --}}
+                        <div class="shrink-0 flex flex-col items-center gap-1 mt-0.5">
+                            <span class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-[11px] font-bold transition-colors"
+                                :class="{
+                                    'bg-emerald-100 text-emerald-700 ring-2 ring-emerald-400': !peo.id,
+                                    'bg-amber-100 text-amber-700 ring-2 ring-amber-400':       peo.id && peo._dirty,
+                                    'bg-emerald-50 text-emerald-800 ring-2 ring-emerald-300':  peo.id && !peo._dirty
+                                }">
+                                <span class="font-bold uppercase" x-text="peo.peo_code"></span>
+                            </span>
+                        </div>
 
-                    {{-- Textarea --}}
-                    <div class="flex-1 min-w-0">
-                        <textarea
-                            x-model="peo.peo_text"
-                            @input="markDirty(peo)"
-                            rows="3"
-                            placeholder="Describe what graduates will be professionally three to five years after graduation…"
-                            class="w-full rounded-lg border px-3 py-2 text-[13px] text-slate-900 placeholder:text-slate-400 focus:outline-none transition-colors resize-none"
-                            :class="{
-                                'border-amber-300 bg-amber-50/50 focus:border-amber-400':       peo.id && peo._dirty,
-                                'border-emerald-300 bg-emerald-50/50 focus:border-emerald-400': !peo.id,
-                                'border-slate-200 bg-white focus:border-emerald-500':           peo.id && !peo._dirty
-                            }"></textarea>
-                        <template x-if="!peo.id">
-                            <p class="mt-1 flex items-center gap-1 text-[12px] text-emerald-600">
-                                <i class="bx bx-plus-circle text-sm shrink-0"></i>
-                                New — click <strong class="mx-0.5">Save All</strong> to persist.
-                            </p>
-                        </template>
-                        <template x-if="peo.id && peo._dirty">
-                            <p class="mt-1 flex items-center gap-1 text-[12px] text-amber-600">
-                                <i class="bx bx-edit-alt text-sm shrink-0"></i>
-                                Modified — not saved yet.
-                            </p>
-                        </template>
+                        {{-- Textarea --}}
+                        <div class="flex-1 min-w-0">
+                            <textarea
+                                x-model="peo.peo_text"
+                                @input="markDirty(peo)"
+                                rows="3"
+                                placeholder="Describe what graduates will be professionally three to five years after graduation…"
+                                class="w-full rounded-lg border px-3 py-2 text-[13px] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all resize-none leading-relaxed"
+                                :class="{
+                                    'border-amber-300 bg-amber-50/50 focus:border-amber-400 focus:ring-amber-100':       peo.id && peo._dirty,
+                                    'border-emerald-300 bg-emerald-50/50 focus:border-emerald-400 focus:ring-emerald-100': !peo.id,
+                                    'border-slate-200 bg-white focus:border-emerald-400 focus:ring-emerald-100':           peo.id && !peo._dirty
+                                }"></textarea>
+
+                            <template x-if="!peo.id">
+                                <p class="mt-1 flex items-center gap-1 text-[11px] text-emerald-600 font-medium">
+                                    <i class="bx bx-plus-circle text-sm shrink-0"></i>
+                                    New — click <strong class="mx-0.5">Save All</strong> to persist.
+                                </p>
+                            </template>
+                            <template x-if="peo.id && peo._dirty">
+                                <p class="mt-1 flex items-center gap-1 text-[11px] text-amber-600 font-medium">
+                                    <i class="bx bx-edit-alt text-sm shrink-0"></i>
+                                    Modified — not saved yet.
+                                </p>
+                            </template>
+                        </div>
+
+                        {{-- Delete saved --}}
+                        <button x-show="peo.id" type="button" @click="deletePeo(peo)"
+                            class="shrink-0 mt-0.5 p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                            title="Delete PEO">
+                            <i class="bx bx-trash text-base"></i>
+                        </button>
+
+                        {{-- Remove unsaved --}}
+                        <button x-show="!peo.id" x-cloak type="button" @click="peos.splice(index, 1)"
+                            class="shrink-0 mt-0.5 p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                            title="Remove">
+                            <i class="bx bx-x text-lg"></i>
+                        </button>
+
                     </div>
-
-                    {{-- Delete saved PEO --}}
-                    <button x-show="peo.id" type="button"
-                        @click="deletePeo(peo)"
-                        class="mt-1 p-2 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                        title="Delete PEO">
-                        <i class="bx bx-trash text-base"></i>
-                    </button>
-
-                    {{-- Remove unsaved PEO --}}
-                    <button x-show="!peo.id" x-cloak type="button"
-                        @click="peos.splice(index, 1)"
-                        class="mt-1 p-2 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                        title="Remove unsaved PEO">
-                        <i class="bx bx-x text-lg"></i>
-                    </button>
-
                 </div>
             </template>
         </div>
 
         {{-- Empty state --}}
         <template x-if="peos.length === 0">
-            <div class="rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 py-10 text-center">
-                <i class="bx bx-graduation text-4xl text-slate-300"></i>
-                <p class="mt-2 text-[13px] font-semibold text-slate-500">No PEOs yet</p>
-                <p class="text-[13px] text-slate-400 mt-0.5">Add the first one below.</p>
+            <div class="rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 py-12 text-center">
+                <span class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-slate-100 mb-3">
+                    <i class="bx bx-graduation text-3xl text-slate-300"></i>
+                </span>
+                <p class="text-[13px] font-semibold text-slate-500">No PEOs yet</p>
+                <p class="text-[12px] text-slate-400 mt-0.5">Click <strong>Add PEO</strong> below to get started.</p>
             </div>
         </template>
 
         {{-- Action buttons --}}
-        <div class="flex items-center gap-2 pt-1">
-            <x-button variant="add-dashed" type="button" @click="addPeo()" class="flex-1 w-full">
-                <i class="bx bx-plus"></i> Add PEO
+        <div class="flex items-center gap-2 pt-1 border-t border-slate-100">
+            <x-button variant="add-dashed" type="button" @click="addPeo()" class="flex-1">
+                <i class="bx bx-plus text-base"></i> Add PEO
             </x-button>
+
+            <template x-if="hasPending()">
+                <x-button variant="cancel" type="button" @click="revert()">
+                    <i class="bx bx-undo text-base leading-none"></i> Revert
+                </x-button>
+            </template>
 
             <x-button variant="add-button" type="button" @click="savePeos()"
                 x-bind:disabled="isSaving" class="whitespace-nowrap relative">
@@ -137,7 +153,7 @@
 
     </div>
 
-    {{-- Hidden delete forms rendered server-side (stable at render time) --}}
+    {{-- Hidden delete forms --}}
     @foreach($peos as $peo)
         @if(!empty($peo['id']))
             <form id="peo-delete-form-{{ $peo['id'] }}" method="POST"
@@ -156,43 +172,12 @@
             _keyCounter: initialPeos.length,
 
             init() {
-                this.$nextTick(() => this.initSortable());
                 this.$el.closest('[wire\\:id]')?.addEventListener('peos-saved', (e) => {
                     const fresh = e.detail[0] ?? e.detail.peos ?? [];
                     this.peos = fresh.map((p, i) => ({
                         ...p, _dirty: false, _original: p.peo_text,
                         _key: p.id ?? ('new-' + i)
                     }));
-                    this.$nextTick(() => this.initSortable());
-                });
-            },
-
-            initSortable() {
-                const el = document.getElementById('peo-sortable');
-                if (!el || typeof Sortable === 'undefined') return;
-                Sortable.create(el, {
-                    handle: '.peo-drag-handle',
-                    animation: 150,
-                    onEnd: (evt) => {
-                        if (evt.oldIndex === evt.newIndex) return;
-                        // Swap text content between the two positions — keep ids in place
-                        // This avoids Alpine's keyed x-for undoing the DOM move
-                        const from = evt.oldIndex;
-                        const to   = evt.newIndex;
-                        const step = from < to ? 1 : -1;
-                        const tmp  = this.peos[from].peo_text;
-                        for (let i = from; i !== to; i += step) {
-                            this.peos[i].peo_text = this.peos[i + step].peo_text;
-                            if (this.peos[i].id) {
-                                this.peos[i]._dirty = true;
-                                this.peos[i]._original = this.peos[i]._original; // preserve original for dirty check
-                            }
-                        }
-                        this.peos[to].peo_text = tmp;
-                        if (this.peos[to].id) this.peos[to]._dirty = true;
-                        // Restore DOM to match Alpine's array order (Sortable moved it, Alpine will rediff)
-                        this.$nextTick(() => {});
-                    }
                 });
             },
 
@@ -210,6 +195,13 @@
                     modified: this.peos.filter(p => p.id && p._dirty).length,
                     get total() { return this.added + this.modified; }
                 };
+            },
+
+            revert() {
+                // Remove unsaved rows, reset dirty rows to their original text
+                this.peos = this.peos
+                    .filter(p => p.id)
+                    .map(p => ({ ...p, peo_text: p._original, _dirty: false }));
             },
 
             addPeo() {
