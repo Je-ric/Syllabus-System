@@ -103,7 +103,7 @@
                         </div>
                         <div class="space-y-2">
                             <template x-for="(ref, rIdx) in fields.references" :key="rIdx">
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-2 border-b border-[#e2e8f0] pb-1.5 last:border-b-0 last:pb-0">
                                     <input type="text" x-model="ref.text"
                                         placeholder="e.g. Author (Year). Title. Publisher."
                                         class="flex-1 text-[13px] rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-1.5
@@ -137,7 +137,7 @@
                         </div>
                         <div class="space-y-3">
                             <template x-for="(mat, mIdx) in fields.materials" :key="mIdx">
-                                <div class="flex items-start gap-2">
+                                <div class="flex items-start gap-2 border-b border-[#e2e8f0] pb-1.5 last:border-b-0 last:pb-0">
                                     <div class="flex-1 space-y-1.5">
                                         <input type="text" x-model="mat.name"
                                             :placeholder="'Name (e.g. Week ' + weekNo + ' Slides)'"

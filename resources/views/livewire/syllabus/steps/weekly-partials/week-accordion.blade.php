@@ -5,7 +5,7 @@
 @include('livewire.syllabus.steps.weekly-partials.week-edit-modal')
 
 <div x-data="{ openWeek: {{ $syllabusWeeks->first()?->week_no ?? 1 }} }"
-     class="rounded-xl border border-[#e2e8f0] bg-white divide-y divide-[#e2e8f0]" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
+     class="space-y-2">
 
     @foreach ($syllabusWeeks as $week)
         @php
@@ -51,11 +51,19 @@
             $bodyBorderClass  = $isLocked ? 'border-rose-100' : 'border-[#e2e8f0]';
         @endphp
 
-        <div wire:key="week-{{ $week->week_no }}-{{ $activeComponent }}" class="relative">
+        <div
+            wire:key="week-{{ $week->week_no }}-{{ $activeComponent }}"
+            class="bg-white border-2 rounded-xl overflow-hidden shadow-xs transition-all duration-200"
+
+            :class="openWeek === {{ $week->week_no }}
+                ? '{{ $isLocked
+                    ? 'border-rose-500 shadow-lg'
+                    : 'border-emerald-600 shadow-lg' }}'
+                : 'border-[#e2e8f0]'">
 
             {{-- Left accent bar --}}
-            <span class="absolute left-0 top-0 bottom-0 w-1"
-                :class="openWeek === {{ $week->week_no }} ? '{{ $accentOpen }}' : '{{ $accentClosed }}'"></span>
+            {{-- <span class="absolute left-0 top-0 bottom-0 w-1"
+                :class="openWeek === {{ $week->week_no }} ? '{{ $accentOpen }}' : '{{ $accentClosed }}'"></span> --}}
 
             {{-- Accordion Header --}}
             <button type="button"
@@ -70,17 +78,25 @@
                 <div class="flex items-center gap-3 min-w-0 flex-1">
 
                     {{-- Week number circle --}}
-                    <span @class([
-                        'inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold shrink-0',
-                        'bg-rose-100 text-rose-700 ring-1 ring-rose-300'         => $isLocked,
-                        'bg-[#dcfce7] text-[#15803d] ring-1 ring-[#15803d]'     => ! $isLocked,
-                    ])>{{ $week->week_no }}</span>
+                    <span
+                        class="inline-flex items-center justify-center rounded-full shadow-md w-8 h-8 text-xs font-bold shrink-0 transition-colors duration-200"
+
+                        :class="openWeek === {{ $week->week_no }}
+                            ? '{{ $isLocked
+                                ? 'bg-rose-500 text-white'
+                                : 'bg-emerald-600 text-white' }}'
+                            : '{{ $isLocked
+                                ? 'bg-rose-100 text-rose-700 ring-1 ring-rose-300'
+                                : 'text-[#15803d] ring-1 ring-[#15803d]' }}'">
+                        {{ $week->week_no }}
+                    </span>
 
                     <div class="flex items-center gap-2 flex-wrap min-w-0">
                         <span class="text-[13px] font-semibold shrink-0 {{ $isLocked ? 'text-rose-700' : 'text-[#0f172a]' }}">
                             Week {{ $week->week_no }}
                         </span>
-                        <span class="text-[13px] text-[#94a3b8] shrink-0">
+                        |
+                        <span class="text-[13px] text-black shrink-0">
                             {{ $start->format('M d') }}–{{ $end->format('M d, Y') }}
                         </span>
 

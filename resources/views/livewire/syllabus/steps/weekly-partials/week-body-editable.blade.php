@@ -101,9 +101,9 @@
     ];
 @endphp
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-0 border border-black/10 mb-6">
     @foreach ($richFields as $rf)
-        <div class="rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2.5 flex flex-col gap-2">
+        <div class="bg-whitemin-h65 p-5 border-r border-black/10 last:border-r-0 flex flex-col">
             <div class="flex items-center justify-between gap-2">
                 <p class="text-[10px] font-bold uppercase tracking-[0.12em] text-[#475569]">{{ $rf['label'] }}</p>
                 <button type="button"
@@ -114,9 +114,8 @@
                         field:     '{{ $rf['key'] }}',
                         fields:    {{ Js::from($baseFields) }}
                     })"
-                    class="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold
-                           text-[#16a34a] border border-[#bbf7d0] bg-white hover:bg-[#f0fdf4] transition-colors">
-                    <i class="bx bx-edit text-xs"></i> Edit
+                    class="text-[10px] uppercase tracking-[0.2em] font-bold text-emerald-600 hover:text-emerald-700transition-colors">
+                    <i class="bx bx-edit text-xs"></i>
                 </button>
             </div>
             @if ($rf['value'] && trim(strip_tags($rf['value'])) !== '')
