@@ -2,7 +2,7 @@
 
 <div class="mb-5 space-y-4">
 
-    <x-wizard.step-header title="Weekly Coverage" icon="calendar-week"
+    <x-wizard.step-header title="Weekly Coverage" eyebrow="Assessments"
         description="Weeks are auto-generated from the academic calendar. Fill in coverage details per week. Exam and Non-Teaching weeks are locked automatically.">
         <div class="flex items-center gap-2">
             @if (!$weeksGenerated)
@@ -48,7 +48,7 @@
                         <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-3">Class Schedule</p>
                         <div class="flex gap-2 flex-wrap">
                             @if ($hasLEC)
-                                <div class="flex-1 min-w-[120px] rounded-lg bg-[#f0fdf4] border border-[#bbf7d0] px-3 py-2">
+                                <div class="flex-1 min-w-30 rounded-lg bg-[#f0fdf4] border border-[#bbf7d0] px-3 py-2">
                                     <div class="flex items-center gap-1.5 mb-1">
                                         <span class="w-1.5 h-1.5 rounded-full bg-[#16a34a] shrink-0"></span>
                                         <span class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#166534]">LEC</span>
@@ -62,7 +62,7 @@
                                 </div>
                             @endif
                             @if ($hasLAB)
-                                <div class="flex-1 min-w-[120px] rounded-lg bg-[#eff6ff] border border-[#bfdbfe] px-3 py-2">
+                                <div class="flex-1 min-w-30 rounded-lg bg-[#eff6ff] border border-[#bfdbfe] px-3 py-2">
                                     <div class="flex items-center gap-1.5 mb-1">
                                         <span class="w-1.5 h-1.5 rounded-full bg-[#3b82f6] shrink-0"></span>
                                         <span class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#1e40af]">LAB</span>

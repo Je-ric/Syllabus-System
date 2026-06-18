@@ -21,7 +21,7 @@
     
         <x-wizard.step-header
             title="Course Outcomes"
-            icon="book-open"
+            eyebrow="test"
             description="Add outcomes below. Changes are staged until you click Save All." />
     
         {{-- Pending changes bar --}}

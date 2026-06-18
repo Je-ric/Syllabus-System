@@ -67,15 +67,37 @@
 {{-- CO row (non-MVGO) --}}
 @if (!$isMvgo)
     <div
-        class="mb-3 flex items-center justify-between gap-3 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2.5">
-        <div class="min-w-0">
-            <p class="text-[10px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-0.5">Course Outcome</p>
-            @if ($coLabel)
-                <p class="text-[13px] text-[#0f172a] truncate">{{ $coLabel }}</p>
-            @else
-                <p class="text-[13px] text-[#94a3b8] italic">Not selected</p>
-            @endif
+        class="mb-3 flex items-center justify-between gap-3 rounded-xl
+               border border-emerald-200 bg-emerald-50/60 px-3 py-3">
+
+        <div class="flex items-start gap-3 min-w-0">
+
+            <div
+                class="flex items-center justify-center
+                       w-8 h-8 rounded-lg
+                       bg-white border border-emerald-200
+                       text-emerald-600 shrink-0">
+                <i class="bx bx-link-alt text-sm"></i>
+            </div>
+
+            <div class="min-w-0">
+                <p class="text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-700">
+                    Linked Course Outcome
+                </p>
+
+                @if ($coLabel)
+                    <p class="mt-1 text-[13px] text-slate-800 truncate">
+                        {{ $coLabel }}
+                    </p>
+                @else
+                    <p class="mt-1 text-[13px] italic text-slate-400">
+                        No course outcome selected
+                    </p>
+                @endif
+            </div>
+
         </div>
+
         <button type="button"
             x-on:click="$dispatch('open-week-modal', {
                 weekNo: {{ $week->week_no }},
@@ -84,10 +106,16 @@
                 field: 'learning_outcomes',
                 fields: {{ Js::from($baseFields) }}
             })"
-            class="shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[12px] font-semibold
-                   text-[#16a34a] border border-[#bbf7d0] bg-white hover:bg-[#f0fdf4] transition-colors">
-            <i class="bx bx-edit text-sm"></i> Edit
+            class="shrink-0 inline-flex items-center gap-1.5
+                   px-3 py-1.5 rounded-lg
+                   text-[12px] font-semibold
+                   text-emerald-700 bg-white
+                   border border-emerald-200
+                   hover:bg-emerald-50 transition">
+            <i class="bx bx-edit-alt"></i>
+            Edit
         </button>
+
     </div>
 @endif
 
@@ -101,75 +129,158 @@
     ];
 @endphp
 
-<div class="grid grid-cols-1 lg:grid-cols-4 gap-0 border border-black/10 mb-6">
+<div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
     @foreach ($richFields as $rf)
-        <div class="bg-whitemin-h65 p-5 border-r border-black/10 last:border-r-0 flex flex-col">
-            <div class="flex items-center justify-between gap-2">
-                <p class="text-[10px] font-bold uppercase tracking-[0.12em] text-[#475569]">{{ $rf['label'] }}</p>
+        <div
+            class="group rounded-2xl border border-slate-200 bg-white
+                   p-4 transition-all duration-200
+                   hover:border-emerald-200 hover:shadow-sm">
+
+            <div class="flex items-start justify-between gap-3 mb-3">
+
+                <div>
+                    <p
+                        class="text-[10px] font-bold uppercase tracking-[0.14em]
+                              text-slate-500">
+                        {{ $rf['label'] }}
+                    </p>
+                </div>
+
                 <button type="button"
                     x-on:click="$dispatch('open-week-modal', {
-                        weekNo:    {{ $week->week_no }},
+                        weekNo: {{ $week->week_no }},
                         weekDates: '{{ $weekDatesStr }}',
-                        isMvgo:    {{ $isMvgo ? 'true' : 'false' }},
-                        field:     '{{ $rf['key'] }}',
-                        fields:    {{ Js::from($baseFields) }}
+                        isMvgo: {{ $isMvgo ? 'true' : 'false' }},
+                        field: '{{ $rf['key'] }}',
+                        fields: {{ Js::from($baseFields) }}
                     })"
-                    class="text-[10px] uppercase tracking-[0.2em] font-bold text-emerald-600 hover:text-emerald-700transition-colors">
-                    <i class="bx bx-edit text-xs"></i>
+                    class="opacity-0 group-hover:opacity-100
+                           transition-opacity
+                           flex items-center justify-center
+                           w-8 h-8 rounded-lg
+                           border border-slate-200
+                           hover:border-emerald-200
+                           hover:bg-emerald-50">
+                    <i class="bx bx-edit-alt text-sm text-slate-600"></i>
                 </button>
+
             </div>
+
             @if ($rf['value'] && trim(strip_tags($rf['value'])) !== '')
                 <div
-                    class="text-[13px] text-[#0f172a] leading-relaxed prose prose-sm max-w-none
-                            [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4
-                            [&_strong]:font-bold [&_em]:italic [&_u]:underline
-                            [&_p]:m-0 [&_p+p]:mt-2">
-                    {!! htmlspecialchars_decode($rf['value'], ENT_QUOTES) !!}</div>
+                    class="text-[13px] text-slate-700 leading-relaxed
+                           prose prose-sm max-w-none
+                           [&_ul]:list-disc [&_ul]:pl-4
+                           [&_ol]:list-decimal [&_ol]:pl-4
+                           [&_p]:m-0 [&_p+p]:mt-2">
+                    {!! htmlspecialchars_decode($rf['value'], ENT_QUOTES) !!}
+                </div>
             @else
-                <p class="text-[13px] text-[#94a3b8] italic">No content yet.</p>
+                <div
+                    class="flex items-center justify-center
+                           min-h-20
+                           rounded-xl border border-dashed
+                           border-slate-200">
+                    <span class="text-[12px] italic text-slate-400">
+                        No content yet
+                    </span>
+                </div>
             @endif
+
         </div>
     @endforeach
 </div>
 
 {{-- References & Materials --}}
 @if (count($refs) > 0 || count($mats) > 0)
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+
+        {{-- References --}}
         @if (count($refs) > 0)
-            <div class="rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2.5">
-                <p class="text-[10px] font-bold uppercase tracking-[0.12em] text-[#166534] mb-1.5">
-                    <i class="bx bx-book-open text-[#16a34a]"></i> References
-                </p>
-                <ul class="space-y-1">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4">
+
+                <div class="flex items-center gap-2 mb-3">
+                    <div
+                        class="flex items-center justify-center
+                                w-8 h-8 rounded-lg
+                                bg-emerald-50 text-emerald-600">
+                        <i class="bx bx-book-open"></i>
+                    </div>
+
+                    <div>
+                        <p class="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">
+                            References
+                        </p>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
                     @foreach ($refs as $ref)
-                        <li class="text-[13px] text-[#0f172a] flex items-start gap-1.5">
-                            <span class="mt-1.5 w-1 h-1 rounded-full bg-[#16a34a] shrink-0"></span>
-                            {{ $ref['text'] }}
-                        </li>
+                        <div class="flex items-start gap-2 text-[13px] text-slate-700">
+
+                            <span class="mt-2 w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0">
+                            </span>
+
+                            <span>{{ $ref['text'] }}</span>
+
+                        </div>
                     @endforeach
-                </ul>
+                </div>
+
             </div>
         @endif
+
+        {{-- Online Materials --}}
         @if (count($mats) > 0)
-            <div class="rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2.5">
-                <p class="text-[10px] font-bold uppercase tracking-[0.12em] text-[#1e40af] mb-1.5">
-                    <i class="bx bx-link text-[#3b82f6]"></i> Online Materials
-                </p>
-                <ul class="space-y-1">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4">
+
+                <div class="flex items-center gap-2 mb-3">
+                    <div
+                        class="flex items-center justify-center
+                                w-8 h-8 rounded-lg
+                                bg-blue-50 text-blue-600">
+                        <i class="bx bx-link"></i>
+                    </div>
+
+                    <p class="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">
+                        Online Materials
+                    </p>
+                </div>
+
+                <div class="space-y-2">
+
                     @foreach ($mats as $mat)
-                        <li class="text-[13px] text-[#0f172a]">
-                            {{ $mat['name'] }}
-                            @if ($mat['url'])
-                                <a href="{{ $mat['url'] }}" target="_blank" rel="noopener"
-                                    class="text-[#3b82f6] underline underline-offset-2 break-all text-[12px] ml-1">
-                                    {{ \Illuminate\Support\Str::limit($mat['url'], 50) }}
-                                </a>
-                            @endif
-                        </li>
+                        <a href="{{ $mat['url'] }}" target="_blank" rel="noopener"
+                            class="group flex items-center justify-between
+                                   rounded-xl border border-slate-200
+                                   px-3 py-2 hover:border-blue-200
+                                   hover:bg-blue-50/50 transition">
+
+                            <div class="min-w-0">
+                                <p class="text-[13px] font-medium text-slate-800 truncate">
+                                    {{ $mat['name'] }}
+                                </p>
+
+                                @if ($mat['url'])
+                                    <p class="text-[11px] text-slate-500 truncate">
+                                        {{ $mat['url'] }}
+                                    </p>
+                                @endif
+                            </div>
+
+                            <i
+                                class="bx bx-link-external text-slate-400
+                                       group-hover:text-blue-600">
+                            </i>
+
+                        </a>
                     @endforeach
-                </ul>
+
+                </div>
+
             </div>
         @endif
+
     </div>
 @endif
 

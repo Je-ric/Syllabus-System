@@ -40,128 +40,251 @@
             <div class="flex-1 overflow-y-auto flex flex-col gap-0">
 
                 {{-- Field tab strip --}}
-                <div class="flex items-center gap-1 px-5 pt-4 pb-3 border-b border-[#f1f5f9] shrink-0 overflow-x-auto">
-                    <template x-for="tab in richFields" :key="tab.key">
-                        <button type="button" x-on:click="switchField(tab.key)"
-                            x-bind:class="activeField === tab.key ?
-                                'bg-[#16a34a] text-white shadow-sm' :
-                                'bg-[#f1f5f9] text-[#475569] hover:bg-[#e2e8f0]'"
-                            class="shrink-0 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-colors">
-                            <span x-text="tab.label"></span>
+                <div class="px-5 pt-4 pb-3 border-b border-slate-100 shrink-0">
+
+                    <div class="flex gap-2 overflow-x-auto">
+
+                        <template x-for="tab in richFields" :key="tab.key">
+                            <button type="button" x-on:click="switchField(tab.key)"
+                                x-bind:class="activeField === tab.key ?
+                                    'bg-emerald-600 text-white border-emerald-600' :
+                                    'bg-white text-slate-600 border-slate-200 hover:border-slate-300'"
+                                class="shrink-0 inline-flex items-center gap-2
+                                px-3 py-2 rounded-xl border
+                                text-[12px] font-medium
+                                transition-all duration-200">
+
+                                <i
+                                    x-bind:class="{
+                                        'bx bx-target-lock': tab.key === 'learning_outcomes',
+                                        'bx bx-task': tab.key === 'assessment_task',
+                                        'bx bx-book-content': tab.key === 'topic',
+                                        'bx bx-chalkboard': tab.key === 'teaching_activities'
+                                    }">
+                                </i>
+
+                                <span x-text="tab.label"></span>
+
+                            </button>
+                        </template>
+
+                        {{-- References & Materials tab --}}
+                        <button type="button" x-on:click="activeField = 'references_materials'"
+                            x-bind:class="activeField === 'references_materials' ?
+                                'bg-blue-600 text-white border-blue-600' :
+                                'bg-white text-slate-600 border-slate-200 hover:border-slate-300'"
+                            class="shrink-0 inline-flex items-center gap-2
+                            px-3 py-2 rounded-xl border
+                            text-[12px] font-medium
+                            transition-all duration-200">
+                            <i class="bx bx-library"></i>
+                            <span>References & Materials</span>
                         </button>
-                    </template>
+
+                    </div>
+
                 </div>
+
 
                 <div class="px-5 pt-4 pb-2 flex flex-col gap-4">
 
-                    {{-- CO selector / MVGO --}}
-                    <div x-show="!isMvgo">
-                        <label class="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-1.5">
-                            Course Outcome
-                        </label>
-                        <select x-model="fields.course_outcome_id"
-                            class="w-full text-[13px] rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
-                                   focus:border-[#16a34a] focus:outline-none focus:bg-white transition-colors">
-                            <option value="">— Select Course Outcome —</option>
-                            @foreach ($courseOutcomes as $co)
-                                <option value="{{ $co['id'] }}">
-                                    {{ $co['co_code'] }} – {{ \Illuminate\Support\Str::limit($co['description'], 70) }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div x-show="isMvgo"
-                        class="flex items-center gap-2 px-3 py-2 rounded-lg border border-[#bbf7d0] bg-[#f0fdf4]">
-                        <x-feedback-status.status-indicator variant="brand"
-                            icon="bx bx-star">MVGO</x-feedback-status.status-indicator>
-                        <span class="text-[13px] text-[#475569]">Mission-Vision-Goals-Objectives</span>
-                    </div>
+                    {{-- Rich-text panels (hidden when References & Materials tab is active) --}}
+                    <template x-if="activeField !== 'references_materials'">
+                        <div class="flex flex-col gap-4">
 
-                    {{-- Single Quill editor --}}
-                    <div>
-                        <label class="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-1.5"
-                            x-text="activeFieldLabel"></label>
-                        <div id="week-quill-editor" class="rounded-lg border border-[#e2e8f0] bg-white overflow-hidden"
-                            class="rounded-lg border border-[#e2e8f0] bg-white
-                                    [&_.ql-toolbar]:rounded-t-lg [&_.ql-toolbar]:border-[#e2e8f0]
-                                    [&_.ql-container]:rounded-b-lg [&_.ql-container]:border-[#e2e8f0]
-                                    [&_.ql-editor]:text-[13px] [&_.ql-editor]:min-h-45">
-                        </div>
-                    </div>
+                            <div x-show="!isMvgo" class="rounded-xl border border-emerald-100 bg-emerald-50/50 p-3">
 
-                    {{-- References --}}
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#166534]">
-                                <i class="bx bx-book-open text-[#16a34a]"></i> References
-                            </p>
-                            <button type="button" x-on:click="addRef()"
-                                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[12px] font-semibold
-                                       bg-[#f0fdf4] text-[#16a34a] border border-[#bbf7d0] hover:bg-[#dcfce7] transition-colors">
-                                <i class="bx bx-plus text-sm"></i> Add
-                            </button>
-                        </div>
-                        <div class="space-y-2">
-                            <template x-for="(ref, rIdx) in fields.references" :key="rIdx">
-                                <div class="flex items-center gap-2 border-b border-[#e2e8f0] pb-1.5 last:border-b-0 last:pb-0">
-                                    <input type="text" x-model="ref.text"
-                                        placeholder="e.g. Author (Year). Title. Publisher."
-                                        class="flex-1 text-[13px] rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-1.5
-                                               focus:border-[#16a34a] focus:outline-none focus:bg-white
-                                               placeholder:text-[#94a3b8] transition-colors" />
-                                    <template x-if="fields.references.length > 1">
-                                        <button type="button" x-on:click="removeRef(rIdx)"
-                                            class="shrink-0 p-1.5 text-[#94a3b8] hover:text-rose-500 hover:bg-rose-50 rounded-md transition-colors">
-                                            <i class="bx bx-trash text-sm"></i>
-                                        </button>
-                                    </template>
-                                    <template x-if="fields.references.length <= 1">
-                                        <span class="w-7 shrink-0"></span>
-                                    </template>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-
-                    {{-- Online Materials --}}
-                    <div class="pb-2">
-                        <div class="flex items-center justify-between mb-2">
-                            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#1e40af]">
-                                <i class="bx bx-link text-[#3b82f6]"></i> Online Materials
-                            </p>
-                            <button type="button" x-on:click="addMat()"
-                                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[12px] font-semibold
-                                       bg-[#eff6ff] text-[#3b82f6] border border-[#bfdbfe] hover:bg-[#dbeafe] transition-colors">
-                                <i class="bx bx-plus text-sm"></i> Add
-                            </button>
-                        </div>
-                        <div class="space-y-3">
-                            <template x-for="(mat, mIdx) in fields.materials" :key="mIdx">
-                                <div class="flex items-start gap-2 border-b border-[#e2e8f0] pb-1.5 last:border-b-0 last:pb-0">
-                                    <div class="flex-1 space-y-1.5">
-                                        <input type="text" x-model="mat.name"
-                                            :placeholder="'Name (e.g. Week ' + weekNo + ' Slides)'"
-                                            class="w-full text-[13px] rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-1.5
-                                                   focus:border-[#16a34a] focus:outline-none focus:bg-white
-                                                   placeholder:text-[#94a3b8] transition-colors" />
-                                        <input type="url" x-model="mat.url" placeholder="https://…"
-                                            class="w-full text-[13px] rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-1.5
-                                                   focus:border-[#16a34a] focus:outline-none focus:bg-white
-                                                   placeholder:text-[#94a3b8] transition-colors" />
+                                <div class="flex items-center gap-2 mb-2">
+                                    <div
+                                        class="w-8 h-8 rounded-lg
+                   bg-white border border-emerald-200
+                   flex items-center justify-center">
+                                        <i class="bx bx-link-alt text-emerald-600"></i>
                                     </div>
-                                    <template x-if="fields.materials.length > 1">
-                                        <button type="button" x-on:click="removeMat(mIdx)"
-                                            class="shrink-0 mt-1 p-1.5 text-[#94a3b8] hover:text-rose-500 hover:bg-rose-50 rounded-md transition-colors">
-                                            <i class="bx bx-trash text-sm"></i>
-                                        </button>
-                                    </template>
-                                    <template x-if="fields.materials.length <= 1">
-                                        <span class="w-7 shrink-0 mt-1"></span>
+
+                                    <div>
+                                        <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-700">
+                                            Outcome Mapping
+                                        </p>
+
+                                        <p class="text-[12px] text-slate-500">
+                                            Link this week to a course outcome
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <select x-model="fields.course_outcome_id"
+                                    class="w-full rounded-lg border border-emerald-200
+               bg-white px-3 py-2 text-[13px]
+               focus:border-emerald-500 focus:outline-none">
+
+                                    <option value="">Select Course Outcome</option>
+
+                                    @foreach ($courseOutcomes as $co)
+                                        <option value="{{ $co['id'] }}">
+                                            {{ $co['co_code'] }} —
+                                            {{ \Illuminate\Support\Str::limit($co['description'], 70) }}
+                                        </option>
+                                    @endforeach
+
+                                </select>
+
+                            </div>
+                            <div x-show="isMvgo"
+                                class="flex items-center gap-2 px-3 py-2 rounded-lg border border-[#bbf7d0] bg-[#f0fdf4]">
+                                <x-feedback-status.status-indicator variant="brand"
+                                    icon="bx bx-star">MVGO</x-feedback-status.status-indicator>
+                                <span class="text-[13px] text-[#475569]">Mission-Vision-Goals-Objectives</span>
+                            </div>
+                            <div>
+
+                                <div class="flex items-center justify-between mb-3">
+
+                                    <div>
+                                        <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">
+                                            Editing
+                                        </p>
+
+                                        <h4 class="text-[15px] font-semibold text-slate-800" x-text="activeFieldLabel">
+                                        </h4>
+                                    </div>
+
+                                    <span
+                                        class="inline-flex items-center gap-1
+                   px-2 py-1 rounded-full
+                   bg-emerald-50 text-emerald-700
+                   text-[11px] font-medium">
+
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                        Rich Text Editor
+
+                                    </span>
+
+                                </div>
+
+                                <div id="week-quill-editor"
+                                    class="overflow-hidden rounded-2xl
+               border border-slate-200 bg-white
+               shadow-sm
+
+               [&_.ql-toolbar]:border-b
+               [&_.ql-toolbar]:border-slate-200
+               [&_.ql-toolbar]:bg-slate-50
+
+               [&_.ql-container]:border-0
+
+               [&_.ql-editor]:min-h-[220px]
+               [&_.ql-editor]:text-[14px]
+               [&_.ql-editor]:leading-relaxed">
+                                </div>
+
+                            </div>
+
+                        </div> {{-- end rich-text flex col --}}
+                    </template> {{-- end x-if active !== references_materials --}}
+
+                    {{-- References & Materials panel --}}
+                    <template x-if="activeField === 'references_materials'">
+
+                        <div class="grid grid-cols-2 gap-5">
+
+                            {{-- References --}}
+                            <div>
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center gap-2">
+                                        <div
+                                            class="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center">
+                                            <i class="bx bx-book-open text-emerald-600 text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <p
+                                                class="text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-700">
+                                                References</p>
+                                            <p class="text-[12px] text-slate-500">Books, journals, and printed sources
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <button type="button" x-on:click="addRef()"
+                                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[12px] font-semibold
+                                           bg-[#f0fdf4] text-[#16a34a] border border-[#bbf7d0] hover:bg-[#dcfce7] transition-colors">
+                                        <i class="bx bx-plus text-sm"></i> Add
+                                    </button>
+                                </div>
+                                <div class="space-y-2">
+                                    <template x-for="(ref, rIdx) in fields.references" :key="rIdx">
+                                        <div class="flex items-center gap-2">
+                                            <span
+                                                class="shrink-0 w-5 h-5 rounded-full bg-emerald-50 border border-emerald-200
+                                                     flex items-center justify-center text-[10px] font-bold text-emerald-700"
+                                                x-text="rIdx + 1"></span>
+                                            <input type="text" x-model="ref.text"
+                                                placeholder="e.g. Author (Year). Title. Publisher."
+                                                class="flex-1 text-[13px] rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-1.5
+                                                   focus:border-emerald-400 focus:outline-none focus:bg-white
+                                                   placeholder:text-[#94a3b8] transition-colors" />
+                                            <button type="button" x-on:click="removeRef(rIdx)"
+                                                x-bind:class="fields.references.length <= 1 ? 'opacity-0 pointer-events-none' : ''"
+                                                class="shrink-0 p-1.5 text-[#94a3b8] hover:text-rose-500 hover:bg-rose-50 rounded-md transition-colors">
+                                                <i class="bx bx-trash text-sm"></i>
+                                            </button>
+                                        </div>
                                     </template>
                                 </div>
-                            </template>
+                            </div>
+
+                            {{-- <div class="border-t border-slate-100"></div> --}}
+
+                            {{-- Online Materials --}}
+                            <div class="pb-2">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center gap-2">
+                                        <div
+                                            class="w-7 h-7 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center">
+                                            <i class="bx bx-link text-blue-600 text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-700">
+                                                Online Materials</p>
+                                            <p class="text-[12px] text-slate-500">Links, slides, videos, or web
+                                                resources</p>
+                                        </div>
+                                    </div>
+                                    <button type="button" x-on:click="addMat()"
+                                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[12px] font-semibold
+                                           bg-[#eff6ff] text-[#3b82f6] border border-[#bfdbfe] hover:bg-[#dbeafe] transition-colors">
+                                        <i class="bx bx-plus text-sm"></i> Add
+                                    </button>
+                                </div>
+                                <div class="space-y-3">
+                                    <template x-for="(mat, mIdx) in fields.materials" :key="mIdx">
+                                        <div class="flex items-start gap-2">
+                                            <span
+                                                class="shrink-0 w-5 h-5 rounded-full bg-blue-50 border border-blue-200
+                                                     flex items-center justify-center text-[10px] font-bold text-blue-700"
+                                                x-text="mIdx + 1"></span>
+                                            <div class="flex-1 space-y-1.5">
+                                                <input type="text" x-model="mat.name"
+                                                    :placeholder="'Name (e.g. Week ' + weekNo + ' Slides)'"
+                                                    class="w-full text-[13px] rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-1.5
+                                                       focus:border-blue-400 focus:outline-none focus:bg-white
+                                                       placeholder:text-[#94a3b8] transition-colors" />
+                                                <input type="url" x-model="mat.url" placeholder="https://…"
+                                                    class="w-full text-[13px] rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-1.5
+                                                       focus:border-blue-400 focus:outline-none focus:bg-white
+                                                       placeholder:text-[#94a3b8] transition-colors" />
+                                            </div>
+                                            <button type="button" x-on:click="removeMat(mIdx)"
+                                                x-bind:class="fields.materials.length <= 1 ? 'opacity-0 pointer-events-none' : ''"
+                                                class="shrink-0 mt-1 p-1.5 text-[#94a3b8] hover:text-rose-500 hover:bg-rose-50 rounded-md transition-colors">
+                                                <i class="bx bx-trash text-sm"></i>
+                                            </button>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
                         </div>
-                    </div>
+                    </template> {{-- end references_materials panel --}}
 
                 </div>
             </div>
@@ -253,6 +376,7 @@
             _quill: null,
 
             get activeFieldLabel() {
+                if (this.activeField === 'references_materials') return 'References & Materials';
                 return this.richFields.find(f => f.key === this.activeField)?.label ?? '';
             },
 
@@ -272,9 +396,9 @@
             },
 
             close() {
-                // Save any pending changes before closing
-                this._saveCurrentField();
-                // Clean up Quill instance
+                if (this.activeField !== 'references_materials') {
+                    this._saveCurrentField();
+                }
                 this._destroyQuill();
                 this.isOpen = false;
             },
@@ -342,14 +466,20 @@
             switchField(key) {
                 if (key === this.activeField) return;
 
-                // Save current field before switching
-                this._saveCurrentField();
+                // Save current field before switching (only if coming from a rich-text field)
+                if (this.activeField !== 'references_materials') {
+                    this._saveCurrentField();
+                }
                 this.activeField = key;
 
-                // Reinitialize Quill for the new field
-                this.$nextTick(() => {
-                    this._initQuill();
-                });
+                // Only init Quill when switching TO a rich-text field
+                if (key !== 'references_materials') {
+                    this.$nextTick(() => {
+                        this._initQuill();
+                    });
+                } else {
+                    this._destroyQuill();
+                }
             },
 
             addRef() {
@@ -371,7 +501,9 @@
             },
 
             async save() {
-                this._saveCurrentField();
+                if (this.activeField !== 'references_materials') {
+                    this._saveCurrentField();
+                }
                 this.saving = true;
 
                 try {
