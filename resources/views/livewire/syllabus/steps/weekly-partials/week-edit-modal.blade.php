@@ -16,7 +16,7 @@
         x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100"
         x-transition:leave-end="opacity-0 scale-95" class="fixed inset-0 z-50 flex items-center justify-center p-4">
 
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col" x-on:click.stop>
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] h-[90vh] flex flex-col" x-on:click.stop>
 
             {{-- Header --}}
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#e2e8f0] shrink-0">
@@ -173,7 +173,7 @@
 
                [&_.ql-container]:border-0
 
-               [&_.ql-editor]:min-h-[220px]
+               [&_.ql-editor]:min-h-55
                [&_.ql-editor]:text-[14px]
                [&_.ql-editor]:leading-relaxed">
                                 </div>

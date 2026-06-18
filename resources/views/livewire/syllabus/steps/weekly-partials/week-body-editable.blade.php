@@ -129,66 +129,69 @@
     ];
 @endphp
 
-<div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-    @foreach ($richFields as $rf)
-        <div
-            class="group rounded-2xl border border-slate-200 bg-white
-                   p-4 transition-all duration-200
-                   hover:border-emerald-200 hover:shadow-sm">
+<div class="overflow-hidden rounded-2xl border border-slate-200 bg-white mb-6">
 
-            <div class="flex items-start justify-between gap-3 mb-3">
+    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4">
 
-                <div>
-                    <p
-                        class="text-[10px] font-bold uppercase tracking-[0.14em]
-                              text-slate-500">
+        @foreach ($richFields as $rf)
+
+            <div class="border-r border-slate-200 last:border-r-0">
+
+                {{-- Header --}}
+                <div
+                    class="flex items-center justify-between
+                           px-4 py-3
+                           bg-slate-50 border-b border-slate-200">
+
+                    <h4 class="text-[14px] font-semibold text-slate-800">
                         {{ $rf['label'] }}
-                    </p>
+                    </h4>
+
+                    <button
+                        type="button"
+                        x-on:click="$dispatch('open-week-modal', {
+                            weekNo: {{ $week->week_no }},
+                            weekDates: '{{ $weekDatesStr }}',
+                            isMvgo: {{ $isMvgo ? 'true' : 'false' }},
+                            field: '{{ $rf['key'] }}',
+                            fields: {{ Js::from($baseFields) }}
+                        })"
+                        class="text-slate-400 hover:text-emerald-600 transition-colors">
+
+                        <i class="bx bx-edit-alt text-base"></i>
+
+                    </button>
+
                 </div>
 
-                <button type="button"
-                    x-on:click="$dispatch('open-week-modal', {
-                        weekNo: {{ $week->week_no }},
-                        weekDates: '{{ $weekDatesStr }}',
-                        isMvgo: {{ $isMvgo ? 'true' : 'false' }},
-                        field: '{{ $rf['key'] }}',
-                        fields: {{ Js::from($baseFields) }}
-                    })"
-                    class="opacity-0 group-hover:opacity-100
-                           transition-opacity
-                           flex items-center justify-center
-                           w-8 h-8 rounded-lg
-                           border border-slate-200
-                           hover:border-emerald-200
-                           hover:bg-emerald-50">
-                    <i class="bx bx-edit-alt text-sm text-slate-600"></i>
-                </button>
+                {{-- Content --}}
+                <div class="p-4 min-h-[220px]">
+
+                    @if ($rf['value'] && trim(strip_tags($rf['value'])) !== '')
+                        <div
+                            class="text-[13px] text-slate-700 leading-relaxed
+                                   prose prose-sm max-w-none
+                                   [&_ul]:list-disc [&_ul]:pl-4
+                                   [&_ol]:list-decimal [&_ol]:pl-4
+                                   [&_p]:m-0 [&_p+p]:mt-2">
+
+                            {!! htmlspecialchars_decode($rf['value'], ENT_QUOTES) !!}
+
+                        </div>
+                    @else
+                        <p class="text-[13px] italic text-slate-400">
+                            No content yet
+                        </p>
+                    @endif
+
+                </div>
 
             </div>
 
-            @if ($rf['value'] && trim(strip_tags($rf['value'])) !== '')
-                <div
-                    class="text-[13px] text-slate-700 leading-relaxed
-                           prose prose-sm max-w-none
-                           [&_ul]:list-disc [&_ul]:pl-4
-                           [&_ol]:list-decimal [&_ol]:pl-4
-                           [&_p]:m-0 [&_p+p]:mt-2">
-                    {!! htmlspecialchars_decode($rf['value'], ENT_QUOTES) !!}
-                </div>
-            @else
-                <div
-                    class="flex items-center justify-center
-                           min-h-20
-                           rounded-xl border border-dashed
-                           border-slate-200">
-                    <span class="text-[12px] italic text-slate-400">
-                        No content yet
-                    </span>
-                </div>
-            @endif
+        @endforeach
 
-        </div>
-    @endforeach
+    </div>
+
 </div>
 
 {{-- References & Materials --}}

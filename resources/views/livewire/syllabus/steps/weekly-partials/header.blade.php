@@ -6,24 +6,17 @@
         description="Weeks are auto-generated from the academic calendar. Fill in coverage details per week. Exam and Non-Teaching weeks are locked automatically.">
         <div class="flex items-center gap-2">
             @if (!$weeksGenerated)
-                <x-button variant="sm-add"
-                    wire:click="generateWeeklyCoverage"
-                    :disabled="!$academic_calendar_id"
-                    wireTarget="generateWeeklyCoverage"
-                    loading="Generating…">
+                <x-button variant="sm-add" wire:click="generateWeeklyCoverage" :disabled="!$academic_calendar_id"
+                    wireTarget="generateWeeklyCoverage" loading="Generating…">
                     <i class="bx bx-calendar-plus"></i> Generate Weeks
                 </x-button>
             @else
-                <x-button variant="sm-warning"
-                    wire:click="regenerateWeeks"
-                    wireTarget="regenerateWeeks"
+                <x-button variant="sm-warning" wire:click="regenerateWeeks" wireTarget="regenerateWeeks"
                     wire:confirm="This will delete all existing weeks and recreate them. All content will be lost. Continue?"
                     loading="Regenerating…">
                     <i class="bx bx-refresh"></i> Regenerate
                 </x-button>
-                <x-button variant="sm-add"
-                    wire:click="saveAllWeeklyEntries"
-                    wireTarget="saveAllWeeklyEntries"
+                <x-button variant="sm-add" wire:click="saveAllWeeklyEntries" wireTarget="saveAllWeeklyEntries"
                     loading="Saving…">
                     <i class="bx bx-save"></i> Save All
                 </x-button>
@@ -38,50 +31,68 @@
     @endif
 
     @if ($weeksGenerated || ($courseComponents ?? null))
-        <div class="grid gap-3 sm:grid-cols-2">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
 
             {{-- Schedule chips --}}
             @if ($courseComponents ?? null)
-                @php $hasLEC = isset($courseComponents['LEC']); $hasLAB = isset($courseComponents['LAB']); @endphp
+                @php
+                    $hasLEC = isset($courseComponents['LEC']);
+                    $hasLAB = isset($courseComponents['LAB']);
+                @endphp
                 @if ($hasLEC || $hasLAB)
-                    <div class="rounded-xl border border-[#e2e8f0] bg-white p-4" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
-                        <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-3">Class Schedule</p>
-                        <div class="flex gap-2 flex-wrap">
-                            @if ($hasLEC)
-                                <div class="flex-1 min-w-30 rounded-lg bg-[#f0fdf4] border border-[#bbf7d0] px-3 py-2">
-                                    <div class="flex items-center gap-1.5 mb-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#16a34a] shrink-0"></span>
-                                        <span class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#166534]">LEC</span>
-                                    </div>
-                                    <p class="text-[13px] font-semibold text-[#0f172a] leading-snug">
-                                        {{ $courseComponents['LEC']['schedule'] ?? '—' }}
-                                    </p>
-                                    <p class="text-[11px] text-[#16a34a] mt-0.5">
-                                        {{ $courseComponents['LEC']['class_hours'] ?? '—' }} hrs/wk
-                                    </p>
-                                </div>
-                            @endif
-                            @if ($hasLAB)
-                                <div class="flex-1 min-w-30 rounded-lg bg-[#eff6ff] border border-[#bfdbfe] px-3 py-2">
-                                    <div class="flex items-center gap-1.5 mb-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#3b82f6] shrink-0"></span>
-                                        <span class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#1e40af]">LAB</span>
-                                    </div>
-                                    <p class="text-[13px] font-semibold text-[#0f172a] leading-snug">
-                                        {{ $courseComponents['LAB']['schedule'] ?? '—' }}
-                                    </p>
-                                    <p class="text-[11px] text-[#3b82f6] mt-0.5">
-                                        {{ $courseComponents['LAB']['class_hours'] ?? '—' }} hrs/wk
-                                    </p>
-                                </div>
-                            @endif
+                    <div class="rounded-xl border border-slate-200 bg-white overflow-hidden">
+
+                        <div class="px-4 py-3 border-b border-slate-200 bg-slate-50">
+                            <h3 class="text-[14px] font-semibold text-slate-800">
+                                Class Schedule
+                            </h3>
                         </div>
+
+                        <div class="divide-y divide-slate-100">
+
+                            @if ($hasLEC)
+                                <div class="flex items-center justify-between px-4 py-3">
+                                    <div>
+                                        <p class="text-xs font-semibold text-emerald-700">
+                                            Lecture (LEC)
+                                        </p>
+                                        <p class="text-sm text-slate-800">
+                                            {{ $courseComponents['LEC']['schedule'] ?? '—' }}
+                                        </p>
+                                    </div>
+
+                                    <span class="text-xs text-slate-500">
+                                        {{ $courseComponents['LEC']['class_hours'] ?? '—' }} hrs/wk
+                                    </span>
+                                </div>
+                            @endif
+
+                            @if ($hasLAB)
+                                <div class="flex items-center justify-between px-4 py-3">
+                                    <div>
+                                        <p class="text-xs font-semibold text-blue-700">
+                                            Laboratory (LAB)
+                                        </p>
+                                        <p class="text-sm text-slate-800">
+                                            {{ $courseComponents['LAB']['schedule'] ?? '—' }}
+                                        </p>
+                                    </div>
+
+                                    <span class="text-xs text-slate-500">
+                                        {{ $courseComponents['LAB']['class_hours'] ?? '—' }} hrs/wk
+                                    </span>
+                                </div>
+                            @endif
+
+                        </div>
+
                     </div>
                 @endif
             @endif
 
             {{-- Academic Calendar --}}
-            <div class="rounded-xl border border-[#e2e8f0] bg-white p-4" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
+            <div class="rounded-xl border border-[#e2e8f0] bg-white p-4"
+                style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
                 <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-3">Academic Calendar</p>
                 @if ($syllabus?->academicCalendar)
                     <div class="flex items-center justify-between gap-3 flex-wrap">
