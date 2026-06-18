@@ -7,35 +7,17 @@ use App\Services\Syllabus\CourseOutcomeService;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
-// Course Outcomes step — Batch / Draft-first model.
-//
-// UI contract:
-//   Alpine owns all transient state (drafts[], deletedIds[], editingIdx, saving).
-//   Livewire owns $outcomes (authoritative) and $programOutcomes (read-only).
-//
-//   Alpine calls ONE method: saveAll(drafts, deletedIds)
-//     drafts[]     — [{ id: int|null, description: string, isNew: bool }]
-//     deletedIds[] — int[] of persisted CO ids to remove
-//
-//   Livewire dispatches:
-//     co-all-saved   → payload: { outcomes: [...] }  → Alpine re-syncs clean
-//     co-save-failed → Alpine resets saving flag, preserves drafts
 class CourseOutcomesStep extends Component
 {
-    // ── Identity ───────────────────────────────────────────────────────────────
     public int $syllabusId;
 
-    // ── Data ───────────────────────────────────────────────────────────────────
     // Each item: ['id' => int, 'co_code' => string, 'description' => string]
     public array $outcomes = [];
 
-    // Program Outcomes for the reference panel
     // Each item: ['po_code' => string, 'po_text' => string, 'ied' => string]
     public array $programOutcomes = [];
 
-    // ══════════════════════════════════════════════════════════════════════════
-    // LIFECYCLE
-    // ══════════════════════════════════════════════════════════════════════════
+    // ── Lifecycle ─────────────────────────────────────────────────────────────
 
     public function mount(int $syllabusId): void
     {
@@ -48,9 +30,7 @@ class CourseOutcomesStep extends Component
         return view('livewire.syllabus.steps.course-outcomes');
     }
 
-    // ══════════════════════════════════════════════════════════════════════════
-    // EVENT LISTENERS
-    // ══════════════════════════════════════════════════════════════════════════
+    // ── Event listeners ───────────────────────────────────────────────────────
 
     #[On('syllabus-step-changed')]
     public function onStepChanged(string $step): void
@@ -60,10 +40,6 @@ class CourseOutcomesStep extends Component
         }
     }
 
-    // Auto-save on step navigation.
-    // Alpine is responsible for warning the user about unsaved drafts before
-    // navigation (via isDirty guard in the wizard). If they navigate away
-    // anyway, we signal done without saving — drafts are intentionally lost.
     #[On('syllabus-save-step')]
     public function onSaveRequested(string $step): void
     {
@@ -75,36 +51,48 @@ class CourseOutcomesStep extends Component
         $this->dispatch('syllabus-course-outcomes-updated');
     }
 
-    // ══════════════════════════════════════════════════════════════════════════
-    // BATCH SAVE — single entry point called from Alpine
-    // ══════════════════════════════════════════════════════════════════════════
+    // ── Actions ───────────────────────────────────────────────────────────────
 
     /**
-     * Persist all pending changes in one shot.
-     *
-     * @param  array  $drafts      [{ id: int|null, description: string, isNew: bool }]
-     * @param  array  $deletedIds  int[] — IDs of persisted COs to remove
+     * Delete a single persisted CO immediately (called from Alpine per-row).
      */
-    public function saveAll(array $drafts, array $deletedIds): void
+    public function deleteSingle(int $outcomeId): void
     {
         $service = app(CourseOutcomeService::class);
 
         try {
-            // 1. Deletions first — avoids co_code collisions on re-numbering
-            foreach ($deletedIds as $id) {
-                $service->delete($this->syllabusId, (int) $id);
-            }
+            $service->delete($this->syllabusId, $outcomeId);
+        } catch (\Throwable $e) {
+            report($e);
+            $this->dispatch('lw-toast', type: 'error', message: 'Unable to delete Course Outcome.');
+            $this->dispatch('co-save-failed');
+            return;
+        }
 
-            // 2. Updates for existing, dirty COs
+        $this->outcomes = $service->all($this->syllabusId);
+        $this->dispatch('co-all-saved', outcomes: $this->outcomes);
+        $this->dispatch('lw-toast', type: 'success', message: 'Course Outcome deleted.');
+        $this->dispatch('syllabus-course-outcomes-updated');
+    }
+
+    /**
+     * Persist all pending additions and edits in one shot.
+     *
+     * @param  array  $drafts  [{ id: int|null, description: string, isNew: bool }]
+     */
+    public function saveAll(array $drafts): void
+    {
+        $service = app(CourseOutcomeService::class);
+
+        try {
             foreach ($drafts as $draft) {
                 $description = trim($draft['description'] ?? '');
 
-                if (empty($description)) {
-                    continue; // skip empty drafts silently
+                if ($description === '') {
+                    continue;
                 }
 
                 if (!empty($draft['isNew'])) {
-                    // 3. Creates for new drafts
                     $service->create($this->syllabusId, $description);
                 } else {
                     $service->update($this->syllabusId, (int) $draft['id'], $description);
@@ -121,18 +109,14 @@ class CourseOutcomesStep extends Component
             return;
         }
 
-        // Reload authoritative list and push back to Alpine
         $this->outcomes = $service->all($this->syllabusId);
-
         $this->dispatch('co-all-saved', outcomes: $this->outcomes);
         $this->dispatch('lw-toast', type: 'success', message: 'Course Outcomes saved.');
         $this->dispatch('syllabus-step-saved', step: 'course_outcomes');
         $this->dispatch('syllabus-course-outcomes-updated');
     }
 
-    // ══════════════════════════════════════════════════════════════════════════
-    // PRIVATE HELPERS
-    // ══════════════════════════════════════════════════════════════════════════
+    // ── Private ───────────────────────────────────────────────────────────────
 
     private function loadData(): void
     {

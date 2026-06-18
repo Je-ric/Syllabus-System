@@ -1,317 +1,302 @@
-{{--
-    COURSE OUTCOMES STEP — Batch / Draft-first
-    ─────────────────────────────────────────────────────────────────────────────
-    UX model: all edits are local until "Save All" is clicked.
-      • drafts[]     — full working copy (adds, edits, deletes all live here)
-      • deletedIds[] — IDs of persisted COs marked for removal
-      • editingIdx   — which draft index is in edit mode (null = all read)
-      • saving       — bool, true while Livewire saveAll() is in flight
-      • isDirty      — computed: any addition, edit, or deletion pending
-
-    Livewire owns:
-      $outcomes  — authoritative list, only updated after successful saveAll()
-      $programOutcomes — read-only reference
-
-    Livewire dispatches:
-      co-all-saved   → Alpine resets to clean state (re-syncs from $outcomes)
-      co-save-failed → Alpine resets saving flag, preserves drafts
-    ─────────────────────────────────────────────────────────────────────────────
---}}
-
-<div
-    x-data="{
-        drafts:     {{ Js::from(collect($outcomes)->map(fn($o) => [...$o, 'isNew' => false, 'isDirty' => false])->values()) }},
-        deletedIds: [],
-        editingIdx: null,
-        editBuf:    '',
-        saving:     false,
-
-        get isDirty() {
-            return this.deletedIds.length > 0
-                || this.drafts.some(d => d.isNew || d.isDirty);
-        },
-        get pendingSummary() {
-            const adds = this.drafts.filter(d => d.isNew).length;
-            const edits = this.drafts.filter(d => !d.isNew && d.isDirty).length;
-            const dels = this.deletedIds.length;
-            const parts = [];
-            if (adds)  parts.push(adds  + (adds  === 1 ? ' new'  : ' new'));
-            if (edits) parts.push(edits + (edits === 1 ? ' edit' : ' edits'));
-            if (dels)  parts.push(dels  + (dels  === 1 ? ' deletion' : ' deletions'));
-            return parts.join(', ') + ' pending';
-        },
-
-        startEdit(idx) {
-            this.editingIdx = idx;
-            this.editBuf    = this.drafts[idx].description;
-            this.$nextTick(() => {
-                const el = document.getElementById('edit-ta-' + idx);
-                if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
-            });
-        },
-        commitEdit(idx) {
-            const text = this.editBuf.trim();
-            if (!text) return;
-            const orig = {{ Js::from(collect($outcomes)->pluck('description', 'id')) }};
-            this.drafts[idx].description = text;
-            if (!this.drafts[idx].isNew) {
-                this.drafts[idx].isDirty = text !== (orig[this.drafts[idx].id] ?? text);
-            }
-            this.editingIdx = null;
-            this.editBuf    = '';
-        },
-        cancelEdit() {
-            this.editingIdx = null;
-            this.editBuf    = '';
-        },
-
-        addDraft() {
-            this.drafts.push({ id: null, co_code: 'CO' + (this.drafts.length + 1), description: '', isNew: true, isDirty: false });
-            const newIdx = this.drafts.length - 1;
-            this.editingIdx = newIdx;
-            this.editBuf    = '';
-            this.$nextTick(() => {
-                const el = document.getElementById('edit-ta-' + newIdx);
-                if (el) el.focus();
-            });
-        },
-        removeDraft(idx) {
-            const draft = this.drafts[idx];
-            if (!draft.isNew) {
-                if (!confirm('Remove ' + draft.co_code + '? Changes are not saved yet — this will mark it for deletion.')) return;
-                this.deletedIds.push(draft.id);
-            }
-            this.drafts.splice(idx, 1);
-            // Recompute CO codes for display
-            this.drafts.forEach((d, i) => { if (d.isNew) d.co_code = 'CO' + (i + 1); });
-            if (this.editingIdx === idx) { this.editingIdx = null; this.editBuf = ''; }
-            else if (this.editingIdx > idx) this.editingIdx--;
-        },
-
-        async saveAll() {
-            // Commit any open edit first
-            if (this.editingIdx !== null) this.commitEdit(this.editingIdx);
-            if (!this.isDirty) return;
-            this.saving = true;
-            await $wire.saveAll(
-                this.drafts.map(d => ({ id: d.id, description: d.description, isNew: d.isNew })),
-                this.deletedIds
-            );
-        },
-
-        discardAll() {
-            if (!confirm('Discard all unsaved changes?')) return;
-            this.drafts     = {{ Js::from(collect($outcomes)->map(fn($o) => [...$o, 'isNew' => false, 'isDirty' => false])->values()) }};
-            this.deletedIds = [];
-            this.editingIdx = null;
-            this.editBuf    = '';
-        },
-
-        syncFromServer(outcomes) {
-            this.drafts     = outcomes.map(o => ({ ...o, isNew: false, isDirty: false }));
-            this.deletedIds = [];
-            this.editingIdx = null;
-            this.editBuf    = '';
-            this.saving     = false;
-        }
-    }"
-    x-on:co-all-saved.window="syncFromServer($event.detail.outcomes)"
-    x-on:co-save-failed.window="saving = false"
-    class="space-y-5">
-
-    {{-- Step header --}}
-    <x-wizard.step-header
-        title="Course Outcomes"
-        icon="book-open"
-        description="Draft all outcomes, then save everything at once when you're ready." />
-
-    {{-- Pending changes banner --}}
-    <div x-show="isDirty" x-cloak
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 -translate-y-2"
-         x-transition:enter-end="opacity-100 translate-y-0"
-         class="flex items-center justify-between gap-4 px-4 py-3 rounded-xl
-                border border-amber-200 bg-amber-50">
-        <div class="flex items-center gap-2 min-w-0">
-            <span class="shrink-0 flex items-center justify-center w-7 h-7 rounded-lg bg-amber-100 text-amber-600">
-                <i class="bx bx-edit text-base leading-none"></i>
-            </span>
-            <p class="text-[13px] font-medium text-amber-800 truncate" x-text="pendingSummary"></p>
+<div>
+    {{--
+        COURSE OUTCOMES STEP — Inline / Draft-first (PEO-style)
+        ─────────────────────────────────────────────────────────────────────────────
+        UX model identical to PEOs:
+          • rows are always visible and directly editable
+          • each row tracks _dirty / _original for change indicators
+          • unsaved new rows have id = null
+          • "Save All" persists everything in one Livewire call
+          • "Revert" restores all rows to server state
+          • individual delete on persisted rows calls Livewire immediately (no batch)
+        ─────────────────────────────────────────────────────────────────────────────
+    --}}
+    
+    @include('livewire.programs.partials.confirm-modal', ['confirmNs' => 'co'])
+    
+    <div x-data="coManager(@js(collect($outcomes)->values()->all()), @js($syllabusId))"
+         x-on:co-all-saved.window="onSaved($event.detail.outcomes)"
+         x-on:co-save-failed.window="isSaving = false"
+         class="space-y-5">
+    
+        <x-wizard.step-header
+            title="Course Outcomes"
+            icon="book-open"
+            description="Add outcomes below. Changes are staged until you click Save All." />
+    
+        {{-- Pending changes bar --}}
+        <template x-if="hasPending()">
+            <div class="flex flex-wrap items-center gap-2 px-4 py-2.5 rounded-xl border border-amber-200 bg-amber-50 text-[13px]">
+                <i class="bx bx-error-circle text-amber-500 shrink-0"></i>
+                <span class="text-amber-700 font-semibold">Unsaved changes:</span>
+                <template x-if="pendingSummary().added > 0">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-semibold">
+                        <i class="bx bx-plus text-xs"></i>
+                        <span x-text="pendingSummary().added + ' new'"></span>
+                    </span>
+                </template>
+                <template x-if="pendingSummary().modified > 0">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[11px] font-semibold">
+                        <i class="bx bx-edit-alt text-xs"></i>
+                        <span x-text="pendingSummary().modified + ' modified'"></span>
+                    </span>
+                </template>
+                <span class="ml-auto text-[11px] text-amber-600">Click <strong>Save All</strong> to apply.</span>
+            </div>
+        </template>
+    
+        {{-- CO rows --}}
+        <div class="space-y-2">
+            <template x-for="(co, index) in outcomes" :key="co._key">
+                <div class="rounded-xl border transition-all duration-200"
+                    :class="{
+                        'border-emerald-300 bg-emerald-50/40 shadow-emerald-100': !co.id,
+                        'border-amber-300 bg-amber-50/30 shadow-amber-100':       co.id && co._dirty,
+                        'border-slate-200 bg-white shadow-slate-100':             co.id && !co._dirty
+                    }"
+                    style="box-shadow:0 1px 8px rgba(0,0,0,.05);">
+    
+                    <div class="flex items-start gap-3 px-4 py-3 border-l-4 rounded-xl"
+                        :class="{
+                            'border-emerald-400': !co.id,
+                            'border-amber-400':   co.id && co._dirty,
+                            'border-emerald-700': co.id && !co._dirty,
+                        }">
+    
+                        {{-- Code badge --}}
+                        <div class="shrink-0 flex flex-col items-center gap-1 mt-0.5">
+                            <span class="inline-flex items-center justify-center w-10 h-10 rounded-xl text-[11px] font-bold transition-colors"
+                                :class="{
+                                    'bg-emerald-100 text-emerald-700 ring-2 ring-emerald-400': !co.id,
+                                    'bg-amber-100 text-amber-700 ring-2 ring-amber-400':       co.id && co._dirty,
+                                    'bg-emerald-50 text-emerald-800 ring-2 ring-emerald-300':  co.id && !co._dirty
+                                }"
+                                x-text="co.co_code">
+                            </span>
+                        </div>
+    
+                        {{-- Textarea --}}
+                        <div class="flex-1 min-w-0">
+                            <textarea
+                                x-model="co.description"
+                                x-on:input="markDirty(co)"
+                                rows="3"
+                                placeholder="Describe what students will be able to do after this outcome…"
+                                x-bind:disabled="isSaving"
+                                class="w-full rounded-lg border px-3 py-2 text-[13px] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all resize-none leading-relaxed disabled:opacity-50"
+                                :class="{
+                                    'border-amber-300 bg-amber-50/50 focus:border-amber-400 focus:ring-amber-100':       co.id && co._dirty,
+                                    'border-emerald-300 bg-emerald-50/50 focus:border-emerald-400 focus:ring-emerald-100': !co.id,
+                                    'border-slate-200 bg-white focus:border-emerald-400 focus:ring-emerald-100':           co.id && !co._dirty
+                                }"></textarea>
+    
+                            <template x-if="!co.id">
+                                <p class="mt-1 flex items-center gap-1 text-[11px] text-emerald-600 font-medium">
+                                    <i class="bx bx-plus-circle text-sm shrink-0"></i>
+                                    New — click <strong class="mx-0.5">Save All</strong> to persist.
+                                </p>
+                            </template>
+                            <template x-if="co.id && co._dirty">
+                                <p class="mt-1 flex items-center gap-1 text-[11px] text-amber-600 font-medium">
+                                    <i class="bx bx-edit-alt text-sm shrink-0"></i>
+                                    Modified — not saved yet.
+                                </p>
+                            </template>
+                        </div>
+    
+                        {{-- Delete saved row --}}
+                        <button x-show="co.id" type="button"
+                            x-on:click="deleteCo(co)"
+                            x-bind:disabled="isSaving"
+                            class="shrink-0 mt-0.5 p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors disabled:opacity-40"
+                            title="Delete CO">
+                            <i class="bx bx-trash text-base"></i>
+                        </button>
+    
+                        {{-- Remove unsaved row --}}
+                        <button x-show="!co.id" x-cloak type="button"
+                            x-on:click="outcomes.splice(index, 1); resequenceCodes()"
+                            x-bind:disabled="isSaving"
+                            class="shrink-0 mt-0.5 p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors disabled:opacity-40"
+                            title="Remove">
+                            <i class="bx bx-x text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            </template>
+    
+            {{-- Empty state --}}
+            <template x-if="outcomes.length === 0">
+                <div class="rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 py-12 text-center">
+                    <span class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-slate-100 mb-3">
+                        <i class="bx bx-book-open text-3xl text-slate-300"></i>
+                    </span>
+                    <p class="text-[13px] font-semibold text-slate-500">No Course Outcomes yet</p>
+                    <p class="text-[12px] text-slate-400 mt-0.5">Click <strong>Add Course Outcome</strong> below to get started.</p>
+                </div>
+            </template>
         </div>
-        <div class="shrink-0 flex items-center gap-2">
-            <button type="button"
-                x-on:click="discardAll()"
-                x-bind:disabled="saving"
-                class="text-[12px] font-medium text-amber-700 hover:text-amber-900
-                       disabled:opacity-40 transition-colors underline underline-offset-2">
-                Discard
-            </button>
-            <button type="button"
-                x-on:click="saveAll()"
-                x-bind:disabled="saving"
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg
-                       bg-[#16a34a] text-white text-[12px] font-semibold
-                       hover:bg-[#15803d] disabled:opacity-50 transition-colors">
-                <span x-show="!saving" class="inline-flex items-center gap-1.5">
-                    <i class="bx bx-save text-sm leading-none"></i> Save All
+    
+        {{-- Action row --}}
+        <div class="flex items-center gap-2 pt-1 border-t border-slate-100">
+            <x-button variant="add-dashed" type="button" x-on:click="addCo()"
+                x-bind:disabled="isSaving" class="flex-1">
+                <i class="bx bx-plus text-base"></i> Add Course Outcome
+            </x-button>
+    
+            <template x-if="hasPending()">
+                <x-button variant="cancel" type="button" x-on:click="revert()">
+                    <i class="bx bx-undo text-base leading-none"></i> Revert
+                </x-button>
+            </template>
+    
+            <x-button variant="add-button" type="button" x-on:click="saveAll()"
+                x-bind:disabled="isSaving" class="whitespace-nowrap relative">
+                <template x-if="hasPending()">
+                    <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400 ring-2 ring-white animate-pulse"></span>
+                </template>
+                <span x-show="!isSaving" class="inline-flex items-center gap-1.5 leading-none">
+                    <i class="bx bx-save text-base leading-none"></i> Save All
                 </span>
-                <span x-show="saving" x-cloak class="inline-flex items-center gap-1.5">
+                <span x-show="isSaving" x-cloak class="inline-flex items-center gap-1.5 leading-none">
                     <svg class="animate-spin h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                     </svg>
-                    Saving…
+                    <span class="leading-none">Saving…</span>
                 </span>
-            </button>
+            </x-button>
         </div>
+    
+        {{-- Program Outcomes Reference --}}
+        <div>
+            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-2">Reference</p>
+            @include('livewire.syllabus.steps.outcome-partials.po-reference')
+        </div>
+    
     </div>
-
-    {{-- CO draft cards --}}
-    <div class="space-y-2">
-
-        <template x-if="drafts.length === 0">
-            <div class="flex flex-col items-center gap-3 py-14 text-center
-                        rounded-xl border-2 border-dashed border-[#e2e8f0] bg-[#f8fafc]">
-                <span class="flex items-center justify-center w-14 h-14 rounded-xl bg-[#dcfce7] text-[#16a34a]">
-                    <i class="bx bx-book-open text-2xl"></i>
-                </span>
-                <div>
-                    <p class="text-[13px] font-semibold text-[#0f172a]">No Course Outcomes yet</p>
-                    <p class="text-[13px] text-[#94a3b8] mt-1">
-                        Click <strong class="text-[#16a34a]">Add Course Outcome</strong> below to get started.
-                    </p>
-                </div>
-            </div>
-        </template>
-
-        <template x-for="(draft, idx) in drafts" :key="idx">
-            <div
-                x-bind:class="{
-                    'ring-2 ring-[#16a34a] ring-offset-1': editingIdx === idx,
-                    'opacity-60':                          saving,
-                    'border-amber-200 bg-amber-50/30':     draft.isDirty && editingIdx !== idx,
-                    'border-[#bbf7d0] bg-[#f0fdf4]/30':   draft.isNew && editingIdx !== idx,
-                    'border-[#e2e8f0] bg-white':           !draft.isDirty && !draft.isNew && editingIdx !== idx,
-                }"
-                class="rounded-xl border overflow-hidden transition-all duration-150"
-                style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
-
-                {{-- READ mode --}}
-                <div x-show="editingIdx !== idx"
-                     class="flex items-start gap-4 p-4"
-                     x-bind:class="{
-                         'border-l-[3px] border-[#16a34a]': !draft.isDirty && !draft.isNew,
-                         'border-l-[3px] border-amber-400': draft.isDirty,
-                         'border-l-[3px] border-emerald-300': draft.isNew,
-                     }">
-
-                    <span class="shrink-0 mt-0.5 inline-flex items-center justify-center
-                                 w-10 h-10 rounded-xl text-white text-[13px] font-bold"
-                          x-bind:class="{
-                              'bg-[#16a34a]':   !draft.isDirty && !draft.isNew,
-                              'bg-amber-400':    draft.isDirty,
-                              'bg-emerald-300':  draft.isNew,
-                          }"
-                          x-text="draft.co_code">
-                    </span>
-
-                    <div class="flex-1 min-w-0 pt-1">
-                        <p class="text-[13px] text-[#0f172a] leading-relaxed"
-                           x-show="draft.description"
-                           x-text="draft.description"></p>
-                        <p class="text-[13px] text-[#94a3b8] italic"
-                           x-show="!draft.description">
-                            No description yet — click edit to add one.
-                        </p>
-                    </div>
-
-                    {{-- State badge --}}
-                    <span x-show="draft.isNew"
-                          class="shrink-0 mt-1 text-[10px] font-bold uppercase tracking-[0.1em]
-                                 px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-700">
-                        New
-                    </span>
-                    <span x-show="draft.isDirty && !draft.isNew"
-                          class="shrink-0 mt-1 text-[10px] font-bold uppercase tracking-[0.1em]
-                                 px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-700">
-                        Edited
-                    </span>
-
-                    <div class="shrink-0 flex items-center gap-1 ml-1">
-                        <button type="button"
-                            x-on:click="startEdit(idx)"
-                            x-bind:disabled="saving"
-                            title="Edit"
-                            class="p-2 rounded-lg text-[#94a3b8] hover:text-[#16a34a] hover:bg-[#f0fdf4]
-                                   disabled:opacity-40 transition-colors">
-                            <i class="bx bx-edit-alt text-base leading-none"></i>
-                        </button>
-                        <button type="button"
-                            x-on:click="removeDraft(idx)"
-                            x-bind:disabled="saving"
-                            title="Remove"
-                            class="p-2 rounded-lg text-[#94a3b8] hover:text-rose-600 hover:bg-rose-50
-                                   disabled:opacity-40 transition-colors">
-                            <i class="bx bx-trash text-base leading-none"></i>
-                        </button>
-                    </div>
-                </div>
-
-                {{-- EDIT mode --}}
-                <div x-show="editingIdx === idx" x-cloak
-                     class="p-4 bg-[#f0fdf4]/40 space-y-3">
-                    <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#166534]"
-                       x-text="'Editing ' + draft.co_code"></p>
-                    <textarea
-                        x-bind:id="'edit-ta-' + idx"
-                        x-model="editBuf"
-                        rows="3"
-                        placeholder="Describe what students will be able to do…"
-                        x-on:keydown.escape="cancelEdit()"
-                        class="w-full resize-none rounded-xl border border-[#bbf7d0] bg-white
-                               px-3 py-2.5 text-[13px] text-[#0f172a]
-                               placeholder:text-[#94a3b8] focus:border-[#16a34a] focus:outline-none transition-colors"
-                        style="box-shadow:none"
-                        onfocus="this.style.boxShadow='0 0 0 3px rgba(22,163,74,0.25)'"
-                        onblur="this.style.boxShadow='none'"></textarea>
-                    <div class="flex items-center gap-2 justify-between">
-                        <p class="text-[13px] text-[#94a3b8]">
-                            <i class="bx bx-info-circle"></i>
-                            <kbd class="px-1 py-0.5 rounded border border-[#e2e8f0] bg-white text-[11px]">Esc</kbd> to cancel
-                        </p>
-                        <div class="flex items-center gap-2">
-                            <x-button type="button" variant="cancel"
-                                x-on:click="cancelEdit()">
-                                <i class="bx bx-x"></i> Cancel
-                            </x-button>
-                            <x-button type="button" variant="add-button"
-                                x-on:click="commitEdit(idx)"
-                                x-bind:disabled="!editBuf.trim()">
-                                <i class="bx bx-check"></i> Done
-                            </x-button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </template>
-
-        {{-- Add button --}}
-        <x-button type="button" variant="add-dashed"
-            x-on:click="addDraft()"
-            x-bind:disabled="saving"
-            class="w-full">
-            <i class="bx bx-plus text-lg"></i>
-            Add Course Outcome
-        </x-button>
-
-    </div>
-
-    {{-- Program Outcomes Reference (Offcanvas) --}}
-    <div>
-        <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-2">
-            Reference
-        </p>
-        @include('livewire.syllabus.steps.outcome-partials.po-reference')
-    </div>
-
+    
+    <script>
+    function coManager(initialOutcomes, syllabusId) {
+        return {
+            outcomes:    initialOutcomes.map((o, i) => ({
+                ...o,
+                _dirty:    false,
+                _original: o.description,
+                _key:      o.id ?? ('new-' + i),
+            })),
+            isSaving:    false,
+            _keyCounter: initialOutcomes.length,
+    
+            markDirty(co) {
+                if (co.id) co._dirty = (co.description !== co._original);
+            },
+    
+            hasPending() {
+                return this.outcomes.some(o => !o.id || o._dirty);
+            },
+    
+            pendingSummary() {
+                return {
+                    added:    this.outcomes.filter(o => !o.id).length,
+                    modified: this.outcomes.filter(o => o.id && o._dirty).length,
+                    get total() { return this.added + this.modified; }
+                };
+            },
+    
+            resequenceCodes() {
+                // Re-number ALL rows (saved + unsaved) so display codes stay sequential
+                this.outcomes.forEach((o, i) => {
+                    o.co_code = 'CO' + (i + 1);
+                });
+            },
+    
+            addCo() {
+                if (this.outcomes.some(o => !o.description?.trim())) {
+                    window.dispatchEvent(new CustomEvent('lw-toast', {
+                        detail: { type: 'warning', message: 'Fill in the blank CO before adding another.' }
+                    }));
+                    return;
+                }
+                this._keyCounter++;
+                const idx = this.outcomes.length;
+                this.outcomes.push({
+                    id: null,
+                    co_code: 'CO' + (idx + 1),
+                    description: '',
+                    _dirty: false,
+                    _original: '',
+                    _key: 'new-' + this._keyCounter,
+                });
+            },
+    
+            revert() {
+                this.outcomes = this.outcomes
+                    .filter(o => o.id)
+                    .map(o => ({ ...o, description: o._original, _dirty: false }));
+            },
+    
+            async deleteCo(co) {
+                if (!co.id) return;
+                const ok = await this._confirm({
+                    title: 'Delete ' + co.co_code + '?',
+                    message: 'This course outcome will be permanently removed and codes will be re-sequenced.',
+                    confirmLabel: 'Delete',
+                    confirmClass: 'bg-rose-600 hover:bg-rose-700 text-white',
+                });
+                if (!ok) return;
+                this.isSaving = true;
+                try {
+                    await this.$wire.call('deleteSingle', co.id);
+                } finally {
+                    this.isSaving = false;
+                }
+            },
+    
+            async saveAll() {
+                if (!this.hasPending()) {
+                    window.dispatchEvent(new CustomEvent('lw-toast', {
+                        detail: { type: 'info', message: 'No changes to save.' }
+                    }));
+                    return;
+                }
+                // Validate: no blank rows
+                const blank = this.outcomes.find(o => !o.description?.trim());
+                if (blank) {
+                    window.dispatchEvent(new CustomEvent('lw-toast', {
+                        detail: { type: 'warning', message: 'All course outcomes must have a description.' }
+                    }));
+                    return;
+                }
+                this.isSaving = true;
+                try {
+                    await this.$wire.call('saveAll',
+                        this.outcomes.map(o => ({ id: o.id, description: o.description, isNew: !o.id }))
+                    );
+                } catch {
+                    this.isSaving = false;
+                }
+            },
+    
+            onSaved(fresh) {
+                this.outcomes = fresh.map((o, i) => ({
+                    ...o,
+                    _dirty:    false,
+                    _original: o.description,
+                    _key:      o.id ?? ('new-' + i),
+                }));
+                this.isSaving = false;
+            },
+    
+            _confirm(detail) {
+                return new Promise(resolve => {
+                    window.dispatchEvent(new CustomEvent('confirm-dialog:co', {
+                        detail: { ...detail, _resolve: resolve }
+                    }));
+                });
+            },
+        };
+    }
+    </script>
+    
 </div>
