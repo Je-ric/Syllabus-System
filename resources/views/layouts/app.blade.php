@@ -181,7 +181,8 @@
 
             {{-- Navbar --}}
             <header class="sticky top-0 z-20 border-b border-white/10 {{ $isWizardRoute ? 'hidden' : '' }}"
-                style="background: linear-gradient(90deg, #003a10 0%, #006622 60%, #009639 100%);">
+                style="background: linear-gradient(90deg, #003a10 0%, #006622 60%, #009639 100%);"
+                >
                 <div class="px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
 
                     {{-- Left: hamburger + page context --}}

@@ -165,7 +165,7 @@
                 </div>
 
                 {{-- Content --}}
-                <div class="p-4 min-h-[220px]">
+                <div class="p-4 min-h-55">
 
                     @if ($rf['value'] && trim(strip_tags($rf['value'])) !== '')
                         <div
