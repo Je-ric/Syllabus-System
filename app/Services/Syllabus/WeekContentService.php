@@ -42,12 +42,14 @@ class WeekContentService
 
         $allRefs = Reference::where('syllabus_id', $syllabusId)
             ->whereIn('syllabus_week_id', $weekIds)
+            ->where('component_type', $activeComponent)
             ->orderBy('id')
             ->get()
             ->groupBy('syllabus_week_id');
 
         $allMats = OnlineMaterial::where('syllabus_id', $syllabusId)
             ->whereIn('syllabus_week_id', $weekIds)
+            ->where('component_type', $activeComponent)
             ->orderBy('id')
             ->get()
             ->groupBy('syllabus_week_id');
@@ -154,6 +156,7 @@ class WeekContentService
             // Dirty-check references (sort both sides — order is irrelevant)
             $existingRefs = Reference::where('syllabus_id', $syllabusId)
                 ->where('syllabus_week_id', $week->id)
+                ->where('component_type', $activeComponent)
                 ->pluck('reference_text')
                 ->map(fn ($t) => trim((string) $t))
                 ->filter()->sort()->values()->all();
@@ -167,6 +170,7 @@ class WeekContentService
             // ── Dirty-check materials ─────────────────────────────────────────
             $existingMats = OnlineMaterial::where('syllabus_id', $syllabusId)
                 ->where('syllabus_week_id', $week->id)
+                ->where('component_type', $activeComponent)
                 ->get()
                 ->map(fn ($m) => trim($m->material_name ?? '') . '|' . trim($m->url ?? ''))
                 ->sort()->values()->all();
@@ -194,6 +198,7 @@ class WeekContentService
             if ($refsChanged) {
                 Reference::where('syllabus_id', $syllabusId)
                     ->where('syllabus_week_id', $week->id)
+                    ->where('component_type', $activeComponent)
                     ->delete();
 
                 foreach ((array) ($payload['references'] ?? []) as $ref) {
@@ -202,6 +207,7 @@ class WeekContentService
                         Reference::create([
                             'syllabus_id'      => $syllabusId,
                             'syllabus_week_id' => $week->id,
+                            'component_type'   => $activeComponent,
                             'reference_text'   => $text,
                         ]);
                     }
@@ -212,6 +218,7 @@ class WeekContentService
             if ($matsChanged) {
                 OnlineMaterial::where('syllabus_id', $syllabusId)
                     ->where('syllabus_week_id', $week->id)
+                    ->where('component_type', $activeComponent)
                     ->delete();
 
                 foreach ((array) ($payload['materials'] ?? []) as $mat) {
@@ -221,6 +228,7 @@ class WeekContentService
                         OnlineMaterial::create([
                             'syllabus_id'      => $syllabusId,
                             'syllabus_week_id' => $week->id,
+                            'component_type'   => $activeComponent,
                             'material_name'    => $name ?: 'Online Material',
                             'url'              => $url,
                         ]);
@@ -261,10 +269,12 @@ class WeekContentService
 
         Reference::where('syllabus_id', $syllabusId)
             ->where('syllabus_week_id', $week->id)
+            ->where('component_type', $activeComponent)
             ->delete();
 
         OnlineMaterial::where('syllabus_id', $syllabusId)
             ->where('syllabus_week_id', $week->id)
+            ->where('component_type', $activeComponent)
             ->delete();
 
         return [

@@ -11,6 +11,7 @@ class OnlineMaterial extends Model
     protected $fillable = [
         'syllabus_id',
         'syllabus_week_id',
+        'component_type',
         'material_name',
         'url',
     ];
