@@ -67,7 +67,7 @@ class SyllabusPreviewService
             'course.program.departments.objectives',
             'course.program.departments.college.goals',
             'course.programOutcomes',
-            'components',
+            'components.schedules',
             'courseOutcomes',
             'references',
             'onlineMaterials',
@@ -77,6 +77,7 @@ class SyllabusPreviewService
             'reviewers.user',
             'dean',
             'deanConcurred',
+            'preparer.consultationHours',
         ]);
     }
 
@@ -97,6 +98,7 @@ class SyllabusPreviewService
         $courseOutcomes       = $syllabus->courseOutcomes?->sortBy('co_code') ?? collect();
         $lecComponent         = $syllabus->components?->firstWhere('type', 'LEC');
         $labComponent         = $syllabus->components?->firstWhere('type', 'LAB');
+        $preparerConsultationHours = $syllabus->preparer?->consultationHours ?? collect();
 
         $coursePoIedMap = $syllabus->course?->programOutcomes
             ?->pluck('pivot.ied', 'id')
@@ -158,6 +160,7 @@ class SyllabusPreviewService
                 'courseOutcomes',
                 'lecComponent',
                 'labComponent',
+                'preparerConsultationHours',
                 'coursePoIedMap',
                 'courseLevel',
                 'syllabusRevisions',

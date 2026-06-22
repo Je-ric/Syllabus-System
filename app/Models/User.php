@@ -47,6 +47,13 @@ class User extends Authenticatable
         return $this->hasMany(UserOtp::class);
     }
 
+    public function consultationHours()
+    {
+        return $this->hasMany(UserConsultationHour::class)->orderByRaw(
+            "FIELD(day,'Monday','Tuesday','Wednesday','Thursday','Friday')"
+        );
+    }
+
     // Used in: assignDean() - OrganizationalHierarchyController; 
     //          assignChair() - OrganizationalHierarchyController; 
     //          assignFaculty() - OrganizationalHierarchyController

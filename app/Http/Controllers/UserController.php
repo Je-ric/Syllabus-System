@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
 use App\Models\User;
+use App\Models\UserConsultationHour;
 use App\Services\OtpService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,9 +14,7 @@ class UserController extends Controller
 {
     private const PASSWORD_CHANGE_OTP_SESSION_KEY = 'password_change_otp';
 
-    public function __construct(private OtpService $otpService)
-    {
-    }
+    public function __construct(private OtpService $otpService) {}
 
     public function index()
     {
@@ -23,6 +22,7 @@ class UserController extends Controller
             'roles',
             'assignments.department.college',
             'assignments.college',
+            'consultationHours',
         ])->findOrFail(Auth::id());
 
         $recentActivity = AuditLog::where('user_id', $user->id)
@@ -31,6 +31,29 @@ class UserController extends Controller
             ->get();
 
         return view('Authentication.viewDetails', compact('user', 'recentActivity'));
+    }
+
+    public function storeConsultationHour(Request $request)
+    {
+        $validated = $request->validate([
+            'day'  => ['required', 'in:Monday,Tuesday,Wednesday,Thursday,Friday'],
+            'time' => ['required', 'string', 'max:100'],
+        ]);
+
+        UserConsultationHour::create([
+            'user_id' => Auth::id(),
+            'day'     => $validated['day'],
+            'time'    => $validated['time'],
+        ]);
+
+        return back()->with('toast', ['message' => 'Consultation hour added.', 'type' => 'success']);
+    }
+
+    public function destroyConsultationHour(UserConsultationHour $hour)
+    {
+        abort_if($hour->user_id !== Auth::id(), 403);
+        $hour->delete();
+        return back()->with('toast', ['message' => 'Consultation hour removed.', 'type' => 'success']);
     }
 
     public function update(Request $request)

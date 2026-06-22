@@ -51,6 +51,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/profile/password', [UserController::class,'changePassword'])->name('profile.password.change');
     Route::post('/profile/password/verify-otp', [UserController::class,'verifyPasswordOtp'])->name('profile.password.verify-otp');
     Route::post('/profile/password/resend-otp', [UserController::class,'resendPasswordOtp'])->name('profile.password.resend-otp');
+    Route::post('/profile/consultation-hours', [UserController::class,'storeConsultationHour'])->name('profile.consultation.store');
+    Route::delete('/profile/consultation-hours/{hour}', [UserController::class,'destroyConsultationHour'])->name('profile.consultation.destroy');
 
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/account-approval', [AccountApprovalController::class, 'index'])->name('accounts.approval');

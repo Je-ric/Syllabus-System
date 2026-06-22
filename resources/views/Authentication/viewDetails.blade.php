@@ -186,6 +186,57 @@
                 </form>
             </x-card-section>
 
+            {{-- Consultation Hours CRUD --}}
+            {{-- @unless ($isAdmin) --}}
+            <x-card-section title="Consultation Hours" icon="bx-time">
+                <div class="space-y-3">
+                    @forelse ($user->consultationHours as $hour)
+                        <div class="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5">
+                            <div class="flex items-center gap-3">
+                                <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-bold shrink-0">
+                                    {{ substr($hour->day, 0, 3) }}
+                                </span>
+                                <span class="text-[13px] font-medium text-slate-700">{{ $hour->day }}</span>
+                                <span class="text-[13px] text-slate-500">{{ $hour->time }}</span>
+                            </div>
+                            <form method="POST" action="{{ route('profile.consultation.destroy', $hour) }}">
+                                @csrf @method('DELETE')
+                                <button type="submit"
+                                    onclick="return confirm('Remove this consultation hour?')"
+                                    class="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition">
+                                    <i class="bx bx-trash text-sm"></i>
+                                </button>
+                            </form>
+                        </div>
+                    @empty
+                        <p class="text-[13px] text-slate-400 italic">No consultation hours added yet.</p>
+                    @endforelse
+
+                    <form method="POST" action="{{ route('profile.consultation.store') }}"
+                        class="mt-3 flex flex-wrap items-end gap-3 pt-3 border-t border-slate-100">
+                        @csrf
+                        <div class="space-y-1">
+                            <x-form.label>Day</x-form.label>
+                            <x-form.select name="day">
+                                @foreach (['Monday','Tuesday','Wednesday','Thursday','Friday'] as $d)
+                                    <option value="{{ $d }}" {{ old('day') === $d ? 'selected' : '' }}>{{ $d }}</option>
+                                @endforeach
+                            </x-form.select>
+                            @error('day')<p class="text-xs text-rose-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div class="space-y-1 flex-1 min-w-40">
+                            <x-form.label>Time <span class="text-slate-400 font-normal normal-case">(e.g. 01:00 PM – 03:00 PM)</span></x-form.label>
+                            <x-form.input type="text" name="time" placeholder="01:00 PM – 03:00 PM" :value="old('time')" />
+                            @error('time')<p class="text-xs text-rose-600">{{ $message }}</p>@enderror
+                        </div>
+                        <x-button type="submit" variant="sm-add">
+                            <i class="bx bx-plus"></i> Add
+                        </x-button>
+                    </form>
+                </div>
+            </x-card-section>
+            {{-- @endunless --}}
+
             <x-card-section
                 title="Recent Activity"
                 icon="bx-history"

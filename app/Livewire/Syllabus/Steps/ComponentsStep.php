@@ -3,24 +3,13 @@
 namespace App\Livewire\Syllabus\Steps;
 
 use App\Models\CourseComponent;
+use App\Models\CourseComponentSchedule;
 use App\Models\Syllabus;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
-// ComponentsStep
-//
-// wire:model.live is used in the blade so every field change is immediately
-// synced to PHP state. The save runs on navigation (syllabus-save-step) or
-// the manual Save button. Because the wizard never remounts child components,
-// onStepChanged always reloads fresh DB data when navigating back to this step.
-//
-// DB schema (course_components):
-//   performance_standard  DECIMAL(5,2)  DEFAULT 50.00
-//   instructor_name       VARCHAR        NOT NULL
-//   instructor_email      VARCHAR        NOT NULL
-//   class_hours           VARCHAR        NOT NULL
-//   phone / office / schedule / consultation_hours  NULLABLE
 class ComponentsStep extends Component
 {
     // ── Public state ──────────────────────────────────────────────────────────
@@ -30,25 +19,26 @@ class ComponentsStep extends Component
     public bool $isLoaded     = false;
 
     // LEC fields
-    public ?string $lec_instructor_name      = null;
-    public ?string $lec_instructor_email     = null;
-    public ?string $lec_phone                = null;
-    public ?string $lec_office               = null;
-    public ?string $lec_schedule             = null;
-    public ?string $lec_consultation_hours   = null;
+    public ?string $lec_instructor_name  = null;
+    public ?string $lec_instructor_email = null;
+    public ?string $lec_phone            = null;
+    public ?string $lec_office           = null;
+    public array   $lec_schedules        = []; // [['day'=>'Monday','time'=>'...']]
 
     // LAB fields
-    public ?string $lab_instructor_name      = null;
-    public ?string $lab_instructor_email     = null;
-    public ?string $lab_phone                = null;
-    public ?string $lab_office               = null;
-    public ?string $lab_schedule             = null;
-    public ?string $lab_consultation_hours   = null;
+    public ?string $lab_instructor_name  = null;
+    public ?string $lab_instructor_email = null;
+    public ?string $lab_phone            = null;
+    public ?string $lab_office           = null;
+    public array   $lab_schedules        = [];
 
-    // Read-only from course (not stored in course_components)
+    // Read-only from course
     public string  $lec_class_hours          = '3 hr';
     public string  $lec_performance_standard = '60.00';
     public ?string $lab_class_hours          = null;
+
+    // User's consultation hours (read-only display, managed via profile)
+    public array $userConsultationHours = [];
 
     // ── Mount ─────────────────────────────────────────────────────────────────
 
@@ -72,10 +62,7 @@ class ComponentsStep extends Component
     #[On('syllabus-step-changed')]
     public function onStepChanged(string $step): void
     {
-        if ($step !== 'course_components') {
-            return;
-        }
-        // Always reload from DB on re-visit — isLoaded guard does NOT apply here.
+        if ($step !== 'course_components') return;
         $this->isLoaded = false;
         $this->loadData();
     }
@@ -83,14 +70,26 @@ class ComponentsStep extends Component
     #[On('syllabus-save-step')]
     public function onSaveRequested(string $step): void
     {
-        if ($step !== 'course_components') {
-            return;
-        }
+        if ($step !== 'course_components') return;
         $this->saveComponents();
         $this->dispatch('syllabus-step-saved', step: 'course_components');
     }
 
-    // ── Manual save button ────────────────────────────────────────────────────
+    // ── Schedule mutations ────────────────────────────────────────────────────
+
+    public function addSchedule(string $prefix): void
+    {
+        $this->{$prefix . '_schedules'}[] = ['day' => 'Monday', 'time' => ''];
+        $this->dispatch('syllabus-step-dirty', step: 'course_components', dirty: true);
+    }
+
+    public function removeSchedule(string $prefix, int $index): void
+    {
+        array_splice($this->{$prefix . '_schedules'}, $index, 1);
+        $this->dispatch('syllabus-step-dirty', step: 'course_components', dirty: true);
+    }
+
+    // ── Manual save ───────────────────────────────────────────────────────────
 
     public function save(): void
     {
@@ -103,15 +102,8 @@ class ComponentsStep extends Component
 
     public function updated(string $property): void
     {
-        if (! $this->isLoaded) {
-            return;
-        }
-        if (! str_starts_with($property, 'lec_') && ! str_starts_with($property, 'lab_')) {
-            return;
-        }
-        // When has_lec_lab, the performance standard is a single shared field.
-        // Keep lab in sync whenever lec_performance_standard changes.
-        // class_hours and performance_standard are now on the course, not editable here
+        if (! $this->isLoaded) return;
+        if (! str_starts_with($property, 'lec_') && ! str_starts_with($property, 'lab_')) return;
         $this->dispatch('syllabus-step-dirty', step: 'course_components', dirty: true);
     }
 
@@ -119,14 +111,11 @@ class ComponentsStep extends Component
 
     private function loadData(): void
     {
-        if ($this->isLoaded) {
-            return;
-        }
+        if ($this->isLoaded) return;
 
-        $syllabus           = Syllabus::query()->with('course')->findOrFail($this->syllabusId);
+        $syllabus           = Syllabus::with('course')->findOrFail($this->syllabusId);
         $this->courseHasLab = (bool) $syllabus->course?->has_lec_lab;
 
-        // Load passing_mark and class_hours from the course record
         $course = $syllabus->course;
         if ($course) {
             $this->lec_performance_standard = $this->toOptionValue($course->passing_mark, '60.00');
@@ -134,34 +123,37 @@ class ComponentsStep extends Component
             $this->lab_class_hours          = $course->lab_class_hours;
         }
 
-        $lec = CourseComponent::query()
-            ->where('syllabus_id', $this->syllabusId)
-            ->where('type', 'LEC')
-            ->first();
+        // Load user consultation hours for display
+        /** @var User $user */
+        $user = Auth::user();
+        $this->userConsultationHours = $user?->consultationHours
+            ->map(fn ($h) => ['day' => $h->day, 'time' => $h->time])
+            ->values()->all() ?? [];
+
+        $lec = CourseComponent::with('schedules')
+            ->where('syllabus_id', $this->syllabusId)->where('type', 'LEC')->first();
 
         if ($lec) {
-            $this->lec_instructor_name    = $lec->instructor_name;
-            $this->lec_instructor_email   = $lec->instructor_email;
-            $this->lec_phone              = $lec->phone;
-            $this->lec_office             = $lec->office;
-            $this->lec_schedule           = $lec->schedule;
-            $this->lec_consultation_hours = $lec->consultation_hours;
+            $this->lec_instructor_name  = $lec->instructor_name;
+            $this->lec_instructor_email = $lec->instructor_email;
+            $this->lec_phone            = $lec->phone;
+            $this->lec_office           = $lec->office;
+            $this->lec_schedules        = $lec->schedules->map(fn ($s) => ['day' => $s->day, 'time' => $s->time])->values()->all();
         } else {
             $this->prefillLecFromUser();
         }
 
-        $lab = CourseComponent::query()
-            ->where('syllabus_id', $this->syllabusId)
-            ->where('type', 'LAB')
-            ->first();
+        if ($this->courseHasLab) {
+            $lab = CourseComponent::with('schedules')
+                ->where('syllabus_id', $this->syllabusId)->where('type', 'LAB')->first();
 
-        if ($lab) {
-            $this->lab_instructor_name    = $lab->instructor_name;
-            $this->lab_instructor_email   = $lab->instructor_email;
-            $this->lab_phone              = $lab->phone;
-            $this->lab_office             = $lab->office;
-            $this->lab_schedule           = $lab->schedule;
-            $this->lab_consultation_hours = $lab->consultation_hours;
+            if ($lab) {
+                $this->lab_instructor_name  = $lab->instructor_name;
+                $this->lab_instructor_email = $lab->instructor_email;
+                $this->lab_phone            = $lab->phone;
+                $this->lab_office           = $lab->office;
+                $this->lab_schedules        = $lab->schedules->map(fn ($s) => ['day' => $s->day, 'time' => $s->time])->values()->all();
+            }
         }
 
         $this->isLoaded = true;
@@ -170,9 +162,7 @@ class ComponentsStep extends Component
     private function prefillLecFromUser(): void
     {
         $user = Auth::user();
-        if (! $user) {
-            return;
-        }
+        if (! $user) return;
         if (empty($this->lec_instructor_name)  && ! empty($user->name))         $this->lec_instructor_name  = $user->name;
         if (empty($this->lec_instructor_email) && ! empty($user->email))        $this->lec_instructor_email = $user->email;
         if (empty($this->lec_phone)            && ! empty($user->phone_number)) $this->lec_phone            = $user->phone_number;
@@ -183,37 +173,42 @@ class ComponentsStep extends Component
 
     private function saveComponents(): void
     {
-        // When has_lec_lab, performance standard is a single shared value.
-        // Mirror LEC → LAB before saving so both rows store the same mark.
-        if ($this->courseHasLab) {
-            $this->lab_performance_standard = $this->lec_performance_standard;
-        }
-
-        // LEC is always saved
-        CourseComponent::query()->updateOrCreate(
+        $lec = CourseComponent::updateOrCreate(
             ['syllabus_id' => $this->syllabusId, 'type' => 'LEC'],
             $this->buildPayload('lec')
         );
+        $this->syncSchedules($lec, $this->lec_schedules);
 
         if ($this->courseHasLab) {
-            CourseComponent::query()->updateOrCreate(
+            $lab = CourseComponent::updateOrCreate(
                 ['syllabus_id' => $this->syllabusId, 'type' => 'LAB'],
                 $this->buildPayload('lab')
             );
+            $this->syncSchedules($lab, $this->lab_schedules);
         }
     }
 
-    // Build the DB column array from the Livewire public properties.
-    // instructor_name, instructor_email, class_hours — NOT NULL in DB.
-    // phone, office, schedule, consultation_hours   — NULLABLE. Blank → null.
-    // performance_standard                          — DECIMAL. Parse the select option value.
+    private function syncSchedules(CourseComponent $component, array $schedules): void
+    {
+        $component->schedules()->delete();
+
+        foreach ($schedules as $s) {
+            $day  = trim($s['day']  ?? '');
+            $time = trim($s['time'] ?? '');
+            if ($day !== '' && $time !== '') {
+                CourseComponentSchedule::create([
+                    'course_component_id' => $component->id,
+                    'day'                 => $day,
+                    'time'                => $time,
+                ]);
+            }
+        }
+    }
+
     private function buildPayload(string $prefix): array
     {
-        $get = fn (string $field) => $this->{$prefix . '_' . $field};
-
-        // class_hours and performance_standard now live on the course record
+        $get        = fn (string $f) => $this->{$prefix . '_' . $f};
         $classHours = $prefix === 'lec' ? $this->lec_class_hours : ($this->lab_class_hours ?? '3 hr');
-        $perfStd    = $this->toDecimal($this->lec_performance_standard, 60.00);
 
         return [
             'instructor_name'      => $this->str($get('instructor_name'))  ?? '',
@@ -221,49 +216,33 @@ class ComponentsStep extends Component
             'phone'                => $this->nullable($get('phone')),
             'office'               => $this->nullable($get('office')),
             'class_hours'          => $classHours,
-            'schedule'             => $this->nullable($get('schedule')),
-            'consultation_hours'   => $this->nullable($get('consultation_hours')),
-            'performance_standard' => $perfStd,
+            'performance_standard' => $this->toDecimal($this->lec_performance_standard, 60.00),
         ];
     }
 
     // ── Value helpers ─────────────────────────────────────────────────────────
 
-    // Return trimmed string or null for nullable DB columns.
     private function nullable(mixed $v): ?string
     {
         $s = trim((string) ($v ?? ''));
         return $s === '' ? null : $s;
     }
 
-    // Return trimmed string; fall back to $fallback when blank.
-    // Used for NOT NULL columns so the DB never complains.
     private function str(mixed $v, ?string $fallback = null): ?string
     {
         $s = trim((string) ($v ?? ''));
         return $s !== '' ? $s : $fallback;
     }
 
-    // Convert a select option value like "50.00", "67.00", "50", "50%"
-    // to a float for the DECIMAL(5,2) DB column.
     private function toDecimal(mixed $v, float $fallback): float
     {
         $s = str_replace('%', '', trim((string) ($v ?? '')));
         return is_numeric($s) ? round((float) $s, 2) : $fallback;
     }
 
-    // Convert a DB DECIMAL value (e.g. 50.00 / "67.00") to the string
-    // that matches the blade <option value="..."> attribute exactly.
     private function toOptionValue(mixed $v, string $fallback): string
     {
         $s = trim((string) ($v ?? ''));
-        if ($s === '') {
-            return $fallback;
-        }
-        // If already in "50.00" format, return as-is
-        if (is_numeric($s)) {
-            return number_format((float) $s, 2, '.', '');
-        }
-        return $fallback;
+        return is_numeric($s) ? number_format((float) $s, 2, '.', '') : $fallback;
     }
 }
