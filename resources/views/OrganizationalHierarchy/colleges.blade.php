@@ -39,16 +39,12 @@
                                                 {{ $dean->email }}
                                             </p>
                                         </div>
-                                        <form action="{{ route('organizational.remove-dean') }}" method="POST" class="shrink-0">
-                                            @csrf
-                                            <input type="hidden" name="college_id" value="{{ $college->id }}">
-                                            <input type="hidden" name="user_id" value="{{ $dean->id }}">
-                                            <button type="submit"
-                                                class="p-1.5 rounded-lg text-rose-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
-                                                title="Remove dean">
-                                                <i class="bx bx-trash text-base leading-none"></i>
-                                            </button>
-                                        </form>
+                                        <button type="button"
+                                            onclick="document.getElementById('removeDeanModal-{{ $college->id }}').showModal()"
+                                            class="p-1.5 rounded-lg text-rose-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                                            title="Remove dean">
+                                            <i class="bx bx-trash text-base leading-none"></i>
+                                        </button>
                                     </div>
                                 @else
                                     <p class="text-xs text-slate-400 italic">No dean assigned yet.</p>
@@ -87,6 +83,15 @@
                         'collegeName'    => $college->name,
                         'potentialDeans' => $potentialDeans,
                     ])
+
+                    @if ($dean)
+                        @include('OrganizationalHierarchy.modals.removeDeanModal', [
+                            'collegeId'   => $college->id,
+                            'collegeName' => $college->name,
+                            'userId'      => $dean->id,
+                            'userName'    => $dean->name,
+                        ])
+                    @endif
                 @endforeach
 
             </div>

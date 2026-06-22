@@ -76,16 +76,12 @@
                                             </p>
                                         </div>
                                         @if ($canManageChair)
-                                            <form action="{{ route('organizational.remove-chair') }}" method="POST" class="shrink-0">
-                                                @csrf
-                                                <input type="hidden" name="department_id" value="{{ $department->id }}">
-                                                <input type="hidden" name="user_id" value="{{ $chair->id }}">
-                                                <button type="submit"
-                                                    class="p-1.5 rounded-lg text-rose-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
-                                                    title="Remove chair">
-                                                    <i class="bx bx-trash text-base leading-none"></i>
-                                                </button>
-                                            </form>
+                                            <button type="button"
+                                                onclick="document.getElementById('removeChairModal-{{ $department->id }}').showModal()"
+                                                class="p-1.5 rounded-lg text-rose-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                                                title="Remove chair">
+                                                <i class="bx bx-trash text-base leading-none"></i>
+                                            </button>
                                         @endif
                                     </div>
                                 @else
@@ -127,16 +123,12 @@
                                                     <p class="text-xs text-slate-500 truncate">{{ $fa->user->email }}</p>
                                                 </div>
                                                 @if ($canManageFaculty)
-                                                    <form action="{{ route('organizational.remove-faculty') }}" method="POST" class="shrink-0">
-                                                        @csrf
-                                                        <input type="hidden" name="department_id" value="{{ $department->id }}">
-                                                        <input type="hidden" name="user_id" value="{{ $fa->user->id }}">
-                                                        <button type="submit"
-                                                            class="p-1.5 rounded-lg text-rose-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
-                                                            title="Remove faculty">
-                                                            <i class="bx bx-trash text-base leading-none"></i>
-                                                        </button>
-                                                    </form>
+                                                    <button type="button"
+                                                        onclick="document.getElementById('removeFacultyModal-{{ $department->id }}-{{ $fa->user->id }}').showModal()"
+                                                        class="p-1.5 rounded-lg text-rose-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                                                        title="Remove faculty">
+                                                        <i class="bx bx-trash text-base leading-none"></i>
+                                                    </button>
                                                 @endif
                                             </div>
                                         @endforeach
@@ -165,6 +157,24 @@
                             'assignedFacultyIds' => $facultyList->pluck('user_id')->toArray(),
                         ])
                     @endif
+
+                    @if ($chair && $canManageChair)
+                        @include('OrganizationalHierarchy.modals.removeChairModal', [
+                            'departmentId'   => $department->id,
+                            'departmentName' => $department->name,
+                            'userId'         => $chair->id,
+                            'userName'       => $chair->name,
+                        ])
+                    @endif
+
+                    @foreach ($facultyList as $fa)
+                        @include('OrganizationalHierarchy.modals.removeFacultyModal', [
+                            'departmentId'   => $department->id,
+                            'departmentName' => $department->name,
+                            'userId'         => $fa->user->id,
+                            'userName'       => $fa->user->name,
+                        ])
+                    @endforeach
 
                 @endforeach
 
