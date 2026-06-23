@@ -352,7 +352,7 @@ strong,
 .a4-list,
 .a4-row {
     font-family:    var(--font-body);
-    font-size:      var(--fs-body);
+    /* font-size:      var(--fs-body); */
     text-align:     justify;
     letter-spacing: 0.04em;
     line-height:    var(--lh-body);
@@ -567,4 +567,48 @@ table.fcas th {
     .weekly-coverage-table td {
         width: auto !important;
     }
+}
+
+/* ═══════════════════════════════════════════════
+   QUILL RICH-TEXT OUTPUT — fix rendering in weekly coverage table cells
+   Scope: only inside .weekly-coverage-table td
+═══════════════════════════════════════════════ */
+
+/* 1. Restore bullet visibility — your global reset zeroed out list padding */
+.weekly-coverage-table td ul,
+.weekly-coverage-table td ol {
+    padding-left: 1.5em;   /* gives the marker glyph room to appear */
+    margin: 0;
+}
+
+.weekly-coverage-table td ul li {
+    list-style-type: disc;
+    list-style-position: outside;
+    padding-left: 0;       /* override your global 8px that shifts text but not marker */
+}
+
+.weekly-coverage-table td ol li {
+    list-style-type: decimal;
+    list-style-position: outside;
+    padding-left: 0;
+}
+
+/* 2. Fix numbered-list numbers appearing in wrong column —
+   Quill uses data-list + ::before counter by default; force native <ol> rendering instead */
+.weekly-coverage-table td ol li::before {
+    display: none !important; /* kill Quill's pseudo-element counter */
+}
+
+/* 3. Fix font size — the 9pt table rule was being overridden inconsistently.
+   All Quill-output elements inside the cell should respect the cell's font. */
+.weekly-coverage-table td p,
+.weekly-coverage-table td li,
+.weekly-coverage-table td ul,
+.weekly-coverage-table td ol,
+.weekly-coverage-table td span,
+.weekly-coverage-table td strong,
+.weekly-coverage-table td em,
+.weekly-coverage-table td br {
+    font-size: inherit !important;  /* pull from the td's 9pt, not Quill's injected styles */
+    font-family: inherit !important;
 }
