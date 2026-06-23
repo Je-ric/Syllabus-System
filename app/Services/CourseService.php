@@ -55,10 +55,10 @@ class CourseService
             $prerequisite = $this->normalizeRequisite($data['prerequisite'] ?? null);
             $corequisite  = $this->normalizeRequisite($data['corequisite'] ?? null);
 
-            $newHasLecLab = (bool) ($data['has_lec_lab'] ?? false);
+            $newHasLecLab = filter_var($data['has_lec_lab'] ?? $course->has_lec_lab, FILTER_VALIDATE_BOOLEAN);
 
-            // Block has_lec_lab change if syllabi already exist
-            if ($course->has_lec_lab !== $newHasLecLab && $course->syllabi()->exists()) {
+            // Only block if the value is actually changing
+            if ((bool) $course->has_lec_lab !== $newHasLecLab && $course->syllabi()->exists()) {
                 $direction = $newHasLecLab ? 'No → Yes' : 'Yes → No';
                 throw new \RuntimeException(
                     "Cannot change \"Has Laboratory\" ({$direction}) because this course already has syllabi. " .

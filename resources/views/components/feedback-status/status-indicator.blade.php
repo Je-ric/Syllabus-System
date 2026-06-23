@@ -1,92 +1,153 @@
 @props([
-    'status'  => null,
-    'label'   => null,
-    'variant' => null,
-    'dot'     => false,
-    'icon'    => null,
-    'size'    => 'md',
+    'status'  => null,   // semantic mode: 'success' | 'warning' | 'danger' | 'info' | 'neutral' | role keys
+    'variant' => null,   // color mode: 'brand' | 'emerald' | 'lab' | 'blue' | 'amber' | 'rose' | 'slate' | 'violet' | 'indigo' | 'sky'
+    'label'   => null,   // explicit label (overrides slot and auto-label)
+    'dot'     => false,  // show a colored dot instead of an icon
+    'icon'    => null,   // explicit icon class (overrides auto-icon)
+    'size'    => 'md',   // 'sm' | 'md' | 'lg'
 ])
 
 @php
-// Design-token aligned status styles
-$statusStyles = [
-    'success'  => 'bg-[#f0fdf4] text-[#166534] ring-1 ring-[#bbf7d0]',
-    'neutral'  => 'bg-[#f8fafc] text-[#475569] ring-1 ring-[#e2e8f0]',
-    'info'     => 'bg-[#eff6ff] text-[#1e40af] ring-1 ring-[#bfdbfe]',
-    'warning'  => 'bg-[#fffbeb] text-[#92400e] ring-1 ring-[#fcd34d]',
-    'danger'   => 'bg-[#fff1f2] text-[#9f1239] ring-1 ring-[#fda4af]',
-    'active'   => 'bg-[#f0fdf4] text-[#166534] ring-1 ring-[#bbf7d0]',
-    'pending'  => 'bg-[#fffbeb] text-[#92400e] ring-1 ring-[#fcd34d]',
-    'rejected' => 'bg-[#fff1f2] text-[#9f1239] ring-1 ring-[#fda4af]',
-    'disabled' => 'bg-[#f8fafc] text-[#475569] ring-1 ring-[#e2e8f0]',
-    'admin'    => 'bg-[#faf5ff] text-[#581c87] ring-1 ring-[#d8b4fe]',
-    'dean'     => 'bg-[#eef2ff] text-[#3730a3] ring-1 ring-[#a5b4fc]',
-    'chair'    => 'bg-[#eff6ff] text-[#1e40af] ring-1 ring-[#93c5fd]',
-    'faculty'  => 'bg-[#f0fdf4] text-[#166534] ring-1 ring-[#bbf7d0]',
-    'lec'      => 'bg-[#f0fdf4] text-[#166534] ring-1 ring-[#bbf7d0]',
-    'lec_lab'  => 'bg-[#f0fdf4] text-[#166534] ring-1 ring-[#bbf7d0]',
+
+// ── Status token map ─────────────────────────────────────────────────────────
+// Each status resolves to a variant name + optional default icon.
+// This decouples visual tokens from semantic meaning.
+$statusMap = [
+    // State
+    'success'  => ['variant' => 'emerald', 'icon' => 'bx bx-check-circle'],
+    'active'   => ['variant' => 'emerald', 'icon' => 'bx bx-check-shield'],
+    'neutral'  => ['variant' => 'slate',   'icon' => 'bx bx-minus-circle'],
+    'disabled' => ['variant' => 'slate',   'icon' => 'bx bx-pause-circle'],
+    'info'     => ['variant' => 'blue',    'icon' => 'bx bx-info-circle'],
+    'warning'  => ['variant' => 'amber',   'icon' => 'bx bx-error-circle'],
+    'pending'  => ['variant' => 'amber',   'icon' => 'bx bx-time-five'],
+    'danger'   => ['variant' => 'rose',    'icon' => 'bx bx-x-circle'],
+    'rejected' => ['variant' => 'rose',    'icon' => 'bx bx-block'],
+    // Roles
+    'admin'    => ['variant' => 'violet',  'icon' => 'bx bx-crown'],
+    'dean'     => ['variant' => 'indigo',  'icon' => 'bx bx-medal'],
+    'chair'    => ['variant' => 'blue',    'icon' => 'bx bx-user-pin'],
+    'faculty'  => ['variant' => 'emerald', 'icon' => 'bx bx-user'],
+    // Course types
+    'lec'      => ['variant' => 'emerald', 'icon' => 'bx bx-book'],
+    'lec_lab'  => ['variant' => 'emerald', 'icon' => 'bx bx-flask'],
 ];
 
-$statusIcons = [
-    'success'  => 'bx bx-check-circle',
-    'neutral'  => 'bx bx-minus-circle',
-    'info'     => 'bx bx-info-circle',
-    'warning'  => 'bx bx-error-circle',
-    'danger'   => 'bx bx-x-circle',
-    'active'   => 'bx bx-check-shield',
-    'pending'  => 'bx bx-time-five',
-    'rejected' => 'bx bx-block',
-    'disabled' => 'bx bx-pause-circle',
-    'admin'    => 'bx bx-crown',
-    'dean'     => 'bx bx-medal',
-    'chair'    => 'bx bx-user-pin',
-    'faculty'  => 'bx bx-user',
-    'lec'      => 'bx bx-book',
-    'lec_lab'  => 'bx bx-flask',
+// ── Variant token map ────────────────────────────────────────────────────────
+// pill  = the badge background + text + ring
+// dot   = the colored dot fill
+// All rings use ring-inset so they render cleanly inside bordered containers.
+$variantTokens = [
+    'emerald' => [
+        'pill' => 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200',
+        'dot'  => 'bg-emerald-500',
+    ],
+    'brand' => [  // alias → emerald
+        'pill' => 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200',
+        'dot'  => 'bg-emerald-500',
+    ],
+    'blue' => [
+        'pill' => 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200',
+        'dot'  => 'bg-blue-500',
+    ],
+    'lab' => [   // alias → blue
+        'pill' => 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200',
+        'dot'  => 'bg-blue-500',
+    ],
+    'sky' => [
+        'pill' => 'bg-sky-50 text-sky-700 ring-1 ring-inset ring-sky-200',
+        'dot'  => 'bg-sky-500',
+    ],
+    'amber' => [
+        'pill' => 'bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200',
+        'dot'  => 'bg-amber-400',
+    ],
+    'rose' => [
+        'pill' => 'bg-rose-50 text-rose-600 ring-1 ring-inset ring-rose-200',
+        'dot'  => 'bg-rose-400',
+    ],
+    'violet' => [
+        'pill' => 'bg-violet-50 text-violet-700 ring-1 ring-inset ring-violet-200',
+        'dot'  => 'bg-violet-500',
+    ],
+    'indigo' => [
+        'pill' => 'bg-indigo-50 text-indigo-700 ring-1 ring-inset ring-indigo-200',
+        'dot'  => 'bg-indigo-400',
+    ],
+    'slate' => [
+        'pill' => 'bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-200',
+        'dot'  => 'bg-slate-400',
+    ],
 ];
 
-// Variant styles — brand=green, lab=sky-blue, rose=error, slate=neutral
-$variantStyles = [
-    'brand'   => ['pill' => 'bg-[#f0fdf4] text-[#166534] ring-1 ring-[#bbf7d0]',  'dot' => 'bg-[#16a34a]'],
-    'emerald' => ['pill' => 'bg-[#f0fdf4] text-[#166534] ring-1 ring-[#bbf7d0]',  'dot' => 'bg-[#16a34a]'],
-    'lab'     => ['pill' => 'bg-[#eff6ff] text-[#1e40af] ring-1 ring-[#bfdbfe]',  'dot' => 'bg-[#3b82f6]'],
-    'blue'    => ['pill' => 'bg-[#eff6ff] text-[#1e40af] ring-1 ring-[#bfdbfe]',  'dot' => 'bg-[#3b82f6]'],
-    'amber'   => ['pill' => 'bg-[#fffbeb] text-[#92400e] ring-1 ring-[#fcd34d]',  'dot' => 'bg-[#f59e0b]'],
-    'rose'    => ['pill' => 'bg-[#fff1f2] text-[#9f1239] ring-1 ring-[#fda4af]',  'dot' => 'bg-[#f43f5e]'],
-    'slate'   => ['pill' => 'bg-[#f8fafc] text-[#475569] ring-1 ring-[#e2e8f0]',  'dot' => 'bg-[#94a3b8]'],
-    'violet'  => ['pill' => 'bg-[#faf5ff] text-[#581c87] ring-1 ring-[#d8b4fe]',  'dot' => 'bg-[#8b5cf6]'],
-    'indigo'  => ['pill' => 'bg-[#eef2ff] text-[#3730a3] ring-1 ring-[#a5b4fc]',  'dot' => 'bg-[#6366f1]'],
-    'sky'     => ['pill' => 'bg-[#f0f9ff] text-[#075985] ring-1 ring-[#bae6fd]',  'dot' => 'bg-[#0ea5e9]'],
-];
+$fallbackTokens = $variantTokens['slate'];
 
-$isStatusMode = filled($status);
+// ── Resolve variant + icon from status (if in status mode) ──────────────────
+$resolvedVariant  = $variant;  // may be null if only status is set
+$resolvedAutoIcon = null;
 
-$style = $isStatusMode
-    ? ($statusStyles[$status] ?? 'bg-[#f8fafc] text-[#475569] ring-1 ring-[#e2e8f0]')
-    : ($variantStyles[$variant]['pill'] ?? $variantStyles['slate']['pill']);
+if (filled($status) && isset($statusMap[$status])) {
+    $resolvedVariant  = $resolvedVariant ?? $statusMap[$status]['variant'];
+    $resolvedAutoIcon = $statusMap[$status]['icon'] ?? null;
+}
 
-$defaultStatusIcon = $isStatusMode ? ($statusIcons[$status] ?? null) : null;
-$iconClass  = $icon ?? $defaultStatusIcon;
-$dotClass   = $variantStyles[$variant]['dot'] ?? 'bg-[#94a3b8]';
+// ── Pick the token set ───────────────────────────────────────────────────────
+$tokens   = $variantTokens[$resolvedVariant] ?? $fallbackTokens;
+$pillStyle = $tokens['pill'];
+$dotStyle  = $tokens['dot'];
 
-$resolvedLabel = $label
-    ?? ($slot->isNotEmpty() ? null : ($isStatusMode ? ucfirst(str_replace('_', ' ', (string) $status)) : null));
+// ── Icon: explicit prop wins, then status auto-icon, then nothing ───────────
+$iconClass = $icon ?? $resolvedAutoIcon;
+
+// ── Size scale ───────────────────────────────────────────────────────────────
+$sizeClasses = match ($size) {
+    'sm' => 'text-[10px] px-2 py-0.5 gap-1',
+    'lg' => 'text-[13px] px-3 py-1 gap-1.5',
+    default => 'text-[11px] px-2.5 py-0.5 gap-1',  // md
+};
+
+$dotSizeClass = match ($size) {
+    'sm'    => 'w-1 h-1',
+    'lg'    => 'w-2 h-2',
+    default => 'w-1.5 h-1.5',
+};
+
+$iconSizeClass = match ($size) {
+    'sm'    => 'text-[10px]',
+    'lg'    => 'text-[13px]',
+    default => 'text-[11px]',
+};
+
+// ── Label resolution ─────────────────────────────────────────────────────────
+// Priority: explicit $label prop → slot content → auto-derive from $status
+$hasSlot         = $slot->isNotEmpty();
+$autoLabel       = filled($status) ? ucfirst(str_replace('_', ' ', (string) $status)) : null;
+$showExplicit    = filled($label);
+$showSlot        = !$showExplicit && $hasSlot;
+$showAutoLabel   = !$showExplicit && !$hasSlot && filled($autoLabel);
+
 @endphp
 
 <span {{ $attributes->class([
-    'inline-flex items-center gap-1 font-semibold rounded-full',
-    'text-[11px] px-2.5 py-0.5',
-    $style,
+    'inline-flex items-center font-semibold rounded-full whitespace-nowrap',
+    $sizeClasses,
+    $pillStyle,
 ]) }}>
+
+    {{-- Leading indicator: dot or icon, never both --}}
     @if ($dot)
-        <span class="w-1.5 h-1.5 rounded-full shrink-0 {{ $dotClass }}" aria-hidden="true"></span>
+        <span class="rounded-full shrink-0 {{ $dotSizeClass }} {{ $dotStyle }}" aria-hidden="true"></span>
     @elseif ($iconClass)
-        <i class="{{ $iconClass }} text-[11px] shrink-0" aria-hidden="true"></i>
+        <i class="{{ $iconClass }} {{ $iconSizeClass }} shrink-0 leading-none" aria-hidden="true"></i>
     @endif
 
-    @if ($resolvedLabel)
-        {{ $resolvedLabel }}
-    @else
+    {{-- Label --}}
+    @if ($showExplicit)
+        {{ $label }}
+    @elseif ($showSlot)
         {{ $slot }}
+    @elseif ($showAutoLabel)
+        {{ $autoLabel }}
     @endif
+
 </span>
