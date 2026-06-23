@@ -164,14 +164,14 @@
                                                                 href="{{ route('courses.edit', $course->id) }}"
                                                                 variant="table-edit"
                                                                 title="Edit course">
-                                                                <i class="bx bx-edit"></i> Edit
+                                                                <i class="bx bx-edit"></i>
                                                             </x-button>
                                                             <x-button
                                                                 type="button"
                                                                 variant="table-view"
                                                                 onclick="document.getElementById('viewCourseModal_{{ $course->id }}').showModal()"
                                                                 title="View details">
-                                                                <i class="bx bx-show"></i> View
+                                                                <i class="bx bx-show"></i>
                                                             </x-button>
                                                             <x-button
                                                                 type="button"

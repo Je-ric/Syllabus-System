@@ -30,8 +30,7 @@
 
             {{-- Existing syllabi --}}
             @forelse ($draftSyllabi as $syllabus)
-                <div class="flex flex-col rounded-xl bg-white border border-[#e2e8f0] overflow-hidden transition-shadow"
-                     style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
+                <div class="flex flex-col rounded-xl bg-white border border-[#e2e8f0] overflow-hidden transition-shadow shadow-sm">
 
                     <div class="px-4 py-3 bg-[#f0fdf4] border-b border-[#bbf7d0]">
                         <h3 class="font-bold text-[#0f172a] font-mono text-[15px]">{{ $syllabus->course->course_code }}</h3>
@@ -98,8 +97,7 @@
             <x-slot name="slot_under_review">
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
                     @forelse ($underReviewSyllabi as $syllabus)
-                        <div class="flex flex-col rounded-xl bg-white border border-[#e2e8f0] overflow-hidden transition-shadow"
-                             style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
+                        <div class="flex flex-col rounded-xl bg-white border border-[#e2e8f0] overflow-hidden transition-shadow shadow-sm">
                             <div class="px-4 py-3 bg-[#f0fdf4] border-b border-[#bbf7d0]">
                                 <h3 class="font-bold text-[#0f172a] font-mono text-[15px]">{{ $syllabus->course->course_code }}</h3>
                                 <p class="text-[13px] text-[#475569] mt-0.5 leading-relaxed">{{ Str::limit($syllabus->course->course_title, 55) }}</p>
@@ -139,8 +137,7 @@
             <x-slot name="slot_for_revision">
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
                     @forelse ($forRevisionSyllabi as $syllabus)
-                        <div class="flex flex-col rounded-xl bg-white border border-[#e2e8f0] overflow-hidden transition-shadow"
-                             style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
+                        <div class="flex flex-col rounded-xl bg-white border border-[#e2e8f0] overflow-hidden transition-shadow shadow-sm">
                             <div class="px-4 py-3 bg-[#f0fdf4] border-b border-[#bbf7d0]">
                                 <h3 class="font-bold text-[#0f172a] font-mono text-[15px]">{{ $syllabus->course->course_code }}</h3>
                                 <p class="text-[13px] text-[#475569] mt-0.5 leading-relaxed">{{ Str::limit($syllabus->course->course_title, 55) }}</p>
@@ -180,8 +177,7 @@
             <x-slot name="slot_approved">
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
                     @forelse ($approvedSyllabi as $syllabus)
-                        <div class="flex flex-col rounded-xl bg-white border border-[#e2e8f0] overflow-hidden transition-shadow"
-                             style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
+                        <div class="flex flex-col rounded-xl bg-white border border-[#e2e8f0] overflow-hidden transition-shadow shadow-sm">
                             <div class="px-4 py-3 bg-[#f0fdf4] border-b border-[#bbf7d0]">
                                 <h3 class="font-bold text-[#0f172a] font-mono text-[15px]">{{ $syllabus->course->course_code }}</h3>
                                 <p class="text-[13px] text-[#475569] mt-0.5 leading-relaxed">{{ Str::limit($syllabus->course->course_title, 55) }}</p>

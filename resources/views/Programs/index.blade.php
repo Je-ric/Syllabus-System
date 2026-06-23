@@ -61,7 +61,8 @@
                     <x-slot name="slot_peo">
                         <x-feedback-status.alert
                             type="success"
-                            :show-title="false">
+                            :show-title="false"
+                            class="mb-4">
                             Three to five years after graduation, graduates of
                             <strong>{{ $program->name }}</strong> are expected to be:
                         </x-feedback-status.alert>
@@ -73,7 +74,8 @@
                     <x-slot name="slot_po">
                         <x-feedback-status.alert
                             type="default"
-                            :show-title="false">
+                            :show-title="false"
+                            class="mb-4">
                             By the time of graduation, students of
                             <strong>{{ $program->name }}</strong>
                             have the ability to:
@@ -86,11 +88,12 @@
                     <x-slot name="slot_matrix">
                         <x-feedback-status.alert
                             type="info"
-                            :show-title="false">
+                            :show-title="false"
+                            class="mb-4">
                             Read-only mapping matrix of Program Outcomes (POs) against Program Educational Objectives (PEOs)
                             for <strong>{{ $program->name }}</strong>. Manage mappings in the POs & Mapping tab.
                         </x-feedback-status.alert>
-                    
+
                         <livewire:programs.matrix-view :program="$program" />
                     </x-slot>
 

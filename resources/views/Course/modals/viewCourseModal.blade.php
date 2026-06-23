@@ -1,4 +1,4 @@
-<x-modal.dialog id="viewCourseModal_{{ $course->id }}" maxWidth="max-w-3xl" width="w-11/12">
+<x-modal.dialog id="viewCourseModal_{{ $course->id }}" maxWidth="max-w-7xl" width="w-11/12">
     <x-modal.header modalId="viewCourseModal_{{ $course->id }}">
         <div class="flex items-center gap-3 min-w-0">
             <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#dcfce7] text-[#16a34a] shrink-0">
