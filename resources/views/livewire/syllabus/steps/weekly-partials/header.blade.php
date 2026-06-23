@@ -1,109 +1,117 @@
 {{-- weekly-partials/header.blade.php --}}
 
-<div class="mb-5 space-y-4">
+<div class="mb-6 space-y-4">
 
-    <x-wizard.step-header title="Weekly Coverage" eyebrow="Assessments"
-        description="Weeks are auto-generated from the academic calendar. Fill in coverage details per week. Exam and Non-Teaching weeks are locked automatically.">
+    <x-wizard.step-header
+        title="Weekly Coverage"
+        eyebrow="Assessments"
+        description="Weeks are auto-generated from the academic calendar. Fill in coverage details per week. Exam and non-teaching weeks are locked automatically.">
+
         <div class="flex items-center gap-2">
             @if (!$weeksGenerated)
-                <x-button variant="sm-add" wire:click="generateWeeklyCoverage" :disabled="!$academic_calendar_id"
-                    wireTarget="generateWeeklyCoverage" loading="Generating…">
-                    <i class="bx bx-calendar-plus"></i> Generate Weeks
+                <x-button variant="sm-add"
+                    wire:click="generateWeeklyCoverage"
+                    :disabled="!$academic_calendar_id"
+                    wireTarget="generateWeeklyCoverage"
+                    loading="Generating…">
+                    <i class="bx bx-calendar-plus"></i> Generate weeks
                 </x-button>
             @else
-                <x-button variant="sm-warning" wire:click="regenerateWeeks" wireTarget="regenerateWeeks"
+                <x-button variant="sm-warning"
+                    wire:click="regenerateWeeks"
+                    wireTarget="regenerateWeeks"
                     wire:confirm="This will delete all existing weeks and recreate them. All content will be lost. Continue?"
                     loading="Regenerating…">
                     <i class="bx bx-refresh"></i> Regenerate
                 </x-button>
-                <x-button variant="sm-add" wire:click="saveAllWeeklyEntries" wireTarget="saveAllWeeklyEntries"
+                <x-button variant="sm-add"
+                    wire:click="saveAllWeeklyEntries"
+                    wireTarget="saveAllWeeklyEntries"
                     loading="Saving…">
-                    <i class="bx bx-save"></i> Save All
+                    <i class="bx bx-save"></i> Save all
                 </x-button>
             @endif
         </div>
+
     </x-wizard.step-header>
 
+    {{-- No calendar error --}}
     @if (!$weeksGenerated && !$academic_calendar_id)
         <x-feedback-status.alert type="error" :showTitle="false">
-            No academic calendar selected. Go back to the previous step and select one to generate weeks.
+            No academic calendar selected. Go back to the previous step and select one before generating weeks.
         </x-feedback-status.alert>
     @endif
 
+    {{-- Info cards --}}
     @if ($weeksGenerated || ($courseComponents ?? null))
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
 
-            {{-- Schedule chips --}}
-            @if ($courseComponents ?? null)
-                @php
-                    $hasLEC = isset($courseComponents['LEC']);
-                    $hasLAB = isset($courseComponents['LAB']);
-                @endphp
-                @if ($hasLEC || $hasLAB)
-                    <div class="rounded-xl border border-slate-200 bg-white overflow-hidden">
+            {{-- Schedule card --}}
+            @if (($courseComponents ?? null) && (isset($courseComponents['LEC']) || isset($courseComponents['LAB'])))
+                <div class="rounded-xl border border-slate-200 bg-white overflow-hidden">
 
-                        <div class="px-4 py-3 border-b border-slate-200 bg-slate-50">
-                            <h3 class="text-[14px] font-semibold text-slate-800">
-                                Class Schedule
-                            </h3>
-                        </div>
+                    <div class="px-4 py-2.5 border-b border-slate-100 bg-slate-50">
+                        <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                            Class Schedule
+                        </p>
+                    </div>
 
-                        <div class="divide-y divide-slate-100">
+                    <div class="divide-y divide-slate-100">
 
-                            @if ($hasLEC)
-                                <div class="flex items-center justify-between px-4 py-3">
-                                    <div>
-                                        <p class="text-xs font-semibold text-emerald-700">
-                                            Lecture (LEC)
-                                        </p>
-                                        <p class="text-sm text-slate-800">
-                                            {{ $courseComponents['LEC']['schedule'] ?? '—' }}
-                                        </p>
-                                    </div>
-
-                                    <span class="text-xs text-slate-500">
-                                        {{ $courseComponents['LEC']['class_hours'] ?? '—' }} hrs/wk
-                                    </span>
+                        @if (isset($courseComponents['LEC']))
+                            <div class="flex items-center justify-between px-4 py-3">
+                                <div>
+                                    <p class="text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-600 mb-0.5">
+                                        Lecture · LEC
+                                    </p>
+                                    <p class="text-[13px] font-medium text-slate-700">
+                                        {{ $courseComponents['LEC']['schedule'] ?? '—' }}
+                                    </p>
                                 </div>
-                            @endif
+                                <span class="text-[12px] text-slate-400 font-mono shrink-0">
+                                    {{ $courseComponents['LEC']['class_hours'] ?? '—' }} hrs/wk
+                                </span>
+                            </div>
+                        @endif
 
-                            @if ($hasLAB)
-                                <div class="flex items-center justify-between px-4 py-3">
-                                    <div>
-                                        <p class="text-xs font-semibold text-blue-700">
-                                            Laboratory (LAB)
-                                        </p>
-                                        <p class="text-sm text-slate-800">
-                                            {{ $courseComponents['LAB']['schedule'] ?? '—' }}
-                                        </p>
-                                    </div>
-
-                                    <span class="text-xs text-slate-500">
-                                        {{ $courseComponents['LAB']['class_hours'] ?? '—' }} hrs/wk
-                                    </span>
+                        @if (isset($courseComponents['LAB']))
+                            <div class="flex items-center justify-between px-4 py-3">
+                                <div>
+                                    <p class="text-[10px] font-bold uppercase tracking-[0.12em] text-blue-600 mb-0.5">
+                                        Laboratory · LAB
+                                    </p>
+                                    <p class="text-[13px] font-medium text-slate-700">
+                                        {{ $courseComponents['LAB']['schedule'] ?? '—' }}
+                                    </p>
                                 </div>
-                            @endif
-
-                        </div>
+                                <span class="text-[12px] text-slate-400 font-mono shrink-0">
+                                    {{ $courseComponents['LAB']['class_hours'] ?? '—' }} hrs/wk
+                                </span>
+                            </div>
+                        @endif
 
                     </div>
-                @endif
+                </div>
             @endif
 
-            {{-- Academic Calendar --}}
-            <div class="rounded-xl border border-[#e2e8f0] bg-white p-4"
-                style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
-                <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-3">Academic Calendar</p>
+            {{-- Academic calendar card --}}
+            <div class="rounded-xl border border-slate-200 bg-white px-4 py-3.5">
+
+                <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 mb-2.5">
+                    Academic Calendar
+                </p>
+
                 @if ($syllabus?->academicCalendar)
-                    <div class="flex items-center justify-between gap-3 flex-wrap">
+                    <div class="flex items-start justify-between gap-3 flex-wrap">
+
                         <div>
-                            <p class="text-[13px] font-semibold text-[#0f172a] leading-tight">
+                            <p class="text-[14px] font-semibold text-slate-800 leading-tight">
                                 {{ \Carbon\Carbon::parse($syllabus->academicCalendar->start_date)->format('M d') }}
-                                <span class="text-[#94a3b8] font-normal mx-0.5">–</span>
+                                <span class="text-slate-300 mx-0.5">–</span>
                                 {{ \Carbon\Carbon::parse($syllabus->academicCalendar->end_date)->format('M d, Y') }}
                             </p>
                             @if ($syllabus->academicCalendar->academic_year ?? null)
-                                <p class="text-[11px] text-[#94a3b8] mt-0.5">
+                                <p class="text-[11px] text-slate-400 mt-0.5">
                                     {{ $syllabus->academicCalendar->academic_year }}
                                 </p>
                             @endif
@@ -111,26 +119,38 @@
 
                         @if ($weeksGenerated)
                             @php $lockedCount = count($lockedWeeks); @endphp
-                            <div class="flex flex-wrap gap-1.5">
-                                <x-feedback-status.status-indicator variant="brand" :dot="true">
-                                    {{ $syllabusWeeks->count() }} Weeks
-                                </x-feedback-status.status-indicator>
-                                <x-feedback-status.status-indicator variant="brand" :dot="true">
-                                    {{ collect($weekEvents)->flatten(1)->count() }} Events
-                                </x-feedback-status.status-indicator>
+                            <div class="flex flex-wrap gap-1.5 mt-0.5">
+
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold
+                                             bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200">
+                                    <span class="w-1 h-1 rounded-full bg-emerald-500"></span>
+                                    {{ $syllabusWeeks->count() }} weeks
+                                </span>
+
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold
+                                             bg-slate-100 text-slate-500 ring-1 ring-inset ring-slate-200">
+                                    {{ collect($weekEvents)->flatten(1)->count() }} events
+                                </span>
+
                                 @if ($lockedCount > 0)
-                                    <x-feedback-status.status-indicator variant="rose" :dot="true">
-                                        {{ $lockedCount }} Locked
-                                    </x-feedback-status.status-indicator>
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold
+                                                 bg-amber-50 text-amber-600 ring-1 ring-inset ring-amber-200">
+                                        <i class="bx bx-lock-alt text-[10px]"></i>
+                                        {{ $lockedCount }} locked
+                                    </span>
                                 @endif
+
                             </div>
                         @endif
+
                     </div>
                 @else
-                    <p class="text-[13px] text-[#94a3b8] italic flex items-center gap-1.5">
-                        <i class="bx bx-calendar-x text-base"></i> Not set
+                    <p class="text-[13px] text-slate-400 italic flex items-center gap-1.5">
+                        <i class="bx bx-calendar-x text-[15px]"></i>
+                        Not set
                     </p>
                 @endif
+
             </div>
 
         </div>

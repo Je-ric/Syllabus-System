@@ -53,7 +53,7 @@
 
         <div
             wire:key="week-{{ $week->week_no }}-{{ $activeComponent }}"
-            class="bg-white border-2 rounded-xl overflow-hidden shadow-xs transition-all duration-200"
+            class="bg-white border rounded-xl overflow-hidden shadow-md transition-all duration-200"
 
             :class="openWeek === {{ $week->week_no }}
                 ? '{{ $isLocked
@@ -79,7 +79,7 @@
 
                     {{-- Week number circle --}}
                     <span
-                        class="inline-flex items-center justify-center rounded-full shadow-md w-8 h-8 text-xs font-bold shrink-0 transition-colors duration-200"
+                        class="inline-flex items-center justify-center rounded-full shadow-md w-7 h-7 text-xs font-bold shrink-0 transition-colors duration-200"
 
                         :class="openWeek === {{ $week->week_no }}
                             ? '{{ $isLocked
