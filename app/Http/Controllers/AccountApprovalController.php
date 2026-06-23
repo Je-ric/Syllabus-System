@@ -87,20 +87,6 @@ class AccountApprovalController extends Controller
             ]);
     }
 
-    // public function changeStatus(Request $request)
-    // {
-    //     $request->validate([
-    //         'user_id' => 'required|exists:users,id',
-    //         'status'  => 'required|in:pending,active,rejected,disabled',
-    //     ]);
-
-    //     $user = User::findOrFail($request->user_id);
-    //     $user->update(['account_status' => $request->status]);
-
-    //     return redirect()->route('accounts.approval');
-    // }
-
-
     public function assignRole(Request $request)
     {
         $request->validate([
