@@ -38,10 +38,21 @@
         </x-button> --}}
     </div>
 
-    <div class="mt-6">
+    <div class="mt-6 space-y-4">
         <x-feedback-status.alert
             type="warning"
             title="Before you submit"
             message="Once you submit, the syllabus will be sent for review by the department chair. Make sure all information is correct." />
+
+        <div class="flex justify-end">
+            <x-button
+                variant="primary"
+                wire:click="submitForReview"
+                wire:loading.attr="disabled"
+                wire:target="submitForReview"
+                loading="Submitting…">
+                <i class="bx bx-send text-base leading-none"></i> Submit for Review
+            </x-button>
+        </div>
     </div>
 </div>
