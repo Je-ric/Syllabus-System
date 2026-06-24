@@ -154,7 +154,9 @@
                                         @elseif ($isMvgo)
                                             <i class="bx bx-star text-[#16a34a] shrink-0 text-base"></i>
                                         @endif
-                                        {{ $lecTaskLabel }}
+                                        {{-- {{ $lecTaskLabel }} --}}
+                                        {{ \Illuminate\Support\Str::limit(strip_tags($lecTaskLabel ?? ''), 60) }}
+                                        {{-- {!! blank(strip_tags($lecTaskLabel ?? '')) ? '---' : $lecTaskLabel !!} --}}
                                     </div>
                                 </td>
 
