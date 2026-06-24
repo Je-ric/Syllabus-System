@@ -89,6 +89,32 @@ class ComponentsStep extends Component
         $this->dispatch('syllabus-step-dirty', step: 'course_components', dirty: true);
     }
 
+    // ── Consultation Hours (inline modal save) ───────────────────────────────
+
+    public function saveConsultationHours(array $rows): void
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if (! $user) return;
+
+        $user->consultationHours()->delete();
+
+        foreach ($rows as $row) {
+            $day  = trim($row['day']  ?? '');
+            $time = trim($row['time'] ?? '');
+            if ($day !== '' && $time !== '') {
+                $user->consultationHours()->create(['day' => $day, 'time' => $time]);
+            }
+        }
+
+        $this->userConsultationHours = $user->fresh()->consultationHours
+            ->map(fn ($h) => ['day' => $h->day, 'time' => $h->time])
+            ->values()->all();
+
+        $this->dispatch('consultation-hours-updated', hours: $this->userConsultationHours);
+        $this->dispatch('lw-toast', type: 'success', message: 'Consultation hours saved.');
+    }
+
     // ── Manual save ───────────────────────────────────────────────────────────
 
     public function save(): void

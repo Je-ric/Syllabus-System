@@ -186,10 +186,17 @@
                 </form>
             </x-card-section>
 
-            {{-- Consultation Hours CRUD --}}
-            {{-- @unless ($isAdmin) --}}
+            {{-- Consultation Hours --}}
             <x-card-section title="Consultation Hours" icon="bx-time">
-                <div class="space-y-3">
+                <x-slot:actions>
+                    <button type="button" onclick="document.getElementById('profile-ch-modal').showModal()"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-semibold
+                               bg-[#f0fdf4] text-[#16a34a] border border-[#bbf7d0] hover:bg-[#dcfce7] transition-colors">
+                        <i class="bx bx-plus text-sm"></i> Add
+                    </button>
+                </x-slot:actions>
+
+                <div class="space-y-2">
                     @forelse ($user->consultationHours as $hour)
                         <div class="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5">
                             <div class="flex items-center gap-3">
@@ -211,31 +218,41 @@
                     @empty
                         <p class="text-[13px] text-slate-400 italic">No consultation hours added yet.</p>
                     @endforelse
-
-                    <form method="POST" action="{{ route('profile.consultation.store') }}"
-                        class="mt-3 flex flex-wrap items-end gap-3 pt-3 border-t border-slate-100">
-                        @csrf
-                        <div class="space-y-1">
-                            <x-form.label>Day</x-form.label>
-                            <x-form.select name="day">
-                                @foreach (['Monday','Tuesday','Wednesday','Thursday','Friday'] as $d)
-                                    <option value="{{ $d }}" {{ old('day') === $d ? 'selected' : '' }}>{{ $d }}</option>
-                                @endforeach
-                            </x-form.select>
-                            @error('day')<p class="text-xs text-rose-600">{{ $message }}</p>@enderror
-                        </div>
-                        <div class="space-y-1 flex-1 min-w-40">
-                            <x-form.label>Time <span class="text-slate-400 font-normal normal-case">(e.g. 01:00 PM – 03:00 PM)</span></x-form.label>
-                            <x-form.input type="text" name="time" placeholder="01:00 PM – 03:00 PM" :value="old('time')" />
-                            @error('time')<p class="text-xs text-rose-600">{{ $message }}</p>@enderror
-                        </div>
-                        <x-button type="submit" variant="sm-add">
-                            <i class="bx bx-plus"></i> Add
-                        </x-button>
-                    </form>
                 </div>
+
+                {{-- Add modal --}}
+                <x-modal.dialog id="profile-ch-modal" maxWidth="max-w-sm">
+                    <x-modal.header modalId="profile-ch-modal" variant="add">Add Consultation Hour</x-modal.header>
+                    <form method="POST" action="{{ route('profile.consultation.store') }}">
+                        @csrf
+                        <x-modal.body class="space-y-4">
+                            <div>
+                                <x-modal.modal-label for="ch-day">Day</x-modal.modal-label>
+                                <x-form.select id="ch-day" name="day">
+                                    @foreach (['Monday','Tuesday','Wednesday','Thursday','Friday'] as $d)
+                                        <option value="{{ $d }}" {{ old('day') === $d ? 'selected' : '' }}>{{ $d }}</option>
+                                    @endforeach
+                                </x-form.select>
+                                @error('day')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
+                            </div>
+                            <div>
+                                <x-modal.modal-label for="ch-time">Time</x-modal.modal-label>
+                                <x-form.input id="ch-time" type="text" name="time" placeholder="01:00 PM – 03:00 PM" :value="old('time')" />
+                                @error('time')<p class="text-xs text-rose-600 mt-1">{{ $message }}</p>@enderror
+                            </div>
+                        </x-modal.body>
+                        <x-modal.footer>
+                            <x-modal.close-button modalId="profile-ch-modal" />
+                            <x-button type="submit" variant="sm-add">
+                                <i class="bx bx-plus"></i> Add
+                            </x-button>
+                        </x-modal.footer>
+                    </form>
+                </x-modal.dialog>
+                @if ($errors->hasAny(['day', 'time']))
+                    <script>document.addEventListener('DOMContentLoaded', () => document.getElementById('profile-ch-modal')?.showModal());</script>
+                @endif
             </x-card-section>
-            {{-- @endunless --}}
 
             <x-card-section
                 title="Recent Activity"
