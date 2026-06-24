@@ -96,15 +96,29 @@
 
             <div class="border-t border-[#e2e8f0]"></div>
 
-            {{-- Consultation Hours (from profile, read-only) --}}
-            <div>
+            {{-- Consultation Hours --}}
+            <div x-data="{
+                days: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
+                hours: @js($userConsultationHours ?? []),
+                saving: false,
+                addRow()  { this.hours.push({ day: 'Monday', time: '' }); },
+                removeRow(i) { this.hours.splice(i, 1); },
+                async save() {
+                    this.saving = true;
+                    await $wire.saveConsultationHours(this.hours);
+                    this.saving = false;
+                    document.getElementById('consultation-hours-modal')?.close();
+                }
+            }"
+            x-on:consultation-hours-updated.window="hours = $event.detail.hours">
+
                 <div class="flex items-center justify-between mb-2">
                     <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569]">Consultation Hours</p>
-                    <a href="{{ route('profile.index') }}" target="_blank"
-                        class="text-[11px] text-emerald-600 hover:underline flex items-center gap-1">
-                        <i class="bx bx-edit-alt text-sm"></i> Manage in Profile
-                    </a>
+                    <x-button variant="sm-cancel" type="button" x-on:click="document.getElementById('consultation-hours-modal').showModal()">
+                        <i class="bx bx-edit-alt text-sm"></i> Edit
+                    </x-button>
                 </div>
+
                 @forelse ($userConsultationHours as $ch)
                     <div class="flex items-center gap-3 mb-1.5">
                         <span class="inline-flex items-center justify-center w-10 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-bold py-1 shrink-0">
@@ -114,8 +128,13 @@
                         <span class="text-[13px] text-slate-500">{{ $ch['time'] }}</span>
                     </div>
                 @empty
-                    <p class="text-[12px] italic text-[#94a3b8]">No consultation hours set. <a href="{{ route('profile.index') }}" class="text-emerald-600 hover:underline">Add them in your profile.</a></p>
+                    <p class="text-[12px] italic text-[#94a3b8]">No consultation hours set.
+                        <button type="button" x-on:click="document.getElementById('consultation-hours-modal').showModal()" class="text-emerald-600 hover:underline">Add them here.</button>
+                    </p>
                 @endforelse
+
+                @include('livewire.syllabus.steps.components-partials.consultation-hours-modal')
+
             </div>
 
         </div>
@@ -192,5 +211,12 @@
             </div>
         </x-wizard.section>
     @endif
+
+    {{-- Bottom Save All --}}
+    <div class="flex justify-end pt-2">
+        <x-button variant="sm-add" wire:click="save" wireTarget="save" loading="Saving…">
+            <i class="bx bx-save"></i> Save All
+        </x-button>
+    </div>
 
 </div>
