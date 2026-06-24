@@ -41,6 +41,18 @@
                 }
             }
 
+            // Completion: a normal week is "complete" when it has a topic, a CO/MVGO, and an assessment task
+            $isComplete = $isLocked || $isMvgo || (
+                !empty(strip_tags($weekInputs[$wKey]['topic'] ?? '')) &&
+                !empty($weekInputs[$wKey]['course_outcome_id'] ?? null) &&
+                !empty(strip_tags($weekInputs[$wKey]['assessment_task'] ?? ''))
+            );
+            $isPartial = !$isLocked && !$isComplete && (
+                !empty(strip_tags($weekInputs[$wKey]['topic'] ?? '')) ||
+                !empty($weekInputs[$wKey]['course_outcome_id'] ?? null) ||
+                !empty(strip_tags($weekInputs[$wKey]['assessment_task'] ?? ''))
+            );
+
             // Accent bar colors — rose = locked, brand green = normal
             $accentClosed = $isLocked ? 'bg-rose-300' : 'bg-[#16a34a]';
             $accentOpen   = $isLocked ? 'bg-rose-500' : 'bg-[#15803d]';
@@ -120,9 +132,17 @@
                     </div>
                 </div>
 
-                {{-- Right-side meta badges + chevron --}}
+                {{-- Right-side meta badges + completion dot + chevron --}}
                 <div class="flex items-center gap-1.5 shrink-0 ml-3">
                     @if (! $isLocked)
+                        {{-- Completion dot --}}
+                        @if ($isComplete)
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0" title="Complete"></span>
+                        @elseif ($isPartial)
+                            <span class="w-2 h-2 rounded-full bg-amber-400 shrink-0" title="Incomplete"></span>
+                        @else
+                            <span class="w-2 h-2 rounded-full bg-slate-300 shrink-0" title="Empty"></span>
+                        @endif
                         @if (count($events) > 0)
                             <x-feedback-status.status-indicator variant="brand" size="sm">
                                 {{ count($events) }} event{{ count($events) !== 1 ? 's' : '' }}
