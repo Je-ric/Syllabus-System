@@ -27,7 +27,9 @@ class CourseOutcomesStep extends Component
 
     public function render()
     {
-        return view('livewire.syllabus.steps.course-outcomes');
+        return view('livewire.syllabus.steps.course-outcomes', [
+            'courseInfo' => $this->buildCourseInfo(),
+        ]);
     }
 
     // ── Event listeners ───────────────────────────────────────────────────────
@@ -125,14 +127,45 @@ class CourseOutcomesStep extends Component
         $syllabus = Syllabus::with(['course.program.outcomes', 'course.programOutcomes'])
             ->findOrFail($this->syllabusId);
 
+        // course.programOutcomes = pivot table (course_curriculum_maps) with ied
         $coursePoIedById = $syllabus->course?->programOutcomes
             ?->mapWithKeys(fn ($po) => [(int) $po->id => (string) ($po->pivot?->ied ?? '')]) ?? collect();
 
+        // course.program.outcomes = all POs for the program
         $this->programOutcomes = $syllabus->course?->program?->outcomes
             ?->map(fn ($po) => [
                 'po_code' => $po->po_code,
                 'po_text' => $po->po_text,
                 'ied'     => $coursePoIedById->get((int) $po->id, ''),
             ])->values()->all() ?? [];
+    }
+
+    private function buildCourseInfo(): array
+    {
+        $syllabus = Syllabus::with(['course.program', 'course.programOutcomes'])
+            ->find($this->syllabusId);
+
+        $course = $syllabus?->course;
+        if (! $course) return [];
+
+        $coursePoIedById = $course->programOutcomes
+            ->mapWithKeys(fn ($po) => [(int) $po->id => (string) ($po->pivot?->ied ?? '')]);
+
+        $poRows = $course->program?->outcomes
+            ?->map(fn ($po) => [
+                'po_code' => $po->po_code,
+                'po_text' => $po->po_text,
+                'ied'     => $coursePoIedById->get((int) $po->id, ''),
+            ])->values()->all() ?? [];
+
+        return [
+            'course_code'   => $course->course_code,
+            'course_title'  => $course->course_title,
+            'description'   => $course->course_description,
+            'lec_units'     => $course->lec_class_hours,
+            'lab_units'     => $course->lab_class_hours,
+            'program_title' => $course->program?->name,
+            'po_rows'       => $poRows,
+        ];
     }
 }
