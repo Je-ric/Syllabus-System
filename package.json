@@ -17,6 +17,7 @@
         "vite": "^6.0.11"
     },
     "dependencies": {
+        "@fontsource/libre-franklin": "^5.2.8",
         "boxicons": "^2.1.4",
         "flatpickr": "^4.6.13",
         "laravel-precognition-alpine": "^1.0.2"

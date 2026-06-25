@@ -16,26 +16,26 @@
 
         <x-wizard.step-header
             title="Course Outcomes"
-            description="Add outcomes below. Changes are staged until you click Save All." />
+            description="Define what students will achieve. Add outcomes below — changes are staged until you click Save All." />
 
         {{-- Pending changes bar --}}
         <template x-if="hasPending()">
-            <div class="flex flex-wrap items-center gap-2 px-4 py-2.5 rounded-xl border border-amber-200 bg-amber-50 text-[13px]">
+            <div class="flex flex-wrap items-center gap-2 px-4 py-2.5 rounded-xl border border-amber-200 bg-amber-50 text-sm">
                 <i class="bx bx-error-circle text-amber-500 shrink-0"></i>
                 <span class="text-amber-700 font-semibold">Unsaved changes:</span>
                 <template x-if="pendingSummary().added > 0">
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-semibold">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold">
                         <i class="bx bx-plus text-xs"></i>
                         <span x-text="pendingSummary().added + ' new'"></span>
                     </span>
                 </template>
                 <template x-if="pendingSummary().modified > 0">
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[11px] font-semibold">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold">
                         <i class="bx bx-edit-alt text-xs"></i>
                         <span x-text="pendingSummary().modified + ' modified'"></span>
                     </span>
                 </template>
-                <span class="ml-auto text-[11px] text-amber-600">Click <strong>Save All</strong> to apply.</span>
+                <span class="ml-auto text-xs text-amber-600">Click <strong>Save All</strong> to apply.</span>
             </div>
         </template>
 
@@ -66,25 +66,25 @@
                             'bg-emerald-50 text-emerald-800 ring-2 ring-emerald-300':  co.id && !co._dirty
                         }"
                         x-text="co.co_code">
-                    </span>
+                </span>
 
                     <div class="flex-1 min-w-0">
                         <textarea
                             x-model="co.description"
-                            x-on:input="markDirty(co)"
-                            rows="2"
+                            x-on:input="markDirty(co); autoResize($el);"
+                            rows="4"
                             placeholder="Describe what students will be able to do after this outcome…"
                             x-bind:disabled="isSaving"
-                            class="w-full rounded-lg border px-3 py-2 text-[13px] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all resize-none leading-relaxed disabled:opacity-50"
+                            class="w-full rounded-lg border px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all resize-none leading-relaxed disabled:opacity-50"
                             :class="{
                                 'border-amber-300 bg-amber-50/50 focus:border-amber-400 focus:ring-amber-100':       co.id && co._dirty,
                                 'border-emerald-300 bg-emerald-50/50 focus:border-emerald-400 focus:ring-emerald-100': !co.id,
                                 'border-slate-200 bg-white focus:border-emerald-400 focus:ring-emerald-100':           co.id && !co._dirty
                             }"></textarea>
-                        <span x-show="!co.id" class="mt-0.5 flex items-center gap-1 text-[11px] text-emerald-600 font-medium">
+                        <span x-show="!co.id" class="mt-0.5 flex items-center gap-1 text-xs text-emerald-600 font-medium">
                             <i class="bx bx-plus-circle text-sm shrink-0"></i> New — click <strong class="mx-0.5">Save All</strong>
                         </span>
-                        <span x-show="co.id && co._dirty" x-cloak class="mt-0.5 flex items-center gap-1 text-[11px] text-amber-600 font-medium">
+                        <span x-show="co.id && co._dirty" x-cloak class="mt-0.5 flex items-center gap-1 text-xs text-amber-600 font-medium">
                             <i class="bx bx-edit-alt text-sm shrink-0"></i> Modified — not saved yet
                         </span>
                     </div>
@@ -124,14 +124,14 @@
                     <span class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-slate-100 mb-3">
                         <i class="bx bx-book-open text-3xl text-slate-300"></i>
                     </span>
-                    <p class="text-[13px] font-semibold text-slate-500">No Course Outcomes yet</p>
-                    <p class="text-[12px] text-slate-400 mt-0.5">Click <strong>Add Course Outcome</strong> below to get started.</p>
+                    <p class="text-sm font-semibold text-slate-500">No Course Outcomes yet</p>
+                    <p class="text-xs text-slate-400 mt-0.5">Click <strong>Add Course Outcome</strong> below to get started.</p>
                 </div>
             </template>
         </div>
 
         {{-- Action row: Add + Revert (left), Save All (right) --}}
-        <div class="flex items-center justify-between gap-2 pt-1 border-t border-slate-100">
+        <div class="flex items-center justify-between gap-2 pt-3 border-t border-[#e2e8f0]">
             <div class="flex items-center gap-2">
                 <x-button variant="add-dashed" type="button" x-on:click="addCo()" x-bind:disabled="isSaving">
                     <i class="bx bx-plus text-base"></i> Add Course Outcome
@@ -170,6 +170,11 @@
             isSaving:    false,
             _keyCounter: initialOutcomes.length,
             viewModal:   { co_code: '', description: '' },
+
+            // autoResize(el) {
+            //     el.style.height = 'auto';
+            //     el.style.height = el.scrollHeight + 'px';
+            // },
 
             markDirty(co) {
                 if (co.id) co._dirty = (co.description !== co._original);

@@ -64,8 +64,8 @@
                 <i class="bx bx-user-check text-base leading-none"></i>
             </span>
             <div>
-                <p class="text-[13px] font-bold text-[#0f172a]">Review &amp; Approval</p>
-                <p class="text-[11px] text-[#94a3b8] mt-0.5">
+                <p class="text-sm font-bold text-[#0f172a]">Review &amp; Approval</p>
+                <p class="text-xs text-[#94a3b8] mt-0.5">
                     Signatures, concurrence &amp; additional reviewers
                     @if (count($reviewers) > 0)
                         &middot;
@@ -86,7 +86,7 @@
 
             {{-- SECTION 1 — Signatories --}}
             <div class="px-5 py-4">
-                <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-3">Signatories</p>
+                <p class="text-xs font-bold uppercase tracking-widest text-[#475569] mb-3">Signatories</p>
                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
 
                     {{-- Prepared By --}}
@@ -102,12 +102,8 @@
                                 {{ strtoupper(substr($syllabus->preparer->name ?? 'U', 0, 1)) }}
                             </span>
                             <div class="min-w-0">
-                                <p class="text-sm font-semibold text-slate-800 truncate">
-                                    {{ $syllabus->preparer->name ?? 'N/A' }}
-                                </p>
-                                <p class="text-xs text-slate-400 truncate">
-                                    {{ $syllabus->preparer->email ?? '' }}
-                                </p>
+                                <p class="text-sm font-semibold text-slate-800 truncate">{{ $syllabus->preparer->name ?? 'N/A' }}</p>
+                                <p class="text-xs text-slate-400 truncate">{{ $syllabus->preparer->email ?? '' }}</p>
                             </div>
                             <x-feedback-status.status-indicator variant="slate" class="ml-auto shrink-0">
                                 Author
@@ -230,7 +226,7 @@
 
             {{-- SECTION 2 — Additional Reviewers --}}
             <div class="px-5 py-4">
-                <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-3">
+                <p class="text-xs font-bold uppercase tracking-widest text-[#475569] mb-3">
                     Additional Reviewers <span class="text-[#94a3b8] font-normal normal-case tracking-normal">(Faculty)</span>
                 </p>
 
@@ -262,7 +258,7 @@
                                 </span>
                             </x-button>
                         </div>
-                        <p class="text-[13px] text-[#94a3b8] leading-relaxed">
+                        <p class="text-sm text-[#94a3b8] leading-relaxed">
                             Each reviewer appears in the printed syllabus signature section.
                         </p>
                     </div>
@@ -281,12 +277,8 @@
                                             {{ strtoupper(substr($reviewer['user_name'], 0, 1)) }}
                                         </span>
                                         <div class="min-w-0">
-                                            <p class="text-[13px] font-medium text-[#0f172a] truncate">
-                                                {{ $reviewer['user_name'] }}
-                                            </p>
-                                            <p class="text-[11px] text-[#94a3b8] truncate">
-                                                {{ $reviewer['user_email'] }}
-                                            </p>
+                                            <p class="text-sm font-medium text-[#0f172a] truncate">{{ $reviewer['user_name'] }}</p>
+                                            <p class="text-xs text-[#94a3b8] truncate">{{ $reviewer['user_email'] }}</p>
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-2 ml-2 shrink-0">

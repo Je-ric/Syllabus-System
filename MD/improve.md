@@ -476,6 +476,77 @@ Right now, CSMS sends emails synchronously inside service methods (`Mail::to()->
 
 ---
 
+## ADDITIONAL FINDINGS (Post Code-Read)
+
+> Issues found by reading the actual source that are not covered above.
+
+---
+
+### A1. `AccountApprovalService::restore()` — No `DB::transaction()`
+**File:** `app/Services/AccountApprovalService.php` → `restore()`
+**What's wrong:** Every other method in `AccountApprovalService` (`approve`, `reject`, `disable`, `assignRoles`) is wrapped in `DB::transaction()`. `restore()` is not — it directly calls `$user->save()` and `AuditLog::record()` with no rollback protection.
+**Fix needed:** Wrap in `DB::transaction()` to match the pattern of the other methods.
+
+---
+
+### A2. `SyllabusWizard::mount()` — `Syllabus::create()` still fires on direct Livewire mount
+**File:** `app/Livewire/Syllabus/SyllabusWizard.php` → `mount()`
+**What's wrong:** `SyllabusController::wizard()` correctly checks for an existing draft before creating one (fixes issue #2 at the controller layer). However, if `SyllabusWizard` is mounted with `$courseId` directly (e.g., browser back-button to `/syllabus/wizard?courseId=X` after a Livewire full-page reload), the component's `mount()` calls `Syllabus::create()` unconditionally — the controller guard is skipped entirely.
+**Fix needed:** The `firstOrCreate` duplicate-check must live inside `SyllabusWizard::mount()` itself, not only in the controller:
+```php
+$this->syllabus = Syllabus::firstOrCreate(
+    ['course_id' => $this->course->id, 'prepared_by' => Auth::id(), 'status' => 'draft'],
+    ['academic_calendar_id' => null, 'current_step' => 'academic_calendar']
+);
+```
+
+---
+
+### A3. `SyllabusWizard::submitForReview()` duplicates the `saveAsDone()` status transition
+**File:** `app/Livewire/Syllabus/SyllabusWizard.php` → `submitForReview()`
+**What's wrong:** Both `submitForReview()` and `saveAsDone()` independently set `status = 'under_review'`. There are now two divergent code paths that perform the same state transition with no shared logic. When the approval workflow formalizes the status machine, both will need to be updated or one will be missed.
+**Fix needed:** Extract the status transition to `SyllabusApprovalService::submit()` (as already planned in the ARCHITECTURE section) and have both methods call it. This makes the state machine a single point of change.
+
+---
+
+### A4. `ReviewStep::render()` — Full user table queries on every re-render
+**File:** `app/Livewire/Syllabus/Steps/ReviewStep.php` → `render()`
+**What's wrong:** Every Livewire re-render executes:
+- `User::whereHas('roles', ... 'dean')->get()` — all dean users
+- `User::whereHas('roles', ... 'faculty')->whereNotIn(...)->get()` — all faculty users
+
+These are unbounded queries with no `limit()` or caching. On a large faculty list (hundreds of users), every keystroke or state change that triggers a re-render runs two full table scans.
+**Fix needed:** Either cache these lists (`Cache::remember(...)`) with a short TTL, or convert the reviewer/dean dropdowns to use a Livewire search-as-you-type pattern with `limit(20)` instead of loading all users.
+
+---
+
+### A5. `UserController::index()` — Sorts audit logs by `timestamp` (the redundant column)
+**File:** `app/Http/Controllers/UserController.php` → `index()`
+**What's wrong:** `AuditLog::where('user_id', $user->id)->orderByDesc('timestamp')->limit(20)->get()` — this uses the redundant `timestamp` column identified in issue #15. When that column is dropped, this query will throw a `QueryException`.
+**Fix needed:** Change to `orderByDesc('created_at')` now, so the query works before and after the `timestamp` column removal.
+
+---
+
+### A6. `SyllabusReviewService::assignReviewer()` — New reviewers hardcoded as `approved`
+**File:** `app/Services/Syllabus/SyllabusReviewService.php` → `assignReviewer()`
+**What's wrong:** The comment says "No approval flow yet: assigning a reviewer marks them approved instantly." The status is hardcoded to `'approved'`. When the real approval workflow is built, this placeholder will silently continue marking reviewers as pre-approved unless explicitly changed. It's a future-bug landmine.
+**Fix needed:** Change to `'status' => 'pending'` now, matching the `ReviewerStatus` enum planned in the architecture section. The current behavior (auto-approve) can be kept temporarily by adding a note, but `'pending'` is the correct initial state for a reviewer not yet having acted.
+
+---
+
+### A7. `GoalObjectiveService::getAccessibleGoalColleges()` — Dean without assignment sees all colleges
+**File:** `app/Services/GoalObjectiveService.php` → `getAccessibleGoalColleges()`
+**What's wrong:**
+```php
+if ($assignment?->college) { return College::where('id', ...) }
+if ($user->hasRole('dean')) { return College::orderBy('name')->get(); } // ALL colleges
+return collect();
+```
+A dean who exists in the system but has no college assignment falls through to the second check and receives all colleges. The correct behavior is: a dean with no assignment should see nothing (empty). The README says "scoped to their assigned college only."
+**Fix needed:** Remove the `if ($user->hasRole('dean'))` fallback entirely. A dean with no assignment should get `collect()`, not all colleges.
+
+---
+
 ### `app/Notifications/`
 
 **USE — when the approval workflow is built.**

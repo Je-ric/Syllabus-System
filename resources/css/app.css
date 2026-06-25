@@ -1,8 +1,9 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 @import "boxicons/css/boxicons.min.css";
-@import './auth.css';
-@import './sidebar.css';
+@import "./auth.css";
+@import "./sidebar.css";
 /* @import './preview.css'; */
+@import "@fontsource/libre-franklin";
 
 @plugin "daisyui";
 
@@ -13,8 +14,10 @@
 @source "../**/*.vue";
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans:
+        "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji";
 }
 
 :root {
@@ -87,7 +90,6 @@ body {
     font-style: normal;
 }
 
-
 .clsu-card {
     background: #ffffff;
     border: 1px solid var(--clsu-border);
@@ -95,7 +97,6 @@ body {
     padding: 1.5rem;
     box-shadow: var(--clsu-shadow);
 }
-
 
 /* accordion */
 .chevron-icon {
@@ -116,10 +117,56 @@ details summary::-webkit-details-marker {
 
 /* Hide scrollbar but allow scrolling */
 .no-scrollbar {
-    -ms-overflow-style: none;  /* IE + Edge */
-    scrollbar-width: none;     /* Firefox */
+    -ms-overflow-style: none; /* IE + Edge */
+    scrollbar-width: none; /* Firefox */
 }
 
 .no-scrollbar::-webkit-scrollbar {
-    display: none;             /* Chrome, Safari */
+    display: none; /* Chrome, Safari */
+}
+
+.nav-label {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #79c08d;
+    padding: 0 8px;
+    margin-bottom: 4px;
+    display: block;
+}
+.nav-icon {
+    font-size: 15px;
+    width: 16px;
+    flex-shrink: 0;
+    color: #94a3b8;
+    transition: color 120ms;
+}
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #94a3b8;
+    transition:
+        background 120ms,
+        color 120ms;
+    margin-bottom: 1px;
+}
+.nav-link:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+.nav-link:hover .nav-icon {
+    color: #64748b;
+}
+.nav-link.active {
+    background: #dcfce7;
+    color: #166534;
+    font-weight: 700;
+}
+.nav-link.active .nav-icon {
+    color: #16a34a;
 }

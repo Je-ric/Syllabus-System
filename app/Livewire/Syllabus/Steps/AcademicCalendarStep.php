@@ -77,6 +77,9 @@ class AcademicCalendarStep extends Component
         // Store as plain arrays — Livewire serialises these cheaply.
         // Storing Eloquent model collections bloats the snapshot JSON
         // and slows every subsequent request for this component.
+
+        // $formatterSem = AcademicCalendar::getFormattedSemester();
+        
         $this->academicCalendars = AcademicCalendar::query()
             ->orderBy('academic_year', 'desc')
             ->orderBy('semester', 'desc')

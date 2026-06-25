@@ -1,58 +1,59 @@
 <div>
     <x-wizard.step-header
         title="Review & Submit"
-        description="Review all details before submitting for approval." />
+        description="Review all details before submitting for department chair review." />
 
     <div class="space-y-4">
 
         {{-- ── Previews ──────────────────────────────────────────────────── --}}
         @include('livewire.syllabus.steps.review-partials.previews')
 
-        {{-- ══ ACCORDION 1 — REVISION HISTORY ═══════════════════════════════ --}}
+        {{-- ── Revision History ──────────────────────────────────────────── --}}
         @include('livewire.syllabus.steps.review-partials.revisions')
 
-        {{-- ══════════════════════════════════════════════════════════════════
-            ACCORDION 2 — REVIEW & APPROVAL
-            Three sub-sections:
-                1. Approved By    — exactly 1 dean
-                2. Concurred By   — exactly 1 dean
-                3. Reviewed By    — N additional reviewers (syllabus_reviewers table)
-            Auto-saves concurred/approved on accordion close.
-            addReviewer/removeReviewer still go via $parent on SyllabusWizard.
-        ══════════════════════════════════════════════════════════════════════ --}}
+        {{-- ── Review & Approval ─────────────────────────────────────────── --}}
         @include('livewire.syllabus.steps.review-partials.reviewers')
 
         {{-- ── Saved Versions ────────────────────────────────────────────── --}}
-
         @include('livewire.syllabus.steps.review-partials.saved-versions')
 
     </div>
 
-    <div class="mt-6 flex flex-wrap items-center gap-4">
-        {{-- <x-button
-            type="button"
-            variant="add-button"
-            wire:click="$dispatch('wizard-save-as-done')"
-            loading="Freezing version…">
-            <i class="bx bx-save text-base"></i> Save as Done
-        </x-button> --}}
-    </div>
+    {{-- Submit section --}}
+    <div class="mt-6 rounded-xl border border-[#e2e8f0] overflow-hidden"
+         style="box-shadow: 0 2px 12px rgba(0,0,0,.07);">
 
-    <div class="mt-6 space-y-4">
-        <x-feedback-status.alert
-            type="warning"
-            title="Before you submit"
-            message="Once you submit, the syllabus will be sent for review by the department chair. Make sure all information is correct." />
+        {{-- Warning bar --}}
+        <div class="px-5 py-4 border-b border-amber-200 bg-amber-50/80">
+            <div class="flex items-start gap-3">
+                <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-100 text-amber-600 shrink-0 mt-0.5">
+                    <i class="bx bx-error text-base leading-none"></i>
+                </span>
+                <div>
+                    <p class="text-sm font-bold text-amber-800">Before you submit</p>
+                    <p class="text-sm text-amber-700 mt-0.5 leading-relaxed">
+                        Once submitted, this syllabus will be sent to the department chair for review.
+                        Make sure all information is complete and accurate.
+                    </p>
+                </div>
+            </div>
+        </div>
 
-        <div class="flex justify-end">
+        {{-- Submit footer --}}
+        <div class="flex items-center justify-between gap-4 px-5 py-4 bg-white">
+            <p class="text-xs text-slate-400 hidden sm:block">
+                You can still edit your draft if you need to make changes before submitting.
+            </p>
             <x-button
                 variant="primary"
                 wire:click="submitForReview"
                 wire:loading.attr="disabled"
                 wire:target="submitForReview"
-                loading="Submitting…">
+                loading="Submitting…"
+                class="ml-auto">
                 <i class="bx bx-send text-base leading-none"></i> Submit for Review
             </x-button>
         </div>
+
     </div>
 </div>
