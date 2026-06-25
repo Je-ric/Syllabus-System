@@ -28,28 +28,29 @@
         x-transition:leave-end="opacity-0 translate-y-2 scale-[0.98]"
         class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
 
-        <div class="bg-white rounded-2xl shadow-2xl ring-1 ring-black/[0.06] w-full max-w-7xl flex flex-col"
+        <div class="bg-white rounded-2xl shadow-2xl ring-1 ring-black/[0.06] w-full max-w-7xl flex flex-col overflow-hidden"
              style="height: min(88vh, 780px);"
              x-on:click.stop>
 
             {{-- ── Header ──────────────────────────────────────────── --}}
-            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0"
+                 style="background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%)">
 
                 <div class="flex items-center gap-3 min-w-0">
-                    {{-- Week badge --}}
-                    <div class="shrink-0 flex items-center justify-center w-9 h-9 rounded-xl bg-emerald-600 text-white">
-                        <i class="bx bx-edit-alt text-[17px] leading-none"></i>
+                    <div class="shrink-0 flex items-center justify-center w-10 h-10 rounded-xl text-white"
+                         style="background: linear-gradient(135deg, #009639 0%, #16a34a 100%); box-shadow: 0 3px 8px rgba(0,150,57,0.3);">
+                        <i class="bx bx-edit-alt text-lg leading-none"></i>
                     </div>
 
                     <div class="min-w-0">
                         <div class="flex items-center gap-2 flex-wrap">
-                            <span class="text-[13px] font-semibold text-slate-800"
+                            <span class="text-sm font-bold text-slate-800"
                                   x-text="'Week ' + weekNo"></span>
-                            <span class="text-slate-300 text-[13px]">·</span>
-                            <span class="text-[12px] font-medium text-slate-500 truncate"
+                            <span class="text-slate-300">·</span>
+                            <span class="text-sm font-medium text-[#009639] truncate"
                                   x-text="activeFieldLabel"></span>
                         </div>
-                        <p class="text-[11px] text-slate-400 mt-0.5 truncate" x-text="weekDates"></p>
+                        <p class="text-xs text-slate-400 mt-0.5 truncate" x-text="weekDates"></p>
                     </div>
                 </div>
 
@@ -69,7 +70,7 @@
                 <div x-show="isMvgo" class="mb-3">
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full
                                  bg-violet-50 text-violet-700 border border-violet-200
-                                 text-[11px] font-semibold tracking-wide uppercase">
+                                 text-xs font-semibold tracking-wide uppercase">
                         <i class="bx bx-star text-[12px]"></i>
                         Mission-Vision-Goals-Objectives week
                     </span>
@@ -82,10 +83,10 @@
                         <button type="button"
                             x-on:click="switchField(tab.key)"
                             x-bind:class="activeField === tab.key
-                                ? 'border-b-2 border-emerald-600 text-emerald-700 bg-white'
+                                ? 'border-b-2 border-[#009639] text-[#009639] bg-white'
                                 : 'border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'"
                             class="shrink-0 inline-flex items-center gap-1.5
-                                   px-4 py-2.5 text-[12px] font-semibold
+                                   px-4 py-2.5 text-xs font-semibold
                                    transition-all duration-150 whitespace-nowrap rounded-t-lg">
 
                             <i x-bind:class="{
@@ -109,7 +110,7 @@
                             ? 'border-b-2 border-blue-500 text-blue-700 bg-white'
                             : 'border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'"
                         class="shrink-0 inline-flex items-center gap-1.5
-                               px-4 py-2.5 text-[12px] font-semibold
+                               px-4 py-2.5 text-xs font-semibold
                                transition-all duration-150 whitespace-nowrap rounded-t-lg">
                         <i class="bx bx-library text-[14px] leading-none"></i>
                         <span>References & Materials</span>
@@ -128,12 +129,12 @@
                         {{-- CO selector row --}}
                         <div x-show="!isMvgo"
                              class="px-6 pt-4 pb-3 border-b border-slate-100 shrink-0 bg-slate-50/60">
-                            <label class="block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400 mb-1.5">
+                            <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-1.5">
                                 Course Outcome
                             </label>
                             <select x-model="fields.course_outcome_id"
                                 class="w-full max-w-xl rounded-lg border border-slate-200 bg-white
-                                       px-3 py-2 text-[13px] text-slate-700
+                                       px-3 py-2 text-sm text-slate-700
                                        focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100
                                        transition-colors">
                                 <option value="">— Not mapped to a specific CO —</option>
@@ -149,9 +150,9 @@
                         <div class="flex-1 flex flex-col px-6 pt-5 pb-4 min-h-0">
 
                             <div class="flex items-center justify-between mb-3 shrink-0">
-                                <h4 class="text-[13px] font-semibold text-slate-700"
+                                <h4 class="text-sm font-semibold text-slate-700"
                                     x-text="activeFieldLabel"></h4>
-                                <span class="inline-flex items-center gap-1 text-[11px] text-slate-400">
+                                <span class="inline-flex items-center gap-1 text-xs text-slate-400">
                                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                                     Rich text
                                 </span>
@@ -185,8 +186,8 @@
                         <div>
                             <div class="flex items-center justify-between mb-4">
                                 <div>
-                                    <p class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">References</p>
-                                    <p class="text-[12px] text-slate-500 mt-0.5">Books, journals, printed sources</p>
+                                    <p class="text-xs font-bold uppercase tracking-widest text-slate-400">References</p>
+                                    <p class="text-xs text-slate-500 mt-0.5">Books, journals, printed sources</p>
                                 </div>
                                 <button type="button" x-on:click="addRef()"
                                     class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-semibold
@@ -204,7 +205,7 @@
                                               x-text="rIdx + 1"></span>
                                         <input type="text" x-model="ref.text"
                                             placeholder="Author (Year). Title. Publisher."
-                                            class="flex-1 text-[13px] rounded-lg border border-slate-200 bg-white px-3 py-2
+                                            class="flex-1 text-sm rounded-lg border border-slate-200 bg-white px-3 py-2
                                                    text-slate-700 placeholder:text-slate-300
                                                    focus:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-50
                                                    transition-colors" />
@@ -227,8 +228,8 @@
                         <div>
                             <div class="flex items-center justify-between mb-4">
                                 <div>
-                                    <p class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Online Materials</p>
-                                    <p class="text-[12px] text-slate-500 mt-0.5">Links, slides, videos, web resources</p>
+                                    <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Online Materials</p>
+                                    <p class="text-xs text-slate-500 mt-0.5">Links, slides, videos, web resources</p>
                                 </div>
                                 <button type="button" x-on:click="addMat()"
                                     class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-semibold
@@ -247,13 +248,13 @@
                                         <div class="flex-1 space-y-1.5">
                                             <input type="text" x-model="mat.name"
                                                 :placeholder="'Label (e.g. Week ' + weekNo + ' Slides)'"
-                                                class="w-full text-[13px] rounded-lg border border-slate-200 bg-white px-3 py-2
+                                                class="w-full text-sm rounded-lg border border-slate-200 bg-white px-3 py-2
                                                        text-slate-700 placeholder:text-slate-300
                                                        focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-50
                                                        transition-colors" />
                                             <input type="url" x-model="mat.url"
                                                 placeholder="https://…"
-                                                class="w-full text-[13px] rounded-lg border border-slate-200 bg-white px-3 py-2
+                                                class="w-full text-sm rounded-lg border border-slate-200 bg-white px-3 py-2
                                                        text-slate-700 placeholder:text-slate-300 font-mono
                                                        focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-50
                                                        transition-colors" />
@@ -281,7 +282,7 @@
 
                 {{-- Danger zone --}}
                 <button type="button" x-on:click="resetWeek()" x-bind:disabled="saving"
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
                            text-slate-400 hover:text-rose-500 hover:bg-rose-50 border border-transparent
                            hover:border-rose-200 disabled:opacity-40 transition-all duration-150">
                     <i class="bx bx-reset text-[14px]"></i>
@@ -291,17 +292,16 @@
                 {{-- Primary actions --}}
                 <div class="flex items-center gap-2">
                     <button type="button" x-on:click="close()" x-bind:disabled="saving"
-                        class="px-4 py-2 rounded-lg text-[13px] font-semibold text-slate-600
+                        class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600
                                border border-slate-200 bg-white hover:bg-slate-50
                                disabled:opacity-40 transition-colors duration-150">
                         Cancel
                     </button>
 
                     <button type="button" x-on:click="save()" x-bind:disabled="saving"
-                        class="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg text-[13px] font-semibold
-                               bg-emerald-600 text-white hover:bg-emerald-700
-                               shadow-sm shadow-emerald-200
-                               disabled:opacity-50 transition-all duration-150">
+                        class="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg text-sm font-semibold
+                               text-white disabled:opacity-50 transition-all duration-150"
+                        style="background: linear-gradient(135deg, #009639 0%, #16a34a 100%); box-shadow: 0 2px 8px rgba(0,150,57,0.35);">
 
                         <template x-if="!saving">
                             <span class="inline-flex items-center gap-1.5">

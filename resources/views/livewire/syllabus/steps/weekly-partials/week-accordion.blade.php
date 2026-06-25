@@ -91,7 +91,7 @@
 
                     {{-- Week number circle --}}
                     <span
-                        class="inline-flex items-center justify-center rounded-full shadow-md w-7 h-7 text-xs font-bold shrink-0 transition-colors duration-200"
+                        class="inline-flex items-center justify-center rounded-full shadow-md w-8 h-8 text-xs font-bold shrink-0 transition-colors duration-200"
 
                         :class="openWeek === {{ $week->week_no }}
                             ? '{{ $isLocked
@@ -104,11 +104,11 @@
                     </span>
 
                     <div class="flex items-center gap-2 flex-wrap min-w-0">
-                        <span class="text-[13px] font-semibold shrink-0 {{ $isLocked ? 'text-rose-700' : 'text-[#0f172a]' }}">
+                        <span class="text-sm font-semibold shrink-0 {{ $isLocked ? 'text-rose-700' : 'text-[#0f172a]' }}">
                             Week {{ $week->week_no }}
                         </span>
                         |
-                        <span class="text-[13px] text-black shrink-0">
+                        <span class="text-sm text-black shrink-0">
                             {{ $start->format('M d') }}–{{ $end->format('M d, Y') }}
                         </span>
 
@@ -124,7 +124,7 @@
                                 <x-feedback-status.status-indicator variant="brand" size="sm">{{ $coCode }}</x-feedback-status.status-indicator>
                             @endif
                             @if ($savedTopic)
-                                <span class="text-[13px] text-[#94a3b8] truncate max-w-xs hidden md:block">
+                                <span class="text-sm text-[#94a3b8] truncate max-w-xs hidden md:block">
                                     — {{ \Illuminate\Support\Str::limit($savedTopic, 55) }}
                                 </span>
                             @endif
