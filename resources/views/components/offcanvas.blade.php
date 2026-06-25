@@ -59,28 +59,27 @@
 
     {{-- ── Header ─────────────────────────────────────────────────── --}}
     <div class="shrink-0 flex items-center justify-between gap-4
-                px-5 py-4
-                border-b border-slate-100">
+                px-5 py-4 border-b"
+         style="background: linear-gradient(135deg, #002a0c 0%, #004d16 100%); border-color: rgba(255,215,0,0.25);">
 
         <div class="flex items-center gap-3 min-w-0">
 
             @if ($icon)
                 <span class="shrink-0 flex items-center justify-center
-                             w-8 h-8 rounded-xl
-                             bg-emerald-50 text-emerald-600
-                             ring-1 ring-inset ring-emerald-100">
-                    <i class="bx {{ $icon }} text-[16px] leading-none"></i>
+                             w-8 h-8 rounded-xl border border-white/20"
+                      style="background: rgba(255,255,255,0.15);">
+                    <i class="bx {{ $icon }} text-base leading-none text-white"></i>
                 </span>
             @endif
 
             <div class="min-w-0">
                 @if ($title)
-                    <p class="text-[13px] font-semibold text-slate-800 truncate leading-tight">
+                    <p class="text-sm font-semibold text-white truncate leading-tight">
                         {{ $title }}
                     </p>
                 @endif
                 @if ($subtitle)
-                    <p class="text-[11px] text-slate-400 mt-0.5 truncate">
+                    <p class="text-xs mt-0.5 truncate" style="color: rgba(255,255,255,0.6);">
                         {{ $subtitle }}
                     </p>
                 @endif
@@ -93,10 +92,10 @@
             x-on:click="{{ $open }} = false"
             class="shrink-0 flex items-center justify-center
                    w-7 h-7 rounded-lg
-                   text-slate-400 hover:text-slate-700 hover:bg-slate-100
-                   transition-colors duration-150"
+                   hover:bg-white/20 transition-colors duration-150
+                   text-white/70 hover:text-white"
             aria-label="Close panel">
-            <i class="bx bx-x text-[18px] leading-none"></i>
+            <i class="bx bx-x text-lg leading-none"></i>
         </button>
 
     </div>

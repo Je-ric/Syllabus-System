@@ -1,4 +1,4 @@
-<x-offcanvas id="peo-reference-drawer" title="PEO Reference" width="w-96">
+<x-offcanvas title="PEO Reference" open="peoDrawer" icon="bx-graduation" width="max-w-sm">
     @if(count($peos) > 0)
         <div class="space-y-3">
             <p class="text-[12px] text-[#94a3b8]">

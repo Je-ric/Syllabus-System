@@ -33,7 +33,7 @@
     </x-page-header>
 
     <x-panel>
-        
+
         {{-- Program selector --}}
         <x-card-section
             title="Select Program"
@@ -62,13 +62,14 @@
                 </a>
             </div>
 
-            {{-- ── Program Outcomes reference (accordion) ───────────────────── --}}
+            {{-- ── Program Outcomes reference ────────────────────────────────── --}}
             @if ($program->outcomes->isNotEmpty())
-                <label
-                    for="program-outcomes-drawer"
-                    class="btn btn-sm">
-                    Program Outcomes
-                </label>
+                <div x-data="{ poDrawer: false }" class="mb-4">
+                    <x-button type="button" variant="secondary" x-on:click="poDrawer = true">
+                        <i class="bx bx-book-open"></i> Program Outcomes
+                    </x-button>
+                    @include('Course.offcanvasReference')
+                </div>
             @endif
 
             {{-- ── Curriculum map ────────────────────────────────────────────── --}}
@@ -233,8 +234,6 @@
                 message="Select a program above to view and manage its courses." />
         @endif
     </x-panel>
-
-@include('Course.offcanvasReference')
 
     {{-- Modals --}}
     @foreach ($modalCourses as $course)
