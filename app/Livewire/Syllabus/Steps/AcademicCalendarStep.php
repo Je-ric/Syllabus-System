@@ -4,7 +4,6 @@ namespace App\Livewire\Syllabus\Steps;
 
 use App\Models\AcademicCalendar;
 use App\Models\Syllabus;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -103,9 +102,6 @@ class AcademicCalendarStep extends Component
                 'academic_calendar_id' => [
                     'required',
                     'exists:academic_calendars,id',
-                    Rule::unique('syllabi', 'academic_calendar_id')
-                        ->where(fn ($q) => $q->where('course_id', $syllabus->course_id))
-                        ->ignore($syllabus->id),
                 ],
             ]);
         } catch (ValidationException $e) {
