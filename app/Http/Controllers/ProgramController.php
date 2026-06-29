@@ -6,7 +6,6 @@ use App\Models\Program;
 use App\Models\ProgramEducationalObjective;
 use App\Models\ProgramOutcome;
 use App\Models\AuditLog;
-use App\Models\CourseOutcome;
 use App\Helpers\ProgramCodeHelper;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -73,15 +72,16 @@ class ProgramController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
 
-            return redirect()->back()->withErrors([
-                'error' => 'Failed to delete PEO. Please try again.',
+            return redirect()->back()->with('toast', [
+                'message' => 'Failed to delete PEO. Please try again.',
+                'type'    => 'error',
             ]);
         }
 
         return redirect()->route('programs.show', ['program' => $programId])
             ->with('toast', [
                 'message' => 'PEO deleted and codes re-sequenced!',
-                'type' => 'success'
+                'type'    => 'success',
             ]);
     }
 
@@ -105,13 +105,18 @@ class ProgramController extends Controller
             $programName = $po->program?->name ?? 'Unknown Program';
             $poCode = $po->po_code;
 
-            // Block deletion if any course already has this PO mapped in a syllabus
-            $syllabusCount = CourseOutcome::whereHas('programOutcomes', fn($q) => $q->where('program_outcomes.id', $po->id))
-                ->count();
+            // Block deletion if any syllabus exists for a course that maps this PO
+            $syllabusCount = \App\Models\Syllabus::whereIn(
+                'course_id',
+                \App\Models\Course::whereHas('programOutcomes', fn($q) => $q->where('program_outcomes.id', $po->id))
+                    ->select('id')
+            )->count();
+
             if ($syllabusCount > 0) {
                 DB::rollBack();
-                return redirect()->back()->withErrors([
-                    'error' => "Cannot delete {$poCode}: it is mapped in {$syllabusCount} course outcome(s) across existing syllabi. Remove those mappings first.",
+                return redirect()->back()->with('toast', [
+                    'message' => "Cannot delete {$poCode}: it is mapped to a course that has {$syllabusCount} existing syllabus/syllabi. Remove the PO mapping from the course first.",
+                    'type'    => 'error',
                 ]);
             }
 
@@ -136,15 +141,16 @@ class ProgramController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
 
-            return redirect()->back()->withErrors([
-                'error' => 'Failed to delete PO. Please try again.',
+            return redirect()->back()->with('toast', [
+                'message' => 'Failed to delete PO. Please try again.',
+                'type'    => 'error',
             ]);
         }
 
         return redirect()->route('programs.show', ['program' => $programId])
             ->with('toast', [
                 'message' => 'PO deleted and codes re-sequenced!',
-                'type' => 'success'
+                'type'    => 'success',
             ]);
     }
 
