@@ -24,11 +24,22 @@ class ObjectiveController extends Controller
         $selectedDepartmentId = $request->input('department_id');
 
         if (!$selectedCollegeId || !$selectedDepartmentId) {
-            $assignment = $user?->getPrimaryDepartmentAssignment();
-
-            if ($assignment?->department) {
-                $selectedDepartmentId = $assignment->department_id;
-                $selectedCollegeId    = $assignment->department->college_id;
+            if ($isAdmin) {
+                $allColleges = College::orderBy('name')->get();
+                if (!$selectedCollegeId) {
+                    $selectedCollegeId = $allColleges->first()?->id;
+                }
+                if ($selectedCollegeId && !$selectedDepartmentId) {
+                    $selectedDepartmentId = Department::where('college_id', $selectedCollegeId)
+                        ->orderBy('name')
+                        ->first()?->id;
+                }
+            } else {
+                $assignment = $user?->getPrimaryDepartmentAssignment();
+                if ($assignment?->department) {
+                    $selectedDepartmentId = $assignment->department_id;
+                    $selectedCollegeId    = $assignment->department->college_id;
+                }
             }
         }
 

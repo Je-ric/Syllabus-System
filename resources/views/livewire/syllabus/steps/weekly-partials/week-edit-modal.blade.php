@@ -90,10 +90,10 @@
                                    transition-all duration-150 whitespace-nowrap rounded-t-lg">
 
                             <i x-bind:class="{
-                                'bx bx-target-lock':    tab.key === 'learning_outcomes',
-                                'bx bx-checkbox-checked':  tab.key === 'assessment_task',
                                 'bx bx-list-ul':        tab.key === 'topic',
+                                'bx bx-target-lock':    tab.key === 'learning_outcomes',
                                 'bx bx-chalkboard':     tab.key === 'teaching_activities'
+                                'bx bx-checkbox-checked':  tab.key === 'assessment_task',
                             }" class="text-[14px] leading-none"></i>
 
                             <span x-text="tab.label"></span>

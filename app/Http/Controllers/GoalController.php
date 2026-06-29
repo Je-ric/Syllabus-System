@@ -25,8 +25,11 @@ class GoalController extends Controller
         $selectedCollegeId = $request->input('college_id');
 
         if (!$selectedCollegeId) {
-            $assignment        = $user?->getPrimaryCollegeAssignment();
-            $selectedCollegeId = $assignment?->college_id;
+            if ($isAdmin) {
+                $selectedCollegeId = $colleges->first()?->id;
+            } else {
+                $selectedCollegeId = $user?->getPrimaryCollegeAssignment()?->college_id;
+            }
         }
 
         // Non-admin: keep the assigned college selected when one exists
