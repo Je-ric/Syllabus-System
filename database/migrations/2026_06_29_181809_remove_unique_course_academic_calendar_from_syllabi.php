@@ -12,6 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('syllabi', function (Blueprint $table) {
+            // Add plain indexes to replace the FK-supporting role of the
+            // composite unique index before dropping it
+            $table->index('course_id');
+            $table->index('academic_calendar_id');
             $table->dropUnique(['course_id', 'academic_calendar_id']);
         });
     }
@@ -20,6 +24,8 @@ return new class extends Migration
     {
         Schema::table('syllabi', function (Blueprint $table) {
             $table->unique(['course_id', 'academic_calendar_id']);
+            $table->dropIndex(['course_id']);
+            $table->dropIndex(['academic_calendar_id']);
         });
     }
 };
