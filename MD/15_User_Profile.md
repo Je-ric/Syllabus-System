@@ -1,86 +1,154 @@
 # User Profile
 
-Rules for viewing and updating a user's own profile and password.
+Rules for viewing and updating a user's own profile, managing consultation hours, and changing password.
 
 ## Files Used (Source of Truth)
 
 - Controller
-  - `app/Http/Controllers/UserController.php`
+  - `app/Http/Controllers/UserController.php` — index, update, changePassword, verifyPasswordOtp, resendPasswordOtp, storeConsultationHour, destroyConsultationHour
 - Service
-  - `app/Services/OtpService.php`
+  - `app/Services/OtpService.php` — issueForUser, validate, clear, migrateLegacyOtp
 - Models
   - `app/Models/User.php`
   - `app/Models/UserOtp.php`
+  - `app/Models/UserConsultationHour.php`
+  - `app/Models/AuditLog.php` (recent activity)
 - Views
   - `resources/views/Authentication/viewDetails.blade.php`
 - Routes
   - `routes/web.php` (profile routes — authenticated only)
 
-## UI Notes
+## UI Layout
 
-### viewDetails.blade.php
-
-- Profile info card: avatar initial, name, role badges, optional "Organizational Hierarchy" button (admin/dean/chair only).
-- Assignment details grid: Faculty, Chair, Dean assignments shown with department/college context.
-- Admin notice: admins see a warning banner; profile edit and password change are disabled for admin accounts.
-- Profile form: name, email, phone, office, email-verified-at (read-only). Disabled for admins.
-- Password change (Step 1): current password, new password, confirm — all three fields have Alpine show/hide toggles (`bx-show`/`bx-hide`). Minimum 8 characters.
-- Password change (Step 2): shown only when `session('password_change_otp')` exists. OTP input with large tracking. Resend OTP link below.
+Two-column layout:
+- **Left**: Profile card (avatar, name, office, role badges, email verified badge, contact info, assignments, action buttons).
+- **Right**: Profile information form, consultation hours, recent activity, password change.
 
 ## Conditions (If / Then)
 
 ### View Profile
 
 - If the user opens the profile page:
-  - Then load the authenticated user with `roles`, `assignments.department.college`, `assignments.college`.
-  - Then display name, email, phone, office, roles, and organizational assignments.
+  - Then load the authenticated user with `roles`, `assignments.department.college`, `assignments.college`, `consultationHours`.
+  - Then load the last 20 audit log entries for that user (ordered by timestamp DESC).
+  - Then display name, email, phone, office, roles, assignments, consultation hours, and recent activity.
+
+- If user is admin, dean, or chair:
+  - Then show "Organizational Hierarchy" button linking to `route('organizational.hierarchy')`.
 
 ### Update Profile (UserController::update)
 
 - If a user submits a profile update:
   - Then the update always applies to `Auth::id()` only.
-  - If the user has role `admin`: blocked with warning toast.
+  - If the user has role `admin`: blocked with warning toast ("Admin profile details cannot be edited here.").
   - If not admin:
     - `name` required, max 255.
-    - `email` required, valid, unique excluding own id.
+    - `email` required, valid email, unique excluding own id.
     - `phone_number` optional, max 30.
     - `office` optional, max 255.
     - If valid: update user, redirect with success toast.
 
+### Consultation Hours Management
+
+- **Add** (`storeConsultationHour`):
+  - `day` required, must be `Monday`–`Friday`.
+  - `time` required, max 100 chars.
+  - Creates a `UserConsultationHour` record.
+  - Redirects back with success toast.
+
+- **Remove** (`destroyConsultationHour`):
+  - Verifies ownership (abort 403 if not owner).
+  - Deletes the record.
+
 ### Change Password (UserController::changePassword)
 
 - If a user submits a password change:
-  - Then applies to `Auth::id()` only.
   - If admin: blocked with warning toast.
   - If not admin:
     - `current_password` required.
-    - `password` required, minimum 8 chars, must be confirmed, must differ from `current_password`.
-    - If `current_password` does not match stored hash: error "Current password is incorrect."
+    - `password` required, min 8 chars, must be confirmed (`password_confirmation`), must differ from `current_password`.
+    - If `current_password` does not match stored hash: field error "Current password is incorrect."
     - If valid:
-      - Issue OTP for `password_change` via `OtpService`.
-      - Store pending password hash in session `password_change_otp`.
-      - Redirect to profile with info toast to enter OTP.
+      - Issue OTP for `password_change` via `OtpService::issueForUser()`.
+      - Store pending user_id + password hash in session under `password_change_otp`.
+      - Redirect to profile with info toast asking user to enter OTP.
 
 ### Verify Password OTP (UserController::verifyPasswordOtp)
 
 - If a user submits the OTP to confirm password change:
   - Then check session `password_change_otp` exists and matches `Auth::id()`.
-  - If session missing or mismatched: redirect to profile with warning toast.
-  - Then migrate legacy OTP if needed.
+  - If session missing or mismatched: redirect with warning toast ("No pending password change request found.").
+  - Then migrate legacy OTP if needed (`OtpService::migrateLegacyOtp()`).
   - `otp` must be exactly 6 digits.
-  - Validate OTP via `OtpService` for `password_change` purpose.
+  - Validate OTP via `OtpService::validate()` for `password_change` purpose.
   - If invalid or expired: field error on `otp`.
   - If valid:
-    - Apply pending password hash.
-    - Clear OTP for `password_change`.
+    - Apply pending password hash via `forceFill`.
+    - Clear OTP for `password_change` via `OtpService::clear()`.
     - Clear session `password_change_otp`.
-    - Redirect to profile with success toast.
+    - Redirect with success toast.
 
 ### Resend Password OTP (UserController::resendPasswordOtp)
 
 - If admin: blocked with warning toast.
 - If session `password_change_otp` missing or mismatched: redirect with warning toast.
 - If valid: issue new OTP for `password_change`, redirect with success toast.
+
+## OTP Service (OtpService)
+
+Used for both email verification and password change flows.
+
+Constants:
+- `PURPOSE_EMAIL_VERIFICATION = 'email_verification'`
+- `PURPOSE_PASSWORD_CHANGE = 'password_change'`
+
+Default expiry: 10 minutes.
+
+Methods:
+- `issueForUser(User, purpose, expiryMinutes)` — generates 6-digit OTP, hashes it, stores in `user_otps`, sends email via `OtpMail`. Returns `bool` (whether email was sent successfully).
+- `validate(User, otp, purpose)` — checks existence, expiry, hash match. Returns `null` on success or error string.
+- `clear(User, purpose)` — deletes OTP record.
+- `migrateLegacyOtp(User, purpose)` — migrates OTP from legacy `users.otp` column to `user_otps` table, then clears legacy fields.
+
+## UI Notes (viewDetails.blade.php)
+
+### Profile Card (Left)
+- Gradient green banner top.
+- Avatar showing first letter of name.
+- Name, office, role badges (`status-indicator` component).
+- Email verified badge (green/amber based on `email_verified_at`).
+- Info list: email, phone, joined date, account status.
+- Assignment details section: Dean/Chair/Faculty assignments listed with department/college context.
+- "Organizational Hierarchy" button (admin/dean/chair only).
+
+### Profile Information Form
+- 2-column grid: name, email, phone, office, email verified (read-only).
+- Admin notice banner: "Admin profile editing is disabled on this page."
+- All input fields disabled for admin accounts.
+
+### Consultation Hours
+- List of existing hours showing day abbreviation, day name, time range.
+- Delete button per row with confirmation.
+- "Add" button opens modal dialog with day select and time input.
+- Empty state: "No consultation hours added yet."
+
+### Recent Activity
+- Last 20 audit log entries in a scrollable container.
+- Each entry shows: action icon (color-coded), action text with description, module name, timestamp.
+- Icons mapped for: login, logout, register, otp_verify, profile_update, password_change.
+
+### Change Password (Security)
+- **Step 1** — Set New Password:
+  - Three fields: Current Password, New Password, Confirm New Password.
+  - Each field has Alpine show/hide toggle (`bx-show`/`bx-hide`).
+  - Submit button: "Send OTP".
+  - Description text explaining the OTP flow.
+- **Step 2** — Enter Verification Code:
+  - Shown only when session `password_change_otp` exists.
+  - OTP input with large tracking (`tracking-[0.4em]`), max 6 chars.
+  - "Confirm Password Change" button.
+  - "Resend OTP" link below.
+  - Green panel to distinguish from Step 1.
 
 ## Sequences (Typical Flow)
 

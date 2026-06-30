@@ -6,44 +6,42 @@ Practical reference for how CSMS manages the academic structure hierarchy.
 
 - Controller
   - `app/Http/Controllers/AcademicStructureController.php`
+- Service
+  - `app/Services/AcademicStructureService.php`
 - Models
   - `app/Models/College.php`
   - `app/Models/Department.php`
   - `app/Models/Program.php`
   - `app/Models/Course.php`
   - `app/Models/UserAssignment.php`
-- Pivot / relationships
-  - `program_departments` (program-to-department link with `role=primary`)
+- Pivot
+  - `program_departments` (program-to-department link with `role = primary`)
 - Views
   - `resources/views/AcademicStructure/index.blade.php`
-  - `resources/views/AcademicStructure/modals/addCollegeModal.blade.php`
-  - `resources/views/AcademicStructure/modals/addDepartmentModal.blade.php`
-  - `resources/views/AcademicStructure/modals/addProgramModal.blade.php`
-  - `resources/views/AcademicStructure/modals/deleteCollegeModal.blade.php`
-  - `resources/views/AcademicStructure/modals/deleteDepartmentModal.blade.php`
-  - `resources/views/AcademicStructure/modals/deleteProgramModal.blade.php`
+  - `resources/views/AcademicStructure/modals/` (add/delete modals per entity)
 - Routes
-  - `routes/web.php` (Academic Structure routes — admin only)
+  - `routes/web.php` (Academic Structure routes — `role:admin` only)
 
 ## Key Concepts
 
-- Colleges contain Departments.
-- Programs belong to Departments through a pivot (`program_departments`) with a `primary` role.
+- Colleges contain Departments. Programs belong to Departments via `program_departments` pivot with `role = primary`.
 - All structure routes are restricted to `role:admin`.
 - Delete modals show cascade warnings and item counts before confirming.
+- All destructive operations run inside a DB transaction via `AcademicStructureService`.
+- If a service call throws, the controller catches it and returns a generic error toast.
 
 ## Conditions (If / Then)
 
 ### Colleges (Create)
 
 - If creating a college:
-  - Then `name` is required and must be unique.
+  - Then `name` is required and must be unique across `colleges`.
 
 ### Colleges (Update)
 
 - If updating a college:
   - Then the college must exist (route model binding).
-  - Then `name` is required.
+  - Then `name` is required and must be unique, ignoring the current college's own id.
 
 ### Colleges (Delete)
 
@@ -60,18 +58,20 @@ Practical reference for how CSMS manages the academic structure hierarchy.
     - Then delete all college goals.
     - Then delete the college.
     - Then all operations run inside a DB transaction.
+  - If a database error occurs:
+    - Then transaction is rolled back and an error toast is shown.
 
 ### Departments (Create)
 
 - If creating a department:
-  - Then `name` is required.
+  - Then `name` is required and must be unique across `departments`.
   - Then `college_id` is required and must exist.
 
 ### Departments (Update)
 
 - If updating a department:
   - Then the department must exist (route model binding).
-  - Then `name` is required.
+  - Then `name` is required and must be unique, ignoring the current department's own id.
   - Then `college_id` is required and must exist.
 
 ### Departments (Delete)
@@ -85,26 +85,36 @@ Practical reference for how CSMS manages the academic structure hierarchy.
     - Then delete all department objectives.
     - Then delete the department.
     - Then all operations run inside a DB transaction.
+  - If a database error occurs:
+    - Then transaction is rolled back and an error toast is shown.
 
 ### Programs (Create)
 
 - If creating a program:
-  - Then `name` is required.
+  - Then `name` is required and must be unique across `programs`.
   - Then `department_id` is required and must exist.
   - Then `bor_approval_no` is optional.
-  - Then `bor_approval_date` is optional.
+  - Then `bor_approval_date` is optional date.
+- If create succeeds:
+  - Then `programs` row is inserted.
+  - Then `program_departments` pivot row is inserted with `role = primary`.
+  - Then all in a DB transaction.
 
 ### Programs (Update)
 
 - If updating a program:
   - Then the program must exist (route model binding).
-  - Then `name` is required.
+  - Then `name` is required and must be unique, ignoring the current program's own id.
   - Then `department_id` is required and must exist.
   - If `department_id` is changing AND the program has any courses:
     - Then update is blocked with an error toast.
     - Then department change is only allowed when the program has no courses.
   - If department is not changing or program has no courses:
-    - Then update proceeds and `program_departments` pivot is synced to the new department.
+    - Then program fields are updated.
+    - Then `program_departments` pivot is synced (`sync`) to the new department with `role = primary`.
+    - Then all in a DB transaction.
+  - If a database error occurs:
+    - Then transaction is rolled back and generic error message is returned.
 
 ### Programs (Delete)
 
@@ -119,13 +129,15 @@ Practical reference for how CSMS manages the academic structure hierarchy.
     - Then detach the program from all departments (`program_departments`).
     - Then delete the program.
     - Then all operations run inside a DB transaction.
+  - If a database error occurs:
+    - Then transaction is rolled back and an error toast is shown.
 
 ## Sequences (Typical Flow)
 
 ### Create Program
 
 1. User selects a Department and enters Program details.
-2. System validates name and department existence.
+2. System validates name uniqueness and department existence.
 3. System inserts `programs` row.
 4. System inserts `program_departments` row with `role = primary`.
 
@@ -133,13 +145,13 @@ Practical reference for how CSMS manages the academic structure hierarchy.
 
 1. User selects a new Department for the Program.
 2. System checks if the program has any courses.
-3. If courses exist → blocked.
+3. If courses exist → blocked with an error toast.
 4. If no courses → system updates `programs` and syncs `program_departments`.
 
 ### Delete College (Full Cascade)
 
-1. Admin opens delete modal (shows department count).
+1. Admin opens delete modal (shows department count and cascade warning).
 2. Admin confirms.
-3. System checks for courses under all programs.
-4. If courses exist → blocked.
-5. If clear → system deletes assignments, objectives, departments, goals, college in a transaction.
+3. System checks for courses under all programs in all departments.
+4. If courses exist → blocked with an error toast showing the count.
+5. If clear → system deletes assignments, objectives, programs detach, departments, goals, college in a transaction.

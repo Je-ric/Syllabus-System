@@ -16,23 +16,25 @@ Current behavior of `ProgramSelector` used across pages (Courses, Programs, Syll
 
 ## Purpose
 
-Reusable selector for:
-- College
-- Department
-- Program
+Reusable cascading selector for:
+- College → Department → Program
 
-Supports optional auto-redirect after program selection.
+Supports:
+- Optional auto-redirect after program selection.
+- **Locked mode** for non-admin users with scoped access.
+- Breadcrumb step indicators.
 
 ## Public Properties
 
-- `colleges`
-- `departments`
-- `programs`
-- `collegeId`
-- `departmentId`
-- `programId`
-- `redirectRoute` (nullable)
-- `autoRedirect` (default `true`)
+- `colleges` — all colleges (or scoped for non-admins)
+- `departments` — departments for selected college
+- `programs` — programs for selected department
+- `collegeId` — wire:model.live
+- `departmentId` — wire:model.live
+- `programId` — wire:model.live
+- `redirectRoute` — nullable route name to redirect to
+- `autoRedirect` — default `true`
+- `locked` — `bool`, when true shows read-only locked UI
 
 ## Mount Parameters
 
@@ -45,29 +47,43 @@ mount($programId = null, $redirectRoute = null, $autoRedirect = true)
 ### Mount Behavior
 
 - On mount:
-  - Then load all colleges ordered by name.
+  - If user is `admin`:
+    - Then load all colleges ordered by name.
+  - If user is not admin AND `redirectRoute` is `programs.show` or `courses.index`:
+    - Then scope colleges to user's assigned college/department only.
+    - Then set `locked = true`.
+  - Else (syllabus creation, other contexts):
+    - Then load all colleges (same as admin).
   - Then store redirect config.
-- If `programId` is provided:
-  - Then preselect `collegeId`, `departmentId`, `programId` based on that Program.
+
+- If `programId` is provided (via query param, highest priority):
+  - Then preselect college, department, program based on that program.
+  - If user is not admin AND in scoped context:
+    - Then verify the program belongs to user's department.
+    - If not allowed: show warning toast and redirect to programs index.
+
 - If `programId` is not provided:
   - Then attempt preselect from user assignments.
+  - If a program was preselected AND `autoRedirect` is enabled AND `redirectRoute` is set:
+    - Then redirect to the appropriate route with the program ID (prevents redirect loops by checking current `program_id`).
 
 ### Assignment-Based Preselection
 
 Priority:
+1. Department assignment (`chair` first, then `faculty`) — uses `getPrimaryDepartmentAssignment()`
+2. College assignment (`dean`) — uses `getPrimaryCollegeAssignment()`
 
-1. Department assignment (`chair` first, then `faculty`)
-2. College assignment (`dean`)
-
-Rules:
+Rules for department assignment:
 - If user has a department assignment:
   - Then preselect college + department.
   - Then load department programs.
-  - If exactly one program exists:
-    - Then auto-select it.
+  - If exactly one program exists in that department:
+    - Then auto-select it (dispatch `programSelected`, return program ID).
+
+Rules for college assignment (fallback):
 - If user has a college assignment:
   - Then preselect college.
-  - If exactly one department exists:
+  - If exactly one department exists in that college:
     - Then auto-select it.
     - If that department has exactly one program:
       - Then auto-select it.
@@ -77,31 +93,38 @@ Rules:
 - When `programId` changes:
   - Then always dispatch `programSelected` with selected program id.
   - If `autoRedirect = true` and `redirectRoute` is set:
-    - Then redirect using the special rules below.
+    - If `redirectRoute = courses.index`: redirect with `?program_id={id}`.
+    - If `redirectRoute = syllabus.create`: redirect with `?program_id={id}`.
+    - Else: redirect using `route($redirectRoute, $programId)`.
 
-Special route handling:
-- If `redirectRoute = courses.index`:
-  - Then redirect with query: `?program_id={id}`.
-- If `redirectRoute = syllabus.create`:
-  - Then redirect with query: `?program_id={id}`.
-- Else:
-  - Then redirect using route param: `route($redirectRoute, $programId)`.
+### Mount-time Redirect
 
-Mount-time redirect helper also supports:
-- If `redirectRoute = programs.show`:
-  - Then redirect via `route('programs.show', ['program' => $id])`.
+`redirectWithProgramId()` handles mount-time redirects:
+- `courses.index` → with query `?program_id={id}`
+- `syllabus.create` → with query `?program_id={id}`
+- `programs.show` → `route('programs.show', $programId)`
+- Generic → tries with `program_id` query param
+
+### Locked Mode (Non-Admin Users)
+
+- If `locked = true`:
+  - Then the view renders read-only display fields instead of select dropdowns.
+  - Then each field shows a lock icon.
+  - Then breadcrumb still shows all three steps as completed.
+  - No interaction possible — user can only see their assigned context.
 
 ## Sequences
 
 ### `updatedCollegeId()`
 
 1. Load departments by selected college.
-2. Reset `departmentId` and `programId`.
-3. Dispatch `programSelected` with `null`.
+2. If not admin and scoped: filter to user's assigned department only.
+3. Reset `departmentId` and `programId`.
+4. Dispatch `programSelected` with `null`.
 
 ### `updatedDepartmentId()`
 
-1. Load programs by selected department.
+1. Load programs by selected department (via pivot table `department_program`).
 2. Reset `programId`.
 3. Dispatch `programSelected` with `null`.
 
@@ -112,14 +135,22 @@ Mount-time redirect helper also supports:
 
 ## Event Dispatched
 
-Event:
-
-```text
+```
 programSelected
 ```
 
-Payload:
-- `programId` (int|null)
+Payload: `programId` (int|null)
+
+## View Layout
+
+- **Breadcrumb** at top: 1. College → 2. Department → 3. Program (with completion styling).
+- **3-column grid** of select dropdowns:
+  - College: always shown, wire:model.live="collegeId"
+  - Department: disabled until college selected
+  - Program: disabled until department selected
+- **Loading spinners**: each dropdown has loading indicator on wire:target updates.
+- **Confirmation chip**: when a program is selected, shows a green chip with the program name.
+- **Locked mode**: same grid layout but all fields are read-only `<div>` with lock icon.
 
 ## Usage Examples
 
@@ -149,8 +180,18 @@ Payload:
 />
 ```
 
+### Syllabus creation (no lock, all colleges visible)
+
+```blade
+<livewire:programs.program-selector
+    :program-id="optional($program)?->id"
+    redirect-route="syllabus.create"
+    :autoRedirect="true" />
+```
+
 ## Notes
 
-- Prefer listening to `programSelected` for integration.
+- Prefer listening to `programSelected` for integration when `autoRedirect=false`.
+- Non-admin users in Programs/Courses pages are scoped to their assignment — locked mode.
+- Admin users always see all colleges/departments/programs.
 - Keep route names valid; invalid route names will fail redirect.
-- Avoid relying on hardcoded DOM selectors when multiple selector instances exist.
