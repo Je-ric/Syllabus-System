@@ -152,6 +152,14 @@ class WeeklyCoverageStep extends Component
             return;
         }
 
+        // Require a Course Outcome before saving (MVGO week 1 is exempt)
+        $isMvgo = $weekNo === 1;
+        if (! $isMvgo && empty($fields['course_outcome_id'])) {
+            $this->dispatch('lw-toast', type: 'error',
+                message: 'Select a Course Outcome first before filling in week content.');
+            return;
+        }
+
         $this->weekInputs['w' . $weekNo] = [
             'course_outcome_id'   => $fields['course_outcome_id'] ?? null,
             'learning_outcomes'   => $fields['learning_outcomes'] ?? '',
@@ -169,6 +177,9 @@ class WeeklyCoverageStep extends Component
             $this->lockedWeeks,
             $weekNo
         );
+
+        // Reload from DB so the next render gets fresh data into Alpine x-data
+        $this->loadData();
 
         if ($changed) {
             $this->dispatch('lw-toast', type: 'success', message: "Week {$weekNo} saved.");
@@ -190,6 +201,11 @@ class WeeklyCoverageStep extends Component
             return;
         }
 
+        // Skip save if no CO selected (non-MVGO) — don't block collapse, just skip
+        if ($weekNo !== 1 && empty($this->weekInputs['w' . $weekNo]['course_outcome_id'] ?? null)) {
+            return;
+        }
+
         $changed = app(WeekContentService::class)->save(
             $this->syllabusId,
             $this->activeComponent,
@@ -198,6 +214,9 @@ class WeeklyCoverageStep extends Component
             $weekNo
         );
 
+        // Reload from DB so the next render gets fresh data into Alpine x-data
+        $this->loadData();
+
         if ($changed) {
             $this->dispatch('lw-toast', type: 'success', message: "Week {$weekNo} saved.");
         }
@@ -205,12 +224,28 @@ class WeeklyCoverageStep extends Component
 
     public function saveAllWeeklyEntries(): void
     {
+        // Check every editable week has a CO selected (skip MVGO week 1)
+        foreach ($this->weekInputs as $key => $input) {
+            $wn = (int) str_replace('w', '', $key);
+            if ($wn === 1 || isset($this->lockedWeeks[$wn])) {
+                continue;
+            }
+            if (empty($input['course_outcome_id'] ?? null)) {
+                $this->dispatch('lw-toast', type: 'error',
+                    message: "Week {$wn} needs a Course Outcome before saving all weeks.");
+                return;
+            }
+        }
+
         $changed = app(WeekContentService::class)->save(
             $this->syllabusId,
             $this->activeComponent,
             $this->weekInputs,
             $this->lockedWeeks
         );
+
+        // Reload from DB so the next render gets fresh data into Alpine x-data
+        $this->loadData();
 
         if ($changed) {
             $this->dispatch('lw-toast', type: 'success', message: 'All weeks saved.');

@@ -30,9 +30,9 @@
                     <i class="bx bx-error text-base leading-none"></i>
                 </span>
                 <div>
-                    <p class="text-sm font-bold text-amber-800">Before you submit</p>
+                    <p class="text-sm font-bold text-amber-800">Before you submit (not yet implemented)</p>
                     <p class="text-sm text-amber-700 mt-0.5 leading-relaxed">
-                        Once submitted, this syllabus will be sent to the department chair for review.
+                        Once submitted, this syllabus will be sent to the Program CQI Chair and Members for review.
                         Make sure all information is complete and accurate.
                     </p>
                 </div>
@@ -40,7 +40,7 @@
         </div>
 
         {{-- Submit footer --}}
-        <div class="flex items-center justify-between gap-4 px-5 py-4 bg-white">
+        {{-- <div class="flex items-center justify-between gap-4 px-5 py-4 bg-white">
             <p class="text-xs text-slate-400 hidden sm:block">
                 You can still edit your draft if you need to make changes before submitting.
             </p>
@@ -53,7 +53,7 @@
                 class="ml-auto">
                 <i class="bx bx-send text-base leading-none"></i> Submit for Review
             </x-button>
-        </div>
+        </div> --}}
 
     </div>
 </div>

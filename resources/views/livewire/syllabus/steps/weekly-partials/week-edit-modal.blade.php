@@ -126,18 +126,23 @@
                 <template x-if="activeField !== 'references_materials'">
                     <div class="flex flex-col h-full">
 
-                        {{-- CO selector row --}}
+                        {{-- CO selector row (always visible for non-MVGO) --}}
                         <div x-show="!isMvgo"
-                             class="px-6 pt-4 pb-3 border-b border-slate-100 shrink-0 bg-slate-50/60">
-                            <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-1.5">
+                             class="px-6 pt-4 pb-3 border-b border-green-100 shrink-0"
+                             :class="coMissing ? 'bg-amber-50' : 'bg-green-50/60'">
+                            <label class="block text-xs font-bold uppercase tracking-widest mb-1.5"
+                                   :class="coMissing ? 'text-amber-600' : 'text-greeen-400'">
                                 Course Outcome
+                                <span x-show="coMissing"
+                                      class="text-rose-500 normal-case font-medium">* Required</span>
                             </label>
                             <select x-model="fields.course_outcome_id"
-                                class="w-full max-w-xl rounded-lg border border-slate-200 bg-white
-                                       px-3 py-2 text-sm text-slate-700
-                                       focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100
-                                       transition-colors">
-                                <option value="">— Not mapped to a specific CO —</option>
+                                @change="if (!coMissing && activeField !== 'references_materials') $nextTick(() => _initQuill())"
+                                class="w-full max-w-xl rounded-lg border px-3 py-2 text-sm text-slate-700 transition-colors"
+                                :class="coMissing
+                                    ? 'border-amber-300 bg-amber-50 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100'
+                                    : 'border-green-200 bg-white focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100'">
+                                <option value="">— Select a Course Outcome —</option>
                                 @foreach ($courseOutcomes as $co)
                                     <option value="{{ $co['id'] }}">
                                         {{ $co['co_code'] }} — {{ \Illuminate\Support\Str::limit($co['description'], 80) }}
@@ -146,8 +151,26 @@
                             </select>
                         </div>
 
-                        {{-- Quill editor (grows to fill remaining space) --}}
-                        <div class="flex-1 flex flex-col px-6 pt-5 pb-4 min-h-0">
+                        {{-- Blocker — CO not selected yet --}}
+                        <div x-show="coMissing"
+                             class="flex-1 flex flex-col items-center justify-center px-6 py-16 text-center">
+                            <div class="w-16 h-16 rounded-2xl bg-amber-100 flex items-center justify-center mb-5">
+                                <i class="bx bx-target-lock text-2xl text-amber-600"></i>
+                            </div>
+                            <h3 class="text-base font-bold text-slate-700 mb-2">Select a Course Outcome first</h3>
+                            <p class="text-sm text-slate-500 max-w-sm leading-relaxed">
+                                Each week must be linked to a Course Outcome. Choose one from the dropdown above,
+                                then the editor will open for you to fill in the content.
+                            </p>
+                            <div class="mt-5 flex items-center gap-2 text-xs text-slate-400">
+                                <i class="bx bx-info-circle text-[14px]"></i>
+                                <span>All fields become editable once a CO is selected.</span>
+                            </div>
+                        </div>
+
+                        {{-- Quill editor — shown once CO is selected --}}
+                        <div x-show="!coMissing"
+                             class="flex-1 flex flex-col px-6 pt-5 pb-4 min-h-0">
 
                             <div class="flex items-center justify-between mb-3 shrink-0">
                                 <h4 class="text-sm font-semibold text-slate-700"
@@ -180,97 +203,111 @@
 
                 {{-- References & Materials panel --}}
                 <template x-if="activeField === 'references_materials'">
-                    <div class="px-6 py-5 grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                        {{-- References --}}
-                        <div>
-                            <div class="flex items-center justify-between mb-4">
-                                <div>
-                                    <p class="text-xs font-bold uppercase tracking-widest text-slate-400">References</p>
-                                    <p class="text-xs text-slate-500 mt-0.5">Books, journals, printed sources</p>
-                                </div>
-                                <button type="button" x-on:click="addRef()"
-                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-semibold
-                                           bg-emerald-50 text-emerald-700 border border-emerald-200
-                                           hover:bg-emerald-100 transition-colors">
-                                    <i class="bx bx-plus text-[14px]"></i> Add
-                                </button>
+                    <div class="h-full">
+                        {{-- Blocker — CO not selected yet --}}
+                        <div x-show="coMissing"
+                             class="h-full flex flex-col items-center justify-center px-6 py-16 text-center">
+                            <div class="w-16 h-16 rounded-2xl bg-amber-100 flex items-center justify-center mb-5">
+                                <i class="bx bx-library text-2xl text-amber-600"></i>
                             </div>
-
-                            <div class="space-y-2.5">
-                                <template x-for="(ref, rIdx) in fields.references" :key="rIdx">
-                                    <div class="flex items-center gap-2.5">
-                                        <span class="shrink-0 w-5 h-5 rounded-full bg-slate-100 border border-slate-200
-                                                     flex items-center justify-center text-[10px] font-bold text-slate-500"
-                                              x-text="rIdx + 1"></span>
-                                        <input type="text" x-model="ref.text"
-                                            placeholder="Author (Year). Title. Publisher."
-                                            class="flex-1 text-sm rounded-lg border border-slate-200 bg-white px-3 py-2
-                                                   text-slate-700 placeholder:text-slate-300
-                                                   focus:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-50
-                                                   transition-colors" />
-                                        <button type="button" x-on:click="removeRef(rIdx)"
-                                            x-bind:class="fields.references.length <= 1 ? 'opacity-0 pointer-events-none' : 'opacity-100'"
-                                            class="shrink-0 flex items-center justify-center w-7 h-7
-                                                   text-slate-300 hover:text-rose-400 hover:bg-rose-50
-                                                   rounded-md transition-colors">
-                                            <i class="bx bx-trash text-[14px]"></i>
-                                        </button>
-                                    </div>
-                                </template>
-                            </div>
+                            <h3 class="text-base font-bold text-slate-700 mb-2">Select a Course Outcome first</h3>
+                            <p class="text-sm text-slate-500 max-w-sm leading-relaxed">
+                                References and materials are tied to each week's Course Outcome. Pick one from
+                                the dropdown above to start adding resources.
+                            </p>
                         </div>
 
-                        {{-- Vertical divider (hidden on mobile) --}}
-                        {{-- Handled by gap --}}
+                        {{-- Actual references content — shown once CO is selected --}}
+                        <div x-show="!coMissing"
+                             class="px-6 py-5 grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                        {{-- Online Materials --}}
-                        <div>
-                            <div class="flex items-center justify-between mb-4">
-                                <div>
-                                    <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Online Materials</p>
-                                    <p class="text-xs text-slate-500 mt-0.5">Links, slides, videos, web resources</p>
+                            {{-- References --}}
+                            <div>
+                                <div class="flex items-center justify-between mb-4">
+                                    <div>
+                                        <p class="text-xs font-bold uppercase tracking-widest text-slate-400">References</p>
+                                        <p class="text-xs text-slate-500 mt-0.5">Books, journals, printed sources</p>
+                                    </div>
+                                    <button type="button" x-on:click="addRef()"
+                                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-semibold
+                                               bg-emerald-50 text-emerald-700 border border-emerald-200
+                                               hover:bg-emerald-100 transition-colors">
+                                        <i class="bx bx-plus text-[14px]"></i> Add
+                                    </button>
                                 </div>
-                                <button type="button" x-on:click="addMat()"
-                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-semibold
-                                           bg-blue-50 text-blue-700 border border-blue-200
-                                           hover:bg-blue-100 transition-colors">
-                                    <i class="bx bx-plus text-[14px]"></i> Add
-                                </button>
-                            </div>
 
-                            <div class="space-y-3">
-                                <template x-for="(mat, mIdx) in fields.materials" :key="mIdx">
-                                    <div class="flex items-start gap-2.5">
-                                        <span class="shrink-0 mt-2 w-5 h-5 rounded-full bg-slate-100 border border-slate-200
-                                                     flex items-center justify-center text-[10px] font-bold text-slate-500"
-                                              x-text="mIdx + 1"></span>
-                                        <div class="flex-1 space-y-1.5">
-                                            <input type="text" x-model="mat.name"
-                                                :placeholder="'Label (e.g. Week ' + weekNo + ' Slides)'"
-                                                class="w-full text-sm rounded-lg border border-slate-200 bg-white px-3 py-2
+                                <div class="space-y-2.5">
+                                    <template x-for="(ref, rIdx) in fields.references" :key="rIdx">
+                                        <div class="flex items-center gap-2.5">
+                                            <span class="shrink-0 w-5 h-5 rounded-full bg-slate-100 border border-slate-200
+                                                         flex items-center justify-center text-[10px] font-bold text-slate-500"
+                                                  x-text="rIdx + 1"></span>
+                                            <input type="text" x-model="ref.text"
+                                                placeholder="Author (Year). Title. Publisher."
+                                                class="flex-1 text-sm rounded-lg border border-slate-200 bg-white px-3 py-2
                                                        text-slate-700 placeholder:text-slate-300
-                                                       focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-50
+                                                       focus:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-50
                                                        transition-colors" />
-                                            <input type="url" x-model="mat.url"
-                                                placeholder="https://…"
-                                                class="w-full text-sm rounded-lg border border-slate-200 bg-white px-3 py-2
-                                                       text-slate-700 placeholder:text-slate-300 font-mono
-                                                       focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-50
-                                                       transition-colors" />
+                                            <button type="button" x-on:click="removeRef(rIdx)"
+                                                x-bind:class="fields.references.length <= 1 ? 'opacity-0 pointer-events-none' : 'opacity-100'"
+                                                class="shrink-0 flex items-center justify-center w-7 h-7
+                                                       text-slate-300 hover:text-rose-400 hover:bg-rose-50
+                                                       rounded-md transition-colors">
+                                                <i class="bx bx-trash text-[14px]"></i>
+                                            </button>
                                         </div>
-                                        <button type="button" x-on:click="removeMat(mIdx)"
-                                            x-bind:class="fields.materials.length <= 1 ? 'opacity-0 pointer-events-none' : 'opacity-100'"
-                                            class="shrink-0 mt-2 flex items-center justify-center w-7 h-7
-                                                   text-slate-300 hover:text-rose-400 hover:bg-rose-50
-                                                   rounded-md transition-colors">
-                                            <i class="bx bx-trash text-[14px]"></i>
-                                        </button>
-                                    </div>
-                                </template>
+                                    </template>
+                                </div>
                             </div>
-                        </div>
 
+                            {{-- Online Materials --}}
+                            <div>
+                                <div class="flex items-center justify-between mb-4">
+                                    <div>
+                                        <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Online Materials</p>
+                                        <p class="text-xs text-slate-500 mt-0.5">Links, slides, videos, web resources</p>
+                                    </div>
+                                    <button type="button" x-on:click="addMat()"
+                                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-semibold
+                                               bg-blue-50 text-blue-700 border border-blue-200
+                                               hover:bg-blue-100 transition-colors">
+                                        <i class="bx bx-plus text-[14px]"></i> Add
+                                    </button>
+                                </div>
+
+                                <div class="space-y-3">
+                                    <template x-for="(mat, mIdx) in fields.materials" :key="mIdx">
+                                        <div class="flex items-start gap-2.5">
+                                            <span class="shrink-0 mt-2 w-5 h-5 rounded-full bg-slate-100 border border-slate-200
+                                                         flex items-center justify-center text-[10px] font-bold text-slate-500"
+                                                  x-text="mIdx + 1"></span>
+                                            <div class="flex-1 space-y-1.5">
+                                                <input type="text" x-model="mat.name"
+                                                    :placeholder="'Label (e.g. Week ' + weekNo + ' Slides)'"
+                                                    class="w-full text-sm rounded-lg border border-slate-200 bg-white px-3 py-2
+                                                           text-slate-700 placeholder:text-slate-300
+                                                           focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-50
+                                                           transition-colors" />
+                                                <input type="url" x-model="mat.url"
+                                                    placeholder="https://…"
+                                                    class="w-full text-sm rounded-lg border border-slate-200 bg-white px-3 py-2
+                                                           text-slate-700 placeholder:text-slate-300 font-mono
+                                                           focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-50
+                                                           transition-colors" />
+                                            </div>
+                                            <button type="button" x-on:click="removeMat(mIdx)"
+                                                x-bind:class="fields.materials.length <= 1 ? 'opacity-0 pointer-events-none' : 'opacity-100'"
+                                                class="shrink-0 mt-2 flex items-center justify-center w-7 h-7
+                                                       text-slate-300 hover:text-rose-400 hover:bg-rose-50
+                                                       rounded-md transition-colors">
+                                                <i class="bx bx-trash text-[14px]"></i>
+                                            </button>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                        </div>
                     </div>
                 </template>
 
@@ -291,6 +328,13 @@
 
                 {{-- Primary actions --}}
                 <div class="flex items-center gap-2">
+                    {{-- Hint when CO is missing --}}
+                    <span x-show="coMissing"
+                          class="hidden sm:inline-flex items-center gap-1.5 text-xs text-amber-600 mr-1">
+                        <i class="bx bx-info-circle text-[13px]"></i>
+                        Select a Course Outcome to save
+                    </span>
+
                     <button type="button" x-on:click="close()" x-bind:disabled="saving"
                         class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600
                                border border-slate-200 bg-white hover:bg-slate-50
@@ -298,9 +342,12 @@
                         Cancel
                     </button>
 
-                    <button type="button" x-on:click="save()" x-bind:disabled="saving"
+                    <button type="button" x-on:click="save()" x-bind:disabled="saving || coMissing"
                         class="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg text-sm font-semibold
                                text-white disabled:opacity-50 transition-all duration-150"
+                        :class="coMissing
+                            ? 'cursor-not-allowed'
+                            : 'cursor-pointer'"
                         style="background: linear-gradient(135deg, #009639 0%, #16a34a 100%); box-shadow: 0 2px 8px rgba(0,150,57,0.35);">
 
                         <template x-if="!saving">
@@ -366,6 +413,10 @@ function weekEditModal() {
             return this.richFields.find(f => f.key === this.activeField)?.label ?? '';
         },
 
+        get coMissing() {
+            return !this.isMvgo && !this.fields.course_outcome_id;
+        },
+
         // ── Lifecycle ────────────────────────────────────────────────────────
 
         open(detail) {
@@ -393,6 +444,7 @@ function weekEditModal() {
         _initQuill() {
             const el = document.getElementById('week-quill-editor');
             if (!el) return;
+            if (this.coMissing) return;
 
             if (this._quill) this._destroyQuill();
             el.innerHTML = '';
@@ -490,6 +542,7 @@ function weekEditModal() {
 
         _saveCurrentField() {
             if (!this._quill) return;
+            if (this.coMissing) return;
             const rawHtml  = this._quill.root.innerHTML;
             const clean    = this._sanitizeQuillHtml(rawHtml);
             this.fields[this.activeField] = clean;
