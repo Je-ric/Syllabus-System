@@ -17,19 +17,19 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <x-form.label isRequired>Instructor Name</x-form.label>
-                        <x-form.input wire:model.defer="lec_instructor_name" placeholder="Enter instructor name" />
+                        <x-form.input wire:model.defer="lec_instructor_name" placeholder="Enter instructor name" disabled />
                     </div>
                     <div>
                         <x-form.label isRequired>Instructor Email</x-form.label>
-                        <x-form.input type="email" wire:model.defer="lec_instructor_email" placeholder="instructor@clsu.edu.ph" />
+                        <x-form.input type="email" wire:model.defer="lec_instructor_email" placeholder="instructor@clsu.edu.ph" disabled />
                     </div>
                     <div>
                         <x-form.label>Phone <span class="text-slate-400 font-normal normal-case tracking-normal">(optional)</span></x-form.label>
-                        <x-form.input wire:model.defer="lec_phone" placeholder="09XX XXX XXXX" />
+                        <x-form.input wire:model.defer="lec_phone" placeholder="09XX XXX XXXX" disabled />
                     </div>
                     <div>
                         <x-form.label>Office</x-form.label>
-                        <x-form.input wire:model.defer="lec_office" placeholder="Building / Room" />
+                        <x-form.input wire:model.defer="lec_office" placeholder="Building / Room" disabled />
                     </div>
                 </div>
             </div>
@@ -58,80 +58,118 @@
                         <p class="mt-1 text-xs text-[#94a3b8]">Set in course settings.</p>
                     </div>
                 </div>
-
-                {{-- LEC Schedules --}}
-                <div class="space-y-2 mb-1">
-                    <div class="flex items-center justify-between">
-                        <p class="text-xs font-bold uppercase tracking-widest text-[#475569]">Class Schedule</p>
-                        <button type="button" wire:click="addSchedule('lec')"
-                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-[#f0fdf4] text-[#16a34a] border border-[#bbf7d0] hover:bg-[#dcfce7] transition">
-                            <i class="bx bx-plus text-sm"></i> Add
-                        </button>
-                    </div>
-                    @forelse ($lec_schedules as $i => $s)
-                        <div class="flex items-center gap-2">
-                            <select wire:model.defer="lec_schedules.{{ $i }}.day"
-                                class="rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-sm focus:border-emerald-400 focus:outline-none">
-                                @foreach ($days as $d)
-                                    <option value="{{ $d }}" {{ ($s['day'] ?? '') === $d ? 'selected' : '' }}>{{ $d }}</option>
-                                @endforeach
-                            </select>
-                            <input type="text" wire:model.defer="lec_schedules.{{ $i }}.time"
-                                placeholder="e.g. 07:30 AM – 09:00 AM"
-                                class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2 focus:border-emerald-400 focus:outline-none focus:bg-white placeholder:text-[#94a3b8]" />
-                            <button type="button" wire:click="removeSchedule('lec', {{ $i }})"
-                                class="p-1.5 text-[#94a3b8] hover:text-rose-500 hover:bg-rose-50 rounded-md transition">
-                                <i class="bx bx-trash text-sm"></i>
-                            </button>
-                        </div>
-                    @empty
-                        <p class="text-sm italic text-[#94a3b8]">No schedule added yet.</p>
-                    @endforelse
-                </div>
             </div>
 
             <div class="border-t border-[#e2e8f0]"></div>
 
-            {{-- Consultation Hours --}}
-            <div x-data="{
-                days: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
-                hours: @js($userConsultationHours ?? []),
-                saving: false,
-                addRow()  { this.hours.push({ day: 'Monday', time: '' }); },
-                removeRow(i) { this.hours.splice(i, 1); },
-                async save() {
-                    this.saving = true;
-                    await $wire.saveConsultationHours(this.hours);
-                    this.saving = false;
-                    document.getElementById('consultation-hours-modal')?.close();
-                }
-            }"
-            x-on:consultation-hours-updated.window="hours = $event.detail.hours">
+            {{-- ── Side-by-side: Class Schedule | Consultation Hours ─────── --}}
+            <div
+                x-data="{
+                    days: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
+                    schedules: @js($lec_schedules ?? []),
+                    hours: @js($userConsultationHours ?? []),
+                    saving: false,
 
-                <div class="flex items-center justify-between mb-3">
-                    <p class="text-xs font-bold uppercase tracking-widest text-[#475569]">Consultation Hours</p>
-                    <x-button variant="sm-cancel" type="button" x-on:click="document.getElementById('consultation-hours-modal').showModal()">
-                        <i class="bx bx-edit-alt text-sm"></i> Edit
-                    </x-button>
-                </div>
+                    addSchedule()    { this.schedules.push({ day: 'Monday', time: '' }); },
+                    removeSchedule(i){ this.schedules.splice(i, 1); },
 
-                @forelse ($userConsultationHours as $ch)
-                    <div class="flex items-center gap-3 mb-1.5">
-                        <span class="inline-flex items-center justify-center w-10 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold py-1 shrink-0">
-                            {{ substr($ch['day'], 0, 3) }}
-                        </span>
-                        <span class="text-sm text-slate-700">{{ $ch['day'] }}</span>
-                        <span class="text-sm text-slate-500">{{ $ch['time'] }}</span>
+                    addRow()       { this.hours.push({ day: 'Monday', time: '' }); },
+                    removeRow(i)   { this.hours.splice(i, 1); },
+
+                    async saveConsultation() {
+                        this.saving = true;
+                        await $wire.saveConsultationHours(this.hours);
+                        this.saving = false;
+                    },
+
+                    async pushToWire() {
+                        await $wire.pushLecSchedules(this.schedules);
+                        await $wire.pushConsultationHours(this.hours);
+                    },
+                }"
+                x-on:lec-schedules-updated.window="schedules = $event.detail.schedules"
+                x-on:consultation-hours-updated.window="hours = $event.detail.hours"
+                x-on:before-save-all.window="await pushToWire()"
+            >
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                    {{-- ── Class Schedule (LEC) ─────────────────────────── --}}
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-xs font-bold uppercase tracking-widest text-[#475569]">Class Schedule</p>
+                            <button type="button" x-on:click="addSchedule()"
+                                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold
+                                       bg-[#f0fdf4] text-[#16a34a] border border-[#bbf7d0]
+                                       hover:bg-[#dcfce7] transition">
+                                <i class="bx bx-plus text-sm"></i> Add
+                            </button>
+                        </div>
+
+                        <div class="space-y-2">
+                            <template x-for="(row, i) in schedules" :key="i">
+                                <div class="flex items-center gap-2">
+                                    <x-form.select x-model="row.day">
+                                        <template x-for="d in days" :key="d">
+                                            <option :value="d" x-text="d"></option>
+                                        </template>
+                                    </x-form.select>
+                                    <input type="text" x-model="row.time"
+                                        placeholder="e.g. 07:30 AM – 09:00 AM"
+                                        class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
+                                               focus:border-emerald-400 focus:outline-none focus:bg-white
+                                               placeholder:text-[#94a3b8]" />
+                                    <button type="button" x-on:click="removeSchedule(i)"
+                                        class="p-1.5 text-[#94a3b8] hover:text-rose-500 hover:bg-rose-50 rounded-md transition">
+                                        <i class="bx bx-trash text-sm"></i>
+                                    </button>
+                                </div>
+                            </template>
+                            <template x-if="schedules.length === 0">
+                                <p class="text-sm italic text-[#94a3b8]">No schedule added yet.</p>
+                            </template>
+                        </div>
                     </div>
-                @empty
-                    <p class="text-sm italic text-[#94a3b8]">No consultation hours set.
-                        <button type="button" x-on:click="document.getElementById('consultation-hours-modal').showModal()" class="text-emerald-600 hover:underline">Add them here.</button>
-                    </p>
-                @endforelse
 
-                @include('livewire.syllabus.steps.components-partials.consultation-hours-modal')
+                    {{-- ── Consultation Hours ───────────────────────────── --}}
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-xs font-bold uppercase tracking-widest text-[#475569]">Consultation Hours</p>
+                            <button type="button" x-on:click="addRow()"
+                                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold
+                                       bg-amber-50 text-amber-600 border border-amber-200
+                                       hover:bg-amber-100 transition">
+                                <i class="bx bx-plus text-sm"></i> Add
+                            </button>
+                        </div>
 
-            </div>
+                        <div class="space-y-2">
+                            <template x-for="(row, i) in hours" :key="i">
+                                <div class="flex items-center gap-2">
+                                    <x-form.select x-model="row.day">
+                                        <template x-for="d in days" :key="d">
+                                            <option :value="d" x-text="d"></option>
+                                        </template>
+                                    </x-form.select>
+                                    <input type="text" x-model="row.time"
+                                        placeholder="e.g. 09:00 AM – 11:00 AM"
+                                        class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
+                                               focus:border-amber-400 focus:outline-none focus:bg-white
+                                               placeholder:text-[#94a3b8]" />
+                                    <button type="button" x-on:click="removeRow(i)"
+                                        class="p-1.5 text-[#94a3b8] hover:text-rose-500 hover:bg-rose-50 rounded-md transition">
+                                        <i class="bx bx-trash text-sm"></i>
+                                    </button>
+                                </div>
+                            </template>
+                            <template x-if="hours.length === 0">
+                                <p class="text-sm italic text-[#94a3b8]">No consultation hours added.</p>
+                            </template>
+                        </div>
+                    </div>
+
+                </div><!-- /grid -->
+            </div><!-- /x-data consultation -->
 
         </div>
     </x-wizard.section>
@@ -148,19 +186,19 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <x-form.label isRequired>Instructor Name</x-form.label>
-                            <x-form.input wire:model.defer="lab_instructor_name" placeholder="Enter instructor name" />
+                            <x-form.input wire:model.defer="lab_instructor_name" placeholder="Enter instructor name" disabled />
                         </div>
                         <div>
                             <x-form.label isRequired>Instructor Email</x-form.label>
-                            <x-form.input type="email" wire:model.defer="lab_instructor_email" placeholder="instructor@clsu.edu.ph" />
+                            <x-form.input type="email" wire:model.defer="lab_instructor_email" placeholder="instructor@clsu.edu.ph" disabled />
                         </div>
                         <div>
                             <x-form.label>Phone <span class="text-slate-400 font-normal normal-case tracking-normal">(optional)</span></x-form.label>
-                            <x-form.input wire:model.defer="lab_phone" placeholder="09XX XXX XXXX" />
+                            <x-form.input wire:model.defer="lab_phone" placeholder="09XX XXX XXXX" disabled />
                         </div>
                         <div>
                             <x-form.label>Office</x-form.label>
-                            <x-form.input wire:model.defer="lab_office" placeholder="Building / Room" />
+                            <x-form.input wire:model.defer="lab_office" placeholder="Building / Room" disabled />
                         </div>
                     </div>
                 </div>
@@ -171,50 +209,157 @@
                     <p class="text-xs font-bold uppercase tracking-widest text-[#475569] mb-3 flex items-center gap-2">
                         <span class="h-px w-4 bg-[#2563eb]"></span> Class Delivery
                     </p>
-                    <div class="mb-4">
-                        <x-form.label>Class Hours</x-form.label>
-                        <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">{{ $lab_class_hours ?? '—' }}</p>
-                        <p class="mt-1 text-xs text-[#94a3b8]">Set in course settings.</p>
-                    </div>
-
-                    {{-- LAB Schedules --}}
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between">
-                            <p class="text-xs font-bold uppercase tracking-widest text-[#475569]">Class Schedule</p>
-                            <button type="button" wire:click="addSchedule('lab')"
-                                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition">
-                                <i class="bx bx-plus text-sm"></i> Add
-                            </button>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <x-form.label>Class Hours</x-form.label>
+                            <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">{{ $lab_class_hours ?? '—' }}</p>
+                            <p class="mt-1 text-xs text-[#94a3b8]">Set in course settings.</p>
                         </div>
-                        @forelse ($lab_schedules as $i => $s)
-                            <div class="flex items-center gap-2">
-                                <select wire:model.defer="lab_schedules.{{ $i }}.day"
-                                    class="rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-sm focus:border-blue-400 focus:outline-none">
-                                    @foreach ($days as $d)
-                                        <option value="{{ $d }}" {{ ($s['day'] ?? '') === $d ? 'selected' : '' }}>{{ $d }}</option>
-                                    @endforeach
-                                </select>
-                                <input type="text" wire:model.defer="lab_schedules.{{ $i }}.time"
-                                    placeholder="e.g. 01:00 PM – 04:00 PM"
-                                    class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2 focus:border-blue-400 focus:outline-none focus:bg-white placeholder:text-[#94a3b8]" />
-                                <button type="button" wire:click="removeSchedule('lab', {{ $i }})"
-                                    class="p-1.5 text-[#94a3b8] hover:text-rose-500 hover:bg-rose-50 rounded-md transition">
-                                    <i class="bx bx-trash text-sm"></i>
-                                </button>
-                            </div>
-                        @empty
-                            <p class="text-sm italic text-[#94a3b8]">No schedule added yet.</p>
-                        @endforelse
+                        <div>
+                            <x-form.label>
+                                Passing Mark
+                                @if ($course->has_lec_lab)
+                                    <span class="text-[#94a3b8] font-normal normal-case tracking-normal">(LEC & LAB)</span>
+                                @endif
+                            </x-form.label>
+                            <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">{{ $lec_performance_standard }}%</p>
+                            <p class="mt-1 text-xs text-[#94a3b8]">Set in course settings.</p>
+                        </div>
                     </div>
                 </div>
 
+                <div class="border-t border-[#e2e8f0]"></div>
+
+                {{-- ── Side-by-side: Class Schedule | Consultation Hours ─────── --}}
+                <div
+                    x-data="{
+                        days: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
+                        schedules: @js($lab_schedules ?? []),
+                        hours: @js($labConsultationHours ?? []),
+                        saving: false,
+
+                        addSchedule()    { this.schedules.push({ day: 'Monday', time: '' }); },
+                        removeSchedule(i){ this.schedules.splice(i, 1); },
+
+                        addRow()       { this.hours.push({ day: 'Monday', time: '' }); },
+                        removeRow(i)   { this.hours.splice(i, 1); },
+
+                        async saveConsultation() {
+                            this.saving = true;
+                            await $wire.saveLabConsultationHours(this.hours);
+                            this.saving = false;
+                        },
+
+                        async pushToWire() {
+                            await $wire.pushLabSchedules(this.schedules);
+                            await $wire.pushLabConsultationHours(this.hours);
+                        },
+                    }"
+                    x-on:lab-schedules-updated.window="schedules = $event.detail.schedules"
+                    x-on:lab-consultation-hours-updated.window="hours = $event.detail.hours"
+                    x-on:before-save-all.window="await pushToWire()"
+                >
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                        {{-- ── Class Schedule (LAB) ─────────────────────────── --}}
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <p class="text-xs font-bold uppercase tracking-widest text-[#475569]">Class Schedule</p>
+                                <button type="button" x-on:click="addSchedule()"
+                                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold
+                                           bg-blue-50 text-blue-600 border border-blue-200
+                                           hover:bg-blue-100 transition">
+                                    <i class="bx bx-plus text-sm"></i> Add
+                                </button>
+                            </div>
+
+                            <div class="space-y-2">
+                                <template x-for="(row, i) in schedules" :key="i">
+                                    <div class="flex items-center gap-2">
+                                        <x-form.select x-model="row.day">
+                                            <template x-for="d in days" :key="d">
+                                                <option :value="d" x-text="d"></option>
+                                            </template>
+                                        </x-form.select>
+                                        <input type="text" x-model="row.time"
+                                            placeholder="e.g. 01:00 PM – 04:00 PM"
+                                            class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
+                                                   focus:border-blue-400 focus:outline-none focus:bg-white
+                                                   placeholder:text-[#94a3b8]" />
+                                        <button type="button" x-on:click="removeSchedule(i)"
+                                            class="p-1.5 text-[#94a3b8] hover:text-rose-500 hover:bg-rose-50 rounded-md transition">
+                                            <i class="bx bx-trash text-sm"></i>
+                                        </button>
+                                    </div>
+                                </template>
+                                <template x-if="schedules.length === 0">
+                                    <p class="text-sm italic text-[#94a3b8]">No schedule added yet.</p>
+                                </template>
+                            </div>
+                        </div>
+
+                        {{-- ── Consultation Hours (from user) ───────────────────────────── --}}
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <p class="text-xs font-bold uppercase tracking-widest text-[#475569]">Consultation Hours</p>
+                                <button type="button" x-on:click="addRow()"
+                                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold
+                                           bg-amber-50 text-amber-600 border border-amber-200
+                                           hover:bg-amber-100 transition">
+                                    <i class="bx bx-plus text-sm"></i> Add
+                                </button>
+                            </div>
+
+                            <div class="space-y-2">
+                                <template x-for="(row, i) in hours" :key="i">
+                                    <div class="flex items-center gap-2">
+                                        <x-form.select x-model="row.day">
+                                            <template x-for="d in days" :key="d">
+                                                <option :value="d" x-text="d"></option>
+                                            </template>
+                                        </x-form.select>
+                                        <input type="text" x-model="row.time"
+                                            placeholder="e.g. 09:00 AM – 11:00 AM"
+                                            class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
+                                                   focus:border-amber-400 focus:outline-none focus:bg-white
+                                                   placeholder:text-[#94a3b8]" />
+                                        <button type="button" x-on:click="removeRow(i)"
+                                            class="p-1.5 text-[#94a3b8] hover:text-rose-500 hover:bg-rose-50 rounded-md transition">
+                                            <i class="bx bx-trash text-sm"></i>
+                                        </button>
+                                    </div>
+                                </template>
+                                <template x-if="hours.length === 0">
+                                    <p class="text-sm italic text-[#94a3b8]">No consultation hours added.</p>
+                                </template>
+                            </div>
+                        </div>
+
+                    </div><!-- /grid -->
+                </div><!-- /x-data consultation -->
+
+               
             </div>
         </x-wizard.section>
     @endif
 
-    {{-- Bottom Save All --}}
+    {{-- ── Bottom Save All ──────────────────────────────────────────────────── --}}
+    {{--
+        We dispatch `before-save-all` first so the Alpine consultation component
+        can push its local `hours` array into Livewire ($wire.pushConsultationHours)
+        before $wire.save() runs. Because Alpine's x-on listener is async-aware,
+        the await in pushToWire() completes before Livewire.dispatch resolves.
+    --}}
     <div class="flex justify-end pt-1">
-        <x-button variant="sm-add" wire:click="save" wireTarget="save" loading="Saving…">
+        <x-button variant="sm-add"
+            x-on:click="
+                $dispatch('before-save-all');
+                await $nextTick();
+                $wire.save();
+            "
+            wireTarget="save"
+            loading="Saving…">
             <i class="bx bx-save"></i> Save All
         </x-button>
     </div>
