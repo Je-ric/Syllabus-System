@@ -189,12 +189,31 @@ class SyllabusWizard extends Component
             return;
         }
 
+        if ($this->currentStep === 'course_components') {
+            // Tell Alpine to push its local state, then Alpine calls navigate-after-save
+            $this->dispatch('request-push-and-navigate', toStep: $toStep);
+            return;
+        }
+
         $this->dispatch('syllabus-save-step', step: $this->currentStep);
 
         $this->currentStep = $toStep;
         $this->syllabus->update(['current_step' => $toStep]);
 
         $this->dispatch('syllabus-step-changed', step: $toStep);
+    }
+
+    #[On('navigate-after-save')]
+    public function onNavigateAfterSave(string $step): void
+    {
+        if (! array_key_exists($step, $this->syllabus->getWizardSteps())) {
+            return;
+        }
+
+        $this->currentStep = $step;
+        $this->syllabus->update(['current_step' => $step]);
+
+        $this->dispatch('syllabus-step-changed', step: $step);
     }
 
     public function goNextStep(): void
@@ -471,13 +490,12 @@ class SyllabusWizard extends Component
             return false;
         }
 
-        // phone and office are optional — not checked here
+        // phone and office are optional; schedule/consultation_hours were moved
+        // to their own tables — not checked here
         return collect([
             $component->instructor_name,
             $component->instructor_email,
             $component->class_hours,
-            $component->schedule,
-            $component->consultation_hours,
             $component->performance_standard,
         ])->every(fn ($v) => trim((string) $v) !== '');
     }

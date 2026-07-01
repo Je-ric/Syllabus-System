@@ -53,9 +53,18 @@ class ComponentsStep extends Component
 
     public function render()
     {
+        $labUsers = $this->courseHasLab
+            ? User::where('account_status', 'active')
+                ->whereDoesntHave('roles', fn ($q) => $q->where('name', 'admin'))
+                ->orderBy('name')
+                ->get(['id', 'name', 'email', 'phone_number', 'office'])
+                ->toArray()
+            : [];
+
         return view('livewire.syllabus.steps.course-components', [
-            'course' => (object) ['has_lec_lab' => $this->courseHasLab],
+            'course'               => (object) ['has_lec_lab' => $this->courseHasLab],
             'labConsultationHours' => $this->labConsultationHours,
+            'labUsers'             => $labUsers,
         ]);
     }
 
@@ -75,6 +84,13 @@ class ComponentsStep extends Component
         if ($step !== 'course_components') return;
         $this->saveComponents();
         $this->dispatch('syllabus-step-saved', step: 'course_components');
+    }
+
+    public function onPushAndNavigate(string $toStep): void
+    {
+        $this->saveComponents();
+        $this->dispatch('lw-toast', type: 'success', message: 'Course Components saved.');
+        $this->dispatch('navigate-after-save', step: $toStep);
     }
 
     // ── Schedule mutations (kept for backward compat, no longer called from UI) ──
@@ -177,26 +193,50 @@ class ComponentsStep extends Component
     }
 
     /**
-     * Fetch lab instructor consultation hours when instructor email changes.
+     * Called when the lab instructor user is selected from the dropdown.
+     * Populates lab fields from the selected user's profile.
      */
-    public function updatedLabInstructorEmail(?string $value): void
+    public function selectLabInstructor(int $userId): void
     {
-        if (empty($value)) {
-            $this->labConsultationHours = [];
-            $this->dispatch('lab-consultation-hours-updated', hours: []);
-            return;
-        }
+        $user = User::with('consultationHours')->find($userId);
+        if (! $user) return;
 
-        $labInstructor = User::where('email', $value)->first();
-        if ($labInstructor) {
-            $this->labConsultationHours = $labInstructor->consultationHours
-                ->map(fn ($h) => ['day' => $h->day, 'time' => $h->time])
-                ->values()->all();
-        } else {
-            $this->labConsultationHours = [];
-        }
+        $this->lab_instructor_name  = $user->name;
+        $this->lab_instructor_email = $user->email;
+        $this->lab_phone            = $user->phone_number;
+        $this->lab_office           = $user->office;
 
-        $this->dispatch('lab-consultation-hours-updated', hours: $this->labConsultationHours);
+        $this->labConsultationHours = $user->consultationHours
+            ->map(fn ($h) => ['day' => $h->day, 'time' => $h->time])
+            ->values()->all();
+
+        $this->dispatch('lab-instructor-selected', [
+            'name'              => $this->lab_instructor_name,
+            'email'             => $this->lab_instructor_email,
+            'phone'             => $this->lab_phone,
+            'office'            => $this->lab_office,
+            'consultationHours' => $this->labConsultationHours,
+        ]);
+    }
+
+    /**
+     * Clear lab instructor selection.
+     */
+    public function clearLabInstructor(): void
+    {
+        $this->lab_instructor_name  = null;
+        $this->lab_instructor_email = null;
+        $this->lab_phone            = null;
+        $this->lab_office           = null;
+        $this->labConsultationHours = [];
+
+        $this->dispatch('lab-instructor-selected', [
+            'name'              => null,
+            'email'             => null,
+            'phone'             => null,
+            'office'            => null,
+            'consultationHours' => [],
+        ]);
     }
 
     // ── Manual save (Save All button) ─────────────────────────────────────────
@@ -235,9 +275,11 @@ class ComponentsStep extends Component
 
         /** @var User $user */
         $user = Auth::user();
-        $this->userConsultationHours = $user?->consultationHours
-            ->map(fn ($h) => ['day' => $h->day, 'time' => $h->time])
-            ->values()->all() ?? [];
+        $this->userConsultationHours = $user
+            ? $user->consultationHours
+                ->map(fn ($h) => ['day' => $h->day, 'time' => $h->time])
+                ->values()->all()
+            : [];
 
         $lec = CourseComponent::with('schedules')
             ->where('syllabus_id', $this->syllabusId)->where('type', 'LEC')->first();
