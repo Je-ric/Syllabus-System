@@ -141,34 +141,27 @@ class ComponentsStep extends Component
     public function pushConsultationHours(array $rows): void
     {
         $this->userConsultationHours = $rows;
+        $this->saveConsultationHours($rows);
     }
 
-    /**
-     * Alpine pushes its local LEC schedule rows into Livewire state.
-     */
     public function pushLecSchedules(array $rows): void
     {
         $this->lec_schedules = $rows;
     }
 
-    /**
-     * Alpine pushes its local LAB schedule rows into Livewire state.
-     */
     public function pushLabSchedules(array $rows): void
     {
         $this->lab_schedules = $rows;
     }
 
-    /**
-     * Save lab consultation hours from the lab instructor's user record.
-     */
     public function saveLabConsultationHours(array $rows): void
     {
+        if (empty($this->lab_instructor_email)) return;
+
         $labInstructor = User::where('email', $this->lab_instructor_email)->first();
         if (! $labInstructor) return;
 
         $labInstructor->consultationHours()->delete();
-
         foreach ($rows as $row) {
             $day  = trim($row['day']  ?? '');
             $time = trim($row['time'] ?? '');
@@ -180,16 +173,14 @@ class ComponentsStep extends Component
         $this->labConsultationHours = $labInstructor->fresh()->consultationHours
             ->map(fn ($h) => ['day' => $h->day, 'time' => $h->time])
             ->values()->all();
-
-        $this->dispatch('lab-consultation-hours-updated', hours: $this->labConsultationHours);
     }
 
-    /**
-     * Alpine pushes its local lab consultation rows into Livewire state.
-     */
     public function pushLabConsultationHours(array $rows): void
     {
         $this->labConsultationHours = $rows;
+        if (! empty($this->lab_instructor_email)) {
+            $this->saveLabConsultationHours($rows);
+        }
     }
 
     /**
@@ -334,28 +325,18 @@ class ComponentsStep extends Component
 
     private function saveComponents(): void
     {
-        // 1. LEC component
         $lec = CourseComponent::updateOrCreate(
             ['syllabus_id' => $this->syllabusId, 'type' => 'LEC'],
             $this->buildPayload('lec')
         );
         $this->syncSchedules($lec, $this->lec_schedules);
 
-        // 2. LAB component (if applicable)
         if ($this->courseHasLab) {
             $lab = CourseComponent::updateOrCreate(
                 ['syllabus_id' => $this->syllabusId, 'type' => 'LAB'],
                 $this->buildPayload('lab')
             );
             $this->syncSchedules($lab, $this->lab_schedules);
-        }
-
-        // 3. Consultation hours — always included in Save All
-        $this->saveConsultationHours($this->userConsultationHours);
-
-        // 4. Lab consultation hours (if applicable)
-        if ($this->courseHasLab && ! empty($this->lab_instructor_email)) {
-            $this->saveLabConsultationHours($this->labConsultationHours);
         }
     }
 
