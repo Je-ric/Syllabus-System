@@ -141,7 +141,30 @@
                         </tr>
                         <tr>
                             <td>Class Schedule</td>
-                            <td>{!! $lecLabValue($lecComponent?->schedule, $labComponent?->schedule) !!}</td>
+                            <td>
+                                {{-- {!! $lecLabValue($lecComponent?->schedule, $labComponent?->schedule) !!} --}}
+ @php
+                                    $lecSched = $lecComponent?->schedules ?? collect();
+                                    $labSched = $labComponent?->schedules ?? collect();
+                                @endphp
+                                @if (!$hasLab)
+                                    @forelse ($lecSched as $s)
+                                        {{ $s->day }}: {{ $s->time }}<br>
+                                    @empty
+                                        N/A
+                                    @endforelse
+                                @else
+                                    @if ($lecSched->isNotEmpty())
+                                        LEC: <br>
+                                        @foreach ($lecSched as $s){{ $s->day }}: {{ $s->time }}<br>@endforeach
+                                    @endif
+                                    @if ($labSched->isNotEmpty())
+                                        LAB: <br>
+                                        @foreach ($labSched as $s){{ $s->day }}: {{ $s->time }}<br>@endforeach
+                                    @endif
+                                    @if ($lecSched->isEmpty() && $labSched->isEmpty()) @endif
+                                @endif
+                            </td>
                         </tr>
                         <tr>
                             <td>Name of Instructor</td>
@@ -157,7 +180,31 @@
                         </tr>
                         <tr>
                             <td>Consultation Hours</td>
-                            <td>{!! $lecLabValue($lecComponent?->consultation_hours, $labComponent?->consultation_hours) !!}</td>
+                            <td>
+                                @php
+                                    $lecHours = $preparerConsultationHours ?? collect();
+                                    $labInstructor = $labComponent ? \App\Models\User::where('email', $labComponent->instructor_email)->with('consultationHours')->first() : null;
+                                    $labHours = $labInstructor?->consultationHours ?? collect();
+                                @endphp
+                                @if (!$hasLab)
+                                    @if ($lecHours->isEmpty())
+                                        N/A
+                                    @else
+                                        @foreach ($lecHours as $ch){{ $ch->day }}: {{ $ch->time }}<br>@endforeach
+                                    @endif
+                                @else
+                                    @if ($lecHours->isNotEmpty())
+                                        LEC<br>
+                                        @foreach ($lecHours as $ch){{ $ch->day }}: {{ $ch->time }}<br>@endforeach
+                                    @endif
+                                    @if ($labHours->isNotEmpty())
+                                        LAB<br>
+                                        @foreach ($labHours as $ch){{ $ch->day }}: {{ $ch->time }}<br>@endforeach
+                                    @endif
+                                    @if ($lecHours->isEmpty() && $labHours->isEmpty()) @endif
+                                @endif
+                                {{-- {!! $lecLabValue($lecComponent?->consultation_hours, $labComponent?->consultation_hours) !!} --}}
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -301,11 +348,9 @@
                                 @endif
                                 <td style="text-align:center; vertical-align:top;">
                                     {{ $row['wk_label'] ?? ($row['week_label'] ?? ($row['week_no'] ?? '')) }}</td>
-                                <td style="vertical-align:top;">{!! nl2br(e($toMultilineCell($row['topics'] ?? '') !== '' ? $toMultilineCell($row['topics'] ?? '') : '---')) !!}</td>
-                                <td style="vertical-align:top;">{!! nl2br(e($toMultilineCell($row['tla'] ?? '') !== '' ? $toMultilineCell($row['tla'] ?? '') : '---')) !!}</td>
-                                <td style="vertical-align:top;">{!! nl2br(
-                                    e($toMultilineCell($row['assessment'] ?? '') !== '' ? $toMultilineCell($row['assessment'] ?? '') : '---'),
-                                ) !!}</td>
+                                <td style="vertical-align:top;">{!! nl2br(strip_tags(e($toMultilineCell($row['topics'] ?? '')) !== '' ? $toMultilineCell($row['topics'] ?? '') : '---')) !!}</td>
+                                <td style="vertical-align:top;">{!! nl2br(strip_tags(e($toMultilineCell($row['tla'] ?? '')) !== '' ? $toMultilineCell($row['tla'] ?? '') : '---')) !!}</td>
+                                <td style="vertical-align:top;">{!! nl2br(strip_tags(e($toMultilineCell($row['assessment'] ?? '')) !== '' ? $toMultilineCell($row['assessment'] ?? '') : '---'),) !!}</td>
                             </tr>
                         @endif
                     @empty

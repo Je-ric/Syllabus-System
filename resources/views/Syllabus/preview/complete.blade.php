@@ -332,11 +332,11 @@
                                     @endif
                                 @else
                                     @if ($lecHours->isNotEmpty())
-                                        <strong>LEC:</strong><br>
+                                        LEC<br>
                                         @foreach ($lecHours as $ch){{ $ch->day }}: {{ $ch->time }}<br>@endforeach
                                     @endif
                                     @if ($labHours->isNotEmpty())
-                                        <strong>LAB:</strong><br>
+                                        LAB<br>
                                         @foreach ($labHours as $ch){{ $ch->day }}: {{ $ch->time }}<br>@endforeach
                                     @endif
                                     @if ($lecHours->isEmpty() && $labHours->isEmpty()) @endif
