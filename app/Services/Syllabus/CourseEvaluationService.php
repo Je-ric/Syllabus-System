@@ -221,6 +221,25 @@ class CourseEvaluationService
         }
         $courseId = (int) $syllabus->course?->id;
 
+        // Collect the week_content_ids that are currently active
+        $activeIds = [];
+        foreach ($rows as $row) {
+            if (isset($row['lec']['week_content_id'])) {
+                $activeIds[] = (int) $row['lec']['week_content_id'];
+            }
+            if ($courseHasLab && isset($row['lab']['week_content_id'])) {
+                $activeIds[] = (int) $row['lab']['week_content_id'];
+            }
+        }
+
+        // Delete orphaned evaluation records no longer in the current rows
+        // Delete existing weight, that has no assessment. Changes happens, we need to delete here.
+        // were not deleting in weekly when assessment is deleted/removed, we delete here in evaluation
+        // when it determines the assessment blank, it delete's t he existing weight.
+        SyllabusEvaluationItem::where('syllabus_id', $syllabusId)
+            ->whereNotIn('week_content_id', $activeIds)
+            ->delete();
+
         foreach ($rows as $row) {
             if (isset($row['lec']['week_content_id'])) {
                 $this->saveOneItem(
