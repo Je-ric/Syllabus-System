@@ -72,7 +72,8 @@
                         <textarea
                             x-model="co.description"
                             x-on:input="markDirty(co); autoResize($el);"
-                            rows="4"
+                            x-init="autoResize($el)"
+                            rows="2"
                             placeholder="Describe what students will be able to do after this outcome…"
                             x-bind:disabled="isSaving"
                             class="w-full rounded-lg border px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all resize-none leading-relaxed disabled:opacity-50"
@@ -171,10 +172,11 @@
             _keyCounter: initialOutcomes.length,
             viewModal:   { co_code: '', description: '' },
 
-            // autoResize(el) {
-            //     el.style.height = 'auto';
-            //     el.style.height = el.scrollHeight + 'px';
-            // },
+            // autoResize
+            autoResize(el) {
+                el.style.height = 'auto';
+                el.style.height = el.scrollHeight + 'px';
+            },
 
             markDirty(co) {
                 if (co.id) co._dirty = (co.description !== co._original);

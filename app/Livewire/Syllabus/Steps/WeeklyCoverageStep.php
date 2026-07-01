@@ -343,11 +343,16 @@ class WeeklyCoverageStep extends Component
         return Syllabus::with('academicCalendar', 'courseOutcomes')->find($this->syllabusId);
     }
 
+    // display schedule in offcanvas
     private function reloadCourseComponents(): void
     {
-        $this->courseComponents = CourseComponent::where('syllabus_id', $this->syllabusId)
+        $this->courseComponents = CourseComponent::with('schedules')
+            ->where('syllabus_id', $this->syllabusId)
             ->get()
             ->keyBy('type')
+            ->map(fn ($c) => array_merge($c->toArray(), [
+                'schedules' => $c->schedules->map(fn ($s) => ['day' => $s->day, 'time' => $s->time])->values()->all(),
+            ]))
             ->toArray();
     }
 

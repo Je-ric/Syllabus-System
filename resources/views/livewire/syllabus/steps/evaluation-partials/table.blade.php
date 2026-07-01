@@ -178,15 +178,18 @@
                                     </div>
                                 </td>
                                 <td class="px-4 py-3 align-middle">
-                                    @if ($isExam || $isMvgo)
-                                        <x-feedback-status.status-indicator
-                                            variant="slate">{{ $isExam ? 'Exam' : 'Activity' }}</x-feedback-status.status-indicator>
-                                    @else
-                                        <x-form.select wire:model.live="inputs.{{ $labId }}.kind">
-                                            <option value="activity">Activity</option>
-                                            <option value="quiz">Quiz</option>
-                                        </x-form.select>
-                                    @endif
+                                     @if ($isExam)
+                                    <x-feedback-status.status-indicator variant="rose"
+                                        icon="bx bx-clipboard">Exam</x-feedback-status.status-indicator>
+                                @elseif ($isMvgo)
+                                    <x-feedback-status.status-indicator variant="violet"
+                                        icon="bx bx-medal">Activity</x-feedback-status.status-indicator>
+                                @else
+                                    <x-form.select wire:model.live="inputs.{{ $lecId }}.kind">
+                                        <option value="activity">Activity</option>
+                                        <option value="quiz">Quiz</option>
+                                    </x-form.select>
+                                @endif
                                 </td>
                                 <td class="px-4 py-3 align-middle border-r border-slate-200">
                                     <div class="flex items-center gap-1.5">
