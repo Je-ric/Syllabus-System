@@ -56,8 +56,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
                         <x-form.label>Class Hours</x-form.label>
-                        <p
-                            class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
+                        <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
                             {{ $lec_class_hours }}</p>
                         <p class="mt-1 text-xs text-[#94a3b8]">Set in course settings.</p>
                     </div>
@@ -65,12 +64,10 @@
                         <x-form.label>
                             Passing Mark
                             @if ($course->has_lec_lab)
-                                <span class="text-[#94a3b8] font-normal normal-case tracking-normal">(LEC &amp;
-                                    LAB)</span>
+                                <span class="text-[#94a3b8] font-normal normal-case tracking-normal">(LEC &amp; LAB)</span>
                             @endif
                         </x-form.label>
-                        <p
-                            class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
+                        <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
                             {{ $lec_performance_standard }}%</p>
                         <p class="mt-1 text-xs text-[#94a3b8]">Set in course settings.</p>
                     </div>
@@ -82,18 +79,18 @@
             {{-- ── Side-by-side: Class Schedule | Consultation Hours ─────── --}}
             <div x-data="{
                 days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-                schedules: @js($lec_schedules ?? []),
-                hours: @js($userConsultationHours ?? []),
-            
-                addSchedule() { this.schedules.push({ day: 'Monday', time: '' }); },
+                schedules: @js($lec_schedules ?? []).map(s => ({ day: s.day, ...parseTime(s.time) })),
+                hours: @js($userConsultationHours ?? []).map(h => ({ day: h.day, ...parseTime(h.time) })),
+
+                addSchedule() { this.schedules.push({ day: 'Monday', startTime: '', endTime: '' }); },
                 removeSchedule(i) { this.schedules.splice(i, 1); },
-            
+
                 async pushToWire() {
-                    await $wire.pushLecSchedules(this.schedules);
-                    await $wire.pushConsultationHours(this.hours);
+                    await $wire.pushLecSchedules(this.schedules.map(s => ({ day: s.day, time: formatTime(s.startTime, s.endTime) })));
+                    await $wire.pushConsultationHours(this.hours.map(h => ({ day: h.day, time: formatTime(h.startTime, h.endTime) })));
                 },
             }" x-on:lec-schedules-updated.window="schedules = $event.detail.schedules"
-                {{-- x-on:consultation-hours-updated.window="hours = $event.detail.hours" --}} x-on:before-save-all.window="await pushToWire()">
+                x-on:before-save-all.window="await pushToWire()">
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
@@ -108,7 +105,6 @@
                                 <i class="bx bx-plus text-sm"></i> Add
                             </button>
                         </div>
-
                         <div class="space-y-2">
                             <template x-for="(row, i) in schedules" :key="i">
                                 <div class="flex items-center gap-2">
@@ -117,10 +113,13 @@
                                             <option :value="d" x-text="d"></option>
                                         </template>
                                     </x-form.select>
-                                    <input type="text" x-model="row.time" placeholder="e.g. 07:30 AM – 09:00 AM"
+                                    <input type="time" x-model="row.startTime"
                                         class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
-                                               focus:border-emerald-400 focus:outline-none focus:bg-white
-                                               placeholder:text-[#94a3b8]" />
+                                               focus:border-emerald-400 focus:outline-none focus:bg-white" />
+                                    <span class="text-xs text-slate-400 shrink-0">to</span>
+                                    <input type="time" x-model="row.endTime"
+                                        class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
+                                               focus:border-emerald-400 focus:outline-none focus:bg-white" />
                                     <button type="button" x-on:click="removeSchedule(i)"
                                         class="p-1.5 text-[#94a3b8] hover:text-rose-500 hover:bg-rose-50 rounded-md transition">
                                         <i class="bx bx-trash text-sm"></i>
@@ -137,14 +136,13 @@
                     <div>
                         <div class="flex items-center justify-between mb-2">
                             <p class="text-xs font-bold uppercase tracking-widest text-[#475569]">Consultation Hours</p>
-                            <button type="button" x-on:click="hours.push({ day: 'Monday', time: '' })"
+                            <button type="button" x-on:click="hours.push({ day: 'Monday', startTime: '', endTime: '' })"
                                 class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold
                                        bg-amber-50 text-amber-600 border border-amber-200
                                        hover:bg-amber-100 transition">
                                 <i class="bx bx-plus text-sm"></i> Add
                             </button>
                         </div>
-
                         <div class="space-y-2">
                             <template x-for="(row, i) in hours" :key="i">
                                 <div class="flex items-center gap-2">
@@ -153,11 +151,14 @@
                                             <option :value="d" x-text="d"></option>
                                         </template>
                                     </x-form.select>
-                                    <input type="text" x-model="row.time" placeholder="e.g. 09:00 AM – 11:00 AM"
+                                    <input type="time" x-model="row.startTime"
                                         class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
-                                               focus:border-amber-400 focus:outline-none focus:bg-white
-                                               placeholder:text-[#94a3b8]" />
-                                    <button type="button" x-on:click="hours.splice(i, 1);"
+                                               focus:border-amber-400 focus:outline-none focus:bg-white" />
+                                    <span class="text-xs text-slate-400 shrink-0">to</span>
+                                    <input type="time" x-model="row.endTime"
+                                        class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
+                                               focus:border-amber-400 focus:outline-none focus:bg-white" />
+                                    <button type="button" x-on:click="hours.splice(i, 1)"
                                         class="p-1.5 text-[#94a3b8] hover:text-rose-500 hover:bg-rose-50 rounded-md transition">
                                         <i class="bx bx-trash text-sm"></i>
                                     </button>
@@ -170,7 +171,7 @@
                     </div>
 
                 </div><!-- /grid -->
-            </div><!-- /x-data consultation -->
+            </div><!-- /x-data lec -->
 
         </div>
     </x-wizard.section>
@@ -184,8 +185,8 @@
                 @js($lab_phone ?? ''),
                 @js($lab_office ?? ''),
                 @js($lab_schedules ?? []),
-                @js($labConsultationHours ?? []))" x-on:lab-instructor-selected.window="onInstructorSelected($event.detail)"
-                x-on:lab-consultation-hours-updated.window="hours = ($event.detail.hours ?? $event.detail)"
+                @js($labConsultationHours ?? []))"
+                x-on:lab-instructor-selected.window="onInstructorSelected($event.detail)"
                 x-on:before-save-all.window="await pushToWire()">
                 <div class="space-y-5">
 
@@ -195,15 +196,13 @@
                         <label class="block text-xs font-bold uppercase tracking-widest mb-1.5"
                             :class="hasInstructor ? 'text-blue-700' : 'text-amber-600'">
                             Laboratory Instructor
-                            <span x-show="!hasInstructor" class="text-rose-500 normal-case font-medium">*
-                                Required</span>
+                            <span x-show="!hasInstructor" class="text-rose-500 normal-case font-medium">* Required</span>
                         </label>
                         <select x-model="selectedUserId" x-on:change="selectUser($event.target.value)"
                             class="w-full max-w-xl rounded-lg border px-3 py-2 text-sm text-slate-700 transition-colors"
                             :class="hasInstructor
-                                ?
-                                'border-blue-200 bg-white focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100' :
-                                'border-amber-300 bg-amber-50 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100'">
+                                ? 'border-blue-200 bg-white focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100'
+                                : 'border-amber-300 bg-amber-50 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100'">
                             <option value="">— Select a Laboratory Instructor —</option>
                             @foreach ($labUsers as $u)
                                 <option value="{{ $u['id'] }}">{{ $u['name'] }} ({{ $u['email'] }})</option>
@@ -225,8 +224,7 @@
 
                     {{-- ── Instructor Profile ───────────────────────────────── --}}
                     <div x-show="hasInstructor" x-cloak>
-                        <p
-                            class="text-xs font-bold uppercase tracking-widest text-[#475569] mb-3 flex items-center gap-2">
+                        <p class="text-xs font-bold uppercase tracking-widest text-[#475569] mb-3 flex items-center gap-2">
                             <span class="h-px w-4 bg-[#2563eb]"></span> Instructor Profile
                         </p>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -257,24 +255,20 @@
                     <template x-if="hasInstructor">
                         <div>
                             <div class="border-t border-[#e2e8f0] mb-5"></div>
-                            <p
-                                class="text-xs font-bold uppercase tracking-widest text-[#475569] mb-3 flex items-center gap-2">
+                            <p class="text-xs font-bold uppercase tracking-widest text-[#475569] mb-3 flex items-center gap-2">
                                 <span class="h-px w-4 bg-[#2563eb]"></span> Class Delivery
                             </p>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                                 <div>
                                     <x-form.label>Class Hours</x-form.label>
-                                    <p
-                                        class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
+                                    <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
                                         {{ $lab_class_hours ?? '—' }}</p>
                                     <p class="mt-1 text-xs text-[#94a3b8]">Set in course settings.</p>
                                 </div>
                                 <div>
                                     <x-form.label>Passing Mark <span
-                                            class="text-[#94a3b8] font-normal normal-case tracking-normal">(LEC &amp;
-                                            LAB)</span></x-form.label>
-                                    <p
-                                        class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
+                                            class="text-[#94a3b8] font-normal normal-case tracking-normal">(LEC &amp; LAB)</span></x-form.label>
+                                    <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
                                         {{ $lec_performance_standard }}%</p>
                                     <p class="mt-1 text-xs text-[#94a3b8]">Set in course settings.</p>
                                 </div>
@@ -290,9 +284,8 @@
                             {{-- Class Schedule --}}
                             <div>
                                 <div class="flex items-center justify-between mb-2">
-                                    <p class="text-xs font-bold uppercase tracking-widest text-[#475569]">Class
-                                        Schedule</p>
-                                    <button type="button" x-on:click="schedules.push({ day: 'Monday', time: '' })"
+                                    <p class="text-xs font-bold uppercase tracking-widest text-[#475569]">Class Schedule</p>
+                                    <button type="button" x-on:click="schedules.push({ day: 'Monday', startTime: '', endTime: '' })"
                                         class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold
                                                bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition">
                                         <i class="bx bx-plus text-sm"></i> Add
@@ -306,10 +299,13 @@
                                                     <option :value="d" x-text="d"></option>
                                                 </template>
                                             </x-form.select>
-                                            <input type="text" x-model="row.time"
-                                                placeholder="e.g. 01:00 PM – 04:00 PM"
+                                            <input type="time" x-model="row.startTime"
                                                 class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
-                                                       focus:border-blue-400 focus:outline-none focus:bg-white placeholder:text-[#94a3b8]" />
+                                                       focus:border-blue-400 focus:outline-none focus:bg-white" />
+                                            <span class="text-xs text-slate-400 shrink-0">to</span>
+                                            <input type="time" x-model="row.endTime"
+                                                class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
+                                                       focus:border-blue-400 focus:outline-none focus:bg-white" />
                                             <button type="button" x-on:click="schedules.splice(i, 1)"
                                                 class="p-1.5 text-[#94a3b8] hover:text-rose-500 hover:bg-rose-50 rounded-md transition">
                                                 <i class="bx bx-trash text-sm"></i>
@@ -325,9 +321,8 @@
                             {{-- Consultation Hours --}}
                             <div>
                                 <div class="flex items-center justify-between mb-2">
-                                    <p class="text-xs font-bold uppercase tracking-widest text-[#475569]">Consultation
-                                        Hours</p>
-                                    <button type="button" x-on:click="hours.push({ day: 'Monday', time: '' });"
+                                    <p class="text-xs font-bold uppercase tracking-widest text-[#475569]">Consultation Hours</p>
+                                    <button type="button" x-on:click="hours.push({ day: 'Monday', startTime: '', endTime: '' })"
                                         class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold
                                                bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-100 transition">
                                         <i class="bx bx-plus text-sm"></i> Add
@@ -341,11 +336,14 @@
                                                     <option :value="d" x-text="d"></option>
                                                 </template>
                                             </x-form.select>
-                                            <input type="text" x-model="row.time"
-                                                placeholder="e.g. 09:00 AM – 11:00 AM"
+                                            <input type="time" x-model="row.startTime"
                                                 class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
-                                                       focus:border-amber-400 focus:outline-none focus:bg-white placeholder:text-[#94a3b8]" />
-                                            <button type="button" x-on:click="hours.splice(i, 1);"
+                                                       focus:border-amber-400 focus:outline-none focus:bg-white" />
+                                            <span class="text-xs text-slate-400 shrink-0">to</span>
+                                            <input type="time" x-model="row.endTime"
+                                                class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
+                                                       focus:border-amber-400 focus:outline-none focus:bg-white" />
+                                            <button type="button" x-on:click="hours.splice(i, 1)"
                                                 class="p-1.5 text-[#94a3b8] hover:text-rose-500 hover:bg-rose-50 rounded-md transition">
                                                 <i class="bx bx-trash text-sm"></i>
                                             </button>
@@ -380,6 +378,32 @@
     </div>
 
     <script>
+        function parseTime(timeStr) {
+            if (!timeStr) return { startTime: '', endTime: '' };
+            const parts = timeStr.split(' - ');
+            if (parts.length !== 2) return { startTime: '', endTime: '' };
+            const toInput = (t) => {
+                const m = t.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+                if (!m) return '';
+                let h = parseInt(m[1]), min = m[2], period = m[3].toUpperCase();
+                if (period === 'PM' && h !== 12) h += 12;
+                if (period === 'AM' && h === 12) h = 0;
+                return String(h).padStart(2, '0') + ':' + min;
+            };
+            return { startTime: toInput(parts[0]), endTime: toInput(parts[1]) };
+        }
+
+        function formatTime(start, end) {
+            if (!start || !end) return '';
+            const fmt = (t) => {
+                const [h, m] = t.split(':').map(Number);
+                const period = h >= 12 ? 'PM' : 'AM';
+                const h12 = h % 12 || 12;
+                return h12 + ':' + String(m).padStart(2, '0') + ' ' + period;
+            };
+            return fmt(start) + ' - ' + fmt(end);
+        }
+
         function labSection(initUserId, initName, initEmail, initPhone, initOffice, initSchedules, initHours) {
             return {
                 selectedUserId: initUserId || '',
@@ -387,13 +411,12 @@
                 labEmail: initEmail || '',
                 labPhone: initPhone || '',
                 labOffice: initOffice || '',
-                schedules: initSchedules || [],
-                hours: initHours || [],
+                schedules: (initSchedules || []).map(s => ({ day: s.day, ...parseTime(s.time) })),
+                hours: (initHours || []).map(h => ({ day: h.day, ...parseTime(h.time) })),
                 days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
 
                 get hasInstructor() {
-                    return this.selectedUserId !== '' && this.selectedUserId !== null && this.selectedUserId !==
-                        undefined;
+                    return this.selectedUserId !== '' && this.selectedUserId !== null && this.selectedUserId !== undefined;
                 },
 
                 async selectUser(id) {
@@ -411,12 +434,16 @@
                     this.labEmail = d?.email || '';
                     this.labPhone = d?.phone || '';
                     this.labOffice = d?.office || '';
-                    this.hours = d?.consultationHours || [];
+                    this.hours = (d?.consultationHours || []).map(h => ({ day: h.day, ...parseTime(h.time) }));
                 },
 
                 async pushToWire() {
-                    await this.$wire.pushLabSchedules(this.schedules);
-                    await this.$wire.pushLabConsultationHours(this.hours);
+                    await this.$wire.pushLabSchedules(
+                        this.schedules.map(s => ({ day: s.day, time: formatTime(s.startTime, s.endTime) }))
+                    );
+                    await this.$wire.pushLabConsultationHours(
+                        this.hours.map(h => ({ day: h.day, time: formatTime(h.startTime, h.endTime) }))
+                    );
                 },
             };
         }
