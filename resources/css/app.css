@@ -170,3 +170,30 @@ details summary::-webkit-details-marker {
 .nav-link.active .nav-icon {
     color: #16a34a;
 }
+
+
+/* Scrollbar */
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--green) var(--white-50);
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--white-50);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--green);
+    border-radius: 999px;
+    border: 2px solid var(--white-50);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--green-50);
+}

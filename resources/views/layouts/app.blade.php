@@ -6,6 +6,7 @@
 
 <body class="min-h-screen bg-slate-100">
 
+
     @if (session('toast'))
         <x-feedback-status.toast :message="session('toast')['message']" :type="session('toast')['type']" />
     @endif
@@ -15,6 +16,10 @@
         $isWizardRoute = request()->routeIs('syllabus.wizard');
         $user = Auth::user();
     @endphp
+
+    @if (!$isWizardRoute)
+        <x-screen-loader />
+    @endif
 
     {{-- Mobile overlay --}}
     <div id="sidebar-overlay"
