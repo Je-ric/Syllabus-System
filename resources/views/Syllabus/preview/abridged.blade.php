@@ -47,6 +47,10 @@
                     Edit
                 </button>
                 <button type="button" onclick="window.print()">Print</button>
+                <button type="button"
+                    onclick="window.location.href='{{ route('syllabus.index') }}'">
+                    Back
+                </button>
             </div>
         @else
             <button type="button" onclick="window.print()">Print</button>

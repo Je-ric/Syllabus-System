@@ -178,7 +178,7 @@
                                     </div>
                                 </td>
                                 <td class="px-4 py-3 align-middle">
-                                     @if ($isExam)
+                                @if ($isExam)
                                     <x-feedback-status.status-indicator variant="rose"
                                         icon="bx bx-clipboard">Exam</x-feedback-status.status-indicator>
                                 @elseif ($isMvgo)

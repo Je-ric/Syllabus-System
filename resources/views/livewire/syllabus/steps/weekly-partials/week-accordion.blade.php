@@ -4,8 +4,10 @@
 {{-- Week edit modal (single instance, outside the loop) --}}
 @include('livewire.syllabus.steps.weekly-partials.week-edit-modal')
 
-<div x-data="{ openWeek: {{ $syllabusWeeks->first()?->week_no ?? 1 }} }"
-     class="space-y-2">
+<div
+    x-data="{ openWeek: null }" {{-- no opened accordion by default --}}
+    {{-- x-data="{ openWeek: {{ $syllabusWeeks->first()?->week_no ?? 1 }} }" --}}
+    class="space-y-2">
 
     @foreach ($syllabusWeeks as $week)
         @php
@@ -58,14 +60,14 @@
             $accentOpen   = $isLocked ? 'bg-rose-500' : 'bg-[#15803d]';
 
             $openHeaderClass  = $isLocked ? 'bg-rose-50 ring-1 ring-inset ring-rose-200' : 'bg-[#f0fdf4] ring-1 ring-inset ring-[#bbf7d0]';
-            $closedRowClass   = $isLocked ? 'bg-rose-50/20' : 'bg-white';
+            $closedRowClass   = $isLocked ? 'bg-rose-50/20 border-l-4 border-rose-500' : 'bg-white border-l-4 border-emerald-500';
             $bodyBgClass      = $isLocked ? 'bg-rose-50/20' : 'bg-[#f0fdf4]/20';
             $bodyBorderClass  = $isLocked ? 'border-rose-100' : 'border-[#e2e8f0]';
         @endphp
 
         <div
             wire:key="week-{{ $week->week_no }}-{{ $activeComponent }}"
-            class="bg-white border rounded-xl overflow-hidden shadow-md transition-all duration-200"
+            class="bg-white border rounded-xl overflow-hidden shadow-sm transition-all duration-200"
 
             :class="openWeek === {{ $week->week_no }}
                 ? '{{ $isLocked

@@ -21,7 +21,7 @@
         right: 18px;
         bottom: 18px;
         z-index: 100000;
-        background: linear-gradient(135deg, #0e7490 0%, #0b556b 100%);
+        background: linear-gradient(135deg, var(--clsu-green) 0%, var(--clsu-cobra) 100%);
         color: #fff;
         border: none;
         padding: 10px 14px;
@@ -30,12 +30,12 @@
         font-weight: 700;
         letter-spacing: 0.04em;
         cursor: pointer;
-        box-shadow: 0 10px 22px rgba(14, 116, 144, 0.35);
+        box-shadow: 0 10px 22px rgba(0, 150, 57, 0.35);
         transition: all 150ms ease;
     }
 
     .versions-fab:hover {
-        box-shadow: 0 12px 28px rgba(14, 116, 144, 0.45);
+        box-shadow: 0 12px 28px rgba(0, 150, 57, 0.45);
         transform: translateY(-2px);
     }
 
@@ -43,7 +43,7 @@
         position: fixed;
         inset: 0;
         z-index: 99990;
-        background: rgba(0, 0, 0, 0.45);
+        background: rgba(11, 18, 32, 0.45);
     }
 
     .versions-drawer {
@@ -51,10 +51,8 @@
         top: 0;
         right: 0;
         height: 100vh;
-        width: 450px; 
-        /* 360px */
+        width: 450px;
         max-width: calc(100vw - 38px);
-        /* max-width: calc(100vw - 28px); */
         z-index: 100000;
         background: #ffffff;
         transform: translateX(110%);
@@ -63,6 +61,7 @@
         display: flex;
         flex-direction: column;
         font-family: Tahoma, 'Tahoma MT', Geneva, Verdana, sans-serif;
+        border-left: 3px solid var(--clsu-yellow);
     }
 
     .versions-drawer.is-open {
@@ -74,13 +73,13 @@
         align-items: center;
         justify-content: space-between;
         padding: 14px 14px;
-        border-bottom: 2px solid #0e7490;
-        background: linear-gradient(90deg, rgba(14, 116, 144, 0.06) 0%, rgba(11, 85, 107, 0.06) 100%);
+        border-bottom: 2px solid var(--clsu-green);
+        background: linear-gradient(90deg, rgba(0, 150, 57, 0.07) 0%, rgba(26, 95, 48, 0.07) 100%);
     }
 
     .vd-title {
         font-weight: 900;
-        color: #0b556b;
+        color: var(--clsu-cobra);
         font-size: 13px;
         letter-spacing: 0.03em;
         text-transform: uppercase;
@@ -96,6 +95,12 @@
         font-size: 18px;
         line-height: 1;
         color: #111827;
+        transition: all 150ms ease;
+    }
+
+    .vd-close:hover {
+        border-color: var(--clsu-green);
+        color: var(--clsu-cobra);
     }
 
     .vd-body {
@@ -107,8 +112,8 @@
     .vd-current {
         font-size: 12px;
         color: #0b1220;
-        background: #eef2ff;
-        border: 1px solid #e0e7ff;
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
         padding: 10px 12px;
         border-radius: 10px;
         margin-bottom: 12px;
@@ -143,12 +148,17 @@
         color: #0b1220;
         font-size: 12px;
         font-weight: 700;
+        transition: all 150ms ease;
+    }
+
+    .vd-link:hover {
+        border-color: var(--clsu-green);
     }
 
     .vd-link.is-active {
-        border-color: #0e7490;
-        background: #ecfeff;
-        color: #0b556b;
+        border-color: var(--clsu-green);
+        background: #f0fdf4;
+        color: var(--clsu-cobra);
         font-weight: 800;
     }
 
@@ -162,14 +172,14 @@
     }
 
     .vd-version:hover {
-        border-color: #0e7490;
-        box-shadow: 0 2px 8px rgba(14, 116, 144, 0.12);
+        border-color: var(--clsu-green);
+        box-shadow: 0 2px 8px rgba(0, 150, 57, 0.12);
     }
 
     .vd-version.is-active {
-        border-color: #0e7490;
-        background: #ecfeff;
-        box-shadow: 0 4px 12px rgba(14, 116, 144, 0.18);
+        border-color: var(--clsu-green);
+        background: #f0fdf4;
+        box-shadow: 0 4px 12px rgba(0, 150, 57, 0.18);
     }
 
     .vd-version-top {
@@ -220,7 +230,7 @@
     }
 
     .vd-actions a.vd-download {
-        background: linear-gradient(135deg, #0e7490 0%, #0b556b 100%);
+        background: linear-gradient(135deg, var(--clsu-green) 0%, var(--clsu-cobra) 100%);
         color: #fff;
         border-color: transparent;
         font-weight: 800;
@@ -228,7 +238,7 @@
     }
 
     .vd-actions a.vd-download:hover {
-        box-shadow: 0 4px 12px rgba(14, 116, 144, 0.3);
+        box-shadow: 0 4px 12px rgba(0, 150, 57, 0.3);
     }
 
     .vd-empty {
@@ -238,6 +248,7 @@
     }
 
     @media print {
+
         .versions-fab,
         .versions-backdrop,
         .versions-drawer {

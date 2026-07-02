@@ -30,7 +30,7 @@
                         {{ $activeComponent === 'LEC' ? 'bg-emerald-500' : 'bg-slate-300' }}">
                     </span>
                     Lecture
-                    <span class="text-xs font-mono opacity-50">LEC</span>
+                    {{-- <span class="text-xs font-mono opacity-50">LEC</span> --}}
                 </span>
 
             </button>
@@ -56,7 +56,7 @@
                         {{ $activeComponent === 'LAB' ? 'bg-blue-500' : 'bg-slate-300' }}">
                     </span>
                     Laboratory
-                    <span class="text-xs font-mono opacity-50">LAB</span>
+                    {{-- <span class="text-xs font-mono opacity-50">LAB</span> --}}
                 </span>
 
             </button>
@@ -78,7 +78,7 @@
                 ? 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200'
                 : 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200' }}">
             <span class="w-2 h-2 rounded-full {{ $hasLEC ? 'bg-emerald-500' : 'bg-blue-500' }}"></span>
-            {{ $hasLEC ? 'Lecture (LEC)' : 'Laboratory (LAB)' }}
+            {{ $hasLEC ? 'Lecture' : 'Laboratory' }}
         </span>
     </div>
 
