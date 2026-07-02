@@ -5,7 +5,11 @@
     <x-page-header
         icon="bx-book-open"
         title="My Syllabi"
-        desc="Manage and continue working on your course syllabi" />
+        desc="Manage and continue working on your course syllabi">
+        <x-button href="{{ route('syllabus.create') }}" variant="add-button">
+            <i class="bx bx-plus text-base leading-none"></i> Create Syllabus
+        </x-button>
+    </x-page-header>
 
     @php
         $grouped = [
