@@ -187,7 +187,7 @@
             </x-card-section>
 
             {{-- Consultation Hours --}}
-            <x-card-section title="Consultation Hours" icon="bx-time">
+            {{-- <x-card-section title="Consultation Hours" icon="bx-time">
                 <x-slot:actions>
                     <button type="button" onclick="document.getElementById('profile-ch-modal').showModal()"
                         class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-semibold
@@ -220,7 +220,7 @@
                     @endforelse
                 </div>
 
-                {{-- Add modal --}}
+                Add modal
                 <x-modal.dialog id="profile-ch-modal" maxWidth="max-w-sm">
                     <x-modal.header modalId="profile-ch-modal" variant="add">Add Consultation Hour</x-modal.header>
                     <form method="POST" action="{{ route('profile.consultation.store') }}">
@@ -252,7 +252,7 @@
                 @if ($errors->hasAny(['day', 'time']))
                     <script>document.addEventListener('DOMContentLoaded', () => document.getElementById('profile-ch-modal')?.showModal());</script>
                 @endif
-            </x-card-section>
+            </x-card-section> --}}
 
             <x-card-section
                 title="Recent Activity"

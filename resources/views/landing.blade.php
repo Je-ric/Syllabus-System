@@ -147,7 +147,7 @@
     </nav>
 
     {{-- HERO --}}
-    <section id="top" class="grain relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden">
+    <section id="top" class="grain relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden bg-white">
         <div class="max-w-6xl mx-auto px-6 grid lg:grid-cols-[1.05fr_0.95fr] gap-16 items-center">
 
             <div>
@@ -155,12 +155,12 @@
                     Central Luzon State University
                 </p>
                 <h1 class="font-display font-semibold text-ink text-[2.6rem] leading-[1.08] md:text-6xl md:leading-[1.05] mb-6">
-                    Every syllabus,<br>
-                    on record and<br>
-                    <span class="italic text-moss">properly reviewed.</span>
+                    Course Syllabus<br>
+                    Management<br>
+                    <span class="italic text-moss">System</span>
                 </h1>
                 <p class="text-slate text-lg leading-relaxed mb-8 max-w-md">
-                    CSMS is CLSU's official platform for drafting, reviewing, and approving course syllabi — faculty write them, chairs review them, and deans approve them.
+                    CSMS is CLSU's official platform for drafting, reviewing, and approving course syllabi.
                 </p>
 
                 <div class="flex flex-wrap items-center gap-4 mb-10">
@@ -175,22 +175,22 @@
                     </a>
                 </div>
 
-                <div class="flex flex-wrap gap-3">
+                {{-- <div class="flex flex-wrap gap-3">
                     <span class="stamp stamp-approved"><i class="bx bx-lock-alt" aria-hidden="true"></i>OTP-verified</span>
                     <span class="stamp stamp-review"><i class="bx bx-git-branch" aria-hidden="true"></i>Structured review</span>
                     <span class="stamp stamp-draft"><i class="bx bx-buildings" aria-hidden="true"></i>All colleges</span>
-                </div>
+                </div> --}}
             </div>
 
             {{-- document stack visual --}}
             <div class="relative h-[420px] hidden sm:block" aria-hidden="true">
-                <div class="doc-card ruled-line absolute inset-x-6 top-10 h-[320px] rounded-sm rotate-[4deg] opacity-60"></div>
-                <div class="doc-card ruled-line absolute inset-x-3 top-5 h-[320px] rounded-sm rotate-[-2deg] opacity-85"></div>
+                {{-- <div class="doc-card ruled-line absolute inset-x-6 top-10 h-[320px] rounded-sm rotate-[4deg] opacity-60"></div>
+                <div class="doc-card ruled-line absolute inset-x-3 top-5 h-[320px] rounded-sm rotate-[-2deg] opacity-85"></div> --}}
                 <div class="doc-card ruled-line absolute inset-x-0 top-0 h-[320px] rounded-sm p-6 flex flex-col">
                     <div class="flex items-start justify-between mb-4">
                         <div>
                             <p class="font-mono text-[10px] tracking-widest uppercase text-slate mb-1">Course syllabus</p>
-                            <p class="font-display font-semibold text-ink text-lg">AGRI 101 — Soil Science</p>
+                            <p class="font-display font-semibold text-ink text-lg">COURSE 101 — Course Title</p>
                         </div>
                         <span class="stamp stamp-review rotate-[-8deg] text-[10px] px-2.5 py-1">Under review</span>
                     </div>
@@ -204,12 +204,12 @@
                         <div class="w-6 h-6 rounded-full bg-forest/15 flex items-center justify-center">
                             <i class="bx bx-user text-forest text-xs" aria-hidden="true"></i>
                         </div>
-                        <p class="text-xs text-slate">Routed to Dept. Chair, College of Agriculture</p>
+                        <p class="text-xs text-slate">Routed to Dept. Chair, College Dean</p>
                     </div>
                 </div>
-                <span class="stamp stamp-approved absolute -bottom-2 -left-2 rotate-[-10deg] bg-paper text-xs shadow-md">
+                {{-- <span class="stamp stamp-approved absolute -bottom-2 -left-2 rotate-[-10deg] bg-paper text-xs shadow-md">
                     <i class="bx bx-check" aria-hidden="true"></i>Approved · Sample
-                </span>
+                </span> --}}
             </div>
         </div>
     </section>
@@ -266,9 +266,9 @@
                     ['bx-check-double', 'Dean approval', 'The dean gives final approval. The syllabus is then locked, stored, and available for download.', 'approved'],
                 ] as $i => $step)
                 <div class="relative">
-                    @if($i < 3)
+                    {{-- @if($i < 3)
                     <div class="step-thread hidden md:block absolute top-6 left-[calc(50%+28px)] right-[calc(-50%+28px)]"></div>
-                    @endif
+                    @endif --}}
                     <div class="relative z-10 w-12 h-12 rounded-full bg-paper/10 border border-paper/25 flex items-center justify-center mb-5">
                         <i class="bx {{ $step[0] }} text-xl text-gold" aria-hidden="true"></i>
                     </div>
