@@ -5,8 +5,8 @@
     'userName',
 ])
 
-<x-modal.dialog id="removeFacultyModal-{{ $departmentId }}" maxWidth="max-w-md" width="w-11/12" variant="delete">
-    <x-modal.header :modalId="'removeFacultyModal-' . $departmentId" variant="delete">
+<x-modal.dialog id="removeFacultyModal-{{ $departmentId }}-{{ $userId }}" maxWidth="max-w-md" width="w-11/12" variant="delete">
+    <x-modal.header :modalId="'removeFacultyModal-' . $departmentId . '-' . $userId" variant="delete">
         <span class="text-[#9f1239]">Remove Faculty</span>
     </x-modal.header>
 
@@ -32,7 +32,7 @@
     </x-modal.body>
 
     <x-modal.footer>
-        <x-modal.close-button :modalId="'removeFacultyModal-' . $departmentId" text="Cancel" />
+        <x-modal.close-button :modalId="'removeFacultyModal-' . $departmentId . '-' . $userId" text="Cancel" />
         <form action="{{ route('organizational.remove-faculty') }}" method="POST">
             @csrf
             <input type="hidden" name="department_id" value="{{ $departmentId }}">

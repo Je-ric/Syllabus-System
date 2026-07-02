@@ -15,20 +15,31 @@ class ProgramController extends Controller
 {
     public function index()
     {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
         $program = null;
 
-        // If a program ID is passed via query parameter, load it
         if (request('program_id')) {
             $program = Program::find(request('program_id'));
         }
 
-        return view('Programs.index', compact('program'));
+        $noAssignment = !$user->hasRole('admin')
+            && $user->hasRole('chair')
+            && !$user->getPrimaryDepartmentAssignment();
+
+        return view('Programs.index', compact('program', 'noAssignment'));
     }
 
     public function show(Program $program)
     {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
 
-        return view('Programs.index', compact('program'));
+        $noAssignment = !$user->hasRole('admin')
+            && $user->hasRole('chair')
+            && !$user->getPrimaryDepartmentAssignment();
+
+        return view('Programs.index', compact('program', 'noAssignment'));
     }
 
 

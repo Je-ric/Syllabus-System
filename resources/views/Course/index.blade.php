@@ -46,7 +46,10 @@
                 :autoRedirect="true" />
         </x-card-section>
 
-        @if ($program)
+        @if ($noAssignment ?? false)
+            <x-feedback-status.alert type="warning" title="No department assigned"
+                message="You have the Chair role but are not assigned to any department. Contact an administrator to be assigned." />
+        @elseif ($program)
 
             {{-- Active / Archived toggle --}}
             <div class="flex items-center gap-2 mb-4">

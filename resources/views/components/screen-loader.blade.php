@@ -1,4 +1,4 @@
-<div id="screenLoader" class="fixed inset-0 z-99999 bg-white flex items-center justify-center transition-opacity duration-500">
+<div id="screenLoader" class="fixed inset-0 bg-white flex items-center justify-center transition-opacity duration-500" style="z-index: 99999;">
     <div class="text-center">
         <div class="relative">
             <div class="relative mx-auto mb-4 h-16 w-16">

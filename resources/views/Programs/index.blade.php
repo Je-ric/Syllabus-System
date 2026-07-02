@@ -26,7 +26,10 @@
             </p>
         </x-card-section>
 
-        @if (!$program)
+        @if ($noAssignment ?? false)
+            <x-feedback-status.alert type="warning" title="No department assigned"
+                message="You have the Chair role but are not assigned to any department. Contact an administrator to be assigned." />
+        @elseif (!$program)
             <x-empty-state
                 icon="bx-network-chart"
                 title="No program selected"

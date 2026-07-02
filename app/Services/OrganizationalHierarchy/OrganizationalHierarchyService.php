@@ -300,6 +300,13 @@ class OrganizationalHierarchyService
     {
         UserAssignment::removeAssignment($context, $user->id, $collegeId, $departmentId);
 
+        // Remove the paired faculty assignment created by ensureFacultyRoleAndAssignment
+        if ($context === 'chair') {
+            UserAssignment::removeAssignment('faculty', $user->id, null, $departmentId);
+        } elseif ($context === 'dean') {
+            UserAssignment::removeAssignment('faculty', $user->id, $collegeId, null);
+        }
+
         AuditLog::record(
             action: 'removed',
             module: 'Organizational Hierarchy',

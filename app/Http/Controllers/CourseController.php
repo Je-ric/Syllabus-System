@@ -22,6 +22,8 @@ class CourseController extends Controller
 
     public function index(Request $request)
     {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
         $program = null;
         $groupedCourses = collect();
 
@@ -32,7 +34,11 @@ class CourseController extends Controller
             $groupedCourses = $program->getCoursesGroupedByYearAndSemester($status);
         }
 
-        return view('Course.index', compact('program', 'groupedCourses'));
+        $noAssignment = !$user->hasRole('admin')
+            && $user->hasRole('chair')
+            && !$user->getPrimaryDepartmentAssignment();
+
+        return view('Course.index', compact('program', 'groupedCourses', 'noAssignment'));
     }
 
     public function create(Request $request)

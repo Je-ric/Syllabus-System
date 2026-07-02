@@ -34,6 +34,9 @@ class ProgramSelector extends Component
     // Whether the selector is locked (non-admin, scoped context)
     public bool $locked = false;
 
+    // Whether the chair has no department assignment
+    public bool $noAssignment = false;
+
     public function mount($programId = null, $redirectRoute = null, $autoRedirect = true)
     {
         /** @var \App\Models\User|null $user */
@@ -62,6 +65,10 @@ class ProgramSelector extends Component
         $this->redirectRoute = $redirectRoute;
         $this->autoRedirect = $autoRedirect;
         $this->locked = !$isAdmin && in_array($redirectRoute, ['programs.show', 'courses.index']);
+        $this->noAssignment = !$isAdmin
+            && $user?->hasRole('chair')
+            && in_array($redirectRoute, ['programs.show', 'courses.index'])
+            && !$user?->getPrimaryDepartmentAssignment();
 
         // If programId is explicitly provided via query param, use that (highest priority)
         if ($programId) {

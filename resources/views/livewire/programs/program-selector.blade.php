@@ -10,9 +10,9 @@
 <div>
     @if ($locked ?? false)
         @php
-            $lockedCollege = $colleges->firstWhere('id', (int)$collegeId);
-            $lockedDept    = $departments->firstWhere('id', (int)$departmentId);
-            $lockedProgram = $programs->firstWhere('id', (int)$programId);
+            $lockedCollege = collect($colleges)->firstWhere('id', (int)$collegeId);
+            $lockedDept    = collect($departments)->firstWhere('id', (int)$departmentId);
+            $lockedProgram = collect($programs)->firstWhere('id', (int)$programId);
         @endphp
 
         {{-- Same breadcrumb as unlocked, all steps filled --}}
