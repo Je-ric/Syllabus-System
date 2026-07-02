@@ -37,11 +37,11 @@
                         {{-- Department header --}}
                         <div class="flex items-center justify-between gap-3 px-5 py-4 bg-[#f8fafc] border-b border-[#e2e8f0]">
                             <div class="flex items-center gap-3 min-w-0 flex-1">
-                                <span class="shrink-0 w-9 h-9 rounded-lg bg-[#16a34a] flex items-center justify-center">
+                                <span class="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center" style="background: var(--clsu-green);">
                                     <i class="bx bxs-buildings text-white text-lg leading-none"></i>
                                 </span>
                                 <div class="min-w-0">
-                                    <h2 class="text-[13px] font-bold text-[#0f172a] truncate" title="{{ $department->name }}">
+                                    <h2 class="text-sm font-bold text-[#0f172a] truncate" title="{{ $department->name }}">
                                         {{ $department->name }}
                                     </h2>
                                     <p class="text-xs text-slate-500 mt-0.5">
@@ -106,7 +106,7 @@
                                 <x-slot name="title">Faculty Members</x-slot>
                                 <x-slot name="action">
                                     @if ($facultyList->count() > 0)
-                                        <span class="inline-flex items-center justify-center min-w-[1.4rem] h-5 px-1.5 rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold">
+                                        <span class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-slate-200 text-slate-600 text-xs font-bold">
                                             {{ $facultyList->count() }}
                                         </span>
                                     @endif
