@@ -8,7 +8,7 @@
 ])
 
 <div {{ $attributes->merge([
-    'class' => 'rounded-xl border border-green-200 bg-white overflow-hidden shadow-lg'
+    'class' => 'rounded-xl border border-green-200 bg-white overflow-hidden shadow-md'
 ]) }}>
 
     <div class="px-5 py-3 border-b border-green-200 bg-[#f8fafc] flex items-center gap-2">
