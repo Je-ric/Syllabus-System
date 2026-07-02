@@ -37,7 +37,7 @@
 
         {{-- ── Right: actions slot ── --}}
         @if ($slot->isNotEmpty())
-            <div class="shrink-0 flex items-center gap-2 sm:justify-end">
+            <div class="shrink-0 flex items-center gap-2 sm:justify-end bg-white/95 rounded-lg p-0.5 shadow-inner">
                 {{ $slot }}
             </div>
         @endif
