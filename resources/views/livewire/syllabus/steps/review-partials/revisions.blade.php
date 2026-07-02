@@ -17,8 +17,8 @@
                 <i class="bx bx-history text-base leading-none"></i>
             </span>
             <div>
-                <p class="text-[13px] font-bold text-[#0f172a]">Revision History</p>
-                <p class="text-[11px] text-[#94a3b8] mt-0.5">
+                <p class="text-sm font-bold text-[#0f172a]">Revision History</p>
+                <p class="text-xs text-[#94a3b8] mt-0.5">
                     @if (count($revisions) > 0)
                         {{ count($revisions) }} {{ Str::plural('entry', count($revisions)) }} saved
                     @else
@@ -106,14 +106,14 @@
                         <div>
                             <x-form.label for="modal-rev-no" :isRequired="true">Rev. No.</x-form.label>
                             <x-form.input id="modal-rev-no" type="number" min="0" step="1" placeholder="0" x-model="revisionNo" class="text-xs" />
-                            <p class="text-[10px] text-slate-400 mt-1 leading-snug">Whole number ≥ 0.</p>
+                            <p class="text-xs text-slate-400 mt-1 leading-snug">Whole number ≥ 0.</p>
                         </div>
                     </div>
 
                     <div>
                         <x-form.label for="modal-semester" :isRequired="true">Implementation Semester</x-form.label>
                         <x-form.input id="modal-semester" type="text" x-model="semester" placeholder="e.g. 1st Sem 2025–2026" class="text-xs" />
-                        <p x-show="!semester.trim() && saving" x-cloak class="text-[11px] text-rose-500 mt-1">This field is required.</p>
+                        <p x-show="!semester.trim() && saving" x-cloak class="text-xs text-rose-500 mt-1">This field is required.</p>
                     </div>
 
                     <div>
@@ -130,9 +130,11 @@
                 <x-modal.footer>
                     <x-modal.close-button modalId="revision-modal" text="Cancel" x-bind:disabled="saving" />
                     <button type="button" x-on:click="submit()" x-bind:disabled="saving"
-                        class="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg text-[13px] font-semibold text-white shadow-sm
+                        class="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg text-sm font-semibold text-white shadow-sm
                                disabled:opacity-50 transition-colors"
-                        :class="editingId ? 'bg-amber-500 hover:bg-amber-600' : 'bg-emerald-600 hover:bg-emerald-700'">
+                        :style="editingId ? 'background: #d97706' : 'background: var(--clsu-green)'"
+                        x-on:mouseover="$el.style.background = editingId ? '#b45309' : 'var(--clsu-cobra)'"
+                        x-on:mouseleave="$el.style.background = editingId ? '#d97706' : 'var(--clsu-green)'">
                         <span x-show="!saving" class="inline-flex items-center gap-1.5">
                             <i x-show="editingId"  class="bx bx-save leading-none"></i>
                             <i x-show="!editingId" class="bx bx-plus leading-none"></i>
@@ -159,7 +161,7 @@
                             wire:loading.attr="disabled"
                             wire:target="resequenceRevisions"
                             wire:confirm="This will renumber all revisions 0, 1, 2, … in their current order. Continue?"
-                            class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold text-slate-500
+                            class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold text-slate-500
                                    border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-50 transition-colors">
                             <span wire:loading.remove wire:target="resequenceRevisions" class="inline-flex items-center gap-1">
                                 <i class="bx bx-sort-a-z leading-none"></i> Resequence
@@ -174,8 +176,10 @@
                         </button>
                     @endif
                     <button type="button" x-on:click="openNew()"
-                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-semibold
-                               bg-[#f0fdf4] text-[#16a34a] border border-[#bbf7d0] hover:bg-[#dcfce7] transition-colors">
+                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-semibold border transition-colors"
+                        style="background: #f0fdf4; color: var(--clsu-green); border-color: #bbf7d0;"
+                        onmouseover="this.style.background='#dcfce7'"
+                        onmouseout="this.style.background='#f0fdf4'">
                         <i class="bx bx-plus text-sm"></i> Add Revision
                     </button>
                 </div>
@@ -199,7 +203,7 @@
                                         <span class="text-xs font-bold text-slate-700 shrink-0">
                                             Rev.&nbsp;#{{ $rev['revision_no'] }}
                                         </span>
-                                        <span class="text-[11px] text-slate-400">{{ $rev['revision_date'] }}</span>
+                                        <span class="text-xs text-slate-400">{{ $rev['revision_date'] }}</span>
                                         @if ($rev['implementation_semester'])
                                             <x-feedback-status.status-indicator variant="emerald" :dot="true">
                                                 {{ $rev['implementation_semester'] }}
@@ -207,13 +211,13 @@
                                         @endif
                                     </div>
                                     @if ($rev['highlights'])
-                                        <p class="text-[11px] text-slate-500 mt-1.5 leading-relaxed line-clamp-2">
+                                        <p class="text-xs text-slate-500 mt-1.5 leading-relaxed line-clamp-2">
                                             {{ $rev['highlights'] }}
                                         </p>
                                     @endif
                                     @if ($rev['contributors'])
                                         <p class="text-[10px] text-slate-400 mt-1">
-                                            <i class="bx bx-user text-[11px]"></i> {{ $rev['contributors'] }}
+                                            <i class="bx bx-user text-xs"></i> {{ $rev['contributors'] }}
                                         </p>
                                     @endif
                                 </div>
@@ -247,7 +251,7 @@
 
                 @if (count($revisions) > 1)
                     <p class="text-[10px] text-slate-400 mt-2 leading-relaxed">
-                        <i class="bx bx-info-circle text-[11px]"></i>
+                        <i class="bx bx-info-circle text-xs"></i>
                         To insert a revision between existing ones, set its number manually, then click <strong>Resequence</strong>.
                     </p>
                 @endif

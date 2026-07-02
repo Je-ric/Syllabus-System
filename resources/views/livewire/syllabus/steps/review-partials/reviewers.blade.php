@@ -60,7 +60,7 @@
         class="w-full flex items-center justify-between px-5 py-4 text-left
                hover:bg-[#f8fafc] transition-colors focus:outline-none">
         <div class="flex items-center gap-3">
-            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#dcfce7] text-[#16a34a]">
+            <span class="flex items-center justify-center w-8 h-8 rounded-lg" style="background: #f0fdf4; color: var(--clsu-green);">
                 <i class="bx bx-user-check text-base leading-none"></i>
             </span>
             <div>
@@ -69,7 +69,7 @@
                     Signatures, concurrence &amp; additional reviewers
                     @if (count($reviewers) > 0)
                         &middot;
-                        <span class="text-[#16a34a] font-semibold">
+                        <span class="font-semibold" style="color: var(--clsu-green);">
                             {{ count($reviewers) }} {{ Str::plural('reviewer', count($reviewers)) }}
                         </span>
                     @endif
@@ -95,20 +95,49 @@
                             Prepared By
                             <span class="text-slate-300 font-normal normal-case tracking-normal">(Author)</span>
                         </x-form.label>
-                        <div class="flex items-center gap-3 rounded-xl border border-[#bbf7d0]
-                                    bg-[#f0fdf4]/60 px-4 py-3">
-                            <span class="inline-flex items-center justify-center w-9 h-9 rounded-full
-                                         bg-[#dcfce7] text-[#15803d] text-xs font-bold shrink-0">
-                                {{ strtoupper(substr($syllabus->preparer->name ?? 'U', 0, 1)) }}
+
+                        @php
+                            $lecComp = $syllabus->components->firstWhere('type', 'LEC');
+                            $labComp = $syllabus->components->firstWhere('type', 'LAB');
+                        @endphp
+
+                        {{-- LEC instructor (always shown) --}}
+                        <div class="flex items-center gap-3 rounded-xl px-4 py-3"
+                             style="border: 1px solid #bbf7d0; background: rgba(240,253,244,0.6);">
+                            <span class="inline-flex items-center justify-center w-9 h-9 rounded-full text-xs font-bold shrink-0"
+                                  style="background: #f0fdf4; color: var(--clsu-cobra);">
+                                {{ strtoupper(substr($lecComp?->instructor_name ?? $syllabus->preparer->name ?? 'U', 0, 1)) }}
                             </span>
                             <div class="min-w-0">
-                                <p class="text-sm font-semibold text-slate-800 truncate">{{ $syllabus->preparer->name ?? 'N/A' }}</p>
-                                <p class="text-xs text-slate-400 truncate">{{ $syllabus->preparer->email ?? '' }}</p>
+                                <p class="text-sm font-semibold text-slate-800 truncate">
+                                    {{ $lecComp?->instructor_name ?? $syllabus->preparer->name ?? 'N/A' }}
+                                </p>
+                                <p class="text-xs text-slate-400 truncate">
+                                    {{ $lecComp?->instructor_email ?? $syllabus->preparer->email ?? '' }}
+                                </p>
                             </div>
                             <x-feedback-status.status-indicator variant="slate" class="ml-auto shrink-0">
-                                Author
+                                LEC
                             </x-feedback-status.status-indicator>
                         </div>
+
+                        {{-- LAB instructor (only when course has lab and instructor is set) --}}
+                        @if ($labComp && $labComp->instructor_name)
+                            <div class="flex items-center gap-3 rounded-xl px-4 py-3"
+                                 style="border: 1px solid #bfdbfe; background: rgba(239,246,255,0.6);">
+                                <span class="inline-flex items-center justify-center w-9 h-9 rounded-full text-xs font-bold shrink-0"
+                                      style="background: #eff6ff; color: #1d4ed8;">
+                                    {{ strtoupper(substr($labComp->instructor_name, 0, 1)) }}
+                                </span>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-slate-800 truncate">{{ $labComp->instructor_name }}</p>
+                                    <p class="text-xs text-slate-400 truncate">{{ $labComp->instructor_email ?? '' }}</p>
+                                </div>
+                                <x-feedback-status.status-indicator variant="slate" class="ml-auto shrink-0">
+                                    LAB
+                                </x-feedback-status.status-indicator>
+                            </div>
+                        @endif
                     </div>
 
                     {{-- Approved By --}}
@@ -119,11 +148,11 @@
                         </x-form.label>
 
                         <div x-show="getName(localApprovedBy)"
-                            class="flex items-center justify-between gap-2 rounded-xl
-                                   border border-[#bbf7d0] bg-[#f0fdf4]/70 px-3.5 py-2.5">
+                            class="flex items-center justify-between gap-2 rounded-xl px-3.5 py-2.5"
+                            style="border: 1px solid #bbf7d0; background: rgba(240,253,244,0.7);">
                             <div class="flex items-center gap-2 min-w-0">
-                                <span class="inline-flex items-center justify-center w-7 h-7 rounded-full
-                                             bg-[#dcfce7] text-[#15803d] text-xs font-bold shrink-0"
+                                <span class="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold shrink-0"
+                                      style="background: #f0fdf4; color: var(--clsu-cobra);"
                                       x-text="getName(localApprovedBy)?.charAt(0)?.toUpperCase() ?? ''"></span>
                                 <p class="text-xs font-semibold text-slate-800 truncate"
                                    x-text="getName(localApprovedBy)"></p>
@@ -172,11 +201,11 @@
                         </x-form.label>
 
                         <div x-show="getName(localConcurredBy)"
-                            class="flex items-center justify-between gap-2 rounded-xl
-                                   border border-[#bbf7d0] bg-[#f0fdf4]/70 px-3.5 py-2.5">
+                            class="flex items-center justify-between gap-2 rounded-xl px-3.5 py-2.5"
+                            style="border: 1px solid #bbf7d0; background: rgba(240,253,244,0.7);">
                             <div class="flex items-center gap-2 min-w-0">
-                                <span class="inline-flex items-center justify-center w-7 h-7 rounded-full
-                                             bg-[#dcfce7] text-[#15803d] text-xs font-bold shrink-0"
+                                <span class="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold shrink-0"
+                                      style="background: #f0fdf4; color: var(--clsu-cobra);"
                                       x-text="getName(localConcurredBy)?.charAt(0)?.toUpperCase() ?? ''"></span>
                                 <p class="text-xs font-semibold text-slate-800 truncate"
                                    x-text="getName(localConcurredBy)"></p>

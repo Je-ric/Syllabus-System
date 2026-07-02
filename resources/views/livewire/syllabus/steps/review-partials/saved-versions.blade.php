@@ -11,12 +11,12 @@
         class="w-full flex items-center justify-between px-5 py-4 text-left
                hover:bg-[#f8fafc] transition-colors focus:outline-none">
         <div class="flex items-center gap-3">
-            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#dcfce7] text-[#16a34a]">
+            <span class="flex items-center justify-center w-8 h-8 rounded-lg" style="background: #dcfce7; color: var(--clsu-green);">
                 <i class="bx bx-cloud-upload text-base leading-none"></i>
             </span>
             <div>
-                <p class="text-[13px] font-bold text-[#0f172a]">Saved Versions</p>
-                <p class="text-[11px] text-[#94a3b8] mt-0.5">
+                <p class="text-sm font-bold text-[#0f172a]">Saved Versions</p>
+                <p class="text-xs text-[#94a3b8] mt-0.5">
                     @if (isset($completeVersions) && $completeVersions->count() > 0)
                         {{ $completeVersions->count() }} {{ Str::plural('version', $completeVersions->count()) }} saved
                     @else
@@ -65,17 +65,17 @@
                                    bg-[#f8fafc] hover:bg-[#f0fdf4] transition-colors focus:outline-none border-b border-[#e2e8f0]">
                             <div class="flex items-center gap-3">
                                 <span class="inline-flex items-center justify-center w-6 h-6 rounded-md
-                                             bg-[#16a34a] text-white text-[11px] font-bold shrink-0">
+                                             text-white text-xs font-bold shrink-0" style="background: var(--clsu-green);">
                                     v{{ $sv->version }}
                                 </span>
                                 <div>
-                                    <p class="text-[13px] font-semibold text-[#0f172a]">
+                                    <p class="text-sm font-semibold text-[#0f172a]">
                                         Version {{ $sv->version }}
                                         <span class="font-normal text-[#475569] ml-1">
                                             &middot; {{ $sv->academic_year }} {{ $sv->semester }}
                                         </span>
                                     </p>
-                                    <p class="text-[11px] text-[#94a3b8] mt-0.5">
+                                    <p class="text-xs text-[#94a3b8] mt-0.5">
                                         Saved {{ $sv->created_at?->format('M d, Y  H:i') }}
                                     </p>
                                 </div>
@@ -89,21 +89,25 @@
 
                                 {{-- Complete --}}
                                 <div>
-                                    <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-2">
+                                    <p class="text-xs font-bold uppercase tracking-[0.12em] text-[#475569] mb-2">
                                         Complete (OBTL)
                                     </p>
                                     <div class="flex flex-wrap gap-1.5">
                                         <a href="{{ $completePreview }}" target="_blank" rel="noopener"
                                            class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg
-                                                  bg-[#16a34a] text-white text-[13px] font-semibold
-                                                  hover:bg-[#15803d] transition-colors">
+                                                  text-white text-sm font-semibold transition-colors"
+                                           style="background: var(--clsu-green);"
+                                           onmouseover="this.style.background='var(--clsu-cobra)'"
+                                           onmouseout="this.style.background='var(--clsu-green)'">
                                             <i class="bx bx-link-external text-sm"></i> Open
                                         </a>
                                         @if ($completeDownload)
                                             <a href="{{ $completeDownload }}"
                                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg
-                                                      bg-white text-[#166534] text-[13px] font-semibold
-                                                      border border-[#bbf7d0] hover:bg-[#f0fdf4] transition-colors">
+                                                      bg-white text-sm font-semibold border transition-colors"
+                                               style="color: var(--clsu-cobra); border-color: #bbf7d0;"
+                                               onmouseover="this.style.background='#f0fdf4'"
+                                               onmouseout="this.style.background='#ffffff'">
                                                 <i class="bx bx-download text-sm"></i> Download
                                             </a>
                                         @endif
@@ -112,55 +116,55 @@
 
                                 {{-- Abridged --}}
                                 <div>
-                                    <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-2">
+                                    <p class="text-xs font-bold uppercase tracking-[0.12em] text-[#475569] mb-2">
                                         Abridged (Student)
                                     </p>
                                     @if ($hasAbridged)
                                         <div class="flex flex-wrap gap-1.5">
                                             <a href="{{ $abridgedPreview }}" target="_blank" rel="noopener"
                                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg
-                                                      bg-[#1e40af] text-white text-[13px] font-semibold
+                                                      bg-[#1e40af] text-white text-sm font-semibold
                                                       hover:bg-[#1d4ed8] transition-colors">
                                                 <i class="bx bx-link-external text-sm"></i> Open
                                             </a>
                                             @if ($abridgedDownload)
                                                 <a href="{{ $abridgedDownload }}"
                                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg
-                                                          bg-white text-[#1e40af] text-[13px] font-semibold
+                                                          bg-white text-[#1e40af] text-sm font-semibold
                                                           border border-[#bfdbfe] hover:bg-[#eff6ff] transition-colors">
                                                     <i class="bx bx-download text-sm"></i> Download
                                                 </a>
                                             @endif
                                         </div>
                                     @else
-                                        <p class="text-[13px] text-[#94a3b8] italic">Not available.</p>
+                                        <p class="text-sm text-[#94a3b8] italic">Not available.</p>
                                     @endif
                                 </div>
 
                                 {{-- Assessment --}}
                                 <div>
-                                    <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] mb-2">
+                                    <p class="text-xs font-bold uppercase tracking-[0.12em] text-[#475569] mb-2">
                                         Assessment Plan
                                     </p>
                                     @if ($hasAssess)
                                         <div class="flex flex-wrap gap-1.5">
                                             <a href="{{ $assessPreview }}" target="_blank" rel="noopener"
                                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg
-                                                      bg-[#475569] text-white text-[13px] font-semibold
+                                                      bg-[#475569] text-white text-sm font-semibold
                                                       hover:bg-[#334155] transition-colors">
                                                 <i class="bx bx-link-external text-sm"></i> Open
                                             </a>
                                             @if ($assessDownload)
                                                 <a href="{{ $assessDownload }}"
                                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg
-                                                          bg-white text-[#475569] text-[13px] font-semibold
+                                                          bg-white text-[#475569] text-sm font-semibold
                                                           border border-[#e2e8f0] hover:bg-[#f8fafc] transition-colors">
                                                     <i class="bx bx-download text-sm"></i> Download
                                                 </a>
                                             @endif
                                         </div>
                                     @else
-                                        <p class="text-[13px] text-[#94a3b8] italic">Not available.</p>
+                                        <p class="text-sm text-[#94a3b8] italic">Not available.</p>
                                     @endif
                                 </div>
 
