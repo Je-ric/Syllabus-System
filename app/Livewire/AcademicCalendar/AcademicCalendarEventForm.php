@@ -9,15 +9,15 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
-use Livewire\WithFileUploads;
+// use Livewire\WithFileUploads; // CSV import disabled for now
 
 class AcademicCalendarEventForm extends Component
 {
-    use WithFileUploads;
+    // use WithFileUploads; // CSV import disabled for now
 
     public int    $semesterId;
     public string $academicYear = '';
-    public mixed  $csvFile      = null;
+    // public mixed  $csvFile      = null; // CSV import disabled for now
 
     public function mount(int $semesterId, string $academicYear): void
     {
@@ -56,7 +56,6 @@ class AcademicCalendarEventForm extends Component
             return;
         }
 
-        // Fetch already-occupied dates in the range so we can skip them
         $existing = $semester->events()
             ->whereBetween('date', [$dateStart, $dateEnd])
             ->pluck('date')
@@ -143,8 +142,17 @@ class AcademicCalendarEventForm extends Component
 
         $validated = $validator->validated();
 
+        // Guard: if editing, make sure the row still exists (avoids 404 if
+        // it was deleted in another tab/request between form-open and submit)
         if ($editingId) {
-            $event = AcademicCalendarEvent::findOrFail($editingId);
+            $event = AcademicCalendarEvent::find($editingId);
+
+            if (! $event) {
+                $this->dispatch('event-saved'); // closes the modal / refreshes list
+                $this->dispatch('lw-toast', type: 'error', message: 'This event no longer exists — it may have already been deleted.');
+                return;
+            }
+
             $event->update($validated);
 
             AuditLog::record(
@@ -171,61 +179,77 @@ class AcademicCalendarEventForm extends Component
         }
     }
 
-    public function importCsv(): void
-    {
-        $this->validate(['csvFile' => ['required', 'file', 'mimes:csv,txt', 'max:512']]);
-
-        $semester = AcademicCalendar::findOrFail($this->semesterId);
-        $handle   = fopen($this->csvFile->getRealPath(), 'r');
-        $header   = fgetcsv($handle); // skip header row
-
-        $imported = 0;
-        $skipped  = 0;
-
-        while (($row = fgetcsv($handle)) !== false) {
-            if (count($row) < 3) { $skipped++; continue; }
-
-            [$type, $name, $date] = array_map('trim', $row);
-
-            $v = Validator::make(
-                compact('type', 'name', 'date'),
-                [
-                    'type' => ['required', Rule::in(AcademicCalendarEvent::TYPES)],
-                    'name' => ['required', 'string', 'max:255'],
-                    'date' => [
-                        'required', 'date',
-                        'after_or_equal:' . $semester->start_date,
-                        'before_or_equal:' . $semester->end_date,
-                        Rule::unique('academic_calendar_events', 'date')
-                            ->where('academic_calendar_id', $this->semesterId),
-                    ],
-                ]
-            );
-
-            if ($v->fails()) { $skipped++; continue; }
-
-            $semester->events()->create($v->validated());
-            $imported++;
-        }
-
-        fclose($handle);
-        $this->csvFile = null;
-
-        AuditLog::record(
-            action: 'imported',
-            module: 'Academic Calendar Event',
-            referenceId: $this->semesterId,
-            description: "CSV import: {$imported} events added, {$skipped} skipped for {$this->academicYear} {$semester->semester} semester."
-        );
-
-        $this->dispatch('event-saved');
-        $this->dispatch('lw-toast', type: 'success', message: "{$imported} event(s) imported, {$skipped} skipped.");
-    }
+    /*
+    |--------------------------------------------------------------------------
+    | CSV Import — disabled for now
+    |--------------------------------------------------------------------------
+    | Re-enable by uncommenting WithFileUploads trait/use, $csvFile property,
+    | and this method, plus the Import CSV button + modal include in the view.
+    */
+    // public function importCsv(): void
+    // {
+    //     $this->validate(['csvFile' => ['required', 'file', 'mimes:csv,txt', 'max:512']]);
+    //
+    //     $semester = AcademicCalendar::findOrFail($this->semesterId);
+    //     $handle   = fopen($this->csvFile->getRealPath(), 'r');
+    //     $header   = fgetcsv($handle); // skip header row
+    //
+    //     $imported = 0;
+    //     $skipped  = 0;
+    //
+    //     while (($row = fgetcsv($handle)) !== false) {
+    //         if (count($row) < 3) { $skipped++; continue; }
+    //
+    //         [$type, $name, $date] = array_map('trim', $row);
+    //
+    //         $v = Validator::make(
+    //             compact('type', 'name', 'date'),
+    //             [
+    //                 'type' => ['required', Rule::in(AcademicCalendarEvent::TYPES)],
+    //                 'name' => ['required', 'string', 'max:255'],
+    //                 'date' => [
+    //                     'required', 'date',
+    //                     'after_or_equal:' . $semester->start_date,
+    //                     'before_or_equal:' . $semester->end_date,
+    //                     Rule::unique('academic_calendar_events', 'date')
+    //                         ->where('academic_calendar_id', $this->semesterId),
+    //                 ],
+    //             ]
+    //         );
+    //
+    //         if ($v->fails()) { $skipped++; continue; }
+    //
+    //         $semester->events()->create($v->validated());
+    //         $imported++;
+    //     }
+    //
+    //     fclose($handle);
+    //     $this->csvFile = null;
+    //
+    //     AuditLog::record(
+    //         action: 'imported',
+    //         module: 'Academic Calendar Event',
+    //         referenceId: $this->semesterId,
+    //         description: "CSV import: {$imported} events added, {$skipped} skipped for {$this->academicYear} {$semester->semester} semester."
+    //     );
+    //
+    //     $this->dispatch('event-saved');
+    //     $this->dispatch('lw-toast', type: 'success', message: "{$imported} event(s) imported, {$skipped} skipped.");
+    // }
 
     public function deleteEvent(int $eventId): void
     {
-        $event    = AcademicCalendarEvent::findOrFail($eventId);
         $semester = AcademicCalendar::findOrFail($this->semesterId);
+
+        // Use find() instead of findOrFail() — if this event was already
+        // deleted by an earlier in-flight request (rapid double-click,
+        // duplicate dispatch, etc.), just no-op instead of throwing a 404.
+        $event = AcademicCalendarEvent::find($eventId);
+
+        if (! $event) {
+            $this->dispatch('event-deleted');
+            return;
+        }
 
         AuditLog::record(
             action: 'deleted',

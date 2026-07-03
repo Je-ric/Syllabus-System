@@ -4,7 +4,7 @@
     x-data="{
         /* ── modal state ── */
         showForm:   false,
-        showImport: false,
+        {{-- showImport: false, --}}
 
         /* ── form state ── */
         editingId: null,
@@ -15,7 +15,8 @@
         saving:    false,
 
         /* ── calendar state ── */
-        deletingId: null,
+        deletingIds: [],   // array now — supports multiple concurrent deletes safely
+        isDeleting(id) { return this.deletingIds.includes(id); },
 
         /* ── helpers ── */
         get isRange() {
@@ -35,7 +36,6 @@
             return months[+m - 1] + ' ' + +day;
         },
 
-        /* Local-safe date iteration — avoids UTC-shift bug */
         localISO(date) {
             const y = date.getFullYear();
             const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -93,23 +93,24 @@
             if (this.editingId) {
                 await $wire.saveEvent(this.editingId, this.type, this.name, this.dateStart);
             } else {
-                /* Single request for the whole range */
                 await $wire.saveEventRange(this.type, this.name, this.dateStart, this.dateEnd || this.dateStart);
             }
             this.saving = false;
         },
 
         async remove(id) {
-            this.deletingId = id;
+            if (this.isDeleting(id)) return; // guard: already in flight, ignore repeat clicks
+            this.deletingIds.push(id);
             await $wire.deleteEvent(id);
-            this.deletingId = null;
+            this.deletingIds = this.deletingIds.filter(x => x !== id);
         }
     }"
     x-on:event-load-form.window="
         if ($event.detail.id) { openEdit($event.detail); }
         else { openAdd($event.detail.date); }
     "
-    x-on:event-saved.window="closeForm(); showImport = false;">
+    x-on:event-saved.window="closeForm();"
+    x-on:event-deleted.window="">
 
     {{-- ══ CALENDAR VIEW ══════════════════════════════════════════════════════ --}}
 
@@ -129,7 +130,7 @@
         <div class="flex flex-wrap gap-x-4 gap-y-1">
             @foreach(['holiday' => 'Holiday', 'exam' => 'Exam', 'break' => 'Break', 'non_teaching' => 'Non-Teaching', 'other' => 'Other'] as $type => $label)
                 @php $v = $typeVariantMap[$type]; @endphp
-                <span class="inline-flex items-center gap-1.5 text-[12px] {{ $v['text'] }}">
+                <span class="inline-flex items-center gap-1.5 text-xs {{ $v['text'] }}">
                     <span class="w-2 h-2 rounded-full {{ $v['dot'] }}"></span>
                     {{ $label }}
                 </span>
@@ -138,25 +139,30 @@
 
         {{-- Action buttons --}}
         <div class="flex items-center gap-2">
+            {{--
             <button type="button"
                 x-on:click="showImport = true"
                 class="inline-flex items-center gap-1.5 rounded-lg border border-[#e2e8f0] bg-white px-3 py-1.5
-                       text-[12px] font-semibold text-[#475569] hover:bg-[#f8fafc] hover:border-[#cbd5e1]
+                       text-xs font-semibold text-[#475569] hover:bg-[#f8fafc] hover:border-[#cbd5e1]
                        transition-colors">
                 <i class="bx bx-upload text-sm"></i>
                 Import CSV
             </button>
+            --}}
             <button type="button"
                 x-on:click="openAdd()"
-                class="inline-flex items-center gap-1.5 rounded-lg bg-[#16a34a] px-3 py-1.5
-                       text-[12px] font-semibold text-white hover:bg-[#15803d] transition-colors">
+                class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5
+                       text-xs font-semibold text-white transition-colors"
+                style="background: var(--clsu-green);"
+                onmouseover="this.style.background='var(--clsu-cobra)'"
+                onmouseout="this.style.background='var(--clsu-green)'">
                 <i class="bx bx-plus text-sm"></i>
                 Add Event
             </button>
         </div>
     </div>
 
-    {{-- Calendar months --}}
+    {{-- Calendar months — VIEW & DELETE ONLY. Adding is via the "Add Event" button/modal above. --}}
     @php
         $allEvents    = $semester?->events ?? collect();
         $eventsByDate = $allEvents->keyBy(fn($e) => \Carbon\Carbon::parse($e->date)->format('Y-m-d'));
@@ -195,7 +201,7 @@
 
                 <div class="rounded-xl border-t-2 border-green-700 bg-white overflow-hidden shadow-lg">
                     <div class="px-4 py-2.5 bg-green-50 border-b border-[#e2e8f0]">
-                        <p class="text-[13px] font-bold text-[#0f172a]">{{ $month->format('F Y') }}</p>
+                        <p class="text-sm font-bold text-[#0f172a]">{{ $month->format('F Y') }}</p>
                     </div>
 
                     <div class="grid grid-cols-7 border-b border-[#e2e8f0]">
@@ -226,23 +232,26 @@
                                 elseif ($pos === 'middle')  $barStyle .= 'left:-1px;right:-1px;border-radius:0;';
                             @endphp
 
+                            {{--
+                                VIEW / DELETE ONLY:
+                                - If a day has an event, clicking it opens the read-only/edit-in-modal view (still allowed to view details).
+                                - Empty days are NOT clickable anymore — no more click-to-add-on-empty-day.
+                                  Adding only happens via the "Add Event" button at the top, which opens the modal.
+                            --}}
                             <div
                                 @if($event)
                                     x-on:click="openEdit({{ json_encode(['id' => $event->id, 'type' => $event->type, 'name' => $event->name, 'date' => $event->date]) }})"
-                                    title="{{ $event->name }} ({{ ucfirst(str_replace('_',' ',$event->type)) }}) — click to edit"
-                                @elseif($inSem)
-                                    x-on:click="openAdd('{{ $dateKey }}')"
-                                    title="Add event on {{ $date->format('M j, Y') }}"
+                                    title="{{ $event->name }} ({{ ucfirst(str_replace('_',' ',$event->type)) }}) — click to view"
                                 @endif
+                                wire:key="cal-cell-{{ $dateKey }}"
                                 class="group relative min-h-12 p-1 border-r border-b border-[#f1f5f9] transition-colors
                                     {{ !$inSem ? 'bg-[#f8fafc] opacity-40' : '' }}
-                                    {{ $event
-                                        ? $variant['bg'] . ' cursor-pointer hover:brightness-95'
-                                        : ($inSem ? 'hover:bg-[#f0fdf4] cursor-pointer' : '') }}">
+                                    {{ $event ? $variant['bg'] . ' cursor-pointer hover:brightness-95' : '' }}">
 
-                                <span class="text-[11px] font-semibold leading-none
-                                    {{ $isToday ? 'inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#16a34a] text-white' : '' }}
-                                    {{ $event ? $variant['text'] : ($inSem ? 'text-[#0f172a]' : 'text-[#94a3b8]') }}">
+                                <span class="text-xs font-semibold leading-none
+                                    {{ $isToday ? 'inline-flex items-center justify-center w-5 h-5 rounded-full text-white' : '' }}
+                                    {{ $event ? $variant['text'] : ($inSem ? 'text-[#0f172a]' : 'text-[#94a3b8]') }}"
+                                    @if($isToday) style="background: var(--clsu-green);" @endif>
                                     {{ $d }}
                                 </span>
 
@@ -258,7 +267,7 @@
                                     <button
                                         type="button"
                                         x-on:click.stop="remove({{ $event->id }})"
-                                        x-bind:disabled="deletingId === {{ $event->id }}"
+                                        x-bind:disabled="isDeleting({{ $event->id }})"
                                         title="Delete {{ $event->name }}"
                                         class="absolute bottom-1 right-1
                                                hidden group-hover:inline-flex items-center justify-center
@@ -266,10 +275,10 @@
                                                border border-white hover:border-rose-200
                                                text-[#94a3b8] hover:text-rose-500
                                                transition-colors disabled:opacity-50 disabled:cursor-wait">
-                                        <span x-show="deletingId !== {{ $event->id }}">
+                                        <span x-show="!isDeleting({{ $event->id }})">
                                             <i class="bx bx-trash text-[10px] leading-none"></i>
                                         </span>
-                                        <span x-show="deletingId === {{ $event->id }}" x-cloak>
+                                        <span x-show="isDeleting({{ $event->id }})" x-cloak>
                                             <svg class="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none">
                                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
@@ -291,7 +300,8 @@
     @else
         <x-empty-state icon="bx-calendar" title="No semester data" message="" />
     @endif
+
     @include('livewire.academic-calendar.partials.event-modal')
-    @include('livewire.academic-calendar.partials.import-modal')
+    {{-- @include('livewire.academic-calendar.partials.import-modal') --}}
 
 </div>
