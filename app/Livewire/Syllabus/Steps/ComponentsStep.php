@@ -140,6 +140,10 @@ class ComponentsStep extends Component
      */
     public function pushConsultationHours(array $rows): void
     {
+        if ($this->hasScheduleConflict($this->lec_schedules, $rows)) {
+            $this->dispatch('lw-toast', type: 'error', message: 'Consultation hours conflict with LEC class schedule — not saved.');
+            return;
+        }
         $this->userConsultationHours = $rows;
         $this->saveConsultationHours($rows);
     }
@@ -177,6 +181,10 @@ class ComponentsStep extends Component
 
     public function pushLabConsultationHours(array $rows): void
     {
+        if ($this->hasScheduleConflict($this->lab_schedules, $rows)) {
+            $this->dispatch('lw-toast', type: 'error', message: 'Consultation hours conflict with LAB class schedule — not saved.');
+            return;
+        }
         $this->labConsultationHours = $rows;
         if (! empty($this->lab_instructor_email)) {
             $this->saveLabConsultationHours($rows);
@@ -396,5 +404,41 @@ class ComponentsStep extends Component
     {
         $s = trim((string) ($v ?? ''));
         return is_numeric($s) ? number_format((float) $s, 2, '.', '') : $fallback;
+    }
+
+    // ── Conflict helpers ─────────────────────────────────────────────────────
+
+    private function hasScheduleConflict(array $schedules, array $hours): bool
+    {
+        foreach ($hours as $h) {
+            $hDay = trim($h['day'] ?? '');
+            $hRange = $this->parseTimeRange($h['time'] ?? '');
+            if (!$hRange) continue;
+
+            foreach ($schedules as $s) {
+                if (trim($s['day'] ?? '') !== $hDay) continue;
+                $sRange = $this->parseTimeRange($s['time'] ?? '');
+                if (!$sRange) continue;
+
+                if ($hRange[0] < $sRange[1] && $sRange[0] < $hRange[1]) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private function parseTimeRange(string $time): ?array
+    {
+        $parts = array_map('trim', explode('-', $time));
+        if (count($parts) !== 2) return null;
+        try {
+            return [
+                \Carbon\Carbon::parse($parts[0])->format('H:i'),
+                \Carbon\Carbon::parse($parts[1])->format('H:i'),
+            ];
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 }

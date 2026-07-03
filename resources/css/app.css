@@ -121,6 +121,8 @@ details summary::-webkit-details-marker {
     scrollbar-width: none; /* Firefox */
 }
 
+[x-cloak] { display: none !important; }
+
 .no-scrollbar::-webkit-scrollbar {
     display: none; /* Chrome, Safari */
 }

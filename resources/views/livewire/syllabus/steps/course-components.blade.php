@@ -85,12 +85,32 @@
                 addSchedule() { this.schedules.push({ day: 'Monday', startTime: '', endTime: '' }); },
                 removeSchedule(i) { this.schedules.splice(i, 1); },
 
+                timesOverlap(aStart, aEnd, bStart, bEnd) {
+                    if (!aStart || !aEnd || !bStart || !bEnd) return false;
+                    return aStart < bEnd && bStart < aEnd;
+                },
+                hasConflict(hourRow) {
+                    return this.schedules.some(s =>
+                        s.day === hourRow.day &&
+                        this.timesOverlap(hourRow.startTime, hourRow.endTime, s.startTime, s.endTime)
+                    );
+                },
+                hasAnyConflicts() {
+                    return this.hours.some(h => this.hasConflict(h));
+                },
+
                 async pushToWire() {
+                    if (this.hasAnyConflicts()) {
+                        window.dispatchEvent(new CustomEvent('lw-toast', {
+                            detail: { type: 'error', message: 'Fix overlapping consultation hours (LEC) before saving.' }
+                        }));
+                        return; // don't push — Save All / Next will still proceed for other sections, but this one's data stays unsaved server-side
+                    }
                     await $wire.pushLecSchedules(this.schedules.map(s => ({ day: s.day, time: formatTime(s.startTime, s.endTime) })));
                     await $wire.pushConsultationHours(this.hours.map(h => ({ day: h.day, time: formatTime(h.startTime, h.endTime) })));
                 },
             }" x-on:lec-schedules-updated.window="schedules = $event.detail.schedules"
-                x-on:before-save-all.window="await pushToWire()">
+                x-on:before-save-all.window="window._beforeSaveAllPromises.push(pushToWire())">
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
@@ -109,9 +129,9 @@
                             <template x-for="(row, i) in schedules" :key="i">
                                 <div class="flex items-center gap-2">
                                     <x-form.select x-model="row.day">
-                                        <template x-for="d in days" :key="d">
-                                            <option :value="d" x-text="d"></option>
-                                        </template>
+                                        @foreach(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'] as $d)
+                                            <option value="{{ $d }}">{{ $d }}</option>
+                                        @endforeach
                                     </x-form.select>
                                     <input type="time" x-model="row.startTime"
                                         class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
@@ -145,23 +165,28 @@
                         </div>
                         <div class="space-y-2">
                             <template x-for="(row, i) in hours" :key="i">
-                                <div class="flex items-center gap-2">
-                                    <x-form.select x-model="row.day">
-                                        <template x-for="d in days" :key="d">
-                                            <option :value="d" x-text="d"></option>
-                                        </template>
-                                    </x-form.select>
-                                    <input type="time" x-model="row.startTime"
-                                        class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
-                                               focus:border-amber-400 focus:outline-none focus:bg-white" />
-                                    <span class="text-xs text-slate-400 shrink-0">to</span>
-                                    <input type="time" x-model="row.endTime"
-                                        class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
-                                               focus:border-amber-400 focus:outline-none focus:bg-white" />
-                                    <button type="button" x-on:click="hours.splice(i, 1)"
-                                        class="p-1.5 text-[#94a3b8] hover:text-rose-500 hover:bg-rose-50 rounded-md transition">
-                                        <i class="bx bx-trash text-sm"></i>
-                                    </button>
+                                <div>
+                                    <div class="flex items-center gap-2" :class="hasConflict(row) ? 'ring-1 ring-rose-300 rounded-lg p-1' : ''">
+                                        <x-form.select x-model="row.day">
+                                            @foreach(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'] as $d)
+                                                <option value="{{ $d }}">{{ $d }}</option>
+                                            @endforeach
+                                        </x-form.select>
+                                        <input type="time" x-model="row.startTime"
+                                            class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
+                                                   focus:border-amber-400 focus:outline-none focus:bg-white" />
+                                        <span class="text-xs text-slate-400 shrink-0">to</span>
+                                        <input type="time" x-model="row.endTime"
+                                            class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
+                                                   focus:border-amber-400 focus:outline-none focus:bg-white" />
+                                        <button type="button" x-on:click="hours.splice(i, 1)"
+                                            class="p-1.5 text-[#94a3b8] hover:text-rose-500 hover:bg-rose-50 rounded-md transition">
+                                            <i class="bx bx-trash text-sm"></i>
+                                        </button>
+                                    </div>
+                                    <p x-show="hasConflict(row)" x-cloak class="text-xs text-rose-500 mt-1 ml-1 flex items-center gap-1">
+                                        <i class="bx bx-error-circle"></i> Overlaps with a class schedule on <span x-text="row.day"></span>.
+                                    </p>
                                 </div>
                             </template>
                             <template x-if="hours.length === 0">
@@ -187,7 +212,7 @@
                 @js($lab_schedules ?? []),
                 @js($labConsultationHours ?? []))"
                 x-on:lab-instructor-selected.window="onInstructorSelected($event.detail)"
-                x-on:before-save-all.window="await pushToWire()">
+                x-on:before-save-all.window="window._beforeSaveAllPromises.push(pushToWire())">
                 <div class="space-y-5">
 
                     {{-- ── Instructor Selector ──────────────────────────────── --}}
@@ -211,7 +236,7 @@
                     </div>
 
                     {{-- ── Blocker ──────────────────────────────────────────── --}}
-                    <div x-show="!hasInstructor"
+                    <div x-show="!hasInstructor" x-cloak
                         class="flex flex-col items-center justify-center py-12 text-center rounded-xl border border-dashed border-amber-200 bg-amber-50/50">
                         <div class="w-14 h-14 rounded-2xl bg-amber-100 flex items-center justify-center mb-4">
                             <i class="bx bx-user-circle text-2xl text-amber-500"></i>
@@ -295,9 +320,9 @@
                                     <template x-for="(row, i) in schedules" :key="i">
                                         <div class="flex items-center gap-2">
                                             <x-form.select x-model="row.day">
-                                                <template x-for="d in days" :key="d">
-                                                    <option :value="d" x-text="d"></option>
-                                                </template>
+                                                @foreach(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'] as $d)
+                                                    <option value="{{ $d }}">{{ $d }}</option>
+                                                @endforeach
                                             </x-form.select>
                                             <input type="time" x-model="row.startTime"
                                                 class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
@@ -330,23 +355,28 @@
                                 </div>
                                 <div class="space-y-2">
                                     <template x-for="(row, i) in hours" :key="i">
-                                        <div class="flex items-center gap-2">
-                                            <x-form.select x-model="row.day">
-                                                <template x-for="d in days" :key="d">
-                                                    <option :value="d" x-text="d"></option>
-                                                </template>
-                                            </x-form.select>
-                                            <input type="time" x-model="row.startTime"
-                                                class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
-                                                       focus:border-amber-400 focus:outline-none focus:bg-white" />
-                                            <span class="text-xs text-slate-400 shrink-0">to</span>
-                                            <input type="time" x-model="row.endTime"
-                                                class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
-                                                       focus:border-amber-400 focus:outline-none focus:bg-white" />
-                                            <button type="button" x-on:click="hours.splice(i, 1)"
-                                                class="p-1.5 text-[#94a3b8] hover:text-rose-500 hover:bg-rose-50 rounded-md transition">
-                                                <i class="bx bx-trash text-sm"></i>
-                                            </button>
+                                        <div>
+                                            <div class="flex items-center gap-2" :class="hasConflict(row) ? 'ring-1 ring-rose-300 rounded-lg p-1' : ''">
+                                                <x-form.select x-model="row.day">
+                                                    @foreach(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'] as $d)
+                                                        <option value="{{ $d }}">{{ $d }}</option>
+                                                    @endforeach
+                                                </x-form.select>
+                                                <input type="time" x-model="row.startTime"
+                                                    class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
+                                                           focus:border-amber-400 focus:outline-none focus:bg-white" />
+                                                <span class="text-xs text-slate-400 shrink-0">to</span>
+                                                <input type="time" x-model="row.endTime"
+                                                    class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
+                                                           focus:border-amber-400 focus:outline-none focus:bg-white" />
+                                                <button type="button" x-on:click="hours.splice(i, 1)"
+                                                    class="p-1.5 text-[#94a3b8] hover:text-rose-500 hover:bg-rose-50 rounded-md transition">
+                                                    <i class="bx bx-trash text-sm"></i>
+                                                </button>
+                                            </div>
+                                            <p x-show="hasConflict(row)" x-cloak class="text-xs text-rose-500 mt-1 ml-1 flex items-center gap-1">
+                                                <i class="bx bx-error-circle"></i> Overlaps with a class schedule on <span x-text="row.day"></span>.
+                                            </p>
                                         </div>
                                     </template>
                                     <template x-if="hours.length === 0">
@@ -437,7 +467,27 @@
                     this.hours = (d?.consultationHours || []).map(h => ({ day: h.day, ...parseTime(h.time) }));
                 },
 
+                timesOverlap(aStart, aEnd, bStart, bEnd) {
+                    if (!aStart || !aEnd || !bStart || !bEnd) return false;
+                    return aStart < bEnd && bStart < aEnd;
+                },
+                hasConflict(hourRow) {
+                    return this.schedules.some(s =>
+                        s.day === hourRow.day &&
+                        this.timesOverlap(hourRow.startTime, hourRow.endTime, s.startTime, s.endTime)
+                    );
+                },
+                hasAnyConflicts() {
+                    return this.hours.some(h => this.hasConflict(h));
+                },
+
                 async pushToWire() {
+                    if (this.hasAnyConflicts()) {
+                        window.dispatchEvent(new CustomEvent('lw-toast', {
+                            detail: { type: 'error', message: 'Fix overlapping consultation hours (LAB) before saving.' }
+                        }));
+                        return;
+                    }
                     await this.$wire.pushLabSchedules(
                         this.schedules.map(s => ({ day: s.day, time: formatTime(s.startTime, s.endTime) }))
                     );

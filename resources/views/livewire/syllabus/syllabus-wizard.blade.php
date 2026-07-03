@@ -4,7 +4,9 @@
     $currentIndex = array_search($currentStep, $stepsOrder, true);
 @endphp
 
-<div>
+<div x-data="{ _navigating: false }"
+    x-on:syllabus-step-changed.window="_navigating = false"
+    x-on:lw-toast.window="if ($event.detail?.type === 'error') _navigating = false">
     <x-page-header icon="bx-book-open" title="{{ $syllabus->id ? 'Edit' : 'Create' }} Syllabus"
         desc="{{ $course->course_code }} — {{ $course->course_title }}">
         <x-button variant="cancel" href="{{ route('syllabus.index') }}">
@@ -15,8 +17,8 @@
 
     <x-panel>
         {{-- ══ Navigation overlay ══════════════════════════════════════════════════ --}}
-        <div wire:loading.class.remove="hidden" wire:target="goNextStep,goPreviousStep,clickTab"
-            class="hidden fixed inset-0 z-50 flex items-center justify-center">
+        <div x-show="_navigating" x-cloak
+            class="fixed inset-0 z-50 flex items-center justify-center">
             <div class="absolute inset-0" style="background: rgba(49,49,49,0.45); backdrop-filter: blur(4px);"></div>
 
             <div class="relative w-5/12 h-5/12 flex flex-col items-center gap-4 px-10 py-8 rounded-xl shadow-2xl border"
@@ -144,6 +146,7 @@
                             <button type="button" wire:click="clickTab('{{ $step }}')"
                                 wire:loading.attr="disabled"
                                 wire:target="clickTab,goPreviousStep,goNextStep,submitForReview,saveAsDone"
+                                x-on:click="_navigating = true"
                                 class="relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors focus:outline-none disabled:opacity-50
                                        {{ $isCurrent ? 'bg-[#f0fdf4] text-[#15803d] ring-1 ring-[#bbf7d0]' : 'text-slate-500 hover:bg-slate-50' }}">
                                 <span
@@ -260,7 +263,8 @@
                     <div>
                         @if ($this->hasPreviousStep())
                             <x-button variant="cancel" wire:click="goPreviousStep" wire:loading.attr="disabled"
-                                wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview,saveAsDone">
+                                wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview,saveAsDone"
+                                x-on:click="_navigating = true">
                                 <i class="bx bx-chevron-left"></i>
                                 <span class="hidden sm:inline">Previous</span>
                             </x-button>
@@ -270,7 +274,7 @@
                         @if ($this->hasNextStep())
                             <x-button variant="primary" wire:click="goNextStep" wire:loading.attr="disabled"
                                 wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview,saveAsDone"
-                                loading="Saving…">
+                                loading="Saving…" x-on:click="_navigating = true">
                                 <span class="hidden sm:inline">Next</span> <i class="bx bx-chevron-right"></i>
                             </x-button>
                         @endif
@@ -323,6 +327,7 @@
                             <button type="button" wire:click="clickTab('{{ $step }}')"
                                 wire:loading.attr="disabled"
                                 wire:target="clickTab,goPreviousStep,goNextStep,submitForReview,saveAsDone"
+                                x-on:click="_navigating = true"
                                 class="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-all duration-150
                                        focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed
                                        {{ $isCurrent
