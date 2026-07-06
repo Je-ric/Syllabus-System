@@ -55,6 +55,24 @@
                 </div>
             </div>
 
+            {{-- Class Hours --}}
+            <div class="flex flex-wrap gap-3">
+                @if ($course->lec_class_hours)
+                    <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200/60">
+                        <i class="bx bx-time text-emerald-500 text-sm"></i>
+                        <span class="text-xs font-semibold text-emerald-600">LEC</span>
+                        <span class="text-xs font-bold text-slate-700">{{ $course->lec_class_hours }}</span>
+                    </div>
+                @endif
+                @if ($course->has_lec_lab && $course->lab_class_hours)
+                    <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-50 border border-blue-200/60">
+                        <i class="bx bx-time text-blue-500 text-sm"></i>
+                        <span class="text-xs font-semibold text-blue-600">LAB</span>
+                        <span class="text-xs font-bold text-slate-700">{{ $course->lab_class_hours }}</span>
+                    </div>
+                @endif
+            </div>
+
             {{-- Meta (pre/co-req, created by) --}}
             @if ($course->prerequisite || $course->corequisite || $course->creator)
                 <div class="flex flex-wrap gap-3 text-sm">

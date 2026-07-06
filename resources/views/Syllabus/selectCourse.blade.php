@@ -57,6 +57,7 @@
                                         <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569]">Course</th>
                                         <th class="px-4 py-3 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] w-16">Units</th>
                                         <th class="px-4 py-3 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] w-24">Type</th>
+                                        <th class="px-4 py-3 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] w-32">Class Hours</th>
                                         <th class="px-4 py-3 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569]">Action</th>
                                     </tr>
                                 </thead>
@@ -89,6 +90,21 @@
                                                 @else
                                                     <x-feedback-status.status-indicator variant="brand" :dot="true">LEC</x-feedback-status.status-indicator>
                                                 @endif
+                                            </td>
+
+                                            {{-- Class Hours --}}
+                                            <td class="px-4 py-3 text-center">
+                                                <div class="flex flex-col items-center gap-0.5 text-[12px]">
+                                                    @if ($course->lec_class_hours)
+                                                        <span class="text-emerald-700 font-medium">LEC: {{ $course->lec_class_hours }}</span>
+                                                    @endif
+                                                    @if ($course->has_lec_lab && $course->lab_class_hours)
+                                                        <span class="text-blue-700 font-medium">LAB: {{ $course->lab_class_hours }}</span>
+                                                    @endif
+                                                    @if (!$course->lec_class_hours && !$course->lab_class_hours)
+                                                        <span class="text-slate-300">—</span>
+                                                    @endif
+                                                </div>
                                             </td>
 
                                             {{-- Action --}}

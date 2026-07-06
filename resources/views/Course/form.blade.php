@@ -146,7 +146,9 @@
                 </div>
         
                 {{-- Passing Mark + Class Hours --}}
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div x-data="{ hasLab: '{{ old('has_lec_lab', isset($course) ? ($course->has_lec_lab ? '1' : '0') : '0') }}' === '1' }"
+                     x-on:change.capture="$nextTick(() => { const el = document.querySelector('[name=has_lec_lab]:checked'); hasLab = el?.value === '1'; })"
+                     class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div class="space-y-1.5">
                         <x-form.label for="passing_mark" variant="title">Passing Mark</x-form.label>
                         <x-form.select id="passing_mark" name="passing_mark">
@@ -163,7 +165,7 @@
                             @endforeach
                         </x-form.select>
                     </div>
-                    <div class="space-y-1.5" x-data x-show="document.querySelector('[name=has_lec_lab]:checked')?.value === '1'">
+                    <div class="space-y-1.5" x-show="hasLab" x-cloak>
                         <x-form.label for="lab_class_hours" variant="title">LAB Class Hours</x-form.label>
                         <x-form.select id="lab_class_hours" name="lab_class_hours">
                             @foreach(['1 hr','1 hr and 30 min','2 hr','2 hr and 30 min','3 hr'] as $h)
