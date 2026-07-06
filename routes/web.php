@@ -4,7 +4,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AccountApprovalController;
-use App\Http\Controllers\OTPController;
 use App\Http\Controllers\AcademicStructureController;
 use App\Http\Controllers\GoalController;
 use App\Http\Controllers\ObjectiveController;
@@ -30,15 +29,6 @@ Route::get('/auth', [AuthController::class, 'show'])->name('auth.show');
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
-// OTP routes
-Route::get('/show-otp', [OTPController::class, 'showOTP'])->name('otp.show');
-Route::post('/verify-otp', [OTPController::class, 'verifyOTP'])->name('otp.verify');
-Route::get('/resend-otp', function () {
-    return view('Authentication.resendOTP');
-})->name('otp.resend');
-Route::post('/resend-otp', [OTPController::class, 'resendOtpByEmail'])->name('otp.resend.email');
-
 
 Route::get('/waiting-approval', function () {
     return view('Authentication.waiting-approval');

@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Mail;
 
 class OtpService
 {
-    public const PURPOSE_EMAIL_VERIFICATION = 'email_verification';
     public const PURPOSE_PASSWORD_CHANGE = 'password_change';
 
     private const DEFAULT_EXPIRY_MINUTES = 10;
@@ -72,26 +71,4 @@ class OtpService
             ->delete();
     }
 
-    public function migrateLegacyOtp(User $user, string $purpose): void
-    {
-        if (!$user->otp) {
-            return;
-        }
-
-        UserOtp::firstOrCreate(
-            [
-                'user_id' => $user->id,
-                'purpose' => $purpose,
-            ],
-            [
-                'otp' => $user->otp,
-                'otp_expires_at' => $user->otp_expires_at,
-            ]
-        );
-
-        $user->forceFill([
-            'otp' => null,
-            'otp_expires_at' => null,
-        ])->save();
-    }
 }

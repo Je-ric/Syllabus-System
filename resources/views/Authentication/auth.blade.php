@@ -58,18 +58,12 @@
                     </button>
                 </form>
 
-                <div class="mt-5 space-y-2 text-sm text-slate-500">
+                <div class="mt-5 text-sm text-slate-500">
                     <p>
                         Don't have an account?
                         <button type="button" class="text-emerald-700 font-semibold hover:underline" @click="mode = 'register'">
                             Create one
                         </button>
-                    </p>
-                    <p>
-                        Need to verify your email?
-                        <a href="{{ route('otp.resend') }}" class="text-emerald-700 font-semibold hover:underline">
-                            Resend OTP
-                        </a>
                     </p>
                 </div>
             </div>
@@ -180,9 +174,8 @@
                 <div class="space-y-3 mb-6">
                     @foreach ([
                         ['bx-user-plus',   '1', 'Register',        'Sign up with your CLSU email.'],
-                        ['bx-envelope',    '2', 'Verify Email',     'Enter the 6-digit OTP sent to your inbox.'],
-                        ['bx-time',        '3', 'Await Approval',   'An admin activates your account.'],
-                        ['bx-check-shield','4', 'Access Granted',   'Log in and start managing syllabi.'],
+                        ['bx-time',        '2', 'Await Approval',   'An admin reviews and activates your account.'],
+                        ['bx-check-shield','3', 'Access Granted',   'Log in and start managing syllabi.'],
                     ] as [$icon, $num, $title, $desc])
                     <div class="flex items-start gap-3">
                         <span class="flex items-center justify-center w-7 h-7 rounded-full bg-white/20 text-xs font-bold shrink-0 mt-0.5">{{ $num }}</span>

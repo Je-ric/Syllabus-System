@@ -17,6 +17,7 @@ class AccountApprovalService
         return DB::transaction(function () use ($userId) {
             $user = User::findOrFail($userId);
             $user->account_status = 'active';
+            $user->email_verified_at ??= now();
             $user->save();
 
             $facultyRole = Role::where('name', '=', 'faculty')->first();

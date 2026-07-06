@@ -15,11 +15,11 @@
                 {{-- Icon --}}
                 <div class="flex flex-col items-center text-center mb-7">
                     <div class="w-16 h-16 rounded-2xl bg-emerald-100 flex items-center justify-center mb-4">
-                        <i class="bx bx-check-shield text-4xl text-emerald-600"></i>
+                        <i class="bx bx-time-five text-4xl text-emerald-600"></i>
                     </div>
-                    <h1 class="text-xl font-bold text-slate-800">Email Verified!</h1>
+                    <h1 class="text-xl font-bold text-slate-800">Account Submitted</h1>
                     <p class="text-sm text-slate-500 mt-2 leading-relaxed">
-                        Your email address has been successfully confirmed.
+                        Your registration has been received and is awaiting admin review.
                     </p>
                 </div>
 

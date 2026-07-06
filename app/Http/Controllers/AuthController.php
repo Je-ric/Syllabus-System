@@ -4,16 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
 use App\Models\User;
-use App\Services\OtpService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function __construct(private OtpService $otpService)
-    {
-    }
 
     // Show login/register page
     public function show()
@@ -49,6 +45,7 @@ class AuthController extends Controller
             'email'          => $request->email,
             'password'       => Hash::make($request->password),
             'account_status' => 'pending',
+            'email_verified_at' => now(),
             'phone_number'   => $request->phone_number,
             'office'         => $request->office,
         ]);
@@ -61,16 +58,9 @@ class AuthController extends Controller
             userId: $user->id
         );
 
-        $mailSent = $this->otpService->issueForUser($user, OtpService::PURPOSE_EMAIL_VERIFICATION);
-
-        $message = $mailSent
-            ? 'Account created. Please verify your email.'
-            : 'Account created but we could not send the OTP email. Use "Resend OTP" on the next page to try again.';
-
         return redirect()
-            ->route('otp.show')
-            ->with('verify_email', $user->email)
-            ->with('success', $message);
+            ->route('waiting.approval')
+            ->with('success', 'Account created! Please wait for admin approval.');
     }
 
     // Login
@@ -93,18 +83,6 @@ class AuthController extends Controller
                 referenceId: $user->id,
                 description: "User {$user->name} ({$user->email}) logged in."
             );
-
-            if (!$user->email_verified_at) {
-                Auth::logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
-                return redirect()->route('auth.show')
-                    ->with('toast', [
-                        'message' => 'Please verify your email first. Use "Resend OTP" to get a new code.',
-                        'type' => 'warning',
-                    ])
-                    ->withInput($request->only('email'));
-            }
 
             switch ($user->account_status) {
                 case 'active':

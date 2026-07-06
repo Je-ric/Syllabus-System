@@ -141,8 +141,6 @@ class UserController extends Controller
                 ]);
         }
 
-        $this->otpService->migrateLegacyOtp($user, OtpService::PURPOSE_PASSWORD_CHANGE);
-
         $validated = $request->validate([
             'otp' => ['required', 'digits:6'],
         ]);
