@@ -5,29 +5,29 @@
     'class' => '',
 ])
 
-<div {{ $attributes->merge(['class' => 'w-full bg-white border-b-4 border-green-700 shadow-sm ' . $class]) }}>
+<div {{ $attributes->merge(['class' => 'w-full bg-white border-b border-[#e4e4e7] ' . $class]) }}
+     style="box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
 
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-5">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-4">
 
-        {{-- ── Left: icon + text ── --}}
-        <div class="flex items-center gap-4 min-w-0">
+        {{-- Left: icon + text --}}
+        <div class="flex items-center gap-3.5 min-w-0">
 
             @if ($icon)
                 <span class="shrink-0 flex items-center justify-center
-                            w-11 h-11 rounded-xl
-                            bg-green-100 border border-green-200
-                            shadow-sm">
-                    <i class="bx {{ $icon }} text-xl leading-none text-green-700"></i>
+                            w-10 h-10 rounded-[14px]
+                            bg-[#f0fdf4] border border-[#d1fae5]">
+                    <i class="bx {{ $icon }} text-lg leading-none text-[#16a34a]"></i>
                 </span>
             @endif
 
             <div class="min-w-0">
-                <h1 class="text-lg font-bold text-green-800 leading-tight truncate">
+                <h1 class="text-base font-bold text-[#09090b] leading-tight truncate">
                     {{ $title }}
                 </h1>
 
                 @if ($desc)
-                    <p class="text-sm mt-0.5 leading-relaxed truncate text-green-600">
+                    <p class="text-[13px] mt-0.5 leading-snug truncate text-[#71717a]">
                         {{ $desc }}
                     </p>
                 @endif
@@ -35,7 +35,7 @@
 
         </div>
 
-        {{-- ── Right: actions slot ── --}}
+        {{-- Right: actions slot --}}
         @if ($slot->isNotEmpty())
             <div class="shrink-0 flex items-center gap-2 sm:justify-end">
                 {{ $slot }}
@@ -45,52 +45,3 @@
     </div>
 
 </div>
-
-{{-- @props([
-    'icon'  => null,
-    'title',
-    'desc'  => null,
-    'class' => '',
-])
-
-<div {{ $attributes->merge(['class' => 'w-full ' . $class]) }}
-     style="background: linear-gradient(135deg, #002a0c 0%, #004d16 60%, #006622 100%); border-bottom: 3px solid #ffd700;">
-
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-5">
-
-        ── Left: icon + text ──
-        <div class="flex items-center gap-4 min-w-0">
-
-            @if ($icon)
-                <span class="shrink-0 flex items-center justify-center
-                            w-11 h-11 rounded-xl border border-white/20
-                            shadow-lg"
-                      style="background: rgba(255,255,255,0.12);">
-                    <i class="bx {{ $icon }} text-xl leading-none text-white"></i>
-                </span>
-            @endif
-
-            <div class="min-w-0">
-                <h1 class="text-base font-bold text-white leading-tight truncate">
-                    {{ $title }}
-                </h1>
-                @if ($desc)
-                    <p class="text-sm mt-0.5 leading-relaxed truncate" style="color: rgba(255,255,255,0.65);">
-                        {{ $desc }}
-                    </p>
-                @endif
-            </div>
-
-        </div>
-
-        ── Right: actions slot ──
-        @if ($slot->isNotEmpty())
-            <div class="shrink-0 flex items-center gap-2 sm:justify-end bg-white/95 rounded-lg p-0.5 shadow-inner">
-                {{ $slot }}
-            </div>
-        @endif
-
-    </div>
-
-</div>
- --}}

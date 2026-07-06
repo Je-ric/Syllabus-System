@@ -1,14 +1,15 @@
 {{-- Table container --}}
-<div class="rounded-xl border border-[#e2e8f0] bg-white overflow-hidden"
-     style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
+<div class="rounded-[28px] border border-[#ececee] bg-white overflow-hidden"
+     style="box-shadow: rgba(0, 0, 0, 0.04) 0px 4px 12px 0px;">
 
     {{-- Column header --}}
     <div class="grid grid-cols-[2.5rem_1fr_auto] md:grid-cols-[2.5rem_2fr_1fr_1fr_auto] gap-x-3 items-center
-                px-4 py-2.5 bg-[#f8fafc] border-b border-[#e2e8f0]
-                text-[11px] font-bold uppercase tracking-[0.12em] text-[#94a3b8] select-none">
+                px-5 py-3 bg-[#fafafa] border-b border-[#ececee]
+                text-[11px] font-bold uppercase tracking-[0.14em] text-[#a1a1aa] select-none">
         <div class="flex items-center justify-center" @click.stop>
             <input type="checkbox" x-model="selectAll"
-                class="w-4 h-4 rounded border-[#e2e8f0] text-[#16a34a] focus:ring-[#bbf7d0] cursor-pointer">
+                class="w-4 h-4 rounded-[6px] border-[#ececee]"
+                style="accent-color: var(--clsu-green);">
         </div>
         <div>User</div>
         <div class="hidden md:block">Status</div>
@@ -17,16 +18,16 @@
     </div>
 
     {{-- Rows --}}
-    <div class="divide-y divide-[#f1f5f9] empty:py-12">
+    <div class="divide-y divide-[#f4f4f5] empty:py-12">
 
     @forelse($users as $user)
     @php
         $avatarCls = match($user->account_status) {
-            'active'   => 'bg-[#dcfce7] text-[#166534]',
+            'active'   => 'bg-[color-mix(in_srgb,var(--clsu-green)_14%,white)] text-[color:var(--clsu-cobra,var(--clsu-green))]',
             'pending'  => 'bg-[#fef3c7] text-[#92400e]',
             'rejected' => 'bg-[#ffe4e6] text-[#9f1239]',
-            'disabled' => 'bg-[#f1f5f9] text-[#475569]',
-            default    => 'bg-[#f1f5f9] text-[#475569]',
+            'disabled' => 'bg-[#f4f4f5] text-[#71717a]',
+            default    => 'bg-[#f4f4f5] text-[#71717a]',
         };
         $uid = (string) $user->id;
     @endphp
@@ -34,9 +35,9 @@
         <div x-data="{ open: false }"
             @click="open = !open"
             class="cursor-pointer transition-colors select-none"
-            :class="open ? 'bg-[#f0fdf4]' : 'bg-white hover:bg-[#fafafa]'">
+            :class="open ? 'bg-[color-mix(in_srgb,var(--clsu-green)_6%,white)]' : 'bg-white hover:bg-[#fafafa]'">
 
-            <div class="grid grid-cols-[2.5rem_1fr_auto] md:grid-cols-[2.5rem_2fr_1fr_1fr_auto] gap-x-3 items-center px-4 py-3">
+            <div class="grid grid-cols-[2.5rem_1fr_auto] md:grid-cols-[2.5rem_2fr_1fr_1fr_auto] gap-x-3 items-center px-5 py-3.5">
 
                 {{-- Checkbox --}}
                 <div class="flex items-center justify-center" @click.stop>
@@ -46,18 +47,19 @@
                         :disabled="!canSelect('{{ $uid }}') && !isSelected('{{ $uid }}')"
                         :title="!canSelect('{{ $uid }}') && !isSelected('{{ $uid }}') ? 'Only same-status users can be bulk-selected' : ''"
                         :class="(!canSelect('{{ $uid }}') && !isSelected('{{ $uid }}')) ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'"
-                        class="w-4 h-4 rounded border-[#e2e8f0] text-[#16a34a] focus:ring-[#bbf7d0]">
+                        class="w-4 h-4 rounded-[6px] border-[#ececee]"
+                        style="accent-color: var(--clsu-green);">
                 </div>
 
                 {{-- Avatar + name --}}
                 <div class="flex items-center gap-3 min-w-0">
-                    <span class="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full border font-bold text-[13px] {{ $avatarCls }}">
+                    <span class="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full border border-[#ececee] font-bold text-[13px] {{ $avatarCls }}">
                         {{ strtoupper(substr($user->name, 0, 1)) }}
                     </span>
                     <div class="min-w-0">
-                        <p class="text-[13px] font-semibold text-[#0f172a] truncate">{{ $user->name }}</p>
+                        <p class="text-[13px] font-semibold text-[#09090b] truncate">{{ $user->name }}</p>
                         <div class="flex items-center gap-1.5 flex-wrap">
-                            <p class="text-[12px] text-[#94a3b8] truncate">{{ $user->email }}</p>
+                            <p class="text-[12px] text-[#a1a1aa] truncate">{{ $user->email }}</p>
                             @if($user->email_verified_at)
                                 <x-feedback-status.status-indicator variant="emerald" class="text-[10px] px-1.5 py-0.5">
                                     <i class="bx bx-check-circle text-[10px]"></i> Verified
@@ -69,7 +71,7 @@
                             @endif
                         </div>
                     </div>
-                    <i class="bx text-[#94a3b8] text-base shrink-0 ml-2 hidden sm:block transition-transform duration-200"
+                    <i class="bx text-[#a1a1aa] text-base shrink-0 ml-2 hidden sm:block transition-transform duration-200"
                        :class="open ? 'bx-chevron-up' : 'bx-chevron-down'"></i>
                 </div>
 
@@ -83,7 +85,7 @@
                     @forelse($user->roles as $role)
                         <x-feedback-status.status-indicator :status="$role->name" />
                     @empty
-                        <span class="text-[12px] text-[#94a3b8] italic">—</span>
+                        <span class="text-[12px] text-[#a1a1aa] italic">—</span>
                     @endforelse
                 </div>
 
@@ -130,20 +132,20 @@
                 x-transition:enter-end="opacity-100 translate-y-0"
                 x-transition:leave="transition ease-in duration-100"
                 x-transition:leave-end="opacity-0"
-                class="px-4 pb-4 pt-2 border-t border-[#e8f5e9] bg-[#f8fafc]"
+                class="px-5 pb-5 pt-2 border-t border-[#ececee] bg-[#fafafa]"
                 @click.stop>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
 
                     <x-card-section title="Contact" icon="bx-phone">
                         <div class="space-y-2">
                             <div class="flex items-center gap-2">
-                                <i class="bx bx-phone text-[#94a3b8] text-sm shrink-0"></i>
-                                <span class="text-[13px] text-[#0f172a]">{{ $user->phone_number ?: '—' }}</span>
+                                <i class="bx bx-phone text-[#a1a1aa] text-sm shrink-0"></i>
+                                <span class="text-[13px] text-[#09090b]">{{ $user->phone_number ?: '—' }}</span>
                             </div>
                             <div class="flex items-center gap-2">
-                                <i class="bx bx-envelope text-[#94a3b8] text-sm shrink-0"></i>
-                                <span class="text-[13px] text-[#475569] break-all">{{ $user->email }}</span>
+                                <i class="bx bx-envelope text-[#a1a1aa] text-sm shrink-0"></i>
+                                <span class="text-[13px] text-[#52525b] break-all">{{ $user->email }}</span>
                             </div>
                         </div>
                     </x-card-section>
@@ -151,13 +153,13 @@
                     <x-card-section title="Office" icon="bx-buildings">
                         <div class="space-y-2">
                             <div class="flex items-center gap-2">
-                                <i class="bx bx-buildings text-[#94a3b8] text-sm shrink-0"></i>
-                                <span class="text-[13px] text-[#0f172a]">{{ $user->office ?: '—' }}</span>
+                                <i class="bx bx-buildings text-[#a1a1aa] text-sm shrink-0"></i>
+                                <span class="text-[13px] text-[#09090b]">{{ $user->office ?: '—' }}</span>
                             </div>
                             <div class="flex items-center gap-2">
                                 @if($user->email_verified_at)
-                                    <i class="bx bx-check-circle text-[#16a34a] text-sm shrink-0"></i>
-                                    <span class="text-[13px] text-[#16a34a] font-medium">Email verified</span>
+                                    <i class="bx bx-check-circle text-sm shrink-0" style="color: var(--clsu-green);"></i>
+                                    <span class="text-[13px] font-medium" style="color: var(--clsu-cobra, var(--clsu-green));">Email verified</span>
                                 @else
                                     <i class="bx bx-time text-[#f59e0b] text-sm shrink-0"></i>
                                     <span class="text-[13px] text-[#92400e] font-medium">Not verified</span>
@@ -169,12 +171,12 @@
                     <x-card-section title="Account" icon="bx-id-card">
                         <div class="space-y-2">
                             <div class="flex items-center gap-2">
-                                <i class="bx bx-calendar text-[#94a3b8] text-sm shrink-0"></i>
-                                <span class="text-[13px] text-[#475569]">{{ $user->created_at->format('M d, Y') }}</span>
+                                <i class="bx bx-calendar text-[#a1a1aa] text-sm shrink-0"></i>
+                                <span class="text-[13px] text-[#52525b]">{{ $user->created_at->format('M d, Y') }}</span>
                             </div>
                             <div class="flex items-center gap-2">
-                                <i class="bx bx-id-card text-[#94a3b8] text-sm shrink-0"></i>
-                                <span class="text-[13px] text-[#475569]">ID #{{ $user->id }}</span>
+                                <i class="bx bx-id-card text-[#a1a1aa] text-sm shrink-0"></i>
+                                <span class="text-[13px] text-[#52525b]">ID #{{ $user->id }}</span>
                             </div>
                         </div>
                     </x-card-section>
@@ -185,7 +187,7 @@
         </div>
 
     @empty
-        <div class="px-4 py-8">
+        <div class="px-5 py-10">
             <x-empty-state icon="bx-user-x" title="No users found" message="Try adjusting your filters." />
         </div>
     @endforelse
@@ -196,7 +198,7 @@
 {{-- Pagination --}}
 @if($users->hasPages())
     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <p class="text-[13px] text-[#475569]">
+        <p class="text-[13px] text-[#71717a]">
             Showing {{ $users->firstItem() }}–{{ $users->lastItem() }} of {{ $users->total() }}
         </p>
         {{ $users->links() }}

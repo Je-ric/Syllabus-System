@@ -1,45 +1,39 @@
 @props([
-    'title' => null,
-    'icon' => null,
-    'count' => null,
+    'title'    => null,
+    'icon'     => null,
+    'count'    => null,
     'subtitle' => null,
-    'padded' => true,
-    'headerRight' => null,
+    'padded'   => true,
 ])
 
 <div {{ $attributes->merge([
-    'class' => 'rounded-xl border border-green-200 bg-white overflow-hidden shadow-md'
-]) }}>
+    'class' => 'rounded-[16px] border border-[#e4e4e7] bg-white overflow-hidden'
+]) }} style="box-shadow: 0 1px 8px rgba(0,0,0,0.05);">
 
-    <div class="px-5 py-3 border-b border-green-200 bg-[#f8fafc] flex items-center gap-2">
-        <i class="bx {{ $icon }} text-[#16a34a] text-sm"></i>
-        <div class="flex flex-col gap-0.5">
-            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#16a34a]">
+    <div class="px-5 py-3 border-b border-[#e4e4e7] flex items-center gap-2.5">
+        @if($icon)
+            <i class="bx {{ $icon }} text-[#16a34a] text-sm leading-none shrink-0"></i>
+        @endif
+        <div class="flex flex-col gap-0.5 min-w-0">
+            <p class="text-[11px] font-bold uppercase tracking-[0.1em] text-[#52525b] leading-none">
                 {{ $title }}
             </p>
             @if ($subtitle)
-                <p class="text-[11px] text-[#94a3b8]">
-                    {{ $subtitle }}
-                </p>
+                <p class="text-[11px] text-[#a1a1aa] leading-none truncate">{{ $subtitle }}</p>
             @endif
         </div>
 
-        <div class="ml-auto flex items-center gap-3">
-            @if($headerRight)
-                <span class="text-[11px] text-[#64748b]">
-                    {{ $headerRight }}
-                </span>
-            @endif
-
+        <div class="ml-auto flex items-center gap-2.5 shrink-0">
             {{ $actions ?? '' }}
 
             @if ($count !== null)
-                <x-feedback-status.status-indicator variant="brand">
+                <span class="inline-flex items-center justify-center min-w-[1.4rem] h-5 px-1.5
+                             rounded-full bg-[#dcfce7] text-[#166534] text-[10px] font-bold
+                             border border-[#86efac]">
                     {{ $count }}
-                </x-feedback-status.status-indicator>
+                </span>
             @endif
         </div>
-
     </div>
 
     <div class="{{ $padded ? 'p-4' : '' }}">

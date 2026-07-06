@@ -11,7 +11,7 @@
     </x-modal.header>
 
     <x-modal.body>
-        <p class="text-[13px] text-slate-700 leading-relaxed" x-text="viewModal.description"></p>
+        <p class="text-md text-slate-700 leading-relaxed" x-text="viewModal.description"></p>
     </x-modal.body>
 
     <x-modal.footer>

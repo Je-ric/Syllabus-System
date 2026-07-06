@@ -1,41 +1,53 @@
-{{-- outcomes-partials/course-info-drawer.blade.php
-     Requires: $courseInfo array from CourseOutcomesStep::render()
-     Alpine state in parent: courseInfoOpen
---}}
+{{-- outcomes-partials/course-info-drawer.blade.php --}}
 <x-offcanvas title="Course Info" subtitle="Reference while writing outcomes" icon="bx-book" open="courseInfoOpen">
 
-    
-    @if (!empty($courseInfo['program_title']))
-        <div>
-            <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 mb-0.5">Program</p>
-            <p class="text-[13px] text-slate-600">{{ $courseInfo['program_title'] }}</p>
-        </div>
-    @endif
     @if (!empty($courseInfo))
         <div class="space-y-4">
-            <div>
-                <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 mb-0.5">Course Code</p>
-                <p class="text-[13px] font-semibold text-slate-800">{{ $courseInfo['course_code'] ?? '—' }}</p>
+
+            @if (!empty($courseInfo['program_title']))
+                <div>
+                    <x-form.label>Program</x-form.label>
+                    <p class="mt-1 text-[13px] text-[#18181b]">{{ $courseInfo['program_title'] }}</p>
+                </div>
+                <div class="border-t border-[#e4e4e7]"></div>
+            @endif
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <x-form.label>Course Code</x-form.label>
+                    <p class="mt-1 text-[14px] font-bold text-[#09090b]">{{ $courseInfo['course_code'] ?? '—' }}</p>
+                </div>
+                <div>
+                    <x-form.label>Credit Units</x-form.label>
+                    <p class="mt-1 text-[14px] font-bold text-[#09090b]">{{ $courseInfo['credit_units'] ?? '—' }}</p>
+                </div>
             </div>
+
             <div>
-                <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 mb-0.5">Course Title</p>
-                <p class="text-[13px] font-semibold text-slate-800">{{ $courseInfo['course_title'] ?? '—' }}</p>
+                <x-form.label>Course Title</x-form.label>
+                <p class="mt-1 text-[13px] font-semibold text-[#09090b]">{{ $courseInfo['course_title'] ?? '—' }}</p>
             </div>
+
             @if (!empty($courseInfo['description']))
                 <div>
-                    <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 mb-0.5">Description</p>
-                    <p class="text-[13px] text-slate-600 leading-relaxed">{{ $courseInfo['description'] }}</p>
+                    <x-form.label>Description</x-form.label>
+                    <p class="mt-1 text-[13px] text-[#52525b] leading-relaxed">{{ $courseInfo['description'] }}</p>
                 </div>
             @endif
-            <div class="grid grid-cols-2 gap-3">
-                <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
-                    <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 mb-0.5">LEC Hrs</p>
-                    <p class="text-[15px] font-bold text-emerald-700">{{ $courseInfo['lec_units'] ?? '—' }}</p>
+
+            <div class="border-t border-[#e4e4e7]"></div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <x-form.label class="text-[#16a34a]">LEC Hours</x-form.label>
+                    <p class="mt-1 text-[22px] font-bold text-[#15803d]">{{ $courseInfo['lec_class_hours'] ?? '—' }}</p>
                 </div>
-                <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
-                    <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 mb-0.5">LAB Hrs</p>
-                    <p class="text-[15px] font-bold text-blue-700">{{ $courseInfo['lab_units'] ?? '—' }}</p>
-                </div>
+                @if (!empty($courseInfo['has_lec_lab']))
+                    <div>
+                        <x-form.label class="text-[#2563eb]">LAB Hours</x-form.label>
+                        <p class="mt-1 text-[22px] font-bold text-[#1d4ed8]">{{ $courseInfo['lab_class_hours'] ?? '—' }}</p>
+                    </div>
+                @endif
             </div>
 
         </div>

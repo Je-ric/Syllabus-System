@@ -11,11 +11,14 @@
 
 // ── Status token map ─────────────────────────────────────────────────────────
 // Each status resolves to a variant name + optional default icon.
-// This decouples visual tokens from semantic meaning.
+// 'brand' is used for anything that represents the "good / default / active"
+// state so the CLSU green shows up consistently wherever the system is
+// telling the user "this is fine" — rather than a generic Tailwind emerald
+// that happens to look similar but drifts from the brand ramp.
 $statusMap = [
     // State
-    'success'  => ['variant' => 'emerald', 'icon' => 'bx bx-check-circle'],
-    'active'   => ['variant' => 'emerald', 'icon' => 'bx bx-check-shield'],
+    'success'  => ['variant' => 'brand',   'icon' => 'bx bx-check-circle'],
+    'active'   => ['variant' => 'brand',   'icon' => 'bx bx-check-shield'],
     'neutral'  => ['variant' => 'slate',   'icon' => 'bx bx-minus-circle'],
     'disabled' => ['variant' => 'slate',   'icon' => 'bx bx-pause-circle'],
     'info'     => ['variant' => 'blue',    'icon' => 'bx bx-info-circle'],
@@ -27,10 +30,14 @@ $statusMap = [
     'admin'    => ['variant' => 'violet',  'icon' => 'bx bx-crown'],
     'dean'     => ['variant' => 'indigo',  'icon' => 'bx bx-medal'],
     'chair'    => ['variant' => 'blue',    'icon' => 'bx bx-user-pin'],
-    'faculty'  => ['variant' => 'emerald', 'icon' => 'bx bx-user'],
+    'faculty'  => ['variant' => 'brand',   'icon' => 'bx bx-user'],
     // Course types
-    'lec'      => ['variant' => 'emerald', 'icon' => 'bx bx-book'],
-    'lec_lab'  => ['variant' => 'emerald', 'icon' => 'bx bx-flask'],
+    // NOTE: previously 'lec' and 'lec_lab' both resolved to the same variant,
+    // making the two course types indistinguishable at a glance. 'lec_lab'
+    // now uses the existing 'lab' (blue) variant, which was defined but
+    // never actually referenced anywhere.
+    'lec'      => ['variant' => 'brand',   'icon' => 'bx bx-book'],
+    'lec_lab'  => ['variant' => 'lab',     'icon' => 'bx bx-flask'],
 ];
 
 // ── Variant token map ────────────────────────────────────────────────────────
@@ -38,11 +45,14 @@ $statusMap = [
 // dot   = the colored dot fill
 // All rings use ring-inset so they render cleanly inside bordered containers.
 $variantTokens = [
-    'emerald' => [
-        'pill' => 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200',
-        'dot'  => 'bg-emerald-500',
+    // Brand green — sourced from the CLSU CSS variable ramp, with a Tailwind
+    // emerald fallback so the component still renders sensibly if the vars
+    // aren't in scope (e.g. isolated previews).
+    'brand' => [
+        'pill' => 'bg-[var(--clsu-green,#16a34a)]/10 text-[var(--clsu-green,#15803d)] ring-1 ring-inset ring-[var(--clsu-green,#16a34a)]/25',
+        'dot'  => 'bg-[var(--clsu-green,#16a34a)]',
     ],
-    'brand' => [  // alias → emerald
+    'emerald' => [
         'pill' => 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200',
         'dot'  => 'bg-emerald-500',
     ],
@@ -50,7 +60,7 @@ $variantTokens = [
         'pill' => 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200',
         'dot'  => 'bg-blue-500',
     ],
-    'lab' => [   // alias → blue
+    'lab' => [   // alias → blue, used for lab-inclusive course types
         'pill' => 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200',
         'dot'  => 'bg-blue-500',
     ],
@@ -92,7 +102,7 @@ if (filled($status) && isset($statusMap[$status])) {
 }
 
 // ── Pick the token set ───────────────────────────────────────────────────────
-$tokens   = $variantTokens[$resolvedVariant] ?? $fallbackTokens;
+$tokens    = $variantTokens[$resolvedVariant] ?? $fallbackTokens;
 $pillStyle = $tokens['pill'];
 $dotStyle  = $tokens['dot'];
 

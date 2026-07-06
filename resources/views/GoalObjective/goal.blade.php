@@ -19,13 +19,11 @@
 
         <div class="space-y-4">
 
-            {{-- No-assignment notice for dean --}}
             @if ($noAssignment)
                 <x-feedback-status.alert type="warning" title="No college assigned"
                     message="You have the Dean role but are not assigned to any college. Contact an administrator to be assigned." />
             @endif
 
-            {{-- College selector (admin sees all; dean sees only theirs, hidden if single) --}}
             @if ($colleges->count() > 1)
                 <x-card-section title="Select College" icon="bx-buildings" class="max-w-md">
                     <form method="GET" action="{{ route('goal.index') }}">
@@ -53,7 +51,6 @@
                 </x-card-section>
             @endif
 
-            {{-- Goals table --}}
             <x-card-section
                 title="Goals"
                 icon="bx-target-lock"
@@ -68,7 +65,7 @@
                         message="Select a college above to view its goals." />
                 @elseif ($goals->isEmpty())
                     <x-empty-state icon="bx-target-lock" title="No goals yet"
-                        message="No goals have been set for this college. "/>
+                        message="No goals have been set for this college." />
                 @else
                     <x-table.container>
                         <x-table.table>
@@ -76,35 +73,35 @@
                                 <x-table.row>
                                     <x-table.th class="w-20">Code</x-table.th>
                                     <x-table.th>Goal Description</x-table.th>
-                                    <x-table.th align="center" class="w-20">Actions</x-table.th>
+                                    <x-table.th align="center" class="w-24">Actions</x-table.th>
                                 </x-table.row>
                             </x-table.head>
                             <x-table.body>
                                 @foreach ($goals as $goal)
                                     <x-table.row hover>
                                         <x-table.td class="align-top">
-                                            <span class="font-mono text-[13px] font-bold text-[#166534]
-                                                         bg-[#f0fdf4] border border-[#bbf7d0]
-                                                         px-2 py-0.5 rounded-md whitespace-nowrap">
+                                            <span class="inline-flex items-center font-mono text-[12px] font-bold text-[#166534]
+                                                         bg-[#dcfce7] border border-[#86efac]
+                                                         px-2 py-0.5 rounded-[8px] whitespace-nowrap">
                                                 {{ $goal->college_goals_code }}
                                             </span>
                                         </x-table.td>
-                                        <x-table.td class="text-[#475569] leading-relaxed align-top">
+                                        <x-table.td class="text-[#3f3f46] leading-relaxed align-top">
                                             {{ $goal->goal_text }}
                                         </x-table.td>
                                         <x-table.td align="center" class="align-top">
-                                            <div class="inline-flex items-center gap-1">
+                                            <div class="inline-flex items-center gap-0.5">
                                                 <button type="button"
                                                     onclick="document.getElementById('updateGoalModal_{{ $goal->id }}').showModal()"
-                                                    class="p-1.5 rounded-lg text-[#94a3b8] hover:text-[#1e40af] hover:bg-[#eff6ff] transition"
+                                                    class="p-1.5 rounded-[8px] text-[#a1a1aa] hover:text-[#2563eb] hover:bg-[#eff6ff] transition-colors"
                                                     title="Edit goal">
-                                                    <i class="bx bx-edit text-base leading-none"></i>
+                                                    <i class="bx bx-edit text-[15px] leading-none"></i>
                                                 </button>
                                                 <button type="button"
                                                     onclick="document.getElementById('deleteGoalModal_{{ $goal->id }}').showModal()"
-                                                    class="p-1.5 rounded-lg text-[#94a3b8] hover:text-rose-600 hover:bg-rose-50 transition"
+                                                    class="p-1.5 rounded-[8px] text-[#a1a1aa] hover:text-[#e11d48] hover:bg-[#fff1f2] transition-colors"
                                                     title="Delete goal">
-                                                    <i class="bx bx-trash text-base leading-none"></i>
+                                                    <i class="bx bx-trash text-[15px] leading-none"></i>
                                                 </button>
                                             </div>
                                         </x-table.td>

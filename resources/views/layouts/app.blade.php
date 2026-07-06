@@ -4,56 +4,46 @@
     @include('includes.head-assets')
 </head>
 
-<body class="min-h-screen bg-slate-100">
+<body class="min-h-screen bg-[#f4f4f5]">
 
     @php
         $isWizardRoute = request()->routeIs('syllabus.wizard');
         $user = Auth::user();
     @endphp
 
-    {{-- @if (!$isWizardRoute)
-        <x-screen-loader />
-    @endif --}}
-
     @if (session('toast'))
         <x-feedback-status.toast :message="session('toast')['message']" :type="session('toast')['type']" />
     @endif
     <x-feedback-status.toast />
 
-
     {{-- Mobile overlay --}}
     <div id="sidebar-overlay"
-        class="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 hidden lg:hidden
+        class="fixed inset-0 bg-[#09090b]/40 backdrop-blur-sm z-30 hidden lg:hidden
                {{ $isWizardRoute ? 'hidden!' : '' }}">
     </div>
 
-    {{-- ── Sidebar ─────────────────────────────────────────────────── --}}
+    {{-- ── Sidebar ──────────────────────────────────────────────────── --}}
     <aside id="app-sidebar"
         class="fixed inset-y-0 left-0 z-40 w-60 bg-white flex flex-col
-               border-r border-slate-200
+               border-r border-[#e4e4e7]
                transform -translate-x-full lg:translate-x-0
                transition-transform duration-300 ease-out
                {{ $isWizardRoute ? 'hidden lg:hidden' : '' }}">
 
         {{-- Brand header --}}
-        <div class="shrink-0 px-4 pt-5 pb-4 border-b border-slate-100">
+        <div class="shrink-0 px-4 pt-5 pb-4 border-b border-[#f4f4f5]">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
-                    <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
-                        <img
-                            src="{{ asset('assets/CLSU-LOGO-removebg.png') }}"
-                            alt="CLSU Logo"
-                            class="w-11 h-11 object-contain"
-                        >
+                    <div class="w-9 h-9 rounded-[10px] flex items-center justify-center shrink-0 overflow-hidden">
+                        <img src="{{ asset('assets/CLSU-LOGO-removebg.png') }}" alt="CLSU Logo"
+                            class="w-11 h-11 object-contain">
                     </div>
                     <div>
-                        <h1 class="brand-title text-2xl leading-tight text-slate-900 font-bold">
-                            C.S.M.S.
-                        </h1>
+                        <h1 class="brand-title text-2xl leading-tight text-[#09090b] font-bold">C.S.M.S.</h1>
                     </div>
                 </div>
                 <button id="sidebar-close"
-                    class="lg:hidden text-slate-400 hover:text-slate-700 transition p-1.5 rounded-lg hover:bg-slate-100">
+                    class="lg:hidden text-[#a1a1aa] hover:text-[#09090b] transition p-1.5 rounded-[8px] hover:bg-[#f4f4f5]">
                     <i class="bx bx-x text-xl"></i>
                 </button>
             </div>
@@ -62,7 +52,6 @@
         {{-- Nav --}}
         <div class="flex-1 overflow-y-auto no-scrollbar py-3 px-2.5 space-y-5">
             @auth
-                {{-- ── Group 1: Syllabus Work ─────── --}}
                 @if ($user->hasRole('admin') || $user->hasRole('faculty') || $user->hasRole('ovpaa'))
                     <nav>
                         <p class="nav-label">Syllabus</p>
@@ -74,7 +63,6 @@
                     </nav>
                 @endif
 
-                {{-- ── Group 2: Academic Setup ──────── --}}
                 @if ($user->hasRole('admin') || $user->hasRole('chair') || $user->hasRole('dean') || $user->hasRole('ovpaa'))
                     <nav>
                         <p class="nav-label">Academic Setup</p>
@@ -115,7 +103,6 @@
                     </nav>
                 @endif
 
-                {{-- ── Group 3: Administration ──────── --}}
                 @if ($user->hasRole('admin'))
                     <nav>
                         <p class="nav-label">Administration</p>
@@ -155,23 +142,23 @@
 
         {{-- User card + logout --}}
         @auth
-            <div class="shrink-0 border-t border-slate-100 p-3.5">
+            <div class="shrink-0 border-t border-[#f4f4f5] p-3.5">
                 <div class="flex items-center gap-2.5 mb-2.5 px-1">
-                    <div class="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-200
+                    <div class="w-8 h-8 rounded-full bg-[#f0fdf4] border border-[#d1fae5]
                                 flex items-center justify-center shrink-0">
-                        <i class="bx bxs-user text-emerald-600 text-sm"></i>
+                        <i class="bx bxs-user text-[#16a34a] text-sm"></i>
                     </div>
                     <div class="min-w-0">
-                        <p class="text-[12.5px] font-semibold text-slate-800 truncate">{{ $user->name ?? 'User' }}</p>
-                        <p class="text-[10.5px] text-slate-400 capitalize">{{ $user->roles->first()?->name ?? 'Member' }}</p>
+                        <p class="text-[12.5px] font-semibold text-[#09090b] truncate">{{ $user->name ?? 'User' }}</p>
+                        <p class="text-[10.5px] text-[#a1a1aa] capitalize">{{ $user->roles->first()?->name ?? 'Member' }}</p>
                     </div>
                 </div>
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
                     <button type="submit"
-                        class="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg 
-                               bg-red-50 border border-red-100 hover:bg-red-100 hover:border-red-200
-                               text-[11.5px] font-semibold text-red-600
+                        class="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-[8px]
+                               bg-[#fff1f2] border border-[#fecdd3] hover:bg-[#ffe4e6] hover:border-[#fda4af]
+                               text-[11.5px] font-semibold text-[#e11d48]
                                transition-all duration-150">
                         <i class="bx bxs-log-out text-sm"></i>
                         Sign Out
@@ -181,75 +168,72 @@
         @endauth
     </aside>
 
-    {{-- ── Main content column ─────────────────────────────────── --}}
+    {{-- ── Main content column ──────────────────────────────────────── --}}
     <div class="flex flex-col min-h-screen {{ $isWizardRoute ? '' : 'lg:pl-60' }}">
 
         {{-- Navbar --}}
-        <header class="sticky top-0 z-20 bg-white border-b border-slate-200
-                       {{ $isWizardRoute ? 'hidden' : '' }}">
+        <header class="sticky top-0 z-20 bg-white border-b border-[#e4e4e7]
+                       {{ $isWizardRoute ? 'hidden' : '' }}"
+                style="box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
             <div class="px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
 
-                {{-- Left --}}
                 <div class="flex items-center gap-3 min-w-0">
                     <button id="sidebar-open"
                         class="lg:hidden {{ $isWizardRoute ? 'hidden' : 'inline-flex' }}
-                               items-center justify-center h-8 w-8 rounded-lg
-                               text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition shrink-0">
+                               items-center justify-center h-8 w-8 rounded-[8px]
+                               text-[#71717a] hover:text-[#09090b] hover:bg-[#f4f4f5] transition shrink-0">
                         <i class="bx bx-menu text-xl"></i>
                     </button>
-                    <span class="hidden sm:block h-5 w-px bg-slate-200 shrink-0"></span>
+                    <span class="hidden sm:block h-5 w-px bg-[#e4e4e7] shrink-0"></span>
                     <div class="hidden sm:block min-w-0">
-                        <p class="text-[9.5px] uppercase tracking-[0.28em] text-slate-400 leading-none">
+                        <p class="text-[9.5px] uppercase tracking-[0.28em] text-[#a1a1aa] leading-none">
                             Central Luzon State University
                         </p>
-                        <h1 class="brand-title text-[14px] font-bold text-slate-900 leading-tight truncate">
+                        <h1 class="brand-title text-[14px] font-bold text-[#09090b] leading-tight truncate">
                             Course Syllabus Management
                         </h1>
                     </div>
                 </div>
 
-                {{-- Right: profile pill --}}
                 @auth
                     <a href="{{ route('profile.index') }}"
                         class="flex items-center gap-2 shrink-0 rounded-full
-                               bg-slate-50 border border-slate-200 pl-1.5 pr-3 py-1
-                               hover:bg-slate-100 hover:border-slate-300
+                               bg-[#fafafa] border border-[#e4e4e7] pl-1.5 pr-3 py-1
+                               hover:bg-[#f4f4f5] hover:border-[#d4d4d8]
                                transition-all duration-150 group
                                {{ $isWizardRoute ? 'hidden' : '' }}">
-                        <div class="w-7 h-7 rounded-full bg-emerald-50 border border-emerald-200
+                        <div class="w-7 h-7 rounded-full bg-[#f0fdf4] border border-[#d1fae5]
                                     flex items-center justify-center shrink-0">
-                            <i class="bx bxs-user text-emerald-600 text-sm"></i>
+                            <i class="bx bxs-user text-[#16a34a] text-sm"></i>
                         </div>
                         <div class="hidden sm:block text-left leading-tight">
-                            <p class="text-[12.5px] font-semibold text-slate-800 group-hover:text-slate-900 truncate max-w-36">
+                            <p class="text-[12.5px] font-semibold text-[#09090b] group-hover:text-[#18181b] truncate max-w-36">
                                 {{ $user->name ?? 'User' }}
                             </p>
                         </div>
-                        <i class="bx bx-chevron-down text-slate-400 text-sm hidden sm:block group-hover:text-slate-600 transition"></i>
+                        <i class="bx bx-chevron-down text-[#a1a1aa] text-sm hidden sm:block group-hover:text-[#52525b] transition"></i>
                     </a>
                 @endauth
             </div>
         </header>
 
-        <main class="flex-1 w-full bg-slate-100">
+        <main class="flex-1 w-full bg-[#f4f4f5]">
             @yield('content')
         </main>
 
-        {{-- Footer --}}
         @if (!$isWizardRoute)
-            <footer class="border-t border-slate-200 bg-white shrink-0">
+            <footer class="border-t border-[#e4e4e7] bg-white shrink-0">
                 <div class="px-4 sm:px-6 py-3 flex flex-col sm:flex-row items-center justify-between gap-2">
                     <div class="flex items-center gap-2.5">
-                        <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                             style="background: linear-gradient(135deg, #002a0c 0%, #009639 100%);">
+                        <div class="w-7 h-7 rounded-[8px] flex items-center justify-center shrink-0 bg-[#09090b]">
                             <i class="bx bxs-graduation text-[#ffd700] text-sm"></i>
                         </div>
                         <div class="leading-tight">
-                            <span class="text-[12px] font-bold text-slate-800">CLSU</span>
-                            <span class="text-[11px] text-slate-400 ml-1">Course Syllabus Management System</span>
+                            <span class="text-[12px] font-bold text-[#09090b]">CLSU</span>
+                            <span class="text-[11px] text-[#a1a1aa] ml-1">Course Syllabus Management System</span>
                         </div>
                     </div>
-                    <div class="flex items-center gap-3 text-[11px] text-slate-400">
+                    <div class="flex items-center gap-3 text-[11px] text-[#a1a1aa]">
                         <span><i class="bx bx-copyright mr-0.5"></i>{{ date('Y') }} Central Luzon State University</span>
                     </div>
                 </div>
@@ -257,9 +241,7 @@
         @endif
     </div>
 
-    <style>
-        
-    </style>
+    <style></style>
 
     @livewireScripts
     <script src="https://cdn.jsdelivr.net/gh/livewire/sortable@v1.x.x/dist/livewire-sortable.js"></script>

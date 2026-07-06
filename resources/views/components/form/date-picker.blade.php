@@ -21,12 +21,15 @@
     @if($max) max="{{ $max }}" @endif
     {{ $passthrough->merge([
         'class' => '
-            w-full rounded-lg border border-slate-300 bg-white
-            px-3 py-2 text-sm text-slate-700 shadow-sm
-            hover:border-slate-400
-            focus:border-emerald-400 focus:ring-1 focus:ring-emerald-300 focus:outline-none
-            disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed
+            w-full rounded-[14px] border border-[#d4d4d8] bg-white
+            px-3 py-2 text-[13px] text-[#09090b]
+            hover:border-[#a1a1aa]
+            focus:border-[#16a34a] focus:outline-none
+            disabled:bg-[#f4f4f5] disabled:text-[#a1a1aa] disabled:cursor-not-allowed
             transition-colors duration-150
         ',
     ]) }}
+    style="box-shadow: none;"
+    onfocus="this.style.boxShadow='0 0 0 3px rgba(22,163,74,0.15)'"
+    onblur="this.style.boxShadow='none'"
 />

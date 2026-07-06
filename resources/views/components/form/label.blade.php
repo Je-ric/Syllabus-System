@@ -26,7 +26,7 @@
     @if($for) for="{{ $for }}" @endif
     {{ $attributes->class([
         'inline-flex items-center gap-1.5',
-        'text-[11px] font-700 uppercase tracking-[0.12em] text-[#475569]',
+        'text-[11px] font-bold uppercase tracking-[0.1em] text-[#52525b]',
         'mb-1 leading-none',
     ]) }}
 >
@@ -37,6 +37,6 @@
     {{ $slot }}
 
     @if($isRequired)
-        <span class="text-rose-500 font-bold text-xs leading-none ml-0.5">*</span>
+        <span class="text-[#e11d48] font-bold text-xs leading-none ml-0.5">*</span>
     @endif
 </label>

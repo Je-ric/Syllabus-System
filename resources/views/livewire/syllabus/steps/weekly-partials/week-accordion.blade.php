@@ -1,12 +1,7 @@
-{{--
-    Partial: weekly-partials/week-accordion.blade.php
---}}
-{{-- Week edit modal (single instance, outside the loop) --}}
-{{-- Confirm dialog is included inside the modal file at z-[60] --}}
+{{-- weekly-partials/week-accordion.blade.php --}}
 @include('livewire.syllabus.steps.weekly-partials.week-edit-modal')
 
 @php
-    // Precompute incomplete (non-locked, non-MVGO, missing content) week numbers for jump-to-incomplete
     $incompleteWeekNos = [];
     foreach ($syllabusWeeks as $_w) {
         $_wKey     = 'w' . $_w->week_no;
@@ -27,17 +22,10 @@
 <div
     x-data="{
         openWeek: null,
-        allWeeks:       @js($allWeekNos),
+        allWeeks:        @js($allWeekNos),
         incompleteWeeks: @js($incompleteWeekNos),
 
-        expandAll() {
-            // Expand every week — open the first one now, done
-            // (All weeks render their body via x-show, so we use a sentinel value
-            //  of -1 to mean 'all open' — but Alpine's x-show checks openWeek === weekNo.
-            //  Instead we set openWeek to null and dispatch one-by-one via a flag.)
-            // Simplest correct approach: use a separate 'allOpen' flag.
-            this.openWeek = '__all__';
-        },
+        expandAll()   { this.openWeek = '__all__'; },
         collapseAll() { this.openWeek = null; },
 
         jumpToIncomplete() {
@@ -47,10 +35,9 @@
                 }));
                 return;
             }
-            // Find the next incomplete week after the currently open one
-            const cur = this.openWeek;
-            const after = this.incompleteWeeks.find(n => cur === null || cur === '__all__' || n > cur);
-            const target = after ?? this.incompleteWeeks[0]; // wrap around
+            const cur    = this.openWeek;
+            const after  = this.incompleteWeeks.find(n => cur === null || cur === '__all__' || n > cur);
+            const target = after ?? this.incompleteWeeks[0];
             this.openWeek = target;
             this.$nextTick(() => {
                 const el = document.getElementById('week-row-' + target);
@@ -74,14 +61,8 @@
             $isMvgo   = ((int) $week->week_no === 1);
 
             $savedTopic = strip_tags($weekInputs[$wKey]['topic'] ?? '');
-            $refCount   = count(array_filter(
-                $weekInputs[$wKey]['references'] ?? [],
-                fn ($r) => trim($r['text'] ?? '') !== ''
-            ));
-            $matCount   = count(array_filter(
-                $weekInputs[$wKey]['materials'] ?? [],
-                fn ($m) => trim($m['name'] ?? '') !== '' || trim($m['url'] ?? '') !== ''
-            ));
+            $refCount   = count(array_filter($weekInputs[$wKey]['references'] ?? [], fn($r) => trim($r['text'] ?? '') !== ''));
+            $matCount   = count(array_filter($weekInputs[$wKey]['materials'] ?? [], fn($m) => trim($m['name'] ?? '') !== '' || trim($m['url'] ?? '') !== ''));
 
             $lockLabel = match ($lockType) {
                 'exam'         => 'Exam Week',
@@ -97,7 +78,6 @@
                 }
             }
 
-            // Completion: a normal week is "complete" when it has a topic, a CO/MVGO, and an assessment task
             $isComplete = $isLocked || $isMvgo || (
                 !empty(strip_tags($weekInputs[$wKey]['topic'] ?? '')) &&
                 !empty($weekInputs[$wKey]['course_outcome_id'] ?? null) &&
@@ -109,63 +89,49 @@
                 !empty(strip_tags($weekInputs[$wKey]['assessment_task'] ?? ''))
             );
 
-            // Accent bar colors — rose = locked, brand green = normal
-            $accentClosed = $isLocked ? 'bg-rose-300' : 'bg-[#16a34a]';
-            $accentOpen   = $isLocked ? 'bg-rose-500' : 'bg-[#15803d]';
-
-            $openHeaderClass  = $isLocked ? 'bg-rose-50 ring-1 ring-inset ring-rose-200' : 'bg-[#f0fdf4] ring-1 ring-inset ring-[#bbf7d0]';
-            $closedRowClass   = $isLocked ? 'bg-rose-50/20 border-l-4 border-rose-500' : 'bg-white border-l-4 border-emerald-500';
-            $bodyBgClass      = $isLocked ? 'bg-rose-50/20' : 'bg-[#f0fdf4]/20';
-            $bodyBorderClass  = $isLocked ? 'border-rose-100' : 'border-[#e2e8f0]';
+            // Border/bg tokens
+            $openBorder   = $isLocked ? 'border-[#fda4af]'  : 'border-[#86efac]';
+            $closedBorder = 'border-[#e4e4e7]';
+            $openHeader   = $isLocked ? 'bg-[#fff1f2]'      : 'bg-[#f0fdf4]';
+            $closedHeader = $isLocked ? 'bg-[#fff1f2]/60 border-l-[3px] border-l-[#e11d48]' : 'bg-white border-l-[3px] border-l-[#16a34a]';
+            $bodyBg       = $isLocked ? 'bg-[#fff1f2]/30'   : 'bg-[#f0fdf4]/20';
+            $bodyBorder   = $isLocked ? 'border-[#fecdd3]'  : 'border-[#e4e4e7]';
         @endphp
 
         <div
             id="week-row-{{ $week->week_no }}"
             wire:key="week-{{ $week->week_no }}-{{ $activeComponent }}"
-            class="bg-white border rounded-xl overflow-hidden shadow-sm transition-all duration-200"
-
+            class="bg-white rounded-[14px] border overflow-hidden transition-all duration-200"
             :class="(openWeek === {{ $week->week_no }} || openWeek === '__all__')
-                ? '{{ $isLocked
-                    ? 'border-rose-500 shadow-lg'
-                    : 'border-emerald-600 shadow-lg' }}'
-                : 'border-[#e2e8f0]'">
-
-            {{-- Left accent bar --}}
-            {{-- <span class="absolute left-0 top-0 bottom-0 w-1"
-                :class="openWeek === {{ $week->week_no }} ? '{{ $accentOpen }}' : '{{ $accentClosed }}'"></span> --}}
+                ? '{{ $openBorder }} shadow-sm'
+                : '{{ $closedBorder }}'">
 
             {{-- Accordion Header --}}
             <button type="button"
                 @click="openWeek = (openWeek === {{ $week->week_no }} && openWeek !== '__all__') ? null : {{ $week->week_no }}"
-                :class="(openWeek === {{ $week->week_no }} || openWeek === '__all__') ? '{{ $openHeaderClass }}' : '{{ $closedRowClass }}'"
+                :class="(openWeek === {{ $week->week_no }} || openWeek === '__all__') ? '{{ $openHeader }}' : '{{ $closedHeader }}'"
                 @class([
-                    'w-full flex items-center pl-6 pr-5 py-3.5 transition-colors duration-100 focus:outline-none text-left',
-                    'hover:bg-rose-50'    => $isLocked,
-                    'hover:bg-[#f0fdf4]' => ! $isLocked,
+                    'w-full flex items-center pl-5 pr-4 py-3 transition-colors duration-100 focus:outline-none text-left',
+                    'hover:bg-[#fff1f2]'  => $isLocked,
+                    'hover:bg-[#f0fdf4]'  => !$isLocked,
                 ])>
 
                 <div class="flex items-center gap-3 min-w-0 flex-1">
 
-                    {{-- Week number circle --}}
-                    <span
-                        class="inline-flex items-center justify-center rounded-full shadow-md w-8 h-8 text-xs font-bold shrink-0 transition-colors duration-200"
-
+                    {{-- Week number --}}
+                    <span class="inline-flex items-center justify-center rounded-full w-7 h-7 text-[11px] font-bold shrink-0 transition-colors duration-200"
                         :class="openWeek === {{ $week->week_no }}
-                            ? '{{ $isLocked
-                                ? 'bg-rose-500 text-white'
-                                : 'bg-emerald-600 text-white' }}'
-                            : '{{ $isLocked
-                                ? 'bg-rose-100 text-rose-700 ring-1 ring-rose-300'
-                                : 'text-[#15803d] ring-1 ring-[#15803d]' }}'">
+                            ? '{{ $isLocked ? 'bg-[#e11d48] text-white' : 'bg-[#16a34a] text-white' }}'
+                            : '{{ $isLocked ? 'bg-[#ffe4e6] text-[#e11d48] border border-[#fecdd3]' : 'bg-[#f0fdf4] text-[#16a34a] border border-[#86efac]' }}'">
                         {{ $week->week_no }}
                     </span>
 
                     <div class="flex items-center gap-2 flex-wrap min-w-0">
-                        <span class="text-sm font-semibold shrink-0 {{ $isLocked ? 'text-rose-700' : 'text-[#0f172a]' }}">
+                        <span class="text-[13px] font-semibold shrink-0 {{ $isLocked ? 'text-[#e11d48]' : 'text-[#09090b]' }}">
                             Week {{ $week->week_no }}
                         </span>
-                        <span class="text-slate-300 mx-1">·</span>
-                        <span class="text-sm text-slate-500 shrink-0">
+                        <span class="text-[#d4d4d8] mx-0.5">·</span>
+                        <span class="text-[12px] text-[#71717a] shrink-0">
                             {{ $start->format('M d') }}–{{ $end->format('M d, Y') }}
                         </span>
 
@@ -181,7 +147,7 @@
                                 <x-feedback-status.status-indicator variant="brand" size="sm">{{ $coCode }}</x-feedback-status.status-indicator>
                             @endif
                             @if ($savedTopic)
-                                <span class="text-sm text-[#94a3b8] truncate max-w-xs hidden md:block">
+                                <span class="text-[12px] text-[#a1a1aa] truncate max-w-xs hidden md:block">
                                     — {{ \Illuminate\Support\Str::limit($savedTopic, 55) }}
                                 </span>
                             @endif
@@ -189,16 +155,15 @@
                     </div>
                 </div>
 
-                {{-- Right-side meta badges + completion dot + chevron --}}
+                {{-- Right meta --}}
                 <div class="flex items-center gap-1.5 shrink-0 ml-3">
-                    @if (! $isLocked)
-                        {{-- Completion dot --}}
+                    @if (!$isLocked)
                         @if ($isComplete)
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0" title="Complete"></span>
+                            <span class="w-2 h-2 rounded-full bg-[#16a34a] shrink-0" title="Complete"></span>
                         @elseif ($isPartial)
-                            <span class="w-2 h-2 rounded-full bg-amber-400 shrink-0" title="Incomplete"></span>
+                            <span class="w-2 h-2 rounded-full bg-[#d97706] shrink-0" title="Incomplete"></span>
                         @else
-                            <span class="w-2 h-2 rounded-full bg-slate-300 shrink-0" title="Empty"></span>
+                            <span class="w-2 h-2 rounded-full bg-[#d4d4d8] shrink-0" title="Empty"></span>
                         @endif
                         @if (count($events) > 0)
                             <x-feedback-status.status-indicator variant="brand" size="sm">
@@ -207,16 +172,16 @@
                         @endif
                         @if ($refCount > 0)
                             <x-feedback-status.status-indicator variant="brand" size="sm">
-                                {{ $refCount }} {{ $refCount !== 1 ? 'references' : 'reference' }}
+                                {{ $refCount }} ref{{ $refCount !== 1 ? 's' : '' }}
                             </x-feedback-status.status-indicator>
                         @endif
                         @if ($matCount > 0)
                             <x-feedback-status.status-indicator variant="brand" size="sm">
-                                {{ $matCount }} {{ $matCount !== 1 ? 'materials' : 'material' }}
+                                {{ $matCount }} mat{{ $matCount !== 1 ? 's' : '' }}
                             </x-feedback-status.status-indicator>
                         @endif
                     @endif
-                    <i class="bx text-[#94a3b8] text-lg transition-transform duration-200"
+                    <i class="bx text-[#a1a1aa] text-lg transition-transform duration-200"
                         :class="(openWeek === {{ $week->week_no }} || openWeek === '__all__') ? 'bx-chevron-up' : 'bx-chevron-down'"></i>
                 </div>
 
@@ -224,27 +189,21 @@
 
             {{-- Accordion Body --}}
             <div x-show="openWeek === {{ $week->week_no }} || openWeek === '__all__'" x-cloak
-                class="pl-6 pr-5 pb-5 pt-4 border-t {{ $bodyBorderClass }} {{ $bodyBgClass }}">
+                class="pl-5 pr-4 pb-5 pt-4 border-t {{ $bodyBorder }} {{ $bodyBg }}">
 
                 @if ($isLocked)
                     @include('livewire.syllabus.steps.weekly-partials.week-body-locked', [
-                        'week'      => $week,
-                        'events'    => $events,
-                        'lockType'  => $lockType,
-                        'lockLabel' => $lockLabel,
+                        'week' => $week, 'events' => $events, 'lockType' => $lockType, 'lockLabel' => $lockLabel,
                     ])
                 @else
                     @include('livewire.syllabus.steps.weekly-partials.week-body-editable', [
-                        'week'   => $week,
-                        'wKey'   => $wKey,
-                        'events' => $events,
-                        'isMvgo' => $isMvgo,
+                        'week' => $week, 'wKey' => $wKey, 'events' => $events, 'isMvgo' => $isMvgo,
                     ])
                 @endif
 
             </div>
 
-        </div>{{-- /wire:key --}}
+        </div>
     @endforeach
 
-</div>{{-- /accordion --}}
+</div>

@@ -26,57 +26,58 @@
             ['id' => 'approved',     'label' => 'Approved'],
         ];
 
-        /**
-         * Per-status visual tokens.
-         * header_bg / header_border  → card top strip
-         * badge_variant              → your <x-feedback-status.status-indicator> prop
-         * action_label               → primary button text
-         * empty_icon / empty_title / empty_message → empty-state copy
-         */
         $statusConfig = [
             'draft' => [
-                'header_bg'      => 'bg-amber-50',
-                'header_border'  => 'border-amber-200',
-                'badge_variant'  => 'amber',
-                'badge_label'    => 'Draft',
-                'action_label'   => 'Continue',
-                'empty_icon'     => 'bx-file-blank',
-                'empty_title'    => 'No draft syllabi',
-                'empty_message'  => 'Create a new syllabus to start working on it.',
-                'show_create'    => true,
+                'bar'           => 'bg-[#d97706]',
+                'header_bg'     => 'bg-[#fffbeb]',
+                'header_border' => 'border-[#fde68a]',
+                'badge_variant' => 'amber',
+                'badge_label'   => 'Draft',
+                'action_label'  => 'Continue',
+                'progress_color'=> 'bg-[#d97706]',
+                'empty_icon'    => 'bx-file-blank',
+                'empty_title'   => 'No draft syllabi',
+                'empty_message' => 'Create a new syllabus to start working on it.',
+                'show_create'   => true,
             ],
             'under_review' => [
-                'header_bg'      => 'bg-blue-50',
-                'header_border'  => 'border-blue-200',
-                'badge_variant'  => 'blue',
-                'badge_label'    => 'Under Review',
-                'action_label'   => 'View',
-                'empty_icon'     => 'bx-time-five',
-                'empty_title'    => 'No syllabi under review',
-                'empty_message'  => 'Syllabi submitted for review will appear here.',
-                'show_create'    => false,
+                'bar'           => 'bg-[#2563eb]',
+                'header_bg'     => 'bg-[#eff6ff]',
+                'header_border' => 'border-[#bfdbfe]',
+                'badge_variant' => 'blue',
+                'badge_label'   => 'Under Review',
+                'action_label'  => 'View',
+                'progress_color'=> 'bg-[#2563eb]',
+                'empty_icon'    => 'bx-time-five',
+                'empty_title'   => 'No syllabi under review',
+                'empty_message' => 'Syllabi submitted for review will appear here.',
+                'show_create'   => false,
             ],
             'for_revision' => [
-                'header_bg'      => 'bg-rose-50',
-                'header_border'  => 'border-rose-200',
-                'badge_variant'  => 'rose',
-                'badge_label'    => 'For Revision',
-                'action_label'   => 'Continue',
-                'empty_icon'     => 'bx-edit',
-                'empty_title'    => 'No syllabi for revision',
-                'empty_message'  => 'Syllabi returned by reviewers will appear here.',
-                'show_create'    => false,
+                'bar'           => 'bg-[#e11d48]',
+                'header_bg'     => 'bg-[#fff1f2]',
+                'header_border' => 'border-[#fecdd3]',
+                'badge_variant' => 'rose',
+                'badge_label'   => 'For Revision',
+                'action_label'  => 'Continue',
+                'progress_color'=> 'bg-[#e11d48]',
+                'empty_icon'    => 'bx-edit',
+                'empty_title'   => 'No syllabi for revision',
+                'empty_message' => 'Syllabi returned by reviewers will appear here.',
+                'show_create'   => false,
             ],
             'approved' => [
-                'header_bg'      => 'bg-emerald-50',
-                'header_border'  => 'border-emerald-200',
-                'badge_variant'  => 'emerald',
-                'badge_label'    => 'Approved',
-                'action_label'   => 'View',
-                'empty_icon'     => 'bx-check-circle',
-                'empty_title'    => 'No approved syllabi',
-                'empty_message'  => 'Approved syllabi will appear here once completed.',
-                'show_create'    => false,
+                'bar'           => 'bg-[#16a34a]',
+                'header_bg'     => 'bg-[#f0fdf4]',
+                'header_border' => 'border-[#d1fae5]',
+                'badge_variant' => 'emerald',
+                'badge_label'   => 'Approved',
+                'action_label'  => 'View',
+                'progress_color'=> 'bg-[#16a34a]',
+                'empty_icon'    => 'bx-check-circle',
+                'empty_title'   => 'No approved syllabi',
+                'empty_message' => 'Approved syllabi will appear here once completed.',
+                'show_create'   => false,
             ],
         ];
     @endphp
@@ -89,26 +90,30 @@
 
             @foreach ($tabs as $tab)
                 @php
-                    $key      = $tab['id'];
-                    $cfg      = $statusConfig[$key];
-                    $items    = $grouped[$key];
+                    $key   = $tab['id'];
+                    $cfg   = $statusConfig[$key];
+                    $items = $grouped[$key];
                 @endphp
 
                 <x-slot :name="'slot_' . $key">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
 
                         @forelse ($items as $syllabus)
-                            <div class="flex flex-col rounded-xl bg-white border border-slate-200
-                                        overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-150">
+                            <div class="flex flex-col rounded-[16px] bg-white border border-[#e4e4e7] overflow-hidden
+                                        hover:border-[#d4d4d8] transition-all duration-150"
+                                 style="box-shadow: 0 1px 6px rgba(0,0,0,0.05);">
 
-                                {{-- Status-tinted header strip --}}
+                                {{-- Colored top bar --}}
+                                <div class="h-[3px] w-full {{ $cfg['bar'] }}"></div>
+
+                                {{-- Status-tinted header --}}
                                 <div class="px-4 py-3 {{ $cfg['header_bg'] }} border-b {{ $cfg['header_border'] }}">
                                     <div class="flex items-start justify-between gap-2">
                                         <div class="min-w-0">
-                                            <h3 class="font-bold text-slate-900 font-mono text-[14px] leading-none mb-1">
+                                            <h3 class="font-bold text-[#09090b] font-mono text-[13px] leading-none mb-1">
                                                 {{ $syllabus->course->course_code }}
                                             </h3>
-                                            <p class="text-[12px] text-slate-500 leading-relaxed">
+                                            <p class="text-[12px] text-[#71717a] leading-relaxed">
                                                 {{ Str::limit($syllabus->course->course_title, 52) }}
                                             </p>
                                         </div>
@@ -134,13 +139,13 @@
                                         @endphp
                                         <div>
                                             <div class="flex items-center justify-between mb-1">
-                                                <span class="text-[11px] text-slate-400 font-medium">
+                                                <span class="text-[11px] text-[#a1a1aa] font-medium">
                                                     Step {{ $current }} of {{ $total }}
                                                 </span>
-                                                <span class="text-[11px] text-slate-400">{{ $pct }}%</span>
+                                                <span class="text-[11px] text-[#a1a1aa]">{{ $pct }}%</span>
                                             </div>
-                                            <div class="h-1 rounded-full bg-slate-100 overflow-hidden">
-                                                <div class="h-full rounded-full bg-amber-400 transition-all"
+                                            <div class="h-1 rounded-full bg-[#f4f4f5] overflow-hidden">
+                                                <div class="h-full rounded-full {{ $cfg['progress_color'] }} transition-all"
                                                      style="width: {{ $pct }}%"></div>
                                             </div>
                                         </div>
@@ -148,15 +153,15 @@
 
                                     {{-- Academic year --}}
                                     @if ($syllabus->academic_calendar)
-                                        <div class="flex items-center gap-1.5 text-[12px] text-slate-500">
-                                            <i class="bx bx-calendar text-slate-400 text-sm"></i>
+                                        <div class="flex items-center gap-1.5 text-[12px] text-[#71717a]">
+                                            <i class="bx bx-calendar text-[#a1a1aa] text-sm leading-none"></i>
                                             {{ $syllabus->academic_calendar->academic_year }}
                                         </div>
                                     @endif
 
                                     {{-- Program --}}
-                                    <div class="flex items-start gap-1.5 text-[12px] text-slate-500">
-                                        <i class="bx bx-book text-slate-400 text-sm mt-0.5 shrink-0"></i>
+                                    <div class="flex items-start gap-1.5 text-[12px] text-[#71717a]">
+                                        <i class="bx bx-book text-[#a1a1aa] text-sm mt-0.5 shrink-0 leading-none"></i>
                                         <span class="leading-relaxed">{{ $syllabus->course->program->name }}</span>
                                     </div>
 
@@ -187,13 +192,9 @@
                                     :message="$cfg['empty_message']">
 
                                     @if ($cfg['show_create'])
-                                        <a href="{{ route('syllabus.create') }}"
-                                           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg
-                                                  bg-emerald-600 text-white text-sm font-medium
-                                                  hover:bg-emerald-700 transition-colors shadow-sm">
-                                            <i class="bx bx-plus text-base"></i>
-                                            Create Syllabus
-                                        </a>
+                                        <x-button href="{{ route('syllabus.create') }}" variant="add-button">
+                                            <i class="bx bx-plus text-base"></i> Create Syllabus
+                                        </x-button>
                                     @endif
 
                                 </x-empty-state>

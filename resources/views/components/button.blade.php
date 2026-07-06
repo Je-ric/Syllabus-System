@@ -9,102 +9,111 @@
 @php
     $iconFix = '[&_i]:leading-none [&_i]:text-[1.1em] [&_i]:translate-y-px ';
 
-    $tableBtn  = 'inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg
-                  transition-colors duration-150
-                  disabled:opacity-50 disabled:pointer-events-none ' . $iconFix;
+    $tableBtn  = 'inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-[10px]
+                  transition-all duration-150
+                  disabled:opacity-40 disabled:pointer-events-none ' . $iconFix;
 
-    $formBtn   = 'inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-lg
-                  shadow-sm transition-all duration-150 active:scale-95
+    $formBtn   = 'inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-[14px]
+                  transition-all duration-150 active:scale-[0.97]
                   focus:ring-2 focus:outline-none
-                  disabled:opacity-50 disabled:pointer-events-none ' . $iconFix;
+                  disabled:opacity-40 disabled:pointer-events-none ' . $iconFix;
 
-    $wizardBtn = 'inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg
-                  transition-colors duration-150
-                  disabled:opacity-50 disabled:pointer-events-none ' . $iconFix;
+    $wizardBtn = 'inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-[10px]
+                  transition-all duration-150
+                  disabled:opacity-40 disabled:pointer-events-none ' . $iconFix;
 
     $styles = [
 
-        // ── Table buttons (compact, no scale) ──────────────────────────────────
-        'table-confirm'  => $tableBtn . 'text-white bg-emerald-600 hover:bg-emerald-700',
-        'table-edit'     => $tableBtn . 'text-white bg-blue-600 hover:bg-blue-700',
-        'table-view'     => $tableBtn . 'text-white bg-cyan-600 hover:bg-cyan-700',
-        'table-manage'   => $tableBtn . 'text-white bg-slate-600 hover:bg-slate-700',
-        'table-danger'   => $tableBtn . 'text-white bg-rose-600 hover:bg-rose-700',
-        'table-disable'  => $tableBtn . 'text-white bg-slate-500 hover:bg-slate-600',
-        'table-restore'  => $tableBtn . 'text-white bg-indigo-600 hover:bg-indigo-700',
-        'table-cancel'   => $tableBtn . 'bg-white text-slate-700 border border-slate-300
-                                         hover:bg-slate-50 hover:border-slate-400',
+        // ── Table buttons ──────────────────────────────────────────────────────
+        'table-confirm'  => $tableBtn . 'text-white bg-[#16a34a] hover:bg-[#15803d] shadow-sm',
+        'table-edit'     => $tableBtn . 'text-white bg-[#2563eb] hover:bg-[#1d4ed8] shadow-sm',
+        'table-view'     => $tableBtn . 'text-white bg-[#0891b2] hover:bg-[#0e7490] shadow-sm',
+        'table-manage'   => $tableBtn . 'text-white bg-[#52525b] hover:bg-[#3f3f46] shadow-sm',
+        'table-danger'   => $tableBtn . 'text-white bg-[#e11d48] hover:bg-[#be123c] shadow-sm',
+        'table-disable'  => $tableBtn . 'text-white bg-[#71717a] hover:bg-[#52525b] shadow-sm',
+        'table-restore'  => $tableBtn . 'text-white bg-[#7c3aed] hover:bg-[#6d28d9] shadow-sm',
+        'table-cancel'   => $tableBtn . 'bg-white text-[#3f3f46] border border-[#d4d4d8]
+                                         hover:bg-[#f4f4f5] hover:border-[#a1a1aa]',
 
-        // ── Form / CRUD buttons (larger, scales on click) ──────────────────────
+        // ── Form / CRUD buttons ────────────────────────────────────────────────
         'primary'    => $formBtn . '
-            bg-[linear-gradient(90deg,#003a10_0%,#009639_100%)]
-            text-white hover:brightness-110
-            focus:ring-[#009639]/30',
+            bg-[#09090b] text-white
+            hover:bg-[#18181b]
+            focus:ring-[#3f3f46]/40
+            shadow-[inset_0_0.5px_0_0_rgba(255,255,255,0.08),0_1px_3px_rgba(0,0,0,0.3)]',
 
         'secondary'  => $formBtn . '
-            bg-[linear-gradient(90deg,#ffd700_0%,#e0a70d_100%)]
-            text-[#1a5f30] hover:brightness-105
-            focus:ring-[#e0a70d]/30',
+            bg-[#ffd700] text-[#09090b]
+            hover:bg-[#f5ce00]
+            focus:ring-[#ffd700]/40
+            shadow-sm',
 
-        // FIX: on hover, keep the border visible by only filling bg, not swallowing border color.
-        // border-[#1a5f30] stays, bg fills to a slightly lighter green so the border still reads.
         'outline'    => $formBtn . '
-            bg-white text-[#1a5f30]
-            border border-[#1a5f30]
-            hover:bg-[#f0fdf4]
-            focus:ring-[#1a5f30]/30',
+            bg-white text-[#166534]
+            hover:bg-[#f0fdf4] hover:border-[#15803d]
+            focus:ring-[#16a34a]/25',
 
         'add-button' => $formBtn . '
-            bg-emerald-600 text-white hover:bg-emerald-700
-            focus:ring-[#009639]/30',
+            bg-[#16a34a] text-white
+            hover:bg-[#15803d]
+            focus:ring-[#16a34a]/30
+            shadow-sm',
 
         'save' => $formBtn . '
-            bg-emerald-600 text-white hover:bg-emerald-700
-            focus:ring-[#009639]/30',
+            bg-[#16a34a] text-white
+            hover:bg-[#15803d]
+            focus:ring-[#16a34a]/30
+            shadow-sm',
 
         'add-dashed' => $formBtn . '
-            justify-center bg-white text-emerald-700
-            border-2 border-dashed border-emerald-300
-            hover:border-emerald-500 hover:bg-emerald-50
-            focus:ring-emerald-500/20',
+            justify-center bg-white text-[#16a34a]
+            border-2 border-dashed border-[#86efac]
+            hover:border-[#16a34a] hover:bg-[#f0fdf4]
+            focus:ring-[#16a34a]/20',
 
         'cancel'     => $formBtn . '
-            bg-white text-[#475569]
-            border border-[#e2e8f0]
-            hover:bg-[#f8fafc] hover:border-[#94a3b8]
-            focus:ring-[#94a3b8]/20',
+            bg-white text-[#3f3f46]
+            border border-[#d4d4d8]
+            hover:bg-[#f4f4f5] hover:border-[#a1a1aa]
+            focus:ring-[#a1a1aa]/20',
 
         'back'       => $formBtn . '
-            bg-white text-[#475569]
-            border border-[#e2e8f0]
-            hover:bg-[#f8fafc] hover:border-[#94a3b8]
-            focus:ring-[#94a3b8]/20',
+            bg-white text-[#3f3f46]
+            border border-[#d4d4d8]
+            hover:bg-[#f4f4f5] hover:border-[#a1a1aa]
+            focus:ring-[#a1a1aa]/20',
 
         'danger'     => $formBtn . '
-            bg-rose-600 text-white hover:bg-rose-700
-            focus:ring-rose-600/30',
+            bg-[#e11d48] text-white
+            border border-[#be123c]
+            hover:bg-[#be123c]
+            focus:ring-[#e11d48]/30
+            shadow-sm',
 
         'warning'    => $formBtn . '
-            bg-amber-500 text-white hover:bg-amber-600
-            focus:ring-amber-500/30',
+            bg-[#d97706] text-white
+            hover:bg-[#b45309]
+            focus:ring-[#d97706]/30
+            shadow-sm',
 
         // ── Small / wizard buttons ─────────────────────────────────────────────
-        // FIX: sm-primary hover was repeating base bg instead of darkening it.
-        'sm-primary' => $wizardBtn . 'bg-emerald-50 text-emerald-700 border border-emerald-300
-                                       hover:bg-emerald-100 hover:border-emerald-400',
-        'sm-cancel'  => $wizardBtn . 'bg-white text-[#475569] border border-[#e2e8f0]
-                                       hover:bg-[#f8fafc] hover:border-[#94a3b8]',
-        'sm-danger'  => $wizardBtn . 'bg-rose-600 text-white hover:bg-rose-700',
-        'sm-warning' => $wizardBtn . 'bg-amber-50 text-amber-700 border border-amber-300
-                                       hover:bg-amber-100 hover:border-amber-400',
-        'sm-info'    => $wizardBtn . 'bg-blue-50 text-blue-700 border border-blue-300
-                                       hover:bg-blue-100 hover:border-blue-400',
-        'sm-success' => $wizardBtn . 'bg-emerald-50 text-emerald-700 border border-emerald-300
-                                       hover:bg-emerald-100 hover:border-emerald-400',
-        'sm-soft'    => $wizardBtn . 'bg-lime-50 text-lime-700 border border-lime-300
-                                       hover:bg-lime-100 hover:border-lime-400',
-        'sm-add'     => $wizardBtn . 'bg-emerald-600 text-white hover:bg-emerald-700
-                                       focus:ring-2 focus:ring-emerald-300/50',
+        'sm-primary' => $wizardBtn . 'bg-[#f0fdf4] text-[#166534] border border-[#86efac]
+                                       hover:bg-[#dcfce7] hover:border-[#4ade80]',
+        'sm-cancel'  => $wizardBtn . 'bg-white text-[#3f3f46] border border-[#d4d4d8]
+                                       hover:bg-[#f4f4f5] hover:border-[#a1a1aa]',
+        'sm-danger'  => $wizardBtn . 'bg-[#e11d48] text-white border border-[#be123c]
+                                       hover:bg-[#be123c] shadow-sm',
+        'sm-warning' => $wizardBtn . 'bg-[#fffbeb] text-[#92400e] border border-[#fcd34d]
+                                       hover:bg-[#fef3c7] hover:border-[#f59e0b]',
+        'sm-info'    => $wizardBtn . 'bg-[#eff6ff] text-[#1e40af] border border-[#bfdbfe]
+                                       hover:bg-[#dbeafe] hover:border-[#93c5fd]',
+        'sm-success' => $wizardBtn . 'bg-[#f0fdf4] text-[#166534] border border-[#86efac]
+                                       hover:bg-[#dcfce7] hover:border-[#4ade80]',
+        'sm-soft'    => $wizardBtn . 'bg-[#f7fee7] text-[#3f6212] border border-[#bef264]
+                                       hover:bg-[#ecfccb] hover:border-[#a3e635]',
+        'sm-add'     => $wizardBtn . 'bg-[#16a34a] text-white border border-[#15803d]
+                                       hover:bg-[#15803d] shadow-sm
+                                       focus:ring-2 focus:ring-[#16a34a]/30',
     ];
 
     $class = $styles[strval($variant)] ?? $styles['primary'];
@@ -165,32 +174,3 @@
         @endif
     </button>
 @endif
-
-{{--
-VARIANTS
-────────────────────────────────────────────────────────────────────
-Table (compact, no scale):
-  table-confirm   → emerald  — Approve, Activate, generic confirm
-  table-edit      → blue     — Edit (✏) — use this instead of table-confirm for edit actions
-  table-view      → cyan     — View / Preview
-  table-manage    → slate-600 — Roles, Settings
-  table-danger    → rose     — Reject, Delete
-  table-disable   → slate-500 — Disable, Pause
-  table-restore   → indigo   — Restore, Undo
-  table-cancel    → white/border — Cancel inline action
-
-Form (larger, scales on click):
-  primary     → dark-to-green gradient — main submit action
-  save        → green-to-lime gradient — save / update
-  secondary   → gold gradient          — secondary / accent action
-  outline     → white + green border   — ghost / secondary confirm
-  add-button  → solid emerald          — add new record
-  add-dashed  → dashed border          — add optional / inline item
-  cancel      → white + slate border   — cancel / dismiss
-  danger      → solid rose             — destructive action
-
-Small / wizard (match height when beside sm-* buttons):
-  sm-primary  sm-cancel  sm-danger
-  sm-warning  sm-info    sm-success  sm-soft
-  sm-add      ← solid emerald, same height as sm-* variants
---}}
