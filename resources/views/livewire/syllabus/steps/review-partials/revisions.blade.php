@@ -157,10 +157,9 @@
                 <div class="flex items-center gap-2">
                     @if (count($revisions) > 1)
                         <button type="button"
-                            wire:click="resequenceRevisions"
                             wire:loading.attr="disabled"
                             wire:target="resequenceRevisions"
-                            wire:confirm="This will renumber all revisions 0, 1, 2, … in their current order. Continue?"
+                            x-on:click="if (confirm('This will renumber all revisions 0, 1, 2, … in their current order. Continue?')) $wire.resequenceRevisions()"
                             class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold text-slate-500
                                    border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-50 transition-colors">
                             <span wire:loading.remove wire:target="resequenceRevisions" class="inline-flex items-center gap-1">
