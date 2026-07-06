@@ -180,14 +180,21 @@ class SyllabusWizard extends Component
             return;
         }
 
+        // Step 2: Alpine holds schedule/consultation state — must push before saving.
         if ($this->currentStep === 'course_components') {
-            // Tell Alpine to push its local state, then Alpine calls navigate-after-save
             $this->dispatch('request-push-and-navigate', toStep: $toStep);
             return;
         }
 
-        // Guard: block navigation if Course Outcomes has unsaved pending changes.
-        // Dispatch event so Alpine's coManager can auto-save before navigating.
+        // Step 5: Alpine holds weight inputs — flush to Livewire before saving.
+        // Dispatches browser event; Alpine calls $wire.set() for each input,
+        // then syllabus-save-step fires in the same tick via onSaveRequested.
+        if ($this->currentStep === 'course_evaluation') {
+            $this->dispatch('request-eval-flush-and-navigate', toStep: $toStep);
+            return;
+        }
+
+        // Step 3: if dirty, tell Alpine to save pending COs first, then navigate.
         if ($this->currentStep === 'course_outcomes' && ($this->stepDirty['course_outcomes'] ?? false)) {
             $this->dispatch('request-co-save-and-navigate', toStep: $toStep);
             return;

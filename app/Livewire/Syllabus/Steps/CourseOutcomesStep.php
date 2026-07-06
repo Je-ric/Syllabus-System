@@ -52,8 +52,10 @@ class CourseOutcomesStep extends Component
             return;
         }
 
-        $this->dispatch('syllabus-step-saved', step: 'course_outcomes');
-        $this->dispatch('syllabus-course-outcomes-updated');
+        // If Alpine has pending changes, flush them — saveAll() will dispatch
+        // syllabus-step-saved itself after persisting. If nothing is pending,
+        // mark saved immediately.
+        $this->dispatch('request-co-flush-step');
     }
 
     /**

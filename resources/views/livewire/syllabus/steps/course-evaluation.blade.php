@@ -21,7 +21,19 @@
         lecStd: {{ $lecStdNum }},
         labStd: {{ $labStdNum }},
         hasLab: {{ $courseHasLab ? 'true' : 'false' }},
-    }">
+        async flushToWire() {
+            const allInputs = {};
+            Object.entries(this.lec).forEach(([id, v]) => { allInputs['inputs.' + id + '.weight'] = parseInt(v) || 0; });
+            Object.entries(this.lab).forEach(([id, v]) => { allInputs['inputs.' + id + '.weight'] = parseInt(v) || 0; });
+            await Promise.all(Object.entries(allInputs).map(([k, v]) => $wire.set(k, v)));
+        },
+    }"
+    x-on:request-eval-flush.window="await flushToWire()"
+    x-on:request-eval-flush-and-navigate.window="
+        await flushToWire();
+        await $wire.save();
+        $dispatch('navigate-after-save', { step: $event.detail.toStep });
+    ">
 
         @include('livewire.syllabus.steps.evaluation-partials.table')
         @include('livewire.syllabus.steps.evaluation-partials.notes')

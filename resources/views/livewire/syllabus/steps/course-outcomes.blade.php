@@ -12,6 +12,13 @@
     <div x-data="coManager(@js(collect($outcomes)->values()->all()), @js($syllabusId))"
          x-on:co-all-saved.window="onSaved($event.detail.outcomes)"
          x-on:co-save-failed.window="isSaving = false"
+         x-on:request-co-flush-step.window="hasPending() ? saveAll() : $wire.dispatch('syllabus-step-saved', { step: 'course_outcomes' })"
+         x-on:request-co-save-and-navigate.window="
+             if (hasPending()) {
+                 await saveAll();
+             }
+             await $wire.onCoSaveAndNavigate($event.detail.toStep);
+         "
          class="space-y-5">
 
         <x-wizard.step-header
@@ -180,6 +187,7 @@
 
             markDirty(co) {
                 if (co.id) co._dirty = (co.description !== co._original);
+                this.$wire.dispatch('syllabus-step-dirty', { step: 'course_outcomes', dirty: this.hasPending() });
             },
 
             hasPending() {
@@ -214,12 +222,14 @@
                     _original: '',
                     _key: 'new-' + this._keyCounter,
                 });
+                this.$wire.dispatch('syllabus-step-dirty', { step: 'course_outcomes', dirty: true });
             },
 
             revert() {
                 this.outcomes = this.outcomes
                     .filter(o => o.id)
                     .map(o => ({ ...o, description: o._original, _dirty: false }));
+                this.$wire.dispatch('syllabus-step-dirty', { step: 'course_outcomes', dirty: false });
             },
 
             async removeUnsaved(co, index) {
@@ -234,6 +244,7 @@
                 }
                 this.outcomes.splice(index, 1);
                 this.resequenceCodes();
+                this.$wire.dispatch('syllabus-step-dirty', { step: 'course_outcomes', dirty: this.hasPending() });
             },
 
             async deleteCo(co) {
@@ -285,6 +296,7 @@
                     _key:      o.id ?? ('new-' + i),
                 }));
                 this.isSaving = false;
+                this.$wire.dispatch('syllabus-step-dirty', { step: 'course_outcomes', dirty: false });
             },
 
             _confirm(detail) {

@@ -5,12 +5,7 @@
 @endphp
 
 <div x-data="{ _navigating: false, scheduleOpen: false, calInfoOpen: false }"
-    x-on:syllabus-step-changed.window="
-        _navigating = false;
-        window.dispatchEvent(new CustomEvent('lw-toast', {
-            detail: { type: 'success', message: 'Step saved successfully.' }
-        }));
-    "
+    x-on:syllabus-step-changed.window="_navigating = false"
     x-on:lw-toast.window="if ($event.detail?.type === 'error') _navigating = false">
     <x-page-header icon="bx-book-open" title="{{ $syllabus->id ? 'Edit' : 'Create' }} Syllabus"
         desc="{{ $course->course_code }} — {{ $course->course_title }}">
