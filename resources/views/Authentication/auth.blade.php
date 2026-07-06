@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
     @include('includes.head-assets')
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
 </head>
 <body>
 @if (session('toast'))
@@ -19,7 +22,7 @@
             @include('includes.session-success')
 
             {{-- ════ LOGIN ════ --}}
-            <div x-show="mode === 'login'" x-transition.opacity>
+            <div x-show="mode === 'login'" x-cloak x-transition.opacity>
 
                 <div class="mb-7">
                     <p class="text-[11px] uppercase tracking-[0.3em] text-slate-400 mb-1">Account Access</p>
@@ -69,7 +72,7 @@
             </div>
 
             {{-- ════ REGISTER ════ --}}
-            <div x-show="mode === 'register'" x-transition.opacity>
+            <div x-show="mode === 'register'" x-cloak x-transition.opacity>
 
                 <div class="mb-6">
                     <p class="text-[11px] uppercase tracking-[0.3em] text-slate-400 mb-1">New Account</p>
@@ -154,21 +157,21 @@
         <div class="p-8 md:p-10 text-white flex flex-col justify-between green-grad">
             <div>
                 <div class="flex items-center gap-3 mb-6">
-                    <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-                        <i class="bx bx-book-open text-xl text-white"></i>
+                    <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0 overflow-hidden">
+                        <img src="{{ asset('assets/clsu-logo-green.png') }}" alt="CLSU Logo" class="w-8 h-8 object-contain">
                     </div>
                     <div>
                         <p class="text-[10px] uppercase tracking-[0.3em] text-emerald-100">CLSU</p>
-                        <p class="text-sm font-bold leading-tight">Curriculum & Syllabus<br>Management System</p>
+                        <p class="text-sm font-bold leading-tight">CSMS</p>
                     </div>
                 </div>
 
                 <h2 class="text-2xl font-bold mb-3 leading-snug">
-                    Manage syllabi,<br>programs & courses<br>in one place.
+                    Curriculum & Syllabus <br> Management System<br>
                 </h2>
-                <p class="text-sm text-emerald-50/90 leading-relaxed mb-6">
+                {{-- <p class="text-sm text-emerald-50/90 leading-relaxed mb-6">
                     CSMS is the official platform of Central Luzon State University for creating, reviewing, and archiving course syllabi across all colleges and departments.
-                </p>
+                </p> --}}
 
                 {{-- How it works --}}
                 <div class="space-y-3 mb-6">
@@ -198,9 +201,9 @@
                 </div>
             </div>
 
-            <p class="text-[11px] text-emerald-100/50 mt-6 italic">
+            {{-- <p class="text-[11px] text-emerald-100/50 mt-6 italic">
                 "Empowering educators through structured, transparent curriculum management."
-            </p>
+            </p> --}}
         </div>
 
     </div>
