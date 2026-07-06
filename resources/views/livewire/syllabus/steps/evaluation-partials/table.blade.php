@@ -134,7 +134,7 @@
                                     <x-feedback-status.status-indicator variant="violet"
                                         icon="bx bx-medal">Activity</x-feedback-status.status-indicator>
                                 @else
-                                    <x-form.select wire:model.live="inputs.{{ $lecId }}.kind">
+                                    <x-form.select wire:model="inputs.{{ $lecId }}.kind">
                                         <option value="activity">Activity</option>
                                         <option value="quiz">Quiz</option>
                                     </x-form.select>
@@ -143,7 +143,8 @@
                             <td class="px-4 py-3 align-middle {{ $courseHasLab ? 'border-r border-slate-200' : '' }}">
                                 <div class="flex items-center gap-1.5">
                                     <input type="number"
-                                        wire:model.live.debounce.250ms="inputs.{{ $lecId }}.weight"
+                                        wire:model.blur="inputs.{{ $lecId }}.weight"
+                                        x-model="lec[{{ $lecId }}]"
                                         min="0" max="100" step="1" placeholder="0"
                                         class="w-20 text-sm text-right rounded-lg border border-slate-200 bg-white
                                                px-2 py-1.5 focus:border-emerald-400 focus:ring-1
@@ -185,7 +186,7 @@
                                     <x-feedback-status.status-indicator variant="violet"
                                         icon="bx bx-medal">Activity</x-feedback-status.status-indicator>
                                 @else
-                                    <x-form.select wire:model.live="inputs.{{ $lecId }}.kind">
+                                    <x-form.select wire:model="inputs.{{ $labId }}.kind">
                                         <option value="activity">Activity</option>
                                         <option value="quiz">Quiz</option>
                                     </x-form.select>
@@ -194,7 +195,8 @@
                                 <td class="px-4 py-3 align-middle border-r border-slate-200">
                                     <div class="flex items-center gap-1.5">
                                         <input type="number"
-                                            wire:model.live.debounce.250ms="inputs.{{ $labId }}.weight"
+                                            wire:model.blur="inputs.{{ $labId }}.weight"
+                                            x-model="lab[{{ $labId }}]"
                                             min="0" max="100" step="1" placeholder="0"
                                             class="w-20 text-sm text-right rounded-lg border border-slate-200 bg-white
                                                    px-2 py-1.5 focus:border-blue-400 focus:ring-1
@@ -226,51 +228,51 @@
                 @endforeach
 
                 {{-- Totals row --}}
-                @php
-                    $lecOk = $lecTotal === $lecStdNum && $lecTotal > 0;
-                    $lecWarn = $lecTotal > 0 && $lecTotal !== $lecStdNum;
-                    $labOk = $labTotal === $labStdNum && $labTotal > 0;
-                    $labWarn = $courseHasLab && $labTotal > 0 && $labTotal !== $labStdNum;
-                @endphp
-
                 <tr class="bg-slate-50 border-t-2 border-slate-200 font-semibold text-sm">
                     <td class="px-4 py-3 border-r border-slate-200 align-middle">
                         <x-feedback-status.status-indicator variant="slate">Total</x-feedback-status.status-indicator>
                     </td>
                     <td class="px-4 py-3"></td>
                     <td class="px-4 py-3 {{ $courseHasLab ? 'border-r border-slate-200' : '' }} align-middle">
-                        @if ($lecOk)
-                            <x-feedback-status.status-indicator variant="emerald"
-                                icon="bx bx-check-circle">{{ $lecTotal }} /
-                                {{ $lecStdNum }}%</x-feedback-status.status-indicator>
-                        @elseif ($lecWarn)
-                            <x-feedback-status.status-indicator variant="rose"
-                                icon="bx bx-error-circle">{{ $lecTotal }} /
-                                {{ $lecStdNum }}%</x-feedback-status.status-indicator>
-                            <span class="text-xs text-rose-500 block font-normal mt-0.5">Need
-                                {{ $lecStdNum - $lecTotal }}% more</span>
-                        @else
-                            <span class="text-xs text-slate-400">{{ $lecTotal }} / {{ $lecStdNum }}%</span>
-                        @endif
+                        <template x-if="lecTotal === lecStd && lecTotal > 0">
+                            <x-feedback-status.status-indicator variant="emerald" icon="bx bx-check-circle">
+                                <span x-text="lecTotal + ' / {{ $lecStdNum }}%'"></span>
+                            </x-feedback-status.status-indicator>
+                        </template>
+                        <template x-if="lecTotal > 0 && lecTotal !== lecStd">
+                            <div>
+                                <x-feedback-status.status-indicator variant="rose" icon="bx bx-error-circle">
+                                    <span x-text="lecTotal + ' / {{ $lecStdNum }}%'"></span>
+                                </x-feedback-status.status-indicator>
+                                <span class="text-xs text-rose-500 block font-normal mt-0.5"
+                                    x-text="'Need ' + (lecStd - lecTotal) + '% more'"></span>
+                            </div>
+                        </template>
+                        <template x-if="lecTotal === 0">
+                            <span class="text-xs text-slate-400">0 / {{ $lecStdNum }}%</span>
+                        </template>
                     </td>
                     @if ($courseHasLab)
                         <td class="px-4 py-3"></td>
                         <td class="px-4 py-3"></td>
                         <td class="px-4 py-3 border-r border-slate-200 align-middle">
-                            @if ($labOk)
-                                <x-feedback-status.status-indicator variant="emerald"
-                                    icon="bx bx-check-circle">{{ $labTotal }} /
-                                    {{ $labStdNum }}%</x-feedback-status.status-indicator>
-                            @elseif ($labWarn)
-                                <x-feedback-status.status-indicator variant="rose"
-                                    icon="bx bx-error-circle">{{ $labTotal }} /
-                                    {{ $labStdNum }}%</x-feedback-status.status-indicator>
-                                <span class="text-xs text-rose-500 block font-normal mt-0.5">Need
-                                    {{ $labStdNum - $labTotal }}% more</span>
-                            @else
-                                <span class="text-xs text-slate-400">{{ $labTotal }} /
-                                    {{ $labStdNum }}%</span>
-                            @endif
+                            <template x-if="labTotal === labStd && labTotal > 0">
+                                <x-feedback-status.status-indicator variant="emerald" icon="bx bx-check-circle">
+                                    <span x-text="labTotal + ' / {{ $labStdNum }}%'"></span>
+                                </x-feedback-status.status-indicator>
+                            </template>
+                            <template x-if="labTotal > 0 && labTotal !== labStd">
+                                <div>
+                                    <x-feedback-status.status-indicator variant="rose" icon="bx bx-error-circle">
+                                        <span x-text="labTotal + ' / {{ $labStdNum }}%'"></span>
+                                    </x-feedback-status.status-indicator>
+                                    <span class="text-xs text-rose-500 block font-normal mt-0.5"
+                                        x-text="'Need ' + (labStd - labTotal) + '% more'"></span>
+                                </div>
+                            </template>
+                            <template x-if="labTotal === 0">
+                                <span class="text-xs text-slate-400">0 / {{ $labStdNum }}%</span>
+                            </template>
                         </td>
                     @endif
                     <td class="px-4 py-3 text-center align-middle">

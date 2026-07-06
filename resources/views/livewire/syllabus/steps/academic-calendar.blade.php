@@ -45,9 +45,9 @@
                     <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-[#16a34a] shrink-0"></span>
                     Exam and non-teaching events will automatically lock the corresponding weeks.
                 </li>
-                <li class="flex items-start gap-2.5 text-sm text-slate-600">
-                    <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"></span>
-                    Changing the calendar later will require regenerating weeks (content may be lost).
+                <li class="flex items-start gap-2.5 text-sm text-amber-700 bg-amber-50 rounded-lg px-3 py-2 border border-amber-200">
+                    <i class="bx bx-error-circle text-amber-500 shrink-0 mt-0.5"></i>
+                    <span>Changing the calendar later will require regenerating weeks (content may be lost).</span>
                 </li>
             </ul>
         </div>

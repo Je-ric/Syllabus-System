@@ -4,13 +4,19 @@
     $currentIndex = array_search($currentStep, $stepsOrder, true);
 @endphp
 
-<div x-data="{ _navigating: false }"
-    x-on:syllabus-step-changed.window="_navigating = false"
+<div x-data="{ _navigating: false, scheduleOpen: false, calInfoOpen: false }"
+    x-on:syllabus-step-changed.window="
+        _navigating = false;
+        window.dispatchEvent(new CustomEvent('lw-toast', {
+            detail: { type: 'success', message: 'Step saved successfully.' }
+        }));
+    "
     x-on:lw-toast.window="if ($event.detail?.type === 'error') _navigating = false">
     <x-page-header icon="bx-book-open" title="{{ $syllabus->id ? 'Edit' : 'Create' }} Syllabus"
         desc="{{ $course->course_code }} — {{ $course->course_title }}">
         <x-button variant="cancel" href="{{ route('syllabus.index') }}">
             <i class="bx bx-arrow-back"></i>
+            <span class="sm:hidden">Back</span>
             <span class="hidden sm:inline">Back to Syllabi</span>
         </x-button>
     </x-page-header>
@@ -21,10 +27,10 @@
             class="fixed inset-0 z-50 flex items-center justify-center">
             <div class="absolute inset-0" style="background: rgba(49,49,49,0.45); backdrop-filter: blur(4px);"></div>
 
-            <div class="relative w-5/12 h-5/12 flex flex-col items-center gap-4 px-10 py-8 rounded-xl shadow-2xl border"
-                style="background: var(--white); border-color: var(--gray);">
+            <div class="relative flex flex-col items-center gap-6 px-10 py-9 rounded-xl shadow-2xl border"
+                style="background: var(--white); border-color: var(--gray); width: 300px;">
 
-                <div class="relative w-32 h-32 flex items-center justify-center">
+                <div class="relative w-16 h-16 flex items-center justify-center">
                     <svg class="absolute inset-0 animate-spin" viewBox="0 0 64 64" fill="none"
                         style="color: var(--clsu-yellow);">
                         <circle cx="32" cy="32" r="27" stroke="currentColor" stroke-width="3"
@@ -33,20 +39,20 @@
                     <svg class="absolute inset-0" viewBox="0 0 64 64" fill="none" style="color: var(--gray);">
                         <circle cx="32" cy="32" r="27" stroke="currentColor" stroke-width="2" />
                     </svg>
-                    <img src="{{ asset('assets/clsu-logo-green.png') }}" alt="CLSU"
-                        class="relative w-24 h-24 object-contain" />
+                    <img src="{{ asset('assets/CLSU-LOGO-removebg.png') }}" alt="CLSU"
+                        class="relative w-9 h-9 object-contain" />
                 </div>
 
                 <div class="text-center">
-                    <p class="text-md font-semibold" style="color: var(--black-25);">Saving changes…</p>
-                    <p class="text-sm mt-1" style="color: var(--black-20);">Please wait</p>
+                    <p class="text-sm font-bold tracking-wide" style="color: var(--black-25);">Saving changes…</p>
+                    <p class="text-xs mt-1" style="color: var(--black-20);">Please wait</p>
                 </div>
 
-                 <div class="flex justify-center space-x-1">
-                <div class="w-2 h-2 bg-green-600 rounded-full animate-bounce"></div>
-                <div class="w-2 h-2 bg-green-600 rounded-full animate-bounce" style="animation-delay: 0.1s;"></div>
-                <div class="w-2 h-2 bg-green-600 rounded-full animate-bounce" style="animation-delay: 0.2s;"></div>
-            </div>
+                <div class="flex justify-center space-x-1">
+                    <div class="w-2 h-2 bg-green-600 rounded-full animate-bounce"></div>
+                    <div class="w-2 h-2 bg-green-600 rounded-full animate-bounce" style="animation-delay: 0.1s;"></div>
+                    <div class="w-2 h-2 bg-green-600 rounded-full animate-bounce" style="animation-delay: 0.2s;"></div>
+                </div>
             </div>
         </div>
 
@@ -87,11 +93,11 @@
                         <i class="bx bx-code-alt text-base shrink-0" style="color: var(--clsu-gold);"></i>
                         <span class="text-xs" style="color: var(--black-20);">Rendering syllabus…</span>
                     </div>
-                    <div class="flex items-center justify-center gap-3 px-3 py-2 rounded-lg"
+                    {{-- <div class="flex items-center justify-center gap-3 px-3 py-2 rounded-lg"
                         style="background: var(--white-50);">
                         <i class="bx bx-cloud-upload text-base shrink-0" style="color: var(--clsu-gold);"></i>
                         <span class="text-xs" style="color: var(--black-20);">Uploading to Google Drive…</span>
-                    </div>
+                    </div> --}}
                     <div class="flex items-center justify-center gap-3 px-3 py-2 rounded-lg"
                         style="background: var(--white-50);">
                         <i class="bx bx-data text-base shrink-0" style="color: var(--clsu-gold);"></i>
@@ -125,6 +131,12 @@
                 'review' => ['label' => 'Review & Submit', 'icon' => 'bx-check-shield', 'short' => 'Review'],
             ];
             $missingSteps = ['academic_calendar', 'course_components', 'course_outcomes', 'weekly_coverage'];
+            $missingLabels = [
+                'academic_calendar' => 'No calendar selected',
+                'course_components' => 'Instructor details incomplete',
+                'course_outcomes'   => 'No course outcomes saved',
+                'weekly_coverage'   => 'Some weeks have missing content',
+            ];
         @endphp
 
         {{-- ══ Two-column layout ════════════════════════════════════════════════ --}}
@@ -134,14 +146,18 @@
             <div class="flex-1 min-w-0">
 
                 {{-- Mobile step strip --}}
-                <div class="lg:hidden mb-4 overflow-x-auto">
-                    <div class="flex items-center gap-1 min-w-max">
+                <div class="lg:hidden mb-4 relative">
+                    {{-- Right-fade scroll hint --}}
+                    <div class="pointer-events-none absolute right-0 top-0 bottom-0 w-10 z-10"
+                         style="background: linear-gradient(to right, transparent, white);"></div>
+                    <div class="overflow-x-auto scrollbar-none">
+                    <div class="flex items-center gap-1 min-w-max pr-8">
                         @foreach ($navSteps as $step => $meta)
                             @php
                                 $idx = array_search($step, $stepsOrder, true);
                                 $isCurrent = $currentStep === $step;
                                 $isDone = $currentIndex !== false && $idx !== false && $idx < $currentIndex;
-                                $hasMiss = in_array($step, $missingSteps) && $this->stepHasMissingRequired($step);
+                                $hasMiss = in_array($step, $missingSteps) && ($this->stepMissing[$step] ?? false);
                             @endphp
                             <button type="button" wire:click="clickTab('{{ $step }}')"
                                 wire:loading.attr="disabled"
@@ -159,7 +175,8 @@
                                 <span class="whitespace-nowrap">{{ $meta['short'] }}</span>
                                 @if ($hasMiss)
                                     <span
-                                        class="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-amber-400"></span>
+                                        class="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-amber-400"
+                                        title="{{ $missingLabels[$step] ?? 'Incomplete' }}"></span>
                                 @endif
                             </button>
                             @if (!$loop->last)
@@ -167,6 +184,7 @@
                             @endif
                         @endforeach
                     </div>
+                    </div>{{-- /overflow-x-auto --}}
                 </div>
 
                 {{-- Step content card --}}
@@ -322,7 +340,7 @@
                                 $idx = array_search($step, $stepsOrder, true);
                                 $isCurrent = $currentStep === $step;
                                 $isCompleted = $currentIndex !== false && $idx !== false && $idx < $currentIndex;
-                                $hasMissing = in_array($step, $missingSteps) && $this->stepHasMissingRequired($step);
+                                $hasMissing = in_array($step, $missingSteps) && ($this->stepMissing[$step] ?? false);
                             @endphp
                             <button type="button" wire:click="clickTab('{{ $step }}')"
                                 wire:loading.attr="disabled"
@@ -353,7 +371,7 @@
                                 {{-- Missing indicator --}}
                                 @if ($hasMissing)
                                     <span class="shrink-0 w-2 h-2 rounded-full bg-amber-400 animate-pulse"
-                                        title="Incomplete"></span>
+                                        title="{{ $missingLabels[$step] ?? 'Incomplete' }}"></span>
                                 @endif
 
                             </button>
@@ -362,32 +380,31 @@
 
                 </div>
 
-                {{-- Legend — only on Weekly Coverage step --}}
+                {{-- Tools — only on Weekly Coverage step --}}
                 @if ($currentStep === 'weekly_coverage')
-                    <div class="mt-3 px-4 py-3.5 rounded-xl border border-[#e2e8f0] bg-white"
-                        style="box-shadow: 0 1px 4px rgba(0,0,0,.05);">
-                        <p class="text-xs font-bold uppercase tracking-widest text-[#94a3b8] mb-3">Legend</p>
-                        <div class="space-y-2">
-                            <span class="flex items-center gap-2 text-xs text-[#475569]">
-                                <span class="w-3 h-3 rounded-full bg-[#16a34a] shrink-0"></span> Normal week
-                            </span>
-                            <span class="flex items-center gap-2 text-xs text-[#475569]">
-                                <span class="w-3 h-3 rounded-full bg-[#16a34a] ring-2 ring-[#bbf7d0] shrink-0"></span>
-                                MVGO (Week 1)
-                            </span>
-                            <span class="flex items-center gap-2 text-xs text-[#475569]">
-                                <span class="w-3 h-3 rounded-full bg-amber-400 shrink-0"></span>
-                                Exam week <span class="text-[#94a3b8]">(locked)</span>
-                            </span>
-                            <span class="flex items-center gap-2 text-xs text-[#475569]">
-                                <span class="w-3 h-3 rounded-full bg-rose-400 shrink-0"></span>
-                                Non-teaching <span class="text-[#94a3b8]">(locked)</span>
-                            </span>
-                            <span class="flex items-center gap-2 text-xs text-[#475569]">
-                                <span class="w-3 h-3 rounded-full bg-slate-300 shrink-0"></span>
-                                Break <span class="text-[#94a3b8]">(skipped)</span>
-                            </span>
-                        </div>
+                    <div class="mt-3 rounded-xl border border-[#dedee2] bg-white overflow-hidden"
+                        style="box-shadow: 0 2px 12px rgba(0,0,0,.08);">
+                        <button type="button" x-on:click="scheduleOpen = true"
+                            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-[#f8fafc] transition-colors">
+                            <i class="bx bx-time text-sm text-slate-400"></i> Schedule
+                        </button>
+                        <button type="button" x-on:click="calInfoOpen = true"
+                            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-[#f8fafc] transition-colors">
+                            <i class="bx bx-calendar text-sm text-slate-400"></i> Calendar Info
+                        </button>
+                        <div class="mx-4 border-t border-[#e2e8f0]"></div>
+                        <button type="button" x-on:click="$dispatch('expand-all-weeks')"
+                            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-[#f8fafc] transition-colors">
+                            <i class="bx bx-expand-alt text-sm text-slate-400"></i> Expand All
+                        </button>
+                        <button type="button" x-on:click="$dispatch('collapse-all-weeks')"
+                            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-[#f8fafc] transition-colors">
+                            <i class="bx bx-collapse-alt text-sm text-slate-400"></i> Collapse All
+                        </button>
+                        <button type="button" x-on:click="$dispatch('jump-to-incomplete-week')"
+                            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-amber-700 hover:bg-amber-50 transition-colors">
+                            <i class="bx bx-skip-next text-sm text-amber-400"></i> Next Incomplete
+                        </button>
                     </div>
                 @endif
 

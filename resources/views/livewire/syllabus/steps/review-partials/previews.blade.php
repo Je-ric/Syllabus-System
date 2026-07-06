@@ -14,7 +14,7 @@
             </span>
             <div>
                 <p class="text-sm font-semibold text-slate-700 group-hover:text-[var(--clsu-cobra)]">Complete</p>
-                <p class="text-xs text-slate-400 mt-0.5">Full syllabus document</p>
+                <p class="text-xs text-slate-400 mt-0.5 leading-relaxed">Full syllabus with all fields — suitable for official submission and department records.</p>
             </div>
             <i class="bx bx-link-external text-xs text-slate-300 group-hover:text-[var(--clsu-green)] mt-auto self-end transition-colors"></i>
         </a>
@@ -31,7 +31,7 @@
             </span>
             <div>
                 <p class="text-sm font-semibold text-slate-700 group-hover:text-[var(--clsu-cobra)]">Abridged</p>
-                <p class="text-xs text-slate-400 mt-0.5">Condensed version</p>
+                <p class="text-xs text-slate-400 mt-0.5 leading-relaxed">Condensed version showing key topics and outcomes — suitable for student handouts.</p>
             </div>
             <i class="bx bx-link-external text-xs text-slate-300 group-hover:text-[var(--clsu-green)] mt-auto self-end transition-colors"></i>
         </a>
@@ -48,7 +48,7 @@
             </span>
             <div>
                 <p class="text-sm font-semibold text-slate-700 group-hover:text-[var(--clsu-cobra)]">Assessment Plan</p>
-                <p class="text-xs text-slate-400 mt-0.5">Evaluation summary</p>
+                <p class="text-xs text-slate-400 mt-0.5 leading-relaxed">Weighted grading table — suitable for program review and CQI documentation.</p>
             </div>
             <i class="bx bx-link-external text-xs text-slate-300 group-hover:text-[var(--clsu-green)] mt-auto self-end transition-colors"></i>
         </a>

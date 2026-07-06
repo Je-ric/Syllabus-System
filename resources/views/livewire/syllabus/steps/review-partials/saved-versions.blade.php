@@ -17,8 +17,8 @@
             <div>
                 <p class="text-sm font-bold text-[#0f172a]">Saved Versions</p>
                 <p class="text-xs text-[#94a3b8] mt-0.5">
-                    @if (isset($completeVersions) && $completeVersions->count() > 0)
-                        {{ $completeVersions->count() }} {{ Str::plural('version', $completeVersions->count()) }} saved
+                    @if (!empty($completeVersions))
+                        {{ count($completeVersions) }} {{ Str::plural('version', count($completeVersions)) }} saved
                     @else
                         No versions yet
                     @endif
@@ -33,29 +33,33 @@
     <div x-show="open" x-collapse>
         <div class="border-t border-[#e2e8f0] p-4 space-y-2">
 
-            @if (isset($completeVersions) && $completeVersions->count() > 0)
+            @if (!empty($completeVersions))
                 @foreach ($completeVersions as $sv)
                     @php
-                        $completePath     = (string) ($sv->pdf_path ?? '');
+                        $completePath     = (string) ($sv['pdf_path'] ?? '');
                         $completeIsExt    = preg_match('#^https?://#i', $completePath) || str_starts_with($completePath, '/');
-                        $completePreview  = $completeIsExt ? $completePath : route('syllabus.saved.complete.preview',  $sv);
-                        $completeDownload = $completeIsExt ? null          : route('syllabus.saved.complete.download', $sv);
+                        $completePreview  = $completeIsExt ? $completePath : route('syllabus.saved.complete.preview',  $sv['id']);
+                        $completeDownload = $completeIsExt ? null          : route('syllabus.saved.complete.download', $sv['id']);
 
-                        $abridgedPath     = (string) ($sv->abridged_path ?? '');
+                        $abridgedPath     = (string) ($sv['abridged_path'] ?? '');
                         $hasAbridged      = $abridgedPath !== '';
                         $abridgedIsExt    = $hasAbridged && (preg_match('#^https?://#i', $abridgedPath) || str_starts_with($abridgedPath, '/'));
-                        $abridgedPreview  = $hasAbridged ? ($abridgedIsExt ? $abridgedPath : route('syllabus.saved.abridged.preview',  $sv)) : null;
-                        $abridgedDownload = ($hasAbridged && ! $abridgedIsExt) ? route('syllabus.saved.abridged.download', $sv) : null;
+                        $abridgedPreview  = $hasAbridged ? ($abridgedIsExt ? $abridgedPath : route('syllabus.saved.abridged.preview',  $sv['id'])) : null;
+                        $abridgedDownload = ($hasAbridged && ! $abridgedIsExt) ? route('syllabus.saved.abridged.download', $sv['id']) : null;
 
-                        $assessPath     = (string) ($sv->evaluation_path ?? '');
+                        $assessPath     = (string) ($sv['evaluation_path'] ?? '');
                         $hasAssess      = $assessPath !== '';
                         $assessIsExt    = $hasAssess && (preg_match('#^https?://#i', $assessPath) || str_starts_with($assessPath, '/'));
-                        $assessPreview  = $hasAssess ? ($assessIsExt ? $assessPath : route('syllabus.saved.assessment.preview',  $sv)) : null;
-                        $assessDownload = ($hasAssess && ! $assessIsExt) ? route('syllabus.saved.assessment.download', $sv) : null;
+                        $assessPreview  = $hasAssess ? ($assessIsExt ? $assessPath : route('syllabus.saved.assessment.preview',  $sv['id'])) : null;
+                        $assessDownload = ($hasAssess && ! $assessIsExt) ? route('syllabus.saved.assessment.download', $sv['id']) : null;
+
+                        $savedAt = $sv['created_at']
+                            ? \Illuminate\Support\Carbon::parse($sv['created_at'])->format('M d, Y  H:i')
+                            : '';
                     @endphp
 
                     <div
-                        wire:key="sv-{{ $sv->id }}"
+                        wire:key="sv-{{ $sv['id'] }}"
                         x-data="{ vopen: {{ $loop->first ? 'true' : 'false' }} }"
                         class="rounded-xl border border-[#e2e8f0] overflow-hidden">
 
@@ -66,17 +70,17 @@
                             <div class="flex items-center gap-3">
                                 <span class="inline-flex items-center justify-center w-6 h-6 rounded-md
                                              text-white text-xs font-bold shrink-0" style="background: var(--clsu-green);">
-                                    v{{ $sv->version }}
+                                    v{{ $sv['version'] }}
                                 </span>
                                 <div>
                                     <p class="text-sm font-semibold text-[#0f172a]">
-                                        Version {{ $sv->version }}
+                                        Version {{ $sv['version'] }}
                                         <span class="font-normal text-[#475569] ml-1">
-                                            &middot; {{ $sv->academic_year }} {{ $sv->semester }}
+                                            &middot; {{ $sv['academic_year'] }} {{ $sv['semester'] }}
                                         </span>
                                     </p>
                                     <p class="text-xs text-[#94a3b8] mt-0.5">
-                                        Saved {{ $sv->created_at?->format('M d, Y  H:i') }}
+                                        Saved {{ $savedAt }}
                                     </p>
                                 </div>
                             </div>
@@ -180,27 +184,6 @@
                     message="Click 'Save as Done' to create an immutable snapshot of this syllabus." />
             @endif
 
-        </div>
-
-        {{-- Footer: Save as Done --}}
-        <div class="border-t border-[#e2e8f0] px-5 py-3 flex justify-end">
-            <x-button
-                type="button"
-                variant="add-button"
-                wire:click="$parent.saveAsDone"
-                wire:loading.attr="disabled"
-                wire:target="saveAsDone">
-                <span wire:loading.remove wire:target="saveAsDone" class="inline-flex items-center gap-1.5">
-                    <i class="bx bx-save text-base leading-none"></i> Save as Done
-                </span>
-                <span wire:loading wire:target="saveAsDone" class="inline-flex items-center gap-1.5">
-                    <svg class="animate-spin h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                    </svg>
-                    Saving…
-                </span>
-            </x-button>
         </div>
     </div>
 </div>

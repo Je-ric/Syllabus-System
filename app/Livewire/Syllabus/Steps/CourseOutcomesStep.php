@@ -17,6 +17,9 @@ class CourseOutcomesStep extends Component
     // Each item: ['po_code' => string, 'po_text' => string, 'ied' => string]
     public array $programOutcomes = [];
 
+    // Cached from loadData() so render() doesn't re-query
+    public array $courseInfo = [];
+
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
     public function mount(int $syllabusId): void
@@ -28,7 +31,7 @@ class CourseOutcomesStep extends Component
     public function render()
     {
         return view('livewire.syllabus.steps.course-outcomes', [
-            'courseInfo' => $this->buildCourseInfo(),
+            'courseInfo' => $this->courseInfo,
         ]);
     }
 
@@ -51,6 +54,15 @@ class CourseOutcomesStep extends Component
 
         $this->dispatch('syllabus-step-saved', step: 'course_outcomes');
         $this->dispatch('syllabus-course-outcomes-updated');
+    }
+
+    /**
+     * Called via Alpine when the parent dispatches 'request-co-save-and-navigate'.
+     * Alpine's coManager saves pending changes, then calls this method to proceed.
+     */
+    public function onCoSaveAndNavigate(string $toStep): void
+    {
+        $this->dispatch('navigate-after-save', step: $toStep);
     }
 
     // ── Actions ───────────────────────────────────────────────────────────────
@@ -138,34 +150,28 @@ class CourseOutcomesStep extends Component
                 'po_text' => $po->po_text,
                 'ied'     => $coursePoIedById->get((int) $po->id, ''),
             ])->values()->all() ?? [];
-    }
 
-    private function buildCourseInfo(): array
-    {
-        $syllabus = Syllabus::with(['course.program', 'course.programOutcomes'])
-            ->find($this->syllabusId);
+        // Cache courseInfo so render() doesn't need a second query
+        $course = $syllabus->course;
+        if ($course) {
+            $poRows = $course->program?->outcomes
+                ?->map(fn ($po) => [
+                    'po_code' => $po->po_code,
+                    'po_text' => $po->po_text,
+                    'ied'     => $coursePoIedById->get((int) $po->id, ''),
+                ])->values()->all() ?? [];
 
-        $course = $syllabus?->course;
-        if (! $course) return [];
-
-        $coursePoIedById = $course->programOutcomes
-            ->mapWithKeys(fn ($po) => [(int) $po->id => (string) ($po->pivot?->ied ?? '')]);
-
-        $poRows = $course->program?->outcomes
-            ?->map(fn ($po) => [
-                'po_code' => $po->po_code,
-                'po_text' => $po->po_text,
-                'ied'     => $coursePoIedById->get((int) $po->id, ''),
-            ])->values()->all() ?? [];
-
-        return [
-            'course_code'   => $course->course_code,
-            'course_title'  => $course->course_title,
-            'description'   => $course->course_description,
-            'lec_units'     => $course->lec_class_hours,
-            'lab_units'     => $course->lab_class_hours,
-            'program_title' => $course->program?->name,
-            'po_rows'       => $poRows,
-        ];
+            $this->courseInfo = [
+                'course_code'   => $course->course_code,
+                'course_title'  => $course->course_title,
+                'description'   => $course->course_description,
+                'lec_units'     => $course->lec_class_hours,
+                'lab_units'     => $course->lab_class_hours,
+                'program_title' => $course->program?->name,
+                'po_rows'       => $poRows,
+            ];
+        } else {
+            $this->courseInfo = [];
+        }
     }
 }

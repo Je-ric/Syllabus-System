@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Syllabus\Steps;
 
-use App\Models\AcademicCalendar;
 use App\Models\AuditLog;
 use App\Models\CompleteSyllabus;
 use App\Models\Syllabus;
@@ -24,14 +23,18 @@ class ReviewStep extends Component
     // ── Loaded syllabus state ──────────────────────────────────────────────
     public bool              $isLoaded             = false;
     public ?Syllabus         $syllabus             = null;
-    public                   $course;
+    public array             $course               = [];   // plain array — avoids Eloquent snapshot bloat
     public ?int              $academic_calendar_id = null;
-    public                   $academicCalendars;
     public array             $courseOutcomes       = [];
     public array             $examWeeks            = [];
-    public                   $syllabusWeeks;
+    public array             $syllabusWeeks        = [];   // plain array, not Collection
     public ?CompleteSyllabus $latestComplete       = null;
-    public                   $completeVersions;
+    public array             $completeVersions     = [];   // plain array, not Collection
+
+    // ── Cached user lists (loaded once in loadData, not on every render) ──
+    public array $deanUsers    = [];
+    public array $facultyUsers = [];
+    public array $reviewers    = [];
 
     // ── Revision history ───────────────────────────────────────────────────
     // Pure-Alpine form — no wire:model on any draft field.
@@ -51,10 +54,7 @@ class ReviewStep extends Component
 
     public function mount(int $syllabusId): void
     {
-        $this->syllabusId        = $syllabusId;
-        $this->academicCalendars = collect();
-        $this->syllabusWeeks     = collect();
-        $this->completeVersions  = collect();
+        $this->syllabusId = $syllabusId;
         $this->loadData();
     }
 
@@ -79,12 +79,13 @@ class ReviewStep extends Component
     }
 
     // Fired by SyllabusWizard after addReviewer/removeReviewer mutations.
-    // Refreshes the Eloquent relation — accordion stays open.
+    // Refreshes the reviewer list — accordion stays open.
     #[On('syllabus-reviewers-updated')]
     public function onReviewersUpdated(): void
     {
         if ($this->isLoaded) {
             $this->syllabus?->refresh();
+            $this->loadReviewerLists();
         }
     }
 
@@ -103,35 +104,11 @@ class ReviewStep extends Component
 
     public function render()
     {
-        $deanUsers = User::whereHas('roles', fn ($q) => $q->where('name', 'dean'))
-            ->orderBy('name')
-            ->get();
-
-        $alreadyAdded = $this->syllabus
-            ? $this->syllabus->reviewers()->pluck('user_id')->map(fn ($id) => (int) $id)->all()
-            : [];
-
-        $facultyUsers = User::whereHas('roles', fn ($q) => $q->where('name', 'faculty'))
-            ->whereNotIn('id', $alreadyAdded)
-            ->orderBy('name')
-            ->get();
-
-        $reviewers = $this->syllabus
-            ? $this->syllabus->reviewers()->with('user')->orderBy('created_at')->get()
-                ->map(fn ($r) => [
-                    'id'         => $r->id,
-                    'user_id'    => $r->user_id,
-                    'user_name'  => $r->user->name,
-                    'user_email' => $r->user->email,
-                    'status'     => $r->status,
-                ])->values()->all()
-            : [];
-
         return view('livewire.syllabus.steps.review', [
             'course'       => $this->course,
-            'reviewers'    => $reviewers,
-            'deanUsers'    => $deanUsers,
-            'facultyUsers' => $facultyUsers,
+            'reviewers'    => $this->reviewers,
+            'deanUsers'    => $this->deanUsers,
+            'facultyUsers' => $this->facultyUsers,
         ]);
     }
 
@@ -335,7 +312,9 @@ class ReviewStep extends Component
             'revisions',
         ])->findOrFail($this->syllabusId);
 
-        $this->course               = $this->syllabus->course;
+        $this->course               = $this->syllabus->course
+            ? $this->syllabus->course->only(['id', 'course_code', 'course_title', 'has_lec_lab'])
+            : [];
         $this->academic_calendar_id = $this->syllabus->academic_calendar_id
             ? (int) $this->syllabus->academic_calendar_id
             : null;
@@ -347,11 +326,6 @@ class ReviewStep extends Component
             ? (int) $this->syllabus->concurred_by
             : null;
 
-        $this->academicCalendars = AcademicCalendar::query()
-            ->orderBy('academic_year', 'desc')
-            ->orderBy('semester', 'desc')
-            ->get();
-
         $this->courseOutcomes = $this->syllabus->courseOutcomes
             ->map(fn ($co) => [
                 'id'          => $co->id,
@@ -359,29 +333,94 @@ class ReviewStep extends Component
                 'description' => $co->description,
             ])->values()->all();
 
-        $this->syllabusWeeks = $this->syllabus->weeks->sortBy('week_no')->values();
+        $weeksSorted         = $this->syllabus->weeks->sortBy('week_no')->values();
+        $this->syllabusWeeks = $weeksSorted->toArray();
 
         $examWeeks = [];
-        foreach ($this->syllabusWeeks as $week) {
+        foreach ($weeksSorted as $week) {
             if ($week->exam_type) {
                 $examWeeks[$week->exam_type] = $week->week_no;
             }
         }
         $this->examWeeks = $examWeeks;
 
-        $this->completeVersions = CompleteSyllabus::query()
-            ->whereHas('syllabus', fn ($q) =>
-                $q->where('course_id', $this->course->id)
-                  ->where('prepared_by', Auth::id())
-            )
-            ->orderByDesc('version')
-            ->orderByDesc('created_at')
-            ->get();
+        $courseId = $this->course['id'] ?? null;
 
-        $this->latestComplete = $this->completeVersions->first();
+        $this->completeVersions = $courseId
+            ? CompleteSyllabus::query()
+                ->whereHas('syllabus', fn ($q) =>
+                    $q->where('course_id', $courseId)->where('prepared_by', Auth::id())
+                )
+                ->orderByDesc('version')
+                ->orderByDesc('created_at')
+                ->get()
+                ->toArray()
+            : [];
 
+        $this->latestComplete = $courseId
+            ? CompleteSyllabus::query()
+                ->whereHas('syllabus', fn ($q) =>
+                    $q->where('course_id', $courseId)->where('prepared_by', Auth::id())
+                )
+                ->orderByDesc('version')
+                ->first()
+            : null;
+
+        $this->loadReviewerLists();
         $this->loadRevisions();
         $this->isLoaded = true;
+    }
+
+    private function clsuEmailScope($query)
+    {
+        return $query->where(function ($q) {
+            $q->where('email', 'like', '%@clsu.edu.ph')
+              ->orWhere('email', 'like', '%@clsu2.edu.ph');
+        });
+    }
+
+    private function loadReviewerLists(): void
+    {
+        $this->deanUsers = $this->clsuEmailScope(
+            User::whereHas('roles', fn ($q) => $q->where('name', 'dean'))
+        )->orderBy('name')->get(['id', 'name', 'email'])->toArray();
+
+        $alreadyAdded = $this->syllabus
+            ? $this->syllabus->reviewers()->pluck('user_id')->map(fn ($id) => (int) $id)->all()
+            : [];
+
+        // Exclude the preparer and any component instructors (LEC + LAB) from the reviewer dropdown.
+        $excludeIds = array_filter([$this->syllabus?->prepared_by]);
+
+        if ($this->syllabus) {
+            $instructorEmails = $this->syllabus->components
+                ->pluck('instructor_email')
+                ->filter()
+                ->unique()
+                ->values()
+                ->all();
+
+            if ($instructorEmails) {
+                $instructorIds = User::whereIn('email', $instructorEmails)->pluck('id')->all();
+                $excludeIds    = array_unique(array_merge($excludeIds, $instructorIds));
+            }
+        }
+
+        $this->facultyUsers = $this->clsuEmailScope(
+            User::whereHas('roles', fn ($q) => $q->where('name', 'faculty'))
+                ->whereNotIn('id', array_merge($alreadyAdded, $excludeIds))
+        )->orderBy('name')->get(['id', 'name', 'email'])->toArray();
+
+        $this->reviewers = $this->syllabus
+            ? $this->syllabus->reviewers()->with('user')->orderBy('created_at')->get()
+                ->map(fn ($r) => [
+                    'id'         => $r->id,
+                    'user_id'    => $r->user_id,
+                    'user_name'  => $r->user->name,
+                    'user_email' => $r->user->email,
+                    'status'     => $r->status,
+                ])->values()->all()
+            : [];
     }
 
     private function loadRevisions(): void

@@ -2,11 +2,65 @@
     Partial: weekly-partials/week-accordion.blade.php
 --}}
 {{-- Week edit modal (single instance, outside the loop) --}}
+{{-- Confirm dialog is included inside the modal file at z-[60] --}}
 @include('livewire.syllabus.steps.weekly-partials.week-edit-modal')
 
+@php
+    // Precompute incomplete (non-locked, non-MVGO, missing content) week numbers for jump-to-incomplete
+    $incompleteWeekNos = [];
+    foreach ($syllabusWeeks as $_w) {
+        $_wKey     = 'w' . $_w->week_no;
+        $_isLocked = isset($lockedWeeks[$_w->week_no]);
+        $_isMvgo   = ((int) $_w->week_no === 1);
+        if (!$_isLocked && !$_isMvgo) {
+            $_hasTopic  = !empty(strip_tags($weekInputs[$_wKey]['topic'] ?? ''));
+            $_hasCo     = !empty($weekInputs[$_wKey]['course_outcome_id'] ?? null);
+            $_hasAssess = !empty(strip_tags($weekInputs[$_wKey]['assessment_task'] ?? ''));
+            if (!($_hasTopic && $_hasCo && $_hasAssess)) {
+                $incompleteWeekNos[] = $_w->week_no;
+            }
+        }
+    }
+    $allWeekNos = $syllabusWeeks->pluck('week_no')->values()->all();
+@endphp
+
 <div
-    x-data="{ openWeek: null }" {{-- no opened accordion by default --}}
-    {{-- x-data="{ openWeek: {{ $syllabusWeeks->first()?->week_no ?? 1 }} }" --}}
+    x-data="{
+        openWeek: null,
+        allWeeks:       @js($allWeekNos),
+        incompleteWeeks: @js($incompleteWeekNos),
+
+        expandAll() {
+            // Expand every week — open the first one now, done
+            // (All weeks render their body via x-show, so we use a sentinel value
+            //  of -1 to mean 'all open' — but Alpine's x-show checks openWeek === weekNo.
+            //  Instead we set openWeek to null and dispatch one-by-one via a flag.)
+            // Simplest correct approach: use a separate 'allOpen' flag.
+            this.openWeek = '__all__';
+        },
+        collapseAll() { this.openWeek = null; },
+
+        jumpToIncomplete() {
+            if (this.incompleteWeeks.length === 0) {
+                window.dispatchEvent(new CustomEvent('lw-toast', {
+                    detail: { type: 'info', message: 'All editable weeks are complete!' }
+                }));
+                return;
+            }
+            // Find the next incomplete week after the currently open one
+            const cur = this.openWeek;
+            const after = this.incompleteWeeks.find(n => cur === null || cur === '__all__' || n > cur);
+            const target = after ?? this.incompleteWeeks[0]; // wrap around
+            this.openWeek = target;
+            this.$nextTick(() => {
+                const el = document.getElementById('week-row-' + target);
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        }
+    }"
+    x-on:expand-all-weeks.window="expandAll()"
+    x-on:collapse-all-weeks.window="collapseAll()"
+    x-on:jump-to-incomplete-week.window="jumpToIncomplete()"
     class="space-y-2">
 
     @foreach ($syllabusWeeks as $week)
@@ -66,10 +120,11 @@
         @endphp
 
         <div
+            id="week-row-{{ $week->week_no }}"
             wire:key="week-{{ $week->week_no }}-{{ $activeComponent }}"
             class="bg-white border rounded-xl overflow-hidden shadow-sm transition-all duration-200"
 
-            :class="openWeek === {{ $week->week_no }}
+            :class="(openWeek === {{ $week->week_no }} || openWeek === '__all__')
                 ? '{{ $isLocked
                     ? 'border-rose-500 shadow-lg'
                     : 'border-emerald-600 shadow-lg' }}'
@@ -81,8 +136,8 @@
 
             {{-- Accordion Header --}}
             <button type="button"
-                @click="openWeek = openWeek === {{ $week->week_no }} ? null : {{ $week->week_no }}"
-                :class="openWeek === {{ $week->week_no }} ? '{{ $openHeaderClass }}' : '{{ $closedRowClass }}'"
+                @click="openWeek = (openWeek === {{ $week->week_no }} && openWeek !== '__all__') ? null : {{ $week->week_no }}"
+                :class="(openWeek === {{ $week->week_no }} || openWeek === '__all__') ? '{{ $openHeaderClass }}' : '{{ $closedRowClass }}'"
                 @class([
                     'w-full flex items-center pl-6 pr-5 py-3.5 transition-colors duration-100 focus:outline-none text-left',
                     'hover:bg-rose-50'    => $isLocked,
@@ -109,8 +164,8 @@
                         <span class="text-sm font-semibold shrink-0 {{ $isLocked ? 'text-rose-700' : 'text-[#0f172a]' }}">
                             Week {{ $week->week_no }}
                         </span>
-                        |
-                        <span class="text-sm text-black shrink-0">
+                        <span class="text-slate-300 mx-1">·</span>
+                        <span class="text-sm text-slate-500 shrink-0">
                             {{ $start->format('M d') }}–{{ $end->format('M d, Y') }}
                         </span>
 
@@ -152,23 +207,23 @@
                         @endif
                         @if ($refCount > 0)
                             <x-feedback-status.status-indicator variant="brand" size="sm">
-                                {{ $refCount }} ref{{ $refCount !== 1 ? 's' : '' }}
+                                {{ $refCount }} {{ $refCount !== 1 ? 'references' : 'reference' }}
                             </x-feedback-status.status-indicator>
                         @endif
                         @if ($matCount > 0)
                             <x-feedback-status.status-indicator variant="brand" size="sm">
-                                {{ $matCount }} mat{{ $matCount !== 1 ? 's' : '' }}
+                                {{ $matCount }} {{ $matCount !== 1 ? 'materials' : 'material' }}
                             </x-feedback-status.status-indicator>
                         @endif
                     @endif
                     <i class="bx text-[#94a3b8] text-lg transition-transform duration-200"
-                        :class="openWeek === {{ $week->week_no }} ? 'bx-chevron-up' : 'bx-chevron-down'"></i>
+                        :class="(openWeek === {{ $week->week_no }} || openWeek === '__all__') ? 'bx-chevron-up' : 'bx-chevron-down'"></i>
                 </div>
 
             </button>
 
             {{-- Accordion Body --}}
-            <div x-show="openWeek === {{ $week->week_no }}" x-cloak
+            <div x-show="openWeek === {{ $week->week_no }} || openWeek === '__all__'" x-cloak
                 class="pl-6 pr-5 pb-5 pt-4 border-t {{ $bodyBorderClass }} {{ $bodyBgClass }}">
 
                 @if ($isLocked)

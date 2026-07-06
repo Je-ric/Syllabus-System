@@ -28,6 +28,7 @@ class AcademicCalendarStep extends Component
             return;
         }
 
+        $this->isLoaded = false; // Force refresh so new calendars are picked up
         $this->loadData();
     }
 

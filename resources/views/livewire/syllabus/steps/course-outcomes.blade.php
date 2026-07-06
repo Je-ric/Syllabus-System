@@ -110,7 +110,7 @@
 
                     {{-- Remove unsaved row --}}
                     <button x-show="!co.id" x-cloak type="button"
-                        x-on:click="outcomes.splice(index, 1); resequenceCodes()"
+                        x-on:click="removeUnsaved(co, index)"
                         x-bind:disabled="isSaving"
                         class="shrink-0 p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors disabled:opacity-40"
                         title="Remove">
@@ -220,6 +220,20 @@
                 this.outcomes = this.outcomes
                     .filter(o => o.id)
                     .map(o => ({ ...o, description: o._original, _dirty: false }));
+            },
+
+            async removeUnsaved(co, index) {
+                if (co.description?.trim()) {
+                    const ok = await this._confirm({
+                        title: 'Remove unsaved CO?',
+                        message: 'This outcome has not been saved yet. Remove it?',
+                        confirmLabel: 'Remove',
+                        confirmClass: 'bg-rose-600 hover:bg-rose-700 text-white',
+                    });
+                    if (!ok) return;
+                }
+                this.outcomes.splice(index, 1);
+                this.resequenceCodes();
             },
 
             async deleteCo(co) {

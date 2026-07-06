@@ -14,7 +14,7 @@
         localConcurredBy: {{ $concurredBy ?? 'null' }},
         deanMap: {
             @foreach ($deanUsers as $u)
-                {{ $u->id }}: @js($u->name),
+                {{ $u['id'] }}: @js($u['name']),
             @endforeach
         },
         getName(id) {
@@ -179,7 +179,7 @@
                                     x-on:change="localApprovedBy = $event.target.value ? parseInt($event.target.value) : null">
                                     <option value="">Select dean…</option>
                                     @foreach ($deanUsers as $user)
-                                        <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                        <option value="{{ $user['id'] }}">{{ $user['name'] }}</option>
                                     @endforeach
                                 </x-form.select>
                             </div>
@@ -232,10 +232,10 @@
                                     x-on:change="localConcurredBy = $event.target.value ? parseInt($event.target.value) : null">
                                     <option value="">Select dean…</option>
                                     @foreach ($deanUsers as $user)
-                                        <option value="{{ $user->id }}"
-                                            x-bind:disabled="localApprovedBy == {{ $user->id }}"
-                                            x-bind:class="localApprovedBy == {{ $user->id }} ? 'text-slate-300' : ''">
-                                            {{ $user->name }}
+                                        <option value="{{ $user['id'] }}"
+                                            x-bind:disabled="localApprovedBy == {{ $user['id'] }}"
+                                            x-bind:class="localApprovedBy == {{ $user['id'] }} ? 'text-slate-300' : ''">
+                                            {{ $user['name'] }}
                                         </option>
                                     @endforeach
                                 </x-form.select>
@@ -268,7 +268,7 @@
                                 <x-form.select x-model="selectedFaculty">
                                     <option value="">Select faculty reviewer…</option>
                                     @foreach ($facultyUsers as $user)
-                                        <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                        <option value="{{ $user['id'] }}">{{ $user['name'] }}</option>
                                     @endforeach
                                 </x-form.select>
                             </div>

@@ -66,13 +66,9 @@ class CourseEvaluationStep extends Component
         return view('livewire.syllabus.steps.course-evaluation');
     }
 
-    public function updated($propertyName, $value = null): void
+    public function updated(string $propertyName): void
     {
-        if (
-            is_string($propertyName)
-            && str_starts_with($propertyName, 'inputs.')
-            && str_ends_with($propertyName, '.weight')
-        ) {
+        if (str_starts_with($propertyName, 'inputs.') && str_ends_with($propertyName, '.weight')) {
             $this->recomputeTotalsFromInputs();
         }
     }

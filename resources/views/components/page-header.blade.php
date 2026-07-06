@@ -22,7 +22,7 @@
             @endif
 
             <div class="min-w-0">
-                <h1 class="text-base font-bold text-green-800 leading-tight truncate">
+                <h1 class="text-lg font-bold text-green-800 leading-tight truncate">
                     {{ $title }}
                 </h1>
 

@@ -56,11 +56,8 @@ class WeeklyCoverageStep extends Component
 
     public function render()
     {
-        $this->syllabusWeeks  = SyllabusWeek::where('syllabus_id', $this->syllabusId)
-            ->orderBy('week_no')
-            ->get();
-        $this->weeksGenerated = $this->syllabusWeeks->isNotEmpty();
-
+        // syllabusWeeks is loaded by loadData() on mount/step-change.
+        // No need to re-query on every render.
         return view('livewire.syllabus.steps.weekly-coverage', [
             'syllabusWeeks' => $this->syllabusWeeks,
             'syllabus'      => $this->freshSyllabus(),

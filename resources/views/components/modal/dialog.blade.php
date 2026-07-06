@@ -7,10 +7,18 @@
 ])
 
 @php
-    $borderClass = $variant === 'delete' ? 'border-red-400' : 'border-green-700';
-    $shadowStyle = $variant === 'delete'
-        ? 'box-shadow: 0 8px 40px rgba(225,29,72,0.15);'
-        : 'box-shadow: 0 8px 40px rgba(22,163,74,0.18);';
+    $borderClass = match($variant) {
+        'delete'  => 'border-red-400',
+        'warning' => 'border-amber-400',
+        'info'    => 'border-blue-400',
+        default   => 'border-green-700',
+    };
+    $shadowStyle = match($variant) {
+        'delete'  => 'box-shadow: 0 8px 40px rgba(225,29,72,0.15);',
+        'warning' => 'box-shadow: 0 8px 40px rgba(245,158,11,0.15);',
+        'info'    => 'box-shadow: 0 8px 40px rgba(59,130,246,0.15);',
+        default   => 'box-shadow: 0 8px 40px rgba(22,163,74,0.18);',
+    };
 @endphp
 
 <dialog id="{{ $id }}" class="modal" {{ $attributes }}>

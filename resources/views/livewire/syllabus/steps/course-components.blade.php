@@ -12,8 +12,6 @@
     <x-wizard.step-header title="Course Components"
         description="Fill in instructor details and class delivery info for each component." />
 
-    @php $days = ['Monday','Tuesday','Wednesday','Thursday','Friday']; @endphp
-
     {{-- ══ Lecture ═══════════════════════════════════════════════════════════ --}}
     <x-wizard.section title="Lecture (LEC)" icon="book-open" color="emerald">
         <div class="space-y-5">
@@ -28,20 +26,24 @@
                         <x-form.label isRequired>Instructor Name</x-form.label>
                         <x-form.input wire:model.defer="lec_instructor_name" placeholder="Enter instructor name"
                             disabled />
+                        <p class="mt-1 text-xs text-slate-400">Auto-populated from your account profile.</p>
                     </div>
                     <div>
                         <x-form.label isRequired>Instructor Email</x-form.label>
                         <x-form.input type="email" wire:model.defer="lec_instructor_email"
                             placeholder="instructor@clsu.edu.ph" disabled />
+                        <p class="mt-1 text-xs text-slate-400">Auto-populated from your account profile.</p>
                     </div>
                     <div>
                         <x-form.label>Phone <span
                                 class="text-slate-400 font-normal normal-case tracking-normal">(optional)</span></x-form.label>
                         <x-form.input wire:model.defer="lec_phone" placeholder="09XX XXX XXXX" disabled />
+                        <p class="mt-1 text-xs text-slate-400">Auto-populated from your account profile.</p>
                     </div>
                     <div>
                         <x-form.label>Office</x-form.label>
                         <x-form.input wire:model.defer="lec_office" placeholder="Building / Room" disabled />
+                        <p class="mt-1 text-xs text-slate-400">Auto-populated from your account profile.</p>
                     </div>
                 </div>
             </div>
@@ -127,17 +129,17 @@
                         </div>
                         <div class="space-y-2">
                             <template x-for="(row, i) in schedules" :key="i">
-                                <div class="flex items-center gap-2">
-                                    <x-form.select x-model="row.day">
+                                <div class="flex items-center gap-2" role="group" :aria-label="'LEC schedule row ' + (i + 1)">
+                                    <x-form.select x-model="row.day" aria-label="Day">
                                         @foreach(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'] as $d)
                                             <option value="{{ $d }}">{{ $d }}</option>
                                         @endforeach
                                     </x-form.select>
-                                    <input type="time" x-model="row.startTime"
+                                    <input type="time" x-model="row.startTime" aria-label="Start time"
                                         class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
                                                focus:border-emerald-400 focus:outline-none focus:bg-white" />
                                     <span class="text-xs text-slate-400 shrink-0">to</span>
-                                    <input type="time" x-model="row.endTime"
+                                    <input type="time" x-model="row.endTime" aria-label="End time"
                                         class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
                                                focus:border-emerald-400 focus:outline-none focus:bg-white" />
                                     <button type="button" x-on:click="removeSchedule(i)"
@@ -166,17 +168,17 @@
                         <div class="space-y-2">
                             <template x-for="(row, i) in hours" :key="i">
                                 <div>
-                                    <div class="flex items-center gap-2" :class="hasConflict(row) ? 'ring-1 ring-rose-300 rounded-lg p-1' : ''">
-                                        <x-form.select x-model="row.day">
+                                    <div class="flex items-center gap-2" role="group" :aria-label="'LEC consultation row ' + (i + 1)" :class="hasConflict(row) ? 'ring-1 ring-rose-300 rounded-lg p-1' : ''">
+                                        <x-form.select x-model="row.day" aria-label="Day">
                                             @foreach(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'] as $d)
                                                 <option value="{{ $d }}">{{ $d }}</option>
                                             @endforeach
                                         </x-form.select>
-                                        <input type="time" x-model="row.startTime"
+                                        <input type="time" x-model="row.startTime" aria-label="Start time"
                                             class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
                                                    focus:border-amber-400 focus:outline-none focus:bg-white" />
                                         <span class="text-xs text-slate-400 shrink-0">to</span>
-                                        <input type="time" x-model="row.endTime"
+                                        <input type="time" x-model="row.endTime" aria-label="End time"
                                             class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
                                                    focus:border-amber-400 focus:outline-none focus:bg-white" />
                                         <button type="button" x-on:click="hours.splice(i, 1)"
@@ -318,17 +320,17 @@
                                 </div>
                                 <div class="space-y-2">
                                     <template x-for="(row, i) in schedules" :key="i">
-                                        <div class="flex items-center gap-2">
-                                            <x-form.select x-model="row.day">
+                                        <div class="flex items-center gap-2" role="group" :aria-label="'LAB schedule row ' + (i + 1)">
+                                            <x-form.select x-model="row.day" aria-label="Day">
                                                 @foreach(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'] as $d)
                                                     <option value="{{ $d }}">{{ $d }}</option>
                                                 @endforeach
                                             </x-form.select>
-                                            <input type="time" x-model="row.startTime"
+                                            <input type="time" x-model="row.startTime" aria-label="Start time"
                                                 class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
                                                        focus:border-blue-400 focus:outline-none focus:bg-white" />
                                             <span class="text-xs text-slate-400 shrink-0">to</span>
-                                            <input type="time" x-model="row.endTime"
+                                            <input type="time" x-model="row.endTime" aria-label="End time"
                                                 class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
                                                        focus:border-blue-400 focus:outline-none focus:bg-white" />
                                             <button type="button" x-on:click="schedules.splice(i, 1)"
@@ -356,17 +358,17 @@
                                 <div class="space-y-2">
                                     <template x-for="(row, i) in hours" :key="i">
                                         <div>
-                                            <div class="flex items-center gap-2" :class="hasConflict(row) ? 'ring-1 ring-rose-300 rounded-lg p-1' : ''">
-                                                <x-form.select x-model="row.day">
+                                            <div class="flex items-center gap-2" role="group" :aria-label="'LAB consultation row ' + (i + 1)" :class="hasConflict(row) ? 'ring-1 ring-rose-300 rounded-lg p-1' : ''">
+                                                <x-form.select x-model="row.day" aria-label="Day">
                                                     @foreach(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'] as $d)
                                                         <option value="{{ $d }}">{{ $d }}</option>
                                                     @endforeach
                                                 </x-form.select>
-                                                <input type="time" x-model="row.startTime"
+                                                <input type="time" x-model="row.startTime" aria-label="Start time"
                                                     class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
                                                            focus:border-amber-400 focus:outline-none focus:bg-white" />
                                                 <span class="text-xs text-slate-400 shrink-0">to</span>
-                                                <input type="time" x-model="row.endTime"
+                                                <input type="time" x-model="row.endTime" aria-label="End time"
                                                     class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
                                                            focus:border-amber-400 focus:outline-none focus:bg-white" />
                                                 <button type="button" x-on:click="hours.splice(i, 1)"
@@ -393,15 +395,20 @@
         </x-wizard.section>
     @endif
 
-    {{-- ── Bottom Save All ──────────────────────────────────────────────────── --}}
-    <div class="flex justify-end pt-1">
+    {{-- ── Sticky Save All footer ────────────────────────────────────────────── --}}
+    <div class="sticky bottom-0 z-10 mt-4 flex items-center justify-between gap-4 px-5 py-3
+                rounded-xl border border-[#dedee2] bg-white/95 backdrop-blur-sm"
+         style="box-shadow: 0 -2px 16px rgba(0,0,0,.10);">
+        <p class="text-xs text-slate-400 hidden sm:block">
+            Changes in both LEC and LAB sections are saved together.
+        </p>
         <x-button variant="sm-add"
             x-on:click="
-        window._beforeSaveAllPromises = [];
-        window.dispatchEvent(new CustomEvent('before-save-all'));
-        await Promise.all(window._beforeSaveAllPromises);
-        await $wire.save();
-    "
+                window._beforeSaveAllPromises = [];
+                window.dispatchEvent(new CustomEvent('before-save-all'));
+                await Promise.all(window._beforeSaveAllPromises);
+                await $wire.save();
+            "
             wireTarget="save" loading="Saving…">
             <i class="bx bx-save"></i> Save All
         </x-button>

@@ -5,6 +5,7 @@ namespace App\Livewire\Syllabus;
 use App\Services\Syllabus\SyllabusReviewService;
 use App\Services\Syllabus\SyllabusSnapshotService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\On;
@@ -27,11 +28,9 @@ class SyllabusWizard extends Component
     public string    $currentStep = 'academic_calendar';
     public array     $stepDirty   = [];
 
-    // Reviewer list lives here because addReviewer() / removeReviewer() are
-    // parent methods called via $parent.* from the child blade. After each
-    // mutation we reload and dispatch 'syllabus-reviewers-updated' so ReviewStep
-    // re-renders with the fresh list passed from render() below.
-    public array $reviewers = [];
+    // Cached step-missing status — computed once per render() to avoid
+    // repeated DB queries when Blade loops call the indicator check.
+    public array $stepMissing = [];
 
     // ── Mount ─────────────────────────────────────────────────────────────────
 
@@ -70,7 +69,6 @@ class SyllabusWizard extends Component
         }
 
         $this->initializeStepState();
-        $this->loadReviewers();
     }
 
     // ── Event listeners ───────────────────────────────────────────────────────
@@ -102,13 +100,9 @@ class SyllabusWizard extends Component
 
     // ── Reviewer management ───────────────────────────────────────────────────
     //
-    // Revision history mutations (saveRevisions, addRevision, removeRevision,
-    // saveConcurred, saveApproved) all live on ReviewStep directly — no $parent
-    // calls needed, removing the "public method not found on component" error.
-    //
-    // Called from the child blade via $parent.addReviewer($wire.selectedReviewerId)
-    // and $parent.removeReviewer(id). After each mutation we reload $this->reviewers
-    // and dispatch 'syllabus-reviewers-updated' so ReviewStep re-renders.
+    // Reviewer mutations live on the parent because the child Blade calls
+    // $parent.addReviewer() / $parent.removeReviewer(). After each mutation
+    // we dispatch 'syllabus-reviewers-updated' so ReviewStep re-renders.
 
     public function addReviewer(?int $reviewerUserId = null): void
     {
@@ -130,7 +124,6 @@ class SyllabusWizard extends Component
         }
 
         $this->dispatch('lw-toast', type: 'success', message: 'Reviewer assigned (auto-approved).');
-        $this->loadReviewers();
         $this->dispatch('syllabus-reviewers-updated');
     }
 
@@ -150,7 +143,6 @@ class SyllabusWizard extends Component
         }
 
         $this->dispatch('lw-toast', type: 'success', message: 'Reviewer removed.');
-        $this->loadReviewers();
         $this->dispatch('syllabus-reviewers-updated');
     }
 
@@ -174,7 +166,6 @@ class SyllabusWizard extends Component
         }
 
         $this->dispatch('lw-toast', type: 'success', message: 'Reviewer status updated.');
-        $this->loadReviewers();
         $this->dispatch('syllabus-reviewers-updated');
     }
 
@@ -192,6 +183,13 @@ class SyllabusWizard extends Component
         if ($this->currentStep === 'course_components') {
             // Tell Alpine to push its local state, then Alpine calls navigate-after-save
             $this->dispatch('request-push-and-navigate', toStep: $toStep);
+            return;
+        }
+
+        // Guard: block navigation if Course Outcomes has unsaved pending changes.
+        // Dispatch event so Alpine's coManager can auto-save before navigating.
+        if ($this->currentStep === 'course_outcomes' && ($this->stepDirty['course_outcomes'] ?? false)) {
+            $this->dispatch('request-co-save-and-navigate', toStep: $toStep);
             return;
         }
 
@@ -286,82 +284,79 @@ class SyllabusWizard extends Component
         $programName    = $program?->program_name ?? $program?->name ?? 'Unknown Program';
         $facultyName    = $faculty?->name    ?? 'User ' . ($syllabus->prepared_by ?? 'Unknown');
 
-        $version      = (int) (CompleteSyllabus::where('syllabus_id', $syllabus->id)->max('version') ?? 0) + 1;
         $academicYear = $syllabus->academicCalendar?->academic_year ?? 'N-A';
         $semester     = $syllabus->academicCalendar?->semester      ?? 'N-A';
         $courseCode   = $syllabus->course?->course_code             ?? 'COURSE';
-        $courseName   = $syllabus->course?->course_name             ?? $courseCode;
 
-        // Folder: College / Department / Program / Faculty / Course Code / v{n} (AY Sem)
-        $versionFolder = "v{$version} ({$academicYear} {$semester})";
-        $baseDir = implode('/', [
-            'Syllabus Snapshots',
-            $collegeName,
-            $departmentName,
-            $programName,
-            $facultyName,
-            $courseCode,
-            $versionFolder,
-        ]);
-
-        // File names: Complete - COURSE CODE.html, etc.
-        $storagePath           = $baseDir . '/Complete - ' . $courseCode . '.html';
-        $storagePathAbridged   = $baseDir . '/Abridged - ' . $courseCode . '.html';
-        $storagePathAssessment = $baseDir . '/Assessment - ' . $courseCode . '.html';
-
-        // 3. Write to local disk (primary) ────────────────────────────────────
+        // 3. Write to local disk + Google Drive + persist DB record ────────
+        //    Wrapped in a transaction with lockForUpdate to prevent race
+        //    conditions when two requests compute the same version number.
         try {
-            Storage::disk('syllabus_snapshots')->put($storagePath,           $html);
-            Storage::disk('syllabus_snapshots')->put($storagePathAbridged,   $htmlAbridged);
-            Storage::disk('syllabus_snapshots')->put($storagePathAssessment, $htmlAssessment);
+            $version = DB::transaction(function () use ($syllabus, $html, $htmlAbridged, $htmlAssessment, $collegeName, $departmentName, $programName, $facultyName, $courseCode, $academicYear, $semester) {
+
+                // Lock to prevent concurrent inserts from computing the same version
+                $version = (int) (CompleteSyllabus::where('syllabus_id', $syllabus->id)
+                    ->lockForUpdate()
+                    ->max('version') ?? 0) + 1;
+
+                $versionFolder = "v{$version} ({$academicYear} {$semester})";
+                $baseDir = implode('/', [
+                    'Syllabus Snapshots',
+                    $collegeName,
+                    $departmentName,
+                    $programName,
+                    $facultyName,
+                    $courseCode,
+                    $versionFolder,
+                ]);
+
+                $storagePath           = $baseDir . '/Complete - ' . $courseCode . '.html';
+                $storagePathAbridged   = $baseDir . '/Abridged - ' . $courseCode . '.html';
+                $storagePathAssessment = $baseDir . '/Assessment - ' . $courseCode . '.html';
+
+                // Write to local disk (primary)
+                Storage::disk('syllabus_snapshots')->put($storagePath,           $html);
+                Storage::disk('syllabus_snapshots')->put($storagePathAbridged,   $htmlAbridged);
+                Storage::disk('syllabus_snapshots')->put($storagePathAssessment, $htmlAssessment);
+
+                // Mirror to Google Drive (secondary, silent — never blocks save)
+                try {
+                    Storage::disk('google')->put($storagePath,           $html);
+                    Storage::disk('google')->put($storagePathAbridged,   $htmlAbridged);
+                    Storage::disk('google')->put($storagePathAssessment, $htmlAssessment);
+                } catch (Throwable) {
+                    // Non-fatal — local copy is the source of truth
+                }
+
+                // Persist version record
+                CompleteSyllabus::create([
+                    'syllabus_id'          => $syllabus->id,
+                    'course_id'            => $syllabus->course_id,
+                    'academic_year'        => $academicYear,
+                    'semester'             => $semester,
+                    'pdf_path'             => $storagePath,
+                    'abridged_path'        => $storagePathAbridged,
+                    'evaluation_path'      => $storagePathAssessment,
+                    'version'              => $version,
+                    'approved_at'          => null,
+                    'approved_by'          => null,
+                    'checksum'             => hash('sha256', $html),
+                    'checksum_abridged'    => hash('sha256', $htmlAbridged),
+                    'checksum_evaluation'  => hash('sha256', $htmlAssessment),
+                ]);
+
+                // Update syllabus status
+                $syllabus->forceFill([
+                    'status'       => 'under_review',
+                    'current_step' => 'review',
+                ])->save();
+
+                return $version;
+            });
         } catch (Throwable $e) {
             report($e);
-            $this->dispatch('lw-toast', type: 'error', message: 'Failed to save snapshot locally: ' . $e->getMessage());
+            $this->dispatch('lw-toast', type: 'error', message: 'Save-as-done failed: ' . $e->getMessage());
             return;
-        }
-
-        // 3b. Mirror to Google Drive (secondary, silent — never blocks save) ──
-        try {
-            Storage::disk('google')->put($storagePath,           $html);
-            Storage::disk('google')->put($storagePathAbridged,   $htmlAbridged);
-            Storage::disk('google')->put($storagePathAssessment, $htmlAssessment);
-        } catch (Throwable $e) {
-            report($e);
-            // Non-fatal — local copy is the source of truth
-        }
-
-        // 4. Persist version record — always store the GDrive path ────────────
-        try {
-            CompleteSyllabus::create([
-                'syllabus_id'          => $syllabus->id,
-                'course_id'            => $syllabus->course_id,
-                'academic_year'        => $academicYear,
-                'semester'             => $semester,
-                'pdf_path'             => $storagePath,
-                'abridged_path'        => $storagePathAbridged,
-                'evaluation_path'      => $storagePathAssessment,
-                'version'              => $version,
-                'approved_at'          => null,
-                'approved_by'          => null,
-                'checksum'             => hash('sha256', $html),
-                'checksum_abridged'    => hash('sha256', $htmlAbridged),
-                'checksum_evaluation'  => hash('sha256', $htmlAssessment),
-            ]);
-        } catch (Throwable $e) {
-            report($e);
-            $this->dispatch('lw-toast', type: 'error', message: 'DB record error: ' . $e->getMessage());
-            return;
-        }
-
-        // 5. Update syllabus status ───────────────────────────────────────
-        try {
-            $syllabus->forceFill([
-                'status'       => 'under_review',
-                'current_step' => 'review',
-            ])->save();
-        } catch (Throwable $e) {
-            report($e);
-            // Non-fatal — snapshot is saved
         }
 
         $this->syllabus->refresh();
@@ -413,6 +408,14 @@ class SyllabusWizard extends Component
 
     public function render()
     {
+        // Cache step-missing indicators once per render so Blade loops
+        // don't fire repeated DB queries for each step tab.
+        $checkedSteps = ['academic_calendar', 'course_components', 'course_outcomes', 'weekly_coverage', 'course_evaluation'];
+        $this->stepMissing = [];
+        foreach ($checkedSteps as $step) {
+            $this->stepMissing[$step] = $this->stepHasMissingRequired($step);
+        }
+
         return view('livewire.syllabus.syllabus-wizard');
     }
 
@@ -507,25 +510,4 @@ class SyllabusWizard extends Component
         }
     }
 
-    private function loadReviewers(): void
-    {
-        if (! $this->syllabus) {
-            $this->reviewers = [];
-            return;
-        }
-
-        $this->reviewers = $this->syllabus->reviewers()
-            ->with('user')
-            ->orderBy('created_at')
-            ->get()
-            ->map(fn ($reviewer) => [
-                'id'         => $reviewer->id,
-                'user_id'    => $reviewer->user_id,
-                'user_name'  => $reviewer->user->name,
-                'user_email' => $reviewer->user->email,
-                'status'     => $reviewer->status,
-            ])
-            ->values()
-            ->all();
-    }
 }

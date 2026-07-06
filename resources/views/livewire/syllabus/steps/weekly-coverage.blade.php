@@ -1,5 +1,9 @@
 <div>
 
+    {{-- Drawers (Alpine state lives on wizard root x-data) --}}
+    @include('livewire.syllabus.steps.weekly-partials.schedule-drawer')
+    @include('livewire.syllabus.steps.weekly-partials.calendar-info-drawer')
+
     {{-- ══ Header: title, buttons, info cards, stats ═══════════════════════════ --}}
     @include('livewire.syllabus.steps.weekly-partials.header')
 
@@ -25,6 +29,19 @@
 
         {{-- ══ LEC / LAB tab switcher ══════════════════════════════════════════ --}}
         @include('livewire.syllabus.steps.weekly-partials.tab-switcher')
+
+        {{-- Completion dot legend — visible only when sidebar legend is hidden --}}
+        <div class="lg:hidden flex items-center gap-4 mb-3 px-1 flex-wrap">
+            <span class="flex items-center gap-1.5 text-xs text-slate-500">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span> Complete
+            </span>
+            <span class="flex items-center gap-1.5 text-xs text-slate-500">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-400 shrink-0"></span> Incomplete
+            </span>
+            <span class="flex items-center gap-1.5 text-xs text-slate-500">
+                <span class="w-2.5 h-2.5 rounded-full bg-slate-300 shrink-0"></span> Empty
+            </span>
+        </div>
 
         {{-- ══ Week accordion ══════════════════════════════════════════════════ --}}
         @include('livewire.syllabus.steps.weekly-partials.week-accordion')

@@ -344,6 +344,12 @@ class CourseEvaluationService
             'courseHasLab'      => $courseHasLab,
             'lecPerformanceStd' => $lecPerformanceStd,
             'labPerformanceStd' => $labPerformanceStd,
+            'lecStdNum'         => $courseHasLab ? 67 : 100,
+            'labStdNum'         => 33,
+            'lecTotal'          => 0,
+            'labTotal'          => 0,
+            'lecPassingMark'    => 60,
+            'labPassingMark'    => 60,
             'rows'              => [],
             'inputs'            => [],
         ];

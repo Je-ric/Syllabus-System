@@ -93,18 +93,6 @@ class ComponentsStep extends Component
         $this->dispatch('navigate-after-save', step: $toStep);
     }
 
-    // ── Schedule mutations (kept for backward compat, no longer called from UI) ──
-
-    public function addSchedule(string $prefix): void
-    {
-        $this->{$prefix . '_schedules'}[] = ['day' => 'Monday', 'time' => ''];
-    }
-
-    public function removeSchedule(string $prefix, int $index): void
-    {
-        array_splice($this->{$prefix . '_schedules'}, $index, 1);
-    }
-
     // ── Consultation Hours ────────────────────────────────────────────────────
 
     /**
@@ -267,7 +255,10 @@ class ComponentsStep extends Component
 
         $course = $syllabus->course;
         if ($course) {
-            $this->lec_performance_standard = $this->toOptionValue($course->passing_mark, '60.00');
+            $passing = trim((string) ($course->passing_mark ?? ''));
+            $this->lec_performance_standard = is_numeric($passing)
+                ? number_format((float) $passing, 2, '.', '')
+                : '60.00';
             $this->lec_class_hours          = $course->lec_class_hours ?? '3 hr';
             $this->lab_class_hours          = $course->lab_class_hours;
         }
@@ -371,10 +362,10 @@ class ComponentsStep extends Component
         $classHours = $prefix === 'lec' ? $this->lec_class_hours : ($this->lab_class_hours ?? '3 hr');
 
         return [
-            'instructor_name'      => $this->str($get('instructor_name'))  ?? '',
-            'instructor_email'     => $this->str($get('instructor_email')) ?? '',
-            'phone'                => $this->nullable($get('phone')),
-            'office'               => $this->nullable($get('office')),
+            'instructor_name'      => filled($get('instructor_name'))  ? trim($get('instructor_name'))  : '',
+            'instructor_email'     => filled($get('instructor_email')) ? trim($get('instructor_email')) : '',
+            'phone'                => blank($get('phone'))  ? null : trim($get('phone')),
+            'office'               => blank($get('office')) ? null : trim($get('office')),
             'class_hours'          => $classHours,
             'performance_standard' => $this->toDecimal($this->lec_performance_standard, 60.00),
         ];
@@ -382,28 +373,10 @@ class ComponentsStep extends Component
 
     // ── Value helpers ─────────────────────────────────────────────────────────
 
-    private function nullable(mixed $v): ?string
-    {
-        $s = trim((string) ($v ?? ''));
-        return $s === '' ? null : $s;
-    }
-
-    private function str(mixed $v, ?string $fallback = null): ?string
-    {
-        $s = trim((string) ($v ?? ''));
-        return $s !== '' ? $s : $fallback;
-    }
-
     private function toDecimal(mixed $v, float $fallback): float
     {
         $s = str_replace('%', '', trim((string) ($v ?? '')));
         return is_numeric($s) ? round((float) $s, 2) : $fallback;
-    }
-
-    private function toOptionValue(mixed $v, string $fallback): string
-    {
-        $s = trim((string) ($v ?? ''));
-        return is_numeric($s) ? number_format((float) $s, 2, '.', '') : $fallback;
     }
 
     // ── Conflict helpers ─────────────────────────────────────────────────────

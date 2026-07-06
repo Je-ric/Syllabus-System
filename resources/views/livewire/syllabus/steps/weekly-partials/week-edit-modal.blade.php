@@ -3,6 +3,11 @@
     Single modal. Field tabs on top, one Quill editor below.
     Fixes: bullet→number Quill bug, font inheritance, list rendering in preview.
 --}}
+{{-- Confirm dialog for reset-week — rendered at z-[60] so it appears above the modal (z-50) --}}
+<div class="[&>div]:z-60!">
+    @include('livewire.programs.partials.confirm-modal', ['confirmNs' => 'week'])
+</div>
+
 <div x-data="weekEditModal()" x-on:open-week-modal.window="open($event.detail)" x-on:week-modal-saved.window="close()"
     class="relative z-50">
 
@@ -26,7 +31,11 @@
         x-transition:leave="transition ease-in duration-150"
         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
         x-transition:leave-end="opacity-0 translate-y-2 scale-[0.98]"
-        class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="week-modal-title"
+        x-on:keydown.escape.window="close()">
 
         <div class="bg-white rounded-2xl shadow-2xl ring-1 ring-black/[0.06] w-full max-w-7xl flex flex-col overflow-hidden"
              style="height: min(88vh, 780px);"
@@ -44,7 +53,7 @@
 
                     <div class="min-w-0">
                         <div class="flex items-center gap-2 flex-wrap">
-                            <span class="text-sm font-bold text-slate-800"
+                            <span id="week-modal-title" class="text-sm font-bold text-slate-800"
                                   x-text="'Week ' + weekNo"></span>
                             <span class="text-slate-300">·</span>
                             <span class="text-sm font-medium text-[#009639] truncate"
@@ -107,7 +116,7 @@
                     <button type="button"
                         x-on:click="switchField('references_materials')"
                         x-bind:class="activeField === 'references_materials'
-                            ? 'border-b-2 border-blue-500 text-blue-700 bg-white'
+                            ? 'border-b-2 border-[#009639] text-[#009639] bg-white'
                             : 'border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'"
                         class="shrink-0 inline-flex items-center gap-1.5
                                px-4 py-2.5 text-xs font-semibold
@@ -319,9 +328,10 @@
 
                 {{-- Danger zone --}}
                 <button type="button" x-on:click="resetWeek()" x-bind:disabled="saving"
+                    title="This permanently clears all content for this week."
                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
-                           text-slate-400 hover:text-rose-500 hover:bg-rose-50 border border-transparent
-                           hover:border-rose-200 disabled:opacity-40 transition-all duration-150">
+                           text-rose-400 hover:text-rose-600 hover:bg-rose-50 border border-rose-200
+                           hover:border-rose-300 disabled:opacity-40 transition-all duration-150">
                     <i class="bx bx-reset text-[14px]"></i>
                     Reset week
                 </button>
@@ -387,7 +397,7 @@ function weekEditModal() {
         weekNo:      null,
         weekDates:   '',
         isMvgo:      false,
-        activeField: 'learning_outcomes',
+        activeField: 'topic',
 
         fields: {
             course_outcome_id:  '',
@@ -400,10 +410,10 @@ function weekEditModal() {
         },
 
         richFields: [
-            { key: 'learning_outcomes',   label: 'Unit Learning Outcomes' },
-            { key: 'assessment_task',     label: 'Assessment Task'        },
-            { key: 'topic',               label: 'Topics'                 },
-            { key: 'teaching_activities', label: 'Teaching & Learning Activities' },
+            { key: 'topic',               label: 'Topics'                          },
+            { key: 'learning_outcomes',   label: 'Unit Learning Outcomes'          },
+            { key: 'teaching_activities', label: 'Teaching & Learning Activities'  },
+            { key: 'assessment_task',     label: 'Assessment Task'                 },
         ],
 
         _quill: null,
@@ -424,7 +434,7 @@ function weekEditModal() {
             this.weekDates   = detail.weekDates;
             this.isMvgo      = detail.isMvgo;
             this.fields      = JSON.parse(JSON.stringify(detail.fields));
-            this.activeField = detail.field ?? 'learning_outcomes';
+            this.activeField = detail.field ?? 'topic';
             this.saving      = false;
             this.isOpen      = true;
 
@@ -588,7 +598,13 @@ function weekEditModal() {
         },
 
         async resetWeek() {
-            if (!confirm(`Reset Week ${this.weekNo}? All content will be cleared. This cannot be undone.`)) return;
+            const ok = await this._confirm({
+                title:        'Reset Week ' + this.weekNo + '?',
+                message:      'All content for this week will be permanently cleared. This cannot be undone.',
+                confirmLabel: 'Reset Week',
+                confirmClass: 'bg-rose-600 hover:bg-rose-700 text-white',
+            });
+            if (!ok) return;
             this.saving = true;
             try {
                 await this.$wire.resetWeek(this.weekNo);
@@ -596,6 +612,15 @@ function weekEditModal() {
             } finally {
                 this.saving = false;
             }
+        },
+
+        // ── Confirm dialog (same pattern as coManager) ────────────────────────
+        _confirm(detail) {
+            return new Promise(resolve => {
+                window.dispatchEvent(new CustomEvent('confirm-dialog:week', {
+                    detail: { ...detail, _resolve: resolve }
+                }));
+            });
         },
     };
 }
