@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Storage;
 
+use Illuminate\Support\Facades\DB;
+
 class SyllabusController extends Controller
 {
     public function __construct(
@@ -138,10 +140,48 @@ class SyllabusController extends Controller
 
     public function destroy(Syllabus $syllabus)
     {
+        // Only the preparer can delete their own syllabus.
+        if ($syllabus->prepared_by !== Auth::id()) {
+            abort(403, 'Unauthorized');
+        }
+
+        // Only draft syllabi with no saved versions may be deleted.
+        // Under-review / approved syllabi are protected from accidental removal.
+        if ($syllabus->status !== 'draft') {
+            return redirect()->route('syllabus.index')
+                ->with('toast', [
+                    'message' => 'Only draft syllabi can be deleted.',
+                    'type'    => 'error',
+                ]);
+        }
+
+        // Block deletion if any saved version (CompleteSyllabus) exists.
+        // A saved version means the faculty already froze a snapshot — treat
+        // that as important data worth preserving.
+        if ($syllabus->completeSyllabi()->exists()) {
+            return redirect()->route('syllabus.index')
+                ->with('toast', [
+                    'message' => 'This syllabus has saved versions and cannot be deleted.',
+                    'type'    => 'error',
+                ]);
+        }
+
+        // Cascade-delete all child records and disk files inside a transaction.
+        DB::transaction(function () use ($syllabus) {
+            $this->deleteService->delete($syllabus);
+        });
+
+        AuditLog::record(
+            action: 'deleted',
+            module: 'Syllabus',
+            referenceId: $syllabus->id,
+            description: "Deleted draft syllabus for course #{$syllabus->course_id}."
+        );
+
         return redirect()->route('syllabus.index')
             ->with('toast', [
-                'message' => 'Syllabus deletion is not allowed.',
-                'type'    => 'warning',
+                'message' => 'Syllabus deleted.',
+                'type'    => 'success',
             ]);
     }
 

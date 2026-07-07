@@ -4,6 +4,7 @@ namespace App\Services\Syllabus;
 
 use App\Models\CourseOutcome;
 use App\Models\Syllabus;
+use App\Models\WeekContent;
 
 // All database operations for CourseOutcome records.
 //
@@ -78,7 +79,16 @@ class CourseOutcomeService
         return $this->findAsArray($syllabusId, $outcome->id);
     }
 
+    // Count how many WeekContent rows are currently linked to this outcome.
+    // Used by the UI to warn the faculty before deletion.
+    public function countLinkedWeeks(int $outcomeId): int
+    {
+        return WeekContent::where('course_outcome_id', $outcomeId)->count();
+    }
+
     // Delete an outcome and re-sync codes so remaining rows stay sequential.
+    // Also nulls out any WeekContent rows that referenced this outcome so
+    // weekly coverage does not hold a dangling foreign key.
     // @throws \Illuminate\Database\Eloquent\ModelNotFoundException
     public function delete(int $syllabusId, int $outcomeId): void
     {
@@ -86,6 +96,11 @@ class CourseOutcomeService
             ->where('id', $outcomeId)
             ->firstOrFail()
             ->delete();
+
+        // Null out the reference on any week content rows that used this CO
+        // so weekly coverage does not hold a dangling foreign key.
+        WeekContent::where('course_outcome_id', $outcomeId)
+            ->update(['course_outcome_id' => null]);
 
         $this->resyncCodes($syllabusId);
     }

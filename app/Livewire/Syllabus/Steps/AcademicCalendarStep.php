@@ -79,7 +79,7 @@ class AcademicCalendarStep extends Component
         // and slows every subsequent request for this component.
 
         // $formatterSem = AcademicCalendar::getFormattedSemester();
-        
+
         $this->academicCalendars = AcademicCalendar::query()
             ->orderBy('academic_year', 'desc')
             ->orderBy('semester', 'desc')

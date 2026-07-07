@@ -86,6 +86,7 @@ class ComponentsStep extends Component
         $this->dispatch('syllabus-step-saved', step: 'course_components');
     }
 
+    #[On('request-push-and-navigate')]
     public function onPushAndNavigate(string $toStep): void
     {
         $this->saveComponents();

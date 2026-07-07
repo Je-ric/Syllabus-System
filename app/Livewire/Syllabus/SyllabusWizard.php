@@ -56,14 +56,21 @@ class SyllabusWizard extends Component
                 $this->syllabus->update(['current_step' => $this->currentStep]);
             }
         } elseif ($courseId) {
-            $this->course   = Course::with('program')->findOrFail($courseId);
-            $this->syllabus = Syllabus::create([
-                'course_id'            => $this->course->id,
-                'academic_calendar_id' => null,
-                'status'               => 'draft',
-                'current_step'         => 'academic_calendar',
-                'prepared_by'          => Auth::id(),
-            ]);
+            // Syllabus creation is handled by SyllabusController::wizard() before
+            // this component mounts. By the time mount() runs with a courseId,
+            // the controller has already created the record and redirected with
+            // syllabusId — so this branch should never be reached in normal flow.
+            // Guard defensively: look up an existing record or abort.
+            $existing = Syllabus::where('course_id', $courseId)
+                ->where('prepared_by', Auth::id())
+                ->first();
+
+            if ($existing) {
+                $this->syllabus = $existing->load('course.program');
+                $this->course   = $this->syllabus->course;
+            } else {
+                abort(404, 'No syllabus found for this course.');
+            }
         } else {
             abort(404);
         }
@@ -180,6 +187,11 @@ class SyllabusWizard extends Component
             return;
         }
 
+        // Block leaving the academic calendar step until a calendar is selected.
+        // if ($this->currentStep === 'academic_calendar' && empty($this->syllabus->academic_calendar_id)) {
+        //     $this->dispatch('lw-toast', type: 'warning', message: 'Select an academic calendar before continuing.');
+        //     return;
+        // }
         // Step 2: Alpine holds schedule/consultation state — must push before saving.
         if ($this->currentStep === 'course_components') {
             $this->dispatch('request-push-and-navigate', toStep: $toStep);
@@ -295,72 +307,81 @@ class SyllabusWizard extends Component
         $semester     = $syllabus->academicCalendar?->semester      ?? 'N-A';
         $courseCode   = $syllabus->course?->course_code             ?? 'COURSE';
 
-        // 3. Write to local disk + Google Drive + persist DB record ────────
-        //    Wrapped in a transaction with lockForUpdate to prevent race
-        //    conditions when two requests compute the same version number.
+        // 3. Reserve a version number, build paths, write files, then commit DB.
+        //    File I/O is intentionally kept outside the transaction so a DB
+        //    rollback never leaves orphaned files, and a file-write failure
+        //    never leaves a DB record pointing at a missing file.
         try {
-            $version = DB::transaction(function () use ($syllabus, $html, $htmlAbridged, $htmlAssessment, $collegeName, $departmentName, $programName, $facultyName, $courseCode, $academicYear, $semester) {
+            // Step A — reserve version number inside a short transaction.
+            [$version, $storagePath, $storagePathAbridged, $storagePathAssessment] =
+                DB::transaction(function () use ($syllabus, $collegeName, $departmentName, $programName, $facultyName, $courseCode, $academicYear, $semester) {
+                    $version = (int) (CompleteSyllabus::where('syllabus_id', $syllabus->id)
+                        ->lockForUpdate()
+                        ->max('version') ?? 0) + 1;
 
-                // Lock to prevent concurrent inserts from computing the same version
-                $version = (int) (CompleteSyllabus::where('syllabus_id', $syllabus->id)
-                    ->lockForUpdate()
-                    ->max('version') ?? 0) + 1;
+                    $versionFolder = "v{$version} ({$academicYear} {$semester})";
+                    $baseDir = implode('/', [
+                        'Syllabus Snapshots',
+                        $collegeName,
+                        $departmentName,
+                        $programName,
+                        $facultyName,
+                        $courseCode,
+                        $versionFolder,
+                    ]);
 
-                $versionFolder = "v{$version} ({$academicYear} {$semester})";
-                $baseDir = implode('/', [
-                    'Syllabus Snapshots',
-                    $collegeName,
-                    $departmentName,
-                    $programName,
-                    $facultyName,
-                    $courseCode,
-                    $versionFolder,
-                ]);
+                    return [
+                        $version,
+                        $baseDir . '/Complete - '   . $courseCode . '.html',
+                        $baseDir . '/Abridged - '   . $courseCode . '.html',
+                        $baseDir . '/Assessment - ' . $courseCode . '.html',
+                    ];
+                });
 
-                $storagePath           = $baseDir . '/Complete - ' . $courseCode . '.html';
-                $storagePathAbridged   = $baseDir . '/Abridged - ' . $courseCode . '.html';
-                $storagePathAssessment = $baseDir . '/Assessment - ' . $courseCode . '.html';
+            // Step B — write files to disk (outside any transaction).
+            Storage::disk('syllabus_snapshots')->put($storagePath,           $html);
+            Storage::disk('syllabus_snapshots')->put($storagePathAbridged,   $htmlAbridged);
+            Storage::disk('syllabus_snapshots')->put($storagePathAssessment, $htmlAssessment);
 
-                // Write to local disk (primary)
-                Storage::disk('syllabus_snapshots')->put($storagePath,           $html);
-                Storage::disk('syllabus_snapshots')->put($storagePathAbridged,   $htmlAbridged);
-                Storage::disk('syllabus_snapshots')->put($storagePathAssessment, $htmlAssessment);
+            // Mirror to Google Drive (secondary, silent — never blocks save).
+            try {
+                Storage::disk('google')->put($storagePath,           $html);
+                Storage::disk('google')->put($storagePathAbridged,   $htmlAbridged);
+                Storage::disk('google')->put($storagePathAssessment, $htmlAssessment);
+            } catch (Throwable) {
+                // Non-fatal — local copy is the source of truth.
+            }
 
-                // Mirror to Google Drive (secondary, silent — never blocks save)
-                try {
-                    Storage::disk('google')->put($storagePath,           $html);
-                    Storage::disk('google')->put($storagePathAbridged,   $htmlAbridged);
-                    Storage::disk('google')->put($storagePathAssessment, $htmlAssessment);
-                } catch (Throwable) {
-                    // Non-fatal — local copy is the source of truth
-                }
-
-                // Persist version record
+            // Step C — persist DB record now that files exist.
+            DB::transaction(function () use ($syllabus, $storagePath, $storagePathAbridged, $storagePathAssessment, $version, $academicYear, $semester, $html, $htmlAbridged, $htmlAssessment) {
                 CompleteSyllabus::create([
-                    'syllabus_id'          => $syllabus->id,
-                    'course_id'            => $syllabus->course_id,
-                    'academic_year'        => $academicYear,
-                    'semester'             => $semester,
-                    'pdf_path'             => $storagePath,
-                    'abridged_path'        => $storagePathAbridged,
-                    'evaluation_path'      => $storagePathAssessment,
-                    'version'              => $version,
-                    'approved_at'          => null,
-                    'approved_by'          => null,
-                    'checksum'             => hash('sha256', $html),
-                    'checksum_abridged'    => hash('sha256', $htmlAbridged),
-                    'checksum_evaluation'  => hash('sha256', $htmlAssessment),
+                    'syllabus_id'         => $syllabus->id,
+                    'course_id'           => $syllabus->course_id,
+                    'academic_year'       => $academicYear,
+                    'semester'            => $semester,
+                    'pdf_path'            => $storagePath,
+                    'abridged_path'       => $storagePathAbridged,
+                    'evaluation_path'     => $storagePathAssessment,
+                    'version'             => $version,
+                    'approved_at'         => null,
+                    'approved_by'         => null,
+                    'checksum'            => hash('sha256', $html),
+                    'checksum_abridged'   => hash('sha256', $htmlAbridged),
+                    'checksum_evaluation' => hash('sha256', $htmlAssessment),
                 ]);
 
-                // Update syllabus status
                 $syllabus->forceFill([
                     'status'       => 'under_review',
                     'current_step' => 'review',
                 ])->save();
-
-                return $version;
             });
         } catch (Throwable $e) {
+            // If files were written but the DB commit failed, clean them up.
+            foreach ([$storagePath ?? null, $storagePathAbridged ?? null, $storagePathAssessment ?? null] as $path) {
+                if ($path) {
+                    try { Storage::disk('syllabus_snapshots')->delete($path); } catch (Throwable) {}
+                }
+            }
             report($e);
             $this->dispatch('lw-toast', type: 'error', message: 'Save-as-done failed: ' . $e->getMessage());
             return;
@@ -475,6 +496,7 @@ class SyllabusWizard extends Component
                 $weekContentIds = WeekContent::query()
                     ->join('syllabus_weeks', 'syllabus_weeks.id', '=', 'week_contents.syllabus_week_id')
                     ->where('syllabus_weeks.syllabus_id', $syllabusId)
+                    ->whereRaw("syllabus_weeks.week_no <> 1")  // exclude MVGO week
                     ->whereRaw("TRIM(COALESCE(week_contents.assessment_task, '')) <> ''")
                     ->whereRaw("TRIM(week_contents.assessment_task) <> 'Non-Teaching Week'")
                     ->pluck('week_contents.id');

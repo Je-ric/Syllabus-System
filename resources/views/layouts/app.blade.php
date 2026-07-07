@@ -246,6 +246,39 @@
     @livewireScripts
     <script src="https://cdn.jsdelivr.net/gh/livewire/sortable@v1.x.x/dist/livewire-sortable.js"></script>
     @stack('scripts')
+
+    {{-- #22 Session expiry modal — shown when Livewire gets a 419 (CSRF/session expired).
+         Warns the user before they lose unsaved Quill editor content. --}}
+    <div id="session-expired-modal"
+         class="hidden fixed inset-0 z-[9999] flex items-center justify-center">
+        <div class="absolute inset-0 bg-[#09090b]/50 backdrop-blur-[3px]"></div>
+        <div class="relative bg-white rounded-[16px] border border-[#e4e4e7] p-6 w-80 text-center"
+             style="box-shadow: 0 8px 40px rgba(0,0,0,0.14);">
+            <div class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-50 border border-amber-200 mx-auto mb-4">
+                <i class="bx bx-time-five text-2xl text-amber-500"></i>
+            </div>
+            <h3 class="text-[14px] font-bold text-[#09090b] mb-1">Session Expired</h3>
+            <p class="text-[12px] text-[#71717a] mb-4">
+                Your session has expired. Any unsaved content in open editors may be lost.
+                Please save your work, then refresh the page to continue.
+            </p>
+            <button onclick="window.location.reload()"
+                class="w-full px-4 py-2 rounded-[10px] bg-[#09090b] text-white text-[13px] font-semibold hover:bg-[#18181b] transition">
+                Refresh &amp; Log In
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Listen for Livewire request errors — a 419 means the CSRF token
+        // expired (session timed out). Show the modal instead of silently failing.
+        document.addEventListener('livewire:request-error', (e) => {
+            if (e.detail?.status === 419) {
+                document.getElementById('session-expired-modal')?.classList.remove('hidden');
+            }
+        });
+    </script>
+
     <script>
         const sidebar  = document.getElementById('app-sidebar');
         const overlay  = document.getElementById('sidebar-overlay');

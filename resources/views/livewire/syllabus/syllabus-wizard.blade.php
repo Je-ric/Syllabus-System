@@ -4,7 +4,15 @@
     $currentIndex = array_search($currentStep, $stepsOrder, true);
 @endphp
 
-<div x-data="{ _navigating: false, scheduleOpen: false, calInfoOpen: false }"
+<div x-data="{
+        _navigating: false,
+        scheduleOpen: false,
+        calInfoOpen: false,
+        tryNavigate(fn) {
+            this._navigating = true;
+            fn();
+        }
+    }"
     x-on:syllabus-step-changed.window="_navigating = false"
     x-on:lw-toast.window="if ($event.detail?.type === 'error') _navigating = false">
 
@@ -97,12 +105,14 @@
                 'course_evaluation' => ['label' => 'Course Evaluation',  'icon' => 'bx-bar-chart-alt-2','short' => 'Evaluation'],
                 'review'            => ['label' => 'Review & Submit',    'icon' => 'bx-check-shield',   'short' => 'Review'],
             ];
-            $missingSteps = ['academic_calendar', 'course_components', 'course_outcomes', 'weekly_coverage'];
+            // course_evaluation added so the amber dot appears when weights are incomplete 
+            $missingSteps = ['academic_calendar', 'course_components', 'course_outcomes', 'weekly_coverage', 'course_evaluation'];
             $missingLabels = [
                 'academic_calendar' => 'No calendar selected',
                 'course_components' => 'Instructor details incomplete',
                 'course_outcomes'   => 'No course outcomes saved',
                 'weekly_coverage'   => 'Some weeks have missing content',
+                'course_evaluation' => 'Evaluation weights incomplete',
             ];
             $bannerColors = [
                 'academic_calendar' => '#92d12c',
@@ -133,10 +143,10 @@
                                     $isDone    = $currentIndex !== false && $idx !== false && $idx < $currentIndex;
                                     $hasMiss   = in_array($step, $missingSteps) && ($this->stepMissing[$step] ?? false);
                                 @endphp
-                                <button type="button" wire:click="clickTab('{{ $step }}')"
+                                <button type="button"
+                                    x-on:click="tryNavigate(() => $wire.clickTab('{{ $step }}'))"
                                     wire:loading.attr="disabled"
                                     wire:target="clickTab,goPreviousStep,goNextStep,submitForReview,saveAsDone"
-                                    x-on:click="_navigating = true"
                                     class="relative flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-[12px] font-medium transition-colors focus:outline-none disabled:opacity-50
                                            {{ $isCurrent ? 'bg-[#f0fdf4] text-[#15803d] border border-[#86efac]' : 'text-[#71717a] hover:bg-[#f4f4f5] border border-transparent' }}">
                                     <span class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0
@@ -210,9 +220,9 @@
                 <div class="mt-4 flex justify-between items-center gap-3">
                     <div>
                         @if ($this->hasPreviousStep())
-                            <x-button variant="cancel" wire:click="goPreviousStep" wire:loading.attr="disabled"
+                            <x-button variant="cancel" wire:loading.attr="disabled"
                                 wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview,saveAsDone"
-                                x-on:click="_navigating = true">
+                                x-on:click="tryNavigate(() => $wire.goPreviousStep())">
                                 <i class="bx bx-chevron-left"></i>
                                 <span class="hidden sm:inline">Previous</span>
                             </x-button>
@@ -220,9 +230,9 @@
                     </div>
                     <div>
                         @if ($this->hasNextStep())
-                            <x-button variant="primary" wire:click="goNextStep" wire:loading.attr="disabled"
+                            <x-button variant="primary" wire:loading.attr="disabled"
                                 wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview,saveAsDone"
-                                loading="Saving…" x-on:click="_navigating = true">
+                                loading="Saving…" x-on:click="tryNavigate(() => $wire.goNextStep())">
                                 <span class="hidden sm:inline">Next</span> <i class="bx bx-chevron-right"></i>
                             </x-button>
                         @endif
@@ -269,10 +279,10 @@
                                 $isCompleted = $currentIndex !== false && $idx !== false && $idx < $currentIndex;
                                 $hasMissing = in_array($step, $missingSteps) && ($this->stepMissing[$step] ?? false);
                             @endphp
-                            <button type="button" wire:click="clickTab('{{ $step }}')"
+                            <button type="button"
+                                x-on:click="tryNavigate(() => $wire.clickTab('{{ $step }}'))"
                                 wire:loading.attr="disabled"
                                 wire:target="clickTab,goPreviousStep,goNextStep,submitForReview,saveAsDone"
-                                x-on:click="_navigating = true"
                                 class="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-all duration-150
                                        focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed border-l-[3px]
                                        {{ $isCurrent

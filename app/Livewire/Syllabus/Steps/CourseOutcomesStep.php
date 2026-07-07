@@ -164,13 +164,15 @@ class CourseOutcomesStep extends Component
                 ])->values()->all() ?? [];
 
             $this->courseInfo = [
-                'course_code'   => $course->course_code,
-                'course_title'  => $course->course_title,
-                'description'   => $course->course_description,
-                'lec_units'     => $course->lec_class_hours,
-                'lab_units'     => $course->lab_class_hours,
-                'program_title' => $course->program?->name,
-                'po_rows'       => $poRows,
+                'course_code'    => $course->course_code,
+                'course_title'   => $course->course_title,
+                'description'    => $course->course_description,
+                'credit_units'   => $course->credit_units,
+                'lec_class_hours'=> $course->lec_class_hours,
+                'lab_class_hours'=> $course->lab_class_hours,
+                'has_lec_lab'    => $course->has_lec_lab,
+                'program_title'  => $course->program?->name,
+                'po_rows'        => $poRows,
             ];
         } else {
             $this->courseInfo = [];
