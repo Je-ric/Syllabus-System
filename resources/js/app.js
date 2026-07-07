@@ -1,4 +1,5 @@
 import './bootstrap';
+import './syllabus-wizard';
 // import Alpine from 'alpinejs';
 // import Precognition from 'laravel-precognition-alpine'; // for input requests validation
 

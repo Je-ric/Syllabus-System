@@ -193,7 +193,7 @@
                     <ul class="space-y-1.5">
                         @foreach ($mats as $mat)
                             <li>
-                                <a href="{{ $mat['url'] }}" target="_blank" rel="noopener"
+                                <a href="{{ preg_match('#^https?://#i', $mat['url']) ? $mat['url'] : '#' }}" target="_blank" rel="noopener"
                                     class="group flex items-center justify-between gap-2
                                            rounded-[8px] border border-[#e4e4e7] px-3 py-2
                                            hover:border-[#bfdbfe] hover:bg-[#eff6ff]

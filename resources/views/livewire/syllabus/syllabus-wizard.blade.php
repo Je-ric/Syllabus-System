@@ -14,7 +14,8 @@
         }
     }"
     x-on:syllabus-step-changed.window="_navigating = false"
-    x-on:lw-toast.window="if ($event.detail?.type === 'error') _navigating = false">
+    x-on:lw-toast.window="if ($event.detail?.type === 'error') _navigating = false"
+    x-on:livewire:navigated.window="_navigating = false">
 
     <x-page-header icon="bx-book-open" title="{{ $syllabus->id ? 'Edit' : 'Create' }} Syllabus"
         desc="{{ $course->course_code }} — {{ $course->course_title }}">
@@ -28,72 +29,23 @@
     <x-panel>
 
         {{-- ══ Navigation overlay ══════════════════════════════════════════════ --}}
-        <div x-show="_navigating" x-cloak
-            class="fixed inset-0 z-50 flex items-center justify-center">
-            <div class="absolute inset-0 bg-[#09090b]/40 backdrop-blur-[3px]"></div>
-            <div class="relative flex flex-col items-center gap-5 px-10 py-8 rounded-[20px] border border-[#e4e4e7] bg-white"
-                 style="width:300px; box-shadow: 0 8px 40px rgba(0,0,0,0.12);">
-                <div class="relative w-14 h-14 flex items-center justify-center">
-                    <svg class="absolute inset-0 animate-spin" viewBox="0 0 64 64" fill="none" style="color:#ffd700;">
-                        <circle cx="32" cy="32" r="27" stroke="currentColor" stroke-width="3"
-                            stroke-linecap="round" stroke-dasharray="130" stroke-dashoffset="90" />
-                    </svg>
-                    <svg class="absolute inset-0" viewBox="0 0 64 64" fill="none" style="color:#e4e4e7;">
-                        <circle cx="32" cy="32" r="27" stroke="currentColor" stroke-width="2" />
-                    </svg>
-                    <img src="{{ asset('assets/CLSU-LOGO-removebg.png') }}" alt="CLSU"
-                        class="relative w-8 h-8 object-contain" />
-                </div>
-                <div class="text-center">
-                    <p class="text-[13px] font-bold text-[#09090b]">Saving changes…</p>
-                    <p class="text-[11px] mt-0.5 text-[#71717a]">Please wait</p>
-                </div>
-                <div class="flex justify-center gap-1">
-                    <div class="w-1.5 h-1.5 bg-[#16a34a] rounded-full animate-bounce"></div>
-                    <div class="w-1.5 h-1.5 bg-[#16a34a] rounded-full animate-bounce" style="animation-delay:0.1s;"></div>
-                    <div class="w-1.5 h-1.5 bg-[#16a34a] rounded-full animate-bounce" style="animation-delay:0.2s;"></div>
-                </div>
-            </div>
-        </div>
+        <template x-if="_navigating">
+            <x-wizard.overlay title="Saving changes…" subtitle="Please wait" />
+        </template>
 
         {{-- ══ Save-as-Done overlay ════════════════════════════════════════════ --}}
         <div wire:loading.class.remove="hidden" wire:target="saveAsDone"
-            class="hidden fixed inset-0 z-50 flex items-center justify-center">
-            <div class="absolute inset-0 bg-[#09090b]/50 backdrop-blur-[4px]"></div>
-            <div class="relative flex flex-col items-center gap-5 px-10 py-8 rounded-[20px] border border-[#e4e4e7] bg-white"
-                 style="width:300px; box-shadow: 0 8px 40px rgba(0,0,0,0.12);">
-                <div class="relative w-14 h-14 flex items-center justify-center">
-                    <svg class="absolute inset-0 animate-spin" viewBox="0 0 64 64" fill="none" style="color:#ffd700;">
-                        <circle cx="32" cy="32" r="27" stroke="currentColor" stroke-width="3"
-                            stroke-linecap="round" stroke-dasharray="130" stroke-dashoffset="90" />
-                    </svg>
-                    <svg class="absolute inset-0" viewBox="0 0 64 64" fill="none" style="color:#e4e4e7;">
-                        <circle cx="32" cy="32" r="27" stroke="currentColor" stroke-width="2" />
-                    </svg>
-                    <svg class="absolute inset-0 animate-spin" viewBox="0 0 64 64" fill="none"
-                        style="color:#16a34a; animation-direction:reverse; animation-duration:1.4s;">
-                        <circle cx="32" cy="32" r="18" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-dasharray="60" stroke-dashoffset="40" />
-                    </svg>
-                    <img src="{{ asset('assets/CLSU-LOGO-removebg.png') }}" alt="CLSU"
-                        class="relative w-8 h-8 object-contain" />
+            class="hidden">
+            <x-wizard.overlay title="Saving Syllabus…" subtitle="This may take a few seconds" :dual="true">
+                <div class="flex items-center justify-center gap-2.5 px-3 py-2 rounded-[10px] bg-[#f4f4f5]">
+                    <i class="bx bx-code-alt text-sm shrink-0 text-[#ffd700]"></i>
+                    <span class="text-[11px] text-[#71717a]">Rendering syllabus…</span>
                 </div>
-                <div class="text-center">
-                    <p class="text-[13px] font-bold text-[#09090b]">Saving Syllabus…</p>
-                    <p class="text-[11px] mt-0.5 text-[#71717a]">This may take a few seconds</p>
+                <div class="flex items-center justify-center gap-2.5 px-3 py-2 rounded-[10px] bg-[#f4f4f5]">
+                    <i class="bx bx-data text-sm shrink-0 text-[#ffd700]"></i>
+                    <span class="text-[11px] text-[#71717a]">Freezing version record…</span>
                 </div>
-                <div class="w-full space-y-1.5">
-                    <div class="flex items-center justify-center gap-2.5 px-3 py-2 rounded-[10px] bg-[#f4f4f5]">
-                        <i class="bx bx-code-alt text-sm shrink-0 text-[#ffd700]"></i>
-                        <span class="text-[11px] text-[#71717a]">Rendering syllabus…</span>
-                    </div>
-                    <div class="flex items-center justify-center gap-2.5 px-3 py-2 rounded-[10px] bg-[#f4f4f5]">
-                        <i class="bx bx-data text-sm shrink-0 text-[#ffd700]"></i>
-                        <span class="text-[11px] text-[#71717a]">Freezing version record…</span>
-                    </div>
-                </div>
-                <div class="w-12 h-[2px] rounded-full bg-[#16a34a]"></div>
-            </div>
+            </x-wizard.overlay>
         </div>
 
         @php
@@ -105,7 +57,6 @@
                 'course_evaluation' => ['label' => 'Course Evaluation',  'icon' => 'bx-bar-chart-alt-2','short' => 'Evaluation'],
                 'review'            => ['label' => 'Review & Submit',    'icon' => 'bx-check-shield',   'short' => 'Review'],
             ];
-            // course_evaluation added so the amber dot appears when weights are incomplete 
             $missingSteps = ['academic_calendar', 'course_components', 'course_outcomes', 'weekly_coverage', 'course_evaluation'];
             $missingLabels = [
                 'academic_calendar' => 'No calendar selected',
@@ -114,13 +65,15 @@
                 'weekly_coverage'   => 'Some weeks have missing content',
                 'course_evaluation' => 'Evaluation weights incomplete',
             ];
-            $bannerColors = [
-                'academic_calendar' => '#92d12c',
-                'course_components' => '#4eab18',
-                'course_outcomes'   => '#009639',
-                'weekly_coverage'   => '#038303',
-                'course_evaluation' => '#1a5f30',
-                'review'            => '#003a10',
+            // Use CSS variable steps so colors stay in sync with the design system.
+            // Each step gets a progressively darker shade of the CLSU green ramp.
+            $bannerVars = [
+                'academic_calendar' => 'color-mix(in srgb, var(--clsu-green) 55%, #fff)',
+                'course_components' => 'color-mix(in srgb, var(--clsu-green) 70%, #fff)',
+                'course_outcomes'   => 'var(--clsu-green)',
+                'weekly_coverage'   => 'color-mix(in srgb, var(--clsu-green) 100%, #000 5%)',
+                'course_evaluation' => 'color-mix(in srgb, var(--clsu-green) 100%, #000 20%)',
+                'review'            => 'color-mix(in srgb, var(--clsu-green) 100%, #000 40%)',
             ];
         @endphp
 
@@ -173,13 +126,13 @@
 
                     {{-- Step banner --}}
                     @php
-                        $stepNums = array_keys($navSteps);
-                        $stepNum  = (array_search($currentStep, $stepNums) ?: 0) + 1;
-                        $bannerColor = $bannerColors[$currentStep] ?? '#16a34a';
+                        $stepNums    = array_keys($navSteps);
+                        $stepNum     = (array_search($currentStep, $stepNums) ?: 0) + 1;
+                        $bannerColor = $bannerVars[$currentStep] ?? 'var(--clsu-green)';
                         $bannerLabel = $navSteps[$currentStep]['label'] ?? '';
                     @endphp
                     <div class="flex items-center gap-3 px-5 py-2.5 border-b border-[#e4e4e7] rounded-t-[16px]"
-                         style="background: linear-gradient(135deg, {{ $bannerColor }}12 0%, #ffffff 100%);">
+                         style="background: linear-gradient(135deg, color-mix(in srgb, {{ $bannerColor }} 8%, #fff) 0%, #ffffff 100%);">
                         <span class="flex items-center justify-center w-6 h-6 rounded-full text-white text-[11px] font-bold shrink-0"
                               style="background-color: {{ $bannerColor }};">
                             {{ $stepNum }}
@@ -274,10 +227,10 @@
                     <nav class="py-1" aria-label="Wizard Steps">
                         @foreach ($navSteps as $step => $meta)
                             @php
-                                $idx        = array_search($step, $stepsOrder, true);
-                                $isCurrent  = $currentStep === $step;
+                                $idx         = array_search($step, $stepsOrder, true);
+                                $isCurrent   = $currentStep === $step;
                                 $isCompleted = $currentIndex !== false && $idx !== false && $idx < $currentIndex;
-                                $hasMissing = in_array($step, $missingSteps) && ($this->stepMissing[$step] ?? false);
+                                $hasMissing  = in_array($step, $missingSteps) && ($this->stepMissing[$step] ?? false);
                             @endphp
                             <button type="button"
                                 x-on:click="tryNavigate(() => $wire.clickTab('{{ $step }}'))"
@@ -315,11 +268,14 @@
                 @if ($currentStep === 'weekly_coverage')
                     <div class="mt-3 rounded-[16px] border border-[#e4e4e7] bg-white overflow-hidden"
                          style="box-shadow: 0 1px 8px rgba(0,0,0,0.05);">
-                        <button type="button" x-on:click="scheduleOpen = true"
+                        {{-- Schedule and Calendar Info open drawers that live inside the weekly-coverage
+                             Livewire component. We dispatch custom events; the step component listens
+                             for them on its own x-data rather than relying on wizard-root Alpine vars. --}}
+                        <button type="button" x-on:click="$dispatch('open-schedule-drawer')"
                             class="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-medium text-[#52525b] hover:bg-[#f4f4f5] transition-colors">
                             <i class="bx bx-time text-sm text-[#a1a1aa]"></i> Schedule
                         </button>
-                        <button type="button" x-on:click="calInfoOpen = true"
+                        <button type="button" x-on:click="$dispatch('open-calendar-info-drawer')"
                             class="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-medium text-[#52525b] hover:bg-[#f4f4f5] transition-colors">
                             <i class="bx bx-calendar text-sm text-[#a1a1aa]"></i> Calendar Info
                         </button>

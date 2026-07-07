@@ -5,7 +5,9 @@
         _pushing = true;
         window._beforeSaveAllPromises = [];
         window.dispatchEvent(new CustomEvent('before-save-all'));
-        await Promise.all(window._beforeSaveAllPromises);
+        try {
+            await Promise.all(window._beforeSaveAllPromises);
+        } catch { _pushing = false; return; }
         await $wire.onPushAndNavigate($event.detail.toStep);
         _pushing = false;
     ">
@@ -81,7 +83,6 @@
 
             {{-- ── Side-by-side: Class Schedule | Consultation Hours ─────── --}}
             <div x-data="{
-                days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
                 schedules: @js($lec_schedules ?? []).map(s => ({ day: s.day, ...parseTime(s.time) })),
                 hours: @js($userConsultationHours ?? []).map(h => ({ day: h.day, ...parseTime(h.time) })),
 
@@ -107,10 +108,10 @@
                         window.dispatchEvent(new CustomEvent('lw-toast', {
                             detail: { type: 'error', message: 'Fix overlapping consultation hours (LEC) before saving.' }
                         }));
-                        return; // don't push — Save All / Next will still proceed for other sections, but this one's data stays unsaved server-side
+                        return Promise.reject('lec-conflict');
                     }
-                    await $wire.pushLecSchedules(this.schedules.map(s => ({ day: s.day, time: formatTime(s.startTime, s.endTime) })));
-                    await $wire.pushConsultationHours(this.hours.map(h => ({ day: h.day, time: formatTime(h.startTime, h.endTime) })));
+                    await this.$wire.pushLecSchedules(this.schedules.map(s => ({ day: s.day, time: formatTime(s.startTime, s.endTime) })));
+                    await this.$wire.pushConsultationHours(this.hours.map(h => ({ day: h.day, time: formatTime(h.startTime, h.endTime) })));
                 },
             }" x-on:lec-schedules-updated.window="schedules = $event.detail.schedules"
                 x-on:before-save-all.window="window._beforeSaveAllPromises.push(pushToWire())">
@@ -223,16 +224,13 @@
                             Laboratory Instructor
                             <span x-show="!hasInstructor" class="text-rose-500 normal-case font-medium">* Required</span>
                         </label>
-                        <select x-model="selectedUserId" x-on:change="selectUser($event.target.value)"
-                            class="w-full max-w-xl rounded-lg border px-3 py-2 text-sm text-slate-700 transition-colors"
-                            :class="hasInstructor
-                                ? 'border-blue-200 bg-white focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100'
-                                : 'border-amber-300 bg-amber-50 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100'">
+                        <x-form.select x-model="selectedUserId" x-on:change="selectUser($event.target.value)"
+                            class="max-w-xl">
                             <option value="">— Select a Laboratory Instructor —</option>
                             @foreach ($labUsers as $u)
                                 <option value="{{ $u['id'] }}">{{ $u['name'] }} ({{ $u['email'] }})</option>
                             @endforeach
-                        </select>
+                        </x-form.select>
                     </div>
 
                     {{-- ── Blocker ──────────────────────────────────────────── --}}
@@ -402,13 +400,16 @@
         </p>
         <button type="button"
             x-bind:disabled="_saving"
+            wire:loading.attr="disabled"
+            wire:target="save"
             x-on:click="async () => {
-                // Set _saving immediately so the spinner renders before any wire calls.
                 _saving = true;
                 await $nextTick();
                 window._beforeSaveAllPromises = [];
                 window.dispatchEvent(new CustomEvent('before-save-all'));
-                await Promise.all(window._beforeSaveAllPromises);
+                try {
+                    await Promise.all(window._beforeSaveAllPromises);
+                } catch { _saving = false; return; }
                 await $wire.save();
                 _saving = false;
             }"
@@ -427,101 +428,5 @@
         </button>
     </div>
 
-    <script>
-        function parseTime(timeStr) {
-            if (!timeStr) return { startTime: '', endTime: '' };
-            const parts = timeStr.split(' - ');
-            if (parts.length !== 2) return { startTime: '', endTime: '' };
-            const toInput = (t) => {
-                const m = t.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
-                if (!m) return '';
-                let h = parseInt(m[1]), min = m[2], period = m[3].toUpperCase();
-                if (period === 'PM' && h !== 12) h += 12;
-                if (period === 'AM' && h === 12) h = 0;
-                return String(h).padStart(2, '0') + ':' + min;
-            };
-            return { startTime: toInput(parts[0]), endTime: toInput(parts[1]) };
-        }
-
-        function formatTime(start, end) {
-            if (!start || !end) return '';
-            const fmt = (t) => {
-                const [h, m] = t.split(':').map(Number);
-                const period = h >= 12 ? 'PM' : 'AM';
-                const h12 = h % 12 || 12;
-                return h12 + ':' + String(m).padStart(2, '0') + ' ' + period;
-            };
-            return fmt(start) + ' - ' + fmt(end);
-        }
-
-        function labSection(initUserId, initUsers, initSchedules, initHours) {
-            const userMap = {};
-            (initUsers || []).forEach(u => { userMap[u.id] = u; });
-
-            const initUser = initUserId ? userMap[initUserId] : null;
-
-            return {
-                selectedUserId: initUserId || '',
-                labName: initUser?.name || '',
-                labEmail: initUser?.email || '',
-                labPhone: initUser?.phone_number || '',
-                labOffice: initUser?.office || '',
-                schedules: (initSchedules || []).map(s => ({ day: s.day, ...parseTime(s.time) })),
-                hours: (initHours || []).map(h => ({ day: h.day, ...parseTime(h.time) })),
-                days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-
-                get hasInstructor() {
-                    return this.selectedUserId !== '' && this.selectedUserId !== null && this.selectedUserId !== undefined;
-                },
-
-                async selectUser(id) {
-                    this.selectedUserId = id;
-                    if (!id) {
-                        await this.$wire.clearLabInstructor();
-                        return;
-                    }
-                    await this.$wire.selectLabInstructor(parseInt(id));
-                },
-
-                onInstructorSelected(detail) {
-                    const d = Array.isArray(detail) ? detail[0] : detail;
-                    this.labName = d?.name || '';
-                    this.labEmail = d?.email || '';
-                    this.labPhone = d?.phone || '';
-                    this.labOffice = d?.office || '';
-                    this.hours = (d?.consultationHours || []).map(h => ({ day: h.day, ...parseTime(h.time) }));
-                },
-
-                timesOverlap(aStart, aEnd, bStart, bEnd) {
-                    if (!aStart || !aEnd || !bStart || !bEnd) return false;
-                    return aStart < bEnd && bStart < aEnd;
-                },
-                hasConflict(hourRow) {
-                    return this.schedules.some(s =>
-                        s.day === hourRow.day &&
-                        this.timesOverlap(hourRow.startTime, hourRow.endTime, s.startTime, s.endTime)
-                    );
-                },
-                hasAnyConflicts() {
-                    return this.hours.some(h => this.hasConflict(h));
-                },
-
-                async pushToWire() {
-                    if (this.hasAnyConflicts()) {
-                        window.dispatchEvent(new CustomEvent('lw-toast', {
-                            detail: { type: 'error', message: 'Fix overlapping consultation hours (LAB) before saving.' }
-                        }));
-                        return;
-                    }
-                    await this.$wire.pushLabSchedules(
-                        this.schedules.map(s => ({ day: s.day, time: formatTime(s.startTime, s.endTime) }))
-                    );
-                    await this.$wire.pushLabConsultationHours(
-                        this.hours.map(h => ({ day: h.day, time: formatTime(h.startTime, h.endTime) }))
-                    );
-                },
-            };
-        }
-    </script>
 
 </div>

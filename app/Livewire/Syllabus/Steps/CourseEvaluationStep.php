@@ -102,6 +102,20 @@ class CourseEvaluationStep extends Component
         $this->dispatch('syllabus-step-saved', step: 'course_evaluation');
     }
 
+    // Accepts the full Alpine weights map in one round-trip, replacing the
+    // previous Promise.all($wire.set()) loop that fired N simultaneous requests.
+    // Shape: [ week_content_id => weight_int, ... ]
+    public function setAllWeights(array $weights): void
+    {
+        foreach ($weights as $id => $value) {
+            $id = (int) $id;
+            if (isset($this->inputs[$id])) {
+                $this->inputs[$id]['weight'] = is_numeric($value) ? (string) (int) $value : '';
+            }
+        }
+        $this->recomputeTotalsFromInputs();
+    }
+
     // ── Private helpers ───────────────────────────────────────────────────────
 
     private function loadData(): void

@@ -80,13 +80,15 @@ class SyllabusWizard extends Component
 
     // ── Event listeners ───────────────────────────────────────────────────────
 
-    #[On('syllabus-step-dirty')]
-    public function onStepDirty(string $step, bool $dirty = true): void
+    // stepDirty is updated from JS without a round-trip to avoid re-renders.
+    // Alpine calls $wire.setStepDirty() which uses skipRender() so no DOM diff occurs.
+    public function setStepDirty(string $step, bool $dirty): void
     {
         if (! array_key_exists($step, $this->syllabus->getWizardSteps())) {
             return;
         }
         $this->stepDirty[$step] = $dirty;
+        $this->skipRender();
     }
 
     #[On('syllabus-step-saved')]
@@ -207,7 +209,7 @@ class SyllabusWizard extends Component
         }
 
         // Step 3: if dirty, tell Alpine to save pending COs first, then navigate.
-        if ($this->currentStep === 'course_outcomes' && ($this->stepDirty['course_outcomes'] ?? false)) {
+        if ($this->currentStep === 'course_outcomes' && ($this->stepDirty['course_outcomes'] ?? false) === true) {
             $this->dispatch('request-co-save-and-navigate', toStep: $toStep);
             return;
         }
@@ -414,7 +416,7 @@ class SyllabusWizard extends Component
             return null;
         }
 
-        if (($this->stepDirty['course_outcomes'] ?? false) === true) {
+        if (($this->stepDirty['course_outcomes'] ?? false) === true) { // set via setStepDirty(), no re-render
             $this->dispatch('lw-toast', type: 'warning', message: 'Save Course Outcomes first before submitting.');
             return null;
         }

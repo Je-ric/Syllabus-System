@@ -219,9 +219,8 @@
 
                         {{-- Passing mark --}}
                         <td class="px-4 py-3 text-center align-middle">
-                            @php $rowPassingMark = $lecPassingMark ?? 60; @endphp
                             <x-feedback-status.status-indicator variant="slate"
-                                size="sm">{{ $rowPassingMark }}%</x-feedback-status.status-indicator>
+                                size="sm">{{ $lecPassingMark }}%</x-feedback-status.status-indicator>
                         </td>
 
                     </tr>
@@ -232,6 +231,7 @@
                     <td class="px-4 py-3 border-r border-slate-200 align-middle">
                         <x-feedback-status.status-indicator variant="slate">Total</x-feedback-status.status-indicator>
                     </td>
+                    <td class="px-4 py-3"></td>
                     <td class="px-4 py-3"></td>
                     <td class="px-4 py-3 {{ $courseHasLab ? 'border-r border-slate-200' : '' }} align-middle">
                         <template x-if="lecTotal === lecStd && lecTotal > 0">
@@ -277,7 +277,7 @@
                     @endif
                     <td class="px-4 py-3 text-center align-middle">
                         <x-feedback-status.status-indicator variant="slate">Min:
-                            {{ $lecPassingMark ?? 60 }}%</x-feedback-status.status-indicator>
+                            {{ $lecPassingMark }}%</x-feedback-status.status-indicator>
                     </td>
                 </tr>
 

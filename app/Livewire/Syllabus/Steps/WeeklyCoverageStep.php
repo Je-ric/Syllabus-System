@@ -157,6 +157,15 @@ class WeeklyCoverageStep extends Component
             return;
         }
 
+        // Sanitize material URLs — reject javascript: and data: schemes.
+        $materials = array_map(function (array $mat): array {
+            $url = trim((string) ($mat['url'] ?? ''));
+            if ($url !== '' && ! preg_match('#^https?://#i', $url)) {
+                $url = '';
+            }
+            return ['name' => $mat['name'] ?? '', 'url' => $url];
+        }, (array) ($fields['materials'] ?? []));
+
         $this->weekInputs['w' . $weekNo] = [
             'course_outcome_id'   => $fields['course_outcome_id'] ?? null,
             'learning_outcomes'   => $fields['learning_outcomes'] ?? '',
@@ -164,7 +173,7 @@ class WeeklyCoverageStep extends Component
             'topic'               => $fields['topic'] ?? '',
             'teaching_activities' => $fields['teaching_activities'] ?? '',
             'references'          => $fields['references'] ?? [['text' => '']],
-            'materials'           => $fields['materials'] ?? [['name' => '', 'url' => '']],
+            'materials'           => $materials ?: [['name' => '', 'url' => '']],
         ];
 
         $changed = app(WeekContentService::class)->save(

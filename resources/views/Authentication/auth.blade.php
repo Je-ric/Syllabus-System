@@ -167,7 +167,7 @@
                 </div>
 
                 <h2 class="text-2xl font-bold mb-3 leading-snug">
-                    Curriculum & Syllabus <br> Management System<br>
+                    Course Syllabus <br> Management System<br>
                 </h2>
                 {{-- <p class="text-sm text-emerald-50/90 leading-relaxed mb-6">
                     CSMS is the official platform of Central Luzon State University for creating, reviewing, and archiving course syllabi across all colleges and departments.

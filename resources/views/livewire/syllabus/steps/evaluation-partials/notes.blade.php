@@ -45,7 +45,7 @@
                 </p>
             @endif
 
-            @php $lecMark = $lecPassingMark ?? 60; $labMark = $labPassingMark ?? 60; @endphp
+            @php $lecMark = $lecPassingMark; $labMark = $labPassingMark; @endphp
 
             @if ($courseHasLab)
                 <p>

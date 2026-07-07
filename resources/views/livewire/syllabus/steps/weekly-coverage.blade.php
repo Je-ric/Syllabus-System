@@ -1,8 +1,18 @@
 <div>
 
-    {{-- Drawers (Alpine state lives on wizard root x-data) --}}
-    @include('livewire.syllabus.steps.weekly-partials.schedule-drawer')
-    @include('livewire.syllabus.steps.weekly-partials.calendar-info-drawer')
+    {{-- Drawer state — owned here, not on the wizard root, because this is a
+         child Livewire component with its own Alpine scope. The wizard sidebar
+         dispatches open-schedule-drawer / open-calendar-info-drawer on window;
+         we listen here and flip the flags the offcanvas components read. --}}
+    <div x-data="{ scheduleOpen: false, calInfoOpen: false }"
+         x-on:open-schedule-drawer.window="scheduleOpen = true"
+         x-on:open-calendar-info-drawer.window="calInfoOpen = true">
+
+        {{-- Drawers --}}
+        @include('livewire.syllabus.steps.weekly-partials.schedule-drawer')
+        @include('livewire.syllabus.steps.weekly-partials.calendar-info-drawer')
+
+    </div>
 
     {{-- ══ Header: title, buttons, info cards, stats ═══════════════════════════ --}}
     @include('livewire.syllabus.steps.weekly-partials.header')

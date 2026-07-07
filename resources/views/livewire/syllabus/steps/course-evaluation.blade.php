@@ -22,10 +22,10 @@
         labStd: {{ $labStdNum }},
         hasLab: {{ $courseHasLab ? 'true' : 'false' }},
         async flushToWire() {
-            const allInputs = {};
-            Object.entries(this.lec).forEach(([id, v]) => { allInputs['inputs.' + id + '.weight'] = parseInt(v) || 0; });
-            Object.entries(this.lab).forEach(([id, v]) => { allInputs['inputs.' + id + '.weight'] = parseInt(v) || 0; });
-            await Promise.all(Object.entries(allInputs).map(([k, v]) => $wire.set(k, v)));
+            const weights = {};
+            Object.entries(this.lec).forEach(([id, v]) => { weights[id] = parseInt(v) || 0; });
+            Object.entries(this.lab).forEach(([id, v]) => { weights[id] = parseInt(v) || 0; });
+            await $wire.setAllWeights(weights);
         },
     }"
     x-on:request-eval-flush.window="await flushToWire()"
