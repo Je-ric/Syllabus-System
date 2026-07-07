@@ -19,18 +19,12 @@ class ComponentsStep extends Component
     public bool $isLoaded     = false;
 
     // LEC fields
-    public ?string $lec_instructor_name  = null;
-    public ?string $lec_instructor_email = null;
-    public ?string $lec_phone            = null;
-    public ?string $lec_office           = null;
-    public array   $lec_schedules        = [];
+    public ?int  $lec_user_id = null;
+    public array $lec_schedules = [];
 
     // LAB fields
-    public ?string $lab_instructor_name  = null;
-    public ?string $lab_instructor_email = null;
-    public ?string $lab_phone            = null;
-    public ?string $lab_office           = null;
-    public array   $lab_schedules        = [];
+    public ?int  $lab_user_id = null;
+    public array $lab_schedules = [];
 
     // Read-only from course
     public string  $lec_class_hours          = '3 hr';
@@ -56,15 +50,23 @@ class ComponentsStep extends Component
         $labUsers = $this->courseHasLab
             ? User::where('account_status', 'active')
                 ->whereDoesntHave('roles', fn ($q) => $q->where('name', 'admin'))
+                ->when($this->lec_user_id, fn ($q) => $q->where('id', '!=', $this->lec_user_id))
                 ->orderBy('name')
                 ->get(['id', 'name', 'email', 'phone_number', 'office'])
                 ->toArray()
             : [];
 
+        // Fallback: if lec_user_id wasn't persisted yet, use the authenticated user
+        $lecUserId = $this->lec_user_id ?? Auth::id();
+        $lecUser   = $lecUserId ? User::with('consultationHours')->find($lecUserId) : null;
+        $labUser   = $this->lab_user_id ? User::with('consultationHours')->find($this->lab_user_id) : null;
+
         return view('livewire.syllabus.steps.course-components', [
             'course'               => (object) ['has_lec_lab' => $this->courseHasLab],
             'labConsultationHours' => $this->labConsultationHours,
             'labUsers'             => $labUsers,
+            'lecUser'              => $lecUser,
+            'labUser'              => $labUser,
         ]);
     }
 
@@ -74,6 +76,7 @@ class ComponentsStep extends Component
     public function onStepChanged(string $step): void
     {
         if ($step !== 'course_components') return;
+        $this->reset(['lec_user_id', 'lab_user_id', 'lec_schedules', 'lab_schedules', 'userConsultationHours', 'labConsultationHours']);
         $this->isLoaded = false;
         $this->loadData();
     }
@@ -149,9 +152,9 @@ class ComponentsStep extends Component
 
     public function saveLabConsultationHours(array $rows): void
     {
-        if (empty($this->lab_instructor_email)) return;
+        if (! $this->lab_user_id) return;
 
-        $labInstructor = User::where('email', $this->lab_instructor_email)->first();
+        $labInstructor = User::find($this->lab_user_id);
         if (! $labInstructor) return;
 
         $labInstructor->consultationHours()->delete();
@@ -175,7 +178,7 @@ class ComponentsStep extends Component
             return;
         }
         $this->labConsultationHours = $rows;
-        if (! empty($this->lab_instructor_email)) {
+        if ($this->lab_user_id) {
             $this->saveLabConsultationHours($rows);
         }
     }
@@ -189,33 +192,24 @@ class ComponentsStep extends Component
         $user = User::with('consultationHours')->find($userId);
         if (! $user) return;
 
-        $this->lab_instructor_name  = $user->name;
-        $this->lab_instructor_email = $user->email;
-        $this->lab_phone            = $user->phone_number;
-        $this->lab_office           = $user->office;
+        $this->lab_user_id = $user->id;
 
         $this->labConsultationHours = $user->consultationHours
             ->map(fn ($h) => ['day' => $h->day, 'time' => $h->time])
             ->values()->all();
 
         $this->dispatch('lab-instructor-selected', [
-            'name'              => $this->lab_instructor_name,
-            'email'             => $this->lab_instructor_email,
-            'phone'             => $this->lab_phone,
-            'office'            => $this->lab_office,
+            'name'              => $user->name,
+            'email'             => $user->email,
+            'phone'             => $user->phone_number,
+            'office'            => $user->office,
             'consultationHours' => $this->labConsultationHours,
         ]);
     }
 
-    /**
-     * Clear lab instructor selection.
-     */
     public function clearLabInstructor(): void
     {
-        $this->lab_instructor_name  = null;
-        $this->lab_instructor_email = null;
-        $this->lab_phone            = null;
-        $this->lab_office           = null;
+        $this->lab_user_id = null;
         $this->labConsultationHours = [];
 
         $this->dispatch('lab-instructor-selected', [
@@ -241,7 +235,7 @@ class ComponentsStep extends Component
     public function updated(string $property): void
     {
         if (! $this->isLoaded) return;
-        if (! str_starts_with($property, 'lec_') && ! str_starts_with($property, 'lab_')) return;
+        if (! in_array($property, ['lec_user_id', 'lab_user_id'])) return;
         $this->dispatch('syllabus-step-dirty', step: 'course_components', dirty: true);
     }
 
@@ -276,14 +270,11 @@ class ComponentsStep extends Component
             ->where('syllabus_id', $this->syllabusId)->where('type', 'LEC')->first();
 
         if ($lec) {
-            $this->lec_instructor_name  = $lec->instructor_name;
-            $this->lec_instructor_email = $lec->instructor_email;
-            $this->lec_phone            = $lec->phone;
-            $this->lec_office           = $lec->office;
-            $this->lec_schedules        = $lec->schedules
+            $this->lec_user_id   = $lec->user_id ?? Auth::id();
+            $this->lec_schedules = $lec->schedules
                 ->map(fn ($s) => ['day' => $s->day, 'time' => $s->time])->values()->all();
         } else {
-            $this->prefillLecFromUser();
+            $this->lec_user_id = Auth::id();
         }
 
         if ($this->courseHasLab) {
@@ -291,16 +282,12 @@ class ComponentsStep extends Component
                 ->where('syllabus_id', $this->syllabusId)->where('type', 'LAB')->first();
 
             if ($lab) {
-                $this->lab_instructor_name  = $lab->instructor_name;
-                $this->lab_instructor_email = $lab->instructor_email;
-                $this->lab_phone            = $lab->phone;
-                $this->lab_office           = $lab->office;
-                $this->lab_schedules        = $lab->schedules
+                $this->lab_user_id   = $lab->user_id;
+                $this->lab_schedules = $lab->schedules
                     ->map(fn ($s) => ['day' => $s->day, 'time' => $s->time])->values()->all();
 
-                // Fetch consultation hours from the lab instructor's user record
-                if (! empty($this->lab_instructor_email)) {
-                    $labInstructor = User::where('email', $this->lab_instructor_email)->first();
+                if ($this->lab_user_id) {
+                    $labInstructor = User::with('consultationHours')->find($this->lab_user_id);
                     $this->labConsultationHours = $labInstructor?->consultationHours
                         ->map(fn ($h) => ['day' => $h->day, 'time' => $h->time])
                         ->values()->all() ?? [];
@@ -311,20 +298,15 @@ class ComponentsStep extends Component
         $this->isLoaded = true;
     }
 
-    private function prefillLecFromUser(): void
-    {
-        $user = Auth::user();
-        if (! $user) return;
-        if (empty($this->lec_instructor_name)  && ! empty($user->name))         $this->lec_instructor_name  = $user->name;
-        if (empty($this->lec_instructor_email) && ! empty($user->email))        $this->lec_instructor_email = $user->email;
-        if (empty($this->lec_phone)            && ! empty($user->phone_number)) $this->lec_phone            = $user->phone_number;
-        if (empty($this->lec_office)           && ! empty($user->office))       $this->lec_office           = $user->office;
-    }
-
     // ── Private: save ─────────────────────────────────────────────────────────
 
     private function saveComponents(): void
     {
+        // Ensure lec_user_id is always set before saving
+        if (! $this->lec_user_id) {
+            $this->lec_user_id = Auth::id();
+        }
+
         $lec = CourseComponent::updateOrCreate(
             ['syllabus_id' => $this->syllabusId, 'type' => 'LEC'],
             $this->buildPayload('lec')
@@ -342,31 +324,30 @@ class ComponentsStep extends Component
 
     private function syncSchedules(CourseComponent $component, array $schedules): void
     {
-        $component->schedules()->delete();
+        \Illuminate\Support\Facades\DB::transaction(function () use ($component, $schedules) {
+            $component->schedules()->delete();
 
-        foreach ($schedules as $s) {
-            $day  = trim($s['day']  ?? '');
-            $time = trim($s['time'] ?? '');
-            if ($day !== '' && $time !== '') {
-                CourseComponentSchedule::create([
-                    'course_component_id' => $component->id,
-                    'day'                 => $day,
-                    'time'                => $time,
-                ]);
+            foreach ($schedules as $s) {
+                $day  = trim($s['day']  ?? '');
+                $time = trim($s['time'] ?? '');
+                if ($day !== '' && $time !== '') {
+                    CourseComponentSchedule::create([
+                        'course_component_id' => $component->id,
+                        'day'                 => $day,
+                        'time'                => $time,
+                    ]);
+                }
             }
-        }
+        });
     }
 
     private function buildPayload(string $prefix): array
     {
-        $get        = fn (string $f) => $this->{$prefix . '_' . $f};
         $classHours = $prefix === 'lec' ? $this->lec_class_hours : ($this->lab_class_hours ?? '3 hr');
+        $userId     = $prefix === 'lec' ? $this->lec_user_id : $this->lab_user_id;
 
         return [
-            'instructor_name'      => filled($get('instructor_name'))  ? trim($get('instructor_name'))  : '',
-            'instructor_email'     => filled($get('instructor_email')) ? trim($get('instructor_email')) : '',
-            'phone'                => blank($get('phone'))  ? null : trim($get('phone')),
-            'office'               => blank($get('office')) ? null : trim($get('office')),
+            'user_id'              => $userId,
             'class_hours'          => $classHours,
             'performance_standard' => $this->toDecimal($this->lec_performance_standard, 60.00),
         ];
@@ -404,7 +385,7 @@ class ComponentsStep extends Component
 
     private function parseTimeRange(string $time): ?array
     {
-        $parts = array_map('trim', explode('-', $time));
+        $parts = array_map('trim', explode(' - ', $time, 2));
         if (count($parts) !== 2) return null;
         try {
             return [

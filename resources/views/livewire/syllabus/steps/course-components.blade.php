@@ -23,26 +23,27 @@
                 </p>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <x-form.label isRequired>Instructor Name</x-form.label>
-                        <x-form.input wire:model.defer="lec_instructor_name" placeholder="Enter instructor name"
-                            disabled />
+                        <x-form.label>Instructor Name</x-form.label>
+                        <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
+                            {{ $lecUser?->name ?? '—' }}</p>
                         <p class="mt-1 text-xs text-slate-400">Auto-populated from your account profile.</p>
                     </div>
                     <div>
-                        <x-form.label isRequired>Instructor Email</x-form.label>
-                        <x-form.input type="email" wire:model.defer="lec_instructor_email"
-                            placeholder="instructor@clsu.edu.ph" disabled />
+                        <x-form.label>Instructor Email</x-form.label>
+                        <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
+                            {{ $lecUser?->email ?? '—' }}</p>
                         <p class="mt-1 text-xs text-slate-400">Auto-populated from your account profile.</p>
                     </div>
                     <div>
-                        <x-form.label>Phone <span
-                                class="text-slate-400 font-normal normal-case tracking-normal">(optional)</span></x-form.label>
-                        <x-form.input wire:model.defer="lec_phone" placeholder="09XX XXX XXXX" disabled />
+                        <x-form.label>Phone</x-form.label>
+                        <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
+                            {{ $lecUser?->phone_number ?? '—' }}</p>
                         <p class="mt-1 text-xs text-slate-400">Auto-populated from your account profile.</p>
                     </div>
                     <div>
                         <x-form.label>Office</x-form.label>
-                        <x-form.input wire:model.defer="lec_office" placeholder="Building / Room" disabled />
+                        <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
+                            {{ $lecUser?->office ?? '—' }}</p>
                         <p class="mt-1 text-xs text-slate-400">Auto-populated from your account profile.</p>
                     </div>
                 </div>
@@ -206,11 +207,8 @@
     {{-- ══ Laboratory ═══════════════════════════════════════════════════════ --}}
     @if ($course->has_lec_lab)
         <x-wizard.section title="Laboratory (LAB)" icon="test-tube" color="blue">
-            <div x-data="labSection(@js($lab_instructor_email ? \App\Models\User::where('email', $lab_instructor_email)->value('id') ?? '' : ''),
-                @js($lab_instructor_name ?? ''),
-                @js($lab_instructor_email ?? ''),
-                @js($lab_phone ?? ''),
-                @js($lab_office ?? ''),
+            <div x-data="labSection(@js($lab_user_id ?? ''),
+                @js($labUsers),
                 @js($lab_schedules ?? []),
                 @js($labConsultationHours ?? []))"
                 x-on:lab-instructor-selected.window="onInstructorSelected($event.detail)"
@@ -441,13 +439,18 @@
             return fmt(start) + ' - ' + fmt(end);
         }
 
-        function labSection(initUserId, initName, initEmail, initPhone, initOffice, initSchedules, initHours) {
+        function labSection(initUserId, initUsers, initSchedules, initHours) {
+            const userMap = {};
+            (initUsers || []).forEach(u => { userMap[u.id] = u; });
+
+            const initUser = initUserId ? userMap[initUserId] : null;
+
             return {
                 selectedUserId: initUserId || '',
-                labName: initName || '',
-                labEmail: initEmail || '',
-                labPhone: initPhone || '',
-                labOffice: initOffice || '',
+                labName: initUser?.name || '',
+                labEmail: initUser?.email || '',
+                labPhone: initUser?.phone_number || '',
+                labOffice: initUser?.office || '',
                 schedules: (initSchedules || []).map(s => ({ day: s.day, ...parseTime(s.time) })),
                 hours: (initHours || []).map(h => ({ day: h.day, ...parseTime(h.time) })),
                 days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],

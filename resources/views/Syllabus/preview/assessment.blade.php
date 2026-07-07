@@ -399,11 +399,11 @@
                 @php
                     $preparedByName =
                         collect($syllabus->components ?? [])
-                            ->pluck('instructor_name')
+                            ->map(fn ($c) => $c->user?->name)
                             ->filter()
                             ->unique()
                             ->implode(' / ') ?:
-                        $lecComponent?->instructor_name ?? 'N/A';
+                        $lecComponent?->user?->name ?? 'N/A';
                 @endphp
 
                 <p style="display:inline-block; padding-top:4px; min-width:220px;">

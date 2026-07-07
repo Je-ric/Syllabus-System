@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,12 +12,9 @@ class CourseComponent extends Model
 
     protected $fillable = [
         'syllabus_id',
+        'user_id',
         'type',
         'class_hours',
-        'instructor_name',
-        'instructor_email',
-        'phone',
-        'office',
         'performance_standard',
     ];
 
@@ -26,6 +24,11 @@ class CourseComponent extends Model
     public function syllabus()
     {
         return $this->belongsTo(Syllabus::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function schedules()

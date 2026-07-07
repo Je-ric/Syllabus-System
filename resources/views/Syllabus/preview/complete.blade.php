@@ -306,27 +306,26 @@
                     <tbody>
                         <tr>
                             <td>1. Name of Instructor/Professor</td>
-                            <td>{!! $lecLabValue($lecComponent?->instructor_name, $labComponent?->instructor_name) !!}</td>
+                            <td>{!! $lecLabValue($lecComponent?->user?->name, $labComponent?->user?->name) !!}</td>
                         </tr>
                         <tr>
                             <td>2. Office</td>
-                            <td>{!! $lecLabValue($lecComponent?->office, $labComponent?->office) !!}</td>
+                            <td>{!! $lecLabValue($lecComponent?->user?->office, $labComponent?->user?->office) !!}</td>
                         </tr>
                         <tr>
                             <td>3. Phone No. (Optional)</td>
-                            <td>{!! $lecLabValue($lecComponent?->phone, $labComponent?->phone) !!}</td>
+                            <td>{!! $lecLabValue($lecComponent?->user?->phone_number, $labComponent?->user?->phone_number) !!}</td>
                         </tr>
                         <tr>
                             <td>4. Email Address</td>
-                            <td>{!! $lecLabValue($lecComponent?->instructor_email, $labComponent?->instructor_email) !!}</td>
+                            <td>{!! $lecLabValue($lecComponent?->user?->email, $labComponent?->user?->email) !!}</td>
                         </tr>
                         <tr>
                             <td>5. Consultation Hours</td>
                             <td>
                                 @php
                                     $lecHours = $preparerConsultationHours ?? collect();
-                                    $labInstructor = $labComponent ? \App\Models\User::where('email', $labComponent->instructor_email)->with('consultationHours')->first() : null;
-                                    $labHours = $labInstructor?->consultationHours ?? collect();
+                                    $labHours = $labComponent?->user?->consultationHours ?? collect();
                                 @endphp
                                 @if (!$hasLab)
                                     @if ($lecHours->isEmpty())
@@ -343,7 +342,7 @@
                                         LAB<br>
                                         @foreach ($labHours as $ch){{ $ch->day }}: {{ $ch->time }}<br>@endforeach
                                     @endif
-                                    @if ($lecHours->isEmpty() && $labHours->isEmpty()) @endif
+                                    @if ($lecHours->isEmpty() && $labHours->isEmpty()) N/A @endif
                                 @endif
                                 {{-- { $labInstructor } --}}
                             </td>
@@ -1160,7 +1159,7 @@
                     {{-- ── Prepared by ──────────────────────────────────────────────── --}}
                     @php
                         $preparedByNames = collect($syllabus->components ?? [])
-                            ->pluck('instructor_name')
+                            ->map(fn ($c) => $c->user?->name)
                             ->filter()
                             ->unique()
                             ->values();
@@ -1183,7 +1182,7 @@
                     @else
                         <tr>
                             <td><strong>Prepared by:</strong></td>
-                            <td>{{ $lecComponent?->instructor_name ?? 'N/A' }}</td>
+                            <td>{{ $lecComponent?->user?->name ?? 'N/A' }}</td>
                             <td></td>
                             <td></td>
                         </tr>
