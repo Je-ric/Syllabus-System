@@ -55,6 +55,7 @@
 ## HIGH
 
 ### 1. SyllabusController — Destroy method does nothing
+**Status: ❌ NOT FIXED**
 **File:** `app/Http/Controllers/SyllabusController.php` → `destroy()`
 **What's wrong:** The `destroy()` method just returns a toast saying deletion is not allowed, instead of actually deleting the syllabus. The `SyllabusDeleteService` exists and is injected but is never called from this route. The README says "Only draft syllabi can be deleted" and "Only the preparer can delete."
 **Fix needed:** Implement the delete logic — check `$syllabus->status === 'draft'`, check `$syllabus->prepared_by === Auth::id()`, then call `$this->deleteService->delete($syllabus)` inside a `DB::transaction()`. Return proper toast on success/failure.
@@ -62,6 +63,7 @@
 ---
 
 ### 2. SyllabusWizard — Duplicate syllabus created on page reload
+**Status: ❌ NOT FIXED**
 **File:** `app/Livewire/Syllabus/SyllabusWizard.php` → `mount()`
 **What's wrong:** When `$syllabusId` is null and `$courseId` is provided, it immediately calls `Syllabus::create()` in `mount()`. If the user refreshes the page without a `syllabusId`, a second draft is created. The unique constraint `['course_id', 'academic_calendar_id']` won't catch it because `academic_calendar_id` is null at creation time, so duplicates can exist for the same `(course_id, null)` pair.
 **Fix needed:** Before calling `Syllabus::create()` in mount, do a `firstOrCreate` check: `Syllabus::where('course_id', $courseId)->where('prepared_by', Auth::id())->where('status', 'draft')->first()`. If found, use it instead of creating a new one.
@@ -69,6 +71,7 @@
 ---
 
 ### 3. AccountApprovalController — `restore()` and `disable()` missing try/catch
+**Status: ❌ NOT FIXED**
 **File:** `app/Http/Controllers/AccountApprovalController.php` → `restore()`, `disable()`
 **What's wrong:** `approve()` and `reject()` have try/catch blocks. `restore()` and `disable()` do not — any DB error will throw an unhandled exception to the user.
 **Fix needed:** Wrap `restore()` and `disable()` calls in try/catch identical to `approve()` and `reject()`.
@@ -76,6 +79,7 @@
 ---
 
 ### 4. SyllabusDeleteService — Not wrapped in a DB transaction
+**Status: ❌ NOT FIXED**
 **File:** `app/Services/Syllabus/SyllabusDeleteService.php` → `delete()`
 **What's wrong:** The method performs many deletes across multiple tables (components, outcomes, weeks, contents, evaluations, references, materials, revisions, reviewers, snapshots) but has no `DB::transaction()` around them. The docblock says "Must be called inside a DB transaction by the caller" — but in `SyllabusController::destroy()`, no transaction exists (the method doesn't delete anything anyway — see issue #1). In `CourseService::deleteCourse()`, it IS wrapped in a transaction, so that path is safe. The destroy controller path will not be safe once it's fixed.
 **Fix needed:** Either wrap inside `SyllabusDeleteService::delete()` itself, or ensure every caller always wraps it.
@@ -83,6 +87,7 @@
 ---
 
 ### 5. OTPController — `verifyOTP()` accepts email from POST body (user-controlled)
+**Status: ❌ NOT FIXED**
 **File:** `app/Http/Controllers/OTPController.php` → `verifyOTP()`
 **What's wrong:** `$email = $request->input('email') ?? session('verify_email')`. The email is taken from the POST body first. A user could supply any email address in the POST body and verify the OTP for a different account if they know that account's OTP.
 **Fix needed:** Reverse the priority — use session first: `$email = session('verify_email') ?? $request->input('email')`. Session is server-controlled; POST body is user-controlled.
@@ -90,6 +95,7 @@
 ---
 
 ### 6. UserController — `update()` does not audit profile changes
+**Status: ❌ NOT FIXED**
 **File:** `app/Http/Controllers/UserController.php` → `update()`
 **What's wrong:** Profile updates (name, email, phone, office) have no `AuditLog::record()` call. The standards require logging all updates.
 **Fix needed:** Add `AuditLog::record(action: 'updated', module: 'Profile', referenceId: $user->id, description: "User updated their profile.")` after `$user->update($validated)`.

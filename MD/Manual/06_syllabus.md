@@ -16,12 +16,12 @@ Go to **Syllabi** from the sidebar to see all syllabi you have created, organize
 
 | Tab | What It Shows |
 |---|---|
-| Draft | Syllabi still in progress — you can continue editing |
-| Under Review | Syllabi submitted and waiting for review |
-| For Revision | Syllabi returned to you with comments |
-| Approved | Completed and approved syllabi |
+| Draft | Syllabi still in progress — click **Continue** to keep editing |
+| Under Review | Syllabi submitted and waiting for review — click **View** to open read-only |
+| For Revision | Syllabi returned to you with comments — click **Continue** to edit and resubmit |
+| Approved | Completed and approved syllabi — click **View** to open read-only |
 
-Each card shows the course code, academic year, program, and your current progress step. Use the **Continue** or **View** button to open a syllabus, and the **Preview** button to open the read-only view.
+Each card shows the course code, course title, academic year, and program. Draft cards also show a step progress bar. Use the **Preview** button on any card to open the read-only complete preview.
 
 ---
 
@@ -97,7 +97,12 @@ Click **Save All** at the bottom when you are done with this step.
 
 Define what students will be able to do after completing this course.
 
-On the right side you will see a **Course Information drawer** button and a **Program Outcomes reference drawer** button — use these to review the course details and the POs mapped to this course while writing your outcomes.
+On the right side you will see two reference drawer buttons:
+
+- **Course Info** — opens a side panel showing the course code, title, description, credit units, and class hours
+- **Program Outcomes** — opens a side panel listing all POs mapped to this course with their IED levels
+
+Use these to review course details and PO mappings while writing your outcomes.
 
 ### Unsaved Changes Bar
 
@@ -154,14 +159,7 @@ Click **Generate Weekly Coverage**. The system creates weekly rows based on the 
 
 ### Filling in a Week
 
-Weeks are shown as collapsed rows. Each week has four content panels:
-
-- Unit Learning Outcomes
-- Assessment Task
-- Topics
-- Teaching & Learning Activities
-
-Click the **Edit Week** button (or the edit icon on any individual panel) to open the **week edit modal**. Inside the modal:
+Weeks are shown as collapsed rows. Click the **Edit Week** button (or the edit icon on any individual panel) to open the **week edit modal**. Inside the modal:
 
 1. Select the **Course Outcome** this week is linked to (skip for MVGO weeks)
 2. Fill in Unit Learning Outcomes, Topics, Teaching & Learning Activities, and Assessment Task using the rich text editor
@@ -212,7 +210,7 @@ The badge turns green when you hit the exact target and red when you are off.
 
 ---
 
-## Step 6 — Review and Preview
+## Step 6 — Review and Submit
 
 The final step before submitting your syllabus.
 
@@ -222,9 +220,9 @@ Three preview formats are available — each opens in a new tab:
 
 | Format | What It Shows |
 |---|---|
-| Complete | Full syllabus document |
-| Abridged | Condensed version |
-| Assessment Plan | Evaluation summary |
+| Complete | Full syllabus document — suitable for official submission and department records |
+| Abridged | Condensed version showing key topics and outcomes — suitable for student handouts |
+| Assessment Plan | Weighted grading table — suitable for program review and CQI documentation |
 
 ### Revision History
 
@@ -249,7 +247,7 @@ This section has two parts: Signatories and Additional Reviewers.
 
 #### Signatories
 
-- **Prepared By** — your name is shown automatically (read-only)
+- **Prepared By** — shows the LEC instructor name and email (read-only). If the course has a LAB component with a separate instructor, that instructor is also shown.
 - **Approved By** — select a dean from the dropdown, then click **Set**
 - **Concurred By** — select a different dean from the dropdown, then click **Set**
   - The same person cannot be both Approved By and Concurred By
@@ -266,18 +264,43 @@ You can add faculty members as additional reviewers — they will appear in the 
 
 To remove a reviewer, click the **trash icon** on their row.
 
+> The preparer and any component instructors (LEC/LAB) are excluded from the reviewer dropdown.
+
+### Saved Versions
+
+The **Saved Versions** accordion shows all immutable snapshots previously created with **Save as Done**. Each version entry shows:
+
+- Version number (v1, v2, …)
+- Academic year and semester
+- Date and time saved
+
+Expand a version to access its three formats: **Complete (OBTL)**, **Abridged (Student)**, and **Assessment Plan** — each with Open and Download buttons.
+
+### Save as Done
+
+Click **Save as Done** to create an immutable snapshot of the current syllabus state. This:
+
+- Generates HTML snapshots for all three formats (Complete, Abridged, Assessment Plan)
+- Saves them to local storage and mirrors to Google Drive (if configured)
+- Records a versioned entry in Saved Versions (v1, v2, …)
+- Sets the syllabus status to **Under Review**
+
+> Save as Done is the recommended way to finalize and submit your syllabus. It creates a permanent record of the syllabus at that point in time.
+
 ### Submitting
 
 When everything is complete, click **Submit for Review** at the bottom of the page.
 
 > Once submitted, the syllabus moves to "Under Review" and you can no longer edit it until it is returned for revision.
 
-Before submitting, make sure:
+Before submitting, all of the following must be complete:
+
 - An academic calendar is selected
-- Course components are filled in
+- Course components are filled in (instructor name, email, class hours, performance standard)
 - At least one Course Outcome is saved
 - At least one week exists
-- Course evaluation weights are complete and totals are correct
+- Course evaluation weights are complete for all assessable weeks
+- No unsaved Course Outcome changes are pending
 
 ---
 
@@ -289,6 +312,8 @@ From the **My Syllabi** page:
 - **Under Review** — click **View** to see the syllabus (read-only)
 - **For Revision** — click **Continue** to edit and resubmit
 - **Approved** — click **View** to see the final approved syllabus
+
+All tabs also show a **Preview** button that opens the complete read-only preview in a new tab.
 
 ---
 

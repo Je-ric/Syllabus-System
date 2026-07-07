@@ -1,4 +1,4 @@
-﻿# Syllabus Wizard (Complete Functional Memory Guide)
+# Syllabus Wizard (Complete Functional Memory Guide)
 
 Practical reference for how the Syllabus Wizard works today.
 Use this when changing logic, debugging behavior, or explaining the flow to non-technical users.
@@ -112,6 +112,14 @@ When a user clicks `Next`, `Previous`, or a tab:
 
 Switching step and saving happen in one round trip for speed.
 
+### Course Outcomes Navigation Guard
+
+- If the user navigates away from `course_outcomes` while `stepDirty['course_outcomes']` is `true`:
+  - Then `saveAndNavigate()` dispatches `request-co-save-and-navigate` instead of navigating immediately.
+  - Alpine's `coManager` intercepts this event, calls `saveAll()` to persist pending COs, then calls `$wire.onCoSaveAndNavigate(toStep)`.
+  - `onCoSaveAndNavigate()` dispatches `navigate-after-save` which completes the navigation.
+  - This prevents silent data loss when the user has unsaved CO rows and clicks Next.
+
 ## UI Conditions (If / Then)
 
 - If user clicks `Next`, `Previous`, or a step tab:
@@ -120,6 +128,7 @@ Switching step and saving happen in one round trip for speed.
   - Then it is styled as "completed" (visual only; not a validation gate).
 - If a step has missing required fields:
   - Then an amber dot indicator appears on the tab.
+  - The indicator is computed once per `render()` into `$stepMissing[]` and read from that cache in Blade — no repeated DB queries per loop iteration.
 - The layout is two-column: main content (left) + sticky step navigator (right, desktop only).
   - Mobile: horizontal scrollable step strip at top.
 
@@ -132,17 +141,26 @@ Switching step and saving happen in one round trip for speed.
    - Complete syllabus
    - Abridged syllabus
    - Assessment plan
-3. Saves all three to local disk (`syllabus_snapshots` disk).
-4. Mirrors to **Google Drive** silently (non-fatal if unavailable).
-5. Creates a `CompleteSyllabus` version record with checksums and paths.
-6. Sets syllabus `status = under_review`, `current_step = review`.
-7. Records AuditLog.
+3. Wraps steps 3–6 in `DB::transaction()` with `lockForUpdate()` on `CompleteSyllabus` to prevent race conditions when two requests compute the same version number simultaneously.
+4. Saves all three snapshots to local disk (`syllabus_snapshots` disk).
+5. Mirrors to **Google Drive** silently (non-fatal if unavailable).
+6. Creates a `CompleteSyllabus` version record with checksums and paths.
+7. Sets syllabus `status = under_review`, `current_step = review`.
+8. Records AuditLog.
 
 The overlay shows progress messages: "Rendering syllabus…", "Uploading to Google Drive…", "Freezing version record…"
 
-## Submit for Review (Legacy)
+## Submit for Review
 
-`submitForReview()` runs the step completion checks (see below) and sets status to `under_review`. Still exists but `saveAsDone` is the primary action on the Review step.
+`submitForReview()` runs the step completion checks and sets status to `under_review`. It is the primary submit action on the Review step — the Submit for Review button is fully functional.
+
+Gate checks (all must pass before submit):
+- Academic calendar selected.
+- Course components complete.
+- At least one non-blank course outcome saved.
+- At least one syllabus week exists.
+- Course evaluation complete (all assessable weeks have weights).
+- Course Outcomes step must not have unsaved pending changes (`stepDirty['course_outcomes']` must be false).
 
 ## Step-by-Step Rules
 
@@ -153,6 +171,7 @@ The overlay shows progress messages: "Rendering syllabus…", "Uploading to Goog
 - Loads all calendars ordered by `academic_year DESC`, `semester DESC`.
 - Stores as plain arrays (not Eloquent models) to keep Livewire snapshot small.
 - Uses `getFormattedSemester()` for display.
+- `isLoaded` is reset to `false` in `onStepChanged()` before calling `loadData()`, so returning to this step always fetches fresh calendar data.
 
 Conditions:
 - If user changes the dropdown:
@@ -185,10 +204,15 @@ Conditions:
 
 Fields:
 - Instructor name, email, phone (optional), office (optional) — for LEC and LAB.
-- **Schedule management**: dynamic add/remove schedule rows (`addSchedule`, `removeSchedule`) with day + time.
-- **Consultation hours**: inline modal to manage users consultation hours (stored in `user_consultation_hours`).
+- **Schedule management**: dynamic add/remove schedule rows managed entirely in Alpine (client-side). No public Livewire methods for schedule mutations.
+- **Consultation hours**: inline rows to manage user consultation hours (stored in `user_consultation_hours`).
 - Class hours and performance standard are read-only from the course record.
 - `lec_performance_standard` defaults to `60.00`.
+
+Accessibility:
+- All time inputs have `aria-label="Start time"` / `aria-label="End time"`.
+- Day selects have `aria-label="Day"`.
+- Each schedule/consultation row is wrapped in `role="group"` with a dynamic `aria-label`.
 
 Dirty tracking:
 - If any LEC/LAB field changes (after `isLoaded`):
@@ -222,6 +246,12 @@ Conditions:
 - If parent requests save (`syllabus-save-step` for `course_outcomes`):
   - Then step dispatches `syllabus-step-saved` without saving (save handled by Alpine's `saveAll` before navigation).
 
+Navigation guard:
+- If `stepDirty['course_outcomes']` is true when navigating away:
+  - Then `saveAndNavigate()` dispatches `request-co-save-and-navigate`.
+  - Alpine's `coManager` auto-saves, then calls `onCoSaveAndNavigate(toStep)` to complete navigation.
+  - This prevents silent discard of pending CO rows.
+
 Save behavior (via `saveAll`):
 - Blank descriptions are ignored.
 - If all rows are blank, save exits early with warning toast.
@@ -250,8 +280,9 @@ Generation rules:
 - If weeks already exist:
   - Then `loadData()` skips creating duplicates.
   - If user clicks **Regenerate**:
+    - Then a `wire:confirm` dialog is shown before proceeding.
     - Then all existing weeks + week contents are deleted and recreated from the calendar.
-    - Then all previously encoded weekly coverage is lost (confirmation required).
+    - Then all previously encoded weekly coverage is lost.
 
 - If weeks do not exist:
   - Then create sequential week records from calendar start/end date in 7-day blocks.
@@ -284,6 +315,7 @@ Editing rules:
   - Then Alpine watches open week and triggers `$wire.saveWeek(oldWeekNo)`.
 - Save All persists all unlocked weeks via `WeekContentService::save()`.
 - `loadData()` is never called from save paths to avoid overwriting in-progress edits.
+- `$syllabusWeeks` is a protected non-serialised Collection rebuilt in `boot()` and populated in `loadData()`. It is not re-queried on every `render()`.
 
 Week content fields (saved via modal or inline):
 - `course_outcome_id`, `learning_outcomes`, `assessment_task`, `topic`, `teaching_activities`
@@ -305,6 +337,10 @@ LEC/LAB switching:
 - If both components exist: user can switch tab.
 - On switch: save current component content, change active component, reload inputs.
 - If LAB is requested but course has no LAB: ignored.
+
+Week edit modal accessibility:
+- Modal container has `role="dialog"`, `aria-modal="true"`, `aria-labelledby="week-modal-title"`.
+- Escape key closes the modal via `x-on:keydown.escape.window`.
 
 ### 5) Course Evaluation Step
 
@@ -349,11 +385,17 @@ Summary data loaded includes:
 - Version history (`completeVersions` from `CompleteSyllabus`)
 - Latest saved version info
 
+**Property design**:
+- `$course` is stored as a plain `array` (not an Eloquent model) to avoid bloating the Livewire snapshot JSON.
+- `$syllabusWeeks` and `$completeVersions` are typed as `array` — plain arrays, not Collections — to prevent dehydration issues on re-hydration.
+- `$academicCalendars` is not loaded in ReviewStep; the review step reads calendar info from the already-loaded `$syllabus->academicCalendar` relation.
+- Dean and faculty user lists are loaded once in `loadData()` / `loadReviewerLists()` and stored as plain arrays. They are not re-queried on every `render()`.
+
 **Reviewer management** (via `SyllabusReviewService`):
-- `addReviewer(?int $reviewerUserId)` — assigns a reviewer (auto-approved).
+- `addReviewer(?int $reviewerUserId)` — assigns a reviewer (auto-approved). Lives on `SyllabusWizard` because the Blade partial calls `$wire.$parent`.
 - `removeReviewer(int $syllabusReviewerId)` — removes a reviewer.
 - `updateReviewerStatus(int $syllabusReviewerId, string $status)` — updates status.
-- Parent wizard holds `$reviewers` array, dispatches `syllabus-reviewers-updated` after mutations.
+- After mutations, `syllabus-reviewers-updated` is dispatched so `ReviewStep::onReviewersUpdated()` refreshes the reviewer list.
 - Render provides `$deanUsers` and `$facultyUsers` for dropdown selection.
 
 **Revision History** (via `SyllabusRevisionHistoryService`):
@@ -366,6 +408,10 @@ Summary data loaded includes:
 - `saveApproved()` / `clearApproved()` — sets/clears `approved_by` on syllabus.
 - `saveConcurred()` / `clearConcurred()` — sets/clears `concurred_by` on syllabus.
 - Validation: Concurred-by must differ from Approved-by.
+
+**Submit for Review button**:
+- Fully functional. Triggers `submitForReview()` on the parent wizard.
+- All gate checks must pass before submission proceeds.
 
 **Save as Done button**:
 - Triggers `saveAsDone()` on the parent wizard (see section above).
@@ -381,6 +427,8 @@ Used events:
 - `syllabus-calendar-updated` — academic calendar changed (weekly coverage reloads).
 - `syllabus-course-outcomes-updated` — outcomes changed (other steps react).
 - `syllabus-reviewers-updated` — reviewer changes (ReviewStep re-renders).
+- `request-co-save-and-navigate` — parent asks Alpine coManager to save COs then navigate.
+- `navigate-after-save` — Alpine/child tells parent to complete navigation after save.
 - `lw-toast` — toast notification dispatch.
 
 ## Non-Technical Flow (Plain English)
@@ -392,7 +440,9 @@ Used events:
 5. Generate weeks and fill weekly coverage for editable weeks.
 6. Encode Course Evaluation weights.
 7. Review everything, manage revision history and reviewers.
-8. Click **Save as Done** — system freezes a version and sends to review.
+8. Click **Submit for Review** — system sets status to `under_review` and redirects.
+   - Or click **Save as Done** — system freezes a version snapshot and sends to review.
 
 If something required is missing: the system blocks submit and tells the user what to fix.
 If a week has an exam event: the week appears but is locked so faculty cannot encode coverage there.
+If the user navigates away from Course Outcomes with unsaved changes: the system auto-saves before navigating.

@@ -30,3 +30,4 @@ Before any faculty member can create a syllabus, the following must be set up in
 4. Admin/Chair adds POs and maps them to PEOs
 5. Admin/Chair adds Courses and maps each course to POs with IED levels
 6. Faculty creates Syllabi — only possible after step 5 is done for a course
+7. Faculty completes all 6 wizard steps, then clicks **Save as Done** to create an immutable snapshot and submit for review
