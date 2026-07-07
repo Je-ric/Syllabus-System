@@ -1,5 +1,5 @@
 <div
-    x-data="{ _pushing: false }"
+    x-data="{ _pushing: false, _saving: false }"
     x-on:request-push-and-navigate.window="
         if (_pushing) return;
         _pushing = true;
@@ -400,16 +400,31 @@
         <p class="text-xs text-slate-400 hidden sm:block">
             Changes in both LEC and LAB sections are saved together.
         </p>
-        <x-button variant="sm-add"
-            x-on:click="
+        <button type="button"
+            x-bind:disabled="_saving"
+            x-on:click="async () => {
+                // Set _saving immediately so the spinner renders before any wire calls.
+                _saving = true;
+                await $nextTick();
                 window._beforeSaveAllPromises = [];
                 window.dispatchEvent(new CustomEvent('before-save-all'));
                 await Promise.all(window._beforeSaveAllPromises);
                 await $wire.save();
-            "
-            wireTarget="save" loading="Saving…">
-            <i class="bx bx-save"></i> Save All
-        </x-button>
+                _saving = false;
+            }"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold
+                   bg-[#16a34a] text-white hover:bg-[#15803d] disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
+            <span x-show="!_saving" class="inline-flex items-center gap-1.5">
+                <i class="bx bx-save text-base leading-none"></i> Save All
+            </span>
+            <span x-show="_saving" x-cloak class="inline-flex items-center gap-1.5">
+                <svg class="animate-spin h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                </svg>
+                Saving…
+            </span>
+        </button>
     </div>
 
     <script>

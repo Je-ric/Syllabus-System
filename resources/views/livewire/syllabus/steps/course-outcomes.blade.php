@@ -256,7 +256,9 @@
                     confirmClass: 'bg-rose-600 hover:bg-rose-700 text-white',
                 });
                 if (!ok) return;
+                // Flush DOM before the wire call so the spinner is visible immediately.
                 this.isSaving = true;
+                await this.$nextTick();
                 try {
                     await this.$wire.call('deleteSingle', co.id);
                 } finally {
@@ -278,7 +280,10 @@
                     }));
                     return;
                 }
+                // Set isSaving immediately, then flush the DOM before the network
+                // call so the spinner renders in the same frame the user clicked.
                 this.isSaving = true;
+                await this.$nextTick();
                 try {
                     await this.$wire.call('saveAll',
                         this.outcomes.map(o => ({ id: o.id, description: o.description, isNew: !o.id }))
