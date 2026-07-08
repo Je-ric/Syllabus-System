@@ -227,8 +227,13 @@
                         <x-form.select x-model="selectedUserId" x-on:change="selectUser($event.target.value)"
                             class="max-w-xl">
                             <option value="">— Select a Laboratory Instructor —</option>
+                            @if ($lecUser)
+                                <option value="{{ $lecUser->id }}">{{ $lecUser->name }} — Same as LEC ({{ $lecUser->email }})</option>
+                            @endif
                             @foreach ($labUsers as $u)
-                                <option value="{{ $u['id'] }}">{{ $u['name'] }} ({{ $u['email'] }})</option>
+                                @if (!$lecUser || $u['id'] !== $lecUser->id)
+                                    <option value="{{ $u['id'] }}">{{ $u['name'] }} ({{ $u['email'] }})</option>
+                                @endif
                             @endforeach
                         </x-form.select>
                     </div>
