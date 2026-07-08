@@ -7,6 +7,7 @@
     'position' => 'right',
 ])
 
+<div>
 {{-- Backdrop --}}
 <div
     x-show="{{ $open }}"
@@ -91,4 +92,5 @@
         </div>
     @endif
 
+</div>
 </div>

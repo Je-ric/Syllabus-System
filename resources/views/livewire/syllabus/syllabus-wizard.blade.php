@@ -19,12 +19,32 @@
 
     <x-page-header icon="bx-book-open" title="{{ $syllabus->id ? 'Edit' : 'Create' }} Syllabus"
         desc="{{ $course->course_code }} — {{ $course->course_title }}">
+        <button type="button"
+            onclick="window.dispatchEvent(new CustomEvent('open-help-panel'))"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-[10px]
+                   text-[#52525b] bg-white border border-[#d4d4d8] hover:bg-[#f4f4f5] hover:border-[#a1a1aa]
+                   transition-colors [&_i]:leading-none"
+            aria-label="Open how to use guide">
+            <i class="bx bx-help-circle text-sm"></i> How to Use
+        </button>
         <x-button variant="cancel" href="{{ route('syllabus.index') }}">
             <i class="bx bx-arrow-back"></i>
             <span class="sm:hidden">Back</span>
             <span class="hidden sm:inline">Back to Syllabi</span>
         </x-button>
     </x-page-header>
+
+    @php
+        $helpModuleMap = [
+            'academic_calendar' => 'syllabus-academic-calendar',
+            'course_components'  => 'syllabus-course-components',
+            'course_outcomes'    => 'syllabus-course-outcomes',
+            'weekly_coverage'    => 'syllabus-weekly-coverage',
+            'course_evaluation'  => 'syllabus-course-evaluation',
+            'review'             => 'syllabus-review',
+        ];
+    @endphp
+    <x-help-panel :module="$helpModuleMap[$currentStep] ?? 'syllabus-index'" />
 
     <x-panel>
 

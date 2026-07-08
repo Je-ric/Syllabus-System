@@ -6,10 +6,20 @@
         icon="bx-book-open"
         title="My Syllabi"
         desc="Manage and continue working on your course syllabi">
+        <button type="button"
+            onclick="window.dispatchEvent(new CustomEvent('open-help-panel'))"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-[10px]
+                   text-[#52525b] bg-white border border-[#d4d4d8] hover:bg-[#f4f4f5] hover:border-[#a1a1aa]
+                   transition-colors [&_i]:leading-none"
+            aria-label="Open how to use guide">
+            <i class="bx bx-help-circle text-sm"></i> How to Use
+        </button>
         <x-button href="{{ route('syllabus.create') }}" variant="add-button">
             <i class="bx bx-plus text-base leading-none"></i> Create Syllabus
         </x-button>
     </x-page-header>
+
+    <x-help-panel module="syllabus-index" />
 
     @php
         $grouped = [
