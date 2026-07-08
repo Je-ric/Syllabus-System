@@ -217,7 +217,7 @@
             </div>
         </header>
 
-        <main class="flex-1 w-full bg-[#f4f4f5]">
+        <main class="flex-1 w-full">
             @yield('content')
         </main>
 
