@@ -6,6 +6,14 @@
         icon="bx-list-check"
         title="Department Objectives"
         desc="Define and manage learning objectives for each CLSU department">
+        <button type="button"
+            onclick="window.dispatchEvent(new CustomEvent('open-help-panel'))"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-[10px]
+                   text-[#52525b] bg-white border border-[#d4d4d8] hover:bg-[#f4f4f5] hover:border-[#a1a1aa]
+                   transition-colors [&_i]:leading-none"
+            aria-label="Open how to use guide">
+            <i class="bx bx-help-circle text-sm"></i> How to Use
+        </button>
         @if ($selectedCollegeId && $selectedDepartmentId)
             <x-button variant="add-button"
                 onclick="document.getElementById('addObjectiveModal').showModal()">
@@ -13,6 +21,8 @@
             </x-button>
         @endif
     </x-page-header>
+
+    <x-help-panel module="objectives" />
 
     <x-panel>
         @include('includes.error-lists')
@@ -102,7 +112,7 @@
                                         <x-table.td class="align-top">
                                             <span class="inline-flex items-center font-mono text-[12px] font-bold text-[#166534]
                                                          bg-[#dcfce7] border border-[#86efac]
-                                                         px-2 py-0.5 rounded-[8px] whitespace-nowrap">
+                                                         px-2 py-0.5 rounded-lg whitespace-nowrap">
                                                 {{ $objective->dept_obj_code }}
                                             </span>
                                         </x-table.td>
@@ -113,13 +123,13 @@
                                             <div class="inline-flex items-center gap-0.5">
                                                 <button type="button"
                                                     onclick="document.getElementById('updateObjectiveModal_{{ $objective->id }}').showModal()"
-                                                    class="p-1.5 rounded-[8px] text-[#a1a1aa] hover:text-[#2563eb] hover:bg-[#eff6ff] transition-colors"
+                                                    class="p-1.5 rounded-lg text-[#a1a1aa] hover:text-[#2563eb] hover:bg-[#eff6ff] transition-colors"
                                                     title="Edit objective">
                                                     <i class="bx bx-edit text-[15px] leading-none"></i>
                                                 </button>
                                                 <button type="button"
                                                     onclick="document.getElementById('deleteObjectiveModal_{{ $objective->id }}').showModal()"
-                                                    class="p-1.5 rounded-[8px] text-[#a1a1aa] hover:text-[#e11d48] hover:bg-[#fff1f2] transition-colors"
+                                                    class="p-1.5 rounded-lg text-[#a1a1aa] hover:text-[#e11d48] hover:bg-[#fff1f2] transition-colors"
                                                     title="Delete objective">
                                                     <i class="bx bx-trash text-[15px] leading-none"></i>
                                                 </button>
