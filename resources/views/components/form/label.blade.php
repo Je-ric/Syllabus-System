@@ -26,7 +26,7 @@
     @if($for) for="{{ $for }}" @endif
     {{ $attributes->class([
         'inline-flex items-center gap-1.5',
-        'text-[11px] font-bold uppercase tracking-[0.1em] text-[#52525b]',
+        'text-[12.5px] font-semibold text-[#3f3f46]',
         'mb-1 leading-none',
     ]) }}
 >

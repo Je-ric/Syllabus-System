@@ -38,29 +38,29 @@
 </x-accordion>
 
 <x-accordion title="Adding a Course" icon="plus-circle" color="emerald">
-    <ol class="space-y-2.5 text-[13px] text-[#3f3f46]">
+    <ol class="space-y-2.5 text-[13.5px] text-[#3f3f46]">
         <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-5 h-5 rounded-full bg-[#dcfce7] text-[#166534] text-[10px] font-bold mt-0.5">1</span>
+            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">1</span>
             <span>Select a program using the dropdowns at the top, then click <strong>Add Course</strong>.</span>
         </li>
         <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-5 h-5 rounded-full bg-[#dcfce7] text-[#166534] text-[10px] font-bold mt-0.5">2</span>
+            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">2</span>
             <span>Fill in the <strong>Course Code</strong>, <strong>Course Title</strong>, and optional description.</span>
         </li>
         <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-5 h-5 rounded-full bg-[#dcfce7] text-[#166534] text-[10px] font-bold mt-0.5">3</span>
+            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">3</span>
             <span>Set <strong>Credit Units</strong>, <strong>Has Laboratory</strong> (Yes/No), <strong>Year Level</strong>, and <strong>Semester</strong>.</span>
         </li>
         <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-5 h-5 rounded-full bg-[#dcfce7] text-[#166634] text-[10px] font-bold mt-0.5">4</span>
+            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">4</span>
             <span>Set <strong>LEC Class Hours</strong> (and <strong>LAB Class Hours</strong> if the course has a lab component). Optionally set the <strong>Passing Mark</strong>, <strong>Prerequisite</strong>, and <strong>Corequisite</strong>.</span>
         </li>
         <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-5 h-5 rounded-full bg-[#dcfce7] text-[#166534] text-[10px] font-bold mt-0.5">5</span>
+            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">5</span>
             <span>In the <strong>Program Outcomes Mapping</strong> table, select an IED level (I, E, or D) for each applicable PO. Leave blank if the PO does not apply to this course.</span>
         </li>
         <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-5 h-5 rounded-full bg-[#dcfce7] text-[#166534] text-[10px] font-bold mt-0.5">6</span>
+            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">6</span>
             <span>Click <strong>Save Course</strong> — a confirmation dialog will appear. Review and click <strong>Confirm & Create</strong>.</span>
         </li>
     </ol>

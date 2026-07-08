@@ -27,8 +27,8 @@
     <div class="flex items-center justify-between gap-4">
         <div class="flex items-center gap-3 flex-1 min-w-0">
             @if ($ic)
-                <span class="flex items-center justify-center w-8 h-8 rounded-lg shrink-0 {{ $ic['bg'] }} {{ $ic['color'] }}">
-                    <i class="bx {{ $ic['icon'] }} text-base leading-none"></i>
+                <span class="flex items-center justify-center w-9 h-9 rounded-lg shrink-0 {{ $ic['bg'] }} {{ $ic['color'] }}">
+                    <i class="bx {{ $ic['icon'] }} text-lg leading-none"></i>
                 </span>
             @endif
             <div class="flex-1 min-w-0 text-[15px] font-bold text-[#0f172a]">

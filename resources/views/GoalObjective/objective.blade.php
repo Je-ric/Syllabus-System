@@ -110,9 +110,9 @@
                                 @foreach ($objectives as $objective)
                                     <x-table.row hover>
                                         <x-table.td class="align-top">
-                                            <span class="inline-flex items-center font-mono text-[12px] font-bold text-[#166534]
+                                            <span class="inline-flex items-center font-mono text-[12.5px] font-bold text-[#166534]
                                                          bg-[#dcfce7] border border-[#86efac]
-                                                         px-2 py-0.5 rounded-lg whitespace-nowrap">
+                                                         px-2.5 py-1 rounded-lg whitespace-nowrap">
                                                 {{ $objective->dept_obj_code }}
                                             </span>
                                         </x-table.td>
@@ -120,18 +120,18 @@
                                             {{ $objective->objective_text }}
                                         </x-table.td>
                                         <x-table.td align="center" class="align-top">
-                                            <div class="inline-flex items-center gap-0.5">
+                                            <div class="inline-flex items-center gap-1">
                                                 <button type="button"
                                                     onclick="document.getElementById('updateObjectiveModal_{{ $objective->id }}').showModal()"
-                                                    class="p-1.5 rounded-lg text-[#a1a1aa] hover:text-[#2563eb] hover:bg-[#eff6ff] transition-colors"
+                                                    class="p-2 rounded-lg text-[#a1a1aa] hover:text-[#2563eb] hover:bg-[#eff6ff] transition-colors"
                                                     title="Edit objective">
-                                                    <i class="bx bx-edit text-[15px] leading-none"></i>
+                                                    <i class="bx bx-edit text-base leading-none"></i>
                                                 </button>
                                                 <button type="button"
                                                     onclick="document.getElementById('deleteObjectiveModal_{{ $objective->id }}').showModal()"
-                                                    class="p-1.5 rounded-lg text-[#a1a1aa] hover:text-[#e11d48] hover:bg-[#fff1f2] transition-colors"
+                                                    class="p-2 rounded-lg text-[#a1a1aa] hover:text-[#e11d48] hover:bg-[#fff1f2] transition-colors"
                                                     title="Delete objective">
-                                                    <i class="bx bx-trash text-[15px] leading-none"></i>
+                                                    <i class="bx bx-trash text-base leading-none"></i>
                                                 </button>
                                             </div>
                                         </x-table.td>

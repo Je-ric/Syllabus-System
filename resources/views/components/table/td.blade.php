@@ -8,6 +8,6 @@
     };
 @endphp
 
-<td {{ $attributes->merge(['class' => "px-4 py-3 text-[13px] text-[#0f172a] $alignClass $class"]) }}>
+<td {{ $attributes->merge(['class' => "px-4 py-3.5 text-[13.5px] text-[#1a1a1a] $alignClass $class"]) }}>
     {{ $slot }}
 </td>

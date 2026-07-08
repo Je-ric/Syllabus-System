@@ -28,22 +28,22 @@
     >
         {{-- Header --}}
         <div class="shrink-0 flex items-center justify-between gap-3 px-5 py-4 border-b border-[#e4e4e7]">
-            <div class="flex items-center gap-2.5">
-                <span class="flex items-center justify-center w-8 h-8 rounded-[10px] bg-[#f0fdf4] border border-[#d1fae5]">
-                    <i class="bx bx-help-circle text-base leading-none text-[#16a34a]"></i>
+            <div class="flex items-center gap-3">
+                <span class="flex items-center justify-center w-9 h-9 rounded-[10px] bg-[#f0fdf4] border border-[#d1fae5]">
+                    <i class="bx bx-help-circle text-lg leading-none text-[#16a34a]"></i>
                 </span>
                 <div>
-                    <p class="text-[13px] font-semibold text-[#09090b] leading-tight">How to Use</p>
-                    <p class="text-[11px] text-[#71717a] mt-0.5">Quick reference guide</p>
+                    <p class="text-[14px] font-semibold text-[#09090b] leading-tight">How to Use</p>
+                    <p class="text-[12px] text-[#71717a] mt-0.5">Quick reference guide</p>
                 </div>
             </div>
             <button
                 type="button"
                 x-on:click="open = false"
-                class="flex items-center justify-center w-7 h-7 rounded-lg text-[#a1a1aa] hover:text-[#09090b] hover:bg-[#f4f4f5] transition-colors"
+                class="flex items-center justify-center w-8 h-8 rounded-lg text-[#a1a1aa] hover:text-[#09090b] hover:bg-[#f4f4f5] transition-colors"
                 aria-label="Close help panel"
             >
-                <i class="bx bx-x text-lg leading-none"></i>
+                <i class="bx bx-x text-xl leading-none"></i>
             </button>
         </div>
 

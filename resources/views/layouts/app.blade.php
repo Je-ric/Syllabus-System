@@ -4,7 +4,7 @@
     @include('includes.head-assets')
 </head>
 
-<body class="min-h-screen bg-[#f4f4f5]">
+<body class="min-h-screen">
 
     @php
         $isWizardRoute = request()->routeIs('syllabus.wizard');
@@ -149,16 +149,16 @@
                         <i class="bx bxs-user text-[#16a34a] text-sm"></i>
                     </div>
                     <div class="min-w-0">
-                        <p class="text-[12.5px] font-semibold text-[#09090b] truncate">{{ $user->name ?? 'User' }}</p>
-                        <p class="text-[10.5px] text-[#a1a1aa] capitalize">{{ $user->roles->first()?->name ?? 'Member' }}</p>
+                        <p class="text-[13px] font-semibold text-[#09090b] truncate">{{ $user->name ?? 'User' }}</p>
+                        <p class="text-[11px] text-[#71717a] capitalize">{{ $user->roles->first()?->name ?? 'Member' }}</p>
                     </div>
                 </div>
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
                     <button type="submit"
-                        class="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-[8px]
+                        class="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-[8px]
                                bg-[#fff1f2] border border-[#fecdd3] hover:bg-[#ffe4e6] hover:border-[#fda4af]
-                               text-[11.5px] font-semibold text-[#e11d48]
+                               text-[12px] font-semibold text-[#e11d48]
                                transition-all duration-150">
                         <i class="bx bxs-log-out text-sm"></i>
                         Sign Out

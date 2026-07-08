@@ -28,8 +28,8 @@
             'title'     => 'Warning',
         ],
         'info' => [
-            'container' => 'border-[#e2e8f0] bg-[#f8fafc] text-[#0f172a]',
-            'iconWrap'  => 'bg-[#e2e8f0] text-[#475569]',
+            'container' => 'border-[#bfdbfe] bg-[#eff6ff] text-[#1e3a5f]',
+            'iconWrap'  => 'bg-[#dbeafe] text-[#2563eb]',
             'icon'      => 'bx-info-circle',
             'title'     => 'Information',
         ],

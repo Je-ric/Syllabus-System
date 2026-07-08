@@ -7,21 +7,21 @@
 </x-accordion>
 
 <x-accordion title="Step-by-Step Guide" icon="list-ol" color="slate">
-    <ol class="space-y-2.5 text-[13px] text-[#3f3f46]">
+    <ol class="space-y-2.5 text-[13.5px] text-[#3f3f46]">
         <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-5 h-5 rounded-full bg-[#dcfce7] text-[#166534] text-[10px] font-bold mt-0.5">1</span>
+            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">1</span>
             <span>Select a college, then select a department from the dropdowns.</span>
         </li>
         <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-5 h-5 rounded-full bg-[#dcfce7] text-[#166534] text-[10px] font-bold mt-0.5">2</span>
+            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">2</span>
             <span>Click <strong>Add Objective</strong> to open the form.</span>
         </li>
         <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-5 h-5 rounded-full bg-[#dcfce7] text-[#166534] text-[10px] font-bold mt-0.5">3</span>
+            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">3</span>
             <span>Enter the objective text and save. The code is assigned automatically.</span>
         </li>
         <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-5 h-5 rounded-full bg-[#dcfce7] text-[#166534] text-[10px] font-bold mt-0.5">4</span>
+            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">4</span>
             <span>Use the <i class="bx bx-edit text-[#2563eb]"></i> icon to edit or <i class="bx bx-trash text-[#e11d48]"></i> to delete.</span>
         </li>
     </ol>

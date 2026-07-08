@@ -7,13 +7,13 @@
 </x-accordion>
 
 <x-accordion title="How to Complete" icon="list-ol" color="slate">
-    <ol class="space-y-2 text-[13px] text-[#3f3f46]">
+    <ol class="space-y-2 text-[13.5px] text-[#3f3f46]">
         <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-5 h-5 rounded-full bg-[#dcfce7] text-[#166534] text-[10px] font-bold mt-0.5">1</span>
+            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">1</span>
             <span>Choose an academic calendar from the dropdown — each entry shows the academic year and semester (e.g. <em>2024–2025 — 1st Semester</em>).</span>
         </li>
         <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-5 h-5 rounded-full bg-[#dcfce7] text-[#166534] text-[10px] font-bold mt-0.5">2</span>
+            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">2</span>
             <span>Click <strong>Next</strong> — the selection is saved automatically.</span>
         </li>
     </ol>

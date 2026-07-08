@@ -5,8 +5,9 @@
     'class' => '',
 ])
 
-<div {{ $attributes->merge(['class' => 'w-full bg-white border-b border-[#e4e4e7] ' . $class]) }}
-     style="box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+<div {{ $attributes->merge(['class' => 'w-full border-b border-[#e4e4e7] ' . $class]) }}
+    {{-- style="box-shadow: 0 1px 4px rgba(0,0,0,0.04);" --}}
+    >
 
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-4">
 
@@ -27,7 +28,7 @@
                 </h1>
 
                 @if ($desc)
-                    <p class="text-[13px] mt-0.5 leading-snug truncate text-[#71717a]">
+                    <p class="text-[13.5px] mt-0.5 leading-snug text-[#52525b]">
                         {{ $desc }}
                     </p>
                 @endif

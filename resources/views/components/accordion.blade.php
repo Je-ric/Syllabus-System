@@ -34,13 +34,13 @@
     >
         <div class="flex items-center gap-3 min-w-0">
             @if ($icon)
-                <span class="shrink-0 flex items-center justify-center w-8 h-8 rounded-lg {{ $p['icon_bg'] }}">
-                    <i class="bx bx-{{ $icon }} text-base leading-none"></i>
+                <span class="shrink-0 flex items-center justify-center w-9 h-9 rounded-lg {{ $p['icon_bg'] }}">
+                    <i class="bx bx-{{ $icon }} text-lg leading-none"></i>
                 </span>
             @endif
 
             <div class="min-w-0">
-                <p class="text-[13px] font-bold {{ $p['title'] }} leading-snug">{{ $title }}</p>
+                <p class="text-[13.5px] font-bold {{ $p['title'] }} leading-snug">{{ $title }}</p>
             </div>
 
             @if ($badge)

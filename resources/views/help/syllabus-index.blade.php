@@ -28,17 +28,17 @@
 </x-accordion>
 
 <x-accordion title="Creating a Syllabus" icon="plus-circle" color="emerald">
-    <ol class="space-y-2 text-[13px] text-[#3f3f46]">
+    <ol class="space-y-2 text-[13.5px] text-[#3f3f46]">
         <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-5 h-5 rounded-full bg-[#dcfce7] text-[#166534] text-[10px] font-bold mt-0.5">1</span>
+            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">1</span>
             <span>Click <strong>Create Syllabus</strong> and select a program and course.</span>
         </li>
         <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-5 h-5 rounded-full bg-[#dcfce7] text-[#166534] text-[10px] font-bold mt-0.5">2</span>
+            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">2</span>
             <span>Complete all 6 wizard steps. You can navigate freely between steps — progress is saved when you move forward.</span>
         </li>
         <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-5 h-5 rounded-full bg-[#dcfce7] text-[#166534] text-[10px] font-bold mt-0.5">3</span>
+            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">3</span>
             <span>On the Review step, submit for review once all steps are complete.</span>
         </li>
     </ol>

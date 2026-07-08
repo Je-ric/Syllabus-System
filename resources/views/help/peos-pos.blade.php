@@ -1,7 +1,7 @@
 {{-- Help content: PEOs & POs (Programs module) --}}
 
 <x-accordion title="Overview" icon="info-circle" color="emerald" :open="true">
-    <div class="space-y-2 text-[13px] text-[#3f3f46] leading-relaxed">
+    <div class="space-y-2 text-[13.5px] text-[#3f3f46] leading-relaxed">
         <p>This module manages two things for a selected program:</p>
         <ul class="space-y-1.5 mt-2">
             <li class="flex gap-2">
@@ -18,7 +18,7 @@
 </x-accordion>
 
 <x-accordion title="Step-by-Step Guide" icon="list-ol" color="slate">
-    <div class="space-y-4 text-[13px] text-[#3f3f46]">
+    <div class="space-y-4 text-[13.5px] text-[#3f3f46]">
 
         <div>
             <p class="font-bold text-[#09090b] mb-2">1. Select a Program</p>
@@ -72,7 +72,7 @@
 </x-accordion>
 
 <x-accordion title="Unsaved Changes" icon="error-circle" color="amber">
-    <div class="space-y-2 text-[13px] text-[#3f3f46]">
+    <div class="space-y-2 text-[13.5px] text-[#3f3f46]">
         <p>PEOs and POs use a <strong>batch save</strong> pattern — changes are staged locally until you click <strong>Save All</strong>.</p>
         <ul class="space-y-1.5 mt-2">
             <li class="flex gap-2">
@@ -94,7 +94,7 @@
 </x-accordion>
 
 <x-accordion title="Tips" icon="bulb" color="amber">
-    <ul class="space-y-2 text-[13px] text-[#3f3f46]">
+    <ul class="space-y-2 text-[13.5px] text-[#3f3f46]">
         <li class="flex gap-2">
             <i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i>
             <span>Add all PEOs before adding POs — PEO mapping chips only appear on saved POs, and only if PEOs already exist.</span>
@@ -115,7 +115,7 @@
 </x-accordion>
 
 <x-accordion title="Common Mistakes" icon="error-circle" color="rose">
-    <ul class="space-y-2 text-[13px] text-[#3f3f46]">
+    <ul class="space-y-2 text-[13.5px] text-[#3f3f46]">
         <li class="flex gap-2">
             <i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i>
             <span>Navigating away before clicking <strong>Save All</strong> — unsaved rows are lost.</span>
@@ -136,7 +136,7 @@
 </x-accordion>
 
 <x-accordion title="Frequently Asked Questions" icon="question-mark" color="slate">
-    <div class="space-y-3 text-[13px] text-[#3f3f46]">
+    <div class="space-y-3 text-[13.5px] text-[#3f3f46]">
         <div>
             <p class="font-semibold text-[#09090b]">Who can manage PEOs and POs?</p>
             <p class="mt-0.5 text-[#52525b]">Admins (all programs) and Chairs (programs within their assigned department only).</p>

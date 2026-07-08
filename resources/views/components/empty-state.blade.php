@@ -5,7 +5,7 @@
 ])
 
 <div {{ $attributes->class([
-    'rounded-xl border-2 border-dashed border-[#e2e8f0] bg-[#f8fafc] p-8 sm:p-10 text-center'
+    'rounded-xl border-2 border-dashed border-[#d1d5db] bg-[#f9fafb] p-8 sm:p-10 text-center'
 ]) }}>
     <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-[#f0fdf4] text-[#16a34a]">
         <i class="bx {{ $icon }} text-3xl leading-none"></i>

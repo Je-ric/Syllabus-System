@@ -10,16 +10,16 @@
     'class' => 'rounded-[16px] border border-[#e4e4e7] bg-white overflow-hidden'
 ]) }} style="box-shadow: 0 1px 8px rgba(0,0,0,0.05);">
 
-    <div class="px-5 py-3 border-b border-[#e4e4e7] flex items-center gap-2.5">
+    <div class="px-5 py-3.5 border-b border-[#e4e4e7] flex items-center gap-3">
         @if($icon)
-            <i class="bx {{ $icon }} text-[#16a34a] text-sm leading-none shrink-0"></i>
+            <i class="bx {{ $icon }} text-[#16a34a] text-base leading-none shrink-0"></i>
         @endif
         <div class="flex flex-col gap-0.5 min-w-0">
-            <p class="text-[11px] font-bold uppercase tracking-[0.1em] text-[#52525b] leading-none">
+            <p class="text-[12px] font-bold uppercase tracking-[0.08em] text-[#3f3f46] leading-none">
                 {{ $title }}
             </p>
             @if ($subtitle)
-                <p class="text-[11px] text-[#a1a1aa] leading-none truncate">{{ $subtitle }}</p>
+                <p class="text-[12px] text-[#71717a] leading-none truncate">{{ $subtitle }}</p>
             @endif
         </div>
 
@@ -27,8 +27,8 @@
             {{ $actions ?? '' }}
 
             @if ($count !== null)
-                <span class="inline-flex items-center justify-center min-w-[1.4rem] h-5 px-1.5
-                             rounded-full bg-[#dcfce7] text-[#166534] text-[10px] font-bold
+                <span class="inline-flex items-center justify-center min-w-[1.5rem] h-5 px-1.5
+                             rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold
                              border border-[#86efac]">
                     {{ $count }}
                 </span>
