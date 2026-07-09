@@ -24,7 +24,10 @@
 
     {{-- ── Sidebar ──────────────────────────────────────────────────── --}}
     <aside id="app-sidebar"
-        class="fixed inset-y-0 left-0 z-40 w-60 bg-white flex flex-col
+        class="fixed inset-y-0 left-0 z-40 w-60
+                bg-white
+                {{-- green-grad --}}
+                 flex flex-col
                border-r border-[#e4e4e7]
                transform -translate-x-full lg:translate-x-0
                transition-transform duration-300 ease-out

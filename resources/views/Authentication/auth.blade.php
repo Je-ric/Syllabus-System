@@ -156,22 +156,15 @@
         {{-- ── Right: Branding panel ── --}}
         <div class="p-8 md:p-10 text-white flex flex-col justify-between green-grad">
             <div>
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0 overflow-hidden">
-                        <img src="{{ asset('assets/clsu-logo-green.png') }}" alt="CLSU Logo" class="w-8 h-8 object-contain">
+                <div class="flex flex-col items-center text-center mb-7">
+                    <div class="flex items-center justify-center shrink-0 overflow-hidden mb-4">
+                        <img src="{{ asset('assets/clsu-logo-green.png') }}" alt="CLSU Logo" class="w-36 h-36 object-contain">
                     </div>
-                    <div>
-                        <p class="text-[10px] uppercase tracking-[0.3em] text-emerald-100">CLSU</p>
-                        <p class="text-sm font-bold leading-tight">CSMS</p>
-                    </div>
+                    <p class="text-[10px] uppercase tracking-[0.3em] text-emerald-100 mb-2">CLSU · CSMS</p>
+                    <h2 class="text-2xl font-bold leading-snug">
+                        Course Syllabus<br>Management System
+                    </h2>
                 </div>
-
-                <h2 class="text-2xl font-bold mb-3 leading-snug">
-                    Course Syllabus <br> Management System<br>
-                </h2>
-                {{-- <p class="text-sm text-emerald-50/90 leading-relaxed mb-6">
-                    CSMS is the official platform of Central Luzon State University for creating, reviewing, and archiving course syllabi across all colleges and departments.
-                </p> --}}
 
                 {{-- How it works --}}
                 <div class="space-y-3 mb-6">
@@ -191,19 +184,15 @@
                 </div>
 
                 {{-- RBAC note --}}
-                <div class="rounded-xl bg-white/10 border border-white/20 px-4 py-3">
+                {{-- <div class="rounded-xl bg-white/10 border border-white/20 px-4 py-3">
                     <p class="text-xs font-semibold text-white mb-1.5 flex items-center gap-1.5">
                         <i class="bx bx-shield-quarter text-sm"></i> Role-Based Access
                     </p>
                     <p class="text-[11px] text-emerald-100/80 leading-relaxed">
                         All accounts start as <strong class="text-white">Faculty</strong> after approval. Admins may additionally assign <strong class="text-white">Chair</strong>, <strong class="text-white">Dean</strong>, or <strong class="text-white">Admin</strong> roles. A user cannot hold Chair and Dean simultaneously.
                     </p>
-                </div>
+                </div> --}}
             </div>
-
-            {{-- <p class="text-[11px] text-emerald-100/50 mt-6 italic">
-                "Empowering educators through structured, transparent curriculum management."
-            </p> --}}
         </div>
 
     </div>
