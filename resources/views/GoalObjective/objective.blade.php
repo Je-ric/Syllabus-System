@@ -6,14 +6,7 @@
         icon="bx-list-check"
         title="Department Objectives"
         desc="Define and manage learning objectives for each CLSU department">
-        <button type="button"
-            onclick="window.dispatchEvent(new CustomEvent('open-help-panel'))"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-[10px]
-                   text-[#52525b] bg-white border border-[#d4d4d8] hover:bg-[#f4f4f5] hover:border-[#a1a1aa]
-                   transition-colors [&_i]:leading-none"
-            aria-label="Open how to use guide">
-            <i class="bx bx-help-circle text-sm"></i> How to Use
-        </button>
+        <x-ui.help-trigger />
         @if ($selectedCollegeId && $selectedDepartmentId)
             <x-button variant="add-button"
                 onclick="document.getElementById('addObjectiveModal').showModal()">
@@ -110,11 +103,7 @@
                                 @foreach ($objectives as $objective)
                                     <x-table.row hover>
                                         <x-table.td class="align-top">
-                                            <span class="inline-flex items-center font-mono text-[12.5px] font-bold text-[#166534]
-                                                         bg-[#dcfce7] border border-[#86efac]
-                                                         px-2.5 py-1 rounded-lg whitespace-nowrap">
-                                                {{ $objective->dept_obj_code }}
-                                            </span>
+                                            <x-ui.code-badge>{{ $objective->dept_obj_code }}</x-ui.code-badge>
                                         </x-table.td>
                                         <x-table.td class="text-[#3f3f46] leading-relaxed align-top">
                                             {{ $objective->objective_text }}
