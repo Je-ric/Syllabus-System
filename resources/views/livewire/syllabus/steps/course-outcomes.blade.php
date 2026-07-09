@@ -141,14 +141,14 @@
         {{-- Action row: Add + Revert (left), Save All (right) --}}
         <div class="flex items-center justify-between gap-2 pt-3 border-t border-[#e2e8f0]">
             <div class="flex items-center gap-2">
-                <x-button variant="add-dashed" type="button" x-on:click="addCo()" x-bind:disabled="isSaving">
+                <x-ui.button variant="add-dashed" type="button" x-on:click="addCo()" x-bind:disabled="isSaving">
                     <i class="bx bx-plus text-base"></i> Add Course Outcome
-                </x-button>
-                <x-button x-show="hasPending()" x-cloak variant="cancel" type="button" x-on:click="revert()">
+                </x-ui.button>
+                <x-ui.button x-show="hasPending()" x-cloak variant="cancel" type="button" x-on:click="revert()">
                     <i class="bx bx-undo text-base leading-none"></i> Revert
-                </x-button>
+                </x-ui.button>
             </div>
-            <x-button variant="add-button" type="button" x-on:click="saveAll()" x-bind:disabled="isSaving" class="whitespace-nowrap relative">
+            <x-ui.button variant="add-button" type="button" x-on:click="saveAll()" x-bind:disabled="isSaving" class="whitespace-nowrap relative">
                 <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400 ring-2 ring-white animate-pulse"
                     x-show="hasPending()" x-cloak></span>
                 <span x-show="!isSaving" class="inline-flex items-center gap-1.5 leading-none">
@@ -161,7 +161,7 @@
                     </svg>
                     <span class="leading-none">Saving…</span>
                 </span>
-            </x-button>
+            </x-ui.button>
         </div>
 
     </div>

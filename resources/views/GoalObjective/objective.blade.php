@@ -8,10 +8,10 @@
         desc="Define and manage learning objectives for each CLSU department">
         <x-ui.help-trigger />
         @if ($selectedCollegeId && $selectedDepartmentId)
-            <x-button variant="add-button"
+            <x-ui.button variant="add-button"
                 onclick="document.getElementById('addObjectiveModal').showModal()">
                 <i class="bx bx-plus text-base leading-none"></i> Add Objective
-            </x-button>
+            </x-ui.button>
         @endif
     </x-page-header>
 

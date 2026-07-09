@@ -6,10 +6,10 @@
         icon="bx-buildings"
         title="Academic Structure Management"
         desc="Manage colleges, departments, and academic programs across the institution">
-        <x-button variant="add-button"
+        <x-ui.button variant="add-button"
                 onclick="document.getElementById('addCollegeModal').showModal()">
             <i class="bx bx-plus text-base leading-none"></i> Add College
-        </x-button>
+        </x-ui.button>
     </x-page-header>
 
     @if($colleges->count())
@@ -107,10 +107,10 @@
                                 :subtitle="$college->name">
 
                                 <x-slot name="actions">
-                                    <x-button variant="sm-add"
+                                    <x-ui.button variant="sm-add"
                                         onclick="openAddDepartmentModal({{ $college->id }})">
                                         <i class="bx bx-plus text-base leading-none"></i> Add Department
-                                    </x-button>
+                                    </x-ui.button>
                                 </x-slot>
 
                                 <div class="space-y-3">
@@ -244,10 +244,10 @@
                 icon="bxs-school"
                 title="No colleges yet"
                 message="Start by adding your first college to build the academic structure.">
-                <x-button variant="add-button"
+                <x-ui.button variant="add-button"
                     onclick="document.getElementById('addCollegeModal').showModal()">
                     <i class="bx bx-plus text-base leading-none"></i> Add College
-                </x-button>
+                </x-ui.button>
             </x-feedback-status.empty-state>
         </x-panel>
 

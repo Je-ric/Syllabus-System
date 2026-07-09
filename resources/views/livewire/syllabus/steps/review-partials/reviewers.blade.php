@@ -183,13 +183,13 @@
                                     @endforeach
                                 </x-form.select>
                             </div>
-                            <x-button type="button" variant="sm-add"
+                            <x-ui.button type="button" variant="sm-add"
                                 wire:click="saveApproved"
                                 wire:loading.attr="disabled"
                                 wire:target="saveApproved"
                                 loading="Saving…">
                                 <i class="bx bx-check"></i> Set
-                            </x-button>
+                            </x-ui.button>
                         </div>
                     </div>
 
@@ -240,13 +240,13 @@
                                     @endforeach
                                 </x-form.select>
                             </div>
-                            <x-button type="button" variant="sm-add"
+                            <x-ui.button type="button" variant="sm-add"
                                 wire:click="saveConcurred"
                                 wire:loading.attr="disabled"
                                 wire:target="saveConcurred"
                                 loading="Saving…">
                                 <i class="bx bx-check"></i> Set
-                            </x-button>
+                            </x-ui.button>
                         </div>
                     </div>
 
@@ -272,7 +272,7 @@
                                     @endforeach
                                 </x-form.select>
                             </div>
-                            <x-button type="button" variant="sm-add"
+                            <x-ui.button type="button" variant="sm-add"
                                 x-on:click="addReviewer()"
                                 x-bind:disabled="addingReviewer || !selectedFaculty">
                                 <span x-show="!addingReviewer" class="inline-flex items-center gap-1.5 leading-none">
@@ -285,7 +285,7 @@
                                     </svg>
                                     Adding…
                                 </span>
-                            </x-button>
+                            </x-ui.button>
                         </div>
                         <p class="text-sm text-[#94a3b8] leading-relaxed">
                             Each reviewer appears in the printed syllabus signature section.

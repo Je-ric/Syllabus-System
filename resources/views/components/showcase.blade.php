@@ -22,9 +22,9 @@
         @foreach ($buttonVariants as $variant)
             <div class="flex flex-col items-start gap-2">
                 <p class="text-xs font-mono text-slate-500">{{ $variant }}</p>
-                <x-button variant="{{ $variant }}">
+                <x-ui.button variant="{{ $variant }}">
                     {{ ucfirst(str_replace(['-', 'sm_'], [' ', ''], $variant)) }}
-                </x-button>
+                </x-ui.button>
             </div>
         @endforeach
     </div>
@@ -32,17 +32,17 @@
     {{-- Example of buttons with loading --}}
     <div class="mt-8 space-y-2">
         <h2 class="text-lg font-semibold">Loading Button Example</h2>
-        <x-button variant="primary" type="button" loading="Processing...">
+        <x-ui.button variant="primary" type="button" loading="Processing...">
             Submit
-        </x-button>
+        </x-ui.button>
     </div>
 
     {{-- Example of link button --}}
     <div class="mt-4 space-y-2">
         <h2 class="text-lg font-semibold">Link Button Example</h2>
-        <x-button variant="add-button" href="#">
+        <x-ui.button variant="add-button" href="#">
             Go to Page
-        </x-button>
+        </x-ui.button>
     </div>
 </div>
 @endsection

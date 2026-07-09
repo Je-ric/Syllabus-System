@@ -24,13 +24,13 @@
             icon="calendar-x"
             title="No weeks generated yet"
             message="Select an academic calendar in the previous step, then click Generate Weeks.">
-            <x-button variant="sm-add"
+            <x-ui.button variant="sm-add"
                 wire:click="generateWeeklyCoverage"
                 :disabled="! $academic_calendar_id"
                 wireTarget="generateWeeklyCoverage"
                 loading="Generating…">
                 <i class="bx bx-calendar-plus"></i> Generate Weeks
-            </x-button>
+            </x-ui.button>
         </x-feedback-status.empty-state>
 
     @else

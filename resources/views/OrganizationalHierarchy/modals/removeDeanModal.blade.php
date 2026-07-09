@@ -37,9 +37,9 @@
             @csrf
             <input type="hidden" name="college_id" value="{{ $collegeId }}">
             <input type="hidden" name="user_id" value="{{ $userId }}">
-            <x-button type="submit" variant="danger">
+            <x-ui.button type="submit" variant="danger">
                 <i class="bx bx-trash"></i> Remove Dean
-            </x-button>
+            </x-ui.button>
         </form>
     </x-modal.footer>
 </x-modal.dialog>

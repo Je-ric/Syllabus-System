@@ -12,9 +12,9 @@
 
     <x-modal.footer>
         <x-modal.close-button modalId="cancelEditModal" text="Stay on Page" />
-        <x-button type="button" variant="danger"
+        <x-ui.button type="button" variant="danger"
             onclick="window.location.href='{{ route('academic.calendars.index') }}'">
             <i class="bx bx-x"></i> Discard Changes
-        </x-button>
+        </x-ui.button>
     </x-modal.footer>
 </x-modal.dialog>

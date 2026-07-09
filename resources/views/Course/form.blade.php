@@ -7,9 +7,9 @@
     title="{{ $pageTitle }}"
     desc="Fill in the course details and map program outcomes below.">
     <x-ui.help-trigger />
-    <x-button href="{{ route('courses.index') }}" variant="cancel">
+    <x-ui.button href="{{ route('courses.index') }}" variant="cancel">
         <i class="bx bx-arrow-back"></i> Back to Courses
-    </x-button>
+    </x-ui.button>
 </x-page-header>
 
 <x-help-panel module="courses" />
@@ -227,17 +227,17 @@
 
         {{-- Form actions --}}
         <div class="flex flex-wrap items-center justify-between gap-3">
-            <x-button href="{{ route('courses.index') }}" variant="cancel">
+            <x-ui.button href="{{ route('courses.index') }}" variant="cancel">
                 <i class="bx bx-arrow-back"></i> Cancel
-            </x-button>
+            </x-ui.button>
 
             <div class="flex gap-2">
-                <x-button type="button" variant="outline" onclick="resetRadioButtons()">
+                <x-ui.button type="button" variant="outline" onclick="resetRadioButtons()">
                     <i class="bx bx-reset"></i> Reset IED Levels
-                </x-button>
-                <x-button type="button" variant="save" onclick="openCourseConfirmModal()">
+                </x-ui.button>
+                <x-ui.button type="button" variant="save" onclick="openCourseConfirmModal()">
                     <i class="bx bx-save"></i> {{ $submitLabel }}
-                </x-button>
+                </x-ui.button>
             </div>
         </div>
     </form>

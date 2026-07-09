@@ -20,11 +20,11 @@
     <x-page-header icon="bx-book-open" title="{{ $syllabus->id ? 'Edit' : 'Create' }} Syllabus"
         desc="{{ $course->course_code }} — {{ $course->course_title }}">
         <x-ui.help-trigger />
-        <x-button variant="cancel" href="{{ route('syllabus.index') }}">
+        <x-ui.button variant="cancel" href="{{ route('syllabus.index') }}">
             <i class="bx bx-arrow-back"></i>
             <span class="sm:hidden">Back</span>
             <span class="hidden sm:inline">Back to Syllabi</span>
-        </x-button>
+        </x-ui.button>
     </x-page-header>
 
     @php
@@ -186,21 +186,21 @@
                 <div class="mt-4 flex justify-between items-center gap-3">
                     <div>
                         @if ($this->hasPreviousStep())
-                            <x-button variant="cancel" wire:loading.attr="disabled"
+                            <x-ui.button variant="cancel" wire:loading.attr="disabled"
                                 wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview,saveAsDone"
                                 x-on:click="tryNavigate(() => $wire.goPreviousStep())">
                                 <i class="bx bx-chevron-left"></i>
                                 <span class="hidden sm:inline">Previous</span>
-                            </x-button>
+                            </x-ui.button>
                         @endif
                     </div>
                     <div>
                         @if ($this->hasNextStep())
-                            <x-button variant="primary" wire:loading.attr="disabled"
+                            <x-ui.button variant="primary" wire:loading.attr="disabled"
                                 wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview,saveAsDone"
                                 loading="Saving…" x-on:click="tryNavigate(() => $wire.goNextStep())">
                                 <span class="hidden sm:inline">Next</span> <i class="bx bx-chevron-right"></i>
-                            </x-button>
+                            </x-ui.button>
                         @endif
                     </div>
                 </div>

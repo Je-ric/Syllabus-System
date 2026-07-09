@@ -27,7 +27,7 @@
                         <p class="text-xs text-slate-500 mt-0.5">Create an immutable snapshot of this syllabus.</p>
                     </div>
                 </div>
-                <x-button
+                <x-ui.button
                     type="button"
                     variant="add-button"
                     wire:click="$parent.saveAsDone"
@@ -43,7 +43,7 @@
                         </svg>
                         Saving…
                     </span>
-                </x-button>
+                </x-ui.button>
             </div>
         </div>
 
@@ -77,7 +77,7 @@
             <p class="text-xs text-slate-400 hidden sm:block">
                 You can still edit your draft if you need to make changes before submitting.
             </p>
-            <x-button
+            <x-ui.button
                 variant="primary"
                 wire:click="submitForReview"
                 wire:loading.attr="disabled"
@@ -85,7 +85,7 @@
                 loading="Submitting…"
                 class="ml-auto">
                 <i class="bx bx-send text-base leading-none"></i> Submit for Review
-            </x-button>
+            </x-ui.button>
         </div>
 
     </div> --}}

@@ -19,8 +19,8 @@
 
     <x-modal.footer>
         <x-modal.close-button modalId="confirmEditCourseModal" text="Review Again" />
-        <x-button type="button" variant="save" onclick="confirmCourseSubmit()">
+        <x-ui.button type="button" variant="save" onclick="confirmCourseSubmit()">
             <i class="bx bx-check"></i> Confirm & Update
-        </x-button>
+        </x-ui.button>
     </x-modal.footer>
 </x-modal.dialog>

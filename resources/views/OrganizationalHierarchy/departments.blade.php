@@ -11,9 +11,9 @@
         icon="bx-buildings"
         title="{{ $college->name }}"
         desc="Manage department leadership, faculty assignments, and academic structure">
-        <x-button variant="cancel" href="{{ $isAdmin ? route('organizational.colleges.index') : route('organizational.hierarchy') }}">
+        <x-ui.button variant="cancel" href="{{ $isAdmin ? route('organizational.colleges.index') : route('organizational.hierarchy') }}">
             <i class="bx bx-arrow-back"></i> Back
-        </x-button>
+        </x-ui.button>
     </x-page-header>
 
     <x-panel>
@@ -51,12 +51,12 @@
                             </div>
 
                             @if ($canManageFaculty)
-                                <x-button
+                                <x-ui.button
                                     onclick="document.getElementById('assignFacultyModal-{{ $department->id }}').showModal()"
                                     variant="add-button"
                                     class="shrink-0 text-xs">
                                     <i class="bx bx-user-plus"></i> Add Faculty
-                                </x-button>
+                                </x-ui.button>
                             @endif
                         </div>
 
@@ -88,12 +88,12 @@
                                     <div class="flex flex-col items-center gap-3 py-1">
                                         <p class="text-xs text-slate-400 italic">No chair assigned yet.</p>
                                         @if ($canManageChair && $potentialChairs->count() > 0)
-                                            <x-button
+                                            <x-ui.button
                                                 onclick="document.getElementById('assignChairModal-{{ $department->id }}').showModal()"
                                                 variant="cancel"
                                                 class="text-xs">
                                                 <i class="bx bx-user-plus"></i> Assign Chair
-                                            </x-button>
+                                            </x-ui.button>
                                         @elseif ($canManageChair)
                                             <p class="text-xs text-slate-400">No available users to assign</p>
                                         @endif

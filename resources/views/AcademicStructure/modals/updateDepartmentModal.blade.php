@@ -23,9 +23,9 @@
         </x-modal.body>
         <x-modal.footer>
             <x-modal.close-button :modalId="'updateDepartmentModal_' . $dept->id" text="Cancel" />
-            <x-button type="submit" variant="save">
+            <x-ui.button type="submit" variant="save">
                 <i class="bx bx-save"></i> Save Changes
-            </x-button>
+            </x-ui.button>
         </x-modal.footer>
     </form>
 </x-modal.dialog>

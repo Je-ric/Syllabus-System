@@ -21,10 +21,10 @@
         <x-feedback-status.alert type="error" title="Syllabi with generated weeks exist for this calendar." class="mb-5">
             Changing the semester dates will make existing weekly coverage dates stale. Faculty will need to regenerate their weeks manually inside the syllabus wizard.
             <div class="flex gap-2 mt-3">
-                <x-button type="button" variant="danger" wire:click="update" wire:loading.attr="disabled">
+                <x-ui.button type="button" variant="danger" wire:click="update" wire:loading.attr="disabled">
                     <i class="bx bx-check"></i> Proceed Anyway
-                </x-button>
-                <x-button type="button" variant="cancel" wire:click="cancelStaleWarning">Cancel</x-button>
+                </x-ui.button>
+                <x-ui.button type="button" variant="cancel" wire:click="cancelStaleWarning">Cancel</x-ui.button>
             </div>
         </x-feedback-status.alert>
     @endif
@@ -146,27 +146,27 @@
     {{-- ── Actions ─────────────────────────────────────────────────────────── --}}
     <div class="flex flex-wrap justify-end gap-2">
         @if ($isEdit)
-            <x-button type="button" variant="save"
+            <x-ui.button type="button" variant="save"
                 wire:click="update"
                 wire:loading.attr="disabled"
                 wire:target="update"
                 loading="Saving…">
                 <i class="bx bx-save"></i> Update Calendar
-            </x-button>
+            </x-ui.button>
 
-            <x-button type="button" variant="cancel"
+            <x-ui.button type="button" variant="cancel"
                 x-data
                 x-on:click="$dispatch('open-cancel-edit-modal')">
                 <i class="bx bx-x"></i> Cancel
-            </x-button>
+            </x-ui.button>
         @else
-            <x-button type="button" variant="save"
+            <x-ui.button type="button" variant="save"
                 wire:click="requestCreate"
                 wire:loading.attr="disabled"
                 wire:target="requestCreate"
                 loading="Validating…">
                 <i class="bx bx-save"></i> Create Calendar
-            </x-button>
+            </x-ui.button>
         @endif
     </div>
 
@@ -223,12 +223,12 @@
                 <x-modal.close-button modalId="confirmAYModal" text="Review Again"
                     wire:click="cancelConfirm" />
 
-                <x-button type="button" variant="save"
+                <x-ui.button type="button" variant="save"
                     wire:click="store"
                     wire:loading.attr="disabled"
                     loading="Creating…">
                     <i class="bx bx-check"></i> Confirm &amp; Create
-                </x-button>
+                </x-ui.button>
             </x-modal.footer>
         </x-modal.dialog>
     @endif
@@ -255,11 +255,11 @@
 
             <x-modal.footer>
                 <x-modal.close-button modalId="cancelEditModal" text="Stay on Page" />
-                <x-button type="button" variant="danger"
+                <x-ui.button type="button" variant="danger"
                     wire:navigate
                     href="{{ route('academic.calendars.index') }}">
                     <i class="bx bx-x"></i> Discard Changes
-                </x-button>
+                </x-ui.button>
             </x-modal.footer>
         </x-modal.dialog>
     @endif

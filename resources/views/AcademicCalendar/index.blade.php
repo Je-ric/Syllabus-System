@@ -6,9 +6,9 @@
         icon="bx-calendar"
         title="Academic Calendars"
         desc="Manage academic year and semester dates">
-        <x-button variant="add-button" href="{{ route('academic.calendars.create') }}">
+        <x-ui.button variant="add-button" href="{{ route('academic.calendars.create') }}">
             <i class="bx bx-plus"></i> Add Academic Year
-        </x-button>
+        </x-ui.button>
     </x-page-header>
 
     <x-panel>
@@ -78,31 +78,31 @@
 
                         {{-- Actions --}}
                         <div class="flex items-center gap-2 px-5 py-3">
-                            <x-button href="{{ route('academic.calendar.events.index', $year) }}"
+                            <x-ui.button href="{{ route('academic.calendar.events.index', $year) }}"
                                 variant="table-manage">
                                 <i class="bx bx-calendar-event"></i> Manage Events
-                            </x-button>
+                            </x-ui.button>
 
                             @if ($hasEvents)
-                                <x-button variant="table-edit" disabled
+                                <x-ui.button variant="table-edit" disabled
                                     class="opacity-40 cursor-not-allowed"
                                     title="Remove all events to edit">
                                     <i class="bx bx-edit"></i>
-                                </x-button>
-                                <x-button variant="table-danger" disabled
+                                </x-ui.button>
+                                <x-ui.button variant="table-danger" disabled
                                     class="opacity-40 cursor-not-allowed"
                                     title="Remove all events to delete">
                                     <i class="bx bx-trash"></i>
-                                </x-button>
+                                </x-ui.button>
                             @else
-                                <x-button href="{{ route('academic.calendars.edit', $year) }}"
+                                <x-ui.button href="{{ route('academic.calendars.edit', $year) }}"
                                     variant="table-edit" title="Edit">
                                     <i class="bx bx-edit"></i>
-                                </x-button>
-                                <x-button type="button" variant="table-danger" title="Delete"
+                                </x-ui.button>
+                                <x-ui.button type="button" variant="table-danger" title="Delete"
                                     onclick="document.getElementById('deleteAYModal_{{ str_replace('-', '_', $year) }}').showModal()">
                                     <i class="bx bx-trash"></i>
-                                </x-button>
+                                </x-ui.button>
                                 @include('AcademicCalendar.modals.deleteAYModal', ['year' => $year, 'semesters' => $semesters])
                             @endif
                         </div>

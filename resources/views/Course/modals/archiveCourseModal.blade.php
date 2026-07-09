@@ -12,9 +12,9 @@
         <x-modal.close-button :modalId="'archiveCourseModal_' . $course->id" text="Cancel" />
         <form action="{{ route('courses.archive', $course->id) }}" method="POST">
             @csrf
-            <x-button type="submit" variant="warning">
+            <x-ui.button type="submit" variant="warning">
                 <i class="bx bx-archive"></i> Archive
-            </x-button>
+            </x-ui.button>
         </form>
     </x-modal.footer>
 </x-modal.dialog>

@@ -18,9 +18,9 @@
 
         <x-modal.footer>
             <x-modal.close-button modalId="addDepartmentModal" text="Cancel" />
-            <x-button type="submit" variant="add-button">
+            <x-ui.button type="submit" variant="add-button">
                 <i class="bx bx-save"></i> Create Department
-            </x-button>
+            </x-ui.button>
         </x-modal.footer>
     </form>
 </x-modal.dialog>

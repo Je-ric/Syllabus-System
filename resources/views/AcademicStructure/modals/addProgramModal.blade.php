@@ -28,9 +28,9 @@
 
         <x-modal.footer>
             <x-modal.close-button modalId="addProgramModal" text="Cancel" />
-            <x-button type="submit" variant="add-button">
+            <x-ui.button type="submit" variant="add-button">
                 <i class="bx bx-save"></i> Create Program
-            </x-button>
+            </x-ui.button>
         </x-modal.footer>
     </form>
 </x-modal.dialog>

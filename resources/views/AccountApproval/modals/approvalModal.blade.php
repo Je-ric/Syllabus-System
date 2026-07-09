@@ -126,10 +126,10 @@
 
         <x-modal.footer>
             <x-modal.close-button :modalId="$modalId" text="Cancel" />
-            <x-button type="submit" :variant="$hc['btnVariant']">
+            <x-ui.button type="submit" :variant="$hc['btnVariant']">
                 <i class="bx {{ $hc['btnIcon'] }} leading-none"></i>
                 {{ ucfirst($action) }}
-            </x-button>
+            </x-ui.button>
         </x-modal.footer>
     </form>
 </x-modal.dialog>

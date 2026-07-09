@@ -19,9 +19,9 @@
         </x-modal.body>
         <x-modal.footer>
             <x-modal.close-button modalId="addGoalModal" text="Cancel" />
-            <x-button type="submit" variant="add-button">
+            <x-ui.button type="submit" variant="add-button">
                 <i class="bx bx-plus"></i> Add Goal
-            </x-button>
+            </x-ui.button>
         </x-modal.footer>
     </form>
 </x-modal.dialog>

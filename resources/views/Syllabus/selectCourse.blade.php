@@ -114,12 +114,12 @@
                                                         <i class="bx bx-error-circle"></i> No PO mapped
                                                     </x-feedback-status.status-indicator>
                                                 @else
-                                                    <x-button
+                                                    <x-ui.button
                                                         href="{{ route('syllabus.form', $course->id) }}"
                                                         variant="table-confirm"
                                                         class="whitespace-nowrap inline-flex">
                                                         <i class="bx bx-plus"></i> Create Syllabus
-                                                    </x-button>
+                                                    </x-ui.button>
                                                 @endif
                                             </td>
 

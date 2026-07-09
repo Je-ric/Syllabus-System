@@ -221,13 +221,13 @@
 
     {{-- Footer actions --}}
     <div class="flex items-center justify-between gap-2 pt-3 border-t border-[#f4f4f5]">
-        <x-button variant="sm-cancel"
+        <x-ui.button variant="sm-cancel"
             wire:click="resetWeek({{ $week->week_no }})"
             wireTarget="resetWeek({{ $week->week_no }})"
             wire:confirm="Reset Week {{ $week->week_no }}? All content will be cleared and cannot be undone."
             loading="Resetting…">
             <i class="bx bx-reset text-sm"></i> Reset
-        </x-button>
+        </x-ui.button>
 
         <button type="button" x-on:click="openModal('learning_outcomes')"
             class="inline-flex items-center gap-2 px-4 py-2 text-[13px] font-semibold rounded-[10px]

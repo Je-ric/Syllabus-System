@@ -8,10 +8,10 @@
         desc="Define and manage strategic goals for each CLSU college">
         <x-ui.help-trigger />
         @if ($selectedCollegeId)
-            <x-button variant="add-button"
+            <x-ui.button variant="add-button"
                 onclick="document.getElementById('addGoalModal').showModal()">
                 <i class="bx bx-plus text-base leading-none"></i> Add Goal
-            </x-button>
+            </x-ui.button>
         @endif
     </x-page-header>
 

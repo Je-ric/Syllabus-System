@@ -178,9 +178,9 @@
                     </div>
                     @unless ($isAdmin)
                         <div class="mt-4 flex justify-end">
-                            <x-button type="submit" variant="save">
+                            <x-ui.button type="submit" variant="save">
                                 <i class="bx bx-save mr-1"></i> Save Changes
-                            </x-button>
+                            </x-ui.button>
                         </div>
                     @endunless
                 </form>
@@ -243,9 +243,9 @@
                         </x-modal.body>
                         <x-modal.footer>
                             <x-modal.close-button modalId="profile-ch-modal" />
-                            <x-button type="submit" variant="sm-add">
+                            <x-ui.button type="submit" variant="sm-add">
                                 <i class="bx bx-plus"></i> Add
-                            </x-button>
+                            </x-ui.button>
                         </x-modal.footer>
                     </form>
                 </x-modal.dialog>
@@ -347,7 +347,7 @@
                                     </div>
                                 </div>
                                 <div class="md:col-span-2 flex justify-end">
-                                    <x-button type="submit" variant="save">Send OTP</x-button>
+                                    <x-ui.button type="submit" variant="save">Send OTP</x-ui.button>
                                 </div>
                             </form>
                         </div>
@@ -366,7 +366,7 @@
                                             class="mt-1.5 text-center tracking-[0.4em] text-lg font-semibold" required />
                                         @error('otp')<span class="text-rose-600 text-xs">{{ $message }}</span>@enderror
                                     </div>
-                                    <x-button type="submit" variant="save">Confirm Password Change</x-button>
+                                    <x-ui.button type="submit" variant="save">Confirm Password Change</x-ui.button>
                                 </form>
                                 <form method="POST" action="{{ route('profile.password.resend-otp') }}" class="mt-3">
                                     @csrf

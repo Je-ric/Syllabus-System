@@ -32,9 +32,9 @@
         <form action="{{ route('college.destroy', $college->id) }}" method="POST">
             @csrf
             @method('DELETE')
-            <x-button type="submit" variant="danger">
+            <x-ui.button type="submit" variant="danger">
                 <i class="bx bx-trash"></i> Delete College
-            </x-button>
+            </x-ui.button>
         </form>
     </x-modal.footer>
 </x-modal.dialog>

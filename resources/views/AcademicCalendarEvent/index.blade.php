@@ -6,9 +6,9 @@
         icon="bx-calendar-event"
         title="Manage Events — {{ $academicYear }}"
         desc="Add, edit, and delete events for each semester.">
-        <x-button href="{{ route('academic.calendars.index') }}" variant="cancel">
+        <x-ui.button href="{{ route('academic.calendars.index') }}" variant="cancel">
             <i class="bx bx-arrow-back"></i> Back
-        </x-button>
+        </x-ui.button>
     </x-page-header>
 
     <x-panel>

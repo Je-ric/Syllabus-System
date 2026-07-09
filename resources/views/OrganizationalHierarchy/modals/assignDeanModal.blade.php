@@ -35,9 +35,9 @@
 
         <x-modal.footer>
             <x-modal.close-button :modalId="'assignDeanModal-' . $collegeId" text="Cancel" />
-            <x-button type="submit" variant="save">
+            <x-ui.button type="submit" variant="save">
                 <i class="bx bx-user-check"></i> Assign Dean
-            </x-button>
+            </x-ui.button>
         </x-modal.footer>
     </form>
 </x-modal.dialog>

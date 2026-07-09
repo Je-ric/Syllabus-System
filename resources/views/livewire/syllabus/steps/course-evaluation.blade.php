@@ -74,9 +74,9 @@
                 @endif
             </div>
 
-            <x-button variant="sm-add" wire:click="save" wireTarget="save" loading="Saving…">
+            <x-ui.button variant="sm-add" wire:click="save" wireTarget="save" loading="Saving…">
                 <i class="bx bx-save"></i> Save Evaluation
-            </x-button>
+            </x-ui.button>
 
         </div>
 

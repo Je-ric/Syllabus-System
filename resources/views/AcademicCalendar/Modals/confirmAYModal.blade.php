@@ -28,9 +28,9 @@
 
     <x-modal.footer>
         <x-modal.close-button modalId="confirmAYModal" text="Review Again" />
-        <x-button type="button" variant="add-button" onclick="document.getElementById('academicCalendarForm').submit()">
+        <x-ui.button type="button" variant="add-button" onclick="document.getElementById('academicCalendarForm').submit()">
             <i class="bx bx-check"></i> Confirm &amp; Create
-        </x-button>
+        </x-ui.button>
     </x-modal.footer>
 </x-modal.dialog>
 

@@ -54,22 +54,22 @@
                             {{-- Actions --}}
                             <div class="mt-auto pt-3 border-t border-slate-100 flex flex-col gap-2">
 
-                                <x-button
+                                <x-ui.button
                                     href="{{ route('organizational.departments.index', $college->id) }}"
                                     variant="add-button"
                                     class="w-full justify-center">
                                     <i class="bx bx-building"></i>
                                     Manage Departments ({{ $college->departments->count() }})
-                                </x-button>
+                                </x-ui.button>
 
                                 @if (!$dean && $potentialDeans->count() > 0)
-                                    <x-button
+                                    <x-ui.button
                                         onclick="document.getElementById('assignDeanModal-{{ $college->id }}').showModal()"
                                         variant="cancel"
                                         class="w-full justify-center">
                                         <i class="bx bx-user-plus"></i>
                                         Assign Dean
-                                    </x-button>
+                                    </x-ui.button>
                                 @elseif (!$dean)
                                     <p class="text-center text-xs text-slate-400 py-1">No available users to assign</p>
                                 @endif

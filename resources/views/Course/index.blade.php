@@ -25,11 +25,11 @@
         desc="View and manage courses by program, year level, and semester">
         <x-ui.help-trigger />
         @if ($program)
-            <x-button
+            <x-ui.button
                 href="{{ route('courses.create', ['program_id' => $program->id]) }}"
                 variant="add-button">
                 <i class="bx bx-plus"></i> Add Course
-            </x-button>
+            </x-ui.button>
         @endif
     </x-page-header>
 
@@ -50,33 +50,27 @@
                 message="You have the Chair role but are not assigned to any department. Contact an administrator to be assigned." />
         @elseif ($program)
 
-            {{-- Active / Archived toggle --}}
-            <div class="flex items-center gap-1.5 mb-4">
-                <a href="{{ route('courses.index', ['program_id' => $program->id]) }}"
-                    class="px-3 py-1.5 rounded-[10px] text-[13px] font-medium transition-colors
-                            {{ !$showArchived
-                                ? 'bg-[#f0fdf4] text-[#15803d] border border-[#86efac]'
-                                : 'text-[#71717a] hover:bg-[#f4f4f5] border border-transparent' }}">
-                    Active
-                </a>
-                <a href="{{ route('courses.index', ['program_id' => $program->id, 'archived' => 1]) }}"
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-[13px] font-medium transition-colors
-                            {{ $showArchived
-                                ? 'bg-[#fffbeb] text-[#92400e] border border-[#fde68a]'
-                                : 'text-[#71717a] hover:bg-[#f4f4f5] border border-transparent' }}">
-                    <i class="bx bx-archive text-sm leading-none"></i> Archived
-                </a>
-            </div>
+            {{-- Active / Archived tabs + PO offcanvas trigger --}}
+            <div x-data="{ poDrawer: false }">
+                <x-navigation.link-tabs
+                    :tabs="[
+                        ['id' => 'active',   'label' => 'Active',   'icon' => 'bx-book',    'href' => route('courses.index', ['program_id' => $program->id])],
+                        ['id' => 'archived', 'label' => 'Archived', 'icon' => 'bx-archive', 'href' => route('courses.index', ['program_id' => $program->id, 'archived' => 1])],
+                    ]"
+                    :active="$showArchived ? 'archived' : 'active'">
+                    @if ($program->outcomes->isNotEmpty())
+                        <x-slot name="actions">
+                            <x-ui.button type="button" variant="sm-info" x-on:click="poDrawer = true">
+                                <i class="bx bx-book-open text-sm leading-none"></i> Program Outcomes
+                            </x-ui.button>
+                        </x-slot>
+                    @endif
+                </x-navigation.link-tabs>
 
-            {{-- Program Outcomes reference --}}
-            @if ($program->outcomes->isNotEmpty())
-                <div x-data="{ poDrawer: false }" class="mb-4">
-                    <x-button type="button" variant="sm-info" x-on:click="poDrawer = true">
-                        <i class="bx bx-book-open text-sm leading-none"></i> Program Outcomes
-                    </x-button>
+                @if ($program->outcomes->isNotEmpty())
                     @include('Course.offcanvasReference')
-                </div>
-            @endif
+                @endif
+            </div>
 
             {{-- Curriculum map --}}
             @forelse ($groupedCourses as $year => $semesters)
@@ -184,39 +178,39 @@
                                             <td class="px-4 py-3 text-center">
                                                 <div class="inline-flex items-center gap-1">
                                                     @if (!$showArchived)
-                                                        <x-button href="{{ route('courses.edit', $course->id) }}" variant="table-edit" title="Edit course">
+                                                        <x-ui.button href="{{ route('courses.edit', $course->id) }}" variant="table-edit" title="Edit course">
                                                             <i class="bx bx-edit"></i>
-                                                        </x-button>
-                                                        <x-button type="button" variant="table-view"
+                                                        </x-ui.button>
+                                                        <x-ui.button type="button" variant="table-view"
                                                             onclick="document.getElementById('viewCourseModal_{{ $course->id }}').showModal()"
                                                             title="View details">
                                                             <i class="bx bx-show"></i>
-                                                        </x-button>
-                                                        <x-button type="button" variant="table-manage"
+                                                        </x-ui.button>
+                                                        <x-ui.button type="button" variant="table-manage"
                                                             onclick="document.getElementById('archiveCourseModal_{{ $course->id }}').showModal()"
                                                             title="Archive course">
                                                             <i class="bx bx-archive"></i>
-                                                        </x-button>
+                                                        </x-ui.button>
                                                         @if ($canDelete)
-                                                            <x-button type="button" variant="table-danger"
+                                                            <x-ui.button type="button" variant="table-danger"
                                                                 onclick="document.getElementById('deleteCourseModal_{{ $course->id }}').showModal()"
                                                                 title="Delete course">
                                                                 <i class="bx bx-trash"></i>
-                                                            </x-button>
+                                                            </x-ui.button>
                                                         @endif
                                                     @else
                                                         <form action="{{ route('courses.restore', $course->id) }}" method="POST">
                                                             @csrf
-                                                            <x-button type="submit" variant="table-restore" title="Restore course">
+                                                            <x-ui.button type="submit" variant="table-restore" title="Restore course">
                                                                 <i class="bx bx-undo"></i> Restore
-                                                            </x-button>
+                                                            </x-ui.button>
                                                         </form>
                                                         @if ($canDelete)
-                                                            <x-button type="button" variant="table-danger"
+                                                            <x-ui.button type="button" variant="table-danger"
                                                                 onclick="document.getElementById('deleteCourseModal_{{ $course->id }}').showModal()"
                                                                 title="Delete course">
                                                                 <i class="bx bx-trash"></i>
-                                                            </x-button>
+                                                            </x-ui.button>
                                                         @endif
                                                     @endif
                                                 </div>
@@ -235,9 +229,9 @@
             @empty
                 <x-feedback-status.empty-state icon="bx-book-open" title="No courses found"
                     message="This program has no courses yet. Add the first one to get started.">
-                    <x-button href="{{ route('courses.create', ['program_id' => $program->id]) }}" variant="add-button">
+                    <x-ui.button href="{{ route('courses.create', ['program_id' => $program->id]) }}" variant="add-button">
                         <i class="bx bx-plus"></i> Add First Course
-                    </x-button>
+                    </x-ui.button>
                 </x-feedback-status.empty-state>
             @endforelse
 

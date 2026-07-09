@@ -61,7 +61,7 @@
                        border border-[#e2e8f0] bg-white hover:bg-[#f1f5f9] transition-colors">
                 Cancel
             </button>
-            <x-button type="button" variant="add-button"
+            <x-ui.button type="button" variant="add-button"
                 wire:click="importCsv"
                 wire:loading.attr="disabled"
                 wire:target="importCsv,csvFile">
@@ -75,7 +75,7 @@
                     </svg>
                     Importing…
                 </span>
-            </x-button>
+            </x-ui.button>
         </div>
     </div>
 </div>

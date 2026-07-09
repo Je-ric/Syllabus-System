@@ -28,9 +28,9 @@
         <form action="{{ route('objective.destroy', $objective->id) }}" method="POST">
             @csrf
             @method('DELETE')
-            <x-button type="submit" variant="danger">
+            <x-ui.button type="submit" variant="danger">
                 <i class="bx bx-trash"></i> Delete Objective
-            </x-button>
+            </x-ui.button>
         </form>
     </x-modal.footer>
 </x-modal.dialog>

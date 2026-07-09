@@ -7,9 +7,9 @@
         title="My Syllabi"
         desc="Manage and continue working on your course syllabi">
         <x-ui.help-trigger />
-        <x-button href="{{ route('syllabus.create') }}" variant="add-button">
+        <x-ui.button href="{{ route('syllabus.create') }}" variant="add-button">
             <i class="bx bx-plus text-base leading-none"></i> Create Syllabus
-        </x-button>
+        </x-ui.button>
     </x-page-header>
 
     <x-help-panel module="syllabus-index" />
@@ -172,18 +172,18 @@
 
                                 {{-- Actions --}}
                                 <div class="px-3 pb-3 pt-1 flex gap-2">
-                                    <x-button
+                                    <x-ui.button
                                         href="{{ route('syllabus.wizard', ['syllabusId' => $syllabus->id]) }}"
                                         variant="primary"
                                         class="flex-1 justify-center">
                                         {{ $cfg['action_label'] }}
-                                    </x-button>
-                                    <x-button
+                                    </x-ui.button>
+                                    <x-ui.button
                                         href="{{ route('syllabus.preview.complete', ['syllabus' => $syllabus->id]) }}"
                                         variant="cancel"
                                         class="flex-1 justify-center">
                                         Preview
-                                    </x-button>
+                                    </x-ui.button>
                                     @if ($key === 'draft')
                                         <form method="POST"
                                               action="{{ route('syllabus.destroy', $syllabus->id) }}"
@@ -192,9 +192,9 @@
                                                   if (confirm('Delete this draft syllabus? This cannot be undone.')) $el.submit();
                                               ">
                                             @csrf @method('DELETE')
-                                            <x-button type="submit" variant="danger" title="Delete draft">
+                                            <x-ui.button type="submit" variant="danger" title="Delete draft">
                                                 <i class="bx bx-trash text-base leading-none"></i>
-                                            </x-button>
+                                            </x-ui.button>
                                         </form>
                                     @endif
                                 </div>
@@ -208,9 +208,9 @@
                                     :message="$cfg['empty_message']">
 
                                     @if ($cfg['show_create'])
-                                        <x-button href="{{ route('syllabus.create') }}" variant="add-button">
+                                        <x-ui.button href="{{ route('syllabus.create') }}" variant="add-button">
                                             <i class="bx bx-plus text-base"></i> Create Syllabus
-                                        </x-button>
+                                        </x-ui.button>
                                     @endif
 
                                 </x-feedback-status.empty-state>

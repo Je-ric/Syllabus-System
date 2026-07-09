@@ -92,35 +92,35 @@
                 {{-- Actions --}}
                 <div class="flex items-center justify-end gap-1 flex-wrap" @click.stop>
                     @if($user->account_status === 'pending')
-                        <x-button variant="table-confirm" onclick="document.getElementById('approveModal-{{ $user->id }}').showModal()">
+                        <x-ui.button variant="table-confirm" onclick="document.getElementById('approveModal-{{ $user->id }}').showModal()">
                             <i class="bx bx-check leading-none"></i> Approve
-                        </x-button>
-                        <x-button variant="table-danger" onclick="document.getElementById('rejectModal-{{ $user->id }}').showModal()">
+                        </x-ui.button>
+                        <x-ui.button variant="table-danger" onclick="document.getElementById('rejectModal-{{ $user->id }}').showModal()">
                             <i class="bx bx-x leading-none"></i> Reject
-                        </x-button>
+                        </x-ui.button>
                     @elseif($user->account_status === 'disabled')
-                        <x-button variant="table-confirm" onclick="document.getElementById('approveModal-{{ $user->id }}').showModal()">
+                        <x-ui.button variant="table-confirm" onclick="document.getElementById('approveModal-{{ $user->id }}').showModal()">
                             <i class="bx bx-check leading-none"></i> Activate
-                        </x-button>
+                        </x-ui.button>
                     @elseif($user->account_status === 'rejected')
-                        <x-button variant="table-restore" onclick="document.getElementById('restoreModal-{{ $user->id }}').showModal()">
+                        <x-ui.button variant="table-restore" onclick="document.getElementById('restoreModal-{{ $user->id }}').showModal()">
                             <i class="bx bx-revision leading-none"></i> Restore
-                        </x-button>
+                        </x-ui.button>
                     @elseif($user->account_status === 'active')
-                        <x-button variant="table-disable" onclick="document.getElementById('disableModal-{{ $user->id }}').showModal()">
+                        <x-ui.button variant="table-disable" onclick="document.getElementById('disableModal-{{ $user->id }}').showModal()">
                             <i class="bx bx-pause leading-none"></i> Disable
-                        </x-button>
+                        </x-ui.button>
                     @endif
 
                     @if($user->account_status === 'active')
-                        <x-button variant="table-manage" onclick="document.getElementById('assignRoleModal-{{ $user->id }}').showModal()">
+                        <x-ui.button variant="table-manage" onclick="document.getElementById('assignRoleModal-{{ $user->id }}').showModal()">
                             <i class="bx bx-shield leading-none"></i>
-                        </x-button>
+                        </x-ui.button>
                     @endif
 
-                    <x-button variant="table-edit" onclick="document.getElementById('editUserModal-{{ $user->id }}').showModal()">
+                    <x-ui.button variant="table-edit" onclick="document.getElementById('editUserModal-{{ $user->id }}').showModal()">
                         <i class="bx bx-edit leading-none"></i>
-                    </x-button>
+                    </x-ui.button>
                 </div>
 
             </div>

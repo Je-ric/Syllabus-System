@@ -123,17 +123,17 @@
 
         {{-- Action buttons --}}
         <div class="flex items-center gap-2 pt-1 border-t border-slate-100">
-            <x-button variant="add-dashed" type="button" @click="addPeo()" class="flex-1">
+            <x-ui.button variant="add-dashed" type="button" @click="addPeo()" class="flex-1">
                 <i class="bx bx-plus text-base"></i> Add PEO
-            </x-button>
+            </x-ui.button>
 
             <template x-if="hasPending()">
-                <x-button variant="cancel" type="button" @click="revert()">
+                <x-ui.button variant="cancel" type="button" @click="revert()">
                     <i class="bx bx-undo text-base leading-none"></i> Revert
-                </x-button>
+                </x-ui.button>
             </template>
 
-            <x-button variant="add-button" type="button" @click="savePeos()"
+            <x-ui.button variant="add-button" type="button" @click="savePeos()"
                 x-bind:disabled="isSaving" class="whitespace-nowrap relative">
                 <template x-if="hasPending()">
                     <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400 ring-2 ring-white animate-pulse"></span>
@@ -148,7 +148,7 @@
                     </svg>
                     <span class="leading-none">Saving…</span>
                 </span>
-            </x-button>
+            </x-ui.button>
         </div>
 
     </div>

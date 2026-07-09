@@ -7,12 +7,12 @@
         icon="bx-info-circle"
         title="No Assignment Found"
         desc="You have not been assigned a role in the organizational hierarchy yet.">
-        <x-button
+        <x-ui.button
             variant="cancel"
             href="{{ $isAdmin ? route('organizational.colleges.index') : route('profile.index') }}">
             <i class="bx bx-arrow-back"></i>
             {{ $isAdmin ? 'Back to Colleges' : 'Back to Profile' }}
-        </x-button>
+        </x-ui.button>
     </x-page-header>
 
     <x-panel>

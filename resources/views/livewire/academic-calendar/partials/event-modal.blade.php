@@ -139,7 +139,7 @@
                        border border-[#e2e8f0] bg-white hover:bg-[#f1f5f9] transition-colors">
                 Cancel
             </button>
-            <x-button type="button" variant="add-button"
+            <x-ui.button type="button" variant="add-button"
                 x-on:click="submit()"
                 x-bind:disabled="saving">
                 <span x-show="!saving" class="inline-flex items-center gap-1.5">
@@ -154,7 +154,7 @@
                     </svg>
                     Saving…
                 </span>
-            </x-button>
+            </x-ui.button>
         </div>
     </div>
 </div>
