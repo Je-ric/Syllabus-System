@@ -1,5 +1,5 @@
 {{-- outcomes-partials/course-info-drawer.blade.php --}}
-<x-offcanvas title="Course Info" subtitle="Reference while writing outcomes" icon="bx-book" open="courseInfoOpen">
+<x-layout.offcanvas title="Course Info" subtitle="Reference while writing outcomes" icon="bx-book" open="courseInfoOpen">
 
     @if (!empty($courseInfo))
         <div class="space-y-4">
@@ -55,4 +55,4 @@
         <x-feedback-status.empty-state icon="bx-book" title="No course data" message="Course information could not be loaded." />
     @endif
 
-</x-offcanvas>
+</x-layout.offcanvas>

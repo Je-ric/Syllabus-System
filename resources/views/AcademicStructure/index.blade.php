@@ -2,7 +2,7 @@
 
 @section('content')
 
-    <x-page-header
+    <x-layout.page-header
         icon="bx-buildings"
         title="Academic Structure Management"
         desc="Manage colleges, departments, and academic programs across the institution">
@@ -10,13 +10,13 @@
                 onclick="document.getElementById('addCollegeModal').showModal()">
             <i class="bx bx-plus text-base leading-none"></i> Add College
         </x-ui.button>
-    </x-page-header>
+    </x-layout.page-header>
 
     @if($colleges->count())
 
     <div x-data="{ selectedCollege: {{ $colleges->first()->id }} }">
 
-        <x-panel>
+        <x-layout.panel>
             <div class="grid grid-cols-12 gap-5">
 
                 {{-- ── LEFT: College list ──────────────────────────────────────── --}}
@@ -103,7 +103,7 @@
                     @foreach($colleges as $college)
                         <div x-show="selectedCollege === {{ $college->id }}" x-cloak>
 
-                            <x-card-section icon="bx-sitemap" title="Departments & Programs"
+                            <x-layout.card-section icon="bx-sitemap" title="Departments & Programs"
                                 :subtitle="$college->name">
 
                                 <x-slot name="actions">
@@ -226,20 +226,20 @@
                                     @endforelse
                                 </div>
 
-                            </x-card-section>
+                            </x-layout.card-section>
 
                         </div>
                     @endforeach
                 </div>
 
             </div>
-        </x-panel>
+        </x-layout.panel>
 
     </div>
 
     @else
 
-        <x-panel>
+        <x-layout.panel>
             <x-feedback-status.empty-state
                 icon="bxs-school"
                 title="No colleges yet"
@@ -249,7 +249,7 @@
                     <i class="bx bx-plus text-base leading-none"></i> Add College
                 </x-ui.button>
             </x-feedback-status.empty-state>
-        </x-panel>
+        </x-layout.panel>
 
     @endif
 

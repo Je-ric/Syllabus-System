@@ -1,13 +1,13 @@
 {{-- Help content: Courses --}}
 
-<x-accordion title="Overview" icon="info-circle" color="emerald" :open="true">
+<x-layout.accordion title="Overview" icon="info-circle" color="emerald" :open="true">
     <div class="space-y-2 text-[13px] text-[#3f3f46] leading-relaxed">
         <p>Courses are the individual subjects within a program. Each course belongs to a specific year level and semester, carries credit units, and is mapped to Program Outcomes (POs) using IED levels.</p>
         <p class="mt-1">A course must have at least one PO mapping before a syllabus can be created for it.</p>
     </div>
-</x-accordion>
+</x-layout.accordion>
 
-<x-accordion title="Browsing Courses" icon="list-ul" color="slate">
+<x-layout.accordion title="Browsing Courses" icon="list-ul" color="slate">
     <div class="space-y-3 text-[13px] text-[#3f3f46]">
         <p>Courses are grouped by <strong>Year Level → Semester</strong>. Each row shows:</p>
         <ul class="space-y-1.5 mt-1">
@@ -35,9 +35,9 @@
         <p class="mt-2">Click <strong>Program Outcomes</strong> to open a reference panel showing the full text of each PO for the selected program.</p>
         <p class="mt-1">Use the <strong>Active / Archived</strong> toggle to switch between active courses and archived ones.</p>
     </div>
-</x-accordion>
+</x-layout.accordion>
 
-<x-accordion title="Adding a Course" icon="plus-circle" color="emerald">
+<x-layout.accordion title="Adding a Course" icon="plus-circle" color="emerald">
     <ol class="space-y-2.5 text-[13.5px] text-[#3f3f46]">
         <li class="flex gap-2.5">
             <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">1</span>
@@ -64,9 +64,9 @@
             <span>Click <strong>Save Course</strong> — a confirmation dialog will appear. Review and click <strong>Confirm & Create</strong>.</span>
         </li>
     </ol>
-</x-accordion>
+</x-layout.accordion>
 
-<x-accordion title="IED Levels Explained" icon="info-circle" color="blue">
+<x-layout.accordion title="IED Levels Explained" icon="info-circle" color="blue">
     <div class="space-y-2 text-[13px] text-[#3f3f46]">
         <p>IED indicates how deeply a course addresses each Program Outcome:</p>
         <div class="space-y-2 mt-2">
@@ -94,9 +94,9 @@
         </div>
         <p class="mt-2 text-[12px] text-[#71717a]">Use <strong>Reset IED Levels</strong> on the form to clear all selections and start over.</p>
     </div>
-</x-accordion>
+</x-layout.accordion>
 
-<x-accordion title="Archive vs Delete" icon="error-circle" color="amber">
+<x-layout.accordion title="Archive vs Delete" icon="error-circle" color="amber">
     <div class="space-y-2 text-[13px] text-[#3f3f46]">
         <div class="flex items-start gap-3 p-2.5 rounded-lg bg-[#fffbeb] border border-[#fde68a]">
             <i class="bx bx-archive text-[#d97706] text-base shrink-0 mt-0.5"></i>
@@ -114,9 +114,9 @@
         </div>
         <p class="mt-1 text-[12px] text-[#71717a]">Delete is only available to Admins and Chairs managing their own department's programs.</p>
     </div>
-</x-accordion>
+</x-layout.accordion>
 
-<x-accordion title="Tips" icon="bulb" color="amber">
+<x-layout.accordion title="Tips" icon="bulb" color="amber">
     <ul class="space-y-2 text-[13px] text-[#3f3f46]">
         <li class="flex gap-2">
             <i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i>
@@ -135,9 +135,9 @@
             <span>Archive a course instead of deleting it when you want to retire it without losing historical syllabus data.</span>
         </li>
     </ul>
-</x-accordion>
+</x-layout.accordion>
 
-<x-accordion title="Common Mistakes" icon="error-circle" color="rose">
+<x-layout.accordion title="Common Mistakes" icon="error-circle" color="rose">
     <ul class="space-y-2 text-[13px] text-[#3f3f46]">
         <li class="flex gap-2">
             <i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i>
@@ -152,9 +152,9 @@
             <span>Setting LAB class hours without enabling <strong>Has Laboratory</strong> — the LAB hours field only appears when "Yes" is selected.</span>
         </li>
     </ul>
-</x-accordion>
+</x-layout.accordion>
 
-<x-accordion title="Frequently Asked Questions" icon="question-mark" color="slate">
+<x-layout.accordion title="Frequently Asked Questions" icon="question-mark" color="slate">
     <div class="space-y-3 text-[13px] text-[#3f3f46]">
         <div>
             <p class="font-semibold text-[#09090b]">Who can manage courses?</p>
@@ -173,4 +173,4 @@
             <p class="mt-0.5 text-[#52525b]">Nothing — syllabi are preserved. Archiving only hides the course from the active listing.</p>
         </div>
     </div>
-</x-accordion>
+</x-layout.accordion>

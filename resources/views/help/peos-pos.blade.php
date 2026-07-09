@@ -1,6 +1,6 @@
 {{-- Help content: PEOs & POs (Programs module) --}}
 
-<x-accordion title="Overview" icon="info-circle" color="emerald" :open="true">
+<x-layout.accordion title="Overview" icon="info-circle" color="emerald" :open="true">
     <div class="space-y-2 text-[13.5px] text-[#3f3f46] leading-relaxed">
         <p>This module manages two things for a selected program:</p>
         <ul class="space-y-1.5 mt-2">
@@ -15,9 +15,9 @@
         </ul>
         <p class="mt-2">Each PO can be mapped to one or more PEOs. The <strong>Matrix View</strong> tab shows the full mapping at a glance.</p>
     </div>
-</x-accordion>
+</x-layout.accordion>
 
-<x-accordion title="Step-by-Step Guide" icon="list-ol" color="slate">
+<x-layout.accordion title="Step-by-Step Guide" icon="list-ol" color="slate">
     <div class="space-y-4 text-[13.5px] text-[#3f3f46]">
 
         <div>
@@ -69,9 +69,9 @@
         </div>
 
     </div>
-</x-accordion>
+</x-layout.accordion>
 
-<x-accordion title="Unsaved Changes" icon="error-circle" color="amber">
+<x-layout.accordion title="Unsaved Changes" icon="error-circle" color="amber">
     <div class="space-y-2 text-[13.5px] text-[#3f3f46]">
         <p>PEOs and POs use a <strong>batch save</strong> pattern — changes are staged locally until you click <strong>Save All</strong>.</p>
         <ul class="space-y-1.5 mt-2">
@@ -91,9 +91,9 @@
         <p class="mt-2">Click <strong>Revert</strong> to discard all staged changes and restore the last saved state.</p>
         <p class="mt-1">PEO–PO mappings (the chips) save <em>immediately</em> on toggle — no Save All needed.</p>
     </div>
-</x-accordion>
+</x-layout.accordion>
 
-<x-accordion title="Tips" icon="bulb" color="amber">
+<x-layout.accordion title="Tips" icon="bulb" color="amber">
     <ul class="space-y-2 text-[13.5px] text-[#3f3f46]">
         <li class="flex gap-2">
             <i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i>
@@ -112,9 +112,9 @@
             <span>A course must have at least one PO mapping before a syllabus can be created for it.</span>
         </li>
     </ul>
-</x-accordion>
+</x-layout.accordion>
 
-<x-accordion title="Common Mistakes" icon="error-circle" color="rose">
+<x-layout.accordion title="Common Mistakes" icon="error-circle" color="rose">
     <ul class="space-y-2 text-[13.5px] text-[#3f3f46]">
         <li class="flex gap-2">
             <i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i>
@@ -133,9 +133,9 @@
             <span>Adding a blank row and clicking Save All — you'll be warned to fill it in first.</span>
         </li>
     </ul>
-</x-accordion>
+</x-layout.accordion>
 
-<x-accordion title="Frequently Asked Questions" icon="question-mark" color="slate">
+<x-layout.accordion title="Frequently Asked Questions" icon="question-mark" color="slate">
     <div class="space-y-3 text-[13.5px] text-[#3f3f46]">
         <div>
             <p class="font-semibold text-[#09090b]">Who can manage PEOs and POs?</p>
@@ -154,4 +154,4 @@
             <p class="mt-0.5 text-[#52525b]">A read-only grid of every PO (rows) against every PEO (columns), with a checkmark where a mapping exists. The footer row shows how many POs map to each PEO.</p>
         </div>
     </div>
-</x-accordion>
+</x-layout.accordion>

@@ -1,4 +1,4 @@
-<x-offcanvas title="PEO Reference" open="peoDrawer" icon="bx-graduation" width="max-w-sm">
+<x-layout.offcanvas title="PEO Reference" open="peoDrawer" icon="bx-graduation" width="max-w-sm">
     @if(count($peos) > 0)
         <div class="space-y-2.5">
             <p class="text-[12px] text-[#a1a1aa]">
@@ -30,4 +30,4 @@
             <p class="text-[12px] text-[#a1a1aa] mt-1">Go to the PEOs tab and add them first.</p>
         </div>
     @endif
-</x-offcanvas>
+</x-layout.offcanvas>

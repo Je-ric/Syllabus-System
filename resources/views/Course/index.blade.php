@@ -19,7 +19,7 @@
     $showArchived = request()->boolean('archived');
 @endphp
 
-    <x-page-header
+    <x-layout.page-header
         icon="bx-book"
         title="Manage Courses"
         desc="View and manage courses by program, year level, and semester">
@@ -31,19 +31,19 @@
                 <i class="bx bx-plus"></i> Add Course
             </x-ui.button>
         @endif
-    </x-page-header>
+    </x-layout.page-header>
 
-    <x-help-panel module="courses" />
+    <x-layout.help-panel module="courses" />
 
-    <x-panel>
+    <x-layout.panel>
 
         {{-- Program selector --}}
-        <x-card-section title="Select Program" icon="bx-network-chart" class="mb-5">
+        <x-layout.card-section title="Select Program" icon="bx-network-chart" class="mb-5">
             <livewire:programs.program-selector
                 :program-id="optional($program)?->id"
                 redirect-route="courses.index"
                 :autoRedirect="true" />
-        </x-card-section>
+        </x-layout.card-section>
 
         @if ($noAssignment ?? false)
             <x-feedback-status.alert type="warning" title="No department assigned"
@@ -239,7 +239,7 @@
             <x-feedback-status.empty-state icon="bx-book-open" title="No program selected"
                 message="Select a program above to view and manage its courses." />
         @endif
-    </x-panel>
+    </x-layout.panel>
 
     {{-- Modals --}}
     @foreach ($modalCourses as $course)

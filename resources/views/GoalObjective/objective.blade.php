@@ -2,7 +2,7 @@
 
 @section('content')
 
-    <x-page-header
+    <x-layout.page-header
         icon="bx-list-check"
         title="Department Objectives"
         desc="Define and manage learning objectives for each CLSU department">
@@ -13,11 +13,11 @@
                 <i class="bx bx-plus text-base leading-none"></i> Add Objective
             </x-ui.button>
         @endif
-    </x-page-header>
+    </x-layout.page-header>
 
-    <x-help-panel module="objectives" />
+    <x-layout.help-panel module="objectives" />
 
-    <x-panel>
+    <x-layout.panel>
         @include('includes.error-lists')
 
         <div class="space-y-4">
@@ -29,7 +29,7 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 @if ($colleges->count() > 1)
-                    <x-card-section title="Select College" icon="bx-buildings">
+                    <x-layout.card-section title="Select College" icon="bx-buildings">
                         <form method="GET" action="{{ route('objective.index') }}">
                             <x-form.select id="collegeSelect" name="college_id" onchange="this.form.submit()" :disabled="$noAssignment">
                                 <option value="">— Choose College —</option>
@@ -40,18 +40,18 @@
                                 @endforeach
                             </x-form.select>
                         </form>
-                    </x-card-section>
+                    </x-layout.card-section>
                 @elseif ($noAssignment)
-                    <x-card-section title="Select College" icon="bx-buildings">
+                    <x-layout.card-section title="Select College" icon="bx-buildings">
                         <x-form.select disabled>
                             <option>— No department assigned —</option>
                         </x-form.select>
-                    </x-card-section>
+                    </x-layout.card-section>
                 @endif
 
                 @if ($selectedCollegeId)
                     @if ($departments->count() > 1)
-                        <x-card-section title="Select Department" icon="bx-sitemap">
+                        <x-layout.card-section title="Select Department" icon="bx-sitemap">
                             <form method="GET" action="{{ route('objective.index') }}">
                                 <input type="hidden" name="college_id" value="{{ $selectedCollegeId }}">
                                 <x-form.select id="departmentSelect" name="department_id" onchange="this.form.submit()" :disabled="$noAssignment">
@@ -63,7 +63,7 @@
                                     @endforeach
                                 </x-form.select>
                             </form>
-                        </x-card-section>
+                        </x-layout.card-section>
                     @elseif ($departments->count() === 0)
                         <x-feedback-status.alert type="info" title="No departments found"
                             message="This college has no departments configured yet." />
@@ -71,7 +71,7 @@
                 @endif
             </div>
 
-            <x-card-section
+            <x-layout.card-section
                 title="Objectives"
                 icon="bx-list-check"
                 :subtitle="$selectedDepartmentId ? $departments->firstWhere('id', $selectedDepartmentId)?->name : null"
@@ -130,10 +130,10 @@
                         </x-table.table>
                     </x-table.container>
                 @endif
-            </x-card-section>
+            </x-layout.card-section>
 
         </div>
-    </x-panel>
+    </x-layout.panel>
 
     @if ($selectedCollegeId && $selectedDepartmentId)
         @include('GoalObjective.modals.addObjectiveModal')

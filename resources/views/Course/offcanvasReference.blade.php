@@ -1,4 +1,4 @@
-<x-offcanvas title="Program Outcomes Reference" open="poDrawer" icon="bx-book-open" width="max-w-sm">
+<x-layout.offcanvas title="Program Outcomes Reference" open="poDrawer" icon="bx-book-open" width="max-w-sm">
 
     @if ($program && $program->outcomes->count() > 0)
         <div class="space-y-2.5">
@@ -36,4 +36,4 @@
         </div>
     @endif
 
-</x-offcanvas>
+</x-layout.offcanvas>

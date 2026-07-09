@@ -1,7 +1,7 @@
 <div @if($liveRefresh) wire:poll.10s="refresh" @endif>
 
     {{-- ── Filter panel ──────────────────────────────────────────────────── --}}
-    <x-card-section
+    <x-layout.card-section
         title="Filters"
         icon="bx-filter-alt"
         class="mb-4">
@@ -93,7 +93,7 @@
 
         </div>
 
-    </x-card-section>
+    </x-layout.card-section>
 
     {{-- ── Toolbar: count + live toggle ─────────────────────────────────── --}}
     <div class="flex flex-wrap items-center justify-between gap-2 mb-3">

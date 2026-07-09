@@ -1,5 +1,5 @@
 {{-- weekly-partials/calendar-info-drawer.blade.php --}}
-<x-offcanvas title="Academic Calendar" subtitle="Semester dates and event overview" icon="bx-calendar" open="calInfoOpen">
+<x-layout.offcanvas title="Academic Calendar" subtitle="Semester dates and event overview" icon="bx-calendar" open="calInfoOpen">
 
     @if ($syllabus?->academicCalendar)
         @php $cal = $syllabus->academicCalendar; @endphp
@@ -106,4 +106,4 @@
         <x-feedback-status.empty-state icon="bx-calendar-x" title="No calendar selected" message="Select an academic calendar in Step 1." />
     @endif
 
-</x-offcanvas>
+</x-layout.offcanvas>

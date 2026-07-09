@@ -1,5 +1,5 @@
 {{-- weekly-partials/schedule-drawer.blade.php --}}
-<x-offcanvas title="Class Schedule" subtitle="Lecture & Laboratory schedule" icon="bx-time" open="scheduleOpen">
+<x-layout.offcanvas title="Class Schedule" subtitle="Lecture & Laboratory schedule" icon="bx-time" open="scheduleOpen">
 
     @php
         $lec = $courseComponents['LEC'] ?? null;
@@ -60,4 +60,4 @@
         <x-feedback-status.empty-state icon="bx-time" title="No schedule" message="Complete Course Components first to see schedule info here." />
     @endif
 
-</x-offcanvas>
+</x-layout.offcanvas>

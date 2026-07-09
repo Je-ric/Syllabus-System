@@ -2,7 +2,7 @@
 
 @section('content')
 
-    <x-page-header
+    <x-layout.page-header
         icon="bx-book-open"
         title="My Syllabi"
         desc="Manage and continue working on your course syllabi">
@@ -10,9 +10,9 @@
         <x-ui.button href="{{ route('syllabus.create') }}" variant="add-button">
             <i class="bx bx-plus text-base leading-none"></i> Create Syllabus
         </x-ui.button>
-    </x-page-header>
+    </x-layout.page-header>
 
-    <x-help-panel module="syllabus-index" />
+    <x-layout.help-panel module="syllabus-index" />
 
     @php
         $grouped = [
@@ -85,7 +85,7 @@
         ];
     @endphp
 
-    <x-panel>
+    <x-layout.panel>
         <x-navigation.tabs-modern
             :tabs="$tabs"
             :defaultTab="$tabs[0]['id'] ?? null"
@@ -222,6 +222,6 @@
             @endforeach
 
         </x-navigation.tabs-modern>
-    </x-panel>
+    </x-layout.panel>
 
 @endsection

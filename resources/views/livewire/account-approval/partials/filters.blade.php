@@ -1,4 +1,4 @@
-<x-card-section icon="bx-filter-alt" title="Filters">
+<x-layout.card-section icon="bx-filter-alt" title="Filters">
     <x-slot:actions>
         <button wire:click="$set('search',''); $set('role','all'); $set('status','all'); $set('sort','newest')"
             class="text-[11px] text-[#94a3b8] hover:text-rose-500 transition flex items-center gap-1 whitespace-nowrap">
@@ -38,4 +38,4 @@
             <option value="status_desc">Status Z–A</option>
         </x-form.select>
     </div>
-</x-card-section>
+</x-layout.card-section>

@@ -2,12 +2,12 @@
 
 @section('content')
 
-<x-page-header
+<x-layout.page-header
     icon="bx-user"
     title="My Profile"
     desc="View and manage your personal information" />
 
-<x-panel>
+<x-layout.panel>
     @php
         $canOpenHierarchy = $user->hasRole('admin') || $user->hasRole('dean') || $user->hasRole('chair');
         $isAdmin = $user->hasRole('admin');
@@ -137,7 +137,7 @@
                 </div>
             @endif
 
-            <x-card-section
+            <x-layout.card-section
                 title="Profile Information"
                 icon="bx-user-circle">
 
@@ -184,10 +184,10 @@
                         </div>
                     @endunless
                 </form>
-            </x-card-section>
+            </x-layout.card-section>
 
             {{-- Consultation Hours --}}
-            {{-- <x-card-section title="Consultation Hours" icon="bx-time">
+            {{-- <x-layout.card-section title="Consultation Hours" icon="bx-time">
                 <x-slot:actions>
                     <button type="button" onclick="document.getElementById('profile-ch-modal').showModal()"
                         class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-semibold
@@ -252,9 +252,9 @@
                 @if ($errors->hasAny(['day', 'time']))
                     <script>document.addEventListener('DOMContentLoaded', () => document.getElementById('profile-ch-modal')?.showModal());</script>
                 @endif
-            </x-card-section> --}}
+            </x-layout.card-section> --}}
 
-            <x-card-section
+            <x-layout.card-section
                 title="Recent Activity"
                 icon="bx-history"
                 :padded=false
@@ -294,7 +294,7 @@
                     @endif
                 </div>
 
-            </x-card-section>
+            </x-layout.card-section>
 
             {{-- Change Password --}}
             @unless ($isAdmin)
@@ -382,6 +382,6 @@
         {{-- /.right --}}
 
     </div>
-</x-panel>
+</x-layout.panel>
 
 @endsection

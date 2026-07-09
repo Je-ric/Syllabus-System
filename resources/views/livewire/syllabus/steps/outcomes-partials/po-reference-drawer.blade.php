@@ -1,5 +1,5 @@
 {{-- outcomes-partials/po-reference-drawer.blade.php --}}
-<x-offcanvas title="Program Outcomes" subtitle="Align your COs to these POs" icon="bx-list-check" open="poRefOpen">
+<x-layout.offcanvas title="Program Outcomes" subtitle="Align your COs to these POs" icon="bx-list-check" open="poRefOpen">
 
     <x-slot:footer>
         <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5">
@@ -61,4 +61,4 @@
             message="POs are defined at the program level by your Department Chair." />
     @endif
 
-</x-offcanvas>
+</x-layout.offcanvas>

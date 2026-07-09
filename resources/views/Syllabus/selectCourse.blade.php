@@ -1,15 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
-    <x-page-header
+    <x-layout.page-header
         icon="bx-book-add"
         title="Create Syllabus"
         desc="Select a program and course to begin creating a syllabus" />
 
-    <x-panel>
+    <x-layout.panel>
         {{-- Program selector --}}
 
-        <x-card-section
+        <x-layout.card-section
             title="Select Program"
             icon="bx-network-chart"
             class="mb-6">
@@ -18,7 +18,7 @@
                 :program-id="optional($program)?->id"
                 redirect-route="syllabus.create"
                 :autoRedirect="true" />
-        </x-card-section>
+        </x-layout.card-section>
 
         @if ($program)
 
@@ -149,6 +149,6 @@
                 title="No program selected"
                 message="Select a program above to view its courses and begin creating a syllabus." />
         @endif
-    </x-panel>
+    </x-layout.panel>
 
 @endsection

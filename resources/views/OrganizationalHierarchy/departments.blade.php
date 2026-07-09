@@ -7,16 +7,16 @@
         $isAdmin = auth()->user()?->hasRole('admin') ?? false;
     @endphp
 
-    <x-page-header
+    <x-layout.page-header
         icon="bx-buildings"
         title="{{ $college->name }}"
         desc="Manage department leadership, faculty assignments, and academic structure">
         <x-ui.button variant="cancel" href="{{ $isAdmin ? route('organizational.colleges.index') : route('organizational.hierarchy') }}">
             <i class="bx bx-arrow-back"></i> Back
         </x-ui.button>
-    </x-page-header>
+    </x-layout.page-header>
 
-    <x-panel>
+    <x-layout.panel>
 
         @if ($college->departments->isEmpty())
             <x-feedback-status.empty-state
@@ -64,7 +64,7 @@
                         <div class="p-4 grid md:grid-cols-2 gap-4">
 
                             {{-- Chair --}}
-                            <x-card title="Department Chair" icon="user" color="slate" :shadow="false">
+                            <x-layout.card title="Department Chair" icon="user" color="slate" :shadow="false">
                                 @if ($chair)
                                     <div class="flex items-start justify-between gap-3">
                                         <div class="min-w-0">
@@ -99,10 +99,10 @@
                                         @endif
                                     </div>
                                 @endif
-                            </x-card>
+                            </x-layout.card>
 
                             {{-- Faculty --}}
-                            <x-card color="slate" :shadow="false">
+                            <x-layout.card color="slate" :shadow="false">
                                 <x-slot name="title">Faculty Members</x-slot>
                                 <x-slot name="action">
                                     @if ($facultyList->count() > 0)
@@ -136,7 +136,7 @@
                                 @else
                                     <p class="text-xs text-slate-400 italic">No faculty assigned yet.</p>
                                 @endif
-                            </x-card>
+                            </x-layout.card>
 
                         </div>
                     </div>
@@ -181,6 +181,6 @@
             </div>
         @endif
 
-    </x-panel>
+    </x-layout.panel>
 
 @endsection

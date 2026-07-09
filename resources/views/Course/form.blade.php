@@ -2,7 +2,7 @@
 
 @section('content')
 
-<x-page-header
+<x-layout.page-header
     icon="bx-book"
     title="{{ $pageTitle }}"
     desc="Fill in the course details and map program outcomes below.">
@@ -10,11 +10,11 @@
     <x-ui.button href="{{ route('courses.index') }}" variant="cancel">
         <i class="bx bx-arrow-back"></i> Back to Courses
     </x-ui.button>
-</x-page-header>
+</x-layout.page-header>
 
-<x-help-panel module="courses" />
+<x-layout.help-panel module="courses" />
 
-<x-panel>
+<x-layout.panel>
     @if (!$program)
         <x-feedback-status.alert type="warning" class="mb-6">
             Please select a program from the courses page before creating a course.
@@ -241,7 +241,7 @@
             </div>
         </div>
     </form>
-</x-panel>
+</x-layout.panel>
 
 @if ($formMethod === 'POST')
     @include('Course.modals.confirmCourseModal')

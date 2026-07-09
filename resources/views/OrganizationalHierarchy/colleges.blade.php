@@ -2,12 +2,12 @@
 
 @section('content')
 
-    <x-page-header
+    <x-layout.page-header
         icon="bx-buildings"
         title="College Dean Management"
         desc="Manage institutional leadership and organizational structure across all colleges" />
 
-    <x-panel>
+    <x-layout.panel>
 
         @if ($colleges->isEmpty())
             <x-feedback-status.empty-state
@@ -20,7 +20,7 @@
                 @foreach ($colleges as $college)
                     @php $dean = $deanAssignments->get($college->id)?->first()?->user; @endphp
 
-                    <x-card-section title="{{ $college->name }}"
+                    <x-layout.card-section title="{{ $college->name }}"
                                     icon="bx bxs-school"
                                     :padded="false">
 
@@ -28,7 +28,7 @@
                         <div class="flex flex-col gap-4 p-4 flex-1">
 
                             {{-- Dean section --}}
-                            <x-card title="College Dean" icon="user" color="slate" :shadow="false">
+                            <x-layout.card title="College Dean" icon="user" color="slate" :shadow="false">
                                 @if ($dean)
                                     <div class="flex items-start justify-between gap-3">
                                         <div class="min-w-0">
@@ -49,7 +49,7 @@
                                 @else
                                     <p class="text-xs text-slate-400 italic">No dean assigned yet.</p>
                                 @endif
-                            </x-card>
+                            </x-layout.card>
 
                             {{-- Actions --}}
                             <div class="mt-auto pt-3 border-t border-slate-100 flex flex-col gap-2">
@@ -76,7 +76,7 @@
 
                             </div>
                         </div>
-                    </x-card-section>
+                    </x-layout.card-section>
 
                     @include('OrganizationalHierarchy.modals.assignDeanModal', [
                         'collegeId'      => $college->id,
@@ -97,6 +97,6 @@
             </div>
         @endif
 
-    </x-panel>
+    </x-layout.panel>
 
 @endsection

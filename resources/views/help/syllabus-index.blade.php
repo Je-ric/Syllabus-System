@@ -1,12 +1,12 @@
 {{-- Help: Syllabi Index --}}
 
-<x-accordion title="Overview" icon="info-circle" color="emerald" :open="true">
+<x-layout.accordion title="Overview" icon="info-circle" color="emerald" :open="true">
     <p class="text-[13px] text-[#3f3f46] leading-relaxed">
         This page shows all your syllabi grouped by status. Each syllabus belongs to one course and one academic semester. You can have one syllabus per course — creating a duplicate redirects you to the existing one.
     </p>
-</x-accordion>
+</x-layout.accordion>
 
-<x-accordion title="Status Tabs" icon="list-ul" color="slate">
+<x-layout.accordion title="Status Tabs" icon="list-ul" color="slate">
     <div class="space-y-2 text-[13px] text-[#3f3f46]">
         <div class="flex items-start gap-2.5 p-2 rounded-lg bg-[#fffbeb] border border-[#fde68a]">
             <span class="shrink-0 w-2.5 h-2.5 rounded-full bg-[#d97706] mt-1.5"></span>
@@ -25,9 +25,9 @@
             <div><p class="font-semibold text-[#166534]">Approved</p><p class="text-[12px] mt-0.5">Fully approved. View or preview only.</p></div>
         </div>
     </div>
-</x-accordion>
+</x-layout.accordion>
 
-<x-accordion title="Creating a Syllabus" icon="plus-circle" color="emerald">
+<x-layout.accordion title="Creating a Syllabus" icon="plus-circle" color="emerald">
     <ol class="space-y-2 text-[13.5px] text-[#3f3f46]">
         <li class="flex gap-2.5">
             <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">1</span>
@@ -42,13 +42,13 @@
             <span>On the Review step, submit for review once all steps are complete.</span>
         </li>
     </ol>
-</x-accordion>
+</x-layout.accordion>
 
-<x-accordion title="Tips" icon="bulb" color="amber">
+<x-layout.accordion title="Tips" icon="bulb" color="amber">
     <ul class="space-y-2 text-[13px] text-[#3f3f46]">
         <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>The progress bar on each draft card shows which step you're on.</span></li>
         <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Only draft syllabi can be deleted. Submitted or approved syllabi cannot be removed.</span></li>
         <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Any faculty can create a syllabus for any course — there is no department restriction.</span></li>
         <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>The course must have at least one PO mapping before you can create a syllabus for it.</span></li>
     </ul>
-</x-accordion>
+</x-layout.accordion>

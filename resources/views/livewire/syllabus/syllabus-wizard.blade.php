@@ -17,7 +17,7 @@
     x-on:lw-toast.window="if ($event.detail?.type === 'error') _navigating = false"
     x-on:livewire:navigated.window="_navigating = false">
 
-    <x-page-header icon="bx-book-open" title="{{ $syllabus->id ? 'Edit' : 'Create' }} Syllabus"
+    <x-layout.page-header icon="bx-book-open" title="{{ $syllabus->id ? 'Edit' : 'Create' }} Syllabus"
         desc="{{ $course->course_code }} — {{ $course->course_title }}">
         <x-ui.help-trigger />
         <x-ui.button variant="cancel" href="{{ route('syllabus.index') }}">
@@ -25,7 +25,7 @@
             <span class="sm:hidden">Back</span>
             <span class="hidden sm:inline">Back to Syllabi</span>
         </x-ui.button>
-    </x-page-header>
+    </x-layout.page-header>
 
     @php
         $helpModuleMap = [
@@ -37,9 +37,9 @@
             'review'             => 'syllabus-review',
         ];
     @endphp
-    <x-help-panel :module="$helpModuleMap[$currentStep] ?? 'syllabus-index'" />
+    <x-layout.help-panel :module="$helpModuleMap[$currentStep] ?? 'syllabus-index'" />
 
-    <x-panel>
+    <x-layout.panel>
 
         {{-- ══ Navigation overlay ══════════════════════════════════════════════ --}}
         <template x-if="_navigating">
@@ -339,5 +339,5 @@
             </aside>
 
         </div>{{-- end two-column --}}
-    </x-panel>
+    </x-layout.panel>
 </div>

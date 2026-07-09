@@ -2,7 +2,7 @@
 
 @section('content')
 
-    <x-page-header
+    <x-layout.page-header
         icon="bx-target-lock"
         title="College Goals"
         desc="Define and manage strategic goals for each CLSU college">
@@ -13,11 +13,11 @@
                 <i class="bx bx-plus text-base leading-none"></i> Add Goal
             </x-ui.button>
         @endif
-    </x-page-header>
+    </x-layout.page-header>
 
-    <x-help-panel module="goals" />
+    <x-layout.help-panel module="goals" />
 
-    <x-panel>
+    <x-layout.panel>
         @include('includes.error-lists')
 
         <div class="space-y-4">
@@ -28,7 +28,7 @@
             @endif
 
             @if ($colleges->count() > 1)
-                <x-card-section title="Select College" icon="bx-buildings" class="max-w-md">
+                <x-layout.card-section title="Select College" icon="bx-buildings" class="max-w-md">
                     <form method="GET" action="{{ route('goal.index') }}">
                         <x-form.select
                             id="collegeSelect"
@@ -45,16 +45,16 @@
                             @endforeach
                         </x-form.select>
                     </form>
-                </x-card-section>
+                </x-layout.card-section>
             @elseif ($noAssignment)
-                <x-card-section title="Select College" icon="bx-buildings" class="max-w-md">
+                <x-layout.card-section title="Select College" icon="bx-buildings" class="max-w-md">
                     <x-form.select disabled>
                         <option>— No college assigned —</option>
                     </x-form.select>
-                </x-card-section>
+                </x-layout.card-section>
             @endif
 
-            <x-card-section
+            <x-layout.card-section
                 title="Goals"
                 icon="bx-target-lock"
                 :subtitle="$selectedCollegeId ? $colleges->firstWhere('id', $selectedCollegeId)?->name : null"
@@ -110,9 +110,9 @@
                         </x-table.table>
                     </x-table.container>
                 @endif
-            </x-card-section>
+            </x-layout.card-section>
         </div>
-    </x-panel>
+    </x-layout.panel>
 
     @if ($selectedCollegeId)
         @include('GoalObjective.modals.addGoalModal')

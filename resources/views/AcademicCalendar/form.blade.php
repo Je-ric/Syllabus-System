@@ -2,16 +2,16 @@
 
 @section('content')
 
-    <x-page-header
+    <x-layout.page-header
         icon="bx-calendar"
         title="{{ isset($isEdit) ? 'Edit Academic Calendar' : 'Create Academic Calendar' }}"
         desc="Academic Year and Semester Dates">
         <x-ui.button variant="cancel" href="{{ route('academic.calendars.index') }}">
             <i class="bx bx-arrow-back"></i> Back
         </x-ui.button>
-    </x-page-header>
+    </x-layout.page-header>
 
-    <x-panel>
+    <x-layout.panel>
         @if(isset($hasEvents) && $hasEvents)
             <x-feedback-status.alert
                 type="warning"
@@ -30,6 +30,6 @@
             :isEdit="isset($isEdit) && $isEdit"
             :academicYear="$academicYear ?? ''"
             :originalValues="$originalValues ?? []" />
-    </x-panel>
+    </x-layout.panel>
 
 @endsection

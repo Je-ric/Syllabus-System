@@ -2,16 +2,16 @@
 
 @section('content')
 
-    <x-page-header
+    <x-layout.page-header
         icon="bx-calendar-event"
         title="Manage Events — {{ $academicYear }}"
         desc="Add, edit, and delete events for each semester.">
         <x-ui.button href="{{ route('academic.calendars.index') }}" variant="cancel">
             <i class="bx bx-arrow-back"></i> Back
         </x-ui.button>
-    </x-page-header>
+    </x-layout.page-header>
 
-    <x-panel>
+    <x-layout.panel>
         <x-feedback-status.alert type="info" :showTitle="false" class="mb-4">
             <div class="flex flex-wrap items-center gap-2">
                 <span class="font-semibold">Note:</span>
@@ -53,6 +53,6 @@
                 </x-slot>
             @endforeach
         </x-navigation.tabs-modern>
-    </x-panel>
+    </x-layout.panel>
 
 @endsection

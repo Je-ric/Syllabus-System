@@ -2,16 +2,16 @@
 
 @section('content')
 
-    <x-page-header
+    <x-layout.page-header
         icon="bx-calendar"
         title="Academic Calendars"
         desc="Manage academic year and semester dates">
         <x-ui.button variant="add-button" href="{{ route('academic.calendars.create') }}">
             <i class="bx bx-plus"></i> Add Academic Year
         </x-ui.button>
-    </x-page-header>
+    </x-layout.page-header>
 
-    <x-panel>
+    <x-layout.panel>
         @if ($calendars->isEmpty())
             <x-feedback-status.empty-state
                 icon="bx-calendar"
@@ -110,6 +110,6 @@
                 @endforeach
             </div>
         @endif
-    </x-panel>
+    </x-layout.panel>
 
 @endsection

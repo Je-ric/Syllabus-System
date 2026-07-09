@@ -2,32 +2,32 @@
 
 @section('content')
 
-    <x-page-header
+    <x-layout.page-header
         icon="bx-sitemap"
         title="Program Management"
         desc="Manage Program Educational Objectives (PEOs) and Program Outcomes (POs).">
         <x-ui.help-trigger />
-    </x-page-header>
+    </x-layout.page-header>
 
-    <x-help-panel module="peos-pos" />
+    <x-layout.help-panel module="peos-pos" />
 
-    <x-panel>
+    <x-layout.panel>
 
-        <x-card-section title="Select Program" icon="bx-network-chart"
+        <x-layout.card-section title="Select Program" icon="bx-network-chart"
             description="Choose a program to manage its PEOs and POs." class="mb-6">
             <livewire:programs.program-selector
                 :program-id="optional($program)?->id"
                 redirect-route="programs.show"
                 :autoRedirect="true" />
-        </x-card-section>
+        </x-layout.card-section>
 
-        <x-card-section title="University Mission" icon="bx-flag">
+        <x-layout.card-section title="University Mission" icon="bx-flag">
             <p class="text-[13px] text-slate-500 leading-relaxed">
                 CLSU shall develop globally competitive, work-ready, socially-responsible and empowered human resources
                 who value life-long learning; and to generate, disseminate, and apply knowledge and technologies for
                 poverty alleviation, environmental protection, and sustainable development.
             </p>
-        </x-card-section>
+        </x-layout.card-section>
 
         @if ($noAssignment ?? false)
             <x-feedback-status.alert type="warning" title="No department assigned"
@@ -108,6 +108,6 @@
 
         @endif
 
-    </x-panel>
+    </x-layout.panel>
 
 @endsection

@@ -137,7 +137,7 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
 
-                    <x-card-section title="Contact" icon="bx-phone">
+                    <x-layout.card-section title="Contact" icon="bx-phone">
                         <div class="space-y-2">
                             <div class="flex items-center gap-2">
                                 <i class="bx bx-phone text-[#a1a1aa] text-sm shrink-0"></i>
@@ -148,9 +148,9 @@
                                 <span class="text-[13px] text-[#52525b] break-all">{{ $user->email }}</span>
                             </div>
                         </div>
-                    </x-card-section>
+                    </x-layout.card-section>
 
-                    <x-card-section title="Office" icon="bx-buildings">
+                    <x-layout.card-section title="Office" icon="bx-buildings">
                         <div class="space-y-2">
                             <div class="flex items-center gap-2">
                                 <i class="bx bx-buildings text-[#a1a1aa] text-sm shrink-0"></i>
@@ -166,9 +166,9 @@
                                 @endif
                             </div>
                         </div>
-                    </x-card-section>
+                    </x-layout.card-section>
 
-                    <x-card-section title="Account" icon="bx-id-card">
+                    <x-layout.card-section title="Account" icon="bx-id-card">
                         <div class="space-y-2">
                             <div class="flex items-center gap-2">
                                 <i class="bx bx-calendar text-[#a1a1aa] text-sm shrink-0"></i>
@@ -179,7 +179,7 @@
                                 <span class="text-[13px] text-[#52525b]">ID #{{ $user->id }}</span>
                             </div>
                         </div>
-                    </x-card-section>
+                    </x-layout.card-section>
 
                 </div>
             </div>
