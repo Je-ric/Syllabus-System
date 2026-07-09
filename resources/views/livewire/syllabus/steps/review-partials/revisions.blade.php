@@ -256,7 +256,7 @@
                 @endif
 
             @else
-                <x-empty-state
+                <x-feedback-status.empty-state
                     icon="bx-history"
                     title="No revisions yet"
                     message="Click Add Revision to record your first entry." />

@@ -20,7 +20,7 @@
     {{-- ══ Empty State ══════════════════════════════════════════════════════════ --}}
     @if ($syllabusWeeks->isEmpty())
 
-        <x-empty-state
+        <x-feedback-status.empty-state
             icon="calendar-x"
             title="No weeks generated yet"
             message="Select an academic calendar in the previous step, then click Generate Weeks.">
@@ -31,7 +31,7 @@
                 loading="Generating…">
                 <i class="bx bx-calendar-plus"></i> Generate Weeks
             </x-button>
-        </x-empty-state>
+        </x-feedback-status.empty-state>
 
     @else
 

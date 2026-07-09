@@ -5,7 +5,7 @@
         description="Set the weight (%) for each assessment task. Rows are pulled from Weekly Coverage. The 60% passing standard applies per semester." />
 
     @if (count($rows) === 0)
-        <x-empty-state
+        <x-feedback-status.empty-state
             icon="bx-calendar-event"
             title="No assessment tasks yet"
             message="Fill in assessment tasks in the Weekly Coverage step first. Exam weeks are auto-detected from calendar events." />

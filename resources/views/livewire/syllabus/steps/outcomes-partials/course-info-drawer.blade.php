@@ -52,7 +52,7 @@
 
         </div>
     @else
-        <x-empty-state icon="bx-book" title="No course data" message="Course information could not be loaded." />
+        <x-feedback-status.empty-state icon="bx-book" title="No course data" message="Course information could not be loaded." />
     @endif
 
 </x-offcanvas>

@@ -219,7 +219,7 @@
                                         </div>
 
                                     @empty
-                                        <x-empty-state
+                                        <x-feedback-status.empty-state
                                             icon="bx-building"
                                             title="No departments yet"
                                             message="Add a department to start building this college's structure." />
@@ -240,7 +240,7 @@
     @else
 
         <x-panel>
-            <x-empty-state
+            <x-feedback-status.empty-state
                 icon="bxs-school"
                 title="No colleges yet"
                 message="Start by adding your first college to build the academic structure.">
@@ -248,7 +248,7 @@
                     onclick="document.getElementById('addCollegeModal').showModal()">
                     <i class="bx bx-plus text-base leading-none"></i> Add College
                 </x-button>
-            </x-empty-state>
+            </x-feedback-status.empty-state>
         </x-panel>
 
     @endif

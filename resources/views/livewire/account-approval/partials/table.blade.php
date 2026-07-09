@@ -188,7 +188,7 @@
 
     @empty
         <div class="px-5 py-10">
-            <x-empty-state icon="bx-user-x" title="No users found" message="Try adjusting your filters." />
+            <x-feedback-status.empty-state icon="bx-user-x" title="No users found" message="Try adjusting your filters." />
         </div>
     @endforelse
 

@@ -57,7 +57,7 @@
 
         </div>
     @else
-        <x-empty-state icon="bx-time" title="No schedule" message="Complete Course Components first to see schedule info here." />
+        <x-feedback-status.empty-state icon="bx-time" title="No schedule" message="Complete Course Components first to see schedule info here." />
     @endif
 
 </x-offcanvas>

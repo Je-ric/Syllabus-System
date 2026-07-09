@@ -130,21 +130,21 @@
                         </div>
                     </div>
                 @empty
-                    <x-empty-state
+                    <x-feedback-status.empty-state
                         icon="bx-book"
                         title="No courses this semester"
                         message="No courses have been added for this semester yet." />
                 @endforelse
 
             @empty
-                <x-empty-state
+                <x-feedback-status.empty-state
                     icon="bx-book-open"
                     title="No courses found"
                     message="This program has no courses yet. Please contact the administrator to add courses." />
             @endforelse
 
         @else
-            <x-empty-state
+            <x-feedback-status.empty-state
                 icon="bx-book-open"
                 title="No program selected"
                 message="Select a program above to view its courses and begin creating a syllabus." />

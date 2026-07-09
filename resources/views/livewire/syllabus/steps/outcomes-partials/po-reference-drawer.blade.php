@@ -57,7 +57,7 @@
             </table>
         </div>
     @else
-        <x-empty-state icon="bx bx-list-check" title="No Program Outcomes"
+        <x-feedback-status.empty-state icon="bx bx-list-check" title="No Program Outcomes"
             message="POs are defined at the program level by your Department Chair." />
     @endif
 

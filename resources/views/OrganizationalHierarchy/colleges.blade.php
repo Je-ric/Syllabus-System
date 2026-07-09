@@ -10,7 +10,7 @@
     <x-panel>
 
         @if ($colleges->isEmpty())
-            <x-empty-state
+            <x-feedback-status.empty-state
                 icon="bxs-building"
                 title="No colleges found"
                 message="Please create colleges first before managing deans and departments." />

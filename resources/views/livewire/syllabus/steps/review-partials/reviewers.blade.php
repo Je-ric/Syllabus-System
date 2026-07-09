@@ -334,7 +334,7 @@
                                 </div>
                             @endforeach
                         @else
-                            <x-empty-state
+                            <x-feedback-status.empty-state
                                 icon="bx-group"
                                 title="No additional reviewers"
                                 message="Select a faculty member from the dropdown and click Add." />

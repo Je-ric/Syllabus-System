@@ -16,7 +16,7 @@
     </x-page-header>
 
     <x-panel>
-        <x-empty-state
+        <x-feedback-status.empty-state
             icon="bx-user-x"
             title="No assignment found"
             message="You have not been assigned as a dean or chair yet. Please contact your administrator to receive an assignment." />

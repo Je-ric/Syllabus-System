@@ -5,7 +5,7 @@
     'class' => '',
 ])
 
-<div {{ $attributes->merge(['class' => 'w-full border-b border-[#e4e4e7] ' . $class]) }}
+<div {{ $attributes->merge(['class' => 'w-full border-b bg-white border-[#e4e4e7] ' . $class]) }}
     {{-- style="box-shadow: 0 1px 4px rgba(0,0,0,0.04);" --}}
     >
 

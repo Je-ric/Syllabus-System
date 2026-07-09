@@ -85,16 +85,16 @@
                 :count="$selectedDepartmentId && $objectives->count() ? $objectives->count() : null">
 
                 @if ($noAssignment)
-                    <x-empty-state icon="bx-list-check" title="No department assigned"
+                    <x-feedback-status.empty-state icon="bx-list-check" title="No department assigned"
                         message="You are not assigned to any department. Contact an administrator." />
                 @elseif (!$selectedCollegeId)
-                    <x-empty-state icon="bx-list-check" title="No college selected"
+                    <x-feedback-status.empty-state icon="bx-list-check" title="No college selected"
                         message="Select a college above to begin." />
                 @elseif (!$selectedDepartmentId)
-                    <x-empty-state icon="bx-list-check" title="No department selected"
+                    <x-feedback-status.empty-state icon="bx-list-check" title="No department selected"
                         message="Select a department to view its objectives." />
                 @elseif ($objectives->isEmpty())
-                    <x-empty-state icon="bx-list-check" title="No objectives yet"
+                    <x-feedback-status.empty-state icon="bx-list-check" title="No objectives yet"
                         message="No objectives have been set for this department." />
                 @else
                     <x-table.container>

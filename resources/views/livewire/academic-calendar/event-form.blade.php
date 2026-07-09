@@ -298,7 +298,7 @@
             @endforeach
         </div>
     @else
-        <x-empty-state icon="bx-calendar" title="No semester data" message="" />
+        <x-feedback-status.empty-state icon="bx-calendar" title="No semester data" message="" />
     @endif
 
     @include('livewire.academic-calendar.partials.event-modal')

@@ -40,7 +40,7 @@
             <x-feedback-status.alert type="warning" title="No department assigned"
                 message="You have the Chair role but are not assigned to any department. Contact an administrator to be assigned." />
         @elseif (!$program)
-            <x-empty-state
+            <x-feedback-status.empty-state
                 icon="bx-network-chart"
                 title="No program selected"
                 description="Choose a college, department, and program above to manage its PEOs and POs."

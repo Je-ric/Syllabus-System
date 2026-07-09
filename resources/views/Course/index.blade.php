@@ -236,20 +236,20 @@
                         </div>
                     </div>
                 @empty
-                    <x-empty-state icon="bx-book" title="No courses this semester"
+                    <x-feedback-status.empty-state icon="bx-book" title="No courses this semester"
                         message="No courses have been added for this semester yet." />
                 @endforelse
             @empty
-                <x-empty-state icon="bx-book-open" title="No courses found"
+                <x-feedback-status.empty-state icon="bx-book-open" title="No courses found"
                     message="This program has no courses yet. Add the first one to get started.">
                     <x-button href="{{ route('courses.create', ['program_id' => $program->id]) }}" variant="add-button">
                         <i class="bx bx-plus"></i> Add First Course
                     </x-button>
-                </x-empty-state>
+                </x-feedback-status.empty-state>
             @endforelse
 
         @else
-            <x-empty-state icon="bx-book-open" title="No program selected"
+            <x-feedback-status.empty-state icon="bx-book-open" title="No program selected"
                 message="Select a program above to view and manage its courses." />
         @endif
     </x-panel>

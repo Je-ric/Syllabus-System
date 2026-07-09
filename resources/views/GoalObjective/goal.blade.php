@@ -68,13 +68,13 @@
                 :count="$selectedCollegeId && $goals->count() ? $goals->count() : null">
 
                 @if ($noAssignment)
-                    <x-empty-state icon="bx-target-lock" title="No college assigned"
+                    <x-feedback-status.empty-state icon="bx-target-lock" title="No college assigned"
                         message="You are not assigned to any college. Contact an administrator." />
                 @elseif (!$selectedCollegeId)
-                    <x-empty-state icon="bx-target-lock" title="No college selected"
+                    <x-feedback-status.empty-state icon="bx-target-lock" title="No college selected"
                         message="Select a college above to view its goals." />
                 @elseif ($goals->isEmpty())
-                    <x-empty-state icon="bx-target-lock" title="No goals yet"
+                    <x-feedback-status.empty-state icon="bx-target-lock" title="No goals yet"
                         message="No goals have been set for this college." />
                 @else
                     <x-table.container>

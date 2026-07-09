@@ -188,7 +188,7 @@
 
                 @if ($programOutcomes->isEmpty())
                     <div class="p-5">
-                        <x-empty-state
+                        <x-feedback-status.empty-state
                             icon="bx-notepad"
                             title="No program outcomes yet"
                             :message="'No outcomes defined for ' . $program->name . '. Define them in the program settings first.'" />

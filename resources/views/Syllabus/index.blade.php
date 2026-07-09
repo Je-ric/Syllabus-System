@@ -209,7 +209,7 @@
 
                         @empty
                             <div class="col-span-full">
-                                <x-empty-state
+                                <x-feedback-status.empty-state
                                     :icon="$cfg['empty_icon']"
                                     :title="$cfg['empty_title']"
                                     :message="$cfg['empty_message']">
@@ -220,7 +220,7 @@
                                         </x-button>
                                     @endif
 
-                                </x-empty-state>
+                                </x-feedback-status.empty-state>
                             </div>
                         @endforelse
 

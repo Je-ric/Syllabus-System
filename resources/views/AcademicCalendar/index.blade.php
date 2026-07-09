@@ -13,7 +13,7 @@
 
     <x-panel>
         @if ($calendars->isEmpty())
-            <x-empty-state
+            <x-feedback-status.empty-state
                 icon="bx-calendar"
                 title="No Academic Calendars"
                 message="Create an academic calendar to manage semester dates and events." />

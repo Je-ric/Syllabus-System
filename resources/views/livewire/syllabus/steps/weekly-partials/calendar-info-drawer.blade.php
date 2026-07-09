@@ -99,11 +99,11 @@
         @endforeach
 
         @if (!$hasAnyEvent)
-            <x-empty-state icon="bx-calendar-x" title="No events" message="No calendar events found for this semester." />
+            <x-feedback-status.empty-state icon="bx-calendar-x" title="No events" message="No calendar events found for this semester." />
         @endif
 
     @else
-        <x-empty-state icon="bx-calendar-x" title="No calendar selected" message="Select an academic calendar in Step 1." />
+        <x-feedback-status.empty-state icon="bx-calendar-x" title="No calendar selected" message="Select an academic calendar in Step 1." />
     @endif
 
 </x-offcanvas>

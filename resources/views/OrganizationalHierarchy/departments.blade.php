@@ -19,7 +19,7 @@
     <x-panel>
 
         @if ($college->departments->isEmpty())
-            <x-empty-state
+            <x-feedback-status.empty-state
                 icon="bxs-building"
                 title="No departments found"
                 message="Departments for this college will appear here once created." />
