@@ -15,4 +15,6 @@ C:\csms\app\Services\CaisApiService.php
 C:\csms\app\Exceptions\CaisApiException.php
 C:\csms\app\Console\Commands\CaisHealthCheck.php
 
+https://laravel.com/docs/13.x/sanctum
+
 Bearer Token - Sanctum API
