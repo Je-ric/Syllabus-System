@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+// use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -10,9 +11,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
+    // use HasFactory, Notifiable, HasApiTokens;
     use HasFactory, Notifiable;
 
     protected $fillable = [
+        'cais_user_id',
         'name',
         'email',
         'password',
@@ -31,11 +34,21 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'          => 'hashed',
+            'cais_user_id'      => 'integer',
         ];
     }
 
-    // Used in: approve() - AccountApprovalController; 
+    /**
+     * Whether this account is linked to a CAIS user.
+     * Used by CaisTeachingLoadController and syllabus wizard pre-fill.
+     */
+    public function hasCaisLink(): bool
+    {
+        return $this->cais_user_id !== null;
+    }
+
+    // Used in: approve() - AccountApprovalController;
     //          assignRole() - AccountApprovalController
     public function roles(): BelongsToMany
     {
@@ -54,16 +67,16 @@ class User extends Authenticatable
         );
     }
 
-    // Used in: assignDean() - OrganizationalHierarchyController; 
-    //          assignChair() - OrganizationalHierarchyController; 
+    // Used in: assignDean() - OrganizationalHierarchyController;
+    //          assignChair() - OrganizationalHierarchyController;
     //          assignFaculty() - OrganizationalHierarchyController
     public function hasRole(string $role): bool
     {
         return $this->roles()->where('name', $role)->exists();
     }
 
-    // Used in: assignDean() - OrganizationalHierarchyController; 
-    //          assignChair() - OrganizationalHierarchyController; 
+    // Used in: assignDean() - OrganizationalHierarchyController;
+    //          assignChair() - OrganizationalHierarchyController;
     //          assignFaculty() - OrganizationalHierarchyController
     public function assignments()
     {
@@ -77,7 +90,7 @@ class User extends Authenticatable
     }
 
     // Used in: objective_index() - ObjectiveController;
-    //          assignChair() - OrganizationalHierarchyController; 
+    //          assignChair() - OrganizationalHierarchyController;
     //          preselectFromUserAssignments() - ProgramSelector
     public function getPrimaryDepartmentAssignment(): ?UserAssignment
     {
@@ -99,8 +112,8 @@ class User extends Authenticatable
             ->first();
     }
 
-    // Used in: goal_index() - GoalController; 
-    //          assignDean() - OrganizationalHierarchyController; 
+    // Used in: goal_index() - GoalController;
+    //          assignDean() - OrganizationalHierarchyController;
     //          preselectFromUserAssignments() - ProgramSelector
     public function getPrimaryCollegeAssignment(): ?UserAssignment
     {
@@ -111,21 +124,21 @@ class User extends Authenticatable
             ->first();
     }
 
-    // Used in: assignDean() - OrganizationalHierarchyController; 
+    // Used in: assignDean() - OrganizationalHierarchyController;
     //          assignChair() - OrganizationalHierarchyController
     public function isAssignedAsDean(): bool
     {
         return $this->assignments()->where('context', 'dean')->exists();
     }
 
-    // Used in: assignDean() - OrganizationalHierarchyController; 
+    // Used in: assignDean() - OrganizationalHierarchyController;
     //          assignChair() - OrganizationalHierarchyController
     public function isAssignedAsChair(): bool
     {
         return $this->assignments()->where('context', 'chair')->exists();
     }
 
-    // Used in: assignDean() - OrganizationalHierarchyController; 
+    // Used in: assignDean() - OrganizationalHierarchyController;
     //          assignChair() - OrganizationalHierarchyController
     public function ensureFacultyRoleAndAssignment(?int $collegeId = null, ?int $departmentId = null): void
     {

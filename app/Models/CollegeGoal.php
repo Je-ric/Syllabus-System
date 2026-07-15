@@ -13,10 +13,15 @@ class CollegeGoal extends Model
         'college_id',
         'college_goals_code',
         'goal_text',
+        'cais_college_id',
     ];
 
-    // Used in: goal_update() - GoalController; 
-    //          goal_destroy() - GoalController; 
+    protected $casts = [
+        'cais_college_id' => 'integer',
+    ];
+
+    // Used in: goal_update() - GoalController;
+    //          goal_destroy() - GoalController;
     //          sharedData() - SyllabusPreviewService
     public function college()
     {

@@ -13,7 +13,14 @@ class UserAssignment extends Model
         'user_id',
         'college_id',
         'department_id',
+        'cais_college_id',
+        'cais_department_id',
         'context', // dean | chair | faculty
+    ];
+
+    protected $casts = [
+        'cais_college_id'    => 'integer',
+        'cais_department_id' => 'integer',
     ];
 
     public function user()
@@ -58,9 +65,19 @@ class UserAssignment extends Model
         return $query->where('college_id', $collegeId);
     }
 
+    public function scopeForCaisCollege($query, int $caisCollegeId)
+    {
+        return $query->where('cais_college_id', $caisCollegeId);
+    }
+
     public function scopeForDepartment($query, int $departmentId)
     {
         return $query->where('department_id', $departmentId);
+    }
+
+    public function scopeForCaisDepartment($query, int $caisDepartmentId)
+    {
+        return $query->where('cais_department_id', $caisDepartmentId);
     }
 
     public function scopeForUser($query, int $userId)

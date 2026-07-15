@@ -13,10 +13,15 @@ class DepartmentObjective extends Model
         'department_id',
         'dept_obj_code',
         'objective_text',
+        'cais_department_id',
     ];
 
-    // Used in: objective_update() - ObjectiveController; 
-    //          objective_destroy() - ObjectiveController; 
+    protected $casts = [
+        'cais_department_id' => 'integer',
+    ];
+
+    // Used in: objective_update() - ObjectiveController;
+    //          objective_destroy() - ObjectiveController;
     //          sharedData() - SyllabusPreviewService
     public function department()
     {

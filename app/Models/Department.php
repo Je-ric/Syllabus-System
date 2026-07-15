@@ -12,35 +12,41 @@ class Department extends Model
     protected $fillable = [
         'college_id',
         'name',
-        'chair_user_id',
+        'cais_department_id',
+        'cais_college_id',
     ];
 
-    // Used in: index() - AcademicStructureController; 
-    //          sharedData() - SyllabusPreviewService; 
-    //          preselectFromProgram() - ProgramSelector; 
+    protected $casts = [
+        'cais_department_id' => 'integer',
+        'cais_college_id'    => 'integer',
+    ];
+
+    // Used in: index() - AcademicStructureController;
+    //          sharedData() - SyllabusPreviewService;
+    //          preselectFromProgram() - ProgramSelector;
     //          preselectFromUserAssignments() - ProgramSelector
     public function college()
     {
         return $this->belongsTo(College::class);
     }
 
-    // Used in: objective_index() - ObjectiveController; 
-    //          objective_store() - ObjectiveController; 
-    //          destroyDepartment() - AcademicStructureController; 
+    // Used in: objective_index() - ObjectiveController;
+    //          objective_store() - ObjectiveController;
+    //          destroyDepartment() - AcademicStructureController;
     //          resequenceObjectiveCodes() - Department
     public function objectives()
     {
         return $this->hasMany(DepartmentObjective::class);
     }
 
-    // Used in: index() - AcademicStructureController; 
-    //          destroyDepartment() - AcademicStructureController; 
-    //          destroyCollege() - AcademicStructureController; 
+    // Used in: index() - AcademicStructureController;
+    //          destroyDepartment() - AcademicStructureController;
+    //          destroyCollege() - AcademicStructureController;
     //          updateProgram() - AcademicStructureController
     public function programs()
     {
         return $this->belongsToMany(Program::class, 'program_departments')
-                    ->withPivot('role')
+                    ->withPivot('role', 'cais_department_id')
                     ->withTimestamps();
     }
 

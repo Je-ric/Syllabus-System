@@ -9,7 +9,14 @@ class College extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name'];
+    protected $fillable = [
+        'name',
+        'cais_college_id',
+    ];
+
+    protected $casts = [
+        'cais_college_id' => 'integer',
+    ];
 
     // Used in: goal_index() - GoalController;
     //          destroyCollege() - AcademicStructureController

@@ -24,7 +24,7 @@ class Program extends Model
     public function departments()
     {
         return $this->belongsToMany(Department::class, 'program_departments')
-                    ->withPivot('role')
+                    ->withPivot('role', 'cais_department_id')
                     ->withTimestamps();
     }
 

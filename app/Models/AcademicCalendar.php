@@ -14,11 +14,13 @@ class AcademicCalendar extends Model
         'semester',
         'start_date',
         'end_date',
+        'cais_semester_id',
     ];
 
     protected $casts = [
-        'start_date' => 'date',
-        'end_date'   => 'date',
+        'start_date'       => 'date',
+        'end_date'         => 'date',
+        'cais_semester_id' => 'integer',
     ];
 
     // Used in: index() - AcademicCalendarController; 
