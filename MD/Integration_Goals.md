@@ -18,3 +18,7 @@ C:\csms\app\Console\Commands\CaisHealthCheck.php
 https://laravel.com/docs/13.x/sanctum
 
 Bearer Token - Sanctum API
+
+C:\csms\q-dev-chat-2026-07-14.md
+C:\csms\q-dev-chat-2026-07-15.md
+

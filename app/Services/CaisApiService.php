@@ -81,6 +81,63 @@ class CaisApiService
     }
 
     // -------------------------------------------------------------------------
+    // Auth — used by: AuthController::login() to verify credentials against CAIS
+    // -------------------------------------------------------------------------
+
+    /**
+     * Authenticate against CAIS with user credentials.
+     * Returns ['token' => string, 'user' => array] on success, null on failure.
+     * The token is stored in session and used for all subsequent CAIS requests.
+     */
+    public function verifyUser(string $email, string $password): ?array
+    {
+        $url = config('cais.endpoints.verify_user');
+
+        if (empty($url)) {
+            Log::warning('CAIS verify_user endpoint not configured — skipping CAIS auth.');
+            return null;
+        }
+
+        try {
+            $response = Http::withHeaders([
+                    'X-API-KEY' => $this->key,
+                    'Accept'    => 'application/json',
+                ])
+                ->timeout($this->timeout)
+                ->post($url, ['email' => $email, 'password' => $password]);
+
+            if ($response->successful()) {
+                $json  = $response->json();
+                $token = data_get($json, 'token');
+                $raw   = data_get($json, 'user', data_get($json, 'faculty'));
+
+                if (! $token || ! $raw) {
+                    Log::warning('CAIS verifyUser: missing token or user in response', ['body' => $json]);
+                    return null;
+                }
+
+                return ['token' => $token, 'user' => $this->normalizeUser($raw)];
+            }
+
+            // 401 = wrong credentials — expected, not a system error
+            if ($response->status() === 401) {
+                return null;
+            }
+
+            Log::warning('CAIS verifyUser unexpected response', [
+                'status' => $response->status(),
+                'body'   => $response->body(),
+            ]);
+
+            return null;
+
+        } catch (ConnectionException $e) {
+            Log::error('CAIS verifyUser connection failed', ['error' => $e->getMessage()]);
+            return null;
+        }
+    }
+
+    // -------------------------------------------------------------------------
     // Faculty / Users — used by: admin org hierarchy (assign faculty), syllabus course components
     // -------------------------------------------------------------------------
 
@@ -180,8 +237,10 @@ class CaisApiService
      */
     public function getTeachingLoads(int $caisUserId, ?int $caisSemesterId = null): array
     {
-        $all = Cache::remember('cais.teaching_loads', config('cais.cache.teaching_loads'), function () {
-            $payload = $this->get('teaching_loads');
+        $url = config('cais.endpoints.teaching_loads');
+
+        $all = Cache::remember("cais.teaching_loads.{$caisUserId}", config('cais.cache.teaching_loads'), function () use ($url) {
+            $payload = $this->getWithUserToken($url);
             return data_get($payload, 'teachingloads', data_get($payload, 'teaching_loads', []));
         });
 
@@ -200,7 +259,8 @@ class CaisApiService
     public function getTeachingLoad(int $teachingLoadId): array
     {
         return Cache::remember("cais.teaching_load.{$teachingLoadId}", config('cais.cache.teaching_loads'), function () use ($teachingLoadId) {
-            $payload = $this->getWithId('teaching_load', $teachingLoadId);
+            $url     = str_replace('{id}', $teachingLoadId, config('cais.endpoints.teaching_load'));
+            $payload = $this->getWithUserToken($url);
             $raw     = data_get($payload, 'teaching_load', $payload);
             return $raw ? $this->normalizeTeachingLoad($raw) : [];
         });
@@ -216,6 +276,27 @@ class CaisApiService
     }
 
     // -------------------------------------------------------------------------
+    // Workloads — used by: faculty workload page, syllabus wizard step 2 pre-fill
+    // -------------------------------------------------------------------------
+
+    /**
+     * Get the authenticated faculty's workloads from CAIS.
+     * Uses the per-user Bearer token from session — returns only their own data.
+     */
+    public function getWorkloads(): array
+    {
+        $url = config('cais.endpoints.workloads');
+
+        if (empty($url)) {
+            throw new CaisApiException('CAIS workloads endpoint not configured.', 0);
+        }
+
+        return Cache::remember('cais.workloads.' . session('cais_token'), config('cais.cache.workloads'), function () use ($url) {
+            return $this->getWithUserToken($url);
+        });
+    }
+
+    // -------------------------------------------------------------------------
     // Schedules — used by: syllabus wizard step 2 (schedule details lookup)
     // -------------------------------------------------------------------------
 
@@ -223,7 +304,8 @@ class CaisApiService
     public function getSchedules(): array
     {
         return Cache::remember('cais.schedules', config('cais.cache.schedule'), function () {
-            $payload = $this->get('schedules');
+            $url     = config('cais.endpoints.schedules');
+            $payload = $this->getWithUserToken($url);
             return data_get($payload, 'schedule', data_get($payload, 'schedules', []));
         });
     }
@@ -287,7 +369,7 @@ class CaisApiService
     // HTTP internals
     // -------------------------------------------------------------------------
 
-    /** GET a list endpoint. $endpointKey maps to config('cais.endpoints.*'). */
+    /** GET a list endpoint using the system X-API-KEY. */
     private function get(string $endpointKey): array
     {
         $url = config("cais.endpoints.{$endpointKey}");
@@ -299,7 +381,7 @@ class CaisApiService
         return $this->request($url);
     }
 
-    /** GET a single-record endpoint. Replaces {id} in the URL template from config. */
+    /** GET a single-record endpoint using the system X-API-KEY. Replaces {id} in the URL template. */
     private function getWithId(string $endpointKey, int $id): array
     {
         $template = config("cais.endpoints.{$endpointKey}");
@@ -309,6 +391,41 @@ class CaisApiService
         }
 
         return $this->request(str_replace('{id}', $id, $template));
+    }
+
+    /**
+     * GET an endpoint using the per-user Bearer token stored in session.
+     * Used for user-scoped requests (teaching loads, schedules) after CAIS login.
+     */
+    private function getWithUserToken(string $url): array
+    {
+        $token = session('cais_token');
+
+        if (empty($token)) {
+            throw new CaisApiException('No CAIS session token — user must log in first.', 401);
+        }
+
+        try {
+            $response = Http::withToken($token)
+                ->withHeaders(['Accept' => 'application/json'])
+                ->timeout($this->timeout)
+                ->get($url);
+
+            if ($response->successful()) {
+                return $response->json() ?? [];
+            }
+
+            $status  = $response->status();
+            $message = $response->json('message') ?? "CAIS API error: {$url}";
+
+            Log::warning('CAIS user-token request failed', ['url' => $url, 'status' => $status]);
+
+            throw new CaisApiException($message, $status);
+
+        } catch (ConnectionException $e) {
+            Log::error('CAIS user-token connection failed', ['url' => $url, 'error' => $e->getMessage()]);
+            throw new CaisApiException("Could not connect to CAIS: {$e->getMessage()}", 0, $e);
+        }
     }
 
     private function request(string $url): array

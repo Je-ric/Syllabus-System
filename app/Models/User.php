@@ -48,6 +48,33 @@ class User extends Authenticatable
         return $this->cais_user_id !== null;
     }
 
+    /**
+     * Sync CAIS user details onto this local user row.
+     * Called on every successful CAIS-verified login to keep data fresh.
+     * Only updates fields CAIS owns — phone_number and office stay user-managed.
+     * $caisUser = normalized array from CaisApiService::verifyUser() / normalizeUser().
+     */
+    public function syncFromCais(array $caisUser): void
+    {
+        $updates = [];
+
+        $caisId = data_get($caisUser, 'cais_user_id');
+        if ($caisId && $this->cais_user_id !== $caisId) {
+            $updates['cais_user_id'] = $caisId;
+        }
+
+        $firstName = data_get($caisUser, 'first_name', '');
+        $lastName  = data_get($caisUser, 'last_name', '');
+        $fullName  = trim("{$firstName} {$lastName}");
+        if ($fullName && $this->name !== $fullName) {
+            $updates['name'] = $fullName;
+        }
+
+        if (! empty($updates)) {
+            $this->update($updates);
+        }
+    }
+
     // Used in: approve() - AccountApprovalController;
     //          assignRole() - AccountApprovalController
     public function roles(): BelongsToMany

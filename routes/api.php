@@ -72,6 +72,13 @@ Route::get('/test-cais-multiple', function (CaisApiService $cais) {
     ]);
 });
 
+Route::get('/test-login', function (CaisApiService $cais) {
+    return $cais->verifyUser(
+        'juan@clsu.edu.ph',
+        'password123'
+    );
+});
+
 Route::middleware(['auth'])->prefix('cais')->name('cais.')->group(function () {
 
     // ── Colleges ─────────────────────────────────────────────────────────────

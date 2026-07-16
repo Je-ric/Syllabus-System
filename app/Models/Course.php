@@ -6,7 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Course extends Model
 {
+    protected $casts = [
+        'cais_course_id' => 'integer',
+    ];
+
     protected $fillable = [
+        'cais_course_id',
         'program_id',
         'course_code',
         'course_title',

@@ -20,6 +20,9 @@ return [
         'teaching_load'   => env('CAIS_TEACHING_LOAD_API_ENDPOINT'),
 
         'schedules'       => env('CAIS_SCHEDULES_API_ENDPOINT'),
+
+        'verify_user' => env('CAIS_VERIFY_USER_API_ENDPOINT'),
+        'workloads'   => env('CAIS_WORKLOADS_API_ENDPOINT'),
     ],
 
     'cache' => [
@@ -31,5 +34,6 @@ return [
         'active_semester' => (int) env('CAIS_CACHE_ACTIVE_SEMESTER',  1800),   // 30min
         'teaching_loads'  => (int) env('CAIS_CACHE_TEACHING_LOADS',   900),    // 15min
         'schedule'        => (int) env('CAIS_CACHE_SCHEDULE',         900),    // 15min
+        'workloads'       => (int) env('CAIS_CACHE_WORKLOADS',        900),    // 15min
     ],
 ];
