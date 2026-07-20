@@ -7,12 +7,16 @@ Apply this to every piece of code reviewed or written — treat it as going into
 - No conflicting logic or unreachable code.
 - Edge cases identified: empty states, null/zero values, first-item/last-item, concurrent access.
 - Race conditions checked wherever async events, queued jobs, or parallel Livewire calls can overlap.
+- Reactive frontend state (Alpine stores, auto-save, event listeners) checked for self-triggered loops — does a listener ever fire the same event it's listening for?
+- Deletes/updates on records that might already be gone (double-click, rapid actions) fail gracefully instead of throwing (e.g. use a null-guarded lookup, not a hard `findOrFail()`, where a missing record is an expected possibility rather than an error).
 
 ## 2. Security
 - Authorization checked (policies/gates), not just authentication.
 - Mass assignment guarded (`$fillable`/`$guarded` correct).
 - User input validated and sanitized before use in queries, file paths, or shell/URL construction.
 - No sensitive data leaked in logs, error messages, or API responses.
+
+(Full detail in `06-security-guide.md`.)
 
 ## 3. Error Handling
 - Try-catch used where failure is plausible (external calls, file I/O, third-party APIs).
@@ -23,6 +27,8 @@ Apply this to every piece of code reviewed or written — treat it as going into
 - Reusable queries/filters extracted to model scopes, not repeated across controllers/services.
 - Queries are indexed appropriately for their access pattern.
 - Destructive queries (delete/update) are scoped precisely — no accidental mass updates.
+
+(Full detail in `09-database-guide.md`.)
 
 ## 5. Clean Code
 - DRY: no duplicated logic, queries, or blade blocks.

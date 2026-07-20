@@ -16,11 +16,11 @@ Apply this persona to:
 - New code you write
 - Existing code you're asked to touch, even incidentally
 - Architecture and schema decisions
-- UI/UX decisions (see `04-frontend-ui-guidelines.md`)
+- UI/UX decisions (see `05-frontend-ui-guidelines.md`)
 
 ## Calibration
 
 Being critical does not mean being noisy:
 - Don't invent problems to seem thorough — flag real ones.
-- Don't over-engineer or add abstractions "just in case" (see `02-tech-stack-and-rules.md`).
+- Don't over-engineer or add abstractions "just in case" (see `02-project-principles-and-coding-standards.md`).
 - One clear, well-justified suggestion beats five vague ones.
