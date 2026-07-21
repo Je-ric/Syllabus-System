@@ -20,7 +20,7 @@
         activeTab: @js($defaultTab),
 
         init() {
-            const urlTab = new URLSearchParams(window.location.search).get('tab');
+            const urlTab    = new URLSearchParams(window.location.search).get('tab');
             const storedTab = localStorage.getItem(this.storageKey);
             const preferred = urlTab || storedTab || this.activeTab;
 
@@ -49,19 +49,19 @@
             @endif
         }
     }"
-    class="rounded-[20px] border border-[#e4e4e7] bg-white {{ $class }}"
-    style="box-shadow: 0 1px 8px rgba(0,0,0,0.05);"
+    class="rounded-[12px] border border-[#E3E8EB] bg-white {{ $class }}"
+    style="box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06);"
 >
 
-    {{-- HEADER --}}
+    {{-- Optional title / description header --}}
     @if ($title || $description || isset($actions))
-        <div class="flex items-start justify-between gap-4 px-6 pt-6">
+        <div class="flex items-start justify-between gap-4 px-6 pt-5">
             <div>
                 @if ($title)
-                    <h2 class="text-base font-semibold text-[#09090b]">{{ $title }}</h2>
+                    <h2 class="text-[14px] font-semibold text-[#394056]">{{ $title }}</h2>
                 @endif
                 @if ($description)
-                    <p class="mt-0.5 text-sm text-[#71717a]">{{ $description }}</p>
+                    <p class="mt-0.5 text-[13px] text-[#72809E]">{{ $description }}</p>
                 @endif
             </div>
             @isset($actions)
@@ -70,40 +70,40 @@
         </div>
     @endif
 
-    {{-- TABS --}}
-    <div class="flex items-center justify-between border-b border-[#e4e4e7] px-6 mt-4">
-        <div class="flex gap-6">
+    {{-- Tab strip --}}
+    <div class="flex items-center justify-between border-b border-[#E3E8EB] px-5 mt-4">
+        <div class="flex gap-5">
             @foreach ($tabs as $tab)
                 <button
                     type="button"
                     role="tab"
                     @click="setTab('{{ $tab['id'] }}')"
                     :aria-selected="activeTab === '{{ $tab['id'] }}'"
-                    class="relative pb-3.5 text-[13px] font-medium transition-colors"
+                    class="relative pb-3.5 text-[13px] font-medium transition-colors duration-150"
                     :class="activeTab === '{{ $tab['id'] }}'
-                        ? 'text-[#16a34a]'
-                        : 'text-[#71717a] hover:text-[#18181b]'"
+                        ? 'text-[#00965F]'
+                        : 'text-[#72809E] hover:text-[#394056]'"
                 >
                     <div class="flex items-center gap-1.5">
                         @if (isset($tab['icon']))
-                            <i class="bx {{ $tab['icon'] }} text-[15px]"></i>
+                            <i class="bx {{ $tab['icon'] }} text-[14px] leading-none"></i>
                         @endif
                         <span>{{ $tab['label'] }}</span>
                         @if (isset($tab['count']))
                             <span
-                                class="ml-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-semibold"
+                                class="ml-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold"
                                 :class="activeTab === '{{ $tab['id'] }}'
-                                    ? 'bg-[#dcfce7] text-[#166534]'
-                                    : 'bg-[#f4f4f5] text-[#71717a]'"
+                                    ? 'bg-[#D5FFF0] text-[#06754E]'
+                                    : 'bg-[#F1F3F5] text-[#72809E]'"
                             >{{ $tab['count'] }}</span>
                         @endif
                     </div>
 
-                    {{-- Active indicator --}}
+                    {{-- Active underline --}}
                     <span
-                        class="absolute bottom-0 left-0 h-0.5 w-full rounded-full transition-all duration-200"
+                        class="absolute bottom-0 left-0 h-[2px] w-full rounded-full transition-all duration-200"
                         :class="activeTab === '{{ $tab['id'] }}'
-                            ? 'bg-[#16a34a]'
+                            ? 'bg-[#00965F]'
                             : 'bg-transparent'"
                     ></span>
                 </button>
@@ -115,8 +115,8 @@
         @endisset
     </div>
 
-    {{-- CONTENT --}}
-    <div class="p-6">
+    {{-- Tab panels --}}
+    <div class="p-5">
         @foreach ($tabIds as $tabId)
             <div
                 x-show="activeTab === '{{ $tabId }}'"
