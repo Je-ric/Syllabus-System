@@ -9,126 +9,141 @@
 @php
     $iconFix = '[&_i]:leading-none [&_i]:text-[1.1em] [&_i]:translate-y-px ';
 
-    // Table buttons: min ~36px height, readable text
-    $tableBtn  = 'inline-flex items-center gap-1.5 px-3 py-2 text-[12.5px] font-semibold rounded-[10px]
-                  transition-all duration-150
+    // Table buttons: min ~36px height
+    $tableBtn  = 'inline-flex items-center gap-1.5 px-3 py-1.5 text-[12.5px] font-semibold rounded-[6px]
+                  transition-all duration-200
                   focus:outline-none focus:ring-2
                   disabled:opacity-40 disabled:pointer-events-none ' . $iconFix;
 
-    // Form / CRUD buttons: min ~42px height, comfortable text
-    $formBtn   = 'inline-flex items-center gap-2 px-4 py-2.5 text-[14px] font-semibold rounded-[12px]
-                  transition-all duration-150 active:scale-[0.97]
+    // Form / CRUD buttons: min ~42px height
+    $formBtn   = 'inline-flex items-center gap-2 px-4 py-2 text-[13.5px] font-semibold rounded-[7px]
+                  transition-all duration-200 active:scale-[0.97]
                   focus:ring-2 focus:outline-none
                   disabled:opacity-40 disabled:pointer-events-none ' . $iconFix;
 
-    // Small / wizard buttons: compact but still accessible
-    $wizardBtn = 'inline-flex items-center gap-1.5 px-3.5 py-2 text-[13px] font-semibold rounded-[10px]
-                  transition-all duration-150
+    // Small / wizard buttons: compact
+    $wizardBtn = 'inline-flex items-center gap-1.5 px-3 py-1.5 text-[12.5px] font-semibold rounded-[6px]
+                  transition-all duration-200
                   focus:outline-none focus:ring-2
                   disabled:opacity-40 disabled:pointer-events-none ' . $iconFix;
 
     $styles = [
 
         // ── Table buttons ──────────────────────────────────────────────────────
-        'table-confirm'  => $tableBtn . 'text-white bg-[#16a34a] hover:bg-[#15803d] focus:ring-[#16a34a]/30 shadow-sm',
-        'table-edit'     => $tableBtn . 'text-white bg-[#2563eb] hover:bg-[#1d4ed8] focus:ring-[#2563eb]/30 shadow-sm',
-        'table-view'     => $tableBtn . 'text-white bg-[#0891b2] hover:bg-[#0e7490] focus:ring-[#0891b2]/30 shadow-sm',
-        'table-manage'   => $tableBtn . 'text-white bg-[#52525b] hover:bg-[#3f3f46] focus:ring-[#52525b]/30 shadow-sm',
-        'table-danger'   => $tableBtn . 'text-white bg-[#e11d48] hover:bg-[#be123c] focus:ring-[#e11d48]/30 shadow-sm',
-        'table-disable'  => $tableBtn . 'text-white bg-[#71717a] hover:bg-[#52525b] focus:ring-[#71717a]/30 shadow-sm',
-        'table-restore'  => $tableBtn . 'text-white bg-[#7c3aed] hover:bg-[#6d28d9] focus:ring-[#7c3aed]/30 shadow-sm',
-        'table-cancel'   => $tableBtn . 'bg-white text-[#3f3f46] border border-[#d4d4d8]
-                                         hover:bg-[#f4f4f5] hover:border-[#a1a1aa] focus:ring-[#a1a1aa]/20',
+        // Default = Emerald 700, Hover = 800 — solid, readable on white bg
+        'table-confirm'  => $tableBtn . 'text-white bg-[#00965F] hover:bg-[#06754E] active:bg-[#076042] focus:ring-[#00965F]/30 shadow-[0_1px_2px_rgba(16,24,40,0.08)]',
+        'table-edit'     => $tableBtn . 'text-white bg-[#194C6E] hover:bg-[#143D57] active:bg-[#0e2f43] focus:ring-[#194C6E]/30 shadow-[0_1px_2px_rgba(16,24,40,0.08)]',
+        'table-view'     => $tableBtn . 'text-white bg-[#2A3B47] hover:bg-[#1D2836] active:bg-[#141e28] focus:ring-[#2A3B47]/30 shadow-[0_1px_2px_rgba(16,24,40,0.08)]',
+        'table-manage'   => $tableBtn . 'text-white bg-[#394056] hover:bg-[#2A3B47] active:bg-[#1D2836] focus:ring-[#394056]/30 shadow-[0_1px_2px_rgba(16,24,40,0.08)]',
+        'table-danger'   => $tableBtn . 'text-white bg-[#D21B14] hover:bg-[#BA1F19] active:bg-[#9D1F1A] focus:ring-[#D21B14]/30 shadow-[0_1px_2px_rgba(16,24,40,0.08)]',
+        'table-disable'  => $tableBtn . 'text-white bg-[#4F5D6B] hover:bg-[#394056] active:bg-[#2A3B47] focus:ring-[#4F5D6B]/30 shadow-[0_1px_2px_rgba(16,24,40,0.08)]',
+        'table-restore'  => $tableBtn . 'text-white bg-[#06754E] hover:bg-[#076042] active:bg-[#003724] focus:ring-[#06754E]/30 shadow-[0_1px_2px_rgba(16,24,40,0.08)]',
+        'table-cancel'   => $tableBtn . 'bg-white text-[#394056] border border-[#D6DDE3]
+                                         hover:bg-[#F1F3F5] hover:border-[#C1C8D4] focus:ring-[#D6DDE3]/30',
 
-        // ── Form / CRUD buttons ────────────────────────────────────────────────
-        // Primary: CLSU green — the main positive action in the system
+        // ── Form / CRUD buttons — gradient-based for visibility on white ───────
+        // Primary: Emerald gradient 600→800
         'primary'    => $formBtn . '
-            bg-[#009639] text-white
-            hover:bg-[#007d30]
-            focus:ring-[#009639]/35
-            shadow-sm',
+            text-white
+            bg-[linear-gradient(180deg,#00C075_0%,#00965F_100%)]
+            hover:bg-[linear-gradient(180deg,#00965F_0%,#06754E_100%)]
+            active:bg-[#06754E]
+            focus:ring-[#00C075]/40
+            shadow-[0_1px_3px_rgba(0,150,95,0.35)]',
 
-        // Secondary: dark neutral — for secondary confirmations, not gold
-        // Gold (#E0A70D) fails contrast on white text; reserved for accents only
+        // Secondary: Charcoal gradient
         'secondary'  => $formBtn . '
-            bg-[#1a5f30] text-white
-            hover:bg-[#003a10]
-            focus:ring-[#1a5f30]/35
-            shadow-sm',
+            text-white
+            bg-[linear-gradient(180deg,#394056_0%,#253540_100%)]
+            hover:bg-[linear-gradient(180deg,#2A3B47_0%,#1D2836_100%)]
+            active:bg-[#1D2836]
+            focus:ring-[#394056]/40
+            shadow-[0_1px_3px_rgba(37,53,64,0.35)]',
 
-        // Outline: green-tinted ghost button — needs explicit border
+        // Outline: emerald border + tinted text, visible on white
         'outline'    => $formBtn . '
-            bg-white text-[#166534] border border-[#86efac]
-            hover:bg-[#f0fdf4] hover:border-[#16a34a]
-            focus:ring-[#16a34a]/25',
+            bg-transparent text-[#00965F] border-[1.5px] border-[#00C075]
+            hover:bg-[#D5FFF0] hover:border-[#00965F] hover:text-[#06754E]
+            active:bg-[#AEFFE2] active:border-[#06754E] active:text-[#076042]
+            focus:ring-[#00C075]/25',
 
         'add-button' => $formBtn . '
-            bg-[#009639] text-white
-            hover:bg-[#007d30]
-            focus:ring-[#009639]/35
-            shadow-sm',
+            text-white
+            bg-[linear-gradient(180deg,#00C075_0%,#00965F_100%)]
+            hover:bg-[linear-gradient(180deg,#00965F_0%,#06754E_100%)]
+            active:bg-[#06754E]
+            focus:ring-[#00C075]/40
+            shadow-[0_1px_3px_rgba(0,150,95,0.35)]',
 
         'save' => $formBtn . '
-            bg-[#009639] text-white
-            hover:bg-[#007d30]
-            focus:ring-[#009639]/35
-            shadow-sm',
+            text-white
+            bg-[linear-gradient(180deg,#00C075_0%,#00965F_100%)]
+            hover:bg-[linear-gradient(180deg,#00965F_0%,#06754E_100%)]
+            active:bg-[#06754E]
+            focus:ring-[#00C075]/40
+            shadow-[0_1px_3px_rgba(0,150,95,0.35)]',
 
         'add-dashed' => $formBtn . '
-            justify-center bg-white text-[#16a34a]
-            border-2 border-dashed border-[#86efac]
-            hover:border-[#16a34a] hover:bg-[#f0fdf4]
-            focus:ring-[#16a34a]/20',
+            justify-center bg-transparent text-[#00965F]
+            border-2 border-dashed border-[#00C075]
+            hover:border-[#00965F] hover:bg-[#D5FFF0] hover:text-[#06754E]
+            active:bg-[#AEFFE2]
+            focus:ring-[#00C075]/20',
 
         'cancel'     => $formBtn . '
-            bg-white text-[#3f3f46]
-            border border-[#d4d4d8]
-            hover:bg-[#f4f4f5] hover:border-[#a1a1aa]
-            focus:ring-[#a1a1aa]/20',
+            bg-white text-[#394056]
+            border border-[#D6DDE3]
+            hover:bg-[#F1F3F5] hover:border-[#C1C8D4]
+            focus:ring-[#D6DDE3]/20',
 
         'back'       => $formBtn . '
-            bg-white text-[#3f3f46]
-            border border-[#d4d4d8]
-            hover:bg-[#f4f4f5] hover:border-[#a1a1aa]
-            focus:ring-[#a1a1aa]/20',
+            bg-white text-[#394056]
+            border border-[#D6DDE3]
+            hover:bg-[#F1F3F5] hover:border-[#C1C8D4]
+            focus:ring-[#D6DDE3]/20',
 
         'danger'     => $formBtn . '
-            bg-[#e11d48] text-white
-            border border-[#be123c]
-            hover:bg-[#be123c]
-            focus:ring-[#e11d48]/30
-            shadow-sm',
+            text-white
+            bg-[linear-gradient(180deg,#E52F28_0%,#BA1F19_100%)]
+            hover:bg-[linear-gradient(180deg,#D21B14_0%,#9D1F1A_100%)]
+            active:bg-[#9D1F1A]
+            focus:ring-[#E52F28]/35
+            shadow-[0_1px_3px_rgba(186,31,25,0.35)]',
 
         'warning'    => $formBtn . '
-            bg-[#d97706] text-white
-            hover:bg-[#b45309]
-            focus:ring-[#d97706]/30
-            shadow-sm',
+            text-[#394056]
+            bg-[linear-gradient(180deg,#FFC646_0%,#F5B126_100%)]
+            hover:bg-[linear-gradient(180deg,#F5B126_0%,#D79400_100%)]
+            active:bg-[#D79400]
+            focus:ring-[#FFC646]/35
+            shadow-[0_1px_3px_rgba(215,148,0,0.30)]',
 
-        // Gold accent button — use only for highlights/emphasis, never as primary CTA
+        // Gold accent — emphasis only
         'gold'       => $formBtn . '
-            bg-[#e0a70d] text-[#1a1a1a]
-            hover:bg-[#c99200]
-            focus:ring-[#e0a70d]/35
-            shadow-sm',
+            text-[#394056]
+            bg-[linear-gradient(180deg,#FFC646_0%,#F5B126_100%)]
+            hover:bg-[linear-gradient(180deg,#F5B126_0%,#D79400_100%)]
+            active:bg-[#D79400]
+            focus:ring-[#FFC646]/35
+            shadow-[0_1px_3px_rgba(215,148,0,0.30)]',
 
         // ── Small / wizard buttons ─────────────────────────────────────────────
-        'sm-primary' => $wizardBtn . 'bg-[#f0fdf4] text-[#166534] border border-[#86efac]
-                                       hover:bg-[#dcfce7] hover:border-[#4ade80] focus:ring-[#16a34a]/20',
-        'sm-cancel'  => $wizardBtn . 'bg-white text-[#3f3f46] border border-[#d4d4d8]
-                                       hover:bg-[#f4f4f5] hover:border-[#a1a1aa] focus:ring-[#a1a1aa]/20',
-        'sm-danger'  => $wizardBtn . 'bg-[#e11d48] text-white border border-[#be123c]
-                                       hover:bg-[#be123c] focus:ring-[#e11d48]/30 shadow-sm',
-        'sm-warning' => $wizardBtn . 'bg-[#fffbeb] text-[#92400e] border border-[#fcd34d]
-                                       hover:bg-[#fef3c7] hover:border-[#f59e0b] focus:ring-[#d97706]/20',
-        'sm-info'    => $wizardBtn . 'bg-[#eff6ff] text-[#1e40af] border border-[#bfdbfe]
-                                       hover:bg-[#dbeafe] hover:border-[#93c5fd] focus:ring-[#2563eb]/20',
-        'sm-success' => $wizardBtn . 'bg-[#f0fdf4] text-[#166534] border border-[#86efac]
-                                       hover:bg-[#dcfce7] hover:border-[#4ade80] focus:ring-[#16a34a]/20',
-        'sm-soft'    => $wizardBtn . 'bg-[#f7fee7] text-[#3f6212] border border-[#bef264]
-                                       hover:bg-[#ecfccb] hover:border-[#a3e635] focus:ring-[#84cc16]/20',
-        'sm-add'     => $wizardBtn . 'bg-[#009639] text-white border border-[#007d30]
-                                       hover:bg-[#007d30] focus:ring-[#009639]/30 shadow-sm',
+        'sm-primary' => $wizardBtn . 'bg-[#D5FFF0] text-[#076042] border border-[#00965F]
+                                       hover:bg-[#AEFFE2] hover:border-[#06754E] focus:ring-[#00965F]/20',
+        'sm-cancel'  => $wizardBtn . 'bg-white text-[#394056] border border-[#D6DDE3]
+                                       hover:bg-[#F1F3F5] hover:border-[#C1C8D4] focus:ring-[#D6DDE3]/20',
+        'sm-danger'  => $wizardBtn . 'bg-[#E52F28] text-white border border-[#D21B14]
+                                       hover:bg-[#D21B14] active:bg-[#BA1F19] focus:ring-[#E52F28]/30 shadow-[0_1px_2px_rgba(16,24,40,0.08)]',
+        'sm-warning' => $wizardBtn . 'bg-[#FFF6E2] text-[#875200] border border-[#F5B126]
+                                       hover:bg-[#FFE9B5] hover:border-[#D79400] focus:ring-[#FFC646]/20',
+        'sm-info'    => $wizardBtn . 'bg-[#DAF1FF] text-[#143D57] border border-[#3197D6]
+                                       hover:bg-[#AEDFFF] hover:border-[#194C6E] focus:ring-[#3197D6]/20',
+        'sm-success' => $wizardBtn . 'bg-[#D5FFF0] text-[#076042] border border-[#00965F]
+                                       hover:bg-[#AEFFE2] hover:border-[#06754E] focus:ring-[#00965F]/20',
+        'sm-soft'    => $wizardBtn . 'bg-[#AEFFE2] text-[#06754E] border border-[#00C075]
+                                       hover:bg-[#70FFCC] hover:border-[#00965F] focus:ring-[#00C075]/20',
+        'sm-add'     => $wizardBtn . 'bg-[#00965F] text-white border border-[#06754E]
+                                       hover:bg-[#06754E] active:bg-[#076042] focus:ring-[#00965F]/30 shadow-[0_1px_2px_rgba(16,24,40,0.08)]',
     ];
 
     $class = $styles[strval($variant)] ?? $styles['primary'];
@@ -149,7 +164,7 @@
         $parsedTarget = $m[1];
     }
 
-    $autoTarget   = $wireTarget ?: $parsedTarget;
+    $autoTarget    = $wireTarget ?: $parsedTarget;
     $spinnerTarget = $autoTarget ?: $existingTargetAttr;
     $shouldHandleLoading = filled($loading) || filled($spinnerTarget);
 @endphp
