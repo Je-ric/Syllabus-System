@@ -91,7 +91,7 @@ class CaisApiService
      */
     public function verifyUser(string $email, string $password): ?array
     {
-        $url = config('cais.endpoints.verify_user');
+        $url = config('cais.endpoints.verify_user'); // config/cais
 
         if (empty($url)) {
             Log::warning('CAIS verify_user endpoint not configured — skipping CAIS auth.');
@@ -104,7 +104,10 @@ class CaisApiService
                     'Accept'    => 'application/json',
                 ])
                 ->timeout($this->timeout)
-                ->post($url, ['email' => $email, 'password' => $password]);
+                ->post($url, [
+                    'email' => $email,
+                    'password' => $password,
+                ]);
 
             if ($response->successful()) {
                 $json  = $response->json();
