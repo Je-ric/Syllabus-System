@@ -1,41 +1,41 @@
 @props([
-    'type'       => 'info',
-    'title'      => null,
-    'message'    => null,
-    'showTitle'  => true,
-    'dismissable'=> false,
-    'class'      => '',
+    'type'        => 'info',
+    'title'       => null,
+    'message'     => null,
+    'showTitle'   => true,
+    'dismissable' => false,
+    'class'       => '',
 ])
 
 @php
     $styles = [
         'success' => [
-            'container' => 'border-[#bbf7d0] bg-[#f0fdf4] text-[#166534]',
-            'iconWrap'  => 'bg-[#dcfce7] text-[#16a34a]',
+            'container' => 'border-[#00965F] bg-[#D5FFF0] text-[#06754E]',
+            'iconWrap'  => 'bg-[#AEFFE2] text-[#06754E]',
             'icon'      => 'bx-check-circle',
             'title'     => 'Success',
         ],
         'error' => [
-            'container' => 'border-[#fda4af] bg-[#fff1f2] text-[#9f1239]',
-            'iconWrap'  => 'bg-[#ffe4e6] text-[#f43f5e]',
+            'container' => 'border-[#D21B14] bg-[#FFE3E2] text-[#731814]',
+            'iconWrap'  => 'bg-[#FFA2A2] text-[#731814]',
             'icon'      => 'bx-error-circle',
             'title'     => 'Error',
         ],
         'warning' => [
-            'container' => 'border-[#fcd34d] bg-[#fffbeb] text-[#92400e]',
-            'iconWrap'  => 'bg-[#fef3c7] text-[#f59e0b]',
+            'container' => 'border-[#F5B126] bg-[#FFF6E2] text-[#875200]',
+            'iconWrap'  => 'bg-[#FFE9B5] text-[#875200]',
             'icon'      => 'bx-error',
             'title'     => 'Warning',
         ],
         'info' => [
-            'container' => 'border-[#bfdbfe] bg-[#eff6ff] text-[#1e3a5f]',
-            'iconWrap'  => 'bg-[#dbeafe] text-[#2563eb]',
+            'container' => 'border-[#3197D6] bg-[#DAF1FF] text-[#143D57]',
+            'iconWrap'  => 'bg-[#AEDFFF] text-[#143D57]',
             'icon'      => 'bx-info-circle',
             'title'     => 'Information',
         ],
         'default' => [
-            'container' => 'border-blue-100 bg-blue-50/60 text-blue-800',
-            'iconWrap'  => 'bg-blue-50 text-blue-500',
+            'container' => 'border-[#AEDFFF] bg-[#F7FCFE] text-[#194C6E]',
+            'iconWrap'  => 'bg-[#DAF1FF] text-[#194C6E]',
             'icon'      => 'bx-info-circle',
             'title'     => 'Notice',
         ],
@@ -47,11 +47,11 @@
 
 <div
     @if ($dismissable) x-data="{ show: true }" x-show="show" @endif
-    {{ $attributes->class(['rounded-xl border p-4', $alert['container'], $class]) }}
+    {{ $attributes->class(['rounded-[10px] border p-3.5', $alert['container'], $class]) }}
     role="alert">
 
     <div class="flex items-start gap-3">
-        <span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg
+        <span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px]
                 {{ $alert['iconWrap'] }}">
             <i class="bx {{ $alert['icon'] }} text-base leading-none"></i>
         </span>
@@ -62,7 +62,7 @@
             @endif
 
             @if ($message || $slot->isNotEmpty())
-                <div class="{{ $resolvedTitle ? 'mt-0.5' : '' }} text-[13px] leading-relaxed">
+                <div class="{{ $resolvedTitle ? 'mt-0.5' : '' }} text-[13px] leading-relaxed opacity-90">
                     @if ($message)
                         <p>{{ $message }}</p>
                     @endif
@@ -76,8 +76,8 @@
 
         @if ($dismissable)
             <button @click="show = false" type="button"
-                class="shrink-0 mt-0.5 p-0.5 rounded-md opacity-50
-                    hover:opacity-100 transition-opacity focus:outline-none"
+                class="shrink-0 mt-0.5 p-0.5 rounded-[6px] opacity-50
+                    hover:opacity-100 hover:bg-black/10 transition-all duration-150 focus:outline-none"
                 aria-label="Dismiss alert">
                 <i class="bx bx-x text-base" aria-hidden="true"></i>
             </button>

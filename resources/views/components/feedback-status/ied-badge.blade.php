@@ -1,19 +1,19 @@
 @props(['level'])
 
 @php
+    // Light bg + text = border (pill pattern, consistent with design system)
+    // I → Blue 200 bg, Blue 900 text+border
+    // E → Amber 200 bg, Amber 900 text+border
+    // D → Emerald 100 bg, Emerald 800 text+border
     $colors = [
-        // Introductory — blue
-        'I' => 'bg-blue-50 text-blue-700 ring-1 ring-blue-200',
-        // Enabling — amber (was yellow-*, now consistent with app token)
-        'E' => 'bg-amber-50 text-amber-700 ring-1 ring-amber-200',
-        // Demonstrating — emerald (was green-*, now consistent with app token)
-        'D' => 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200',
+        'I' => 'bg-[#DAF1FF] text-[#143D57] ring-1 ring-inset ring-[#143D57]',
+        'E' => 'bg-[#FFF6E2] text-[#875200] ring-1 ring-inset ring-[#875200]',
+        'D' => 'bg-[#D5FFF0] text-[#06754E] ring-1 ring-inset ring-[#06754E]',
     ];
-    // Fallback: slate (was gray-*, now consistent)
-    $classes = $colors[$level] ?? 'bg-slate-50 text-slate-400 ring-1 ring-slate-200';
+    $classes = $colors[$level] ?? 'bg-[#F1F3F5] text-[#394056] ring-1 ring-inset ring-[#394056]';
 @endphp
 
-<span class="inline-flex items-center justify-center px-2.5 py-0.5
+<span class="inline-flex items-center justify-center px-2 py-0.5 w-7
             text-[0.65rem] font-bold rounded-full tracking-wide {{ $classes }}">
     {{ $level ?? '–' }}
 </span>
@@ -24,11 +24,11 @@ x-feedback-status.ied-badge
 Displays an IED (Introductory / Enabling / Demonstrating) level badge.
 Used in course-outcome mapping tables.
 
-Colors:
-    I → blue   (Introductory)
-    E → amber  (Enabling)
-    D → emerald (Demonstrating)
-    – → slate  (no mapping / fallback)
+Colors (light bg + text = border, pill style):
+    I → Blue   (Introductory)
+    E → Amber  (Enabling)
+    D → Emerald (Demonstrating)
+    – → Slate  (no mapping / fallback)
 
 USAGE:
 Static:
