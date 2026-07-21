@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 
 class GoogleDriveAuthorize extends Command
 {
+    // command = php artisan gdrive:authorize
     protected $signature   = 'gdrive:authorize';
     protected $description = 'Authorize Google Drive via OAuth2 and store refresh token in .env';
 

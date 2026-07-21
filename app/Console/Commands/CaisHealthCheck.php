@@ -8,6 +8,7 @@ use Illuminate\Console\Command;
 
 class CaisHealthCheck extends Command
 {
+    // command - php artisan cais:health
     // change ids below to match Postman mock data if needed
     protected $signature = 'cais:health
                             {--user-id=25 : CAIS user ID to use for teaching-loads and faculty profile checks}

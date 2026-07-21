@@ -1,5 +1,5 @@
 {{-- Table container --}}
-<div class="rounded-[28px] border border-[#ececee] bg-white overflow-hidden"
+<div class="rounded-sm border border-[#ececee] bg-white overflow-hidden"
      style="box-shadow: rgba(0, 0, 0, 0.04) 0px 4px 12px 0px;">
 
     {{-- Column header --}}
