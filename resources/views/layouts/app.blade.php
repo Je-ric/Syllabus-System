@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
     @include('includes.head-assets')
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body class="min-h-screen">
@@ -26,27 +29,27 @@
     <aside id="app-sidebar"
         class="fixed inset-y-0 left-0 z-40 w-60
                 bg-white
-                {{-- green-grad --}}
-                 flex flex-col
-               border-r border-[#e4e4e7]
+                flex flex-col
+               border-r border-[#E3E8EB]
                transform -translate-x-full lg:translate-x-0
                transition-transform duration-300 ease-out
-               {{ $isWizardRoute ? 'hidden lg:hidden' : '' }}">
+               {{ $isWizardRoute ? 'hidden lg:hidden' : '' }}"
+        style="box-shadow: 1px 0 0 rgba(16,24,40,0.02), 4px 0 24px -8px rgba(16,24,40,0.06);">
 
         {{-- Brand header --}}
-        <div class="shrink-0 px-4 pt-5 pb-4 border-b border-[#f4f4f5]">
+        <div class="shrink-0 px-4 pt-5 pb-4 border-b border-[#F1F3F5]">
             <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-9 h-9 rounded-[10px] flex items-center justify-center shrink-0 overflow-hidden">
+                <a href="{{ route('syllabus.index') }}" class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 flex items-center justify-center shrink-0">
                         <img src="{{ asset('assets/CLSU-LOGO-removebg.png') }}" alt="CLSU Logo"
-                            class="w-11 h-11 object-contain">
+                            class="w-9 h-9 object-contain">
                     </div>
                     <div>
                         <h1 class="brand-title text-2xl leading-tight text-[#09090b] font-bold">C.S.M.S.</h1>
                     </div>
-                </div>
+                </a>
                 <button id="sidebar-close"
-                    class="lg:hidden text-[#a1a1aa] hover:text-[#09090b] transition p-1.5 rounded-[8px] hover:bg-[#f4f4f5]">
+                    class="lg:hidden text-[#A5B2BD] hover:text-[#394056] transition p-1.5 rounded-[8px] hover:bg-[#F1F3F5]">
                     <i class="bx bx-x text-xl"></i>
                 </button>
             </div>
@@ -145,28 +148,26 @@
 
         {{-- User card + logout --}}
         @auth
-            <div class="shrink-0 border-t border-[#f4f4f5] p-3.5">
-                <div class="flex items-center gap-2.5 mb-2.5 px-1">
-                    <div class="w-8 h-8 rounded-full bg-[#f0fdf4] border border-[#d1fae5]
+            <div class="shrink-0 border-t border-[#F1F3F5] p-3.5">
+                <div class="flex items-center gap-2.5 p-2 rounded-[10px] bg-[#FAFDFB] border border-[#F1F3F5]">
+                    <div class="w-8 h-8 rounded-full bg-[#EDFFF8] border border-[#AEFFE2]
                                 flex items-center justify-center shrink-0">
-                        <i class="bx bxs-user text-[#16a34a] text-sm"></i>
+                        <i class="bx bxs-user text-[#06754E] text-sm"></i>
                     </div>
-                    <div class="min-w-0">
+                    <div class="min-w-0 flex-1">
                         <p class="text-[13px] font-semibold text-[#09090b] truncate">{{ $user->name ?? 'User' }}</p>
                         <p class="text-[11px] text-[#71717a] capitalize">{{ $user->roles->first()?->name ?? 'Member' }}</p>
                     </div>
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" title="Sign out"
+                            class="flex items-center justify-center w-8 h-8 rounded-[8px]
+                                   text-[#A5B2BD] hover:text-[#e11d48] hover:bg-[#fff1f2]
+                                   transition-colors duration-150">
+                            <i class="bx bxs-log-out text-base"></i>
+                        </button>
+                    </form>
                 </div>
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button type="submit"
-                        class="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-[8px]
-                               bg-[#fff1f2] border border-[#fecdd3] hover:bg-[#ffe4e6] hover:border-[#fda4af]
-                               text-[12px] font-semibold text-[#e11d48]
-                               transition-all duration-150">
-                        <i class="bx bxs-log-out text-sm"></i>
-                        Sign Out
-                    </button>
-                </form>
             </div>
         @endauth
     </aside>
@@ -194,7 +195,7 @@
                             Central Luzon State University
                         </p>
                         <h1 class="brand-title text-[13.5px] font-bold text-[#394056] leading-tight truncate">
-                            Course Syllabus Management
+                            Course Syllabus Management System
                         </h1>
                     </div>
                 </div>
@@ -246,7 +247,73 @@
         @endif
     </div>
 
-    <style></style>
+    <style>
+        /* Oswald for the brand mark and nav section labels — everything else stays the body font */
+        .brand-title {
+            font-family: 'Oswald', sans-serif;
+            letter-spacing: -0.01em;
+        }
+
+        /* ─── Sidebar nav links ──────────────────────────────────────────────────── */
+        .nav-label {
+            font-family: 'Oswald', sans-serif;
+            font-size: 10.5px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #A5B2BD;
+            padding: 0 1rem 0.35rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            padding: 0.5rem 1rem;
+            color: #394056;
+            text-decoration: none;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            border-left: 3px solid transparent;
+            border-radius: 0;
+            transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+            background: transparent;
+        }
+
+        .nav-icon {
+            font-size: 1.1rem;
+            opacity: 0.65;
+            transition: opacity 0.18s ease;
+            flex-shrink: 0;
+        }
+
+        .nav-link:hover {
+            color: #06754E;
+            border-left-color: rgba(0, 216, 139, 0.35);
+            background: #FAFDFB;
+        }
+
+        .nav-link:hover .nav-icon {
+            opacity: 1;
+        }
+
+        .nav-link:focus-visible {
+            outline: 2px solid #00D88B;
+            outline-offset: -2px;
+        }
+
+        .nav-link.active {
+            color: #06754E;
+            font-weight: 700;
+            border-left: 3px solid #00D88B;
+            border-radius: 0;
+            background: linear-gradient(90deg, #85e8c2 0%, rgba(237,255,248,0) 85%);
+        }
+
+        .nav-link.active .nav-icon {
+            opacity: 1;
+        }
+    </style>
 
     @livewireScripts
     <script src="https://cdn.jsdelivr.net/gh/livewire/sortable@v1.x.x/dist/livewire-sortable.js"></script>
@@ -308,3 +375,5 @@
     </script>
 </body>
 </html>
+
+

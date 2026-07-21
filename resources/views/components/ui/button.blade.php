@@ -127,6 +127,17 @@
             focus:ring-[#FFC646]/35
             shadow-[0_1px_3px_rgba(215,148,0,0.30)]',
 
+        'sidebar-tool' => $wizardBtn . '
+            text-[#344054]
+            bg-white
+            border border-transparent
+            hover:bg-[#F8FAFC]
+            hover:border-[#E4E7EC]
+            active:bg-[#EEF2F6]
+            active:border-[#D0D5DD]
+            focus:ring-[#D0D5DD]/40
+            shadow-none',
+            
         // ── Small / wizard buttons ─────────────────────────────────────────────
         'sm-primary' => $wizardBtn . 'bg-[#D5FFF0] text-[#076042] border border-[#00965F]
                                        hover:bg-[#AEFFE2] hover:border-[#06754E] focus:ring-[#00965F]/20',

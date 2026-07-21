@@ -502,13 +502,13 @@
 
 
     {{-- ─── 11. Table ─────────────────────────────────────────────────── --}}
-    <section class="space-y-4">
+    {{-- <section class="space-y-4">
         <div class="flex items-center gap-3">
             <h2 class="text-base font-bold text-[#394056]">11. Table</h2>
             <x-ui.code-badge variant="grey">x-table.*</x-ui.code-badge>
         </div>
 
-        {{-- Standard table --}}
+        Standard table
         <div class="bg-white border border-[#E3E8EB] rounded-[12px] p-6
                     shadow-[0_1px_2px_rgba(16,24,40,0.04),0_1px_3px_rgba(16,24,40,0.06)]">
             <p class="text-[10.5px] font-semibold uppercase tracking-widest text-[#93A1AF] mb-4">Standard with hover rows</p>
@@ -557,7 +557,7 @@
             </x-table.container>
         </div>
 
-        {{-- Striped table --}}
+        Striped table
         <div class="bg-white border border-[#E3E8EB] rounded-[12px] p-6
                     shadow-[0_1px_2px_rgba(16,24,40,0.04),0_1px_3px_rgba(16,24,40,0.06)]">
             <p class="text-[10.5px] font-semibold uppercase tracking-widest text-[#93A1AF] mb-4">Striped rows</p>
@@ -593,7 +593,7 @@
             </x-table.container>
         </div>
 
-        {{-- Empty state --}}
+        Empty state
         <div class="bg-white border border-[#E3E8EB] rounded-[12px] p-6
                     shadow-[0_1px_2px_rgba(16,24,40,0.04),0_1px_3px_rgba(16,24,40,0.06)]">
             <p class="text-[10.5px] font-semibold uppercase tracking-widest text-[#93A1AF] mb-4">Empty state</p>
@@ -612,7 +612,7 @@
                 </x-table.table>
             </x-table.container>
         </div>
-    </section>
+    </section> --}}
 
 
     {{-- ─── 12. Offcanvas ─────────────────────────────────────────────── --}}

@@ -1,5 +1,5 @@
 /* ─── Sidebar nav links ──────────────────────────────────────────────────── */
-aside a {
+/* aside a {
     display: flex;
     align-items: center;
     gap: 0.65rem;
@@ -41,4 +41,4 @@ aside a.active {
 
 aside a.active i {
     opacity: 1;
-}
+} */

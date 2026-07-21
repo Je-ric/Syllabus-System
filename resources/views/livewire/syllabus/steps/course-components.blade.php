@@ -397,41 +397,36 @@
     @endif
 
     {{-- ── Sticky Save All footer ────────────────────────────────────────────── --}}
-    <div class="sticky bottom-0 z-10 mt-4 flex items-center justify-between gap-4 px-5 py-3
-                rounded-xl border border-[#dedee2] bg-white/95 backdrop-blur-sm"
-         style="box-shadow: 0 -2px 16px rgba(0,0,0,.10);">
-        <p class="text-xs text-slate-400 hidden sm:block">
-            Changes in both LEC and LAB sections are saved together.
-        </p>
-        <button type="button"
-            x-bind:disabled="_saving"
-            wire:loading.attr="disabled"
-            wire:target="save"
-            x-on:click="async () => {
-                _saving = true;
-                await $nextTick();
-                window._beforeSaveAllPromises = [];
-                window.dispatchEvent(new CustomEvent('before-save-all'));
-                try {
-                    await Promise.all(window._beforeSaveAllPromises);
-                } catch { _saving = false; return; }
-                await $wire.save();
-                _saving = false;
-            }"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold
-                   bg-[#16a34a] text-white hover:bg-[#15803d] disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
-            <span x-show="!_saving" class="inline-flex items-center gap-1.5">
-                <i class="bx bx-save text-base leading-none"></i> Save All
-            </span>
-            <span x-show="_saving" x-cloak class="inline-flex items-center gap-1.5">
-                <svg class="animate-spin h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                </svg>
-                Saving…
-            </span>
-        </button>
-    </div>
+    <x-wizard.save-bar hint="Changes in both LEC and LAB sections are saved together.">
+        <x-slot:action>
+            <x-ui.button type="button" variant="save"
+                x-bind:disabled="_saving"
+                wire:loading.attr="disabled"
+                wire:target="save"
+                x-on:click="async () => {
+                    _saving = true;
+                    await $nextTick();
+                    window._beforeSaveAllPromises = [];
+                    window.dispatchEvent(new CustomEvent('before-save-all'));
+                    try {
+                        await Promise.all(window._beforeSaveAllPromises);
+                    } catch { _saving = false; return; }
+                    await $wire.save();
+                    _saving = false;
+                }">
+                <span x-show="!_saving" class="inline-flex items-center gap-1.5 leading-none">
+                    <i class="bx bx-save text-base leading-none"></i> Save All
+                </span>
+                <span x-show="_saving" x-cloak class="inline-flex items-center gap-1.5 leading-none">
+                    <svg class="animate-spin h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
+                    Saving…
+                </span>
+            </x-ui.button>
+        </x-slot:action>
+    </x-wizard.save-bar>
 
 
 </div>
