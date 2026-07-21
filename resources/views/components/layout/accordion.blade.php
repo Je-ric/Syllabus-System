@@ -10,32 +10,32 @@
 
 @php
     $palette = [
-        'slate'   => ['icon_bg' => 'bg-[#e2e8f0] text-[#475569]',   'title' => 'text-[#0f172a]'],
-        'emerald' => ['icon_bg' => 'bg-[#dcfce7] text-[#16a34a]',   'title' => 'text-[#166534]'],
-        'blue'    => ['icon_bg' => 'bg-[#dbeafe] text-[#1d4ed8]',   'title' => 'text-[#1e40af]'],
-        'amber'   => ['icon_bg' => 'bg-[#fef3c7] text-[#d97706]',   'title' => 'text-[#92400e]'],
-        'rose'    => ['icon_bg' => 'bg-[#ffe4e6] text-[#e11d48]',   'title' => 'text-[#9f1239]'],
+        'slate'   => ['icon_bg' => 'bg-[#F1F3F5] text-[#394056]',   'title' => 'text-[#394056]'],
+        'emerald' => ['icon_bg' => 'bg-[#D5FFF0] text-[#06754E]',   'title' => 'text-[#06754E]'],
+        'blue'    => ['icon_bg' => 'bg-[#DAF1FF] text-[#143D57]',   'title' => 'text-[#143D57]'],
+        'amber'   => ['icon_bg' => 'bg-[#FFF6E2] text-[#875200]',   'title' => 'text-[#875200]'],
+        'rose'    => ['icon_bg' => 'bg-[#FFE3E2] text-[#731814]',   'title' => 'text-[#731814]'],
     ];
     $p = $palette[$color] ?? $palette['slate'];
 @endphp
 
 <div
     x-data="{ open: {{ $open ? 'true' : 'false' }} }"
-    {{ $attributes->class(['rounded-xl border border-[#e2e8f0] bg-white overflow-hidden']) }}
-    style="box-shadow: 0 2px 16px rgba(0,0,0,.07);"
+    {{ $attributes->class(['rounded-[12px] border border-[#E3E8EB] bg-white overflow-hidden']) }}
+    style="box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06);"
 >
     {{-- Header --}}
     <button
         type="button"
         x-on:click="open = !open"
-        class="w-full flex items-center justify-between px-5 py-4 text-left
-               hover:bg-[#f8fafc] transition-colors duration-100 focus:outline-none"
+        class="w-full flex items-center justify-between px-4 py-3.5 text-left
+               hover:bg-[#F9FAFA] transition-colors duration-150 focus:outline-none"
         :aria-expanded="open"
     >
         <div class="flex items-center gap-3 min-w-0">
             @if ($icon)
-                <span class="shrink-0 flex items-center justify-center w-9 h-9 rounded-lg {{ $p['icon_bg'] }}">
-                    <i class="bx bx-{{ $icon }} text-lg leading-none"></i>
+                <span class="shrink-0 flex items-center justify-center w-8 h-8 rounded-[8px] {{ $p['icon_bg'] }}">
+                    <i class="bx bx-{{ $icon }} text-base leading-none"></i>
                 </span>
             @endif
 
@@ -57,14 +57,14 @@
                 </div>
             @endif
 
-            <i class="bx text-[#94a3b8] text-lg transition-transform duration-200"
+            <i class="bx text-[#C1C8D4] text-lg transition-transform duration-200"
                :class="open ? 'bx-chevron-up' : 'bx-chevron-down'"></i>
         </div>
     </button>
 
     {{-- Body --}}
     <div x-show="open" x-collapse x-cloak>
-        <div class="border-t border-[#e2e8f0] {{ $noPadding ? '' : 'p-5' }}">
+        <div class="border-t border-[#E3E8EB] {{ $noPadding ? '' : 'p-4' }}">
             {{ $slot }}
         </div>
     </div>

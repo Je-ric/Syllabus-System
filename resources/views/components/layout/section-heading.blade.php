@@ -1,12 +1,13 @@
 @props(['number', 'label'])
 
-<div {{ $attributes->class(['flex items-center gap-3 mb-3 mt-5 first:mt-0']) }}>
-    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full
-                 bg-[#16a34a] text-white text-[12px] font-bold shrink-0">
+<div {{ $attributes->class(['flex items-center gap-2.5 mb-3 mt-5 first:mt-0']) }}>
+    <span class="inline-flex items-center justify-center w-[22px] h-[22px] rounded-full
+                 bg-[#00965F] text-white text-[11px] font-bold shrink-0
+                 shadow-[0_1px_2px_rgba(0,150,95,0.30)]">
         {{ $number }}
     </span>
-    <h3 class="text-[12px] font-bold text-[#09090b] uppercase tracking-widest">
+    <h3 class="text-[11px] font-bold text-[#394056] uppercase tracking-[0.1em]">
         {{ $label }}
     </h3>
-    <div class="flex-1 h-px bg-[#e4e4e7]"></div>
+    <div class="flex-1 h-px bg-[#E3E8EB]"></div>
 </div>
