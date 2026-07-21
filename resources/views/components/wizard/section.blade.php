@@ -6,18 +6,18 @@
 
 @php
     $palette = [
-        'brand'   => ['bar' => 'bg-[#16a34a]',  'icon_bg' => 'bg-[#dcfce7] text-[#15803d]', 'title' => 'text-[#166534]',  'header' => 'bg-[#f0fdf4] border-[#d1fae5]'],
-        'emerald' => ['bar' => 'bg-[#16a34a]',  'icon_bg' => 'bg-[#dcfce7] text-[#15803d]', 'title' => 'text-[#166534]',  'header' => 'bg-[#f0fdf4] border-[#d1fae5]'],
-        'blue'    => ['bar' => 'bg-[#2563eb]',  'icon_bg' => 'bg-[#dbeafe] text-[#1d4ed8]', 'title' => 'text-[#1e40af]',  'header' => 'bg-[#eff6ff] border-[#bfdbfe]'],
-        'slate'   => ['bar' => 'bg-[#71717a]',  'icon_bg' => 'bg-[#f4f4f5] text-[#52525b]', 'title' => 'text-[#09090b]',  'header' => 'bg-[#fafafa] border-[#e4e4e7]'],
-        'amber'   => ['bar' => 'bg-[#d97706]',  'icon_bg' => 'bg-[#fef3c7] text-[#d97706]', 'title' => 'text-[#92400e]',  'header' => 'bg-[#fffbeb] border-[#fde68a]'],
-        'rose'    => ['bar' => 'bg-[#e11d48]',  'icon_bg' => 'bg-[#ffe4e6] text-[#e11d48]', 'title' => 'text-[#9f1239]',  'header' => 'bg-[#fff1f2] border-[#fecdd3]'],
+        'brand'   => ['bar' => 'bg-[#00965F]',  'icon_bg' => 'bg-[#D5FFF0] text-[#06754E]', 'title' => 'text-[#06754E]',  'header' => 'bg-[#EDFFF8] border-[#00965F]'],
+        'emerald' => ['bar' => 'bg-[#00965F]',  'icon_bg' => 'bg-[#D5FFF0] text-[#06754E]', 'title' => 'text-[#06754E]',  'header' => 'bg-[#EDFFF8] border-[#00965F]'],
+        'blue'    => ['bar' => 'bg-[#3197D6]',  'icon_bg' => 'bg-[#DAF1FF] text-[#143D57]', 'title' => 'text-[#143D57]',  'header' => 'bg-[#DAF1FF] border-[#3197D6]'],
+        'slate'   => ['bar' => 'bg-[#72809E]',  'icon_bg' => 'bg-[#F1F3F5] text-[#394056]', 'title' => 'text-[#394056]',  'header' => 'bg-[#F9FAFA] border-[#E3E8EB]'],
+        'amber'   => ['bar' => 'bg-[#F5B126]',  'icon_bg' => 'bg-[#FFF6E2] text-[#875200]', 'title' => 'text-[#875200]',  'header' => 'bg-[#FFF6E2] border-[#F5B126]'],
+        'rose'    => ['bar' => 'bg-[#D21B14]',  'icon_bg' => 'bg-[#FFE3E2] text-[#731814]', 'title' => 'text-[#731814]',  'header' => 'bg-[#FFE3E2] border-[#D21B14]'],
     ];
     $p = $palette[$color] ?? $palette['brand'];
 @endphp
 
-<div {{ $attributes->class(['rounded-[16px] border border-[#e4e4e7] bg-white overflow-hidden mb-5']) }}
-     style="box-shadow: 0 1px 6px rgba(0,0,0,0.04);">
+<div {{ $attributes->class(['rounded-[12px] border border-[#E3E8EB] bg-white overflow-hidden mb-5']) }}
+     style="box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06);">
 
     {{-- Colored top bar --}}
     <div class="h-[3px] w-full {{ $p['bar'] }}"></div>
@@ -27,11 +27,11 @@
         <div class="flex items-center gap-2.5 min-w-0">
             @if ($icon)
                 <span aria-hidden="true"
-                    class="shrink-0 flex items-center justify-center w-7 h-7 rounded-[10px] {{ $p['icon_bg'] }}">
+                    class="shrink-0 flex items-center justify-center w-7 h-7 rounded-[8px] {{ $p['icon_bg'] }}">
                     <i class="bx bx-{{ $icon }} text-sm leading-none"></i>
                 </span>
             @endif
-            <h4 class="text-sm font-semibold {{ $p['title'] }} truncate">{{ $title }}</h4>
+            <h4 class="text-[13px] font-semibold {{ $p['title'] }} truncate">{{ $title }}</h4>
         </div>
 
         @if (isset($action) && $action->isNotEmpty())
