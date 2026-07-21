@@ -95,48 +95,74 @@ class CaisApiService
 
         if (empty($url)) {
             Log::warning('CAIS verify_user endpoint not configured — skipping CAIS auth.');
-            return null;
+
+            return [
+                'success' => false,
+                'message' => 'CAIS verify_user endpoint not configured.',
+                'url' => $url,
+            ];
         }
 
         try {
+            // $response = Http::withHeaders([
+            //         'X-API-KEY' => $this->key,
+            //         'Accept'    => 'application/json',
+            //     ])
+            //     ->timeout($this->timeout)
+            //     ->post($url, [
+            //         'email' => $email,
+            //         'password' => $password,
+            //     ]);
+
+            // if ($response->successful()) {
+            //     $json  = $response->json();
+            //     $token = data_get($json, 'token');
+            //     $raw   = data_get($json, 'user', data_get($json, 'faculty'));
+
+            //     if (! $token || ! $raw) {
+            //         Log::warning('CAIS verifyUser: missing token or user in response', ['body' => $json]);
+            //         return null;
+            //     }
+
+            //     return ['token' => $token, 'user' => $this->normalizeUser($raw)];
+            // }
+
+            // // 401 = wrong credentials — expected, not a system error
+            // if ($response->status() === 401) {
+            //     return null;
+            // }
+
+            // Log::warning('CAIS verifyUser unexpected response', [
+            //     'status' => $response->status(),
+            //     'body'   => $response->body(),
+            // ]);
+
+            // return null;
             $response = Http::withHeaders([
-                    'X-API-KEY' => $this->key,
-                    'Accept'    => 'application/json',
-                ])
+                'X-API-KEY' => $this->key,
+                'Accept'    => 'application/json',
+            ])
                 ->timeout($this->timeout)
                 ->post($url, [
-                    'email' => $email,
+                    'email'    => $email,
                     'password' => $password,
-                ]);
+                ]); 
 
-            if ($response->successful()) {
-                $json  = $response->json();
-                $token = data_get($json, 'token');
-                $raw   = data_get($json, 'user', data_get($json, 'faculty'));
-
-                if (! $token || ! $raw) {
-                    Log::warning('CAIS verifyUser: missing token or user in response', ['body' => $json]);
-                    return null;
-                }
-
-                return ['token' => $token, 'user' => $this->normalizeUser($raw)];
-            }
-
-            // 401 = wrong credentials — expected, not a system error
-            if ($response->status() === 401) {
-                return null;
-            }
-
-            Log::warning('CAIS verifyUser unexpected response', [
-                'status' => $response->status(),
-                'body'   => $response->body(),
+            return $response->json();
+            
+        // } catch (ConnectionException $e) {
+        //     Log::error('CAIS verifyUser connection failed', ['error' => $e->getMessage()]);
+        //     return null;
+        // }
+        } catch (ConnectionException $e) {
+            Log::error('CAIS verifyUser connection failed', [
+                'error' => $e->getMessage(),
             ]);
 
-            return null;
-
-        } catch (ConnectionException $e) {
-            Log::error('CAIS verifyUser connection failed', ['error' => $e->getMessage()]);
-            return null;
+            return [
+                'message' => 'Could not connect to CAIS.',
+                'error'   => $e->getMessage(),
+            ];
         }
     }
 

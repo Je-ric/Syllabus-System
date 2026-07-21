@@ -72,11 +72,23 @@ Route::get('/test-cais-multiple', function (CaisApiService $cais) {
     ]);
 });
 
+// Route::get('/test-login', function (CaisApiService $cais) {
+//     return $cais->verifyUser(
+//         'jdelacruz@clsu.edu.ph',
+//         'password'
+//     );
+// });
+
 Route::get('/test-login', function (CaisApiService $cais) {
-    return $cais->verifyUser(
-        'juan@clsu.edu.ph',
-        'password123'
+    return response()->json(
+        $cais->verifyUser(
+            'jdelacruz@clsu.edu.ph',
+            'password'
+        )
     );
+    // return response()->json([
+    //     'message' => 'Route is working',
+    // ]);
 });
 
 Route::middleware(['auth'])->prefix('cais')->name('cais.')->group(function () {
