@@ -1,55 +1,56 @@
 # Authentication, OTP, and Account Status
 
-Beginner-friendly summary of what happens in registration, verification (OTP), login, and admin approval.
+Beginner-friendly summary of what happens in registration, login, OTP (password changes), and admin approval.
 
-## Why OTP + Admin Approval (Design Rationale)
+## Why CAIS + Admin Approval (Design Rationale)
 
-### Why OTP Email Verification?
-- Registration is restricted to `@clsu.edu.ph` and `@clsu2.edu.ph` only.
-- OTP confirms the registrant actually owns that CLSU email address.
-- Without OTP, anyone who knows the email format could register with a fake CLSU email.
-- OTP expires in 10 minutes. Users can resend from the OTP page or the resend page.
+### Why CAIS Login?
+- The system integrates with the CLSU CAIS (LMS) API for primary authentication.
+- On login, CAIS is contacted first to verify credentials.
+- If CAIS responds, the user is authenticated via CAIS and a local user row is auto-created if needed.
+- If CAIS is unavailable or rejects the credentials, the system falls back to local password authentication.
+- This ensures faculty can log in with their existing CLSU credentials.
+
+### Why OTP for Password Changes?
+- OTP verifies the user owns their email before allowing a password change.
+- OTP is issued via `OtpService` for purpose `password_change`.
+- OTP expires in 10 minutes. Users can resend from the profile page.
 - If mail sending fails, the OTP record is still saved in DB — user can resend manually.
 
-### Why Admin Approval After OTP?
-- Verifying the email only proves ownership of a CLSU email — not faculty status.
-- CLSU students also have `@clsu.edu.ph` emails. Email verification alone cannot distinguish faculty from students.
+### Why Admin Approval After Registration?
+- Registration creates an account with `pending` status and `email_verified_at = now()` directly.
 - Admin approval is the human gate that confirms the registrant is an actual faculty member.
 - Only after admin approval does the account become `active` and receive the `Faculty` role.
-- This two-step process (OTP → Admin Approval) ensures only verified, authorized faculty access the system.
+- This ensures only verified, authorized faculty access the system.
 
 ## Files Used (Source of Truth)
 
 - Controllers
   - `app/Http/Controllers/AuthController.php`
-  - `app/Http/Controllers/OTPController.php`
   - `app/Http/Controllers/AccountApprovalController.php`
   - `app/Http/Controllers/UserController.php`
-- Service
-  - `app/Services/AccountApprovalService.php`
+- Services
+  - `app/Services/CaisApiService.php`
   - `app/Services/OtpService.php`
+  - `app/Services/AccountApprovalService.php`
 - Models
   - `app/Models/User.php`
-  - `app/Models/UserOtp.php`
   - `app/Models/UserAssignment.php`
 - Mail
-  - `app/Mail/OtpMail.php`
   - `app/Mail/AccountStatusUpdated.php`
 - Views
   - `resources/views/Authentication/auth.blade.php` — Login + Register (single page, Alpine tab switch)
-  - `resources/views/Authentication/verifyOTP.blade.php` — OTP entry screen
-  - `resources/views/Authentication/resendOTP.blade.php` — Resend OTP by email
-  - `resources/views/Authentication/waiting-approval.blade.php` — Post-verification holding screen
+  - `resources/views/Authentication/waiting-approval.blade.php` — Post-registration holding screen
   - `resources/views/Authentication/viewDetails.blade.php` — User profile + password change
 - CSS
   - `resources/css/auth.css` — `.auth-input`, `.auth-primary`, `.auth-secondary`, `.green-grad`
 - Routes
-  - `routes/web.php` (auth, otp, approval routes)
+  - `routes/web.php` (auth, profile, approval routes)
 
 Related docs:
-- `app/MD/08_OTP_Flow_and_Service.md`
-- `app/MD/09_Roles_Assignment.md`
-- `app/MD/15_User_Profile.md`
+- `MD/08_OTP_Flow_and_Service.md`
+- `MD/09_Roles_Assignment.md`
+- `MD/15_User_Profile.md`
 
 ## UI Notes
 
@@ -60,24 +61,15 @@ Related docs:
 - Right panel displays the 4-step onboarding flow and an RBAC summary card.
 - Uses `.auth-input`, `.auth-secondary` (login button), `.auth-primary` (register button), `.green-grad` (right panel).
 
-### verifyOTP.blade.php
-- Standalone page (no layout extension) matching the auth card style.
-- Shows the destination email from `session('verify_email')`.
-- OTP input: centered, large tracking, `autocomplete="one-time-code"`.
-- Inline resend form + "use a different email" link.
-
-### resendOTP.blade.php
-- Standalone page for users who lost their OTP email.
-- Single email field; only works if email is not yet verified.
-
 ### waiting-approval.blade.php
-- Shown after successful OTP verification.
+- Shown after successful registration.
 - Displays a 3-step "what happens next" list.
 - Explains that approved accounts receive the Faculty role by default.
 
 ### viewDetails.blade.php (password fields)
 - All three password fields (current, new, confirm) have Alpine show/hide toggles.
 - Uses `x-bind:type` to switch between `password` and `text`.
+- Password change requires OTP verification via email before the update is processed.
 
 ## Conditions (If / Then)
 
@@ -89,74 +81,71 @@ Related docs:
   - Then `office` is required.
   - Then `email` is required, valid, and unique in `users`.
   - Then email must end with `@clsu.edu.ph` or `@clsu2.edu.ph`.
-  - Then `password` is required, minimum 8 chars, and must match confirmation.
+  - Then `password` is required, minimum 6 chars, and must match confirmation.
 
 ### Registration (Behavior)
 
 - If registration succeeds:
   - Then create user with:
     - `account_status = pending`
-    - `email_verified_at = null`
-  - Then issue OTP via `OtpService` for purpose `email_verification`.
-  - Then store OTP in `user_otps` hashed (not plaintext).
-  - Then set OTP expiry (default 10 minutes).
-  - Then save verification context in session `verify_email`.
-  - Then redirect to `otp.show`.
+    - `email_verified_at = now()`
+  - Then record an AuditLog entry for the registration.
+  - Then redirect to `waiting.approval` with a success message.
+  - No OTP is issued for registration.
 
-### Login (Conditional Flow)
+### Login (CAIS Flow)
 
-- If credentials are invalid:
-  - Then login is rejected.
-- If credentials are valid:
+- If login is attempted:
+  - Then first try CAIS API authentication:
+    - If CAIS responds:
+      - Then find or create a local user row for that email.
+      - If user exists and is not `active`: force `active` status.
+      - Then store `cais_token` in session.
+      - Then call `syncFromCais()` to update local user profile from CAIS data.
+      - Then log in the user via `Auth::login()`.
+      - Then record AuditLog entry for CAIS login.
+      - Then redirect to `syllabus.index`.
+    - If CAIS is unavailable or credentials are rejected:
+      - Then fall back to local authentication.
+- If local auth fails:
+  - Then redirect to `auth.show` with error toast.
+
+### Login (Local Fallback — Conditional Flow)
+
+- If local credentials are invalid:
+  - Then login is rejected with error toast.
+- If local credentials are valid:
   - Then session is regenerated.
-  - If `email_verified_at` is empty:
-    - Then user is logged out immediately.
-    - Then session is invalidated + token regenerated.
-    - Then login is blocked with verification error.
-  - If email is verified:
-    - Then account status is checked:
-      - If `active`: redirect to `syllabus.index`.
-      - If `pending`: redirect to `waiting.approval`.
-      - If `rejected`: logout and block login.
-      - If `disabled`: logout and block login.
-      - If unknown status: logout and block login.
+  - If `account_status` is `pending`:
+    - Then logout, invalidate session, redirect to `waiting.approval` with info toast.
+  - If `account_status` is `rejected`:
+    - Then logout, invalidate session, redirect to `auth.show` with error toast.
+  - If `account_status` is `disabled`:
+    - Then logout, invalidate session, redirect to `auth.show` with error toast.
+  - If `account_status` is `active`:
+    - Then redirect to `syllabus.index`.
 
-### OTP Screen Access
+### Password Change (OTP Flow)
 
-- If route `otp.show` is opened:
-  - Then it requires `session('verify_email')`.
-  - If session key is missing: redirect to `auth.show`.
-
-### OTP Verification (Conditions)
-
+- If user requests a password change:
+  - Then current password is validated first.
+  - If valid:
+    - Then issue OTP via `OtpService` for purpose `password_change`.
+    - Then send OTP email.
+    - Then return an OTP session token (stored in session).
+    - Then user must submit OTP via `verifyPasswordOtp()`.
 - If verifying OTP:
   - Then `otp` must be exactly 6 digits.
-  - Then email source is `request('email')` or `session('verify_email')`.
-  - If no email is available: redirect to login with error.
-  - Then user must exist for that email.
-  - Then `OtpService::migrateLegacyOtp()` runs first (backward compatibility).
-  - Then OTP record must exist in `user_otps`.
+  - Then OTP record must exist for the user.
   - Then OTP must not be expired.
   - Then OTP hash must match.
-
-### OTP Verification (Success Behavior)
-
-- If OTP is valid:
-  - Then set `email_verified_at = now()`.
-  - Then delete OTP record for `email_verification` purpose.
-  - Then remove session key `verify_email`.
-  - Then redirect to `waiting.approval`.
-
-### OTP Resend
-
+  - If valid:
+    - Then update password.
+    - Then clear OTP record.
+    - Then redirect with success toast.
 - If resending OTP:
-  - Then email is required and valid.
-  - Then user must exist.
-  - Then email must not already be verified.
-  - If all checks pass:
-    - Then issue a fresh OTP via `OtpService`.
-    - Then set session `verify_email`.
-    - Then redirect to `otp.show`.
+  - Then issue a fresh OTP via `OtpService`.
+  - Then send a new OTP email.
 
 ### Admin Account Status Actions
 
@@ -192,17 +181,44 @@ Related docs:
 - If `dean` removed: delete all `user_assignments` with `context = dean`.
 - If `chair` removed: delete all `user_assignments` with `context = chair`.
 
+### Consultation Hours (UserController)
+
+- User can manage their own consultation hours via profile.
+- `POST /profile/consultation-hours` — store a consultation hour entry.
+- `DELETE /profile/consultation-hours/{hour}` — delete a consultation hour entry.
+- These are stored on the user record, not per-syllabus.
+
 ## Sequences (Typical Flow)
 
 ### New User Lifecycle
 
-1. User registers with CLSU email.
-2. System issues OTP for email verification.
-3. User verifies OTP → email becomes verified → redirected to waiting-approval page.
-4. User waits for admin approval (account still `pending`).
-5. Admin approves user → account becomes `active`, `faculty` role attached.
-6. Admin assigns additional roles and organizational assignments.
-7. User can log in and use the system.
+1. User registers with CLSU email → account created with `pending` status, email auto-verified.
+2. User redirected to waiting-approval page.
+3. User waits for admin approval (account still `pending`).
+4. Admin approves user → account becomes `active`, `faculty` role attached.
+5. Admin assigns additional roles and organizational assignments.
+6. User can log in and use the system.
+
+### Login (CAIS-first)
+
+1. User submits email + password.
+2. System contacts CAIS API.
+3. If CAIS responds:
+   - User authenticated via CAIS.
+   - Local user created or updated from CAIS profile.
+   - Redirect to syllabus index.
+4. If CAIS unavailable:
+   - Fall back to local password check.
+   - If valid, check account status → redirect or block accordingly.
+
+### Password Change with OTP
+
+1. User requests password change via profile page.
+2. System validates current password.
+3. System issues OTP to user's email.
+4. User enters OTP on profile page.
+5. System verifies OTP → updates password.
+6. User can log in with new password.
 
 ### Disable / Reject Lifecycle
 

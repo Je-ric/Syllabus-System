@@ -1,6 +1,6 @@
 # Syllabus CRUD (Index, Create Entry, Delete)
 
-Rules for the syllabus listing page, creation entry point, and deletion. For wizard internals see [[10_Syllabus_Wizard]].
+Rules for the syllabus listing page, creation entry point, and deletion. For wizard internals see `MD/10_Syllabus_Wizard.md`.
 
 ## Files Used (Source of Truth)
 

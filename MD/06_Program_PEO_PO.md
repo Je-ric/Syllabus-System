@@ -4,8 +4,9 @@ Rules for program-level PEO/PO management, code sequencing, and PO↔PEO mapping
 
 ## Files Used (Source of Truth)
 
-- Program CRUD
-  - `app/Http/Controllers/AcademicStructureController.php` (program is managed under Academic Structure)
+- Controllers
+  - `app/Http/Controllers/AcademicStructureController.php` — program CRUD in Academic Structure admin page
+  - `app/Http/Controllers/ProgramController.php` — program listing, show, PEO/PO delete routes
 - Livewire PEO
   - `app/Livewire/Programs/ManagePeos.php`
   - `resources/views/livewire/programs/manage-peos.blade.php`

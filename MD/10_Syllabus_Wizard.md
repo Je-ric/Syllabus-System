@@ -47,7 +47,7 @@ Use this when changing logic, debugging behavior, or explaining the flow to non-
   - `app/Models/SyllabusReviewer.php`
   - `app/Models/SyllabusRevision.php`
 
-Related docs: [[02_Academic_Calendar_and_Events]], [[04_Course_Management]]
+Related docs: `MD/02_Academic_Calendar_and_Events.md`, `MD/04_Course_Management.md`
 
 ## What It Is
 
@@ -123,7 +123,9 @@ Switching step and saving happen in one round trip for speed.
 ## UI Conditions (If / Then)
 
 - If user clicks `Next`, `Previous`, or a step tab:
-  - Then a full-screen "Saving & switching…" overlay is shown via `wire:loading` until Livewire re-renders.
+  - Then `_navigating` Alpine flag is set to `true`, showing a full-screen "Saving & switching…" overlay.
+  - Once the new step is rendered and `syllabus-step-changed` fires, `_navigating` is reset to `false`.
+  - Uses Alpine `x-show="_navigating"` instead of `wire:loading` to avoid flicker from Livewire's debounce.
 - If a tab is before the current step index:
   - Then it is styled as "completed" (visual only; not a validation gate).
 - If a step has missing required fields:
@@ -191,6 +193,8 @@ Validation:
 ### 2) Course Components Step
 
 **Purpose**: Capture lecture and laboratory teaching details, schedules, and consultation hours.
+
+**Save-before-navigate pattern**: This step has LEC and LAB sections managed by independent Alpine components. When the user navigates away, the parent dispatches `request-push-and-navigate` → each Alpine section pushes a save promise to `window._beforeSaveAllPromises` → `$wire.onPushAndNavigate()` awaits all promises, saves via Livewire, then dispatches `navigate-after-save` → parent completes navigation.
 
 Conditions:
 - If first load and no LEC row exists:

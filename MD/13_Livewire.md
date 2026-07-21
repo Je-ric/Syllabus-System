@@ -17,7 +17,7 @@ Plain-language explanation of how Livewire is used in CSMS.
   - `resources/views/livewire/syllabus/*`
 
 Related docs:
-- `app/MD/10_Syllabus_Wizard.md`
+- `MD/10_Syllabus_Wizard.md`
 
 ## What Livewire Is
 

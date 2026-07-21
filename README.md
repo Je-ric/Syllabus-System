@@ -11,23 +11,21 @@ CSMS is CLSU's official platform for creating and reviewing course syllabi acros
 
 ---
 
-## Why OTP + Admin Approval (Critical Design Decisions)
+## Why CAIS + Admin Approval (Critical Design Decisions)
 
-### Why OTP Email Verification?
+### Why CAIS Login?
+
+- The system integrates with the CLSU CAIS (LMS) API for primary authentication.
+- Faculty can log in with their existing CLSU credentials.
+- If CAIS responds, the user is authenticated via CAIS and a local user row is auto-created if needed.
+- If CAIS is unavailable or rejects credentials, the system falls back to local password authentication.
+
+### Why No OTP Email Verification?
 
 - Registration is restricted to `@clsu.edu.ph` and `@clsu2.edu.ph` email addresses only.
-- OTP verification confirms the registrant actually owns that CLSU email address.
-- This prevents non-CLSU individuals from creating accounts using a fake CLSU email.
-- Without OTP verification, anyone who knows the email format could register.
-- OTP expires in 10 minutes. Users can resend via the OTP page or the resend page.
-
-### Why Admin Approval After OTP?
-
-- Verifying the email only proves the person owns a CLSU email — it does not prove they are faculty.
-- CLSU students also have `@clsu.edu.ph` emails. A verified email alone does not distinguish faculty from students.
-- Admin approval is the human gate that confirms the registrant is an actual faculty member.
+- OTP email verification was previously used but removed — the system now sets `email_verified_at = now()` directly on registration.
+- Admin approval remains the human gate that confirms the registrant is an actual faculty member (not a student).
 - Only after admin approval does the account become `active` and receive the `Faculty` role.
-- This two-step process (OTP → Admin Approval) ensures only verified, authorized faculty access the system.
 
 ---
 
@@ -86,6 +84,15 @@ Scoped to their own syllabi.
 - Cannot manage goals, objectives, PEOs, POs, or courses
 - Sidebar shows: Syllabi
 
+### OVPAA
+
+Scoped to syllabus view access (read-only).
+
+- View all syllabi across all programs/departments
+- Preview and download syllabus PDFs and saved versions
+- Cannot create, edit, or delete syllabi
+- Sidebar shows: Syllabi (same as Faculty, but sees all)
+
 ### Notes on Role Combinations
 
 - A user always has `Faculty` role — it is forced on every active account.
@@ -102,31 +109,23 @@ Scoped to their own syllabi.
 
 1. User fills name, phone, office, CLSU email, password.
 2. Email must end with `@clsu.edu.ph` or `@clsu2.edu.ph` — others are rejected.
-3. System creates account with `status = pending`, `email_verified_at = null`.
-4. System issues a 6-digit OTP (hashed, expires in 10 minutes) and emails it.
-5. User is redirected to the OTP verification page.
+3. System creates account with `status = pending`, `email_verified_at = now()`.
+4. User is redirected to the waiting-approval page (no OTP step).
 
-### OTP Verification
+### Login (CAIS-first)
 
-- Email is passed via URL query param (`?email=...`) AND stored in session.
-- Wrong OTP → stays on OTP page with error, does NOT redirect away.
-- Expired OTP → timer shows 0:00, submit button disabled, resend prompt shown.
-- Correct OTP → `email_verified_at` set, OTP deleted, redirected to waiting-approval page.
-- If mail fails → account is still created, OTP record is saved, user can resend from the OTP page.
-
-### Login
-
-- Invalid credentials → error toast on auth page.
-- Email not verified → warning toast, redirected to auth page.
-- Account pending → info toast, redirected to waiting-approval page.
-- Account rejected → error toast on auth page.
-- Account disabled → error toast on auth page.
-- Account active → redirected to syllabus index.
+1. System first attempts CAIS API authentication.
+2. If CAIS responds: user authenticated, local user created/updated from CAIS profile, redirected to syllabus index.
+3. If CAIS unavailable: fall back to local password check.
+4. If local auth fails → error toast on auth page.
+5. If account pending → info toast, redirected to waiting-approval page.
+6. If account rejected → error toast on auth page.
+7. If account disabled → error toast on auth page.
+8. If account active → redirected to syllabus index.
 
 ### Admin Approval
 
-- Admin sees all users in User Management.
-- Email verified badge shown next to each user's email (green = verified, amber = unverified).
+- Admin sees all users in User Management with account status badges.
 - Admin approves → account becomes `active`, `faculty` role attached, email sent.
 - Admin rejects → account becomes `rejected`, all assignments deleted, email sent.
 - Admin disables → account becomes `disabled`, all assignments deleted, email sent.
@@ -274,7 +273,7 @@ COs use "Save All" (same as PEOs/POs) because:
 - On Hostinger: if session/cache tables are missing, switch to `SESSION_DRIVER=file` and `CACHE_STORE=file` temporarily.
 - `APP_URL` must match the actual deployed domain (not `http://localhost`) for CSRF and redirects to work.
 - `AuditLog::record()` is wrapped in try/catch — it never crashes the app on failure.
-- `OtpService::issueForUser()` returns `bool` — mail failure is logged but does not crash registration.
+- `OtpService::issueForUser()` returns `bool` — mail failure is logged but does not crash the password-change flow.
 - All role checks use `$user->hasRole(string $role)` — requires `/** @var \App\Models\User $user */` docblock for Intelephense.
 - Unauthenticated users are redirected to `route('auth.show')` (not `/login`) via `$middleware->redirectGuestsTo()` in `bootstrap/app.php`.
 
@@ -302,7 +301,7 @@ COs use "Save All" (same as PEOs/POs) because:
 | `/organizational/hierarchy`, `/organizational/college/*/departments`, assign/remove chair/faculty | `role:admin,dean,chair` | Admin, Dean, Chair |
 | `/college/goals` | `role:admin,dean` | Admin, Dean |
 | `/department/objectives`, `/programs`, `/courses` | `role:admin,chair` | Admin, Chair |
-| `/syllabus` | `role:admin,faculty` | Admin, Faculty |
+| `/syllabus` | `role:admin,faculty,ovpaa` | Admin (full), Faculty (own), OVPAA (view-only) |
 | `/profile` | `auth` | Any authenticated user |
 
 ---
@@ -311,17 +310,18 @@ COs use "Save All" (same as PEOs/POs) because:
 
 | What | Where |
 |---|---|
-| Auth + OTP | `app/Http/Controllers/AuthController.php`, `OTPController.php` |
+| Auth + CAIS | `app/Http/Controllers/AuthController.php`, `app/Services/CaisApiService.php` |
 | Account approval | `app/Http/Controllers/AccountApprovalController.php`, `app/Services/AccountApprovalService.php` |
 | Org hierarchy | `app/Services/OrganizationalHierarchy/` |
 | Goals / Objectives | `app/Http/Controllers/GoalController.php`, `ObjectiveController.php` |
-| PEOs / POs | `app/Livewire/Programs/ManagePeos.php`, `ManagePos.php` |
+| PEOs / POs | `app/Http/Controllers/ProgramController.php`, `app/Livewire/Programs/ManagePeos.php`, `ManagePos.php` |
 | Courses | `app/Http/Controllers/CourseController.php` |
 | Syllabus wizard | `app/Livewire/Syllabus/SyllabusWizard.php`, `Steps/` |
 | Syllabus CRUD | `app/Http/Controllers/SyllabusController.php` |
 | Academic calendar | `app/Http/Controllers/AcademicCalendarController.php` |
 | Academic structure | `app/Http/Controllers/AcademicStructureController.php` |
 | OTP service | `app/Services/OtpService.php` |
+| CAIS API | `app/Services/CaisApiService.php` |
 | Audit log | `app/Models/AuditLog.php` |
 | Role middleware | `app/Http/Middleware/RoleMiddleware.php` |
 | Routes | `routes/web.php` |

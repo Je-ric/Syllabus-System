@@ -184,4 +184,4 @@ Practical reference for how Academic Calendars and their semester events behave 
 2. Event is removed immediately (no confirmation modal).
 3. Success toast is shown.
 
-> **Note:** Events immediately affect features that depend on calendar weeks. See [[10_Syllabus_Wizard]] for how `exam`, `non_teaching`, and `break` events affect week generation and locking.
+> **Note:** Events immediately affect features that depend on calendar weeks. See `MD/10_Syllabus_Wizard.md` for how `exam`, `non_teaching`, and `break` events affect week generation and locking.

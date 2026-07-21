@@ -1,12 +1,10 @@
 ﻿# OTP Flow and Service
 
-Beginner-friendly reference for OTP in CSMS: what it is, where it’s stored, and the full conditional flow.
+Beginner-friendly reference for OTP in CSMS: what it is, where it's stored, and the full conditional flow.
 
 ## Files Used (Source of Truth)
 
 - Controllers
-  - `app/Http/Controllers/AuthController.php`
-  - `app/Http/Controllers/OTPController.php`
   - `app/Http/Controllers/UserController.php` (password-change OTP flow)
 - Service
   - `app/Services/OtpService.php`
@@ -15,14 +13,13 @@ Beginner-friendly reference for OTP in CSMS: what it is, where it’s stored, an
 - Mail
   - `app/Mail/OtpMail.php`
 - Routes
-  - `routes/web.php` (auth + otp routes)
+  - `routes/web.php` (profile routes)
 
 ## What OTP Means Here
 
 - OTP = One-Time Password (6-digit code).
-- Used for:
-  - Email verification after registration.
-  - Password-change verification (profile flow).
+- Used only for: **Password-change verification** (profile flow).
+- Registration does NOT use OTP — `email_verified_at` is set to `now()` directly on account creation.
 
 ## Storage Model
 
@@ -39,7 +36,6 @@ Beginner-friendly reference for OTP in CSMS: what it is, where it’s stored, an
 
 From `OtpService`:
 
-- `PURPOSE_EMAIL_VERIFICATION = email_verification`
 - `PURPOSE_PASSWORD_CHANGE = password_change`
 
 ## Conditions (If / Then)
@@ -71,46 +67,23 @@ From `OtpService`:
 
 ## Sequences (Flows)
 
-### Registration → Email OTP
-
-1. User submits registration.
-2. System validates inputs and creates user as `pending` with `email_verified_at = null`.
-3. System issues OTP for `email_verification`.
-4. System stores verification context in session `verify_email`.
-5. User is redirected to the OTP page.
-
-### Verify Email OTP
-
-1. User submits the 6-digit OTP.
-2. System reads email from request or session.
-3. System migrates legacy OTP (if needed).
-4. System validates OTP via `OtpService`.
-5. If valid:
-   - Set `email_verified_at = now()`.
-   - Clear OTP for email verification.
-   - Clear session `verify_email`.
-   - Redirect to waiting approval page.
-
-### Resend Email OTP
-
-1. User submits email.
-2. System checks:
-   - Email is present and valid.
-   - User exists.
-   - Email is not already verified.
-3. System issues a new `email_verification` OTP.
-4. System sets session `verify_email` and redirects to OTP page.
-
 ### Password Change OTP (Profile)
 
 1. Logged-in user requests password change.
-2. System issues OTP for `password_change`.
+2. System validates current password, issues OTP for `password_change`, stores pending hash in session.
 3. User submits OTP to confirm password change.
-4. System validates OTP using the same `OtpService` rules.
+4. System validates OTP via `OtpService`.
+5. If valid: applies new password hash, clears OTP and session, redirects with success toast.
+
+### Resend Password OTP
+
+1. User clicks "Resend OTP" on profile page.
+2. System checks session for pending password change.
+3. If valid: issues new OTP for `password_change`, sends email, redirects with success toast.
 
 ## Security Notes
 
 - OTP is never stored in plaintext.
-- OTP is purpose-specific (email verification vs password change).
+- OTP is purpose-specific (`password_change` only).
 - OTP is one-time use (cleared after success).
 - OTP expiry is enforced by timestamp check.

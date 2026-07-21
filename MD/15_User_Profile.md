@@ -96,10 +96,9 @@ Two-column layout:
 
 ## OTP Service (OtpService)
 
-Used for both email verification and password change flows.
+Used for password change flow.
 
 Constants:
-- `PURPOSE_EMAIL_VERIFICATION = 'email_verification'`
 - `PURPOSE_PASSWORD_CHANGE = 'password_change'`
 
 Default expiry: 10 minutes.
