@@ -8,6 +8,6 @@
     };
 @endphp
 
-<th {{ $attributes->merge(['class' => "px-4 py-3 text-[11.5px] font-bold uppercase tracking-[0.1em] text-[#374151] $alignClass $class"]) }}>
+<th {{ $attributes->merge(['class' => "px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.08em] text-[#72809E] $alignClass $class"]) }}>
     {{ $slot }}
 </th>
