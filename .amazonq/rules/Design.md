@@ -1,106 +1,272 @@
-UI/UX Review Prompt – CLSU Course Syllabus Management System
+# Design System
 
-Review the entire frontend UI/UX of the system with the goal of creating a modern, professional, and highly usable academic application for Central Luzon State University (CLSU). The primary users are faculty members, including senior professors, non-technical users, and users with varying levels of computer proficiency.
+## 1. Color Palettes
 
-Prioritize usability, readability, accessibility, consistency, and efficiency over visual trends.
+### 1.1 Emerald (Primary Scale)
 
-Evaluate every page, modal, form, table, wizard step, and reusable component using the following guidelines:
+A 10-step scale used as the app's core accent color, from near-white tint to near-black shade.
 
-Typography
-Use a consistent font system across the application.
-Select professional, highly legible fonts suitable for academic systems.
-Maintain clear heading hierarchy, comfortable reading sizes, and proper line spacing.
-Avoid small labels, helper text, placeholders, badges, and table text.
-Sizing & Accessibility
-Ensure buttons, inputs, dropdowns, tabs, and clickable elements are large enough for comfortable use.
-Maintain generous spacing between components to reduce visual clutter and prevent misclicks.
-Design for users with limited technical experience.
-Cards & Containers
-Use clean white (#FFFFFF) card backgrounds.
-Improve padding, spacing, border radius, and elevation.
-Apply subtle, premium shadows that create depth without appearing heavy.
-Clearly separate content sections for easier scanning.
-Colors
-Refine the system color palette while maintaining professionalism.
-Improve Success, Warning, Error, and Information colors for better visibility and accessibility.
-Ensure sufficient contrast for readability and color consistency throughout the system.
-Forms & Tables
-Improve spacing, alignment, and visual hierarchy.
-Make forms easier to scan and complete.
-Increase table readability through proper row height, padding, and header styling.
-Navigation & Layout
-Ensure layouts feel clean, balanced, and predictable.
-Improve spacing between sections and maintain consistent alignment throughout the application.
-Keep important actions visible and easy to identify.
-Visual Polish
-Create a modern, premium appearance appropriate for a university management system.
-Use consistent shadows, borders, icon sizes, and component styling.
-Eliminate outdated styling, inconsistent spacing, and unnecessary visual noise.
+| Step | Hex       | Notes                        |
+|------|-----------|-------------------------------|
+| 50   | `#EDFFF8` | Lightest tint — backgrounds  |
+| 100  | `#D5FFF0` | Subtle backgrounds           |
+| 200  | `#AEFFE2` | Light accents                |
+| 300  | `#70FFCC` | Light accents                |
+| 400  | `#2BFDB0` | Bright accent                |
+| 500  | `#00D88B` | Base / brand color (locked)  |
+| 600  | `#00C075` | Hover state                  |
+| 700  | `#00965F` | Active state                 |
+| 800  | `#06754E` | Strong accent                |
+| 900  | `#076042` | Dark accent                  |
+| 950  | `#003724` | Darkest shade                |
 
-For every issue identified, provide:
+### 1.2 Primary Colors (Blue / Charcoal / Grey)
 
-Location
-Problem
-Recommended improvement
-Expected usability benefit
+**Blue**
+| Step | Hex |
+|------|-----|
+| 100  | `#F7FCFE` |
+| 200* | `#DAF1FF` |
+| 300* | `#AEDFFF` |
+| 400  | `#71BFF1` |
+| 500  | `#3197D6` (base) |
+| 600* | `#237A83` |
+| 700* | `#1F5E89` |
+| 800  | `#194C6E` |
+| 900  | `#143D57` |
 
-The objective is to produce a polished, accessible, and professional interface that faculty members can use confidently with minimal learning curve while maintaining the credibility expected of an official CLSU academic system. ## Visual Design & Premium Styling
+**Charcoal**
+| Step | Hex |
+|------|-----|
+| 200  | `#93A1AF` |
+| 300  | `#72809E` |
+| 400  | `#4F5D6B` |
+| 500  | `#394056` (base) |
+| 600  | `#2A3B47` |
+| 700  | `#253540` |
+| 800  | `#1D2836` |
 
-Elevate the visual design to create a modern, premium academic experience while maintaining the professionalism expected of an official CLSU system. The interface should feel polished, refined, and engaging without becoming flashy or distracting.
+**Grey**
+| Step | Hex |
+|------|-----|
+| 200  | `#F9FAFA` |
+| 300  | `#F1F3F5` |
+| 400  | `#E3E8EB` |
+| 500  | `#D6DDE3` (base) |
+| 600  | `#C1C8D4` |
+| 700  | `#B4C0CA` |
+| 800  | `#A5B2BD` |
 
-### Color System
+### 1.3 Secondary Colors (Yellow / Green / Red)
 
-Use the CLSU brand colors as the foundation and build a richer, more cohesive design system around them.
+**Yellow**
+| Step | Hex |
+|------|-----|
+| 100  | `#FFFDF6` |
+| 200  | `#FFF6E2` |
+| 300  | `#FFE9B5` |
+| 400  | `#FFD56D` |
+| 500  | `#FFC646` (base) |
+| 600  | `#F5B126` |
+| 700* | `#D79400` |
+| 800* | `#B37100` |
+| 900  | `#875200` |
 
-| Variable       | Color     |
-| -------------- | --------- |
-| `--clsu-green` | `#009639` |
-| `--clsu-cobra` | `#1A5F30` |
-| `--green-150`  | `#003A10` |
-| `--clsu-gold`  | `#E0A70D` |
+**Green**
+| Step | Hex |
+|------|-----|
+| 100  | `#FAFDFB` |
+| 200* | `#E4FB68` |
+| 300* | `#C4F0CE` |
+| 400  | `#81DC9E` |
+| 500  | `#4BC27D` (base) |
+| 600* | `#3CB170` |
+| 700  | `#2F9F62` |
+| 800* | `#228350` |
+| 900  | `#23633a` |
 
-The current interface feels too flat and visually bland. Improve the application by using these colors with better contrast, layered surfaces, and purposeful accents. Reserve gold for highlights, achievements, important actions, and emphasis rather than large surfaces.
+**Red**
+| Step | Hex |
+|------|-----|
+| 100  | `#FEF7F6` |
+| 200* | `#FFE3E2` |
+| 300* | `#FFA2A2` |
+| 400  | `#F45855` |
+| 500  | `#E52F28` (base) |
+| 600  | `#D21B14` |
+| 700* | `#BA1F19` |
+| 800* | `#9D1F1A` |
+| 900  | `#731814` |
 
-### Premium Feel
+*Asterisked values as printed in the source reference; verify against source file if precision matters.*
 
-* Replace flat components with clean white (`#FFFFFF`) cards.
-* Apply soft, layered shadows that provide depth without feeling heavy.
-* Introduce subtle elevation changes on hover and focus.
-* Use consistent border radii, spacing, and component proportions throughout the system.
-* Create a stronger visual hierarchy using spacing, typography, and elevation instead of excessive colors.
+---
 
-### Component Polish
+## 2. Gradients
 
-Improve the appearance of:
+**Brand card gradient** (e.g. "Customers" stat card)
+```css
+background: linear-gradient(135deg, #00D88B 0%, #06754E 100%);
+/* Emerald 500 → Emerald 800, diagonal */
+```
+Used for hero/stat cards with white text on top for strong contrast.
 
-* Cards
-* Tables
-* Forms
-* Navigation
-* Buttons
-* Modals
-* Wizard steps
-* Status badges
+---
 
-Each component should feel cohesive and professionally crafted.
+## 3. Shadows & Elevation
 
-### Interactive Experience
+Cards use a soft, low-opacity shadow with a light border to sit above the page background.
 
-Create interactions that feel responsive and satisfying:
+```css
+--shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
 
-* Smooth hover and focus transitions.
-* Clear active and selected states.
-* Refined button feedback.
-* Subtle animations that communicate interaction without slowing the interface.
+.card {
+  border: var(--border-width-default) solid var(--border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+```
 
-### Status Colors
+Interactive elements (buttons, badges) use a subtler shadow or none at all — relying instead on background color changes for state changes.
 
-Redesign Success, Warning, Error, and Information colors so they are:
+```css
+--shadow-button: 0 1px 2px rgba(16, 24, 40, 0.05);
+```
 
-* More vibrant and distinguishable.
-* Accessible with sufficient contrast.
-* Consistent across alerts, badges, notifications, and validation states.
+---
 
-### Overall Goal
+## 4. Borders & Radius
 
-The interface should inspire confidence from the first interaction. Users should immediately perceive it as a well-designed, high-quality university system that is pleasant to use daily. Aim for a clean, modern, and premium experience that enhances usability while preserving the trust, credibility, and professionalism of an official CLSU academic platform. 
+### 4.1 Border Colors
+```css
+--border-default: #E3E8EB;  /* Grey 400 — card & container outlines */
+--border-subtle:  #F1F3F5;  /* Grey 300 — dividers, faint separators */
+--border-strong:  #D6DDE3;  /* Grey 500 — inputs, more defined outlines */
+--border-brand:   #00D88B;  /* Emerald 500 — focus / selected / outline buttons */
+--border-brand-hover: #00C075; /* Emerald 600 */
+```
+```css
+--border-width-default: 1px;
+--border-width-thick:   1.5px; /* outline buttons */
+```
+
+### 4.2 Radius Scale
+```css
+--radius-xs:   6px;   /* small tags, chips */
+--radius-sm:   8px;   /* inputs, list item pills */
+--radius-md:   10px;  /* buttons */
+--radius-lg:   16px;  /* cards, panels */
+--radius-xl:   20px;  /* hero/stat cards, large containers */
+--radius-full: 999px; /* circular avatars, selected-day dot, status dots */
+```
+
+### 4.3 Applied Radius
+| Element                          | Radius            |
+|-----------------------------------|--------------------|
+| Cards / panels (Calendar, Today)  | `--radius-lg` (16px) |
+| Stat / hero card (Customers)      | `--radius-xl` (20px) |
+| Buttons (all variants)            | `--radius-md` (10px) |
+| List item pills (Today card)      | `--radius-sm` (8px)  |
+| Info boxes                        | `--radius-sm`–`--radius-md` |
+| Calendar selected-day marker      | `--radius-full` (circle) |
+| Avatars                           | `--radius-full` (circle) |
+| Color swatches                    | `--radius-sm` (8px), top corners only on labeled swatch |
+
+---
+
+## 5. Buttons
+
+Three visual styles, each with four states: Default, Hover, Active, Disabled.
+
+### 4.1 Flat
+Solid emerald fill, white text.
+```css
+.btn-flat            { background: #00D88B; color: #FFFFFF; }
+.btn-flat:hover       { background: #00C075; }  /* 600 */
+.btn-flat:active      { background: #00965F; }  /* 700 */
+.btn-flat:disabled    { background: #AEFFE2; color: #FFFFFF; opacity: 0.7; } /* 200 */
+```
+
+### 4.2 Outline
+Transparent fill, emerald border and text.
+```css
+.btn-outline          { background: transparent; border: var(--border-width-thick) solid var(--border-brand); color: #00D88B; }
+.btn-outline:hover     { background: #EDFFF8; border-color: var(--border-brand-hover); color: #00C075; } /* 50 / 600 */
+.btn-outline:active    { background: #D5FFF0; border-color: #00965F; color: #00965F; } /* 100 / 700 */
+.btn-outline:disabled  { border-color: #AEFFE2; color: #AEFFE2; }
+```
+
+### 4.3 Bezel
+Solid fill similar to Flat but slightly deeper/darker rest state, used for a more "pressed" or tactile look.
+```css
+.btn-bezel            { background: #00C075; color: #FFFFFF; }  /* 600 */
+.btn-bezel:hover       { background: #00A868; }
+.btn-bezel:active      { background: #00965F; }  /* 700 */
+.btn-bezel:disabled    { background: #AEFFE2; color: #FFFFFF; opacity: 0.7; }
+```
+
+**Shared button tokens**
+```css
+--btn-radius: var(--radius-md); /* 10px */
+--btn-padding-y: 10px;
+--btn-padding-x: 16px;
+--btn-font-weight: 600;
+```
+
+---
+
+## 6. Cards & Components
+
+### 5.1 Stat Card (e.g. "Customers")
+- Gradient background (Emerald 500 → 800)
+- White label text (uppercase or medium weight, small size)
+- Large bold number, white
+- Small trend arrow icon inline with the number
+- Supporting caption text in translucent white
+
+### 5.2 Calendar Card
+- White background, card shadow + border
+- Grid of day numbers, muted grey text (`Charcoal 300`) for weekday labels
+- Selected day: solid emerald circle background (`500`), white text
+- Range/highlighted day: light emerald circle (`200`), dark text
+- Primary CTA button ("Continue") in Flat style, full width, bottom-aligned
+
+### 5.3 List Card (e.g. "Today")
+- White background, card shadow + border
+- Each list item on a light emerald background pill (`Emerald 100`–`200`)
+- Item title bold, dark text
+- Time/subtext in muted grey below title
+- Avatar stack (overlapping circular avatars) bottom-left of each item
+- Overflow "…" menu icon top-right of each item
+
+### 5.4 Info Box
+Two intensity styles for inline notice/alert bars:
+```css
+.info-box-1 { background: #AEFFE2; } /* Emerald 200 */
+.info-box-2 { background: #70FFCC; } /* Emerald 300 */
+```
+- Icon (e.g. info/lock) in a filled emerald circle on the left
+- Single line of dark text
+- Full-width, rounded corners (`--radius-card` or slightly smaller, ~12px)
+
+---
+
+## 7. Typography (inferred from layout)
+
+```css
+--font-heading: 600-700 weight, dark charcoal/black
+--font-body: 400-500 weight, charcoal 500
+--font-caption: 400 weight, charcoal 300, smaller size
+```
+
+- Section labels (e.g. "Color Scheme", "Customers", "Calendar") use a smaller, medium-weight label style, often muted grey when not the primary heading.
+- Large numeric stats use a bold, large display size (e.g. "1.553").
+
+---
+
+## 8. Usage Notes
+
+- **Base/brand color** is Emerald 500 (`#00D88B`) — treat as the single source of truth for primary actions.
+- Lighter steps (50–300) are reserved for backgrounds, hover fills, and subtle highlights — never for text on white.
+- Darker steps (700–950) are reserved for text-on-light-background use or deep gradient ends — avoid using as large fill areas except in gradients/hero cards.
+- Secondary palette (Yellow/Green/Red) should be reserved for status/semantic meaning (warning, success, error) rather than general UI decoration.
