@@ -195,7 +195,7 @@
                             Central Luzon State University
                         </p>
                         <h1 class="brand-title text-[13.5px] font-bold text-[#394056] leading-tight truncate">
-                            Course Syllabus Management System
+                            Course Syllabus Management
                         </h1>
                     </div>
                 </div>
@@ -248,6 +248,47 @@
     </div>
 
     <style>
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: -12%;
+            z-index: -1;
+            pointer-events: none;
+            background:
+                radial-gradient(620px 620px at 18% 15%, rgba(0, 216, 139, 0.25) 0%, transparent 60%),
+                radial-gradient(520px 520px at 88% 8%,  rgba(49, 151, 214, 0.15) 0%, transparent 60%),
+                radial-gradient(680px 680px at 78% 78%, rgba(112, 255, 204, 0.25) 0%, transparent 60%),
+                radial-gradient(460px 460px at 8% 88%,  rgba(174, 223, 255, 0.15) 0%, transparent 60%),
+                radial-gradient(520px 520px at 48% 45%, rgba(43, 253, 176, 0.13) 0%, transparent 60%);
+            filter: blur(70px) saturate(115%);
+            animation: drift 26s ease-in-out infinite alternate;
+        }
+
+        @keyframes drift {
+            0%   { transform: translate3d(0, 0, 0) scale(1); }
+            50%  { transform: translate3d(-2.5%, 2%, 0) scale(1.06); }
+            100% { transform: translate3d(2.5%, -2%, 0) scale(1); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            body::before { animation: none; }
+        }
+
+        /* Fine grid texture on top of the blob glow — adds tactile detail without competing with it */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            background-image:
+                repeating-linear-gradient(0deg,  transparent, transparent 5px, rgba(6, 117, 78, 0.03) 5px, rgba(6, 117, 78, 0.03) 6px, transparent 6px, transparent 15px),
+                repeating-linear-gradient(90deg, transparent, transparent 5px, rgba(6, 117, 78, 0.03) 5px, rgba(6, 117, 78, 0.03) 6px, transparent 6px, transparent 15px),
+                repeating-linear-gradient(0deg,  transparent, transparent 10px, rgba(57, 64, 86, 0.016) 10px, rgba(57, 64, 86, 0.016) 11px, transparent 11px, transparent 30px),
+                repeating-linear-gradient(90deg, transparent, transparent 10px, rgba(57, 64, 86, 0.016) 10px, rgba(57, 64, 86, 0.016) 11px, transparent 11px, transparent 30px);
+        }
+
         /* Oswald for the brand mark and nav section labels — everything else stays the body font */
         .brand-title {
             font-family: 'Oswald', sans-serif;
@@ -307,7 +348,7 @@
             font-weight: 700;
             border-left: 3px solid #00D88B;
             border-radius: 0;
-            background: linear-gradient(90deg, #85e8c2 0%, rgba(237,255,248,0) 85%);
+            background: linear-gradient(90deg, #EDFFF8 0%, rgba(237,255,248,0) 85%);
         }
 
         .nav-link.active .nav-icon {
@@ -375,5 +416,3 @@
     </script>
 </body>
 </html>
-
-

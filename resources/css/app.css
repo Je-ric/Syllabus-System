@@ -66,14 +66,13 @@ body {
         system-ui,
         -apple-system,
         sans-serif;
-    background: radial-gradient(
-        1100px 600px at 15% -10%,
-        #e0f2fe 0%,
-        #f8fafc 45%,
-        #f1f5f9 100%
-    );
     color: var(--brand-ink);
 }
+
+.oswald {
+    font-family: "Oswald", sans-serif;
+}
+
 
 .green-grad {
     background: var(--green-grad);
