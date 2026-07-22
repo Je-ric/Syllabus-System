@@ -20,6 +20,9 @@ below (see the map at the bottom).
 | 10 | `10-debugging-guide.md` | Step-by-step debugging process and tool reference |
 | 11 | `11-common-errors-log.md` | Running log of specific errors hit and their fixes (add new entries here) |
 | 12 | `12-deployment-checklist.md` | Pre-launch checklist |
+| 13 | `13-condition-completeness-and-error-handling.md` | Exhaustive condition coverage, conflicting conditions, all error possibilities, missing/null/empty data handling |
+| 14 | `14-input-validation-guide.md` | What to validate, where, error response shape, frontend display rules, null/missing/wrong-type handling |
+| 13 | `13-condition-completeness-and-edge-cases.md` | Method for making sure conditions are exhaustive and non-conflicting — null/empty data, boundaries, state machines, error paths, concurrency |
 
 ## Where old content went (dedup map)
 

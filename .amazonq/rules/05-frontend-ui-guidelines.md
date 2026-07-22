@@ -14,7 +14,7 @@ HTML5, CSS3, Tailwind CSS, JavaScript (ES2023+), Alpine.js, Laravel Blade, Livew
 
 ## Forms
 - Easy to scan: logical grouping, clear labels, required-field indicators.
-- Validation errors are specific and appear near the field they relate to.
+- Validation errors are specific, field-level, and appear near the field they relate to — for null/missing/wrong input, show what's wrong and what's expected (see `14-input-validation-guide.md` for the full display rules and the null/missing/wrong-type matrix).
 - Full keyboard navigation supported.
 - Auto-compute derived fields where possible (e.g. age from birthdate input).
 - Cascading address fields (province → city → barangay) driven by JSON data.
