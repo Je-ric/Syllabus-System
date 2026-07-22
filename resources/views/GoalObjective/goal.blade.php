@@ -27,6 +27,7 @@
                     message="You have the Dean role but are not assigned to any college. Contact an administrator to be assigned." />
             @endif
 
+            {{-- College selector — only shown when admin has multiple colleges --}}
             @if ($colleges->count() > 1)
                 <x-layout.card-section title="Select College" icon="bx-buildings" class="max-w-md">
                     <form method="GET" action="{{ route('goal.index') }}">
@@ -54,6 +55,7 @@
                 </x-layout.card-section>
             @endif
 
+            {{-- Goals list --}}
             <x-layout.card-section
                 title="Goals"
                 icon="bx-target-lock"
@@ -61,56 +63,79 @@
                 :count="$selectedCollegeId && $goals->count() ? $goals->count() : null">
 
                 @if ($noAssignment)
-                    <x-feedback-status.empty-state icon="bx-target-lock" title="No college assigned"
+                    <x-feedback-status.empty-state
+                        icon="bx-target-lock"
+                        title="No college assigned"
                         message="You are not assigned to any college. Contact an administrator." />
+
                 @elseif (!$selectedCollegeId)
-                    <x-feedback-status.empty-state icon="bx-target-lock" title="No college selected"
+                    <x-feedback-status.empty-state
+                        icon="bx-buildings"
+                        title="No college selected"
                         message="Select a college above to view its goals." />
+
                 @elseif ($goals->isEmpty())
-                    <x-feedback-status.empty-state icon="bx-target-lock" title="No goals yet"
-                        message="No goals have been set for this college." />
+                    <x-feedback-status.empty-state
+                        icon="bx-target-lock"
+                        title="No goals yet"
+                        message="No goals have been set for this college. Click Add Goal to get started.">
+                        <x-ui.button variant="add-button"
+                            onclick="document.getElementById('addGoalModal').showModal()">
+                            <i class="bx bx-plus text-base leading-none"></i> Add Goal
+                        </x-ui.button>
+                    </x-feedback-status.empty-state>
+
                 @else
                     <x-table.container>
                         <x-table.table>
                             <x-table.head>
-                                <x-table.row>
-                                    <x-table.th class="w-20">Code</x-table.th>
+                                <tr>
+                                    <x-table.th class="w-24">Code</x-table.th>
                                     <x-table.th>Goal Description</x-table.th>
-                                    <x-table.th align="center" class="w-24">Actions</x-table.th>
-                                </x-table.row>
+                                    <x-table.th align="right" class="w-28">Actions</x-table.th>
+                                </tr>
                             </x-table.head>
                             <x-table.body>
                                 @foreach ($goals as $goal)
-                                    <x-table.row hover>
+                                    <tr class="border-b border-[#E3E8EB] last:border-0 hover:bg-[#F9FAFA] transition-colors duration-150">
+
+                                        {{-- Code badge --}}
                                         <x-table.td class="align-top">
                                             <x-ui.code-badge>{{ $goal->college_goals_code }}</x-ui.code-badge>
                                         </x-table.td>
-                                        <x-table.td class="text-[#3f3f46] leading-relaxed align-top">
-                                            {{ $goal->goal_text }}
+
+                                        {{-- Goal text --}}
+                                        <x-table.td class="align-top">
+                                            <p class="text-[13px] text-[#394056] leading-relaxed">
+                                                {{ $goal->goal_text }}
+                                            </p>
                                         </x-table.td>
-                                        <x-table.td align="center" class="align-top">
-                                            <div class="inline-flex items-center gap-1">
-                                                <button type="button"
+
+                                        {{-- Actions --}}
+                                        <x-table.td align="right" class="align-top">
+                                            <div class="inline-flex items-center gap-0.5">
+                                                <x-ui.button variant="table-light-edit"
                                                     onclick="document.getElementById('updateGoalModal_{{ $goal->id }}').showModal()"
-                                                    class="p-2 rounded-lg text-[#a1a1aa] hover:text-[#2563eb] hover:bg-[#eff6ff] transition-colors"
                                                     title="Edit goal">
-                                                    <i class="bx bx-edit text-base leading-none"></i>
-                                                </button>
-                                                <button type="button"
+                                                    <i class="bx bx-edit leading-none"></i>
+                                                </x-ui.button>
+                                                <x-ui.button variant="table-light-delete"
                                                     onclick="document.getElementById('deleteGoalModal_{{ $goal->id }}').showModal()"
-                                                    class="p-2 rounded-lg text-[#a1a1aa] hover:text-[#e11d48] hover:bg-[#fff1f2] transition-colors"
                                                     title="Delete goal">
-                                                    <i class="bx bx-trash text-base leading-none"></i>
-                                                </button>
+                                                    <i class="bx bx-trash leading-none"></i>
+                                                </x-ui.button>
                                             </div>
                                         </x-table.td>
-                                    </x-table.row>
+
+                                    </tr>
                                 @endforeach
                             </x-table.body>
                         </x-table.table>
                     </x-table.container>
                 @endif
+
             </x-layout.card-section>
+
         </div>
     </x-layout.panel>
 

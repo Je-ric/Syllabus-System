@@ -8,12 +8,14 @@
         {{-- Section header --}}
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-                <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-emerald-100 ring-1 ring-emerald-200">
-                    <i class="bx bx-medal text-emerald-700 text-sm"></i>
+                <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg border"
+                         style="background:#EDFFF8; border-color:#AEFFE2;">
+                    <i class="bx bx-medal text-[13px] leading-none" style="color:#00965F;"></i>
                 </span>
-                <h3 class="text-[13px] font-bold text-slate-700">Program Educational Objectives</h3>
-                <span class="inline-flex items-center justify-center min-w-[1.4rem] h-5 px-1.5 rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-bold ring-1 ring-emerald-200"
-                    x-text="peos.filter(p => p.id).length"></span>
+                <h3 class="text-[13px] font-bold text-[#394056]">Program Educational Objectives</h3>
+                <span class="inline-flex items-center justify-center min-w-5.5 h-5.5 px-1.5 rounded-full text-[10px] font-bold border"
+                      style="background:#D5FFF0; color:#06754E; border-color:#AEFFE2;"
+                      x-text="peos.filter(p => p.id).length"></span>
             </div>
         </div>
 
@@ -228,7 +230,7 @@
                     title: 'Delete PEO?',
                     message: 'This PEO will be permanently removed and all codes will be re-sequenced.',
                     confirmLabel: 'Delete',
-                    confirmClass: 'bg-rose-600 hover:bg-rose-700 text-white'
+                    confirmClass: 'bg-[#D21B14] hover:bg-[#E52F28] text-white'
                 });
                 if (!ok) return;
                 const form = document.getElementById('peo-delete-form-' + peo.id);
@@ -244,7 +246,7 @@
                     title: 'Save all PEOs?',
                     message: 'This will save all new and modified PEOs and re-sequence codes.',
                     confirmLabel: 'Save All',
-                    confirmClass: 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                    confirmClass: 'bg-[#00965F] hover:bg-[#06754E] text-white'
                 });
                 if (!ok) return;
 

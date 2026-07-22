@@ -1,32 +1,29 @@
 <x-modal.dialog id="deleteCourseModal_{{ $course->id }}" maxWidth="max-w-md" width="w-11/12" variant="delete">
     <x-modal.header modalId="deleteCourseModal_{{ $course->id }}" variant="delete">
-        <span class="text-[#9f1239]">Delete Course</span>
+        <span>Delete Course</span>
     </x-modal.header>
 
     <x-modal.body>
         <div class="space-y-4">
-            <p class="text-[13px] text-[#475569]">Are you sure you want to delete this course?</p>
 
-            <div class="rounded-xl border border-rose-200 bg-rose-50 p-4 space-y-2">
-                <div class="flex items-center justify-between">
-                    <span class="text-[11px] font-bold uppercase tracking-[0.12em] text-rose-400">Code</span>
-                    <span class="font-mono text-[13px] font-bold text-rose-600">{{ $course->course_code }}</span>
-                </div>
-                <div class="flex items-center justify-between">
-                    <span class="text-[11px] font-bold uppercase tracking-[0.12em] text-rose-400">Title</span>
-                    <span class="text-[13px] text-rose-700 text-right max-w-[60%]">{{ $course->course_title }}</span>
-                </div>
-                <div class="flex items-center justify-between">
-                    <span class="text-[11px] font-bold uppercase tracking-[0.12em] text-rose-400">Program</span>
-                    <span class="text-[13px] text-rose-700">{{ $course->program?->name ?? '—' }}</span>
-                </div>
-                @php $syllabusCount = $course->syllabi()->count(); @endphp
-                @if ($syllabusCount > 0)
-                    <div class="flex items-center justify-between">
-                        <span class="text-[11px] font-bold uppercase tracking-[0.12em] text-rose-400">Linked Syllabi</span>
-                        <span class="text-[13px] font-semibold text-rose-600">{{ $syllabusCount }}</span>
+            {{-- Course identity --}}
+            <div class="flex items-start gap-3">
+                <div class="min-w-0">
+                    <p class="text-[13px] font-semibold text-[#1D2836] leading-snug">{{ $course->course_title }}</p>
+                    <div class="flex items-center gap-2 mt-1 flex-wrap">
+                        <span class="font-mono text-[11px] font-bold text-[#4F5D6B] bg-[#F1F3F5] border border-[#E3E8EB] px-2 py-0.5 rounded-md">{{ $course->course_code }}</span>
+                        @if ($course->program)
+                            <span class="text-[12px] text-[#93A1AF]">{{ $course->program->name }}</span>
+                        @endif
                     </div>
-                @endif
+                    @php $syllabusCount = $course->syllabi()->count(); @endphp
+                    @if ($syllabusCount > 0)
+                        <p class="mt-1.5 text-[12px] text-[#93A1AF]">
+                            <i class="bx bx-link text-[11px]"></i>
+                            {{ $syllabusCount }} {{ Str::plural('syllabus', $syllabusCount) }} linked
+                        </p>
+                    @endif
+                </div>
             </div>
 
             <x-feedback-status.alert type="error" :showTitle="false">

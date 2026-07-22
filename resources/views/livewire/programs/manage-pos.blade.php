@@ -7,12 +7,14 @@
     {{-- Section header --}}
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
-            <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-blue-100 ring-1 ring-blue-200">
-                <i class="bx bx-target-lock text-blue-700 text-sm"></i>
-            </span>
-            <h3 class="text-[13px] font-bold text-slate-700">Program Outcomes & PEO Mapping</h3>
-            <span class="inline-flex items-center justify-center min-w-[1.4rem] h-5 px-1.5 rounded-full bg-blue-100 text-blue-700 text-[11px] font-bold ring-1 ring-blue-200"
-                x-text="pos.filter(p => p.id).length"></span>
+            <span class="inline-flex items-center justify-center w-7 h-7 rounded-[8px] border"
+                         style="background:#DAF1FF; border-color:#AEDFFF;">
+                    <i class="bx bx-target-lock text-[13px] leading-none" style="color:#194C6E;"></i>
+                </span>
+                <h3 class="text-[13px] font-bold text-[#394056]">Program Outcomes & PEO Mapping</h3>
+                <span class="inline-flex items-center justify-center min-w-5.5 h-5.5 px-1.5 rounded-full text-[10px] font-bold border"
+                      style="background:#DAF1FF; color:#194C6E; border-color:#AEDFFF;"
+                      x-text="pos.filter(p => p.id).length"></span>
         </div>
     </div>
 
@@ -157,11 +159,6 @@
                                             ? 'border-emerald-400 bg-emerald-100 text-emerald-800 ring-1 ring-emerald-300 shadow-sm'
                                             : 'border-slate-200 bg-white text-slate-500 hover:border-emerald-300 hover:bg-emerald-50/60 hover:text-emerald-700'"
                                     class="inline-flex items-center gap-1.5 cursor-pointer rounded-lg border px-2.5 py-1.5 text-[12px] font-semibold transition-all duration-100 select-none">
-                                    {{-- <input type="checkbox"
-                                        :checked="isPoMappedToPeo(po.id, peo.id)"
-                                        @change="toggleMapping(po.id, peo.id, $event.target.checked)"
-                                        :disabled="isMappingPending(po.id, peo.id)"
-                                        class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-200 focus:ring-1"> --}}
                                         <x-form.checkbox
                                             ::checked="isPoMappedToPeo(po.id, peo.id)"
                                             x-on:change="toggleMapping(po.id, peo.id, $event.target.checked)"
@@ -174,9 +171,6 @@
                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                                         </svg>
                                     </template>
-                                    {{-- <template x-if="isPoMappedToPeo(po.id, peo.id) && !isMappingPending(po.id, peo.id)">
-                                        <i class="bx bx-check text-xs text-emerald-600"></i>
-                                    </template> --}}
                                 </label>
                             </template>
                         </div>
@@ -350,7 +344,7 @@
                         title: 'Delete PO?',
                         message: 'This PO will be permanently removed. This action cannot be undone.',
                         confirmLabel: 'Delete',
-                        confirmClass: 'bg-rose-600 hover:bg-rose-700 text-white'
+                        confirmClass: 'bg-[#D21B14] hover:bg-[#E52F28] text-white'
                     });
                     if (!ok) return;
                     const form = document.getElementById('po-delete-form-' + po.id);
@@ -366,7 +360,7 @@
                         title: 'Save all POs?',
                         message: 'This will save all new and modified POs and re-sequence codes.',
                         confirmLabel: 'Save All',
-                        confirmClass: 'bg-blue-600 hover:bg-blue-700 text-white'
+                        confirmClass: 'bg-[#194C6E] hover:bg-[#3197D6] text-white'
                     });
                     if (!ok) return;
 

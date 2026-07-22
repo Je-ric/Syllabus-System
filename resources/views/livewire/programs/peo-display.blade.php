@@ -1,6 +1,7 @@
 {{--
     peo-display.blade.php  (read-only)
     Shown at the top of the PO tab as a reference panel.
+    determine if being used, delete if not.
 --}}
 <div>
     <div class="flex items-center gap-2 mb-3">

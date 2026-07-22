@@ -32,25 +32,20 @@
 
         {{-- Program info chip --}}
         @if ($program)
-            <div class="flex items-center gap-3 rounded-[14px] border border-[#e4e4e7] bg-[#fafafa] px-4 py-3">
-                <span class="flex items-center justify-center w-8 h-8 rounded-[10px] bg-[#dcfce7] shrink-0">
-                    <i class="bx bx-book-open text-[#16a34a] text-base leading-none"></i>
+            <div class="flex items-center gap-3 rounded-[14px] border border-[#E3E8EB] bg-[#F9FAFA] px-4 py-3">
+                <span class="flex items-center justify-center w-8 h-8 rounded-[10px] bg-[#AEFFE2] shrink-0">
+                    <i class="bx bx-book-open text-[#00965F] text-base leading-none"></i>
                 </span>
                 <div class="min-w-0">
-                    <p class="text-[11px] font-bold uppercase tracking-[0.1em] text-[#a1a1aa]">Program</p>
-                    <p class="text-[13px] font-semibold text-[#09090b] truncate">{{ $program->name }}</p>
+                    <p class="text-[11px] font-bold uppercase tracking-[0.1em] text-[#93A1AF]">Program</p>
+                    <p class="text-[13px] font-semibold text-[#1D2836] truncate">{{ $program->name }}</p>
                 </div>
             </div>
         @endif
 
         {{-- ── Section: Course Details ──────────────────────────────────────── --}}
-        <div class="rounded-[16px] border border-[#e4e4e7] bg-white overflow-hidden"
-             style="box-shadow: 0 1px 6px rgba(0,0,0,0.04);">
-            <div class="px-5 py-3 border-b border-[#e4e4e7] bg-[#f4f4f5]">
-                <p class="text-[11px] font-bold uppercase tracking-[0.1em] text-[#52525b]">Course Details</p>
-            </div>
-
-            <div class="px-5 pt-4 pb-5 space-y-4">
+        <x-layout.card-section title="Course Details" icon="bx-book">
+            <div class="space-y-4">
                 {{-- Code + Title --}}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <x-form.field label="Course Code" for="code" :isRequired="true" error="code">
@@ -82,9 +77,9 @@
                             $hasSyllabi = isset($course) && $course->syllabi()->exists();
                         @endphp
                         @if ($hasSyllabi)
-                            <div class="flex items-start gap-2 rounded-[10px] border border-[#fde68a] bg-[#fffbeb] px-3 py-2 mb-1">
-                                <i class="bx bx-lock text-[#d97706] text-sm mt-0.5 shrink-0"></i>
-                                <p class="text-[11px] text-[#92400e] leading-snug">Locked — delete all syllabi first to change this.</p>
+                            <div class="flex items-start gap-2 rounded-[10px] border border-[#FFE9B5] bg-[#FFF6E2] px-3 py-2 mb-1">
+                                <i class="bx bx-lock text-[#F5B126] text-sm mt-0.5 shrink-0"></i>
+                                <p class="text-[11px] text-[#875200] leading-snug">Locked — delete all syllabi first to change this.</p>
                             </div>
                         @endif
                         <x-form.radio
@@ -96,7 +91,7 @@
                             <input type="hidden" name="has_lec_lab" value="{{ $labValue }}">
                         @endif
                         @error('has_lec_lab')
-                            <p class="text-xs text-[#e11d48] flex items-center gap-1 mt-1">
+                            <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
                                 <i class="bx bx-error-circle"></i> {{ $message }}
                             </p>
                         @enderror
@@ -163,21 +158,16 @@
                     </x-form.field>
                 </div>
             </div>
-        </div>
+        </x-layout.card-section>
 
         {{-- ── Section: PO Mapping ──────────────────────────────────────────── --}}
         @if ($program)
-            <div class="rounded-[16px] border border-[#e4e4e7] bg-white overflow-hidden"
-                 style="box-shadow: 0 1px 6px rgba(0,0,0,0.04);">
-
-                <div class="px-5 py-3 border-b border-[#e4e4e7] bg-[#f4f4f5] flex items-center justify-between gap-3">
-                    <p class="text-[11px] font-bold uppercase tracking-[0.1em] text-[#52525b]">
-                        Program Outcomes Mapping
-                    </p>
-                    <span class="text-[11px] text-[#a1a1aa] whitespace-nowrap shrink-0">
-                        <strong class="text-[#52525b]">IED:</strong> I – Introductory · E – Enabling · D – Demonstrating
+            <x-layout.card-section title="Program Outcomes Mapping" icon="bx-target-lock" :padded="false">
+                <x-slot:actions>
+                    <span class="text-[11px] text-[#93A1AF] whitespace-nowrap hidden sm:inline">
+                        <strong class="text-[#4F5D6B]">IED:</strong> I – Introductory · E – Enabling · D – Demonstrating
                     </span>
-                </div>
+                </x-slot:actions>
 
                 @if ($programOutcomes->isEmpty())
                     <div class="p-5">
@@ -199,7 +189,7 @@
                             <x-table.body>
                                 @foreach ($programOutcomes as $outcome)
                                     <x-table.row hover>
-                                        <x-table.td class="font-mono font-bold text-[#18181b]">
+                                        <x-table.td class="font-mono font-bold text-[#1D2836]">
                                             {{ $outcome->po_code }}
                                         </x-table.td>
                                         <x-table.td class="leading-relaxed">
@@ -218,11 +208,11 @@
                             </x-table.body>
                         </x-table.table>
                     </x-table.container>
-                    <p class="px-5 py-3 text-[11px] text-[#a1a1aa] border-t border-[#f4f4f5]">
+                    <p class="px-4 py-3 text-[11px] text-[#93A1AF] border-t border-[#F1F3F5]">
                         Leave blank if this outcome does not apply to this course.
                     </p>
                 @endif
-            </div>
+            </x-layout.card-section>
         @endif
 
         {{-- Form actions --}}

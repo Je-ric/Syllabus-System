@@ -26,26 +26,27 @@
 
                 {{-- Year heading --}}
                 <div class="flex items-center gap-3 mb-4">
-                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-full
-                                 bg-[#16a34a] text-white text-[13px] font-bold shrink-0">
+                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-full shrink-0
+                                 bg-[linear-gradient(180deg,#00C075_0%,#06754E_100%)] text-white text-[13px] font-bold">
                         {{ $year ?? '?' }}
                     </span>
-                    <h3 class="text-[13px] font-bold text-[#0f172a] uppercase tracking-[0.12em]">
+                    <h3 class="text-[13px] font-bold text-[#394056] uppercase tracking-[0.12em]">
                         Year {{ $year ?? 'N/A' }}
                     </h3>
-                    <div class="flex-1 h-px bg-[#e2e8f0]"></div>
+                    <div class="flex-1 h-px bg-[#E3E8EB]"></div>
                 </div>
 
                 @forelse ($semesters as $semester => $courses)
-                    <div class="mb-5 rounded-xl border border-[#e2e8f0] bg-white overflow-hidden" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
+                    <div class="mb-5 rounded-[12px] border border-[#E3E8EB] bg-white overflow-hidden"
+                         style="box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06);">
 
                         {{-- Semester sub-header --}}
-                        <div class="px-5 py-2.5 border-b border-[#e2e8f0] bg-[#f8fafc] flex items-center gap-2">
-                            <span class="w-1.5 h-1.5 rounded-full bg-[#16a34a] shrink-0"></span>
-                            <h4 class="text-[11px] font-bold text-[#475569] uppercase tracking-[0.12em]">
+                        <div class="px-5 py-2.5 border-b border-[#E3E8EB] bg-[#F9FAFA] flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#00965F] shrink-0"></span>
+                            <h4 class="text-[11px] font-bold text-[#394056] uppercase tracking-[0.12em]">
                                 Semester {{ $semester ?? 'N/A' }}
                             </h4>
-                            <span class="ml-auto text-[13px] text-[#94a3b8]">
+                            <span class="ml-auto text-[12px] text-[#93A1AF]">
                                 {{ count($courses) }} course(s)
                             </span>
                         </div>
@@ -53,32 +54,32 @@
                         <div class="overflow-x-auto">
                             <table class="w-full text-sm border-collapse">
                                 <thead>
-                                    <tr class="bg-[#f8fafc] border-b border-[#e2e8f0]">
-                                        <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569]">Course</th>
-                                        <th class="px-4 py-3 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] w-16">Units</th>
-                                        <th class="px-4 py-3 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] w-24">Type</th>
-                                        <th class="px-4 py-3 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] w-32">Class Hours</th>
-                                        <th class="px-4 py-3 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569]">Action</th>
+                                    <tr class="bg-[#F1F3F5] border-b border-[#E3E8EB]">
+                                        <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-[0.12em] text-[#72809E]">Course</th>
+                                        <th class="px-4 py-3 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-[#72809E] w-16">Units</th>
+                                        <th class="px-4 py-3 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-[#72809E] w-24">Type</th>
+                                        <th class="px-4 py-3 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-[#72809E] w-32">Class Hours</th>
+                                        <th class="px-4 py-3 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-[#72809E]">Action</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-[#e2e8f0]">
+                                <tbody class="divide-y divide-[#E3E8EB]">
                                     @foreach ($courses as $course)
                                         @php $hasPo = $course->programOutcomes()->exists(); @endphp
-                                        <tr class="hover:bg-[#f0fdf4] transition-colors group">
+                                        <tr class="hover:bg-[#EDFFF8] transition-colors duration-150 group">
 
                                             {{-- Course code + title --}}
                                             <td class="px-5 py-3">
-                                                <span class="font-mono font-semibold text-[#0f172a] text-[13px]">
+                                                <span class="font-mono font-semibold text-[#394056] text-[13px]">
                                                     {{ $course->course_code }}
                                                 </span>
-                                                <span class="text-[#94a3b8] mx-1">—</span>
-                                                <span class="text-[13px] text-[#475569]">{{ $course->course_title }}</span>
+                                                <span class="text-[#C1C8D4] mx-1">—</span>
+                                                <span class="text-[13px] text-[#72809E]">{{ $course->course_title }}</span>
                                             </td>
 
                                             {{-- Units --}}
                                             <td class="px-4 py-3 text-center">
                                                 <span class="inline-flex items-center justify-center w-7 h-7 rounded-full
-                                                             bg-[#f8fafc] text-[#0f172a] text-[13px] font-bold ring-1 ring-[#e2e8f0]">
+                                                             bg-[#D5FFF0] text-[#06754E] text-[13px] font-bold ring-1 ring-[#00965F]">
                                                     {{ $course->credit_units }}
                                                 </span>
                                             </td>
@@ -96,13 +97,13 @@
                                             <td class="px-4 py-3 text-center">
                                                 <div class="flex flex-col items-center gap-0.5 text-[12px]">
                                                     @if ($course->lec_class_hours)
-                                                        <span class="text-emerald-700 font-medium">LEC: {{ $course->lec_class_hours }}</span>
+                                                        <span class="text-[#06754E] font-medium">LEC: {{ $course->lec_class_hours }}</span>
                                                     @endif
                                                     @if ($course->has_lec_lab && $course->lab_class_hours)
-                                                        <span class="text-blue-700 font-medium">LAB: {{ $course->lab_class_hours }}</span>
+                                                        <span class="text-[#143D57] font-medium">LAB: {{ $course->lab_class_hours }}</span>
                                                     @endif
                                                     @if (!$course->lec_class_hours && !$course->lab_class_hours)
-                                                        <span class="text-slate-300">—</span>
+                                                        <span class="text-[#C1C8D4]">—</span>
                                                     @endif
                                                 </div>
                                             </td>

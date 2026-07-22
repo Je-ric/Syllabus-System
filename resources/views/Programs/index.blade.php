@@ -79,7 +79,7 @@
                     {{-- ── PO + Mapping Tab ───────────────────────────────────── --}}
                     <x-slot name="slot_po">
                         <x-feedback-status.alert
-                            type="default"
+                            type="info"
                             :show-title="false"
                             class="mb-4">
                             By the time of graduation, students of
