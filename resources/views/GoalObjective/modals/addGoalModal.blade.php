@@ -1,4 +1,4 @@
-<x-modal.dialog id="addGoalModal" maxWidth="max-w-xl" width="w-11/12">
+<x-modal.dialog id="addGoalModal" maxWidth="max-w-xl" width="w-11/12" variant="add">
     <x-modal.header modalId="addGoalModal" variant="add">
         Add New Goal
     </x-modal.header>

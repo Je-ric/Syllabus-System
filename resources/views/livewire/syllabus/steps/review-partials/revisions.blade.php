@@ -92,7 +92,7 @@
             class="border-t border-[#e2e8f0] p-5">
 
             {{-- ── Revision add/edit modal ── --}}
-            <x-modal.dialog id="revision-modal" maxWidth="max-w-md">
+            <x-modal.dialog id="revision-modal" maxWidth="max-w-md" variant="edit">
                 <x-modal.header modalId="revision-modal" variant="edit">
                     <span x-text="editingId ? 'Edit Revision' : 'Add Revision'"></span>
                 </x-modal.header>

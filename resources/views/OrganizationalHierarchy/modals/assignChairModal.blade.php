@@ -4,7 +4,7 @@
     'potentialChairs' => [],
 ])
 
-<x-modal.dialog id="assignChairModal-{{ $departmentId }}" maxWidth="max-w-md" width="w-11/12" maxHeight="max-h-[90vh]">
+<x-modal.dialog id="assignChairModal-{{ $departmentId }}" maxWidth="max-w-md" width="w-11/12" maxHeight="max-h-[90vh]" variant="assign">
     <form method="POST" action="{{ route('organizational.assign-chair') }}" class="flex flex-col">
         @csrf
         <input type="hidden" name="department_id" value="{{ $departmentId }}">

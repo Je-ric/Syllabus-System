@@ -1,4 +1,4 @@
-<x-modal.dialog id="cancelEditModal" maxWidth="max-w-sm" width="w-11/12">
+<x-modal.dialog id="cancelEditModal" maxWidth="max-w-sm" width="w-11/12" variant="warning">
     <x-modal.header modalId="cancelEditModal" variant="warning">
         <span class="text-amber-800">Discard Changes?</span>
     </x-modal.header>

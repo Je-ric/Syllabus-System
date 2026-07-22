@@ -1,4 +1,4 @@
-<x-modal.dialog id="updateDepartmentModal_{{ $dept->id }}" maxWidth="max-w-md" width="w-11/12">
+<x-modal.dialog id="updateDepartmentModal_{{ $dept->id }}" maxWidth="max-w-md" width="w-11/12" variant="edit">
     <x-modal.header modalId="updateDepartmentModal_{{ $dept->id }}" variant="edit">
         <div>
             <p class="text-[15px] font-bold text-[#0f172a]">Edit Department</p>

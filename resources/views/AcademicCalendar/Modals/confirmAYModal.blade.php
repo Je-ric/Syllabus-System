@@ -1,4 +1,4 @@
-<x-modal.dialog id="confirmAYModal" maxWidth="max-w-md" width="w-11/12">
+<x-modal.dialog id="confirmAYModal" maxWidth="max-w-md" width="w-11/12" variant="confirm">
     <x-modal.header modalId="confirmAYModal" variant="confirm">
         <span class="text-green-800">Confirm Academic Year</span>
     </x-modal.header>

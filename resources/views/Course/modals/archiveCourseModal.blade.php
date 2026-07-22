@@ -1,4 +1,4 @@
-<x-modal.dialog id="archiveCourseModal_{{ $course->id }}" maxWidth="max-w-md" width="w-11/12" variant="warning">
+<x-modal.dialog id="archiveCourseModal_{{ $course->id }}" maxWidth="max-w-md" width="w-11/12" variant="archive">
     <x-modal.header modalId="archiveCourseModal_{{ $course->id }}" variant="archive">
         <span class="text-amber-800">Archive Course</span>
     </x-modal.header>

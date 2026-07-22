@@ -176,6 +176,7 @@
             id="confirmAYModal"
             maxWidth="max-w-lg"
             width="w-11/12"
+            variant="confirm"
             x-data
             x-on:open-confirm-ay-modal.window="$el.showModal()"
             x-bind:open="$wire.showConfirmModal">
@@ -235,7 +236,7 @@
 
     {{-- ── Cancel-edit modal ───────────────────────────────────────────────── --}}
     @if ($isEdit)
-        <x-modal.dialog id="cancelEditModal" maxWidth="max-w-md" width="w-11/12"
+        <x-modal.dialog id="cancelEditModal" maxWidth="max-w-md" width="w-11/12" variant="warning"
             x-data
             x-on:open-cancel-edit-modal.window="$el.showModal()">
 

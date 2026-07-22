@@ -1,4 +1,4 @@
-<x-modal.dialog id="updateObjectiveModal_{{ $objective->id }}" maxWidth="max-w-lg" width="w-11/12">
+<x-modal.dialog id="updateObjectiveModal_{{ $objective->id }}" maxWidth="max-w-lg" width="w-11/12" variant="edit">
     <x-modal.header modalId="updateObjectiveModal_{{ $objective->id }}" variant="edit">
         Edit Objective
     </x-modal.header>

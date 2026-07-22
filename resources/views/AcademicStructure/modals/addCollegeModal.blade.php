@@ -1,4 +1,4 @@
-<x-modal.dialog id="addCollegeModal" maxWidth="max-w-md" width="w-11/12">
+<x-modal.dialog id="addCollegeModal" maxWidth="max-w-md" width="w-11/12" variant="add">
     <x-modal.header modalId="addCollegeModal" variant="add">
         <div>
             <p class="text-[15px] font-bold text-[#0f172a]">Add New College</p>

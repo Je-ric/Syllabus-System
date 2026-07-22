@@ -5,7 +5,7 @@
     };
 @endphp
 
-<x-modal.dialog :id="$modalId" maxWidth="max-w-lg" width="w-11/12"
+<x-modal.dialog :id="$modalId" maxWidth="max-w-lg" width="w-11/12" variant="roles"
     onclose="this.querySelector('form')?.reset()">
     <form method="POST" action="{{ route('account-approval.assign-role') }}"
             class="flex flex-col h-full"

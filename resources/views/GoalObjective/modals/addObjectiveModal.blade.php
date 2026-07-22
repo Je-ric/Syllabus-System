@@ -1,4 +1,4 @@
-<x-modal.dialog id="addObjectiveModal" maxWidth="max-w-lg" width="w-11/12">
+<x-modal.dialog id="addObjectiveModal" maxWidth="max-w-lg" width="w-11/12" variant="add">
     <x-modal.header modalId="addObjectiveModal" variant="add">
         Add New Objective
     </x-modal.header>

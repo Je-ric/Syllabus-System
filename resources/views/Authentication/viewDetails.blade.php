@@ -221,7 +221,7 @@
                 </div>
 
                 Add modal
-                <x-modal.dialog id="profile-ch-modal" maxWidth="max-w-sm">
+                <x-modal.dialog id="profile-ch-modal" maxWidth="max-w-sm" variant="add">
                     <x-modal.header modalId="profile-ch-modal" variant="add">Add Consultation Hour</x-modal.header>
                     <form method="POST" action="{{ route('profile.consultation.store') }}">
                         @csrf

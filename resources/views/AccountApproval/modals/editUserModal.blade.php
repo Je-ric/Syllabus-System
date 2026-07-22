@@ -8,7 +8,7 @@
     };
 @endphp
 
-<x-modal.dialog :id="$modalId" maxWidth="max-w-lg" width="w-11/12">
+<x-modal.dialog :id="$modalId" maxWidth="max-w-lg" width="w-11/12" variant="edit">
     <form method="POST" action="{{ route('account-approval.edit-user') }}" class="flex flex-col">
         @csrf
         @method('PUT')
