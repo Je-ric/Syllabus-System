@@ -4,8 +4,8 @@
     'desc'  => null,
     'class' => '',
 ])
-
-<div {{ $attributes->merge(['class' => 'w-full border-b bg-white border-[#E3E8EB] ' . $class]) }}>
+{{-- border-b border-[#E3E8EB] --}}
+<div {{ $attributes->merge(['class' => 'w-full bg-transparent ' . $class]) }}>
 
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-4">
 

@@ -10,6 +10,7 @@
     x-data="{ open: false }"
     x-on:open-help-panel.window="open = true"
     x-on:keydown.escape.window="open = false"
+    class="oswald"
 >
     {{-- Panel (no backdrop — intentionally non-blocking) --}}
     <div
@@ -23,7 +24,7 @@
         x-transition:leave-end="opacity-0 translate-x-4"
         role="complementary"
         aria-label="How to use this page"
-        class="fixed inset-y-0 right-0 z-40 flex flex-col bg-white w-full max-w-sm border-l border-[#e4e4e7]"
+        class="fixed inset-y-0 right-0 z-40 flex flex-col bg-white w-full max-w-lg border-l border-[#e4e4e7]"
         style="box-shadow: -4px 0 32px rgba(0,0,0,0.10);"
     >
         {{-- Header --}}

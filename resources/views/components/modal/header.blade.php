@@ -2,36 +2,47 @@
     'class'   => '',
     'modalId' => null,
     'variant' => null,
-    // {{-- add | edit | delete | assign | confirm | warning | approve | reject | restore | disable | archive | roles --}}
+    // add | edit | delete | assign | confirm | warning | approve | reject | restore | disable | archive | roles
 ])
 
 @php
+    /*
+    ┌──────────────────────────────────────────────────────────────────────────┐
+    │  modal.header — Design.md compliant icon chips                           │
+    │  Emerald scale  : add / assign / confirm / approve                       │
+    │  Red scale      : delete / reject           (§ 1.3 Red)                 │
+    │  Yellow scale   : warning / archive / disable (§ 1.3 Yellow)            │
+    │  Blue scale     : edit / roles / restore    (§ 1.2 Blue)                │
+    └──────────────────────────────────────────────────────────────────────────┘
+    */
     $icons = [
-        'add'     => ['icon' => 'bx-plus-circle',  'bg' => 'bg-green-600',  'color' => 'text-green-100'],
-        'edit'    => ['icon' => 'bx-edit',          'bg' => 'bg-blue-600',   'color' => 'text-blue-100'],
-        'delete'  => ['icon' => 'bx-trash',         'bg' => 'bg-red-600',    'color' => 'text-red-100'],
-        'assign'  => ['icon' => 'bx-user-check',    'bg' => 'bg-green-600',   'color' => 'text-green-100'],
-        'roles'   => ['icon' => 'bx-shield',        'bg' => 'bg-blue-600',   'color' => 'text-blue-100'],
-        'confirm' => ['icon' => 'bx-check-circle',  'bg' => 'bg-green-600',  'color' => 'text-green-100'],
-        'warning' => ['icon' => 'bx-error',         'bg' => 'bg-amber-600',  'color' => 'text-amber-100'],
-        'archive' => ['icon' => 'bx-archive',       'bg' => 'bg-amber-600',  'color' => 'text-amber-100'],
-        'approve' => ['icon' => 'bx-check-shield',  'bg' => 'bg-green-600',  'color' => 'text-green-100'],
-        'reject'  => ['icon' => 'bx-block',         'bg' => 'bg-red-600',    'color' => 'text-red-100'],
-        'restore' => ['icon' => 'bx-revision',      'bg' => 'bg-blue-600',   'color' => 'text-blue-100'],
-        'disable' => ['icon' => 'bx-pause-circle',  'bg' => 'bg-amber-600',  'color' => 'text-amber-100'],
+        'add'     => ['icon' => 'bx-plus-circle',  'bg' => '#06754E', 'ring' => '#AEFFE2', 'fg' => '#EDFFF8'],  // Emerald 800 / 200 / 50
+        'edit'    => ['icon' => 'bx-edit',          'bg' => '#194C6E', 'ring' => '#AEDFFF', 'fg' => '#DAF1FF'],  // Blue 800 / 300 / 200
+        'delete'  => ['icon' => 'bx-trash',         'bg' => '#D21B14', 'ring' => '#FFA2A2', 'fg' => '#FFE3E2'],  // Red 600 / 300 / 200
+        'assign'  => ['icon' => 'bx-user-check',    'bg' => '#06754E', 'ring' => '#AEFFE2', 'fg' => '#EDFFF8'],
+        'roles'   => ['icon' => 'bx-shield',        'bg' => '#194C6E', 'ring' => '#AEDFFF', 'fg' => '#DAF1FF'],
+        'confirm' => ['icon' => 'bx-check-circle',  'bg' => '#06754E', 'ring' => '#AEFFE2', 'fg' => '#EDFFF8'],
+        'warning' => ['icon' => 'bx-error',         'bg' => '#B37100', 'ring' => '#FFE9B5', 'fg' => '#FFF6E2'],  // Yellow 800 / 300 / 200
+        'archive' => ['icon' => 'bx-archive',       'bg' => '#B37100', 'ring' => '#FFE9B5', 'fg' => '#FFF6E2'],
+        'approve' => ['icon' => 'bx-check-shield',  'bg' => '#06754E', 'ring' => '#AEFFE2', 'fg' => '#EDFFF8'],
+        'reject'  => ['icon' => 'bx-block',         'bg' => '#D21B14', 'ring' => '#FFA2A2', 'fg' => '#FFE3E2'],
+        'restore' => ['icon' => 'bx-revision',      'bg' => '#194C6E', 'ring' => '#AEDFFF', 'fg' => '#DAF1FF'],
+        'disable' => ['icon' => 'bx-pause-circle',  'bg' => '#B37100', 'ring' => '#FFE9B5', 'fg' => '#FFF6E2'],
     ];
     $ic = $variant ? ($icons[$variant] ?? null) : null;
 @endphp
 
-<header {{ $attributes->merge(['class' => "px-6 py-4 border-b border-[#e2e8f0] bg-white flex-shrink-0 $class"]) }}>
+<header {{ $attributes->merge(['class' => "px-5 py-4 border-b border-[#E3E8EB] bg-white flex-shrink-0 $class"]) }}>
     <div class="flex items-center justify-between gap-4">
         <div class="flex items-center gap-3 flex-1 min-w-0">
             @if ($ic)
-                <span class="flex items-center justify-center w-9 h-9 rounded-lg shrink-0 {{ $ic['bg'] }} {{ $ic['color'] }}">
-                    <i class="bx {{ $ic['icon'] }} text-lg leading-none"></i>
+                {{-- Icon chip: filled bg + lighter ring border for depth --}}
+                <span class="flex items-center justify-center w-9 h-9 rounded-[10px] shrink-0 border"
+                      style="background:{{ $ic['bg'] }}; border-color:{{ $ic['ring'] }};">
+                    <i class="bx {{ $ic['icon'] }} text-[15px] leading-none" style="color:{{ $ic['fg'] }};"></i>
                 </span>
             @endif
-            <div class="flex-1 min-w-0 text-[15px] font-bold text-[#0f172a]">
+            <div class="flex-1 min-w-0 text-[14.5px] font-bold text-[#253540]">
                 {{ $slot }}
             </div>
         </div>
@@ -40,8 +51,8 @@
             <button
                 type="button"
                 onclick="document.getElementById('{{ $modalId }}').close()"
-                class="shrink-0 rounded-lg p-1.5 text-[#94a3b8]
-                       hover:bg-[#f8fafc] hover:text-[#475569]
+                class="shrink-0 rounded-[8px] p-1.5
+                       text-[#A5B2BD] hover:text-[#394056] hover:bg-[#F1F3F5]
                        transition-colors duration-150"
                 aria-label="Close">
                 <i class="bx bx-x text-xl leading-none"></i>

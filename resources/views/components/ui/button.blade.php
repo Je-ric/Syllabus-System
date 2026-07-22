@@ -31,118 +31,45 @@
 
         // ── Table buttons ──────────────────────────────────────────────────────
         // Default = Emerald 700, Hover = 800 — solid, readable on white bg
-        'table-confirm'  => $tableBtn . 'text-white bg-[#00965F] hover:bg-[#06754E] active:bg-[#076042] focus:ring-[#00965F]/30 shadow-[0_1px_2px_rgba(16,24,40,0.08)]',
-        'table-edit'     => $tableBtn . 'text-white bg-[#194C6E] hover:bg-[#143D57] active:bg-[#0e2f43] focus:ring-[#194C6E]/30 shadow-[0_1px_2px_rgba(16,24,40,0.08)]',
-        'table-view'     => $tableBtn . 'text-white bg-[#2A3B47] hover:bg-[#1D2836] active:bg-[#141e28] focus:ring-[#2A3B47]/30 shadow-[0_1px_2px_rgba(16,24,40,0.08)]',
-        'table-manage'   => $tableBtn . 'text-white bg-[#394056] hover:bg-[#2A3B47] active:bg-[#1D2836] focus:ring-[#394056]/30 shadow-[0_1px_2px_rgba(16,24,40,0.08)]',
-        'table-danger'   => $tableBtn . 'text-white bg-[#D21B14] hover:bg-[#BA1F19] active:bg-[#9D1F1A] focus:ring-[#D21B14]/30 shadow-[0_1px_2px_rgba(16,24,40,0.08)]',
-        'table-disable'  => $tableBtn . 'text-white bg-[#4F5D6B] hover:bg-[#394056] active:bg-[#2A3B47] focus:ring-[#4F5D6B]/30 shadow-[0_1px_2px_rgba(16,24,40,0.08)]',
-        'table-restore'  => $tableBtn . 'text-white bg-[#06754E] hover:bg-[#076042] active:bg-[#003724] focus:ring-[#06754E]/30 shadow-[0_1px_2px_rgba(16,24,40,0.08)]',
-        'table-cancel'   => $tableBtn . 'bg-white text-[#394056] border border-[#D6DDE3]
-                                         hover:bg-[#F1F3F5] hover:border-[#C1C8D4] focus:ring-[#D6DDE3]/30',
+        // 'table-confirm'  => $tableBtn . 'text-white bg-[#00965F] hover:bg-[#06754E] active:bg-[#076042] focus:ring-[#00965F]/30 shadow-[0_1px_2px_rgba(16,24,40,0.08)]',
+        // 'table-edit'     => $tableBtn . 'text-white bg-[#194C6E] hover:bg-[#143D57] active:bg-[#0e2f43] focus:ring-[#194C6E]/30 shadow-[0_1px_2px_rgba(16,24,40,0.08)]',
+        // 'table-view'     => $tableBtn . 'text-white bg-[#2A3B47] hover:bg-[#1D2836] active:bg-[#141e28] focus:ring-[#2A3B47]/30 shadow-[0_1px_2px_rgba(16,24,40,0.08)]',
+        // 'table-manage'   => $tableBtn . 'text-white bg-[#394056] hover:bg-[#2A3B47] active:bg-[#1D2836] focus:ring-[#394056]/30 shadow-[0_1px_2px_rgba(16,24,40,0.08)]',
+        // 'table-danger'   => $tableBtn . 'text-white bg-[#D21B14] hover:bg-[#BA1F19] active:bg-[#9D1F1A] focus:ring-[#D21B14]/30 shadow-[0_1px_2px_rgba(16,24,40,0.08)]',
+        // 'table-disable'  => $tableBtn . 'text-white bg-[#4F5D6B] hover:bg-[#394056] active:bg-[#2A3B47] focus:ring-[#4F5D6B]/30 shadow-[0_1px_2px_rgba(16,24,40,0.08)]',
+        // 'table-restore'  => $tableBtn . 'text-white bg-[#06754E] hover:bg-[#076042] active:bg-[#003724] focus:ring-[#06754E]/30 shadow-[0_1px_2px_rgba(16,24,40,0.08)]',
+        // 'table-cancel'   => $tableBtn . 'bg-white text-[#394056] border border-[#D6DDE3]
+        //                                  hover:bg-[#F1F3F5] hover:border-[#C1C8D4] focus:ring-[#D6DDE3]/30',
+        'table-confirm'  => $tableBtn . 'text-white bg-[linear-gradient(180deg,#00C075_0%,#00965F_100%)] hover:bg-[linear-gradient(180deg,#00965F_0%,#06754E_100%)] active:bg-[#06754E] focus:ring-[#00C075]/30 shadow-[0_1px_2px_rgba(0,150,95,0.3)]',
+        'table-edit'     => $tableBtn . 'text-white bg-[linear-gradient(180deg,#1F5E89_0%,#194C6E_100%)] hover:bg-[linear-gradient(180deg,#194C6E_0%,#143D57_100%)] active:bg-[#143D57] focus:ring-[#1F5E89]/30 shadow-[0_1px_2px_rgba(25,76,110,0.3)]',
+        'table-view'     => $tableBtn . 'text-white bg-[linear-gradient(180deg,#253540_0%,#1D2836_100%)] hover:bg-[linear-gradient(180deg,#1D2836_0%,#141e28_100%)] active:bg-[#141e28] focus:ring-[#253540]/30 shadow-[0_1px_2px_rgba(29,40,54,0.3)]',
+        'table-manage'   => $tableBtn . 'text-white bg-[linear-gradient(180deg,#394056_0%,#2A3B47_100%)] hover:bg-[linear-gradient(180deg,#2A3B47_0%,#1D2836_100%)] active:bg-[#1D2836] focus:ring-[#394056]/30 shadow-[0_1px_2px_rgba(42,59,71,0.3)]',
+        'table-danger'   => $tableBtn . 'text-white bg-[linear-gradient(180deg,#E52F28_0%,#BA1F19_100%)] hover:bg-[linear-gradient(180deg,#D21B14_0%,#9D1F1A_100%)] active:bg-[#9D1F1A] focus:ring-[#E52F28]/30 shadow-[0_1px_2px_rgba(186,31,25,0.3)]',
+        'table-disable'  => $tableBtn . 'text-white bg-[linear-gradient(180deg,#4F5D6B_0%,#394056_100%)] hover:bg-[linear-gradient(180deg,#394056_0%,#2A3B47_100%)] active:bg-[#2A3B47] focus:ring-[#4F5D6B]/30 shadow-[0_1px_2px_rgba(57,64,86,0.25)]',
+        'table-restore'  => $tableBtn . 'text-white bg-[linear-gradient(180deg,#06754E_0%,#076042_100%)] hover:bg-[linear-gradient(180deg,#076042_0%,#003724_100%)] active:bg-[#003724] focus:ring-[#06754E]/30 shadow-[0_1px_2px_rgba(6,117,78,0.3)]',
+        'table-cancel'   => $tableBtn . 'bg-white text-[#394056] border border-[#D6DDE3] hover:bg-[#F1F3F5] hover:border-[#C1C8D4] focus:ring-[#D6DDE3]/30',
+
+        'table-light-edit' => $tableBtn . 'p-2 rounded-lg text-[#A5B2BD] hover:text-[#194C6E] hover:bg-[#DAF1FF] focus:ring-[#3197D6]/25 transition-colors',
+        'table-light-delete' => $tableBtn . 'p-2 rounded-lg text-[#A5B2BD] hover:text-[#9D1F1A] hover:bg-[#FFE3E2] focus:ring-[#E52F28]/25 transition-colors',
 
         // ── Form / CRUD buttons — gradient-based for visibility on white ───────
-        // Primary: Emerald gradient 600→800
-        'primary'    => $formBtn . '
-            text-white
-            bg-[linear-gradient(180deg,#00C075_0%,#00965F_100%)]
-            hover:bg-[linear-gradient(180deg,#00965F_0%,#06754E_100%)]
-            active:bg-[#06754E]
-            focus:ring-[#00C075]/40
-            shadow-[0_1px_3px_rgba(0,150,95,0.35)]',
+        'primary'    => $formBtn . 'text-white bg-[linear-gradient(180deg,#00C075_0%,#00965F_100%)] hover:bg-[linear-gradient(180deg,#00965F_0%,#06754E_100%)] active:bg-[#06754E] focus:ring-[#00C075]/40 shadow-[0_1px_3px_rgba(0,150,95,0.35)]',
+        'secondary'  => $formBtn . 'text-white bg-[linear-gradient(180deg,#394056_0%,#253540_100%)] hover:bg-[linear-gradient(180deg,#2A3B47_0%,#1D2836_100%)] active:bg-[#1D2836] focus:ring-[#394056]/40 shadow-[0_1px_3px_rgba(37,53,64,0.35)]',
+        'outline'    => $formBtn . 'bg-transparent text-[#00965F] border-[1.5px] border-[#00C075] hover:bg-[#D5FFF0] hover:border-[#00965F] hover:text-[#06754E] active:bg-[#AEFFE2] active:border-[#06754E] active:text-[#076042] focus:ring-[#00C075]/25',
+        'add-button' => $formBtn . 'text-white bg-[linear-gradient(180deg,#00C075_0%,#00965F_100%)] hover:bg-[linear-gradient(180deg,#00965F_0%,#06754E_100%)] active:bg-[#06754E] focus:ring-[#00C075]/40 shadow-[0_1px_3px_rgba(0,150,95,0.35)]',
+        'save'       => $formBtn . 'text-white bg-[linear-gradient(180deg,#00C075_0%,#00965F_100%)] hover:bg-[linear-gradient(180deg,#00965F_0%,#06754E_100%)] active:bg-[#06754E] focus:ring-[#00C075]/40 shadow-[0_1px_3px_rgba(0,150,95,0.35)]',
+        'add-dashed' => $formBtn . 'justify-center bg-transparent text-[#00965F] border-2 border-dashed border-[#00C075] hover:border-[#00965F] hover:bg-[#D5FFF0] hover:text-[#06754E] active:bg-[#AEFFE2] focus:ring-[#00C075]/20',
+        'cancel'     => $formBtn . 'bg-white text-[#394056] border border-[#D6DDE3] hover:bg-[#F1F3F5] hover:border-[#C1C8D4] focus:ring-[#D6DDE3]/20',
+        'back'       => $formBtn . 'bg-white text-[#394056] border border-[#D6DDE3] hover:bg-[#F1F3F5] hover:border-[#C1C8D4] focus:ring-[#D6DDE3]/20',
+        'danger'     => $formBtn . 'text-white bg-[linear-gradient(180deg,#E52F28_0%,#BA1F19_100%)] hover:bg-[linear-gradient(180deg,#D21B14_0%,#9D1F1A_100%)] active:bg-[#9D1F1A] focus:ring-[#E52F28]/35 shadow-[0_1px_3px_rgba(186,31,25,0.35)]',
+        'warning'    => $formBtn . ' text-[#394056] bg-[linear-gradient(180deg,#FFC646_0%,#F5B126_100%)] hover:bg-[linear-gradient(180deg,#F5B126_0%,#D79400_100%)] active:bg-[#D79400] focus:ring-[#FFC646]/35 shadow-[0_1px_3px_rgba(215,148,0,0.30)]',
+        'gold'       => $formBtn . ' text-[#394056] bg-[linear-gradient(180deg,#FFC646_0%,#F5B126_100%)] hover:bg-[linear-gradient(180deg,#F5B126_0%,#D79400_100%)] active:bg-[#D79400] focus:ring-[#FFC646]/35 shadow-[0_1px_3px_rgba(215,148,0,0.30)]',
 
-        // Secondary: Charcoal gradient
-        'secondary'  => $formBtn . '
-            text-white
-            bg-[linear-gradient(180deg,#394056_0%,#253540_100%)]
-            hover:bg-[linear-gradient(180deg,#2A3B47_0%,#1D2836_100%)]
-            active:bg-[#1D2836]
-            focus:ring-[#394056]/40
-            shadow-[0_1px_3px_rgba(37,53,64,0.35)]',
-
-        // Outline: emerald border + tinted text, visible on white
-        'outline'    => $formBtn . '
-            bg-transparent text-[#00965F] border-[1.5px] border-[#00C075]
-            hover:bg-[#D5FFF0] hover:border-[#00965F] hover:text-[#06754E]
-            active:bg-[#AEFFE2] active:border-[#06754E] active:text-[#076042]
-            focus:ring-[#00C075]/25',
-
-        'add-button' => $formBtn . '
-            text-white
-            bg-[linear-gradient(180deg,#00C075_0%,#00965F_100%)]
-            hover:bg-[linear-gradient(180deg,#00965F_0%,#06754E_100%)]
-            active:bg-[#06754E]
-            focus:ring-[#00C075]/40
-            shadow-[0_1px_3px_rgba(0,150,95,0.35)]',
-
-        'save' => $formBtn . '
-            text-white
-            bg-[linear-gradient(180deg,#00C075_0%,#00965F_100%)]
-            hover:bg-[linear-gradient(180deg,#00965F_0%,#06754E_100%)]
-            active:bg-[#06754E]
-            focus:ring-[#00C075]/40
-            shadow-[0_1px_3px_rgba(0,150,95,0.35)]',
-
-        'add-dashed' => $formBtn . '
-            justify-center bg-transparent text-[#00965F]
-            border-2 border-dashed border-[#00C075]
-            hover:border-[#00965F] hover:bg-[#D5FFF0] hover:text-[#06754E]
-            active:bg-[#AEFFE2]
-            focus:ring-[#00C075]/20',
-
-        'cancel'     => $formBtn . '
-            bg-white text-[#394056]
-            border border-[#D6DDE3]
-            hover:bg-[#F1F3F5] hover:border-[#C1C8D4]
-            focus:ring-[#D6DDE3]/20',
-
-        'back'       => $formBtn . '
-            bg-white text-[#394056]
-            border border-[#D6DDE3]
-            hover:bg-[#F1F3F5] hover:border-[#C1C8D4]
-            focus:ring-[#D6DDE3]/20',
-
-        'danger'     => $formBtn . '
-            text-white
-            bg-[linear-gradient(180deg,#E52F28_0%,#BA1F19_100%)]
-            hover:bg-[linear-gradient(180deg,#D21B14_0%,#9D1F1A_100%)]
-            active:bg-[#9D1F1A]
-            focus:ring-[#E52F28]/35
-            shadow-[0_1px_3px_rgba(186,31,25,0.35)]',
-
-        'warning'    => $formBtn . '
-            text-[#394056]
-            bg-[linear-gradient(180deg,#FFC646_0%,#F5B126_100%)]
-            hover:bg-[linear-gradient(180deg,#F5B126_0%,#D79400_100%)]
-            active:bg-[#D79400]
-            focus:ring-[#FFC646]/35
-            shadow-[0_1px_3px_rgba(215,148,0,0.30)]',
-
-        // Gold accent — emphasis only
-        'gold'       => $formBtn . '
-            text-[#394056]
-            bg-[linear-gradient(180deg,#FFC646_0%,#F5B126_100%)]
-            hover:bg-[linear-gradient(180deg,#F5B126_0%,#D79400_100%)]
-            active:bg-[#D79400]
-            focus:ring-[#FFC646]/35
-            shadow-[0_1px_3px_rgba(215,148,0,0.30)]',
-
-        'sidebar-tool' => $wizardBtn . '
-            text-[#344054]
-            bg-white
-            border border-transparent
-            hover:bg-[#F8FAFC]
-            hover:border-[#E4E7EC]
-            active:bg-[#EEF2F6]
-            active:border-[#D0D5DD]
-            focus:ring-[#D0D5DD]/40
-            shadow-none',
+        'sidebar-tool' => $wizardBtn . ' text-[#344054] bg-white border border-transparent hover:bg-[#F8FAFC] hover:border-[#E4E7EC] active:bg-[#EEF2F6] active:border-[#D0D5DD] focus:ring-[#D0D5DD]/40 shadow-none',
             
         // ── Small / wizard buttons ─────────────────────────────────────────────
-        'sm-primary' => $wizardBtn . 'bg-[#D5FFF0] text-[#076042] border border-[#00965F]
-                                       hover:bg-[#AEFFE2] hover:border-[#06754E] focus:ring-[#00965F]/20',
-        'sm-cancel'  => $wizardBtn . 'bg-white text-[#394056] border border-[#D6DDE3]
-                                       hover:bg-[#F1F3F5] hover:border-[#C1C8D4] focus:ring-[#D6DDE3]/20',
+        'sm-primary' => $wizardBtn . 'bg-[#D5FFF0] text-[#076042] border border-[#00965F] hover:bg-[#AEFFE2] hover:border-[#06754E] focus:ring-[#00965F]/20',
+        'sm-cancel'  => $wizardBtn . 'bg-white text-[#394056] border border-[#D6DDE3] hover:bg-[#F1F3F5] hover:border-[#C1C8D4] focus:ring-[#D6DDE3]/20',
         'sm-danger'  => $wizardBtn . 'bg-[#E52F28] text-white border border-[#D21B14]
                                        hover:bg-[#D21B14] active:bg-[#BA1F19] focus:ring-[#E52F28]/30 shadow-[0_1px_2px_rgba(16,24,40,0.08)]',
         'sm-warning' => $wizardBtn . 'bg-[#FFF6E2] text-[#875200] border border-[#F5B126]
