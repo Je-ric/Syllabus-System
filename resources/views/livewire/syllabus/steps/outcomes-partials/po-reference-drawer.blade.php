@@ -3,52 +3,54 @@
 
     <x-slot:footer>
         <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5">
-            <span class="text-[10px] font-bold uppercase tracking-widest text-[#a1a1aa]">IED</span>
-            <span class="flex items-center gap-1.5 text-[11px] text-[#52525b]">
+            <span class="text-[10px] font-bold uppercase tracking-widest text-[#93A1AF]">IED</span>
+            <span class="flex items-center gap-1.5 text-[11px] text-[#4F5D6B]">
                 <x-feedback-status.ied-badge level="I" /> Introductory
             </span>
-            <span class="flex items-center gap-1.5 text-[11px] text-[#52525b]">
+            <span class="flex items-center gap-1.5 text-[11px] text-[#4F5D6B]">
                 <x-feedback-status.ied-badge level="E" /> Enabling
             </span>
-            <span class="flex items-center gap-1.5 text-[11px] text-[#52525b]">
+            <span class="flex items-center gap-1.5 text-[11px] text-[#4F5D6B]">
                 <x-feedback-status.ied-badge level="D" /> Demonstrative
             </span>
         </div>
     </x-slot:footer>
 
     @if (!empty($courseInfo['program_title']))
-        <div class="rounded-[14px] border border-[#e4e4e7] bg-[#f4f4f5] px-4 py-3 mb-4">
-            <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-[#a1a1aa] mb-0.5">Program</p>
-            <p class="text-[13px] font-medium text-[#18181b]">{{ $courseInfo['program_title'] }}</p>
+        <div class="rounded-2xl border border-[#E3E8EB] bg-[#F9FAFA] px-4 py-3 mb-4"
+             style="box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06);">
+            <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-[#93A1AF] mb-0.5">Program</p>
+            <p class="text-[13px] font-medium text-[#1D2836]">{{ $courseInfo['program_title'] }}</p>
         </div>
     @endif
 
     @if (count($programOutcomes) > 0)
-        <div class="overflow-hidden rounded-[14px] border border-[#e4e4e7]">
+        <div class="overflow-hidden rounded-2xl border border-[#E3E8EB]"
+             style="box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06);">
             <table class="w-full text-xs border-collapse">
                 <thead>
-                    <tr class="bg-[#f4f4f5] border-b border-[#e4e4e7]">
-                        <th class="px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-[#a1a1aa] w-14">PO</th>
-                        <th class="px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-[#a1a1aa]">Description</th>
-                        <th class="px-3 py-2.5 text-center text-[10px] font-bold uppercase tracking-widest text-[#a1a1aa] w-12">IED</th>
+                    <tr class="bg-[#F1F3F5] border-b border-[#E3E8EB]">
+                        <th class="px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-[#93A1AF] w-14">PO</th>
+                        <th class="px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-[#93A1AF]">Description</th>
+                        <th class="px-3 py-2.5 text-center text-[10px] font-bold uppercase tracking-widest text-[#93A1AF] w-12">IED</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-[#f4f4f5] bg-white">
+                <tbody class="divide-y divide-[#F1F3F5] bg-white">
                     @foreach ($courseInfo['po_rows'] as $po)
-                        <tr class="hover:bg-[#f4f4f5] transition-colors">
+                        <tr class="hover:bg-[#F9FAFA] transition-colors">
                             <td class="px-3 py-3 align-top">
-                                <span class="inline-flex items-center justify-center w-8 h-8 rounded-[10px] bg-[#f0fdf4] border border-[#d1fae5] text-[#16a34a] text-[11px] font-bold">
+                                <span class="inline-flex items-center justify-center w-8 h-8 rounded-[10px] bg-[#EDFFF8] border border-[#AEFFE2] text-[#06754E] text-[11px] font-bold">
                                     {{ $po['po_code'] }}
                                 </span>
                             </td>
                             <td class="px-3 py-3 align-top">
-                                <p class="text-[12px] text-[#3f3f46] leading-relaxed">{{ $po['po_text'] }}</p>
+                                <p class="text-[12px] text-[#4F5D6B] leading-relaxed">{{ $po['po_text'] }}</p>
                             </td>
                             <td class="px-3 py-3 text-center align-middle">
                                 @if (!empty($po['ied']))
                                     <x-feedback-status.ied-badge :level="$po['ied']" />
                                 @else
-                                    <span class="text-[#d4d4d8]">—</span>
+                                    <span class="text-[#C1C8D4]">—</span>
                                 @endif
                             </td>
                         </tr>
