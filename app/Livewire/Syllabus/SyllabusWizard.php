@@ -19,6 +19,7 @@ use App\Models\CourseOutcome;
 use App\Models\CourseComponent;
 use App\Models\WeekContent;
 use App\Models\SyllabusEvaluationItem;
+use App\Models\AcademicCalendar;
 use Throwable;
 
 class SyllabusWizard extends Component
@@ -532,6 +533,15 @@ class SyllabusWizard extends Component
             $component->class_hours,
             $component->performance_standard,
         ])->every(fn ($v) => trim((string) $v) !== '');
+    }
+
+    public function calendarIsInactive(): bool
+    {
+        if (! $this->syllabus || ! $this->syllabus->academic_calendar_id) {
+            return false;
+        }
+        $activeId = AcademicCalendar::active()->value('id');
+        return $activeId && (int) $this->syllabus->academic_calendar_id !== (int) $activeId;
     }
 
     private function initializeStepState(): void

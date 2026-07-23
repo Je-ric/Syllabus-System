@@ -83,6 +83,7 @@ Route::middleware(['auth'])->group(function () {
             ->middleware(HandlePrecognitiveRequests::class)
             ->name('academic.calendars.update');
         Route::delete('/academic-calendars/{academicYear}', [AcademicCalendarController::class, 'destroy'])->name('academic.calendars.destroy');
+        Route::post('/academic-calendars/{academicYear}/set-active', [AcademicCalendarController::class, 'setActive'])->name('academic.calendars.set-active');
 
         Route::get('/academic-calendars/{academicYear}/events', [AcademicCalendarEventController::class, 'index'])->name('academic.calendar.events.index');
         Route::post('/academic-calendars/{semester}/events', [AcademicCalendarEventController::class, 'store'])->name('academic.calendar.events.store');

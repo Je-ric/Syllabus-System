@@ -161,6 +161,15 @@
                         </div>
                     </div>
 
+                    @if ($currentStep !== 'academic_calendar' && $this->calendarIsInactive())
+                        <div class="mx-5 sm:mx-6 mt-5 sm:mt-6">
+                            <x-feedback-status.alert type="warning" :showTitle="false">
+                                The previously selected academic calendar is no longer active.
+                                <a href="#" wire:click.prevent="clickTab('academic_calendar')" class="underline font-medium">Go to Step 1</a> to update it.
+                            </x-feedback-status.alert>
+                        </div>
+                    @endif
+
                     <div class="{{ $currentStep === 'academic_calendar' ? 'block' : 'hidden' }} p-5 sm:p-6">
                         <livewire:syllabus.steps.academic-calendar-step :syllabus-id="$syllabus->id" />
                     </div>

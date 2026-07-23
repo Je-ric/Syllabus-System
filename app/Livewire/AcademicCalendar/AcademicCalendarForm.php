@@ -127,6 +127,11 @@ class AcademicCalendarForm extends Component
                 'end_date'      => $validated['end_date_2'],
             ]);
 
+            // Auto-activate if no calendar is currently active
+            if (! AcademicCalendar::active()->exists()) {
+                AcademicCalendar::setActive($sem1->id);
+            }
+
             AuditLog::record(
                 action: 'created',
                 module: 'Academic Calendar',

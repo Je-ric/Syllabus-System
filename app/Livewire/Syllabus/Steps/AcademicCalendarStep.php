@@ -70,16 +70,26 @@ class AcademicCalendarStep extends Component
 
         $syllabus = Syllabus::query()->findOrFail($this->syllabusId);
 
-        $this->academic_calendar_id = $syllabus->academic_calendar_id
-            ? (int) $syllabus->academic_calendar_id
-            : null;
+        $activeId = AcademicCalendar::active()->value('id');
+
+        if ($syllabus->academic_calendar_id) {
+            $selectedId = (int) $syllabus->academic_calendar_id;
+            if ($activeId && $selectedId !== $activeId) {
+                // Previously selected calendar is no longer active — auto-switch
+                $syllabus->update(['academic_calendar_id' => $activeId]);
+                $this->dispatch('syllabus-calendar-updated');
+                $this->dispatch('lw-toast', type: 'warning', message: 'Switched to the currently active academic calendar.');
+            }
+            $this->academic_calendar_id = $activeId ?: $selectedId;
+        } else {
+            $this->academic_calendar_id = $activeId;
+            if ($activeId) {
+                $syllabus->update(['academic_calendar_id' => $activeId]);
+                $this->dispatch('syllabus-calendar-updated');
+            }
+        }
 
         // Store as plain arrays — Livewire serialises these cheaply.
-        // Storing Eloquent model collections bloats the snapshot JSON
-        // and slows every subsequent request for this component.
-
-        // $formatterSem = AcademicCalendar::getFormattedSemester();
-
         $this->academicCalendars = AcademicCalendar::query()
             ->orderBy('academic_year', 'desc')
             ->orderBy('semester', 'desc')
@@ -88,6 +98,7 @@ class AcademicCalendarStep extends Component
                 'id'               => $c->id,
                 'academic_year'    => $c->academic_year,
                 'formatted_semester' => $c->getFormattedSemester(),
+                'is_active'        => $c->is_active,
             ])
             ->all();
 

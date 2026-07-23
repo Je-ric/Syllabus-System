@@ -6,16 +6,17 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
 
         {{-- Selector card --}}
-        <x-wizard.section title="Select Academic Calendar" icon="calendar" color="emerald">
+        <x-layout.card title="Select Academic Calendar" icon="calendar" color="emerald" class="mb-5">
             <x-form.label isRequired class="block mb-2">Academic Calendar</x-form.label>
             <x-form.select
                 wire:model="academic_calendar_id"
-                class="@error('academic_calendar_id') border-rose-400 @enderror"
+                class="@error('academic_calendar_id') @enderror"
                 required>
                 <option value="">&mdash; Choose Academic Calendar &mdash;</option>
                 @foreach ($academicCalendars as $calendar)
                     <option value="{{ $calendar['id'] }}">
                         {{ $calendar['academic_year'] }} &ndash; {{ $calendar['formatted_semester'] }}
+                        @if ($calendar['is_active']) (Active) @endif
                     </option>
                 @endforeach
             </x-form.select>
@@ -25,10 +26,10 @@
                     <i class="bx bx-error-circle"></i> {{ $message }}
                 </p>
             @enderror
-        </x-wizard.section>
+        </x-layout.card>
 
         {{-- Info card --}}
-        <x-wizard.info-card title="Why this matters" icon="info-circle" color="emerald">
+        <x-layout.card title="Why this matters" icon="info-circle" color="emerald">
             <ul class="space-y-2">
                 <li class="flex items-start gap-2.5 text-sm text-slate-600">
                     <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-[#16a34a] shrink-0"></span>
@@ -44,7 +45,7 @@
                     </x-feedback-status.alert>
                 </li>
             </ul>
-        </x-wizard.info-card>
+        </x-layout.card>
 
     </div>
 </div>

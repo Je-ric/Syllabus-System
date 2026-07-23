@@ -53,6 +53,28 @@ class AcademicCalendarController extends Controller
         ]);
     }
 
+    public function setActive(string $academicYear)
+    {
+        $ids = AcademicCalendar::where('academic_year', $academicYear)->pluck('id');
+
+        if ($ids->isEmpty()) {
+            return redirect()->route('academic.calendars.index')
+                ->with('toast', ['message' => 'Academic year not found.', 'type' => 'error']);
+        }
+
+        AcademicCalendar::setActive($ids->first());
+
+        AuditLog::record(
+            action: 'set_active',
+            module: 'Academic Calendar',
+            referenceId: $ids->first(),
+            description: "Set A.Y. {$academicYear} as the active academic calendar."
+        );
+
+        return redirect()->route('academic.calendars.index')
+            ->with('toast', ['message' => "A.Y. {$academicYear} is now the active calendar.", 'type' => 'success']);
+    }
+
     // store / update are handled by Livewire AcademicCalendarForm component.
 
     public function destroy(string $academic_year)

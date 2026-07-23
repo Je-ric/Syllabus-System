@@ -34,16 +34,24 @@
                         $secondSem   = $semesters->firstWhere('semester', '2nd');
                     @endphp
 
-                    <div class="rounded-xl border border-[#e2e8f0] bg-white overflow-hidden" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
+                    @php $isActive = $firstSem && $firstSem->is_active; @endphp
+                    <div class="rounded-xl border border-[#e2e8f0] bg-white overflow-hidden {{ $isActive ? 'ring-2 ring-[#16a34a]' : '' }}" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
 
                         {{-- Header --}}
                         <div class="flex items-center justify-between gap-3 px-5 py-4 bg-[#f8fafc] border-b border-[#e2e8f0]">
                             <div class="flex items-center gap-2.5">
-                                <span class="shrink-0 w-9 h-9 rounded-lg bg-[#16a34a] flex items-center justify-center">
+                                <span class="shrink-0 w-9 h-9 rounded-lg {{ $isActive ? 'bg-[#16a34a]' : 'bg-[#94a3b8]' }} flex items-center justify-center">
                                     <i class="bx bx-calendar text-white text-lg leading-none"></i>
                                 </span>
                                 <div>
-                                    <h2 class="text-[15px] font-bold text-[#0f172a]">A.Y. {{ $year }}</h2>
+                                    <div class="flex items-center gap-2">
+                                        <h2 class="text-[15px] font-bold text-[#0f172a]">A.Y. {{ $year }}</h2>
+                                        @if ($isActive)
+                                            <x-feedback-status.status-indicator variant="emerald" :dot="true">
+                                                Active
+                                            </x-feedback-status.status-indicator>
+                                        @endif
+                                    </div>
                                     <p class="text-[13px] text-[#475569]">{{ $semesters->count() }} semester{{ $semesters->count() !== 1 ? 's' : '' }}</p>
                                 </div>
                             </div>
@@ -78,6 +86,15 @@
 
                         {{-- Actions --}}
                         <div class="flex items-center gap-2 px-5 py-3">
+                            @if (!$isActive)
+                                <form action="{{ route('academic.calendars.set-active', $year) }}" method="POST" class="inline">
+                                    @csrf
+                                    <x-ui.button type="submit" variant="table-edit">
+                                        <i class="bx bx-check-circle"></i> Set Active
+                                    </x-ui.button>
+                                </form>
+                            @endif
+
                             <x-ui.button href="{{ route('academic.calendar.events.index', $year) }}"
                                 variant="table-manage">
                                 <i class="bx bx-calendar-event"></i> Manage Events

@@ -15,7 +15,7 @@
         description="Fill in instructor details and class delivery info for each component." />
 
     {{-- ══ Lecture ═══════════════════════════════════════════════════════════ --}}
-    <x-wizard.section title="Lecture (LEC)" icon="book-open" color="emerald">
+    <x-layout.card title="Lecture (LEC)" icon="book-open" color="emerald" class="mb-5">
         <div class="space-y-5">
 
             {{-- Instructor Profile --}}
@@ -203,11 +203,11 @@
             </div><!-- /x-data lec -->
 
         </div>
-    </x-wizard.section>
+    </x-layout.card>
 
     {{-- ══ Laboratory ═══════════════════════════════════════════════════════ --}}
     @if ($course->has_lec_lab)
-        <x-wizard.section title="Laboratory (LAB)" icon="test-tube" color="blue">
+        <x-layout.card title="Laboratory (LAB)" icon="test-tube" color="blue" class="mb-5">
             <div x-data="labSection(@js($lab_user_id ?? ''),
                 @js($labUsers),
                 @js($lab_schedules ?? []),
@@ -393,7 +393,7 @@
 
                 </div>
             </div>{{-- /x-data labSection --}}
-        </x-wizard.section>
+        </x-layout.card>
     @endif
 
     {{-- ── Sticky Save All footer ────────────────────────────────────────────── --}}
