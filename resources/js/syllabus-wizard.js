@@ -118,17 +118,6 @@ window.coManager = function coManager(initialOutcomes, syllabusId) {
         _keyCounter: initialOutcomes.length,
         viewModal:   { co_code: '', description: '' },
 
-        autoResize(el) {
-            el.style.height = '0';
-            el.style.height = el.scrollHeight + 'px';
-        },
-
-        resizeAll() {
-            this.$nextTick(() =>
-                this.$el.querySelectorAll('textarea[x-model]').forEach(ta => this.autoResize(ta))
-            );
-        },
-
         markDirty(co) {
             if (co.id) co._dirty = (co.description !== co._original);
             this.$wire.dispatch('syllabus-step-dirty', { step: 'course_outcomes', dirty: this.hasPending() });
@@ -177,7 +166,6 @@ window.coManager = function coManager(initialOutcomes, syllabusId) {
                 .filter(o => o.id)
                 .map(o => ({ ...o, description: o._original, _dirty: false }));
             this.$wire.dispatch('syllabus-step-dirty', { step: 'course_outcomes', dirty: false });
-            this.resizeAll();
         },
 
         async removeUnsaved(co, index) {
@@ -246,7 +234,6 @@ window.coManager = function coManager(initialOutcomes, syllabusId) {
             }));
             this.isSaving = false;
             this.$wire.dispatch('syllabus-step-dirty', { step: 'course_outcomes', dirty: false });
-            this.resizeAll();
         },
 
         _confirm(detail) {

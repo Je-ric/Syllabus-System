@@ -78,12 +78,11 @@
                     <div class="flex-1 min-w-0">
                         <textarea
                             x-model="co.description"
-                            x-on:input="markDirty(co); autoResize($el);"
-                            x-init="$nextTick(() => autoResize($el))"
-                            rows="1"
+                            x-on:input="markDirty(co)"
+                            rows="3"
                             placeholder="Describe what students will be able to do after this outcome…"
                             x-bind:disabled="isSaving"
-                            class="w-full rounded-lg border px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all resize-none leading-relaxed disabled:opacity-50"
+                            class="w-full rounded-lg border px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all leading-relaxed disabled:opacity-50"
                             :class="{
                                 'border-amber-300 bg-amber-50/50 focus:border-amber-400 focus:ring-amber-100':       co.id && co._dirty,
                                 'border-emerald-300 bg-emerald-50/50 focus:border-emerald-400 focus:ring-emerald-100': !co.id,
