@@ -4,16 +4,41 @@
     @include('includes.head-assets')
     <style>
         [x-cloak] { display: none !important; }
+
+        .auth-overlay {
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.95) 0%,
+                rgba(255, 255, 255, 0.74) 42%,
+                color-mix(in srgb, var(--clsu-green) 55%, transparent) 100%
+            );
+        }
     </style>
 </head>
-<body>
+<body
+    {{-- class="relative min-h-screen bg-cover bg-top bg-no-repeat" --}}
+    {{-- style="background-image: url('{{ asset('assets/CLSU-Siever.jpeg') }}');" --}}
+>
 @if (session('toast'))
     <x-feedback-status.toast :message="session('toast')['message']" :type="session('toast')['type']" />
 @endif
-<div class="flex justify-center items-center min-h-screen px-4 py-8"
-     x-data="{ mode: '{{ old('_mode', 'login') }}' }">
+<div
+    class="relative flex justify-center items-center min-h-screen px-4 py-8 overflow-hidden"
+    x-data="{ mode: '{{ old('_mode', 'login') }}' }"
+>
 
-    <div class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 overflow-hidden rounded-3xl border border-slate-200/80 shadow-2xl bg-white">
+    {{-- Background Overlay --}}
+    {{-- <div class="absolute inset-0 auth-overlay backdrop-blur-[2px]"></div>
+
+    <div class="relative z-10 w-full flex justify-center"> --}}
+    <div class="w-full max-w-5xl
+            grid grid-cols-1 lg:grid-cols-2
+            overflow-hidden
+            rounded-3xl
+            border border-white/60
+            bg-white/92
+            backdrop-blur-xl
+            shadow-[0_30px_80px_rgba(0,0,0,.28)]">
 
         {{-- ── Left: Forms ── --}}
         <div class="p-8 md:p-10 flex flex-col justify-center bg-white">
@@ -34,31 +59,32 @@
                     @csrf
                     <input type="hidden" name="_mode" value="login">
 
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Email Address</label>
-                        <input type="email" name="email"
-                               value="{{ old('email') }}"
-                               placeholder="you@clsu.edu.ph"
-                               class="auth-input" required autofocus>
-                    </div>
+                    <x-form.field label="Email Address" for="login-email" variant="email" error="email">
+                        <x-form.input type="email" name="email" id="login-email"
+                            value="{{ old('email') }}"
+                            placeholder="you@clsu.edu.ph" required autofocus />
+                    </x-form.field>
 
-                    <div x-data="{ show: false }">
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Password</label>
-                        <div class="relative">
-                            <input :type="show ? 'text' : 'password'" name="password"
-                                   placeholder="Enter your password"
-                                   class="auth-input pr-11" required>
+                    <x-form.field label="Password" for="login-password" variant="user">
+                        <div class="relative" x-data="{ show: false }">
+                            <input :type="show ? 'text' : 'password'" name="password" id="login-password"
+                                placeholder="Enter your password" required
+                                class="w-full rounded-[14px] bg-white border border-[#d4d4d8] px-3.5 py-2.5 pr-11
+                                       text-[14px] text-[#09090b] placeholder:text-[#a1a1aa]
+                                       hover:border-[#a1a1aa]
+                                       focus:border-[#16a34a] focus:outline-none focus:ring-2 focus:ring-[#16a34a]/15
+                                       transition-colors duration-150">
                             <button type="button"
                                     @click="show = !show"
-                                    class="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-600 transition-colors">
+                                    class="absolute inset-y-0 right-0 flex items-center px-3 text-[#a1a1aa] hover:text-[#52525b] transition-colors">
                                 <i :class="show ? 'bx bx-hide' : 'bx bx-show'" class="text-lg leading-none"></i>
                             </button>
                         </div>
-                    </div>
+                    </x-form.field>
 
-                    <button type="submit" class="w-full auth-secondary text-white py-2.5 rounded-xl font-semibold shadow-sm transition">
+                    <x-ui.button type="submit" variant="primary" class="w-full justify-center py-2.5">
                         Sign In
-                    </button>
+                    </x-ui.button>
                 </form>
 
                 <div class="mt-5 text-sm text-slate-500">
@@ -84,64 +110,66 @@
                     @csrf
                     <input type="hidden" name="_mode" value="register">
 
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Full Name</label>
-                        <input type="text" name="name" value="{{ old('name') }}"
-                               placeholder="e.g. Juan dela Cruz"
-                               class="auth-input" required>
-                    </div>
+                    <x-form.field label="Full Name" for="register-name" variant="user" error="name">
+                        <x-form.input type="text" name="name" id="register-name"
+                            value="{{ old('name') }}"
+                            placeholder="e.g. Juan dela Cruz" required />
+                    </x-form.field>
 
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Phone Number</label>
-                        <input type="text" name="phone_number" value="{{ old('phone_number') }}"
-                               placeholder="e.g. 09XX-XXX-XXXX"
-                               class="auth-input" required>
-                    </div>
+                    <x-form.field label="Phone Number" for="register-phone" variant="phone" error="phone_number">
+                        <x-form.input type="text" name="phone_number" id="register-phone"
+                            value="{{ old('phone_number') }}"
+                            placeholder="e.g. 09XX-XXX-XXXX" required />
+                    </x-form.field>
 
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Office / Department</label>
-                        <input type="text" name="office" value="{{ old('office') }}"
-                               placeholder="Where can we find you?"
-                               class="auth-input" required>
-                    </div>
+                    <x-form.field label="Office / Department" for="register-office" variant="location" error="office">
+                        <x-form.input type="text" name="office" id="register-office"
+                            value="{{ old('office') }}"
+                            placeholder="Where can we find you?" required />
+                    </x-form.field>
 
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Email Address</label>
-                        <input type="email" name="email" value="{{ old('email') }}"
-                               placeholder="you@clsu.edu.ph or you@clsu2.edu.ph"
-                               class="auth-input" required>
-                        <p class="text-[11px] text-slate-400 mt-1">Must be a valid @clsu.edu.ph or @clsu2.edu.ph address.</p>
-                    </div>
+                    <x-form.field label="Email Address" for="register-email" variant="email" error="email"
+                        hint="Must be a valid @clsu.edu.ph or @clsu2.edu.ph address.">
+                        <x-form.input type="email" name="email" id="register-email"
+                            value="{{ old('email') }}"
+                            placeholder="you@clsu.edu.ph or you@clsu2.edu.ph" required />
+                    </x-form.field>
 
-                    <div x-data="{ show: false }">
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Password</label>
-                        <div class="relative">
-                            <input :type="show ? 'text' : 'password'" name="password"
-                                   placeholder="Minimum 8 characters"
-                                   class="auth-input pr-11" required>
+                    <x-form.field label="Password" for="register-password" variant="user" error="password">
+                        <div class="relative" x-data="{ show: false }">
+                            <input :type="show ? 'text' : 'password'" name="password" id="register-password"
+                                placeholder="Minimum 8 characters" required
+                                class="w-full rounded-[14px] bg-white border border-[#d4d4d8] px-3.5 py-2.5 pr-11
+                                       text-[14px] text-[#09090b] placeholder:text-[#a1a1aa]
+                                       hover:border-[#a1a1aa]
+                                       focus:border-[#16a34a] focus:outline-none focus:ring-2 focus:ring-[#16a34a]/15
+                                       transition-colors duration-150">
                             <button type="button" @click="show = !show"
-                                    class="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-600 transition-colors">
+                                    class="absolute inset-y-0 right-0 flex items-center px-3 text-[#a1a1aa] hover:text-[#52525b] transition-colors">
                                 <i :class="show ? 'bx bx-hide' : 'bx bx-show'" class="text-lg leading-none"></i>
                             </button>
                         </div>
-                    </div>
+                    </x-form.field>
 
-                    <div x-data="{ show: false }">
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Confirm Password</label>
-                        <div class="relative">
-                            <input :type="show ? 'text' : 'password'" name="password_confirmation"
-                                   placeholder="Re-enter your password"
-                                   class="auth-input pr-11" required>
+                    <x-form.field label="Confirm Password" for="register-password-confirm">
+                        <div class="relative" x-data="{ show: false }">
+                            <input :type="show ? 'text' : 'password'" name="password_confirmation" id="register-password-confirm"
+                                placeholder="Re-enter your password" required
+                                class="w-full rounded-[14px] bg-white border border-[#d4d4d8] px-3.5 py-2.5 pr-11
+                                       text-[14px] text-[#09090b] placeholder:text-[#a1a1aa]
+                                       hover:border-[#a1a1aa]
+                                       focus:border-[#16a34a] focus:outline-none focus:ring-2 focus:ring-[#16a34a]/15
+                                       transition-colors duration-150">
                             <button type="button" @click="show = !show"
-                                    class="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-600 transition-colors">
+                                    class="absolute inset-y-0 right-0 flex items-center px-3 text-[#a1a1aa] hover:text-[#52525b] transition-colors">
                                 <i :class="show ? 'bx bx-hide' : 'bx bx-show'" class="text-lg leading-none"></i>
                             </button>
                         </div>
-                    </div>
+                    </x-form.field>
 
-                    <button type="submit" class="w-full auth-primary text-white py-2.5 rounded-xl font-semibold shadow-sm transition">
+                    <x-ui.button type="submit" variant="primary" class="w-full justify-center py-2.5">
                         Create Account
-                    </button>
+                    </x-ui.button>
                 </form>
 
                 <p class="text-sm text-slate-500 mt-4">
@@ -196,6 +224,7 @@
         </div>
 
     </div>
+</div>
 </div>
 @livewireScripts
 </body>
