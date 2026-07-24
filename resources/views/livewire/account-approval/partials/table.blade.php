@@ -178,6 +178,16 @@
                                 <i class="bx bx-id-card text-[#a1a1aa] text-sm shrink-0"></i>
                                 <span class="text-[13px] text-[#52525b]">ID #{{ $user->id }}</span>
                             </div>
+                            <div class="flex items-center gap-2">
+                                <i class="bx bx-sync text-[#a1a1aa] text-sm shrink-0"></i>
+                                <span class="text-[13px] text-[#52525b]">
+                                    @if($user->synced_at)
+                                        Synced {{ $user->synced_at->format('M d, Y h:i A') }}
+                                    @else
+                                        <span class="italic text-[#a1a1aa]">Not synced</span>
+                                    @endif
+                                </span>
+                            </div>
                         </div>
                     </x-layout.card-section>
 

@@ -38,7 +38,7 @@
     aria-modal="true"
     {{ $attributes->merge([
         'class' =>
-            'fixed inset-y-0 z-50 flex flex-col bg-white w-full ' .
+            'oswald fixed inset-y-0 z-50 flex flex-col bg-white w-full ' .
             $width . ' ' .
             ($position === 'left' ? 'left-0' : 'right-0')
     ]) }}
@@ -49,7 +49,7 @@
 
         <div class="flex items-center gap-3 min-w-0">
             @if ($icon)
-                <span class="shrink-0 flex items-center justify-center w-8 h-8 rounded-[8px]
+                <span class="shrink-0 flex items-center justify-center w-8 h-8 rounded-md
                              bg-[#D5FFF0] border border-[#00C075]">
                     <i class="bx {{ $icon }} text-base leading-none text-[#06754E]"></i>
                 </span>

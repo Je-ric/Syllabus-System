@@ -89,55 +89,21 @@ class CaisApiService
      * Returns ['token' => string, 'user' => array] on success, null on failure.
      * The token is stored in session and used for all subsequent CAIS requests.
      */
+    /**
+     * Authenticate against CAIS with user credentials.
+     * Returns ['token' => string, 'user' => normalizedArray] on success, null on failure/unavailable.
+     * Handles both external CAIS shape and local system shape.
+     */
     public function verifyUser(string $email, string $password): ?array
     {
-        $url = config('cais.endpoints.verify_user'); // config/cais
+        $url = config('cais.endpoints.verify_user');
 
         if (empty($url)) {
             Log::warning('CAIS verify_user endpoint not configured — skipping CAIS auth.');
-
-            return [
-                'success' => false,
-                'message' => 'CAIS verify_user endpoint not configured.',
-                'url' => $url,
-            ];
+            return null;
         }
 
         try {
-            // $response = Http::withHeaders([
-            //         'X-API-KEY' => $this->key,
-            //         'Accept'    => 'application/json',
-            //     ])
-            //     ->timeout($this->timeout)
-            //     ->post($url, [
-            //         'email' => $email,
-            //         'password' => $password,
-            //     ]);
-
-            // if ($response->successful()) {
-            //     $json  = $response->json();
-            //     $token = data_get($json, 'token');
-            //     $raw   = data_get($json, 'user', data_get($json, 'faculty'));
-
-            //     if (! $token || ! $raw) {
-            //         Log::warning('CAIS verifyUser: missing token or user in response', ['body' => $json]);
-            //         return null;
-            //     }
-
-            //     return ['token' => $token, 'user' => $this->normalizeUser($raw)];
-            // }
-
-            // // 401 = wrong credentials — expected, not a system error
-            // if ($response->status() === 401) {
-            //     return null;
-            // }
-
-            // Log::warning('CAIS verifyUser unexpected response', [
-            //     'status' => $response->status(),
-            //     'body'   => $response->body(),
-            // ]);
-
-            // return null;
             $response = Http::withHeaders([
                 'X-API-KEY' => $this->key,
                 'Accept'    => 'application/json',
@@ -146,23 +112,37 @@ class CaisApiService
                 ->post($url, [
                     'email'    => $email,
                     'password' => $password,
-                ]); 
+                ]);
 
-            return $response->json();
-            
-        // } catch (ConnectionException $e) {
-        //     Log::error('CAIS verifyUser connection failed', ['error' => $e->getMessage()]);
-        //     return null;
-        // }
+            if (! $response->successful()) {
+                // 401 = wrong credentials — expected, not a system error
+                if ($response->status() !== 401) {
+                    Log::warning('CAIS verifyUser unexpected response', [
+                        'status' => $response->status(),
+                        'body'   => $response->body(),
+                    ]);
+                }
+                return null;
+            }
+
+            $json  = $response->json();
+            $token = data_get($json, 'token');
+
+            // Support both { user: {...} } and { faculty: {...} } and flat response shapes
+            $raw = data_get($json, 'user', data_get($json, 'faculty', $json));
+
+            if (! $token || ! is_array($raw)) {
+                Log::warning('CAIS verifyUser: missing token or user in response', ['body' => $json]);
+                return null;
+            }
+
+            return ['token' => $token, 'user' => $this->normalizeUser($raw)];
+
         } catch (ConnectionException $e) {
-            Log::error('CAIS verifyUser connection failed', [
+            Log::warning('CAIS verifyUser connection failed — falling back to local auth', [
                 'error' => $e->getMessage(),
             ]);
-
-            return [
-                'message' => 'Could not connect to CAIS.',
-                'error'   => $e->getMessage(),
-            ];
+            return null;
         }
     }
 
@@ -362,10 +342,16 @@ class CaisApiService
 
     private function normalizeUser(array $u): array
     {
+        // Support combined name field (e.g. local system) or split first/last (CAIS)
+        $name      = data_get($u, 'name');
+        $firstName = data_get($u, 'first_name', data_get($u, 'user_fname', ''));
+        $lastName  = data_get($u, 'last_name', data_get($u, 'user_lname', ''));
+
         return [
             'cais_user_id' => data_get($u, 'id', data_get($u, 'user_id')),
-            'first_name'   => data_get($u, 'first_name', data_get($u, 'user_fname')),
-            'last_name'    => data_get($u, 'last_name', data_get($u, 'user_lname')),
+            'name'         => $name ?: trim("{$firstName} {$lastName}"),
+            'first_name'   => $firstName ?: ($name ? explode(' ', $name, 2)[0] : ''),
+            'last_name'    => $lastName  ?: ($name ? (explode(' ', $name, 2)[1] ?? '') : ''),
             'email'        => data_get($u, 'email'),
             'user_type'    => data_get($u, 'user_type'),
         ];

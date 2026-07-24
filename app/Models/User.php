@@ -23,6 +23,7 @@ class User extends Authenticatable
         'phone_number',
         'office',
         'email_verified_at',
+        'synced_at',
     ];
 
     protected $hidden = [
@@ -34,6 +35,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'synced_at'         => 'datetime',
             'password'          => 'hashed',
             'cais_user_id'      => 'integer',
         ];
@@ -56,22 +58,35 @@ class User extends Authenticatable
      */
     public function syncFromCais(array $caisUser): void
     {
-        $updates = [];
+        $updates = ['synced_at' => now()];
 
         $caisId = data_get($caisUser, 'cais_user_id');
         if ($caisId && $this->cais_user_id !== $caisId) {
             $updates['cais_user_id'] = $caisId;
         }
 
-        $firstName = data_get($caisUser, 'first_name', '');
-        $lastName  = data_get($caisUser, 'last_name', '');
-        $fullName  = trim("{$firstName} {$lastName}");
-        if ($fullName && $this->name !== $fullName) {
-            $updates['name'] = $fullName;
+        // Handle both split (first_name/last_name) and combined (name) fields
+        $name = data_get($caisUser, 'name');
+        if (! $name) {
+            $firstName = trim(data_get($caisUser, 'first_name', ''));
+            $lastName  = trim(data_get($caisUser, 'last_name', ''));
+            $name      = trim("{$firstName} {$lastName}");
+        }
+        if ($name && $this->name !== $name) {
+            $updates['name'] = $name;
         }
 
-        if (! empty($updates)) {
-            $this->update($updates);
+        // Always activate on successful CAIS sync
+        if ($this->account_status !== 'active') {
+            $updates['account_status'] = 'active';
+        }
+
+        $this->update($updates);
+
+        // Ensure faculty role is attached
+        $facultyRole = Role::where('name', 'faculty')->firstOrCreate(['name' => 'faculty']);
+        if (! $this->roles()->where('role_id', $facultyRole->id)->exists()) {
+            $this->roles()->attach($facultyRole->id);
         }
     }
 

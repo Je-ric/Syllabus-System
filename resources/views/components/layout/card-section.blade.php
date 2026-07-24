@@ -5,9 +5,12 @@
     'subtitle' => null,
     'padded'   => true,
 ])
+{{-- border-[#E3E8EB]  --}}
 
 <div {{ $attributes->merge([
-    'class' => 'rounded-2xl border border-[#E3E8EB] bg-white/[.97] backdrop-blur-sm overflow-hidden
+    'class' => 'rounded-2xl border
+    border-white
+    bg-white/[.97] backdrop-blur-sm overflow-hidden
                 shadow-[0_1px_2px_rgba(16,24,40,0.03),0_2px_8px_rgba(16,24,40,0.06),0_0_0_0.5px_rgba(16,24,40,0.04)]
                 relative'
 ]) }}>

@@ -86,17 +86,12 @@ class AuthController extends Controller
             $user = User::firstOrCreate(
                 ['email' => $email],
                 [
-                    'name'              => trim(($result['user']['first_name'] ?? '') . ' ' . ($result['user']['last_name'] ?? '')),
+                    'name'              => $result['user']['name'],
                     'password'          => Hash::make($password),
                     'account_status'    => 'active',
                     'email_verified_at' => now(),
                 ]
             );
-
-            // Ensure active — a previously pending/rejected CAIS user should be activated
-            if ($user->account_status !== 'active') {
-                $user->update(['account_status' => 'active']);
-            }
 
             $request->session()->put('cais_token', $result['token']);
             $user->syncFromCais($result['user']);
