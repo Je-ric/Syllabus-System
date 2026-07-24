@@ -20,26 +20,6 @@ below (see the map at the bottom).
 | 10 | `10-debugging-guide.md` | Step-by-step debugging process and tool reference |
 | 11 | `11-common-errors-log.md` | Running log of specific errors hit and their fixes (add new entries here) |
 | 12 | `12-deployment-checklist.md` | Pre-launch checklist |
-| 13 | `13-condition-completeness-and-error-handling.md` | Exhaustive condition coverage, conflicting conditions, all error possibilities, missing/null/empty data handling |
+| 13 | `13-condition-completeness-and-error-handling.md` | Method for making sure conditions are exhaustive and non-conflicting. Exhaustive condition coverage, conflicting conditions, all error possibilities, missing/null/empty data handling |
 | 14 | `14-input-validation-guide.md` | What to validate, where, error response shape, frontend display rules, null/missing/wrong-type handling |
-| 13 | `13-condition-completeness-and-edge-cases.md` | Method for making sure conditions are exhaustive and non-conflicting — null/empty data, boundaries, state machines, error paths, concurrency |
-
-## Where old content went (dedup map)
-
-- `AGENT_PERSONA.md` → 01, references updated to match this file set
-- `PROJECT_RULES.md` → split: principles/standards → 02, Database section → 09
-- `REFRACTORING_RULES.md` (Rule of Three) → merged into 02
-- `CODE_REVIEW.md` → 03 (unchanged, this is the canonical checklist)
-- `naming-conventions.md` → 04 (kept as canonical; it was a superset of the table in `development-notes.md`)
-- `FRONTEND_UI.md` → 05, extended with the app-specific behaviors that were only in `development-notes.md`
-- `security-guide.md` → 06 (kept as canonical; it was a superset of the security section in `development-notes.md`)
-- `api-standards.md` → 07 (unchanged)
-- `system-flow-template.md` + `development-notes.md` §1–3 (Foundation, Planning, Core Features) + audit-log requirement from §7 → 08
-- `development-notes.md` §9 (Database Notes) + `PROJECT_RULES.md` Database section → merged into 09
-- `debugging-guide.md` → 10 (kept as canonical; it was a superset of `development-notes.md` §10)
-- `common-errors.md` → 11 (unchanged — keep appending new entries at the top)
-- `development-notes.md` §11 (Deployment Notes) → 12
-
-`development-notes.md`'s other §7 items (service classes, hashed passwords,
-server-side validation, proper HTTP methods) were exact duplicates of rules
-already stated in 02, 06, and 07 — they were not copied again.
+| 15 | `15-md-update.md` | — update documentation per module |
