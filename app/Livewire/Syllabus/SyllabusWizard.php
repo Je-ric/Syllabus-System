@@ -2,23 +2,16 @@
 
 namespace App\Livewire\Syllabus;
 
+use App\Services\Syllabus\SyllabusCompletionService;
 use App\Services\Syllabus\SyllabusReviewService;
 use App\Services\Syllabus\SyllabusSnapshotService;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use App\Models\Syllabus;
 use App\Models\Course;
-use App\Models\CompleteSyllabus;
 use App\Models\AuditLog;
-use App\Models\SyllabusWeek;
-use App\Models\CourseOutcome;
-use App\Models\CourseComponent;
-use App\Models\WeekContent;
-use App\Models\SyllabusEvaluationItem;
 use App\Models\AcademicCalendar;
 use Throwable;
 
@@ -283,114 +276,19 @@ class SyllabusWizard extends Component
             return;
         }
 
-        // 1. Generate HTML snapshots (complete + abridged + assessment) ──────
         try {
-            $snapshot       = app(SyllabusSnapshotService::class);
-            $html           = $snapshot->generateCompleteHtml($syllabus);
-            $htmlAbridged   = $snapshot->generateAbridgedHtml($syllabus);
-            $htmlAssessment = $snapshot->generateAssessmentHtml($syllabus);
+            $version = app(SyllabusSnapshotService::class)->saveVersion($syllabus);
         } catch (Throwable $e) {
-            report($e);
-            $this->dispatch('lw-toast', type: 'error', message: 'Save-as-done failed: ' . $e->getMessage());
-            return;
-        }
-
-        // 2. Build storage paths ─────────────────────────────────────────
-        $program    = $syllabus->course?->program;
-        $department = $program?->departments?->first();
-        $college    = $department?->college;
-        $faculty    = $syllabus->preparer;
-
-        $collegeName    = $college?->name    ?? 'Unknown College';
-        $departmentName = $department?->name ?? 'Unknown Department';
-        $programName    = $program?->program_name ?? $program?->name ?? 'Unknown Program';
-        $facultyName    = $faculty?->name    ?? 'User ' . ($syllabus->prepared_by ?? 'Unknown');
-
-        $academicYear = $syllabus->academicCalendar?->academic_year ?? 'N-A';
-        $semester     = $syllabus->academicCalendar?->semester      ?? 'N-A';
-        $courseCode   = $syllabus->course?->course_code             ?? 'COURSE';
-
-        // 3. Reserve a version number, build paths, write files, then commit DB.
-        //    File I/O is intentionally kept outside the transaction so a DB
-        //    rollback never leaves orphaned files, and a file-write failure
-        //    never leaves a DB record pointing at a missing file.
-        try {
-            // Step A — reserve version number inside a short transaction.
-            [$version, $storagePath, $storagePathAbridged, $storagePathAssessment] =
-                DB::transaction(function () use ($syllabus, $collegeName, $departmentName, $programName, $facultyName, $courseCode, $academicYear, $semester) {
-                    $version = (int) (CompleteSyllabus::where('syllabus_id', $syllabus->id)
-                        ->lockForUpdate()
-                        ->max('version') ?? 0) + 1;
-
-                    $versionFolder = "v{$version} ({$academicYear} {$semester})";
-                    $baseDir = implode('/', [
-                        'Syllabus Snapshots',
-                        $collegeName,
-                        $departmentName,
-                        $programName,
-                        $facultyName,
-                        $courseCode,
-                        $versionFolder,
-                    ]);
-
-                    return [
-                        $version,
-                        $baseDir . '/Complete - '   . $courseCode . '.html',
-                        $baseDir . '/Abridged - '   . $courseCode . '.html',
-                        $baseDir . '/Assessment - ' . $courseCode . '.html',
-                    ];
-                });
-
-            // Step B — write files to disk (outside any transaction).
-            Storage::disk('syllabus_snapshots')->put($storagePath,           $html);
-            Storage::disk('syllabus_snapshots')->put($storagePathAbridged,   $htmlAbridged);
-            Storage::disk('syllabus_snapshots')->put($storagePathAssessment, $htmlAssessment);
-
-            // Mirror to Google Drive (secondary, silent — never blocks save).
-            try {
-                Storage::disk('google')->put($storagePath,           $html);
-                Storage::disk('google')->put($storagePathAbridged,   $htmlAbridged);
-                Storage::disk('google')->put($storagePathAssessment, $htmlAssessment);
-            } catch (Throwable) {
-                // Non-fatal — local copy is the source of truth.
-            }
-
-            // Step C — persist DB record now that files exist.
-            DB::transaction(function () use ($syllabus, $storagePath, $storagePathAbridged, $storagePathAssessment, $version, $academicYear, $semester, $html, $htmlAbridged, $htmlAssessment) {
-                CompleteSyllabus::create([
-                    'syllabus_id'         => $syllabus->id,
-                    'course_id'           => $syllabus->course_id,
-                    'academic_year'       => $academicYear,
-                    'semester'            => $semester,
-                    'pdf_path'            => $storagePath,
-                    'abridged_path'       => $storagePathAbridged,
-                    'evaluation_path'     => $storagePathAssessment,
-                    'version'             => $version,
-                    'approved_at'         => null,
-                    'approved_by'         => null,
-                    'checksum'            => hash('sha256', $html),
-                    'checksum_abridged'   => hash('sha256', $htmlAbridged),
-                    'checksum_evaluation' => hash('sha256', $htmlAssessment),
-                ]);
-
-                $syllabus->forceFill([
-                    'status'       => 'under_review',
-                    'current_step' => 'review',
-                ])->save();
-            });
-        } catch (Throwable $e) {
-            // If files were written but the DB commit failed, clean them up.
-            foreach ([$storagePath ?? null, $storagePathAbridged ?? null, $storagePathAssessment ?? null] as $path) {
-                if ($path) {
-                    try { Storage::disk('syllabus_snapshots')->delete($path); } catch (Throwable) {}
-                }
-            }
             report($e);
             $this->dispatch('lw-toast', type: 'error', message: 'Save-as-done failed: ' . $e->getMessage());
             return;
         }
 
         $this->syllabus->refresh();
+
+        $courseCode   = $syllabus->course?->course_code             ?? 'COURSE';
+        $academicYear = $syllabus->academicCalendar?->academic_year ?? 'N-A';
+        $semester     = $syllabus->academicCalendar?->semester      ?? 'N-A';
 
         AuditLog::record(
             action: 'saved_version',
@@ -408,11 +306,15 @@ class SyllabusWizard extends Component
 
     public function submitForReview()
     {
-        if ($this->stepHasMissingRequired('academic_calendar')
-            || $this->stepHasMissingRequired('course_components')
-            || $this->stepHasMissingRequired('course_outcomes')
-            || $this->stepHasMissingRequired('weekly_coverage')
-            || $this->stepHasMissingRequired('course_evaluation')) {
+        $completion  = app(SyllabusCompletionService::class);
+        $syllabusId  = (int) $this->syllabus->id;
+        $hasLecLab   = (bool) $this->course->has_lec_lab;
+
+        if (empty($this->syllabus->academic_calendar_id)
+            || $completion->isMissing($syllabusId, 'course_components', $hasLecLab)
+            || $completion->isMissing($syllabusId, 'course_outcomes',   $hasLecLab)
+            || $completion->isMissing($syllabusId, 'weekly_coverage',   $hasLecLab)
+            || $completion->isMissing($syllabusId, 'course_evaluation', $hasLecLab)) {
             $this->dispatch('lw-toast', type: 'error', message: 'Complete all required fields before submitting.');
             return null;
         }
@@ -441,11 +343,17 @@ class SyllabusWizard extends Component
     {
         // Cache step-missing indicators once per render so Blade loops
         // don't fire repeated DB queries for each step tab.
-        $checkedSteps = ['academic_calendar', 'course_components', 'course_outcomes', 'weekly_coverage', 'course_evaluation'];
-        $this->stepMissing = [];
-        foreach ($checkedSteps as $step) {
-            $this->stepMissing[$step] = $this->stepHasMissingRequired($step);
-        }
+        $completion = app(SyllabusCompletionService::class);
+        $syllabusId = (int) $this->syllabus->id;
+        $hasLecLab  = (bool) $this->course->has_lec_lab;
+
+        $this->stepMissing = [
+            'academic_calendar' => empty($this->syllabus->academic_calendar_id),
+            'course_components' => $completion->isMissing($syllabusId, 'course_components', $hasLecLab),
+            'course_outcomes'   => $completion->isMissing($syllabusId, 'course_outcomes',   $hasLecLab),
+            'weekly_coverage'   => $completion->isMissing($syllabusId, 'weekly_coverage',   $hasLecLab),
+            'course_evaluation' => $completion->isMissing($syllabusId, 'course_evaluation', $hasLecLab),
+        ];
 
         return view('livewire.syllabus.syllabus-wizard');
     }
@@ -469,70 +377,6 @@ class SyllabusWizard extends Component
         $steps = array_keys($this->syllabus->getWizardSteps());
         $index = array_search($this->currentStep, $steps, true);
         return $index !== false && $index > 0;
-    }
-
-    public function stepHasMissingRequired(string $step): bool
-    {
-        $syllabusId = (int) $this->syllabus->id;
-
-        switch ($step) {
-
-            case 'academic_calendar':
-                return empty($this->syllabus->academic_calendar_id);
-
-            case 'course_components':
-                $lec        = CourseComponent::where('syllabus_id', $syllabusId)->where('type', 'LEC')->first();
-                $missingLec = ! $this->componentComplete($lec);
-                $lab        = CourseComponent::where('syllabus_id', $syllabusId)->where('type', 'LAB')->first();
-                $missingLab = $this->course->has_lec_lab ? ! $this->componentComplete($lab) : false;
-                return $missingLec || $missingLab;
-
-            case 'course_outcomes':
-                return ! CourseOutcome::where('syllabus_id', $syllabusId)
-                    ->whereRaw("TRIM(description) <> ''")
-                    ->exists();
-
-            case 'weekly_coverage':
-                return ! SyllabusWeek::where('syllabus_id', $syllabusId)->exists();
-
-            case 'course_evaluation':
-                $weekContentIds = WeekContent::query()
-                    ->join('syllabus_weeks', 'syllabus_weeks.id', '=', 'week_contents.syllabus_week_id')
-                    ->where('syllabus_weeks.syllabus_id', $syllabusId)
-                    ->whereRaw("syllabus_weeks.week_no <> 1")  // exclude MVGO week
-                    ->whereRaw("TRIM(COALESCE(week_contents.assessment_task, '')) <> ''")
-                    ->whereRaw("TRIM(week_contents.assessment_task) <> 'Non-Teaching Week'")
-                    ->pluck('week_contents.id');
-
-                if ($weekContentIds->isEmpty()) {
-                    return true;
-                }
-
-                $evaluatedCount = SyllabusEvaluationItem::whereIn('week_content_id', $weekContentIds)
-                    ->whereNotNull('weight')
-                    ->count();
-
-                return $evaluatedCount !== $weekContentIds->count();
-
-            default:
-                return false;
-        }
-    }
-
-    private function componentComplete(?CourseComponent $component): bool
-    {
-        if (! $component) {
-            return false;
-        }
-
-        // phone and office are optional; schedule/consultation_hours were moved
-        // to their own tables — not checked here
-        return collect([
-            $component->instructor_name,
-            $component->instructor_email,
-            $component->class_hours,
-            $component->performance_standard,
-        ])->every(fn ($v) => trim((string) $v) !== '');
     }
 
     public function calendarIsInactive(): bool

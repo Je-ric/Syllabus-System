@@ -107,11 +107,15 @@ class WeeklyCoverageStep extends Component
             ? (int) $syllabus->academic_calendar_id
             : null;
 
-        $ok = app(WeekGenerationService::class)->generate(
-            $syllabus,
-            $this->courseComponents,
-            $this
-        );
+        try {
+            $ok = app(WeekGenerationService::class)->generate(
+                $syllabus,
+                $this->courseComponents
+            );
+        } catch (\RuntimeException $e) {
+            $this->dispatch('lw-toast', type: 'error', message: $e->getMessage());
+            return;
+        }
 
         if ($ok) {
             $this->loadData();
@@ -124,11 +128,15 @@ class WeeklyCoverageStep extends Component
     {
         $this->reloadCourseComponents();
 
-        app(WeekGenerationService::class)->regenerate(
-            $this->freshSyllabus(),
-            $this->courseComponents,
-            $this
-        );
+        try {
+            app(WeekGenerationService::class)->regenerate(
+                $this->freshSyllabus(),
+                $this->courseComponents
+            );
+        } catch (\RuntimeException $e) {
+            $this->dispatch('lw-toast', type: 'error', message: $e->getMessage());
+            return;
+        }
 
         $this->weekInputs  = [];
         $this->lockedWeeks = [];

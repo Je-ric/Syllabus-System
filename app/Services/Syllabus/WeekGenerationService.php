@@ -12,7 +12,6 @@ use App\Models\WeekContent;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Livewire\Component;
 
 // Owns the full lifecycle of SyllabusWeek rows for a syllabus.
 //   generate()       — first-time creation (idempotent guard included)
@@ -22,25 +21,30 @@ use Livewire\Component;
 // Break weeks are SKIPPED (no row created, week numbers stay sequential).
 // Exam / non-teaching labels are written into WeekContent rows at creation
 // time so WeekLockService remains a pure read.
+//
+// generate() and regenerate() throw \RuntimeException on validation failure
+// (no calendar, no components) — the caller (WeeklyCoverageStep) catches
+// and dispatches the appropriate toast. Services must not depend on Livewire.
 class WeekGenerationService
 {
     // Generate weeks for the first time.
     // Idempotent — exits cleanly if rows already exist.
-    public function generate(Syllabus $syllabus, array $courseComponents, Component $livewire): bool
+    // @throws \RuntimeException when prerequisites are not met
+    public function generate(Syllabus $syllabus, array $courseComponents): bool
     {
         if (! $syllabus->academic_calendar_id) {
-            $livewire->dispatch('lw-toast', type: 'error', message: 'Select an academic calendar first.');
-            return false;
+            throw new \RuntimeException('Select an academic calendar first.');
         }
 
-        return $this->createWeekRows($syllabus, $courseComponents, $livewire);
+        return $this->createWeekRows($syllabus, $courseComponents);
     }
 
     // Delete every existing week then regenerate fresh from the calendar.
-    public function regenerate(Syllabus $syllabus, array $courseComponents, Component $livewire): bool
+    // @throws \RuntimeException when prerequisites are not met
+    public function regenerate(Syllabus $syllabus, array $courseComponents): bool
     {
         $this->deleteAllWeeks($syllabus);
-        return $this->createWeekRows($syllabus, $courseComponents, $livewire);
+        return $this->createWeekRows($syllabus, $courseComponents);
     }
 
     // Hard-delete all SyllabusWeek rows and their dependent data for a syllabus.
@@ -73,7 +77,8 @@ class WeekGenerationService
     // Break weeks are SKIPPED — no row created, no week-number gap.
     // The entire loop runs inside a DB transaction so a mid-loop failure
     // never leaves a partial week set.
-    private function createWeekRows(Syllabus $syllabus, array $courseComponents, Component $livewire): bool
+    // @throws \RuntimeException when the calendar has no dates or no components exist
+    private function createWeekRows(Syllabus $syllabus, array $courseComponents): bool
     {
         if (SyllabusWeek::where('syllabus_id', $syllabus->id)->exists()) {
             return true;
@@ -81,16 +86,14 @@ class WeekGenerationService
 
         $calendar = $syllabus->academicCalendar;
         if (! $calendar || ! $calendar->start_date || ! $calendar->end_date) {
-            $livewire->dispatch('lw-toast', type: 'error', message: 'Academic calendar has no start/end date.');
-            return false;
+            throw new \RuntimeException('Academic calendar has no start/end date.');
         }
 
         $hasLEC = isset($courseComponents['LEC']);
         $hasLAB = isset($courseComponents['LAB']);
 
         if (! $hasLEC && ! $hasLAB) {
-            $livewire->dispatch('lw-toast', type: 'error', message: 'Complete the Course Components step first.');
-            return false;
+            throw new \RuntimeException('Complete the Course Components step first.');
         }
 
         // Pre-load all calendar events once so the loop does not query per week.

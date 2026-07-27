@@ -4,12 +4,14 @@ namespace App\Services\Syllabus;
 
 use App\Models\CompleteSyllabus;
 use App\Models\Syllabus;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
-// Handles HTML snapshot generation and saved-version file serving.
-// Used by SyllabusController for downloads and saved-version previews.
+// Handles HTML snapshot generation, version saving, and saved-version file serving.
+// Used by SyllabusWizard (saveVersion) and SyllabusController (downloads, previews).
 //
 // Public API:
+//   saveVersion(Syllabus)            — generate HTML, write files, persist DB record; returns version int
 //   generateCompleteHtml(Syllabus)   — render complete preview as self-contained HTML
 //   generateAbridgedHtml(Syllabus)   — render abridged preview as self-contained HTML
 //   generateAssessmentHtml(Syllabus) — render assessment preview as self-contained HTML
@@ -20,6 +22,102 @@ class SyllabusSnapshotService
     public function __construct(
         private readonly SyllabusPreviewService $previewService
     ) {}
+
+    // ── Version save ──────────────────────────────────────────────────────────
+
+    // Generate HTML snapshots, write them to disk, and persist the CompleteSyllabus
+    // record in one coordinated sequence.
+    //
+    // Step A — reserve version number (short transaction + lock)
+    // Step B — write files to disk (outside transaction — rollback must not leave orphans)
+    // Step C — persist DB record now that files exist
+    //
+    // Returns the new version number.
+    // Throws \Throwable on any failure — caller is responsible for cleanup messaging.
+    public function saveVersion(Syllabus $syllabus): int
+    {
+        $html           = $this->generateCompleteHtml($syllabus);
+        $htmlAbridged   = $this->generateAbridgedHtml($syllabus);
+        $htmlAssessment = $this->generateAssessmentHtml($syllabus);
+
+        $program    = $syllabus->course?->program;
+        $department = $program?->departments?->first();
+        $college    = $department?->college;
+        $faculty    = $syllabus->preparer;
+
+        $collegeName    = $college?->name    ?? 'Unknown College';
+        $departmentName = $department?->name ?? 'Unknown Department';
+        $programName    = $program?->program_name ?? $program?->name ?? 'Unknown Program';
+        $facultyName    = $faculty?->name    ?? 'User ' . ($syllabus->prepared_by ?? 'Unknown');
+        $academicYear   = $syllabus->academicCalendar?->academic_year ?? 'N-A';
+        $semester       = $syllabus->academicCalendar?->semester      ?? 'N-A';
+        $courseCode     = $syllabus->course?->course_code             ?? 'COURSE';
+
+        // Step A — reserve version number
+        [$version, $pathComplete, $pathAbridged, $pathAssessment] =
+            DB::transaction(function () use ($syllabus, $collegeName, $departmentName, $programName, $facultyName, $courseCode, $academicYear, $semester) {
+                $version = (int) (CompleteSyllabus::where('syllabus_id', $syllabus->id)
+                    ->lockForUpdate()
+                    ->max('version') ?? 0) + 1;
+
+                $baseDir = implode('/', [
+                    'Syllabus Snapshots',
+                    $collegeName,
+                    $departmentName,
+                    $programName,
+                    $facultyName,
+                    $courseCode,
+                    "v{$version} ({$academicYear} {$semester})",
+                ]);
+
+                return [
+                    $version,
+                    $baseDir . '/Complete - '   . $courseCode . '.html',
+                    $baseDir . '/Abridged - '   . $courseCode . '.html',
+                    $baseDir . '/Assessment - ' . $courseCode . '.html',
+                ];
+            });
+
+        // Step B — write files (outside transaction)
+        Storage::disk('syllabus_snapshots')->put($pathComplete,   $html);
+        Storage::disk('syllabus_snapshots')->put($pathAbridged,   $htmlAbridged);
+        Storage::disk('syllabus_snapshots')->put($pathAssessment, $htmlAssessment);
+
+        // Mirror to Google Drive — secondary, silent, never blocks save
+        try {
+            Storage::disk('google')->put($pathComplete,   $html);
+            Storage::disk('google')->put($pathAbridged,   $htmlAbridged);
+            Storage::disk('google')->put($pathAssessment, $htmlAssessment);
+        } catch (\Throwable) {
+            // Non-fatal — local copy is the source of truth
+        }
+
+        // Step C — persist DB record now that files exist
+        DB::transaction(function () use ($syllabus, $pathComplete, $pathAbridged, $pathAssessment, $version, $academicYear, $semester, $html, $htmlAbridged, $htmlAssessment) {
+            CompleteSyllabus::create([
+                'syllabus_id'         => $syllabus->id,
+                'course_id'           => $syllabus->course_id,
+                'academic_year'       => $academicYear,
+                'semester'            => $semester,
+                'pdf_path'            => $pathComplete,
+                'abridged_path'       => $pathAbridged,
+                'evaluation_path'     => $pathAssessment,
+                'version'             => $version,
+                'approved_at'         => null,
+                'approved_by'         => null,
+                'checksum'            => hash('sha256', $html),
+                'checksum_abridged'   => hash('sha256', $htmlAbridged),
+                'checksum_evaluation' => hash('sha256', $htmlAssessment),
+            ]);
+
+            $syllabus->forceFill([
+                'status'       => 'under_review',
+                'current_step' => 'review',
+            ])->save();
+        });
+
+        return $version;
+    }
 
     // ── HTML snapshot generation ──────────────────────────────────────────────
 

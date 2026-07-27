@@ -39,7 +39,7 @@
         {{-- Brand header --}}
         <div class="shrink-0 px-4 pt-5 pb-4 border-b border-[#F1F3F5]">
             <div class="flex items-center justify-between">
-                <a href="{{ route('syllabus.index') }}" class="flex items-center gap-2.5">
+                <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5">
                     <div class="w-9 h-9 flex items-center justify-center shrink-0">
                         <img src="{{ asset('assets/CLSU-LOGO-removebg.png') }}" alt="CLSU Logo"
                             class="w-9 h-9 object-contain">
@@ -58,6 +58,15 @@
         {{-- Nav --}}
         <div class="flex-1 overflow-y-auto no-scrollbar py-3 px-2.5 space-y-5">
             @auth
+                <nav>
+                    <p class="nav-label">Home</p>
+                    <a href="{{ route('dashboard') }}"
+                        class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                        <i class="bx bx-grid-alt nav-icon"></i>
+                        Dashboard
+                    </a>
+                </nav>
+
                 @if ($user->hasRole('admin') || $user->hasRole('faculty') || $user->hasRole('ovpaa'))
                     <nav>
                         <p class="nav-label">Syllabus</p>

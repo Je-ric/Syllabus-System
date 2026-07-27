@@ -14,12 +14,13 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\SyllabusController;
 use App\Http\Controllers\OrganizationalHierarchyController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AuditLogController;
 use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 
 Route::get('/', function () {
     if (Auth::check()) {
-        return redirect()->route('syllabus.index');
+        return redirect()->route('dashboard');
     }
     return view('landing');
 })->name('home');
@@ -36,6 +37,8 @@ Route::get('/waiting-approval', function () {
 
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
     Route::get('/profile', [UserController::class,'index'])->name('profile.index');
     Route::put('/profile', [UserController::class,'update'])->name('profile.update');
     Route::post('/profile/password', [UserController::class,'changePassword'])->name('profile.password.change');

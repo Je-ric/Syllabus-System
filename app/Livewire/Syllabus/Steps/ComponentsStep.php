@@ -109,20 +109,7 @@ class ComponentsStep extends Component
         $user = Auth::user();
         if (! $user) return;
 
-        $user->consultationHours()->delete();
-
-        foreach ($rows as $row) {
-            $day  = trim($row['day']  ?? '');
-            $time = trim($row['time'] ?? '');
-            if ($day !== '' && $time !== '') {
-                $user->consultationHours()->create(['day' => $day, 'time' => $time]);
-            }
-        }
-
-        $this->userConsultationHours = $user->fresh()->consultationHours
-            ->map(fn ($h) => ['day' => $h->day, 'time' => $h->time])
-            ->values()->all();
-
+        $this->userConsultationHours = $this->persistConsultationHours($user, $rows);
         $this->dispatch('consultation-hours-updated', hours: $this->userConsultationHours);
     }
 
@@ -157,18 +144,7 @@ class ComponentsStep extends Component
         $labInstructor = User::find($this->lab_user_id);
         if (! $labInstructor) return;
 
-        $labInstructor->consultationHours()->delete();
-        foreach ($rows as $row) {
-            $day  = trim($row['day']  ?? '');
-            $time = trim($row['time'] ?? '');
-            if ($day !== '' && $time !== '') {
-                $labInstructor->consultationHours()->create(['day' => $day, 'time' => $time]);
-            }
-        }
-
-        $this->labConsultationHours = $labInstructor->fresh()->consultationHours
-            ->map(fn ($h) => ['day' => $h->day, 'time' => $h->time])
-            ->values()->all();
+        $this->labConsultationHours = $this->persistConsultationHours($labInstructor, $rows);
     }
 
     public function pushLabConsultationHours(array $rows): void
@@ -351,6 +327,27 @@ class ComponentsStep extends Component
             'class_hours'          => $classHours,
             'performance_standard' => $this->toDecimal($this->lec_performance_standard, 60.00),
         ];
+    }
+
+    // ── Private: consultation hours ───────────────────────────────────────────
+
+    // Delete and re-insert consultation hours for a user, then return the
+    // saved rows as plain arrays. Used by both LEC and LAB save paths.
+    private function persistConsultationHours(User $user, array $rows): array
+    {
+        $user->consultationHours()->delete();
+
+        foreach ($rows as $row) {
+            $day  = trim($row['day']  ?? '');
+            $time = trim($row['time'] ?? '');
+            if ($day !== '' && $time !== '') {
+                $user->consultationHours()->create(['day' => $day, 'time' => $time]);
+            }
+        }
+
+        return $user->fresh()->consultationHours
+            ->map(fn ($h) => ['day' => $h->day, 'time' => $h->time])
+            ->values()->all();
     }
 
     // ── Value helpers ─────────────────────────────────────────────────────────
