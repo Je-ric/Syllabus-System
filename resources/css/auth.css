@@ -1,4 +1,4 @@
-/* .auth-input {
+.auth-input {
     width: 100%;
     border: 1px solid #cbd5e1;
     border-radius: 0.75rem;
@@ -48,4 +48,4 @@
         rgba(0, 129, 2, 1) 0%,
         rgba(149, 210, 45, 1) 100%
     );
-} */
+}
