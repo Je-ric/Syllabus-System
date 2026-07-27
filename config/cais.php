@@ -1,8 +1,9 @@
 <?php
 
 return [
-    'key'     => env('CAIS_API_KEY', ''),
-    'timeout' => (int) env('CAIS_API_TIMEOUT', 10),
+    // Hex key used to encrypt outgoing payloads and decrypt incoming responses (AES-256-GCM)
+    'shared_key' => env('API_SHARED_KEY', ''),
+    'timeout'    => (int) env('CAIS_API_TIMEOUT', 10),
 
     'endpoints' => [
         'colleges'        => env('CAIS_COLLEGES_API_ENDPOINT'),
