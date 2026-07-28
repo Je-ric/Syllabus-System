@@ -36,8 +36,8 @@ class WorkloadController extends Controller
     public function sync(Request $request)
     {
         $request->validate([
-            'cais_employee_id' => ['required', 'string'],
-            'cais_password'    => ['required', 'string'],
+            'cais_email'    => ['required', 'email'],
+            'cais_password' => ['required', 'string'],
         ]);
 
         /** @var \App\Models\User $user */
@@ -46,7 +46,7 @@ class WorkloadController extends Controller
         try {
             $this->syncService->syncForUser(
                 $user,
-                $request->cais_employee_id,
+                $request->cais_email,
                 $request->cais_password
             );
 

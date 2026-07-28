@@ -59,6 +59,8 @@ abstract class CaisHttpClient
      * GET an endpoint using the logged-in user's Bearer token (stored in session after CAIS login).
      * Used for user-scoped data: teaching loads, schedules, workloads.
      * Throws if the user hasn't logged in via CAIS yet (no token in session).
+     * If the response body is an AES-256-GCM encrypted envelope { ciphertext, iv, tag },
+     * it is decrypted automatically using the shared key before returning.
      */
     protected function getWithUserToken(string $url): array
     {
@@ -77,7 +79,21 @@ abstract class CaisHttpClient
                 ->get($url);
 
             if ($response->successful()) {
-                return $response->json() ?? [];
+                $json = $response->json() ?? [];
+
+                // If CAIS returned an encrypted envelope, decrypt it before returning.
+                // This mirrors the same pattern used in CaisAuthService::verifyUser().
+                $sharedKey = config('cais.shared_key');
+                if (! empty($sharedKey) && isset($json['ciphertext'])) {
+                    $decrypted = $this->decryptResponse($json);
+                    if ($decrypted === null) {
+                        Log::error('CAIS getWithUserToken: decryption failed', ['url' => $url]);
+                        throw new CaisApiException('Failed to decrypt CAIS workload response.', 0);
+                    }
+                    return $decrypted;
+                }
+
+                return $json;
             }
 
             $status  = $response->status();

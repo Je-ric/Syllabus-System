@@ -47,10 +47,10 @@
                     <input type="hidden" name="_mode" value="login">
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Employee ID</label>
-                        <input type="text" name="employee_id"
-                               value="{{ old('employee_id') }}"
-                               placeholder="e.g. 2024-00123"
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Email Address</label>
+                        <input type="email" name="email"
+                               value="{{ old('email') }}"
+                               placeholder="you@clsu.edu.ph"
                                class="auth-input" required autofocus>
                     </div>
 

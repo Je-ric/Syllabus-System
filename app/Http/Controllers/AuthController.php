@@ -69,25 +69,25 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'employee_id' => 'required|string',
-            'password'    => 'required|string',
+            'email'    => 'required|email',
+            'password' => 'required|string',
         ]);
 
-        $employeeId = $request->employee_id;
-        $password   = $request->password;
+        $email    = $request->email;
+        $password = $request->password;
 
         // --- Attempt CAIS authentication first ---
         /** @var CaisApiService $cais */
         $cais   = app(CaisApiService::class);
-        $result = $cais->verifyUser($employeeId, $password);
+        $result = $cais->verifyUser($email, $password);
 
         if ($result !== null) {
-            // CAIS confirmed — find or create the local user row by employee ID
+            // CAIS confirmed — find or create the local user row by email
             $user = User::firstOrCreate(
-                ['cais_employee_id' => $employeeId],
+                ['email' => $email],
                 [
                     'name'              => $result['user']['name'],
-                    'email'             => $result['user']['email'] ?? ($employeeId . '@clsu.edu.ph'),
+                    'email'             => $email,
                     'password'          => Hash::make($password),
                     'account_status'    => 'active',
                     'email_verified_at' => now(),
@@ -103,20 +103,19 @@ class AuthController extends Controller
                 action: 'login',
                 module: 'Authentication',
                 referenceId: $user->id,
-                description: "User {$user->name} (ID: {$employeeId}) logged in via CAIS."
+                description: "User {$user->name} ({$email}) logged in via CAIS."
             );
 
             return redirect()->intended(route('syllabus.index'));
         }
 
         // --- CAIS unavailable or rejected — fall back to local auth ---
-        // Look up by employee ID; attempt password check manually since Auth::attempt uses email
-        $user = User::where('cais_employee_id', $employeeId)->first();
+        $user = User::where('email', $email)->first();
 
         if (! $user || ! Hash::check($password, $user->password)) {
             return redirect()->route('auth.show')
-                ->with('toast', ['message' => 'Invalid Employee ID or password.', 'type' => 'error'])
-                ->withInput($request->only('employee_id'));
+                ->with('toast', ['message' => 'Invalid email or password.', 'type' => 'error'])
+                ->withInput($request->only('email'));
         }
 
         if ($user->account_status === 'pending') {
@@ -130,7 +129,7 @@ class AuthController extends Controller
                 : 'Your account has been disabled by an administrator.';
             return redirect()->route('auth.show')
                 ->with('toast', ['message' => $msg, 'type' => 'error'])
-                ->withInput($request->only('employee_id'));
+                ->withInput($request->only('email'));
         }
 
         Auth::login($user, $request->filled('remember'));
@@ -140,7 +139,7 @@ class AuthController extends Controller
             action: 'login',
             module: 'Authentication',
             referenceId: $user->id,
-            description: "User {$user->name} (ID: {$employeeId}) logged in (local fallback)."
+            description: "User {$user->name} ({$email}) logged in (local fallback)."
         );
 
         return redirect()->intended(route('syllabus.index'));

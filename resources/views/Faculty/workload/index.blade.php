@@ -112,18 +112,18 @@
 
         <x-modal.body>
             <p class="text-[13px] text-[#52525b] mb-4">
-                Enter your <strong>CAIS credentials</strong> to fetch your current teaching assignments.
+                Enter your <strong>CAIS email and password</strong> to fetch your current teaching assignments.
                 These are the same credentials you use to log in to the CLSU CAIS system.
             </p>
 
             <div class="space-y-4">
-                <x-form.field label="Employee ID" for="cais_employee_id" required>
+                <x-form.field label="Email Address" for="cais_email" required>
                     <x-form.input
-                        id="cais_employee_id"
-                        name="cais_employee_id"
-                        type="text"
-                        placeholder="e.g. 2024-00123"
-                        value="{{ old('cais_employee_id', auth()->user()->cais_employee_id) }}"
+                        id="cais_email"
+                        name="cais_email"
+                        type="email"
+                        placeholder="you@clsu.edu.ph"
+                        value="{{ old('cais_email', auth()->user()->email) }}"
                         autocomplete="username"
                         required />
                 </x-form.field>

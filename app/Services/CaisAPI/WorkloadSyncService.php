@@ -30,13 +30,13 @@ class WorkloadSyncService extends CaisHttpClient
      *
      * Returns the synced teaching loads for display, or throws on failure.
      */
-    public function syncForUser(User $user, string $employeeId, string $password): array
+    public function syncForUser(User $user, string $email, string $password): array
     {
         // Step 1 — verify credentials; returns ['token' => ..., 'user' => ...] or null
-        $result = $this->auth->verifyUser($employeeId, $password);
+        $result = $this->auth->verifyUser($email, $password);
 
         if ($result === null) {
-            throw new \RuntimeException('Invalid CAIS credentials. Please check your Employee ID and password.');
+            throw new \RuntimeException('Invalid CAIS credentials. Please check your email and password.');
         }
 
         // Step 2 — store token in session so getWithUserToken() can use it
