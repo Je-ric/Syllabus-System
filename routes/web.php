@@ -16,6 +16,7 @@ use App\Http\Controllers\OrganizationalHierarchyController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\WorkloadController;
 use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 
 Route::get('/', function () {
@@ -133,6 +134,11 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/courses/{course}', [CourseController::class, 'destroy'])->name('courses.destroy');
         Route::post('/courses/{course}/archive', [CourseController::class, 'archive'])->name('courses.archive');
         Route::post('/courses/{course}/restore', [CourseController::class, 'restore'])->name('courses.restore');
+    });
+
+    Route::middleware(['role:admin,faculty'])->group(function () {
+        Route::get('/workload', [WorkloadController::class, 'index'])->name('workload.index');
+        Route::post('/workload/sync', [WorkloadController::class, 'sync'])->name('workload.sync');
     });
 
     Route::middleware(['role:admin,faculty,ovpaa'])->group(function () {

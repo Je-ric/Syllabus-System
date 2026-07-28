@@ -16,6 +16,7 @@ class User extends Authenticatable
 
     protected $fillable = [
         'cais_user_id',
+        'cais_employee_id',
         'name',
         'email',
         'password',
@@ -38,6 +39,7 @@ class User extends Authenticatable
             'synced_at'         => 'datetime',
             'password'          => 'hashed',
             'cais_user_id'      => 'integer',
+            'cais_employee_id'  => 'string',
         ];
     }
 
@@ -47,7 +49,7 @@ class User extends Authenticatable
      */
     public function hasCaisLink(): bool
     {
-        return $this->cais_user_id !== null;
+        return $this->cais_user_id !== null || $this->cais_employee_id !== null;
     }
 
     /**
@@ -63,6 +65,11 @@ class User extends Authenticatable
         $caisId = data_get($caisUser, 'cais_user_id');
         if ($caisId && $this->cais_user_id !== $caisId) {
             $updates['cais_user_id'] = $caisId;
+        }
+
+        $employeeId = data_get($caisUser, 'cais_employee_id');
+        if ($employeeId && $this->cais_employee_id !== $employeeId) {
+            $updates['cais_employee_id'] = $employeeId;
         }
 
         // Handle both split (first_name/last_name) and combined (name) fields

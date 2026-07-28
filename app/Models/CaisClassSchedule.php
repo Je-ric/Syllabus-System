@@ -10,8 +10,10 @@ class CaisClassSchedule extends Model
         'external_id',
         'external_semester_id',
         'external_department_id',
+        'external_course_id',
         'cais_semester_id',
         'department_id',
+        'course_id',
         'subject_code',
         'subject_title',
         'units',
@@ -27,8 +29,10 @@ class CaisClassSchedule extends Model
         'external_id'            => 'integer',
         'external_semester_id'   => 'integer',
         'external_department_id' => 'integer',
+        'external_course_id'     => 'integer',
         'cais_semester_id'       => 'integer',
         'department_id'          => 'integer',
+        'course_id'              => 'integer',
         'units'                  => 'decimal:2',
         'synced_at'              => 'datetime',
     ];
@@ -43,6 +47,12 @@ class CaisClassSchedule extends Model
     public function department()
     {
         return $this->belongsTo(Department::class);
+    }
+
+    // Used in: WorkloadSyncService — matched local CSMS course for this schedule
+    public function course()
+    {
+        return $this->belongsTo(Course::class);
     }
 
     // Used in: CaisTeachingLoad — loads assigned to this schedule

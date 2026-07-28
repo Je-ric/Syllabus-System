@@ -46,7 +46,7 @@ class AuthController extends Controller
             'name'           => $request->name,
             'email'          => $request->email,
             'password'       => Hash::make($request->password),
-            'account_status' => 'pending',
+            'account_status' => 'active',
             'email_verified_at' => now(),
             'phone_number'   => $request->phone_number,
             'office'         => $request->office,
@@ -69,24 +69,25 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email'    => 'required|email',
-            'password' => 'required',
+            'employee_id' => 'required|string',
+            'password'    => 'required|string',
         ]);
 
-        $email    = $request->email;
-        $password = $request->password;
+        $employeeId = $request->employee_id;
+        $password   = $request->password;
 
         // --- Attempt CAIS authentication first ---
         /** @var CaisApiService $cais */
         $cais   = app(CaisApiService::class);
-        $result = $cais->verifyUser($email, $password);
+        $result = $cais->verifyUser($employeeId, $password);
 
         if ($result !== null) {
-            // CAIS confirmed — find or create the local user row
+            // CAIS confirmed — find or create the local user row by employee ID
             $user = User::firstOrCreate(
-                ['email' => $email],
+                ['cais_employee_id' => $employeeId],
                 [
                     'name'              => $result['user']['name'],
+                    'email'             => $result['user']['email'] ?? ($employeeId . '@clsu.edu.ph'),
                     'password'          => Hash::make($password),
                     'account_status'    => 'active',
                     'email_verified_at' => now(),
@@ -102,51 +103,44 @@ class AuthController extends Controller
                 action: 'login',
                 module: 'Authentication',
                 referenceId: $user->id,
-                description: "User {$user->name} ({$user->email}) logged in via CAIS."
+                description: "User {$user->name} (ID: {$employeeId}) logged in via CAIS."
             );
 
             return redirect()->intended(route('syllabus.index'));
         }
 
         // --- CAIS unavailable or rejected — fall back to local auth ---
-        $user = User::where('email', $email)->first();
+        // Look up by employee ID; attempt password check manually since Auth::attempt uses email
+        $user = User::where('cais_employee_id', $employeeId)->first();
 
-        if (! $user || ! Auth::attempt(['email' => $email, 'password' => $password], $request->filled('remember'))) {
+        if (! $user || ! Hash::check($password, $user->password)) {
             return redirect()->route('auth.show')
-                ->with('toast', ['message' => 'Invalid email or password.', 'type' => 'error'])
-                ->withInput($request->only('email'));
+                ->with('toast', ['message' => 'Invalid Employee ID or password.', 'type' => 'error'])
+                ->withInput($request->only('employee_id'));
         }
 
-        $request->session()->regenerate();
-
-        /** @var User $user */
-        $user = Auth::user();
-
         if ($user->account_status === 'pending') {
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
             return redirect()->route('waiting.approval')
                 ->with('toast', ['message' => 'Your account is pending admin approval.', 'type' => 'info']);
         }
 
         if (in_array($user->account_status, ['rejected', 'disabled'])) {
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
             $msg = $user->account_status === 'rejected'
                 ? 'Your account registration was rejected.'
                 : 'Your account has been disabled by an administrator.';
             return redirect()->route('auth.show')
                 ->with('toast', ['message' => $msg, 'type' => 'error'])
-                ->withInput($request->only('email'));
+                ->withInput($request->only('employee_id'));
         }
+
+        Auth::login($user, $request->filled('remember'));
+        $request->session()->regenerate();
 
         AuditLog::record(
             action: 'login',
             module: 'Authentication',
             referenceId: $user->id,
-            description: "User {$user->name} ({$user->email}) logged in (local fallback)."
+            description: "User {$user->name} (ID: {$employeeId}) logged in (local fallback)."
         );
 
         return redirect()->intended(route('syllabus.index'));
@@ -177,74 +171,3 @@ class AuthController extends Controller
     }
 }
 
-
-// Login
-    // public function login(Request $request)
-    // {
-    //     $credentials = $request->validate([
-    //         'email'    => 'required|email',
-    //         'password' => 'required',
-    //     ]);
-
-    //     if (Auth::attempt($credentials, $request->filled('remember'))) {
-    //         $request->session()->regenerate();
-
-    //         /** @var User $user */
-    //         $user = Auth::user();
-
-    //         AuditLog::record(
-    //             action: 'login',
-    //             module: 'Authentication',
-    //             referenceId: $user->id,
-    //             description: "User {$user->name} ({$user->email}) logged in."
-    //         );
-
-    //         switch ($user->account_status) {
-    //             case 'active':
-    //                 return redirect()->intended(route('syllabus.index'));
-    //             case 'pending':
-    //                 Auth::logout();
-    //                 $request->session()->invalidate();
-    //                 $request->session()->regenerateToken();
-    //                 return redirect()->route('waiting.approval')
-    //                     ->with('toast', [
-    //                         'message' => 'Your account is pending admin approval.',
-    //                         'type' => 'info',
-    //                     ]);
-    //             case 'rejected':
-    //                 Auth::logout();
-    //                 $request->session()->invalidate();
-    //                 $request->session()->regenerateToken();
-    //                 return redirect()->route('auth.show')
-    //                     ->with('toast', [
-    //                         'message' => 'Your account registration was rejected.',
-    //                         'type' => 'error',
-    //                     ])
-    //                     ->withInput($request->only('email'));
-    //             case 'disabled':
-    //                 Auth::logout();
-    //                 $request->session()->invalidate();
-    //                 $request->session()->regenerateToken();
-    //                 return redirect()->route('auth.show')
-    //                     ->with('toast', [
-    //                         'message' => 'Your account has been disabled by an administrator.',
-    //                         'type' => 'error',
-    //                     ])
-    //                     ->withInput($request->only('email'));
-    //             default:
-    //                 Auth::logout();
-    //                 $request->session()->invalidate();
-    //                 $request->session()->regenerateToken();
-    //                 return redirect()->route('auth.show')
-    //                     ->with('toast', [
-    //                         'message' => 'Your account is in an unrecognized state. Please contact support.',
-    //                         'type' => 'error',
-    //                     ])
-    //                     ->withInput($request->only('email'));
-    //         }
-    //     }
-
-    //     return redirect()->route('auth.show')
-    //         ->with('toast', ['message' => 'Invalid email or password.', 'type' => 'error'])
-    //         ->withInput($request->only('email'));
-    // }

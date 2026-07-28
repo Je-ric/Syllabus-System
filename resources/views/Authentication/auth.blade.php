@@ -18,17 +18,6 @@
     x-data="{ mode: '{{ old('_mode', 'login') }}' }"
 >
 
-    {{-- Background Overlay --}}
-    {{-- <div
-        class="absolute inset-0
-                bg-gradient-to-br
-                from-white/90
-                via-white/75
-                to-emerald-900/55
-                backdrop-blur-[2px]">
-    </div>
-
-    <div class="relative z-10 w-full flex justify-center"> --}}
     <div class="w-full max-w-5xl
             grid grid-cols-1 lg:grid-cols-2
             overflow-hidden
@@ -58,10 +47,10 @@
                     <input type="hidden" name="_mode" value="login">
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Email Address</label>
-                        <input type="email" name="email"
-                               value="{{ old('email') }}"
-                               placeholder="you@clsu.edu.ph"
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Employee ID</label>
+                        <input type="text" name="employee_id"
+                               value="{{ old('employee_id') }}"
+                               placeholder="e.g. 2024-00123"
                                class="auth-input" required autofocus>
                     </div>
 

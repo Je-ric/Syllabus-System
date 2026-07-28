@@ -75,6 +75,13 @@
                             <i class="bx bxs-notepad nav-icon"></i>
                             Syllabi
                         </a>
+                        @if ($user->hasRole('admin') || $user->hasRole('faculty'))
+                            <a href="{{ route('workload.index') }}"
+                                class="nav-link {{ request()->routeIs('workload.*') ? 'active' : '' }}">
+                                <i class="bx bx-briefcase nav-icon"></i>
+                                My Workload
+                            </a>
+                        @endif
                     </nav>
                 @endif
 

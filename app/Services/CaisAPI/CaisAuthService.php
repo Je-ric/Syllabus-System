@@ -22,7 +22,7 @@ class CaisAuthService extends CaisHttpClient
      *   - Encrypted: { ciphertext, iv, tag }  — used by admissions.clsu.edu.ph
      *   - Plain JSON: { token, user }          — used by local/dev systems
      */
-    public function verifyUser(string $email, string $password): ?array
+    public function verifyUser(string $employeeId, string $password): ?array
     {
         $url = config('cais.endpoints.verify_user');
 
@@ -37,8 +37,8 @@ class CaisAuthService extends CaisHttpClient
             // If a shared key is set, encrypt the credentials before sending.
             // Without a key (ex. local dev), send plain JSON.
             $body = ! empty($sharedKey)
-                ? $this->encryptPayload(['email' => $email, 'password' => $password])
-                : ['email' => $email, 'password' => $password];
+                ? $this->encryptPayload(['employee_id' => $employeeId, 'password' => $password])
+                : ['employee_id' => $employeeId, 'password' => $password];
 
             $response = Http::withHeaders(['Accept' => 'application/json'])
                 ->timeout($this->timeout)

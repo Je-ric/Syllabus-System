@@ -216,14 +216,15 @@ abstract class CaisHttpClient
         $lastName  = data_get($u, 'last_name',  data_get($u, 'user_lname', ''));
 
         return [
-            'cais_user_id' => data_get($u, 'id', data_get($u, 'user_id')),
+            'cais_user_id'      => data_get($u, 'id', data_get($u, 'user_id')),
+            'cais_employee_id'  => data_get($u, 'employee_id', data_get($u, 'emp_id', data_get($u, 'employeeId'))),
             // Use the combined name if present, otherwise join first + last
-            'name'         => $name ?: trim("{$firstName} {$lastName}"),
+            'name'              => $name ?: trim("{$firstName} {$lastName}"),
             // If only a combined name was given, split it at the first space
-            'first_name'   => $firstName ?: ($name ? explode(' ', $name, 2)[0] : ''),
-            'last_name'    => $lastName  ?: ($name ? (explode(' ', $name, 2)[1] ?? '') : ''),
-            'email'        => data_get($u, 'email'),
-            'user_type'    => data_get($u, 'user_type'),
+            'first_name'        => $firstName ?: ($name ? explode(' ', $name, 2)[0] : ''),
+            'last_name'         => $lastName  ?: ($name ? (explode(' ', $name, 2)[1] ?? '') : ''),
+            'email'             => data_get($u, 'email'),
+            'user_type'         => data_get($u, 'user_type'),
         ];
     }
 
