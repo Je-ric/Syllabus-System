@@ -9,7 +9,7 @@
         desc="You have not been assigned a role in the organizational hierarchy yet.">
         <x-ui.button
             variant="cancel"
-            href="{{ $isAdmin ? route('organizational.colleges.index') : route('profile.index') }}">
+            href="{{ $isAdmin ? route('user-assignments.colleges.index') : route('profile.index') }}">
             <i class="bx bx-arrow-back"></i>
             {{ $isAdmin ? 'Back to Colleges' : 'Back to Profile' }}
         </x-ui.button>

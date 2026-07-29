@@ -33,7 +33,7 @@
 
     <x-modal.footer>
         <x-modal.close-button :modalId="'removeDeanModal-' . $collegeId" text="Cancel" />
-        <form action="{{ route('organizational.remove-dean') }}" method="POST">
+        <form action="{{ route('user-assignments.remove-dean') }}" method="POST">
             @csrf
             <input type="hidden" name="college_id" value="{{ $collegeId }}">
             <input type="hidden" name="user_id" value="{{ $userId }}">

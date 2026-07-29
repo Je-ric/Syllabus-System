@@ -33,7 +33,7 @@
 
     <x-modal.footer>
         <x-modal.close-button :modalId="'removeChairModal-' . $departmentId" text="Cancel" />
-        <form action="{{ route('organizational.remove-chair') }}" method="POST">
+        <form action="{{ route('user-assignments.remove-chair') }}" method="POST">
             @csrf
             <input type="hidden" name="department_id" value="{{ $departmentId }}">
             <input type="hidden" name="user_id" value="{{ $userId }}">

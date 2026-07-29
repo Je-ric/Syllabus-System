@@ -116,7 +116,7 @@
                     {{-- Action buttons --}}
                     <div class="w-full mt-5 space-y-2">
                         @if ($canOpenHierarchy)
-                            <a href="{{ route('organizational.hierarchy') }}"
+                            <a href="{{ route('user-assignments.hierarchy') }}"
                                class="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-[13px] font-semibold border border-[#e2e8f0] text-[#475569] hover:bg-[#f8fafc] transition">
                                 <i class="bx bx-sitemap"></i> Organizational Hierarchy
                             </a>

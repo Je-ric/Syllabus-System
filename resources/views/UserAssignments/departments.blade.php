@@ -11,7 +11,7 @@
         icon="bx-buildings"
         title="{{ $college->name }}"
         desc="Manage department leadership, faculty assignments, and academic structure">
-        <x-ui.button variant="cancel" href="{{ $isAdmin ? route('organizational.colleges.index') : route('organizational.hierarchy') }}">
+        <x-ui.button variant="cancel" href="{{ $isAdmin ? route('user-assignments.colleges.index') : route('user-assignments.hierarchy') }}">
             <i class="bx bx-arrow-back"></i> Back
         </x-ui.button>
     </x-layout.page-header>

@@ -6,7 +6,7 @@
 ])
 
 <x-modal.dialog id="assignFacultyModal-{{ $departmentId }}" maxWidth="max-w-md" width="w-11/12" maxHeight="max-h-[90vh]" variant="assign">
-    <form method="POST" action="{{ route('organizational.assign-faculty') }}" class="flex flex-col">
+    <form method="POST" action="{{ route('user-assignments.assign-faculty') }}" class="flex flex-col">
         @csrf
         <input type="hidden" name="department_id" value="{{ $departmentId }}">
 

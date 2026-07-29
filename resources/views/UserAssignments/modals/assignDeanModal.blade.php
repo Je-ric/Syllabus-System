@@ -5,7 +5,7 @@
 ])
 
 <x-modal.dialog id="assignDeanModal-{{ $collegeId }}" maxWidth="max-w-md" width="w-11/12" maxHeight="max-h-[90vh]" variant="assign">
-    <form method="POST" action="{{ route('organizational.assign-dean') }}" class="flex flex-col">
+    <form method="POST" action="{{ route('user-assignments.assign-dean') }}" class="flex flex-col">
         @csrf
         <input type="hidden" name="college_id" value="{{ $collegeId }}">
 

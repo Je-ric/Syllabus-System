@@ -9,7 +9,7 @@ Beginner-friendly summary of what happens in registration, login, OTP (password 
 - On login, CAIS is contacted first to verify credentials.
 - If CAIS responds, the user is authenticated via CAIS and a local user row is auto-created if needed.
 - If CAIS is unavailable or rejects the credentials, the system falls back to local password authentication.
-- This ensures faculty can log in with their existing CLSU credentials.
+- This ensures faculty can log in with their existing CLSU credentials without a separate password.
 
 ### Why OTP for Password Changes?
 - OTP verifies the user owns their email before allowing a password change.
@@ -26,26 +26,37 @@ Beginner-friendly summary of what happens in registration, login, OTP (password 
 ## Files Used (Source of Truth)
 
 - Controllers
-  - `app/Http/Controllers/AuthController.php`
-  - `app/Http/Controllers/AccountApprovalController.php`
-  - `app/Http/Controllers/UserController.php`
+  - `app/Http/Controllers/Authentication/AuthController.php`
+  - `app/Http/Controllers/Authentication/AccountApprovalController.php`
+  - `app/Http/Controllers/UserManagement/UserController.php`
 - Services
   - `app/Services/CaisApiService.php`
   - `app/Services/OtpService.php`
   - `app/Services/AccountApprovalService.php`
 - Models
   - `app/Models/User.php`
+  - `app/Models/UserOtp.php`
   - `app/Models/UserAssignment.php`
+  - `app/Models/Role.php`
 - Mail
   - `app/Mail/AccountStatusUpdated.php`
+  - `app/Mail/OtpMail.php`
 - Views
   - `resources/views/Authentication/auth.blade.php` — Login + Register (single page, Alpine tab switch)
   - `resources/views/Authentication/waiting-approval.blade.php` — Post-registration holding screen
   - `resources/views/Authentication/viewDetails.blade.php` — User profile + password change
-- CSS
-  - `resources/css/auth.css` — `.auth-input`, `.auth-primary`, `.auth-secondary`, `.green-grad`
 - Routes
-  - `routes/web.php` (auth, profile, approval routes)
+  - `routes/web.php`
+    - `GET /auth` — show login/register page
+    - `POST /login` — login
+    - `POST /register` — register
+    - `POST /logout` — logout
+    - `GET /waiting-approval` — post-registration holding screen (public)
+    - `GET /profile` — view profile (auth)
+    - `PUT /profile` — update profile details (auth)
+    - `POST /profile/password` — initiate password change (auth)
+    - `POST /profile/password/verify-otp` — verify OTP and commit password (auth)
+    - `POST /profile/password/resend-otp` — resend OTP (auth)
 
 Related docs:
 - `MD/08_OTP_Flow_and_Service.md`
@@ -59,7 +70,6 @@ Related docs:
 - `_mode` hidden input preserves which tab was active on validation error redirect.
 - All password fields have a show/hide toggle (Alpine `show` flag, `bx-show`/`bx-hide` icon).
 - Right panel displays the 4-step onboarding flow and an RBAC summary card.
-- Uses `.auth-input`, `.auth-secondary` (login button), `.auth-primary` (register button), `.green-grad` (right panel).
 
 ### waiting-approval.blade.php
 - Shown after successful registration.
@@ -77,8 +87,8 @@ Related docs:
 
 - If registering:
   - Then `name` is required.
-  - Then `phone_number` is required.
-  - Then `office` is required.
+  - Then `phone_number` is required, max 20 chars.
+  - Then `office` is required, max 255 chars.
   - Then `email` is required, valid, and unique in `users`.
   - Then email must end with `@clsu.edu.ph` or `@clsu2.edu.ph`.
   - Then `password` is required, minimum 6 chars, and must match confirmation.
@@ -87,143 +97,143 @@ Related docs:
 
 - If registration succeeds:
   - Then create user with:
-    - `account_status = pending`
+    - `account_status = active`
     - `email_verified_at = now()`
   - Then record an AuditLog entry for the registration.
   - Then redirect to `waiting.approval` with a success message.
+  - No role is assigned at registration — only after admin approval.
   - No OTP is issued for registration.
 
 ### Login (CAIS Flow)
 
 - If login is attempted:
-  - Then first try CAIS API authentication:
-    - If CAIS responds:
+  - Then first try CAIS API authentication via `CaisApiService::verifyUser()`:
+    - If CAIS responds with a valid result:
       - Then find or create a local user row for that email.
-      - If user exists and is not `active`: force `active` status.
       - Then store `cais_token` in session.
-      - Then call `syncFromCais()` to update local user profile from CAIS data.
-      - Then log in the user via `Auth::login()`.
+      - Then call `User::syncFromCais()` to update local profile from CAIS data:
+        - Updates `cais_user_id`, `cais_employee_id`, `name` if changed.
+        - Forces `account_status = active`.
+        - Ensures `faculty` role is attached.
+      - Then log in the user via `Auth::login()` with remember-me if checked.
+      - Then regenerate session.
       - Then record AuditLog entry for CAIS login.
       - Then redirect to `syllabus.index`.
     - If CAIS is unavailable or credentials are rejected:
       - Then fall back to local authentication.
-- If local auth fails:
+
+### Login (Local Fallback)
+
+- If local credentials (email + password hash) do not match:
   - Then redirect to `auth.show` with error toast.
-
-### Login (Local Fallback — Conditional Flow)
-
-- If local credentials are invalid:
-  - Then login is rejected with error toast.
-- If local credentials are valid:
-  - Then session is regenerated.
+- If credentials match:
   - If `account_status` is `pending`:
-    - Then logout, invalidate session, redirect to `waiting.approval` with info toast.
+    - Then redirect to `waiting.approval` with info toast.
   - If `account_status` is `rejected`:
-    - Then logout, invalidate session, redirect to `auth.show` with error toast.
+    - Then redirect to `auth.show` with error toast.
   - If `account_status` is `disabled`:
-    - Then logout, invalidate session, redirect to `auth.show` with error toast.
+    - Then redirect to `auth.show` with error toast.
   - If `account_status` is `active`:
-    - Then redirect to `syllabus.index`.
+    - Then log in, regenerate session, record AuditLog, redirect to `syllabus.index`.
+
+### Logout
+
+- If user logs out:
+  - Then record AuditLog entry for the logout.
+  - Then call `Auth::logout()`.
+  - Then forget `cais_token` from session.
+  - Then invalidate and regenerate session token.
+  - Then redirect to `auth.show`.
 
 ### Password Change (OTP Flow)
 
 - If user requests a password change:
-  - Then current password is validated first.
+  - If user has role `admin`: blocked with warning toast (admin cannot change password from this page).
+  - Then validate current password via `Hash::check()`.
+  - If current password is wrong: return field-level error.
   - If valid:
-    - Then issue OTP via `OtpService` for purpose `password_change`.
-    - Then send OTP email.
-    - Then return an OTP session token (stored in session).
-    - Then user must submit OTP via `verifyPasswordOtp()`.
+    - Then issue OTP via `OtpService::issueForUser()` for purpose `password_change`.
+    - Then store `['user_id', 'password_hash']` in session under `password_change_otp` key.
+    - Then redirect to profile with info toast (or warning if mail failed).
 - If verifying OTP:
   - Then `otp` must be exactly 6 digits.
-  - Then OTP record must exist for the user.
-  - Then OTP must not be expired.
-  - Then OTP hash must match.
+  - Then session must have a pending change for this user.
+  - Then `OtpService::validate()` checks: record exists, not expired, hash matches.
   - If valid:
-    - Then update password.
-    - Then clear OTP record.
-    - Then redirect with success toast.
+    - Then update password to the hashed value stored in session.
+    - Then clear OTP record via `OtpService::clear()`.
+    - Then clear session key.
+    - Then redirect to profile with success toast.
+  - If invalid: return field-level error on `otp`.
 - If resending OTP:
-  - Then issue a fresh OTP via `OtpService`.
-  - Then send a new OTP email.
+  - If user has role `admin`: blocked with warning toast.
+  - If no pending session change exists: redirect with warning toast.
+  - Then issue a fresh OTP via `OtpService::issueForUser()`.
+  - Then redirect to profile with success or warning toast.
 
 ### Admin Account Status Actions
 
-- If `approve`: set `active`, attach `faculty` role, send email.
-- If `reject`: set `rejected`, delete all `user_assignments`, send email.
-- If `restore`: set `pending`, no assignment cleanup.
-- If `disable`: set `disabled`, delete all `user_assignments`, send email.
+| Action | Status set | Assignments cleared | Email sent |
+|---|---|---|---|
+| `approve` | `active` | — | Yes (AccountStatusUpdated) |
+| `reject` | `rejected` | All `user_assignments` deleted | Yes |
+| `restore` | `pending` | — | No |
+| `disable` | `disabled` | All `user_assignments` deleted | Yes |
+
+- On `approve`: `faculty` role is attached if not already present.
+- On `approve`: `email_verified_at` is set to `now()` if null.
 
 ### Admin Edit User (AccountApprovalController)
 
-- Acting user must have role `admin`.
+- Acting user must have role `admin` (checked explicitly, not just route middleware).
 - `name` required, max 255.
 - `email` required, valid, unique excluding target user's own id.
 - `phone_number` optional, max 30.
 - `office` optional, max 255.
+- Records an AuditLog entry after update.
 
-### User Self-Update (UserController)
-
-- Update always applies to `Auth::id()` only.
-- If user has role `admin`: blocked with warning toast.
-- `name` required, max 255.
-- `email` required, valid, unique excluding own id.
-- `phone_number` optional, max 30.
-- `office` optional, max 255.
-
-### Role Assignment (Admin)
+### Role Assignment (Admin — AccountApprovalController)
 
 - User account must be `active`.
 - Allowed roles: `admin`, `chair`, `dean`, `faculty`.
-- `faculty` is always forced into role set.
-- Roles are synced (unselected roles removed).
-- If new role set contains both `dean` and `chair`: blocked with 422.
-- If `dean` removed: delete all `user_assignments` with `context = dean`.
-- If `chair` removed: delete all `user_assignments` with `context = chair`.
-
-### Consultation Hours (UserController)
-
-- User can manage their own consultation hours via profile.
-- `POST /profile/consultation-hours` — store a consultation hour entry.
-- `DELETE /profile/consultation-hours/{hour}` — delete a consultation hour entry.
-- These are stored on the user record, not per-syllabus.
+- `faculty` is always forced into the role set (cannot be removed via this action).
+- Roles are synced — roles not in the submitted set are removed.
+- If submitted set contains both `dean` and `chair`: blocked with error toast (controller-level guard) and 422 (service-level guard).
+- If `dean` role removed: all `user_assignments` with `context = dean` are deleted.
+- If `chair` role removed: all `user_assignments` with `context = chair` are deleted.
+- If `faculty` role removed: all `user_assignments` with `context = faculty` are deleted.
+- Notifications sent via `SystemRoleChangedNotification` for roles added or removed (admin role excluded).
 
 ## Sequences (Typical Flow)
 
 ### New User Lifecycle
 
-1. User registers with CLSU email → account created with `pending` status, email auto-verified.
+1. User registers with CLSU email → account created with `active` status, email auto-verified.
 2. User redirected to waiting-approval page.
-3. User waits for admin approval (account still `pending`).
-4. Admin approves user → account becomes `active`, `faculty` role attached.
-5. Admin assigns additional roles and organizational assignments.
-6. User can log in and use the system.
+3. Admin approves user → `faculty` role attached, approval email sent.
+4. Admin assigns additional roles and organizational assignments as needed.
+5. User can log in and use the system.
 
 ### Login (CAIS-first)
 
 1. User submits email + password.
-2. System contacts CAIS API.
-3. If CAIS responds:
-   - User authenticated via CAIS.
-   - Local user created or updated from CAIS profile.
-   - Redirect to syllabus index.
-4. If CAIS unavailable:
-   - Fall back to local password check.
-   - If valid, check account status → redirect or block accordingly.
+2. System contacts CAIS API via `CaisApiService::verifyUser()`.
+3. If CAIS responds: user authenticated, local profile synced, redirect to syllabus index.
+4. If CAIS unavailable: fall back to local password check → check account status → redirect or block.
 
 ### Password Change with OTP
 
-1. User requests password change via profile page.
+1. User navigates to profile page and fills password change form.
 2. System validates current password.
-3. System issues OTP to user's email.
-4. User enters OTP on profile page.
-5. System verifies OTP → updates password.
+3. System issues OTP to user's email and stores pending hash in session.
+4. User enters 6-digit OTP on profile page.
+5. System verifies OTP → updates password → clears OTP record and session key.
 6. User can log in with new password.
 
 ### Disable / Reject Lifecycle
 
-1. Admin disables or rejects a user.
+1. Admin disables or rejects a user via Account Approval page.
 2. System sets account status.
 3. System deletes all `user_assignments` for that user.
 4. User is removed from all dean/chair/faculty hierarchy positions.
-5. Status email is sent.
+5. Status email sent via `AccountStatusUpdated` mailable.

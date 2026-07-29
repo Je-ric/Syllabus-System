@@ -55,7 +55,7 @@
                             <div class="mt-auto pt-3 border-t border-slate-100 flex flex-col gap-2">
 
                                 <x-ui.button
-                                    href="{{ route('organizational.departments.index', $college->id) }}"
+                                    href="{{ route('user-assignments.departments.index', $college->id) }}"
                                     variant="add-button"
                                     class="w-full justify-center">
                                     <i class="bx bx-building"></i>
