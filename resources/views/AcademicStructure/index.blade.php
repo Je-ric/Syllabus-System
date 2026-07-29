@@ -160,18 +160,50 @@
                                             {{-- Program rows --}}
                                             <div class="divide-y divide-[#F1F3F5]">
                                                 @forelse($dept->programs as $program)
+                                                    @php
+                                                        $role = $program->pivot->role;
+                                                        $otherDepts = $program->departments->where('id', '!=', $dept->id);
+                                                    @endphp
                                                     <div class="flex items-center justify-between px-4 py-2.5 hover:bg-[#F9FAFA] transition-colors duration-150">
                                                         <div class="flex items-center gap-2.5 min-w-0">
-                                                            <span class="w-6 h-6 rounded-[7px] bg-[#D5FFF0] flex items-center justify-center shrink-0">
-                                                                <i class="bx bx-book-alt text-[#06754E] text-xs leading-none"></i>
+                                                            <span class="w-6 h-6 rounded-[7px] flex items-center justify-center shrink-0
+                                                                {{ $role === 'primary' ? 'bg-[#D5FFF0]' : 'bg-[#FFF3CD]' }}">
+                                                                <i class="bx bx-book-alt text-xs leading-none
+                                                                    {{ $role === 'primary' ? 'text-[#06754E]' : 'text-[#856404]' }}"></i>
                                                             </span>
                                                             <div class="min-w-0">
-                                                                <p class="text-[13px] font-medium text-[#394056] truncate">{{ $program->name }}</p>
-                                                                <p class="text-[11px] text-[#93A1AF] mt-0.5">
-                                                                    {{ $program->bor_approval_no }}
-                                                                    &middot;
-                                                                    {{ \Carbon\Carbon::parse($program->bor_approval_date)->format('M d, Y') }}
-                                                                </p>
+                                                                <div class="flex items-center gap-1.5 flex-wrap">
+                                                                    <p class="text-[13px] font-medium text-[#394056] truncate">{{ $program->name }}</p>
+                                                                    @if($role === 'primary')
+                                                                        <span class="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#D5FFF0] text-[#06754E] border border-[#00965F]">
+                                                                            Primary
+                                                                        </span>
+                                                                    @else
+                                                                        <span class="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#FFF3CD] text-[#856404] border border-[#FFC107]">
+                                                                            Supporting
+                                                                        </span>
+                                                                    @endif
+                                                                </div>
+                                                                <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                                                                    @if($program->bor_approval_no)
+                                                                        <p class="text-[11px] text-[#93A1AF]">
+                                                                            {{ $program->bor_approval_no }}
+                                                                            @if($program->bor_approval_date)
+                                                                                &middot; {{ \Carbon\Carbon::parse($program->bor_approval_date)->format('M d, Y') }}
+                                                                            @endif
+                                                                        </p>
+                                                                    @endif
+                                                                    {{-- @if($otherDepts->count())
+                                                                        <span class="text-[10px] text-[#93A1AF]">&middot;</span>
+                                                                        @foreach($otherDepts as $other)
+                                                                            <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-[#F1F3F5] text-[#72809E] border border-[#E3E8EB]"
+                                                                                  title="{{ $other->pivot->role === 'primary' ? 'Primary' : 'Supporting' }}: {{ $other->name }}">
+                                                                                {{ Str::limit($other->name, 30) }}
+                                                                                ({{ $other->pivot->role === 'primary' ? 'P' : 'S' }})
+                                                                            </span>
+                                                                        @endforeach
+                                                                    @endif --}}
+                                                                </div>
                                                             </div>
                                                         </div>
 
@@ -211,7 +243,8 @@
                                                 class="w-full flex items-center justify-center gap-1.5 py-2 text-[12px] font-semibold
                                                        text-[#00965F] hover:bg-[#EDFFF8] border-t border-dashed border-[#00C075]
                                                        transition-all duration-150 rounded-b-[12px]"
-                                                onclick="openAddProgramModal({{ $dept->id }})">                                                <i class="bx bx-plus text-sm leading-none"></i>
+                                                onclick="document.getElementById('addProgramModal').showModal()">
+                                                <i class="bx bx-plus text-sm leading-none"></i>
                                                 Add Program
                                             </button>
 
@@ -255,7 +288,7 @@
 
     @include('AcademicStructure.modals.addCollegeModal')
     @include('AcademicStructure.modals.addDepartmentModal')
-    @include('AcademicStructure.modals.addProgramModal')
+    @include('AcademicStructure.modals.addProgramModal', ['allDepartments' => $allDepartments])
 
     @foreach ($colleges as $college)
         @include('AcademicStructure.modals.updateCollegeModal', ['college' => $college])
@@ -263,11 +296,13 @@
         @foreach ($departments->where('college_id', $college->id) as $dept)
             @include('AcademicStructure.modals.updateDepartmentModal', ['dept' => $dept])
             @include('AcademicStructure.modals.deleteDepartmentModal', ['dept' => $dept])
-            @foreach ($dept->programs as $program)
-                @include('AcademicStructure.modals.updateProgramModal', ['program' => $program])
-                @include('AcademicStructure.modals.deleteProgramModal', ['program' => $program])
-            @endforeach
         @endforeach
+    @endforeach
+
+    {{-- Program modals rendered once per unique program to avoid duplicates --}}
+    @foreach ($programs as $program)
+        @include('AcademicStructure.modals.updateProgramModal', ['program' => $program, 'allDepartments' => $allDepartments])
+        @include('AcademicStructure.modals.deleteProgramModal', ['program' => $program])
     @endforeach
 
 @endsection
@@ -278,12 +313,6 @@ function openAddDepartmentModal(collegeId) {
     const input = document.getElementById('addDepartment_college_id');
     if (input) input.value = collegeId;
     document.getElementById('addDepartmentModal').showModal();
-}
-
-function openAddProgramModal(departmentId) {
-    const input = document.getElementById('addProgram_department_id');
-    if (input) input.value = departmentId;
-    document.getElementById('addProgramModal').showModal();
 }
 </script>
 @endpush

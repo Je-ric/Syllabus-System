@@ -1,28 +1,102 @@
-<x-modal.dialog id="addProgramModal" maxWidth="max-w-md" width="w-11/12" variant="add">
+<x-modal.dialog id="addProgramModal" maxWidth="max-w-6xl" width="w-2xl sm:w-full" variant="add">
     <x-modal.header modalId="addProgramModal" variant="add">
         <div>
             <p class="text-[15px] font-bold text-[#0f172a]">Add New Program</p>
-            <p class="text-[13px] text-[#94a3b8]">Will be created under the selected department.</p>
+            <p class="text-[13px] text-[#94a3b8]">Assign a primary department and optional supporting departments.</p>
         </div>
     </x-modal.header>
 
-    <form method="POST" action="{{ route('program.store') }}" class="flex flex-col">
+    <form method="POST" action="{{ route('program.store') }}" class="flex flex-col min-h-0"
+        x-data="{
+            primaryDept: '',
+            supportingDepts: []
+        }">
         @csrf
-        <input type="hidden" name="department_id" id="addProgram_department_id" value="">
+
         <x-modal.body>
-            <div class="space-y-4">
-                <div>
-                    <x-modal.modal-label isRequired>Program Name</x-modal.modal-label>
-                    <x-form.input type="text" name="name" placeholder="e.g. Bachelor of Science in Computer Science" required />
+            {{-- Two-column grid on md+, single column on mobile --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
+
+                {{-- LEFT COLUMN --}}
+                <div class="flex flex-col gap-4">
+
+                    <div>
+                        <x-modal.modal-label isRequired>Program Name</x-modal.modal-label>
+                        <x-form.input
+                            type="text"
+                            name="name"
+                            placeholder="e.g. BS Computer Science"
+                            required />
+                    </div>
+
+                    <div>
+                        <x-modal.modal-label for="add_primary_department_id" isRequired>Primary Department</x-modal.modal-label>
+                        <select
+                            name="primary_department_id"
+                            id="add_primary_department_id"
+                            x-model="primaryDept"
+                            class="w-full px-3 py-2 text-[13px] border border-[#E3E8EB] rounded-[8px] bg-white
+                                   focus:outline-none focus:ring-2 focus:ring-[#00C075] focus:border-transparent"
+                            required>
+                            <option value="">Select primary department</option>
+                            @foreach($allDepartments->groupBy('college.name') as $collegeName => $depts)
+                                <optgroup label="{{ $collegeName }}">
+                                    @foreach($depts as $dept)
+                                        <option value="{{ $dept->id }}">{{ $dept->name }}</option>
+                                    @endforeach
+                                </optgroup>
+                            @endforeach
+                        </select>
+                        <p class="text-[11px] text-[#93A1AF] mt-1">Main department responsible for this program</p>
+                    </div>
+
+                    <div>
+                        <x-modal.modal-label>BOR Approval Resolution No.</x-modal.modal-label>
+                        <x-form.input
+                            type="text"
+                            name="bor_approval_no"
+                            placeholder="e.g. BOR Res. No. 123" />
+                    </div>
+
+                    <div>
+                        <x-modal.modal-label>BOR Approval Date</x-modal.modal-label>
+                        <x-form.input type="date" name="bor_approval_date" />
+                    </div>
+
                 </div>
-                <div>
-                    <x-modal.modal-label isRequired>BOR Approval Resolution No.</x-modal.modal-label>
-                    <x-form.input type="text" name="bor_approval_no" placeholder="e.g. BOR Approval Resolution No. 123" required />
+
+                {{-- RIGHT COLUMN — Supporting Departments --}}
+                <div class="flex flex-col gap-1">
+                    <x-modal.modal-label>Supporting Departments <span class="text-[#93A1AF] font-normal">(Optional)</span></x-modal.modal-label>
+                    <p class="text-[11px] text-[#93A1AF] mb-2">Departments that also contribute to this program</p>
+
+                    <div class="border border-[#E3E8EB] rounded-[8px] divide-y divide-[#F1F3F5] overflow-y-auto max-h-64">
+                        @foreach($allDepartments->groupBy('college.name') as $collegeName => $depts)
+                            <div>
+                                <p class="text-[10.5px] font-bold uppercase tracking-wide text-[#72809E]
+                                          bg-[#F9FAFA] px-3 py-1.5 border-b border-[#F1F3F5]">
+                                    {{ $collegeName }}
+                                </p>
+                                @foreach($depts as $dept)
+                                    <label class="flex items-center gap-2.5 px-3 py-2 hover:bg-[#F9FAFA]
+                                                  cursor-pointer transition-colors duration-100"
+                                           :class="{ 'opacity-40 cursor-not-allowed pointer-events-none': primaryDept == {{ $dept->id }} }">
+                                        <input
+                                            type="checkbox"
+                                            name="supporting_department_ids[]"
+                                            value="{{ $dept->id }}"
+                                            x-model="supportingDepts"
+                                            :disabled="primaryDept == {{ $dept->id }}"
+                                            class="w-4 h-4 rounded text-[#00C075] border-[#C8D0DA]
+                                                   focus:ring-[#00C075] focus:ring-offset-0 shrink-0">
+                                        <span class="text-[12px] text-[#394056] leading-snug">{{ $dept->name }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
-                <div>
-                    <x-modal.modal-label isRequired>BOR Approval Date</x-modal.modal-label>
-                    <x-form.input type="date" name="bor_approval_date" required />
-                </div>
+
             </div>
         </x-modal.body>
 

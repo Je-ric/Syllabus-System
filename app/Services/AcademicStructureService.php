@@ -161,13 +161,24 @@ class AcademicStructureService
                 'bor_approval_date' => $data['bor_approval_date'] ?? null,
             ]);
 
-            $program->departments()->attach($data['department_id'], ['role' => 'primary']);
+            // Attach primary department
+            $program->departments()->attach($data['primary_department_id'], ['role' => 'primary']);
+
+            // Attach supporting departments if any
+            if (!empty($data['supporting_department_ids'])) {
+                foreach ($data['supporting_department_ids'] as $supportingDeptId) {
+                    // Skip if the supporting department is the same as primary
+                    if ($supportingDeptId != $data['primary_department_id']) {
+                        $program->departments()->attach($supportingDeptId, ['role' => 'supporting']);
+                    }
+                }
+            }
 
             AuditLog::record(
                 action: 'created',
                 module: 'Academic Structure',
                 referenceId: $program->id,
-                description: "Created program {$program->name} under department #{$data['department_id']}."
+                description: "Created program {$program->name} with primary department #{$data['primary_department_id']}."
             );
 
             DB::commit();
@@ -184,8 +195,8 @@ class AcademicStructureService
     public function updateProgram(Program $program, array $data): string|null
     {
         $currentDeptId = $program->departments()->wherePivot('role', 'primary')->value('departments.id');
-        if ((int) $data['department_id'] !== (int) $currentDeptId && $program->courses()->exists()) {
-            return 'Cannot change department: this program has courses assigned to it. Remove all courses first.';
+        if ((int) $data['primary_department_id'] !== (int) $currentDeptId && $program->courses()->exists()) {
+            return 'Cannot change primary department: this program has courses assigned to it. Remove all courses first.';
         }
 
         DB::beginTransaction();
@@ -196,13 +207,28 @@ class AcademicStructureService
                 'bor_approval_date' => $data['bor_approval_date'] ?? null,
             ]);
 
-            $program->departments()->sync([$data['department_id'] => ['role' => 'primary']]);
+            // Prepare departments array for sync
+            $departmentsToSync = [
+                $data['primary_department_id'] => ['role' => 'primary']
+            ];
+
+            // Add supporting departments
+            if (!empty($data['supporting_department_ids'])) {
+                foreach ($data['supporting_department_ids'] as $supportingDeptId) {
+                    // Skip if the supporting department is the same as primary
+                    if ($supportingDeptId != $data['primary_department_id']) {
+                        $departmentsToSync[$supportingDeptId] = ['role' => 'supporting'];
+                    }
+                }
+            }
+
+            $program->departments()->sync($departmentsToSync);
 
             AuditLog::record(
                 action: 'updated',
                 module: 'Academic Structure',
                 referenceId: $program->id,
-                description: "Updated program {$program->name} and set department #{$data['department_id']}."
+                description: "Updated program {$program->name} and set primary department #{$data['primary_department_id']}."
             );
 
             DB::commit();

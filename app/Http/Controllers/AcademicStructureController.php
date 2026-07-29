@@ -20,7 +20,8 @@ class AcademicStructureController extends Controller
         return view('AcademicStructure.index', [
             'colleges' => College::orderBy('name')->get(),
             'departments' => Department::withRelations()->orderBy('name')->get(),
-            'programs' => Program::all()->sortBy('name'),
+            'programs' => Program::with('departments')->get()->sortBy('name'),
+            'allDepartments' => Department::with('college')->orderBy('name')->get(),
         ]);
     }
 
@@ -110,7 +111,9 @@ class AcademicStructureController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', Rule::unique('programs', 'name')],
-            'department_id' => ['required', 'exists:departments,id'],
+            'primary_department_id' => ['required', 'exists:departments,id'],
+            'supporting_department_ids' => ['nullable', 'array'],
+            'supporting_department_ids.*' => ['exists:departments,id'],
             'bor_approval_no' => ['nullable', 'string'],
             'bor_approval_date' => ['nullable', 'date'],
         ]);
@@ -127,7 +130,9 @@ class AcademicStructureController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', Rule::unique('programs', 'name')->ignore($program->id)],
-            'department_id' => ['required', 'exists:departments,id'],
+            'primary_department_id' => ['required', 'exists:departments,id'],
+            'supporting_department_ids' => ['nullable', 'array'],
+            'supporting_department_ids.*' => ['exists:departments,id'],
             'bor_approval_no' => ['nullable', 'string'],
             'bor_approval_date' => ['nullable', 'date'],
         ]);
