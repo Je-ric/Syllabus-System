@@ -2,31 +2,38 @@
 
 namespace App\Services\Syllabus;
 
-use App\Models\AcademicCalendarEvent;
 use App\Models\OnlineMaterial;
 use App\Models\Reference;
 use App\Models\Syllabus;
 use App\Models\SyllabusEvaluationItem;
 use App\Models\SyllabusWeek;
 use App\Models\WeekContent;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 // Owns the full lifecycle of SyllabusWeek rows for a syllabus.
+//
+// Public API:
 //   generate()       — first-time creation (idempotent guard included)
-//   regenerate()     — wipe all existing rows then recreate from scratch
-//   deleteAllWeeks() — delete weeks + dependent rows (used by regenerate)
+//   hardReset()      — destroy ALL content then recreate fresh from the calendar
+//   deleteAllWeeks() — hard-delete weeks + all dependent rows (called by hardReset)
+//
+// For updating dates while keeping existing faculty content, use
+// WeekReconciliationService::reconcile() instead.
 //
 // Break weeks are SKIPPED (no row created, week numbers stay sequential).
 // Exam / non-teaching labels are written into WeekContent rows at creation
 // time so WeekLockService remains a pure read.
 //
-// generate() and regenerate() throw \RuntimeException on validation failure
+// generate() and hardReset() throw \RuntimeException on validation failure
 // (no calendar, no components) — the caller (WeeklyCoverageStep) catches
 // and dispatches the appropriate toast. Services must not depend on Livewire.
 class WeekGenerationService
 {
+    public function __construct(
+        private readonly CalendarWeekSequenceBuilder $sequenceBuilder,
+    ) {}
+
     // Generate weeks for the first time.
     // Idempotent — exits cleanly if rows already exist.
     // @throws \RuntimeException when prerequisites are not met
@@ -39,17 +46,17 @@ class WeekGenerationService
         return $this->createWeekRows($syllabus, $courseComponents);
     }
 
-    // Delete every existing week then regenerate fresh from the calendar.
+    // Destroy every existing week + all faculty content, then recreate fresh.
+    // This is the destructive "Hard Reset" path — call reconcile() to preserve content.
     // @throws \RuntimeException when prerequisites are not met
-    public function regenerate(Syllabus $syllabus, array $courseComponents): bool
+    public function hardReset(Syllabus $syllabus, array $courseComponents): bool
     {
         $this->deleteAllWeeks($syllabus);
         return $this->createWeekRows($syllabus, $courseComponents);
     }
 
-    // Hard-delete all SyllabusWeek rows and their dependent data for a syllabus.
-    // Also deletes SyllabusEvaluationItem rows so no orphaned weight records
-    // remain after a regeneration.
+    // Hard-delete all SyllabusWeek rows and every dependent data row for a syllabus.
+    // Evaluation items are deleted first to avoid FK violations on week_contents.
     public function deleteAllWeeks(Syllabus $syllabus): void
     {
         $weekIds = SyllabusWeek::where('syllabus_id', $syllabus->id)->pluck('id')->all();
@@ -58,7 +65,7 @@ class WeekGenerationService
             return;
         }
 
-        // Delete evaluation items that reference week contents under these weeks.
+        // Evaluation items reference week_contents — delete them first.
         $weekContentIds = WeekContent::whereIn('syllabus_week_id', $weekIds)->pluck('id')->all();
         if (! empty($weekContentIds)) {
             SyllabusEvaluationItem::whereIn('week_content_id', $weekContentIds)->delete();
@@ -74,7 +81,6 @@ class WeekGenerationService
 
     // Core week-row creation loop.
     // Idempotent: exits immediately if rows already exist for this syllabus.
-    // Break weeks are SKIPPED — no row created, no week-number gap.
     // The entire loop runs inside a DB transaction so a mid-loop failure
     // never leaves a partial week set.
     // @throws \RuntimeException when the calendar has no dates or no components exist
@@ -96,63 +102,35 @@ class WeekGenerationService
             throw new \RuntimeException('Complete the Course Components step first.');
         }
 
-        // Pre-load all calendar events once so the loop does not query per week.
-        $allEvents = AcademicCalendarEvent::where('academic_calendar_id', $syllabus->academic_calendar_id)
-            ->orderBy('date')
-            ->get();
+        $sequence = $this->sequenceBuilder->build($calendar, (int) $syllabus->academic_calendar_id);
 
-        $breakDates = $allEvents->where('type', 'break')
-            ->map(fn ($e) => Carbon::parse($e->date)->startOfDay());
+        if (empty($sequence)) {
+            throw new \RuntimeException('The selected calendar produced no teachable weeks. Check the calendar dates and break events.');
+        }
 
         // Exam labels assigned in encounter order across weeks.
         $examTermLabels = ['1st Term', '2nd Term', 'Final Term'];
         $examsSeen      = 0;
 
-        $start  = Carbon::parse($calendar->start_date)->startOfDay();
-        $end    = Carbon::parse($calendar->end_date)->startOfDay();
-        $weekNo = 1;
-        $cursor = $start->copy();
-
         $totalCreated = DB::transaction(function () use (
-            $syllabus, $hasLEC, $hasLAB, $allEvents, $breakDates,
-            $examTermLabels, &$examsSeen, &$weekNo, $start, $end, $cursor
+            $syllabus, $hasLEC, $hasLAB, $sequence, $examTermLabels, &$examsSeen
         ) {
-            while ($cursor->lte($end)) {
-                $weekStart = $cursor->copy();
-                $weekEnd   = $cursor->copy()->addDays(6);
-
-                if ($weekEnd->gt($end)) {
-                    $weekEnd = $end->copy();
-                }
-
-                // Skip break weeks — institution closed, no coverage row needed.
-                $isBreak = $breakDates->contains(fn ($d) => $d->between($weekStart, $weekEnd));
-                if ($isBreak) {
-                    $cursor = $weekEnd->copy()->addDay();
-                    continue;
-                }
+            foreach ($sequence as $index => $slot) {
+                $weekNo = $index + 1;
 
                 $syllabusWeek = SyllabusWeek::create([
                     'syllabus_id'  => $syllabus->id,
                     'week_no'      => $weekNo,
-                    'start_date'   => $weekStart->toDateString(),
-                    'end_date'     => $weekEnd->toDateString(),
+                    'start_date'   => $slot['start'],
+                    'end_date'     => $slot['end'],
                     'is_exam_week' => false,
                 ]);
 
-                // Determine if this week has a locking event and write the
-                // assessment_task label immediately on creation (Issue #5 fix:
-                // label-writing belongs here, not in WeekLockService reads).
-                $eventsThisWeek = $allEvents->filter(
-                    fn ($e) => Carbon::parse($e->date)->between($weekStart, $weekEnd)
-                );
-
-                $lockingEvent = $eventsThisWeek->first(
-                    fn ($e) => in_array($e->type, ['exam', 'non_teaching'], true)
-                );
-
-                $lecTask = '';
-                $labTask = '';
+                // Resolve assessment_task labels for locked weeks.
+                // Written at creation time — WeekLockService stays a pure read.
+                $lockingEvent = $slot['lockingEvent'];
+                $lecTask      = '';
+                $labTask      = '';
 
                 if ($lockingEvent?->type === 'exam') {
                     $termLabel = $examTermLabels[min($examsSeen, 2)];
@@ -185,12 +163,9 @@ class WeekGenerationService
                         'tla'               => '',
                     ]);
                 }
-
-                $weekNo++;
-                $cursor = $weekEnd->copy()->addDay();
             }
 
-            return $weekNo - 1;
+            return count($sequence);
         });
 
         Log::info('[WeekGenerationService] weeks created', [

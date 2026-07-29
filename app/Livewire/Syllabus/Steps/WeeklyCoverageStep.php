@@ -8,6 +8,7 @@ use App\Models\SyllabusWeek;
 use App\Services\Syllabus\WeekContentService;
 use App\Services\Syllabus\WeekGenerationService;
 use App\Services\Syllabus\WeekLockService;
+use App\Services\Syllabus\WeekReconciliationService;
 use App\Services\Syllabus\WeekResourceService;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\On;
@@ -15,11 +16,16 @@ use Livewire\Component;
 
 // WeeklyCoverageStep
 //
-// Thin Livewire component — all business logic lives in four services:
-//   WeekGenerationService  generate() / regenerate() / deleteAllWeeks()
-//   WeekLockService        computeLockedWeeks()
-//   WeekContentService     populateInputs() / save() / reset()
-//   WeekResourceService    addReference() / removeReference() / addMaterial() / removeMaterial()
+// Thin Livewire component — all business logic lives in five services:
+//   WeekGenerationService      generate() / hardReset() / deleteAllWeeks()
+//   WeekReconciliationService  reconcile()  — preserves faculty content, updates dates only
+//   WeekLockService            computeLockedWeeks()
+//   WeekContentService         populateInputs() / save() / reset()
+//   WeekResourceService        addReference() / removeReference() / addMaterial() / removeMaterial()
+//
+// Two regeneration paths are exposed to the UI:
+//   refreshWeekDates()  — soft path: updates week dates/exam labels, keeps all content intact
+//   hardResetWeeks()    — destructive path: wipes everything and rebuilds from scratch
 //
 // This class is responsible only for:
 //   • Holding reactive Livewire state ($weekInputs, $activeComponent, …)
@@ -99,6 +105,7 @@ class WeeklyCoverageStep extends Component
 
     // ── Week generation ───────────────────────────────────────────────────────
 
+    // First-time generation — no weeks exist yet.
     public function generateWeeklyCoverage(): void
     {
         $syllabus = $this->freshSyllabus();
@@ -124,12 +131,57 @@ class WeeklyCoverageStep extends Component
         }
     }
 
-    public function regenerateWeeks(): void
+    // Soft path — update week dates and exam/non-teaching labels from the current
+    // calendar without touching any faculty-entered content (LOs, topics, TLAs,
+    // assessment tasks, references, materials, evaluation weights).
+    //
+    // Surplus tail weeks are removed when the new calendar is shorter; new empty
+    // weeks are appended when it is longer. A precise toast message describes
+    // exactly what changed.
+    //
+    // Guard: only the active calendar is allowed. Refreshing against a stale or
+    // inactive calendar would silently shift all week dates to wrong date ranges.
+    public function refreshWeekDates(): void
+    {
+        $syllabus = $this->freshSyllabus();
+
+        // Reject if the syllabus is linked to a calendar that is no longer active.
+        // The faculty must go back to Step 1 and select the active calendar first.
+        if ($syllabus?->academicCalendar && ! $syllabus->academicCalendar->is_active) {
+            $this->dispatch('lw-toast', type: 'error',
+                message: 'Refresh Dates can only be used with the active academic calendar. Go to Step 1 and switch to the current active calendar first.');
+            return;
+        }
+
+        $this->reloadCourseComponents();
+
+        try {
+            $result = app(WeekReconciliationService::class)->reconcile(
+                $syllabus,
+                $this->courseComponents
+            );
+        } catch (\RuntimeException $e) {
+            $this->dispatch('lw-toast', type: 'error', message: $e->getMessage());
+            return;
+        }
+
+        $this->loadData();
+
+        $toastType = $result->hasNoChanges() ? 'info' : 'success';
+        $this->dispatch('lw-toast', type: $toastType, message: $result->toMessage());
+        $this->dispatch('syllabus-step-saved', step: 'weekly_coverage');
+    }
+
+    // Destructive path — wipe all weeks and every piece of faculty-entered content,
+    // then rebuild fresh from the current calendar.
+    // This is irreversible. The blade must show an explicit confirmation dialog
+    // before calling this action.
+    public function hardResetWeeks(): void
     {
         $this->reloadCourseComponents();
 
         try {
-            app(WeekGenerationService::class)->regenerate(
+            app(WeekGenerationService::class)->hardReset(
                 $this->freshSyllabus(),
                 $this->courseComponents
             );
@@ -138,13 +190,14 @@ class WeeklyCoverageStep extends Component
             return;
         }
 
+        // Clear in-memory state so stale inputs cannot bleed into the fresh load.
         $this->weekInputs  = [];
         $this->lockedWeeks = [];
         $this->weekEvents  = [];
 
         $this->loadData();
 
-        $this->dispatch('lw-toast', type: 'success', message: 'Weeks regenerated.');
+        $this->dispatch('lw-toast', type: 'success', message: 'Weeks rebuilt from scratch. All previous content has been cleared.');
         $this->dispatch('syllabus-step-saved', step: 'weekly_coverage');
     }
 
@@ -357,7 +410,7 @@ class WeeklyCoverageStep extends Component
         return Syllabus::with('academicCalendar', 'courseOutcomes')->find($this->syllabusId);
     }
 
-    // display schedule in offcanvas
+    // Reload course components + schedules for the offcanvas schedule drawer.
     private function reloadCourseComponents(): void
     {
         $this->courseComponents = CourseComponent::with('schedules')
@@ -403,12 +456,12 @@ class WeeklyCoverageStep extends Component
             ->get();
         $this->weeksGenerated = $this->syllabusWeeks->isNotEmpty();
 
-        // Compute locked weeks + write exam labels to DB
+        // Compute locked weeks and event labels from the current calendar.
         $lock = app(WeekLockService::class)->computeLockedWeeks($syllabus, $this->syllabusWeeks);
         $this->lockedWeeks = $lock['lockedWeeks'];
         $this->weekEvents  = $lock['weekEvents'];
 
-        // Populate form inputs from DB
+        // Populate form inputs from DB for the active component.
         $this->weekInputs = app(WeekContentService::class)->populateInputs(
             $this->syllabusId,
             $this->activeComponent,
