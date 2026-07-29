@@ -7,6 +7,7 @@ use App\Models\College;
 use App\Models\Department;
 use App\Models\User;
 use App\Models\UserAssignment;
+use App\Notifications\RoleAssignmentNotification;
 use Closure;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -154,7 +155,7 @@ class OrganizationalHierarchyService
         $user = User::findOrFail($userId);
 
         return $this->runInTransaction(
-            fn() => $this->removeAndAudit('dean', $user, $college->id, null, "Removed {$user->name} as dean of {$college->name}."),
+            fn() => $this->removeAndAudit('dean', $user, $college->id, null, "Removed {$user->name} as dean of {$college->name}.", $college->name),
             'Failed to remove dean assignment. Please try again.',
             'Dean assignment removed.'
         );
@@ -170,7 +171,7 @@ class OrganizationalHierarchyService
         }
 
         return $this->runInTransaction(
-            fn() => $this->removeAndAudit('chair', $user, null, $department->id, "Removed {$user->name} as chair of {$department->name}."),
+            fn() => $this->removeAndAudit('chair', $user, null, $department->id, "Removed {$user->name} as chair of {$department->name}.", $department->name),
             'Failed to remove chair assignment. Please try again.',
             'Chair assignment removed.'
         );
@@ -186,7 +187,7 @@ class OrganizationalHierarchyService
         }
 
         return $this->runInTransaction(
-            fn() => $this->removeAndAudit('faculty', $user, null, $department->id, "Removed {$user->name} as faculty from {$department->name}."),
+            fn() => $this->removeAndAudit('faculty', $user, null, $department->id, "Removed {$user->name} as faculty from {$department->name}.", $department->name),
             'Failed to remove faculty assignment. Please try again.',
             'Faculty assignment removed.'
         );
@@ -244,13 +245,15 @@ class OrganizationalHierarchyService
     private function createDeanAssignment(User $user, College $college): void
     {
         UserAssignment::create([
-            'user_id' => $user->id,
-            'college_id' => $college->id,
+            'user_id'       => $user->id,
+            'college_id'    => $college->id,
             'department_id' => null,
-            'context' => 'dean',
+            'context'       => 'dean',
         ]);
 
         $user->ensureFacultyRoleAndAssignment($college->id, null);
+
+        $user->notify(new RoleAssignmentNotification('dean', 'assigned', $college->name));
 
         AuditLog::record(
             action: 'assigned',
@@ -263,13 +266,15 @@ class OrganizationalHierarchyService
     private function createChairAssignment(User $user, Department $department): void
     {
         UserAssignment::create([
-            'user_id' => $user->id,
-            'college_id' => null,
+            'user_id'       => $user->id,
+            'college_id'    => null,
             'department_id' => $department->id,
-            'context' => 'chair',
+            'context'       => 'chair',
         ]);
 
         $user->ensureFacultyRoleAndAssignment(null, $department->id);
+
+        $user->notify(new RoleAssignmentNotification('chair', 'assigned', $department->name));
 
         AuditLog::record(
             action: 'assigned',
@@ -282,11 +287,13 @@ class OrganizationalHierarchyService
     private function createFacultyAssignment(User $user, Department $department): void
     {
         UserAssignment::create([
-            'user_id' => $user->id,
-            'college_id' => null,
+            'user_id'       => $user->id,
+            'college_id'    => null,
             'department_id' => $department->id,
-            'context' => 'faculty',
+            'context'       => 'faculty',
         ]);
+
+        $user->notify(new RoleAssignmentNotification('faculty', 'assigned', $department->name));
 
         AuditLog::record(
             action: 'assigned',
@@ -296,9 +303,13 @@ class OrganizationalHierarchyService
         );
     }
 
-    private function removeAndAudit(string $context, User $user, ?int $collegeId, ?int $departmentId, string $description): void
+    private function removeAndAudit(string $context, User $user, ?int $collegeId, ?int $departmentId, string $description, string $placeName = ''): void
     {
         UserAssignment::removeAssignment($context, $user->id, $collegeId, $departmentId);
+
+        if ($placeName !== '') {
+            $user->notify(new RoleAssignmentNotification($context, 'removed', $placeName));
+        }
 
         AuditLog::record(
             action: 'removed',
