@@ -7,6 +7,7 @@ use App\Models\AuditLog;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\UserAssignment;
+use App\Notifications\SystemRoleChangedNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
@@ -144,6 +145,21 @@ class AccountApprovalService
             }
 
             $user->roles()->sync($roleIds);
+
+            // Notify user for each meaningful role that was added or removed.
+            // 'faculty' is excluded — it is always forced on and is not a meaningful admin action.
+            $notifiableRoles = ['admin', 'dean', 'chair'];
+
+            $added   = array_diff($newRoleNames, $oldRoleNames);
+            $removed = array_diff($oldRoleNames, $newRoleNames);
+
+            foreach (array_intersect($added, $notifiableRoles) as $role) {
+                $user->notify(new SystemRoleChangedNotification($role, 'granted'));
+            }
+
+            foreach (array_intersect($removed, $notifiableRoles) as $role) {
+                $user->notify(new SystemRoleChangedNotification($role, 'revoked'));
+            }
 
             AuditLog::record(
                 action: 'roles_updated',
