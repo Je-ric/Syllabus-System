@@ -1,44 +1,64 @@
+.brand-title {
+    font-family: "Anton", "Oswald", sans-serif;
+    letter-spacing: 0.04em;
+}
+        
 /* ─── Sidebar nav links ──────────────────────────────────────────────────── */
-/* aside a {
+.nav-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #A5B2BD;
+    padding: 0 1rem 0.35rem;
+}
+
+.nav-link {
     display: flex;
     align-items: center;
     gap: 0.65rem;
     padding: 0.5rem 1rem;
-    color: white;
+    color: #394056;
     text-decoration: none;
     font-size: 0.8125rem;
     font-weight: 500;
     border-left: 3px solid transparent;
-    border-radius: 0 0.5rem 0.5rem 0;
-    margin-left: 0.75rem;
-    transition: all 0.18s ease;
+    border-radius: 0;
+    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
     background: transparent;
 }
 
-aside a i {
+.nav-icon {
     font-size: 1.1rem;
-    opacity: 0.75;
+    opacity: 0.65;
     transition: opacity 0.18s ease;
     flex-shrink: 0;
 }
 
-aside a:hover {
-    color: #ffffff;
-    border-left-color: rgba(255, 215, 0, 0.5);
-    background: rgba(255, 255, 255, 0.07);
+.nav-link:hover {
+    color: #06754E;
+    border-left-color: rgba(0, 216, 139, 0.35);
+    background: #FAFDFB;
 }
 
-aside a:hover i {
+.nav-link:hover .nav-icon {
     opacity: 1;
 }
 
-aside a.active {
-    color: #ffd700;
+.nav-link:focus-visible {
+    outline: 2px solid #00D88B;
+    outline-offset: -2px;
+}
+
+.nav-link.active {
+    color: #06754E;
     font-weight: 700;
-    border-left: 3px solid #ffd700;
-    background: rgba(255, 215, 0, 0.08);
+    border-left: 3px solid #00D88B;
+    border-radius: 0;
+    background: linear-gradient(90deg, #EDFFF8 0%, rgba(237,255,248,0) 85%);
 }
 
-aside a.active i {
+.nav-link.active .nav-icon {
     opacity: 1;
-} */
+}
