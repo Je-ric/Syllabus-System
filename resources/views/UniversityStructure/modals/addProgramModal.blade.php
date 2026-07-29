@@ -6,7 +6,7 @@
         </div>
     </x-modal.header>
 
-    <form method="POST" action="{{ route('program.store') }}" class="flex flex-col min-h-0"
+    <form method="POST" action="{{ route('university.structure.program.store') }}" class="flex flex-col min-h-0"
         x-data="{
             primaryDept: '',
             supportingDepts: []

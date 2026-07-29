@@ -29,7 +29,7 @@
 
     <x-modal.footer>
         <x-modal.close-button :modalId="'deleteCollegeModal_' . $college->id" text="Cancel" />
-        <form action="{{ route('college.destroy', $college->id) }}" method="POST">
+        <form action="{{ route('university.structure.college.destroy', $college->id) }}" method="POST">
             @csrf
             @method('DELETE')
             <x-ui.button type="submit" variant="danger">

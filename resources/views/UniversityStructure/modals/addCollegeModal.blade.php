@@ -6,7 +6,7 @@
         </div>
     </x-modal.header>
 
-    <form method="POST" action="{{ route('college.store') }}" class="flex flex-col">
+    <form method="POST" action="{{ route('university.structure.college.store') }}" class="flex flex-col">
         @csrf
         <x-modal.body>
             <div>

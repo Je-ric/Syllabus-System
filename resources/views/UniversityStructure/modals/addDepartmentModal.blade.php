@@ -6,7 +6,7 @@
         </div>
     </x-modal.header>
 
-    <form method="POST" action="{{ route('department.store') }}" class="flex flex-col">
+    <form method="POST" action="{{ route('university.structure.department.store') }}" class="flex flex-col">
         @csrf
         <input type="hidden" name="college_id" id="addDepartment_college_id" value="">
         <x-modal.body>

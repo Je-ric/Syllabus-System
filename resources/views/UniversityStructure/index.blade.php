@@ -286,23 +286,23 @@
     @endif
 
 
-    @include('AcademicStructure.modals.addCollegeModal')
-    @include('AcademicStructure.modals.addDepartmentModal')
-    @include('AcademicStructure.modals.addProgramModal', ['allDepartments' => $allDepartments])
+    @include('UniversityStructure.modals.addCollegeModal')
+    @include('UniversityStructure.modals.addDepartmentModal')
+    @include('UniversityStructure.modals.addProgramModal', ['allDepartments' => $allDepartments])
 
     @foreach ($colleges as $college)
-        @include('AcademicStructure.modals.updateCollegeModal', ['college' => $college])
-        @include('AcademicStructure.modals.deleteCollegeModal',  ['college' => $college])
+        @include('UniversityStructure.modals.updateCollegeModal', ['college' => $college])
+        @include('UniversityStructure.modals.deleteCollegeModal',  ['college' => $college])
         @foreach ($departments->where('college_id', $college->id) as $dept)
-            @include('AcademicStructure.modals.updateDepartmentModal', ['dept' => $dept])
-            @include('AcademicStructure.modals.deleteDepartmentModal', ['dept' => $dept])
+            @include('UniversityStructure.modals.updateDepartmentModal', ['dept' => $dept])
+            @include('UniversityStructure.modals.deleteDepartmentModal', ['dept' => $dept])
         @endforeach
     @endforeach
 
     {{-- Program modals rendered once per unique program to avoid duplicates --}}
     @foreach ($programs as $program)
-        @include('AcademicStructure.modals.updateProgramModal', ['program' => $program, 'allDepartments' => $allDepartments])
-        @include('AcademicStructure.modals.deleteProgramModal', ['program' => $program])
+        @include('UniversityStructure.modals.updateProgramModal', ['program' => $program, 'allDepartments' => $allDepartments])
+        @include('UniversityStructure.modals.deleteProgramModal', ['program' => $program])
     @endforeach
 
 @endsection
