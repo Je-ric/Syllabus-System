@@ -1,18 +1,19 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\UserManagement;
 
+use App\Http\Controllers\Controller;
 use App\Models\UserAssignment;
-use App\Services\OrganizationalHierarchy\OrganizationalHierarchyService;
+use App\Services\UserAssignments\UserAssignmentsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 
-// This controller is thin — all business logic lives in OrganizationalHierarchyService and OrganizationalHierarchyChecker.
-class OrganizationalHierarchyController extends Controller
+// This controller is thin — all business logic lives in UserAssignmentsService and UserAssignmentsChecker.
+class UserAssignmentsController extends Controller
 {
     public function __construct(
-        protected OrganizationalHierarchyService $organizationalHierarchyService
+        protected UserAssignmentsService $userAssignmentsService
     ) {
     }
 
@@ -20,20 +21,19 @@ class OrganizationalHierarchyController extends Controller
     // ################### DEAN FUNCTIONS ###################
     // ############################################################
 
-    // colleges with deans
     public function collegesIndex()
     {
-        return view('OrganizationalHierarchy.colleges', $this->organizationalHierarchyService->collegesIndexData());
+        return view('UserAssignments.colleges', $this->userAssignmentsService->collegesIndexData());
     }
 
-    // Assign dean to a college (one dean per college, one college per dean)
     public function assignDean(Request $request)
     {
         $request->validate([
             'college_id' => 'required|exists:colleges,id',
-            'user_id' => 'required|exists:users,id',
+            'user_id'    => 'required|exists:users,id',
         ]);
-        $result = $this->organizationalHierarchyService->assignDean(
+
+        $result = $this->userAssignmentsService->assignDean(
             (int) $request->input('college_id'),
             (int) $request->input('user_id')
         );
@@ -41,14 +41,14 @@ class OrganizationalHierarchyController extends Controller
         return back()->with('toast', $result['toast']);
     }
 
-    // Remove dean assignment from a college
     public function removeDean(Request $request)
     {
         $request->validate([
             'college_id' => 'required|exists:colleges,id',
-            'user_id' => 'required|exists:users,id',
+            'user_id'    => 'required|exists:users,id',
         ]);
-        $result = $this->organizationalHierarchyService->removeDean(
+
+        $result = $this->userAssignmentsService->removeDean(
             (int) $request->input('college_id'),
             (int) $request->input('user_id')
         );
@@ -60,29 +60,28 @@ class OrganizationalHierarchyController extends Controller
     // ################### CHAIR FUNCTIONS ###################
     // ############################################################
 
-    // Display departments with chair assignments for a college
     public function departmentsIndex($collegeId)
     {
         /** @var \App\Models\User|null $actor */
         $actor = Auth::user();
 
         return view(
-            'OrganizationalHierarchy.departments',
-            $this->organizationalHierarchyService->departmentsIndexData($actor, (int) $collegeId)
+            'UserAssignments.departments',
+            $this->userAssignmentsService->departmentsIndexData($actor, (int) $collegeId)
         );
     }
 
-    // Assign chair to a department (one chair per department, one department per chair)
     public function assignChair(Request $request)
     {
         $request->validate([
             'department_id' => 'required|exists:departments,id',
-            'user_id' => 'required|exists:users,id',
+            'user_id'       => 'required|exists:users,id',
         ]);
+
         /** @var \App\Models\User|null $actor */
         $actor = Auth::user();
 
-        $result = $this->organizationalHierarchyService->assignChair(
+        $result = $this->userAssignmentsService->assignChair(
             (int) $request->input('department_id'),
             (int) $request->input('user_id'),
             $actor
@@ -91,17 +90,17 @@ class OrganizationalHierarchyController extends Controller
         return back()->with('toast', $result['toast']);
     }
 
-    // Remove chair assignment from a department
     public function removeChair(Request $request)
     {
         $request->validate([
             'department_id' => 'required|exists:departments,id',
-            'user_id' => 'required|exists:users,id',
+            'user_id'       => 'required|exists:users,id',
         ]);
+
         /** @var \App\Models\User|null $actor */
         $actor = Auth::user();
 
-        $result = $this->organizationalHierarchyService->removeChair(
+        $result = $this->userAssignmentsService->removeChair(
             (int) $request->input('department_id'),
             (int) $request->input('user_id'),
             $actor
@@ -113,17 +112,18 @@ class OrganizationalHierarchyController extends Controller
     // ############################################################
     // ################### FACULTY FUNCTIONS ###################
     // ############################################################
-    // Assign faculty to a department
+
     public function assignFaculty(Request $request)
     {
         $request->validate([
             'department_id' => 'required|exists:departments,id',
-            'user_id' => 'required|exists:users,id',
+            'user_id'       => 'required|exists:users,id',
         ]);
+
         /** @var \App\Models\User|null $actor */
         $actor = Auth::user();
 
-        $result = $this->organizationalHierarchyService->assignFaculty(
+        $result = $this->userAssignmentsService->assignFaculty(
             (int) $request->input('department_id'),
             (int) $request->input('user_id'),
             $actor
@@ -132,17 +132,17 @@ class OrganizationalHierarchyController extends Controller
         return back()->with('toast', $result['toast']);
     }
 
-    // Remove faculty assignment from a department
     public function removeFaculty(Request $request)
     {
         $request->validate([
             'department_id' => 'required|exists:departments,id',
-            'user_id' => 'required|exists:users,id',
+            'user_id'       => 'required|exists:users,id',
         ]);
+
         /** @var \App\Models\User|null $actor */
         $actor = Auth::user();
 
-        $result = $this->organizationalHierarchyService->removeFaculty(
+        $result = $this->userAssignmentsService->removeFaculty(
             (int) $request->input('department_id'),
             (int) $request->input('user_id'),
             $actor
@@ -151,8 +151,7 @@ class OrganizationalHierarchyController extends Controller
         return back()->with('toast', $result['toast']);
     }
 
-
-    // Redirect role entry point directly to management pages.
+    // Redirect role entry point directly to the appropriate management page.
     public function hierarchyView()
     {
         /** @var \App\Models\User|null $user */
@@ -163,7 +162,7 @@ class OrganizationalHierarchyController extends Controller
         }
 
         if ($user->hasRole('admin')) {
-            return redirect()->route('organizational.colleges.index');
+            return redirect()->route('user-assignments.colleges.index');
         }
 
         $deanAssignment = UserAssignment::where('user_id', $user->id)
@@ -171,7 +170,7 @@ class OrganizationalHierarchyController extends Controller
             ->first();
 
         if ($deanAssignment) {
-            return redirect()->route('organizational.departments.index', $deanAssignment->college_id);
+            return redirect()->route('user-assignments.departments.index', $deanAssignment->college_id);
         }
 
         $chairAssignment = UserAssignment::where('user_id', $user->id)
@@ -180,10 +179,9 @@ class OrganizationalHierarchyController extends Controller
             ->first();
 
         if ($chairAssignment && $chairAssignment->department) {
-            return redirect()->route('organizational.departments.index', $chairAssignment->department->college_id);
+            return redirect()->route('user-assignments.departments.index', $chairAssignment->department->college_id);
         }
 
-        return view('OrganizationalHierarchy.no-assignment');
+        return view('UserAssignments.no-assignment');
     }
-
 }

@@ -50,7 +50,7 @@ class Department extends Model
                     ->withTimestamps();
     }
 
-    // Used in: departmentsIndexData() - OrganizationalHierarchyService
+    // Used in: departmentsIndexData() - UserAssignmentsService
     // Returns the chair User via UserAssignment (context = 'chair'); chair_user_id column is not used
     public function deptChair()
     {

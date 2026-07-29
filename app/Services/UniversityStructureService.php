@@ -10,9 +10,9 @@ use App\Models\Program;
 use App\Models\UserAssignment;
 use Illuminate\Support\Facades\DB;
 
-// Used in: AcademicStructureController
+// Used in: UniversityStructureController
 
-class AcademicStructureService
+class UniversityStructureService
 {
     // COLLEGE
 

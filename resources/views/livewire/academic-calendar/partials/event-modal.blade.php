@@ -103,7 +103,7 @@
                     </span>
                 </div>
 
-                <p x-show="saving && !dateStart" x-cloak class="mt-1 text-[13px] text-rose-500 flex items-center gap-1">
+                <p x-show="hasAttempted && !dateStart" x-cloak class="mt-1 text-[13px] text-rose-500 flex items-center gap-1">
                     <i class="bx bx-error-circle"></i> Date is required.
                 </p>
                 @error('date')
@@ -122,7 +122,7 @@
                     style="box-shadow:none"
                     onfocus="this.style.boxShadow='0 0 0 3px rgba(22,163,74,0.25)'"
                     onblur="this.style.boxShadow='none'" />
-                <p x-show="saving && !name.trim()" x-cloak class="mt-1 text-[13px] text-rose-500 flex items-center gap-1">
+                <p x-show="hasAttempted && !name.trim()" x-cloak class="mt-1 text-[13px] text-rose-500 flex items-center gap-1">
                     <i class="bx bx-error-circle"></i> Event name is required.
                 </p>
                 @error('name')

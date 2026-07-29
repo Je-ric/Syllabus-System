@@ -1,26 +1,27 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\University;
 
+use App\Http\Controllers\Controller;
 use App\Models\College;
 use App\Models\Department;
 use App\Models\Program;
-use App\Services\AcademicStructureService;
+use App\Services\UniversityStructureService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
-class AcademicStructureController extends Controller
+class UniversityStructureController extends Controller
 {
-    public function __construct(private AcademicStructureService $service)
+    public function __construct(private UniversityStructureService $service)
     {
     }
 
     public function index()
     {
-        return view('AcademicStructure.index', [
-            'colleges' => College::orderBy('name')->get(),
-            'departments' => Department::withRelations()->orderBy('name')->get(),
-            'programs' => Program::with('departments')->get()->sortBy('name'),
+        return view('UniversityStructure.index', [
+            'colleges'       => College::orderBy('name')->get(),
+            'departments'    => Department::withRelations()->orderBy('name')->get(),
+            'programs'       => Program::with('departments')->get()->sortBy('name'),
             'allDepartments' => Department::with('college')->orderBy('name')->get(),
         ]);
     }
@@ -70,7 +71,7 @@ class AcademicStructureController extends Controller
     public function storeDepartment(Request $request)
     {
         $data = $request->validate([
-            'name' => ['required', 'string', Rule::unique('departments', 'name')],
+            'name'       => ['required', 'string', Rule::unique('departments', 'name')],
             'college_id' => ['required', 'exists:colleges,id'],
         ]);
         $this->service->storeDepartment($data);
@@ -81,7 +82,7 @@ class AcademicStructureController extends Controller
     public function updateDepartment(Request $request, Department $department)
     {
         $data = $request->validate([
-            'name' => ['required', 'string', Rule::unique('departments', 'name')->ignore($department->id)],
+            'name'       => ['required', 'string', Rule::unique('departments', 'name')->ignore($department->id)],
             'college_id' => ['required', 'exists:colleges,id'],
         ]);
         $this->service->updateDepartment($department, $data);
@@ -110,12 +111,12 @@ class AcademicStructureController extends Controller
     public function storeProgram(Request $request)
     {
         $data = $request->validate([
-            'name' => ['required', 'string', Rule::unique('programs', 'name')],
-            'primary_department_id' => ['required', 'exists:departments,id'],
-            'supporting_department_ids' => ['nullable', 'array'],
+            'name'                        => ['required', 'string', Rule::unique('programs', 'name')],
+            'primary_department_id'       => ['required', 'exists:departments,id'],
+            'supporting_department_ids'   => ['nullable', 'array'],
             'supporting_department_ids.*' => ['exists:departments,id'],
-            'bor_approval_no' => ['nullable', 'string'],
-            'bor_approval_date' => ['nullable', 'date'],
+            'bor_approval_no'             => ['nullable', 'string'],
+            'bor_approval_date'           => ['nullable', 'date'],
         ]);
         try {
             $this->service->storeProgram($data);
@@ -129,12 +130,12 @@ class AcademicStructureController extends Controller
     public function updateProgram(Request $request, Program $program)
     {
         $data = $request->validate([
-            'name' => ['required', 'string', Rule::unique('programs', 'name')->ignore($program->id)],
-            'primary_department_id' => ['required', 'exists:departments,id'],
-            'supporting_department_ids' => ['nullable', 'array'],
+            'name'                        => ['required', 'string', Rule::unique('programs', 'name')->ignore($program->id)],
+            'primary_department_id'       => ['required', 'exists:departments,id'],
+            'supporting_department_ids'   => ['nullable', 'array'],
             'supporting_department_ids.*' => ['exists:departments,id'],
-            'bor_approval_no' => ['nullable', 'string'],
-            'bor_approval_date' => ['nullable', 'date'],
+            'bor_approval_no'             => ['nullable', 'string'],
+            'bor_approval_date'           => ['nullable', 'date'],
         ]);
         try {
             $error = $this->service->updateProgram($program, $data);

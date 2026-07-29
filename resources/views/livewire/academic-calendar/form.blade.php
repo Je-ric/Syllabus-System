@@ -45,7 +45,7 @@
                 <i class="bx bx-error-circle"></i> {{ $message }}
             </p>
         @else
-            @if ($academic_year && preg_match('/^\d{4}-\d{4}$/', $academic_year))
+            @if ($isAcademicYearValid)
                 <p class="mt-1.5 flex items-center gap-1 text-[13px] text-[#16a34a]">
                     <i class="bx bx-check-circle"></i> Looks good
                 </p>
@@ -256,11 +256,11 @@
 
             <x-modal.footer>
                 <x-modal.close-button modalId="cancelEditModal" text="Stay on Page" />
-                <x-ui.button type="button" variant="danger"
-                    wire:navigate
-                    href="{{ route('academic.calendars.index') }}">
+                <a href="{{ route('academic.calendars.index') }}"
+                   wire:navigate
+                   class="inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 transition-colors">
                     <i class="bx bx-x"></i> Discard Changes
-                </x-ui.button>
+                </a>
             </x-modal.footer>
         </x-modal.dialog>
     @endif

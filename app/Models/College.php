@@ -30,13 +30,13 @@ class College extends Model
     //          storeProgram() - AcademicStructureController;
     //          updateProgram() - AcademicStructureController;
     //          destroyCollege() - AcademicStructureController;
-    //          collegesIndexData() - OrganizationalHierarchyService
+    //          collegesIndexData() - UserAssignmentsService
     public function departments()
     {
         return $this->hasMany(Department::class);
     }
 
-    // Used in: collegesIndexData() - OrganizationalHierarchyService
+    // Used in: collegesIndexData() - UserAssignmentsService
     public function deanAssignment()
     {
         return UserAssignment::where('college_id', $this->id)

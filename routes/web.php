@@ -2,22 +2,22 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\AccountApprovalController;
-use App\Http\Controllers\AcademicStructureController;
-use App\Http\Controllers\GoalController;
-use App\Http\Controllers\ObjectiveController;
-use App\Http\Controllers\ProgramController;
-use App\Http\Controllers\AcademicCalendarController;
-use App\Http\Controllers\AcademicCalendarEventController;
-use App\Http\Controllers\CourseController;
-use App\Http\Controllers\SyllabusController;
-use App\Http\Controllers\OrganizationalHierarchyController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\AuditLogController;
-use App\Http\Controllers\WorkloadController;
-use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Authentication\AuthController;
+use App\Http\Controllers\Authentication\AccountApprovalController;
+use App\Http\Controllers\System\DashboardController;
+use App\Http\Controllers\System\AuditLogController;
+use App\Http\Controllers\System\NotificationController;
+use App\Http\Controllers\University\UniversityStructureController;
+use App\Http\Controllers\UserManagement\UserController;
+use App\Http\Controllers\UserManagement\UserAssignmentsController;
+use App\Http\Controllers\Academic\AcademicCalendarController;
+use App\Http\Controllers\Academic\AcademicCalendarEventController;
+use App\Http\Controllers\Academic\CourseController;
+use App\Http\Controllers\Academic\WorkloadController;
+use App\Http\Controllers\CQI\GoalController;
+use App\Http\Controllers\CQI\ObjectiveController;
+use App\Http\Controllers\CQI\ProgramController;
+use App\Http\Controllers\Syllabus\SyllabusController;
 use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 
 Route::get('/', function () {
@@ -46,13 +46,13 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/notifications/{id}/read',    [NotificationController::class, 'markRead'])->name('notifications.read');
     Route::post('/notifications/read-all',     [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
 
-    Route::get('/profile', [UserController::class,'index'])->name('profile.index');
-    Route::put('/profile', [UserController::class,'update'])->name('profile.update');
-    Route::post('/profile/password', [UserController::class,'changePassword'])->name('profile.password.change');
-    Route::post('/profile/password/verify-otp', [UserController::class,'verifyPasswordOtp'])->name('profile.password.verify-otp');
-    Route::post('/profile/password/resend-otp', [UserController::class,'resendPasswordOtp'])->name('profile.password.resend-otp');
-    Route::post('/profile/consultation-hours', [UserController::class,'storeConsultationHour'])->name('profile.consultation.store');
-    Route::delete('/profile/consultation-hours/{hour}', [UserController::class,'destroyConsultationHour'])->name('profile.consultation.destroy');
+    Route::get('/profile', [UserController::class, 'index'])->name('profile.index');
+    Route::put('/profile', [UserController::class, 'update'])->name('profile.update');
+    Route::post('/profile/password', [UserController::class, 'changePassword'])->name('profile.password.change');
+    Route::post('/profile/password/verify-otp', [UserController::class, 'verifyPasswordOtp'])->name('profile.password.verify-otp');
+    Route::post('/profile/password/resend-otp', [UserController::class, 'resendPasswordOtp'])->name('profile.password.resend-otp');
+    Route::post('/profile/consultation-hours', [UserController::class, 'storeConsultationHour'])->name('profile.consultation.store');
+    Route::delete('/profile/consultation-hours/{hour}', [UserController::class, 'destroyConsultationHour'])->name('profile.consultation.destroy');
 
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/account-approval', [AccountApprovalController::class, 'index'])->name('accounts.approval');
@@ -63,23 +63,22 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/account-approval/assign-role', [AccountApprovalController::class, 'assignRole'])->name('account-approval.assign-role');
         Route::put('/account-approval/edit-user', [AccountApprovalController::class, 'editUser'])->name('account-approval.edit-user');
 
-        Route::get('/academic-structure', [AcademicStructureController::class, 'index'])->name('academic.structure.index');
-        Route::post('/academic-structure/college', [AcademicStructureController::class, 'storeCollege'])->name('college.store');
-        Route::put('/academic-structure/college/{college}', [AcademicStructureController::class, 'updateCollege'])->name('college.update');
-        Route::delete('/academic-structure/college/{college}', [AcademicStructureController::class, 'destroyCollege'])->name('college.destroy');
-        Route::post('/academic-structure/department', [AcademicStructureController::class, 'storeDepartment'])->name('department.store');
-        Route::put('/academic-structure/department/{department}', [AcademicStructureController::class, 'updateDepartment'])->name('department.update');
-        Route::delete('/academic-structure/department/{department}', [AcademicStructureController::class, 'destroyDepartment'])->name('department.destroy');
-        Route::post('/academic-structure/program', [AcademicStructureController::class, 'storeProgram'])->name('program.store');
-        Route::put('/academic-structure/program/{program}', [AcademicStructureController::class, 'updateProgram'])->name('program.update');
-        Route::delete('/academic-structure/program/{program}', [AcademicStructureController::class, 'destroyProgram'])->name('program.destroy');
+        Route::get('/university-structure', [UniversityStructureController::class, 'index'])->name('university.structure.index');
+        Route::post('/university-structure/college', [UniversityStructureController::class, 'storeCollege'])->name('university.structure.college.store');
+        Route::put('/university-structure/college/{college}', [UniversityStructureController::class, 'updateCollege'])->name('university.structure.college.update');
+        Route::delete('/university-structure/college/{college}', [UniversityStructureController::class, 'destroyCollege'])->name('university.structure.college.destroy');
+        Route::post('/university-structure/department', [UniversityStructureController::class, 'storeDepartment'])->name('university.structure.department.store');
+        Route::put('/university-structure/department/{department}', [UniversityStructureController::class, 'updateDepartment'])->name('university.structure.department.update');
+        Route::delete('/university-structure/department/{department}', [UniversityStructureController::class, 'destroyDepartment'])->name('university.structure.department.destroy');
+        Route::post('/university-structure/program', [UniversityStructureController::class, 'storeProgram'])->name('university.structure.program.store');
+        Route::put('/university-structure/program/{program}', [UniversityStructureController::class, 'updateProgram'])->name('university.structure.program.update');
+        Route::delete('/university-structure/program/{program}', [UniversityStructureController::class, 'destroyProgram'])->name('university.structure.program.destroy');
 
-        Route::get('/organizational/colleges', [OrganizationalHierarchyController::class, 'collegesIndex'])->name('organizational.colleges.index');
-        Route::post('/organizational/assign-dean', [OrganizationalHierarchyController::class, 'assignDean'])->name('organizational.assign-dean');
-        Route::post('/organizational/remove-dean', [OrganizationalHierarchyController::class, 'removeDean'])->name('organizational.remove-dean');
+        Route::get('/user-assignments/colleges', [UserAssignmentsController::class, 'collegesIndex'])->name('user-assignments.colleges.index');
+        Route::post('/user-assignments/assign-dean', [UserAssignmentsController::class, 'assignDean'])->name('user-assignments.assign-dean');
+        Route::post('/user-assignments/remove-dean', [UserAssignmentsController::class, 'removeDean'])->name('user-assignments.remove-dean');
 
         Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit.logs.index');
-
     });
 
     Route::middleware(['role:admin,ovpaa'])->group(function () {
@@ -102,15 +101,15 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::middleware(['role:admin,dean,chair'])->group(function () {
-        Route::get('/organizational/hierarchy', [OrganizationalHierarchyController::class, 'hierarchyView'])->name('organizational.hierarchy');
-        Route::get('/organizational/college/{collegeId}/departments', [OrganizationalHierarchyController::class, 'departmentsIndex'])->name('organizational.departments.index');
+        Route::get('/user-assignments/hierarchy', [UserAssignmentsController::class, 'hierarchyView'])->name('user-assignments.hierarchy');
+        Route::get('/user-assignments/college/{collegeId}/departments', [UserAssignmentsController::class, 'departmentsIndex'])->name('user-assignments.departments.index');
     });
 
     Route::middleware(['role:admin'])->group(function () {
-        Route::post('/organizational/assign-chair', [OrganizationalHierarchyController::class, 'assignChair'])->name('organizational.assign-chair');
-        Route::post('/organizational/remove-chair', [OrganizationalHierarchyController::class, 'removeChair'])->name('organizational.remove-chair');
-        Route::post('/organizational/assign-faculty', [OrganizationalHierarchyController::class, 'assignFaculty'])->name('organizational.assign-faculty');
-        Route::post('/organizational/remove-faculty', [OrganizationalHierarchyController::class, 'removeFaculty'])->name('organizational.remove-faculty');
+        Route::post('/user-assignments/assign-chair', [UserAssignmentsController::class, 'assignChair'])->name('user-assignments.assign-chair');
+        Route::post('/user-assignments/remove-chair', [UserAssignmentsController::class, 'removeChair'])->name('user-assignments.remove-chair');
+        Route::post('/user-assignments/assign-faculty', [UserAssignmentsController::class, 'assignFaculty'])->name('user-assignments.assign-faculty');
+        Route::post('/user-assignments/remove-faculty', [UserAssignmentsController::class, 'removeFaculty'])->name('user-assignments.remove-faculty');
     });
 
     Route::middleware(['role:admin,dean'])->group(function () {

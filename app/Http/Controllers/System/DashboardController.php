@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\System;
 
+use App\Http\Controllers\Controller;
 use App\Services\Dashboard\DashboardService;
 use Illuminate\Support\Facades\Auth;
 

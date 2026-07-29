@@ -63,6 +63,16 @@ class AcademicCalendarForm extends Component
         return view('livewire.academic-calendar.form');
     }
 
+    /**
+     * True only when academic_year matches YYYY-YYYY and has no validation error.
+     * Used in the view to show the "Looks good" green tick without preg_match in Blade.
+     */
+    public function getIsAcademicYearValidProperty(): bool
+    {
+        return (bool) preg_match('/^\d{4}-\d{4}$/', $this->academic_year)
+            && ! $this->getErrorBag()->has('academic_year');
+    }
+
     // ── Real-time validation ───────────────────────────────────────────────────
     // Livewire calls updated() on every property change (wire:model.blur fires
     // on field blur so we get per-field validation the moment the user leaves).

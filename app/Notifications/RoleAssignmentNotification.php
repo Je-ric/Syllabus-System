@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notification;
  * Notifies a user that they have been assigned to or removed from a role
  * (dean, chair, or faculty) in the organizational hierarchy.
  *
- * USAGE (from OrganizationalHierarchyService):
+ * USAGE (from UserAssignmentsService):
  *   $user->notify(new RoleAssignmentNotification('dean', 'assigned', $college->name));
  *   $user->notify(new RoleAssignmentNotification('chair', 'removed', $department->name));
  *

@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\CQI;
 
+use App\Http\Controllers\Controller;
 use App\Models\Program;
 use App\Models\ProgramEducationalObjective;
 use App\Models\ProgramOutcome;
@@ -52,7 +53,6 @@ class ProgramController extends Controller
             $programId = $peo->program_id;
 
             /** @var \App\Models\User $user */
-            // $user = auth()->user();
             $user = Auth::user();
             if (!$user->hasRole('admin')) {
                 if ($redirect = $this->abortIfNotAssignedToProgram($user, $programId)) {
@@ -105,7 +105,6 @@ class ProgramController extends Controller
             $programId = $po->program_id;
 
             /** @var \App\Models\User $user */
-            // $user = auth()->user();
             $user = Auth::user();
             if (!$user->hasRole('admin')) {
                 if ($redirect = $this->abortIfNotAssignedToProgram($user, $programId)) {

@@ -37,8 +37,10 @@ class AcademicCalendar extends Model
 
     public static function setActive(int $id): void
     {
-        static::query()->update(['is_active' => false]);
-        static::where('id', $id)->update(['is_active' => true]);
+        \Illuminate\Support\Facades\DB::transaction(function () use ($id) {
+            static::query()->update(['is_active' => false]);
+            static::where('id', $id)->update(['is_active' => true]);
+        });
     }
 
     // Used in: index() - AcademicCalendarController; 

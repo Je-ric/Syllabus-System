@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\CQI;
 
+use App\Http\Controllers\Controller;
 use App\Models\College;
 use App\Models\Department;
 use App\Models\DepartmentObjective;
-use App\Services\GoalObjectiveService;
+use App\Services\CQI\GoalObjectiveService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;

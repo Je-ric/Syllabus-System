@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\OrganizationalHierarchy;
+namespace App\Services\UserAssignments;
 
 use App\Models\AuditLog;
 use App\Models\College;
@@ -12,10 +12,10 @@ use Closure;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
-class OrganizationalHierarchyService
+class UserAssignmentsService
 {
     public function __construct(
-        protected OrganizationalHierarchyChecker $checker
+        protected UserAssignmentsChecker $checker
     ) {
     }
 

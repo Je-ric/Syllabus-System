@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Academic;
 
+use App\Http\Controllers\Controller;
 use App\Models\CaisTeachingLoad;
 use App\Services\CaisAPI\WorkloadSyncService;
 use Illuminate\Http\Request;

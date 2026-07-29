@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Authentication;
 
+use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\User;
 use App\Services\CaisApiService;
@@ -169,4 +170,3 @@ class AuthController extends Controller
         return redirect()->route('auth.show');
     }
 }
-

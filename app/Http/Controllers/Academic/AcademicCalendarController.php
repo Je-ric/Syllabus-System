@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Academic;
 
+use App\Http\Controllers\Controller;
 use App\Models\AcademicCalendar;
 use App\Models\AuditLog;
 use App\Models\Syllabus;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AcademicCalendarController extends Controller
 {
@@ -62,12 +64,14 @@ class AcademicCalendarController extends Controller
                 ->with('toast', ['message' => 'Academic year not found.', 'type' => 'error']);
         }
 
-        AcademicCalendar::setActive($ids->first());
+        $id = $ids->first();
+
+        AcademicCalendar::setActive($id);
 
         AuditLog::record(
             action: 'set_active',
             module: 'Academic Calendar',
-            referenceId: $ids->first(),
+            referenceId: $id,
             description: "Set A.Y. {$academicYear} as the active academic calendar."
         );
 
@@ -120,6 +124,10 @@ class AcademicCalendarController extends Controller
             DB::commit();
         } catch (\Throwable $e) {
             DB::rollBack();
+            Log::error('Failed to delete academic calendar', [
+                'academic_year' => $academic_year,
+                'error'         => $e->getMessage(),
+            ]);
 
             return redirect()->route('academic.calendars.index')
                 ->with('toast', ['message' => 'Failed to delete academic year.', 'type' => 'error']);

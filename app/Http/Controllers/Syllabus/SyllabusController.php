@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Syllabus;
 
+use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\CompleteSyllabus;
 use App\Models\Program;

@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Academic;
 
+use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\Program;
-// use App\Models\UserAssignment;
 use App\Models\User;
-use App\Services\CourseService;
+use App\Services\Academic\CourseService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -236,7 +236,6 @@ class CourseController extends Controller
         if ($user->hasRole('admin')) return null;
 
         $assignment = $user->getPrimaryDepartmentAssignment();
-        // $assignment = User::getPrimaryDepartmentAssignment();
         $allowed = $assignment && Program::whereHas('departments', fn($q) =>
             $q->where('department_id', $assignment->department_id)
         )->where('id', $program->id)->exists();

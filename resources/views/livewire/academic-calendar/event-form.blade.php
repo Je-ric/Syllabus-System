@@ -4,7 +4,6 @@
     x-data="{
         /* ── modal state ── */
         showForm:   false,
-        {{-- showImport: false, --}}
 
         /* ── form state ── */
         editingId: null,
@@ -13,6 +12,7 @@
         dateStart: '',
         dateEnd:   '',
         saving:    false,
+        hasAttempted: false,
 
         /* ── calendar state ── */
         deletingIds: [],   // array now — supports multiple concurrent deletes safely
@@ -62,6 +62,7 @@
             this.dateStart = prefillDate || '';
             this.dateEnd   = prefillDate || '';
             this.saving    = false;
+            this.hasAttempted = false;
             this.showForm  = true;
         },
 
@@ -72,6 +73,7 @@
             this.dateStart = detail.date  ?? '';
             this.dateEnd   = detail.date  ?? '';
             this.saving    = false;
+            this.hasAttempted = false;
             this.showForm  = true;
         },
 
@@ -82,9 +84,11 @@
             this.dateEnd   = '';
             this.name      = '';
             this.saving    = false;
+            this.hasAttempted = false;
         },
 
         async submit() {
+            this.hasAttempted = true;
             if (!this.name.trim() || !this.dateStart) return;
             if (this.dateEnd && this.dateEnd < this.dateStart) {
                 [this.dateStart, this.dateEnd] = [this.dateEnd, this.dateStart];
@@ -110,7 +114,6 @@
         else { openAdd($event.detail.date); }
     "
     x-on:event-saved.window="closeForm();"
-    x-on:event-deleted.window="">
 
     {{-- ══ CALENDAR VIEW ══════════════════════════════════════════════════════ --}}
 
@@ -165,14 +168,17 @@
     {{-- Calendar months — VIEW & DELETE ONLY. Adding is via the "Add Event" button/modal above. --}}
     @php
         $allEvents    = $semester?->events ?? collect();
-        $eventsByDate = $allEvents->keyBy(fn($e) => \Carbon\Carbon::parse($e->date)->format('Y-m-d'));
+        $eventsByDate = $allEvents->groupBy(fn($e) => \Carbon\Carbon::parse($e->date)->format('Y-m-d'));
 
         $rangePos = [];
-        foreach ($eventsByDate as $dk => $ev) {
+        foreach ($eventsByDate as $dk => $dayGroup) {
+            $ev      = $dayGroup->first();
             $prev    = \Carbon\Carbon::parse($dk)->subDay()->format('Y-m-d');
             $next    = \Carbon\Carbon::parse($dk)->addDay()->format('Y-m-d');
-            $hasPrev = isset($eventsByDate[$prev]) && $eventsByDate[$prev]->name === $ev->name && $eventsByDate[$prev]->type === $ev->type;
-            $hasNext = isset($eventsByDate[$next]) && $eventsByDate[$next]->name === $ev->name && $eventsByDate[$next]->type === $ev->type;
+            $prevEv  = $eventsByDate[$prev]?->first();
+            $nextEv  = $eventsByDate[$next]?->first();
+            $hasPrev = $prevEv && $prevEv->name === $ev->name && $prevEv->type === $ev->type;
+            $hasNext = $nextEv && $nextEv->name === $ev->name && $nextEv->type === $ev->type;
             if ($hasPrev && $hasNext) $rangePos[$dk] = 'middle';
             elseif ($hasPrev)         $rangePos[$dk] = 'end';
             elseif ($hasNext)         $rangePos[$dk] = 'start';
@@ -219,7 +225,9 @@
                             @php
                                 $date    = $month->copy()->setDay($d);
                                 $dateKey = $date->format('Y-m-d');
-                                $event   = $eventsByDate[$dateKey] ?? null;
+                                $dayEvents = $eventsByDate[$dateKey] ?? collect();
+                                $event     = $dayEvents->first();     // first event for display
+                                $hasConflict = $dayEvents->count() > 1; // flag for badge
                                 $inSem   = $date->between($semStart, $semEnd);
                                 $isToday = $date->isToday();
                                 $variant = $event ? ($typeVariantMap[$event->type] ?? $typeVariantMap['other']) : null;
@@ -262,6 +270,11 @@
                                         <p class="mt-0.5 text-[9px] font-semibold leading-tight truncate {{ $variant['text'] }}">
                                             {{ $event->name }}
                                         </p>
+                                        @if($hasConflict)
+                                            <p class="mt-0.5 text-[8px] font-bold leading-tight text-rose-600 truncate">
+                                                +{{ $dayEvents->count() - 1 }} more
+                                            </p>
+                                        @endif
                                     @endif
 
                                     <button
@@ -302,6 +315,5 @@
     @endif
 
     @include('livewire.academic-calendar.partials.event-modal')
-    {{-- @include('livewire.academic-calendar.partials.import-modal') --}}
 
 </div>

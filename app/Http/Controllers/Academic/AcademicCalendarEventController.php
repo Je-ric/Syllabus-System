@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Academic;
 
+use App\Http\Controllers\Controller;
 use App\Models\AcademicCalendar;
 use App\Models\AcademicCalendarEvent;
 use App\Models\AuditLog;
@@ -19,7 +20,7 @@ class AcademicCalendarEventController extends Controller
 
         if ($semesters->isEmpty()) {
             return redirect()->route('academic.calendars.index')
-                ->with('error', 'Academic year not found.');
+                ->with('toast', ['message' => 'Academic year not found.', 'type' => 'error']);
         }
 
         return view('AcademicCalendarEvent.index', compact('semesters', 'academicYear'));
@@ -30,6 +31,7 @@ class AcademicCalendarEventController extends Controller
 
     public function destroy(AcademicCalendarEvent $event)
     {
+        $event->loadMissing('calendar');
         $academicYear = $event->calendar->academic_year;
         $semester     = $event->calendar->semester;
         $eventId      = $event->id;

@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Services\OrganizationalHierarchy;
+namespace App\Services\UserAssignments;
 
 use App\Models\College;
 use App\Models\Department;
 use App\Models\User;
 
-class OrganizationalHierarchyChecker
+class UserAssignmentsChecker
 {
     public function scopeCollegeForDepartmentsIndex(?User $actor, College $college): array
     {
