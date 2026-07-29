@@ -126,7 +126,7 @@
             </template>
 
             {{-- Empty state --}}
-            <template x-if="outcomes.length === 0">
+            <template x-if="outcomes.length === 0 && !isSaving">
                 <div class="py-12 text-center bg-slate-50">
                     <span class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-slate-100 mb-3">
                         <i class="bx bx-book-open text-3xl text-slate-300"></i>

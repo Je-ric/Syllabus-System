@@ -226,14 +226,18 @@ window.coManager = function coManager(initialOutcomes, syllabusId) {
         },
 
         onSaved(fresh) {
+            // Update outcomes first before changing isSaving to prevent empty state flash
             this.outcomes = fresh.map((o, i) => ({
                 ...o,
                 _dirty:    false,
                 _original: o.description,
                 _key:      o.id ?? ('new-' + i),
             }));
-            this.isSaving = false;
-            this.$wire.dispatch('syllabus-step-dirty', { step: 'course_outcomes', dirty: false });
+            // Use nextTick to ensure DOM update completes before removing saving state
+            this.$nextTick(() => {
+                this.isSaving = false;
+                this.$wire.dispatch('syllabus-step-dirty', { step: 'course_outcomes', dirty: false });
+            });
         },
 
         _confirm(detail) {
