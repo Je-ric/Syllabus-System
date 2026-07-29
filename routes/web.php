@@ -17,6 +17,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\WorkloadController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 
 Route::get('/', function () {
@@ -39,6 +40,11 @@ Route::get('/waiting-approval', function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Notification endpoints — consumed by the bell dropdown via fetch()
+    Route::get('/notifications/data',          [NotificationController::class, 'data'])->name('notifications.data');
+    Route::post('/notifications/{id}/read',    [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::post('/notifications/read-all',     [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
 
     Route::get('/profile', [UserController::class,'index'])->name('profile.index');
     Route::put('/profile', [UserController::class,'update'])->name('profile.update');
