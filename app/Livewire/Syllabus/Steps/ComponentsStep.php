@@ -35,6 +35,9 @@ class ComponentsStep extends Component
     public array $userConsultationHours = [];
     public array $labConsultationHours = [];
 
+    // Cached lab instructor list — loaded once in loadData(), not on every render
+    public array $labUsers = [];
+
     // ── Mount ─────────────────────────────────────────────────────────────────
 
     public function mount(int $syllabusId): void
@@ -47,15 +50,6 @@ class ComponentsStep extends Component
 
     public function render()
     {
-        $labUsers = $this->courseHasLab
-            ? User::where('account_status', 'active')
-                ->whereDoesntHave('roles', fn ($q) => $q->where('name', 'admin'))
-                ->when($this->lec_user_id, fn ($q) => $q->where('id', '!=', $this->lec_user_id))
-                ->orderBy('name')
-                ->get(['id', 'name', 'email', 'phone_number', 'office'])
-                ->toArray()
-            : [];
-
         // Fallback: if lec_user_id wasn't persisted yet, use the authenticated user
         $lecUserId = $this->lec_user_id ?? Auth::id();
         $lecUser   = $lecUserId ? User::with('consultationHours')->find($lecUserId) : null;
@@ -64,7 +58,7 @@ class ComponentsStep extends Component
         return view('livewire.syllabus.steps.course-components', [
             'course'               => (object) ['has_lec_lab' => $this->courseHasLab],
             'labConsultationHours' => $this->labConsultationHours,
-            'labUsers'             => $labUsers,
+            'labUsers'             => $this->labUsers,
             'lecUser'              => $lecUser,
             'labUser'              => $labUser,
         ]);
@@ -76,7 +70,7 @@ class ComponentsStep extends Component
     public function onStepChanged(string $step): void
     {
         if ($step !== 'course_components') return;
-        $this->reset(['lec_user_id', 'lab_user_id', 'lec_schedules', 'lab_schedules', 'userConsultationHours', 'labConsultationHours']);
+        $this->reset(['lec_user_id', 'lab_user_id', 'lec_schedules', 'lab_schedules', 'userConsultationHours', 'labConsultationHours', 'labUsers']);
         $this->isLoaded = false;
         $this->loadData();
     }
@@ -240,6 +234,16 @@ class ComponentsStep extends Component
             ? $user->consultationHours
                 ->map(fn ($h) => ['day' => $h->day, 'time' => $h->time])
                 ->values()->all()
+            : [];
+
+        // Cache eligible lab instructors as plain arrays so this query only
+        // runs once per step load, not on every Livewire render cycle.
+        $this->labUsers = $this->courseHasLab
+            ? User::where('account_status', 'active')
+                ->whereDoesntHave('roles', fn ($q) => $q->where('name', 'admin'))
+                ->orderBy('name')
+                ->get(['id', 'name', 'email', 'phone_number', 'office'])
+                ->toArray()
             : [];
 
         $lec = CourseComponent::with('schedules')

@@ -58,22 +58,6 @@ Add the same gate checks from `submitForReview()` at the top of `saveAsDone()` b
 
 ---
 
-## Issue #9
-
-**Problem**
-Consultation hours are saved to the user's profile globally, not scoped to the syllabus.
-
-**When It Occurs**
-Any time a faculty member saves consultation hours in any syllabus wizard, those hours overwrite the user's profile-level consultation hours. If the faculty member has different consultation hours for different courses/semesters, saving one syllabus's hours will corrupt the others.
-
-**Impact**
-A faculty member with two active syllabi (e.g., one for 1st semester, one for 2nd semester) who updates consultation hours in one wizard will see those hours reflected in all other syllabi. Previously saved syllabi snapshots are unaffected, but the live wizard view for other syllabi will show the wrong hours.
-
-**Recommended Fix**
-Store consultation hours per `CourseComponent` row rather than on the user profile, or at minimum warn the user that saving consultation hours updates their profile globally and affects all syllabi.
-
----
-
 ## Issue #13
 
 **Problem**
@@ -112,21 +96,7 @@ Set the initial status to `'pending'` and implement a reviewer notification/acce
 
 ---
 
-## Issue #15
 
-**Problem**
-The `labUsers` query in `ComponentsStep::render()` runs on every Livewire render cycle.
-
-**When It Occurs**
-Every time any Livewire property changes on the Course Components step (e.g., typing in the instructor name field triggers `updated()`, which triggers a re-render, which re-runs the query).
-
-**Impact**
-For a system with many active faculty users, this query runs dozens of times per page interaction. On a hosted server with a slow DB connection, this will cause noticeable lag on the Course Components step.
-
-**Recommended Fix**
-Move the `labUsers` query into `loadData()` and cache the result as a component property, the same pattern used for `academicCalendars` in `AcademicCalendarStep`.
-
----
 
 ## Issue #16
 

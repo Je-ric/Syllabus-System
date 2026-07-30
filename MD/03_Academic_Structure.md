@@ -5,9 +5,9 @@ Practical reference for how CSMS manages the academic structure hierarchy.
 ## Files Used (Source of Truth)
 
 - Controller
-  - `app/Http/Controllers/AcademicStructureController.php`
+  - `app/Http/Controllers/University/UniversityStructureController.php`
 - Service
-  - `app/Services/AcademicStructureService.php`
+  - `app/Services/UniversityStructureService.php`
 - Models
   - `app/Models/College.php`
   - `app/Models/Department.php`
@@ -15,19 +15,19 @@ Practical reference for how CSMS manages the academic structure hierarchy.
   - `app/Models/Course.php`
   - `app/Models/UserAssignment.php`
 - Pivot
-  - `program_departments` (program-to-department link with `role = primary`)
+  - `program_departments` (program-to-department link with `role = primary` or `role = supporting`)
 - Views
-  - `resources/views/AcademicStructure/index.blade.php`
-  - `resources/views/AcademicStructure/modals/` (add/delete modals per entity)
+  - `resources/views/UniversityStructure/index.blade.php`
+  - `resources/views/UniversityStructure/modals/`
 - Routes
-  - `routes/web.php` (Academic Structure routes — `role:admin` only)
+  - `routes/web.php` (university structure routes — `role:admin` only)
 
 ## Key Concepts
 
-- Colleges contain Departments. Programs belong to Departments via `program_departments` pivot with `role = primary`.
+- Colleges contain Departments. Programs belong to Departments via the `program_departments` pivot with `role = primary` (one) and optional `role = supporting` (many).
 - All structure routes are restricted to `role:admin`.
 - Delete modals show cascade warnings and item counts before confirming.
-- All destructive operations run inside a DB transaction via `AcademicStructureService`.
+- All destructive operations run inside a DB transaction via `UniversityStructureService`.
 - If a service call throws, the controller catches it and returns a generic error toast.
 
 ## Conditions (If / Then)
@@ -92,12 +92,14 @@ Practical reference for how CSMS manages the academic structure hierarchy.
 
 - If creating a program:
   - Then `name` is required and must be unique across `programs`.
-  - Then `department_id` is required and must exist.
-  - Then `bor_approval_no` is optional.
+  - Then `primary_department_id` is required and must exist.
+  - Then `supporting_department_ids` is optional array; each entry must exist in `departments`.
+  - Then `bor_approval_no` is optional string.
   - Then `bor_approval_date` is optional date.
 - If create succeeds:
   - Then `programs` row is inserted.
-  - Then `program_departments` pivot row is inserted with `role = primary`.
+  - Then `program_departments` pivot row is inserted with `role = primary` for the primary department.
+  - Then additional `program_departments` rows are inserted with `role = supporting` for each supporting department (skipping any that duplicate the primary).
   - Then all in a DB transaction.
 
 ### Programs (Update)
@@ -105,13 +107,14 @@ Practical reference for how CSMS manages the academic structure hierarchy.
 - If updating a program:
   - Then the program must exist (route model binding).
   - Then `name` is required and must be unique, ignoring the current program's own id.
-  - Then `department_id` is required and must exist.
-  - If `department_id` is changing AND the program has any courses:
+  - Then `primary_department_id` is required and must exist.
+  - Then `supporting_department_ids` is optional array.
+  - If `primary_department_id` is changing AND the program has any courses:
     - Then update is blocked with an error toast.
-    - Then department change is only allowed when the program has no courses.
+    - Then primary department change is only allowed when the program has no courses.
   - If department is not changing or program has no courses:
     - Then program fields are updated.
-    - Then `program_departments` pivot is synced (`sync`) to the new department with `role = primary`.
+    - Then `program_departments` pivot is synced to the new primary + supporting departments.
     - Then all in a DB transaction.
   - If a database error occurs:
     - Then transaction is rolled back and generic error message is returned.
@@ -136,14 +139,14 @@ Practical reference for how CSMS manages the academic structure hierarchy.
 
 ### Create Program
 
-1. User selects a Department and enters Program details.
+1. Admin enters program name, selects primary department, optionally selects supporting departments.
 2. System validates name uniqueness and department existence.
 3. System inserts `programs` row.
-4. System inserts `program_departments` row with `role = primary`.
+4. System inserts `program_departments` row with `role = primary` and any `role = supporting` rows.
 
 ### Update Program Department Link
 
-1. User selects a new Department for the Program.
+1. Admin selects a new primary department for the Program.
 2. System checks if the program has any courses.
 3. If courses exist → blocked with an error toast.
 4. If no courses → system updates `programs` and syncs `program_departments`.
@@ -154,4 +157,4 @@ Practical reference for how CSMS manages the academic structure hierarchy.
 2. Admin confirms.
 3. System checks for courses under all programs in all departments.
 4. If courses exist → blocked with an error toast showing the count.
-5. If clear → system deletes assignments, objectives, programs detach, departments, goals, college in a transaction.
+5. If clear → system deletes assignments, objectives, program detachments, departments, goals, college in a transaction.

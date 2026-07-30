@@ -5,9 +5,9 @@ Rules for creating, updating, archiving, restoring, deleting, and PO mapping of 
 ## Files Used (Source of Truth)
 
 - Controller
-  - `app/Http/Controllers/CourseController.php`
+  - `app/Http/Controllers/Academic/CourseController.php`
 - Service
-  - `app/Services/CourseService.php`
+  - `app/Services/Academic/CourseService.php`
   - `app/Services/Syllabus/SyllabusDeleteService.php` — cascade-delete per syllabus (shared with `SyllabusController`)
 - Models
   - `app/Models/Course.php`
@@ -18,7 +18,7 @@ Rules for creating, updating, archiving, restoring, deleting, and PO mapping of 
 - Views
   - `resources/views/Course/index.blade.php`
   - `resources/views/Course/form.blade.php`
-  - `resources/views/Course/modals/deleteCourseModal.blade.php`
+  - `resources/views/Course/modals/`
 - Routes
   - `routes/web.php` (course routes — `role:admin,chair`)
 

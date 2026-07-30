@@ -5,69 +5,104 @@ Practical reference for how Academic Calendars and their semester events behave 
 ## Files Used (Source of Truth)
 
 - Controllers
-  - `app/Http/Controllers/AcademicCalendarController.php`
-  - `app/Http/Controllers/AcademicCalendarEventController.php`
+  - `app/Http/Controllers/Academic/AcademicCalendarController.php`
+  - `app/Http/Controllers/Academic/AcademicCalendarEventController.php`
 - Livewire
   - `app/Livewire/AcademicCalendar/AcademicCalendarForm.php`
   - `app/Livewire/AcademicCalendar/AcademicCalendarEventForm.php`
-  - `resources/views/livewire/academic-calendar/form.blade.php`
-  - `resources/views/livewire/academic-calendar/event-form.blade.php`
 - Models
   - `app/Models/AcademicCalendar.php`
   - `app/Models/AcademicCalendarEvent.php`
   - `app/Models/Syllabus.php`
   - `app/Models/SyllabusWeek.php`
+- Views (controller-rendered)
+  - `resources/views/AcademicCalendar/index.blade.php`
+  - `resources/views/AcademicCalendar/form.blade.php`
+  - `resources/views/AcademicCalendar/Modals/cancelEditModal.blade.php`
+  - `resources/views/AcademicCalendar/Modals/confirmAYModal.blade.php`
+  - `resources/views/AcademicCalendar/Modals/deleteAYModal.blade.php`
+  - `resources/views/AcademicCalendar/Modals/event-modal.blade.php`
+  - `resources/views/AcademicCalendarEvent/index.blade.php`
+- Views (Livewire)
+  - `resources/views/livewire/academic-calendar/form.blade.php`
+  - `resources/views/livewire/academic-calendar/event-form.blade.php`
+  - `resources/views/livewire/academic-calendar/partials/`
 - Routes
-  - `routes/web.php` (academic calendar + events routes)
+  - `routes/web.php` (academic calendar + events routes — `role:admin,ovpaa`)
+    - `GET /academic-calendars` — index
+    - `GET /academic-calendars/create` — create form
+    - `POST /academic-calendars` — store (routed but handled by Livewire `store()`)
+    - `GET /academic-calendars/{academicYear}/edit` — edit form
+    - `PUT /academic-calendars/{academicYear}` — update (routed but handled by Livewire `update()`)
+    - `DELETE /academic-calendars/{academicYear}` — destroy (controller)
+    - `POST /academic-calendars/{academicYear}/set-active` — set active (controller)
+    - `GET /academic-calendars/{academicYear}/events` — events index
+    - `POST /academic-calendars/{semester}/events` — store event (routed but handled by Livewire)
+    - `PUT /academic-calendars/events/{event}` — update event (routed but handled by Livewire)
+    - `DELETE /academic-calendars/events/{event}` — destroy event (controller)
 
 ## Key Concepts
 
-- One academic year is represented by **two** `academic_calendars` rows (1st + 2nd semester).
+- One academic year is represented by **two** `academic_calendars` rows — one for 1st semester, one for 2nd semester.
 - Events are stored per semester row in `academic_calendar_events`.
-- Store and update are handled by the `AcademicCalendarForm` Livewire component, not the controller.
-- Event add, edit, delete, bulk range, and CSV import are handled by `AcademicCalendarEventForm` Livewire component.
+- `is_active = true` on one semester row marks it as the active calendar used by the syllabus wizard and dashboard.
+- `setActive()` is a static model method — it wraps all-false then single-true in a DB transaction.
+- Store and update of the calendar form are handled by the `AcademicCalendarForm` Livewire component; the POST/PUT controller methods do not exist.
+- Event add, edit, delete, and bulk range are handled by the `AcademicCalendarEventForm` Livewire component; the POST/PUT controller event methods do not exist.
+- CSV import is present in the codebase but **currently disabled** (commented out with `WithFileUploads`).
 
 ## Conditions (If / Then)
 
-### Academic Calendar (Create — Livewire)
+### Academic Calendar (Create — Livewire `requestCreate` + `store`)
 
-- If `academic_year` is missing:
-  - Then validation fails.
-- If `academic_year` format is not `YYYY-YYYY`:
-  - Then validation fails.
+- If `academic_year` is missing or does not match `YYYY-YYYY`:
+  - Then validation fails with inline error.
 - If `academic_year` already exists in `academic_calendars`:
-  - Then validation fails (must be unique).
+  - Then validation fails (unique constraint checked on submit, not per keystroke).
 - If any semester start/end date is missing:
   - Then validation fails.
 - If 1st semester `end_date < start_date`:
   - Then validation fails.
-- If 2nd semester `start_date` is not after 1st semester `end_date`:
+- If 2nd semester `start_date` is not strictly after 1st semester `end_date`:
   - Then validation fails.
 - If 2nd semester `end_date < start_date`:
   - Then validation fails.
 - If all validations pass:
-  - Then `requestCreate()` opens the confirm modal (`showConfirmModal = true`).
-  - Then `store()` creates two `academic_calendars` rows (1st and 2nd semester).
-  - Then redirect to the events screen for the new academic year.
-- Real-time validation: `academic_year` only checks format while typing (no DB hit per keystroke); uniqueness is checked on submit.
+  - Then `requestCreate()` sets `showConfirmModal = true` — confirm modal opens.
+  - Then `store()` is called on confirmation:
+    - Then two `academic_calendars` rows are created (1st and 2nd semester) inside a DB transaction.
+    - If no calendar is currently active: the newly created 1st semester is auto-activated.
+    - Then AuditLog recorded.
+    - Then redirect to events index for the new academic year.
+  - If DB error: transaction rolled back, inline error shown, modal closed.
 
-### Academic Calendar (Update — Livewire)
+### Academic Calendar (Update — Livewire `update`)
 
 - If the requested `academic_year` does not exist in DB:
-  - Then add error and return.
+  - Then inline error added and return.
 - If changing the `academic_year` value:
-  - Then the new year must still be unique (unless it matches the current year being edited).
-- If dates are changed and syllabi with generated weeks exist for this calendar:
-  - Then `showStaleWeeksWarning = true` and update is paused.
-  - Then the blade shows a warning banner: "Syllabi with generated weeks exist."
+  - Then the new year must be unique (unless it matches the current year being edited).
+- If dates are changed AND syllabi with generated weeks exist for this calendar:
+  - Then `showStaleWeeksWarning = true` — update is paused.
+  - Then the blade shows a stale-weeks warning banner.
   - If admin clicks "Proceed Anyway":
-    - Then `showStaleWeeksWarning` is bypassed and update proceeds.
+    - Then `showStaleWeeksWarning` is bypassed and `update()` runs again.
     - Then existing syllabus week dates become stale (faculty must regenerate manually).
-  - If admin clicks "Cancel":
-    - Then `showStaleWeeksWarning = false` and no changes are saved.
+  - If admin clicks "Cancel" (`cancelStaleWarning`):
+    - Then `showStaleWeeksWarning = false` — no changes saved.
 - If all validations pass and no stale-weeks pause:
-  - Then update both semester rows under the same `academic_year`.
-  - Then redirect to the calendar index with a success toast.
+  - Then both semester rows under the same `academic_year` are updated inside a DB transaction.
+  - Then AuditLog recorded.
+  - Then redirect to calendar index with a success toast.
+
+### Academic Calendar (Set Active — Controller)
+
+- If `academic_year` does not exist in DB:
+  - Then redirect to index with error toast.
+- If valid:
+  - Then `AcademicCalendar::setActive()` wraps all-false + single-true in a transaction.
+  - Then AuditLog recorded.
+  - Then redirect to index with success toast.
 
 ### Academic Calendar (Delete — Controller)
 
@@ -75,113 +110,116 @@ Practical reference for how Academic Calendars and their semester events behave 
   - Then redirect with error toast (invalid format).
 - If no `academic_calendars` rows exist for that year:
   - Then redirect with error toast (not found).
-- If any syllabus is linked to this academic year's calendar IDs:
+- If any `Syllabus` is linked to this academic year's calendar IDs:
   - Then redirect with error toast showing the count of linked syllabi.
   - Then delete is blocked.
 - If all checks pass:
-  - Then delete all `academic_calendars` rows matching the confirmed ID set (not raw string).
+  - Then delete all `academic_calendars` rows for that year inside a DB transaction.
   - Then related events are removed via FK cascade.
-  - Then redirect to index with a success toast.
+  - Then AuditLog recorded.
+  - Then redirect to index with success toast.
+  - If DB error: transaction rolled back, error toast shown.
 
-### Academic Event (Single Date — Add or Edit)
+### Academic Event (Single Date — Livewire `saveEvent`)
 
-- If `type` is missing or not one of the valid types:
-  - Then a toast error is dispatched and save is blocked.
-- Valid types: `holiday`, `exam`, `break`, `non_teaching`, `other`
-- If `name` is missing:
-  - Then a toast error is dispatched.
+- If `type` is not one of `holiday`, `exam`, `break`, `non_teaching`, `other`:
+  - Then `lw-toast` error dispatched.
+- If `name` is missing or exceeds 255 chars:
+  - Then `lw-toast` error dispatched.
 - If `date` is missing, invalid, or outside the semester's `start_date`–`end_date` range:
-  - Then a toast error is dispatched.
+  - Then `lw-toast` error dispatched.
 - If another event already exists on the same `date` for the same semester:
-  - Then a toast error is dispatched (unique per semester date).
-- When editing: the current event's own date is excluded from the uniqueness check.
+  - Then `lw-toast` error dispatched (unique per `academic_calendar_id` + `date`).
+- When editing: the current event's own `id` is excluded from the uniqueness check.
+- If editing and the event no longer exists (deleted in another tab):
+  - Then `event-saved` dispatched (refreshes list) + error toast. No crash.
 - If all validations pass:
-  - Then the event is saved and a success toast is dispatched.
+  - Then event is created or updated.
+  - Then AuditLog recorded.
+  - Then `event-saved` dispatched + success toast.
 
-### Academic Event (Date Range — Bulk Add)
+### Academic Event (Date Range — Livewire `saveEventRange`)
 
 - If `type`, `name`, `dateStart`, or `dateEnd` fail validation:
-  - Then a toast error is dispatched and no rows are inserted.
+  - Then `lw-toast` error dispatched, no rows inserted.
 - If `dateStart` or `dateEnd` are outside the semester range:
   - Then validation fails.
 - If `dateEnd < dateStart`:
   - Then validation fails.
 - If all validations pass:
-  - Then the system iterates each day in the range.
-  - Dates that already have an event for this semester are silently skipped.
-  - Only new dates are inserted in a single bulk DB operation.
-  - Then a success toast shows how many events were added (e.g. "3 event(s) added.").
+  - Then existing event dates in the range are fetched and flipped into a skip map.
+  - Then one row is inserted per day in the range not already covered (bulk `insert`).
+  - Then AuditLog recorded.
+  - Then success toast shows how many events were added (e.g. "3 event(s) added.").
 
 ### Academic Event (CSV Import)
 
-- File must be `.csv` or `.txt`, max 512 KB.
+- **Currently disabled** — `WithFileUploads` trait and `importCsv()` method are commented out.
+- When re-enabled: file must be `.csv` or `.txt`, max 512 KB.
 - Each row must have at least 3 columns: `type`, `name`, `date`.
-- Rows with fewer than 3 columns are skipped.
-- Each row is individually validated against the same rules as single-date add (type whitelist, name required, date in semester range, unique per semester date).
-- Rows that fail validation are skipped silently.
-- After processing:
-  - Then a toast shows how many events were imported and how many were skipped.
-  - Then the CSV file field is cleared.
+- Rows with fewer than 3 columns or failing validation are silently skipped.
+- After processing: toast reports imported and skipped counts.
 
-### Academic Event (Delete)
+### Academic Event (Delete — Livewire `deleteEvent`)
 
-- Deletion is handled by the Livewire `deleteEvent()` method (inline in the event form) or the controller `destroy()` (via route).
-- If an event is deleted:
-  - Then that event row is removed.
-  - Then a success toast is dispatched.
-- If the event type was `exam` or `non_teaching` and it was affecting a syllabus week lock:
-  - Then the week will no longer be locked on the next week regeneration.
-  - Then existing locked weeks in already-generated syllabi are **not** automatically unlocked.
+- Uses `find()` instead of `findOrFail()` — if the event was already deleted (double-click, duplicate dispatch), the method no-ops gracefully.
+- If event exists:
+  - Then AuditLog recorded.
+  - Then event deleted.
+- Then `event-deleted` dispatched (closes modal / refreshes list).
+
+### Academic Event (Delete — Controller `destroy`)
+
+- Called by the `DELETE /academic-calendars/events/{event}` route.
+- Loads the calendar relationship to get academic year + semester for the AuditLog description.
+- Deletes the event and records AuditLog.
+- Redirects to events index for that academic year with success toast.
 
 ## Sequences (Typical Flow)
 
 ### Create an Academic Year
 
-1. User submits year + two semester date ranges.
-2. Livewire validates format and date order in real time (uniqueness only on submit).
-3. User clicks "Create Calendar" → confirm modal opens.
-4. User confirms → system creates 2 semester rows (1st and 2nd).
-5. System redirects to the event management screen for that year.
+1. Admin navigates to `/academic-calendars/create`.
+2. Admin fills in academic year (YYYY-YYYY) and two semester date ranges.
+3. Livewire validates format/dates in real time (uniqueness only on submit).
+4. Admin clicks "Create Calendar" → confirm modal opens (`showConfirmModal = true`).
+5. Admin confirms → `store()` creates 2 semester rows in a transaction.
+6. If no active calendar: 1st semester auto-activated.
+7. Redirect to events index for the new academic year.
 
-### Edit an Academic Year with Existing Syllabi
+### Edit an Academic Year (with Existing Syllabi)
 
-1. User edits dates.
-2. System detects syllabi with generated weeks linked to this calendar.
-3. System shows stale-weeks warning banner.
-4. User either proceeds (accepting stale weeks) or cancels.
-5. If proceeding, both semester rows are updated and user is redirected to the calendar index.
+1. Admin navigates to the edit form.
+2. Admin changes semester dates.
+3. Livewire detects syllabi with generated weeks linked to this calendar.
+4. `showStaleWeeksWarning = true` — warning banner shown, save paused.
+5. Admin clicks "Proceed Anyway" → `showStaleWeeksWarning` bypassed, both rows updated.
+6. Existing syllabus week dates are now stale — faculty must regenerate weeks manually.
+
+### Set Active Academic Year
+
+1. Admin clicks "Set Active" on a calendar row.
+2. Controller calls `AcademicCalendar::setActive()`.
+3. All calendars set to `is_active = false`, selected one set to `is_active = true`.
+4. AuditLog recorded. Redirect to index with success toast.
 
 ### Add Events (Single Date)
 
-1. User selects an event type, name, and a single date.
+1. User selects event type, name, and a single date within the semester range.
 2. Livewire validates type whitelist, date-in-range, and per-date uniqueness.
-3. If valid, event is saved and a success toast is shown.
+3. If valid: event saved, `event-saved` dispatched, success toast shown.
 
 ### Add Events (Date Range)
 
-1. User selects an event type, name, start date, and end date.
+1. User selects event type, name, start date, and end date.
 2. Livewire validates the range against the semester boundaries.
-3. System inserts one event per day, skipping dates that already have an event.
+3. System bulk-inserts one row per day, skipping dates already covered.
 4. Success toast reports how many days were inserted.
-
-### Import Events via CSV
-
-1. User uploads a CSV file with columns: `type`, `name`, `date`.
-2. System validates each row individually.
-3. Valid rows are inserted; invalid or duplicate rows are skipped.
-4. Success toast reports imported and skipped counts.
-
-### Edit an Event
-
-1. User clicks edit on an existing event.
-2. Form pre-fills with current values.
-3. Same validation rules apply (date uniqueness ignores the current event).
-4. If valid, event is updated and a success toast is shown.
 
 ### Delete an Event
 
 1. User clicks delete on an existing event.
-2. Event is removed immediately (no confirmation modal).
-3. Success toast is shown.
+2. Livewire `deleteEvent()` uses `find()` — safe against double-click.
+3. AuditLog recorded, event deleted, `event-deleted` dispatched.
 
-> **Note:** Events immediately affect features that depend on calendar weeks. See `MD/10_Syllabus_Wizard.md` for how `exam`, `non_teaching`, and `break` events affect week generation and locking.
+> **Note:** Events affect features that depend on calendar weeks. See `MD/10_Syllabus_Wizard.md` for how `exam`, `non_teaching`, and `break` events affect week generation and locking.

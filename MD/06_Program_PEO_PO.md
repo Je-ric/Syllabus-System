@@ -5,146 +5,210 @@ Rules for program-level PEO/PO management, code sequencing, and PO↔PEO mapping
 ## Files Used (Source of Truth)
 
 - Controllers
-  - `app/Http/Controllers/AcademicStructureController.php` — program CRUD in Academic Structure admin page
-  - `app/Http/Controllers/ProgramController.php` — program listing, show, PEO/PO delete routes
-- Livewire PEO
+  - `app/Http/Controllers/University/UniversityStructureController.php` — program CRUD (admin page)
+  - `app/Http/Controllers/CQI/ProgramController.php` — program listing, show, PEO/PO delete routes
+- Livewire
   - `app/Livewire/Programs/ManagePeos.php`
-  - `resources/views/livewire/programs/manage-peos.blade.php`
-- Livewire PO
   - `app/Livewire/Programs/ManagePos.php`
-  - `resources/views/livewire/programs/manage-pos.blade.php`
+  - `app/Livewire/Programs/PeoDisplay.php`
+  - `app/Livewire/Programs/MatrixView.php`
+  - `app/Livewire/Programs/ProgramSelector.php`
 - Models
-  - `app/Models/ProgramEducationalObjective.php`
+  - `app/Models/Program.php`
+  - `app/Models/ProgramEducationalObjective.php` (table: `program_eos`)
   - `app/Models/ProgramOutcome.php`
 - Mapping pivots
-  - `program_outcome_peo` (PO ↔ PEO)
-  - `course_curriculum_maps` (PO ↔ Course)
+  - `program_outcome_peo` (PO ↔ PEO, foreign keys: `program_outcome_id`, `program_eo_id`)
+  - `course_curriculum_maps` (PO ↔ Course, with `ied` column)
 - Helper
   - `app/Helpers/ProgramCodeHelper.php`
+- Views (controller-rendered)
+  - `resources/views/Programs/index.blade.php`
+- Views (Livewire)
+  - `resources/views/livewire/programs/manage-peos.blade.php`
+  - `resources/views/livewire/programs/manage-pos.blade.php`
+  - `resources/views/livewire/programs/peo-display.blade.php`
+  - `resources/views/livewire/programs/matrix-view.blade.php`
+  - `resources/views/livewire/programs/program-selector.blade.php`
+  - `resources/views/livewire/programs/partials/`
 - Routes
-  - `routes/web.php` (PEO + PO routes — `role:admin,chair`)
+  - `routes/web.php` (program routes — `role:admin,chair`)
+    - `GET /programs` — index
+    - `GET /programs/{program}` — show
+    - `DELETE /programs/peo/{peo}` — delete PEO
+    - `DELETE /programs/po/{po}` — delete PO
+
+## Key Concepts
+
+- `ProgramEducationalObjective` uses the table name `program_eos` (not `program_educational_objectives`).
+- PEO codes and PO codes are auto-generated letters (`a`, `b`, ..., `z`, `aa`, `ab`, ...) using `ProgramCodeHelper`.
+- All codes are nulled first before resequencing to avoid unique constraint collisions during reorder.
+- `resequencePeoCodes()` and `resequencePoCodes()` are deprecated — use `resequencePeoCodesOrdered()` and `resequencePoCodesOrdered()` instead.
+- `PeoDisplay` and `MatrixView` are read-only reactive components that refresh when `peosUpdated` or `pos-saved` events are dispatched.
 
 ## Conditions (If / Then)
 
-### Program Authorization (Mount Guard)
+### Program Authorization (Mount Guard — ManagePeos and ManagePos)
 
 - If the logged-in user is not admin:
   - Then check if the program belongs to the user's assigned department.
-  - If it does not → flash warning toast and redirect to program index.
-- This check applies to both `ManagePeos` and `ManagePos` on `mount()`.
+  - If it does not → flash warning toast and `$this->redirect(route('programs.index'))`.
+- This check runs in `mount()` of both `ManagePeos` and `ManagePos`.
 
-### PEO Rules (Livewire — Save)
+### PEO Rules (Livewire — `savePeos`)
 
 - If any `peo_text` in the submitted rows is blank:
-  - Then a `RuntimeException` is thrown and a toast error is dispatched.
+  - Then `RuntimeException` thrown, caught, error toast dispatched.
   - Then nothing is saved.
-- If saving PEOs:
-  - Then PEOs absent from the submission (by id) are deleted.
-  - Then existing PEO rows are updated in place (text only; code is not updated here).
-  - Then new rows (no id) are inserted with `peo_code = null`.
-  - Then `ProgramCodeHelper::resequencePeoCodesOrdered()` is called with the final ordered id list (submitted ids first, then newly inserted ids).
-  - Then codes are assigned in the visual order the user has arranged the rows.
-  - Then a `peosUpdated` event is dispatched so `ManagePos` on the same page can refresh its PEO list.
-  - Then a `peos-saved` event is dispatched with the updated PEO array.
+- If all rows are non-empty:
+  - Then runs inside a DB transaction:
+    - PEOs absent from the submission (had an id, not in submitted list) are hard-deleted.
+    - Existing rows are updated (text only).
+    - New rows (no id) are inserted with `peo_code = null`.
+    - `ProgramCodeHelper::resequencePeoCodesOrdered()` is called with submitted ids first, then new ids.
+    - Codes are nulled globally first, then assigned in visual order.
+  - Then AuditLog recorded.
+  - Then `lw-toast` success dispatched.
+  - Then `peosUpdated` event dispatched with `programId` — triggers `ManagePos`, `PeoDisplay`, and `MatrixView` to refresh.
+  - Then `peos-saved` event dispatched with updated PEO array.
 
-### PO Rules (Livewire — Save)
+### PO Rules (Livewire — `savePos`)
 
 - If any `po_text` in the submitted rows is blank:
-  - Then a `RuntimeException` is thrown and a toast error is dispatched.
+  - Then `RuntimeException` thrown, caught, error toast dispatched.
   - Then nothing is saved.
-- If saving POs:
-  - Then POs absent from the submission (by id) are deleted.
-  - Then existing PO rows are updated in place (text only).
-  - Then new rows (no id) are inserted with `po_code = null`.
-  - Then `ProgramCodeHelper::resequencePoCodesOrdered()` is called with the final ordered id list.
-  - Then codes are assigned in the visual order the user has arranged the rows.
-  - Then PEO mappings for each existing PO are synced from the submitted `mappingData`.
-  - Then new rows (no id yet during save) do not get mapping synced — mapping must be set after save.
-  - Then a `pos-saved` event is dispatched with the updated PO and mapping arrays.
+- If all rows are non-empty:
+  - Then runs inside a DB transaction:
+    - POs absent from the submission are hard-deleted.
+    - Existing rows are updated (text only).
+    - New rows (no id) are inserted with `po_code = null`.
+    - `ProgramCodeHelper::resequencePoCodesOrdered()` is called with submitted ids first, then new ids.
+    - PEO mappings for each **existing** PO are synced from `mappingData` via `$po->peos()->sync()`.
+    - New rows (no id at submission time) do not get mapping synced — must be set after next save.
+  - Then AuditLog recorded.
+  - Then `lw-toast` success dispatched.
+  - Then `pos-saved` event dispatched with updated PO and mapping arrays — triggers `MatrixView` to refresh.
 
-### PO Delete (Controller Route)
+### PO ↔ PEO Toggle Mapping (Live — `toggleMapping`)
 
-- If deleting a PO via `DELETE /programs/po/{id}`:
-  - If the PO is mapped in any existing syllabus course outcomes:
-    - Then delete is blocked with an error message showing the count of affected course outcomes.
-  - If not mapped in any syllabus:
-    - Then detach all PEO mappings from `program_outcome_peo`.
-    - Then detach all course curriculum mappings from `course_curriculum_maps`.
-    - Then delete the PO.
-    - Then codes are resequenced after delete.
-
-### PEO Delete (Controller Route)
-
-- If deleting a PEO via `DELETE /programs/peo/{id}`:
-  - Then detach all PO mappings from `program_outcome_peo` before deleting.
-  - Then delete the PEO.
-  - Then codes are resequenced after delete.
-
-### PO ↔ PEO Toggle Mapping (Live)
-
-- If `toggleMapping(poId, peoId, checked)` is called:
-  - If the PO does not exist for the selected program:
-    - Then dispatch warning toast: "Save PO row first before mapping."
-  - If the PEO id does not belong to the same program:
-    - Then silently return (no-op).
-  - If `checked = true`:
-    - Then add the PEO to the PO via `syncWithoutDetaching`.
-  - If `checked = false`:
-    - Then detach the PEO from the PO.
-  - Then reload the mapping state.
+- If the PO does not exist for the selected program:
+  - Then dispatch warning toast: "Save PO row first before mapping."
+- If the PEO id does not belong to the same program:
+  - Then silently return (no-op).
+- If `checked = true`:
+  - Then add the PEO to the PO via `$po->peos()->syncWithoutDetaching([$peoId])`.
+- If `checked = false`:
+  - Then detach the PEO via `$po->peos()->detach($peoId)`.
+- Then AuditLog recorded (`mapped` or `unmapped`).
+- Then `loadMapping()` reloads local mapping state.
 
 ### PEOs Updated — Cross-Component Sync
 
-- When `ManagePeos` dispatches the `peosUpdated` event:
-  - Then `ManagePos` receives it via `#[On('peosUpdated')]`.
-  - Then `ManagePos` reloads its local PEO list.
-  - Then `ManagePos` cleans up its in-memory mapping: any mapping referencing a deleted PEO id is removed.
+- When `ManagePeos` dispatches `peosUpdated`:
+  - `ManagePos` (`#[On('peosUpdated')]` → `refreshPeos()`): reloads local PEO list; removes stale PEO ids from in-memory `$mapping`.
+  - `PeoDisplay` (`#[On('peosUpdated')]` → `refreshPeos()`): reloads display list.
+  - `MatrixView` (`#[On('peosUpdated')]` → `onPeosUpdated()`): reloads full matrix state.
+- When `ManagePos` dispatches `pos-saved`:
+  - `MatrixView` (`#[On('pos-saved')]` → `onPosSaved()`): reloads full matrix state.
+- All listeners guard by `$this->program->id === $programId` before acting.
 
-### UI Guardrails
+### PEO Delete (Controller — `deletePeo`)
 
-- If a blank row already exists in the list:
-  - Then adding another blank row is blocked client-side.
-- If a row has no id (unsaved):
-  - Then it can be removed client-side without a server call.
-- If a row has an id (saved):
-  - Then removing it during the next save triggers a server-side delete.
+- If deleting a PEO via `DELETE /programs/peo/{peo}`:
+  - If user is not admin:
+    - Then `abortIfNotAssignedToProgram()` checks department assignment.
+    - If not assigned → redirect to `programs.index` with warning toast.
+  - If authorized:
+    - Then `$peo->outcomes()->detach()` removes all PO mappings from `program_outcome_peo`.
+    - Then PEO is deleted.
+    - Then `ProgramCodeHelper::resequencePeoCodes()` resequences remaining codes.
+    - Then AuditLog recorded.
+    - Then redirect to `programs.show` with success toast.
+  - If any error: DB rolled back, redirect back with error toast.
+
+### PO Delete (Controller — `deletePo`)
+
+- If deleting a PO via `DELETE /programs/po/{po}`:
+  - If user is not admin:
+    - Then `abortIfNotAssignedToProgram()` checks department assignment.
+  - If authorized:
+    - Then count syllabi for courses that map this PO (via `course_curriculum_maps`).
+    - If `$syllabusCount > 0`:
+      - Then delete is blocked with error toast showing the count.
+      - Then redirect back.
+    - If no syllabi:
+      - Then `$po->peos()->detach()` removes PEO mappings.
+      - Then `$po->courses()->detach()` removes course curriculum mappings.
+      - Then PO is deleted.
+      - Then `ProgramCodeHelper::resequencePoCodes()` resequences remaining codes.
+      - Then AuditLog recorded.
+      - Then redirect to `programs.show` with success toast.
+  - If any error: DB rolled back, redirect back with error toast.
+
+### ProgramSelector — Scoped Access
+
+- If `redirectRoute` is `programs.show` or `courses.index`:
+  - Then `locked = true` for non-admin users.
+  - Then colleges list is restricted to the user's assigned college/department.
+  - Then `noAssignment = true` if chair has no department assignment.
+- If `redirectRoute` is `syllabus.create` or other:
+  - Then all colleges are shown regardless of role.
+- On `updatedProgramId()`:
+  - If `autoRedirect = true` and `redirectRoute` is set: redirects to the route with `program_id`.
+  - Special cases: `courses.index` uses `?program_id=`, `programs.show` uses route model binding, `syllabus.create` uses `?program_id=`.
+- On `mount()` with no explicit `programId`:
+  - `preselectFromUserAssignments()` preselects college + department from user's assignment.
+  - If the department has exactly 1 program: that program is also preselected and a redirect fires (if `autoRedirect`).
+
+## Code Generation Logic (ProgramCodeHelper)
+
+```
+numberToLetter(n):
+  - n=1 → "a", n=2 → "b", ..., n=26 → "z"
+  - n=27 → "aa", n=28 → "ab", ...
+  - Overflow-safe: uses modulo arithmetic, not fixed 26-letter cap.
+```
+
+Resequencing pattern (both PEO and PO):
+1. Null all codes for the program (`UPDATE ... SET code = null`) — avoids unique constraint conflicts.
+2. Loop over the ordered ID list, assigning `numberToLetter(position + 1)` to each.
 
 ## Sequences (Typical Flow)
 
 ### Save PEOs
 
-1. User adds, edits, or removes rows in the Livewire component.
-2. User clicks Save. Component validates all text fields are non-empty.
-3. Component deletes removed rows, updates existing, inserts new.
-4. Component resequences codes in the submitted visual order.
-5. `peosUpdated` event fires; `ManagePos` refreshes its PEO columns and cleans up stale mappings.
+1. User adds, edits, reorders, or removes rows in `ManagePeos`.
+2. User clicks Save — `savePeos(peosData)` called.
+3. Component validates all text fields are non-empty.
+4. Transaction: delete removed, update existing, insert new, resequence codes.
+5. `peosUpdated` dispatched → `ManagePos`, `PeoDisplay`, `MatrixView` all refresh.
 
 ### Save POs
 
-1. User adds, edits, reorders, or removes rows.
-2. User sets PEO mapping checkboxes per row.
-3. User clicks Save. Component validates all text fields are non-empty.
-4. Component deletes removed rows, updates existing, inserts new.
-5. Component resequences codes in the submitted visual order.
-6. Component syncs PEO mappings for existing PO rows from `mappingData`.
+1. User adds, edits, reorders PO rows; sets PEO mapping checkboxes per row.
+2. User clicks Save — `savePos(posData, mappingData)` called.
+3. Component validates all text fields are non-empty.
+4. Transaction: delete removed, update existing, insert new, resequence codes, sync PEO mappings for existing rows.
+5. `pos-saved` dispatched → `MatrixView` refreshes.
 
-### Delete PEO
+### Toggle PO↔PEO Mapping (Live)
 
-1. User clicks delete on a PEO row.
-2. System detaches all PO mappings for that PEO.
-3. System deletes the PEO.
-4. System resequences remaining PEO codes.
+1. User clicks a mapping checkbox in `ManagePos`.
+2. `toggleMapping(poId, peoId, checked)` validates program ownership.
+3. Adds or removes the mapping in `program_outcome_peo`.
+4. AuditLog recorded. Local mapping reloaded.
 
-### Delete PO
+### Delete PEO (via Route)
 
-1. User clicks delete on a PO row.
-2. System checks if the PO is mapped in any syllabus course outcomes.
-3. If mapped → blocked with error showing count.
-4. If not mapped → system detaches PEO and course mappings, deletes PO, resequences codes.
+1. User clicks delete on a PEO from the Programs page.
+2. Controller checks authorization.
+3. Detaches all PO mappings, deletes PEO, resequences codes.
+4. Redirect to program show with success toast.
 
-### Toggle PO↔PEO Mapping
+### Delete PO (via Route)
 
-1. User clicks a mapping checkbox (PO row × PEO column).
-2. Component validates program ownership and PO existence.
-3. Component adds or removes the mapping in `program_outcome_peo`.
-4. Mapping state is reloaded and reflected in the UI.
+1. User clicks delete on a PO from the Programs page.
+2. Controller checks authorization.
+3. If any syllabus maps a course that uses this PO → blocked with count.
+4. If clear: detach PEO mappings, detach course mappings, delete PO, resequence.
+5. Redirect to program show with success toast.

@@ -5,15 +5,18 @@ Rules and flow for encoding College Goals and Department Objectives.
 ## Files Used (Source of Truth)
 
 - Controllers
-  - `app/Http/Controllers/GoalController.php`
-  - `app/Http/Controllers/ObjectiveController.php`
+  - `app/Http/Controllers/CQI/GoalController.php`
+  - `app/Http/Controllers/CQI/ObjectiveController.php`
 - Service
-  - `app/Services/GoalObjectiveService.php`
+  - `app/Services/CQI/GoalObjectiveService.php`
 - Models
   - `app/Models/College.php` (`getNextGoalCode()`, `resequenceGoalCodes()`)
   - `app/Models/CollegeGoal.php`
   - `app/Models/Department.php` (`getNextObjectiveCode()`, `resequenceObjectiveCodes()`)
   - `app/Models/DepartmentObjective.php`
+- Views
+  - `resources/views/GoalObjective/goal.blade.php`
+  - `resources/views/GoalObjective/objective.blade.php`
 - Routes
   - `routes/web.php` (goals routes — `role:admin,dean`; objectives routes — `role:admin,chair`)
 
