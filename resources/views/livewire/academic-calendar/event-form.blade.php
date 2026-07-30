@@ -113,7 +113,7 @@
         if ($event.detail.id) { openEdit($event.detail); }
         else { openAdd($event.detail.date); }
     "
-    x-on:event-saved.window="closeForm();"
+    x-on:event-saved.window="closeForm();">
 
     {{-- ══ CALENDAR VIEW ══════════════════════════════════════════════════════ --}}
 
@@ -167,6 +167,7 @@
 
     {{-- Calendar months — VIEW & DELETE ONLY. Adding is via the "Add Event" button/modal above. --}}
     @php
+        $semester     = $this->semester;
         $allEvents    = $semester?->events ?? collect();
         $eventsByDate = $allEvents->groupBy(fn($e) => \Carbon\Carbon::parse($e->date)->format('Y-m-d'));
 
@@ -175,8 +176,8 @@
             $ev      = $dayGroup->first();
             $prev    = \Carbon\Carbon::parse($dk)->subDay()->format('Y-m-d');
             $next    = \Carbon\Carbon::parse($dk)->addDay()->format('Y-m-d');
-            $prevEv  = $eventsByDate[$prev]?->first();
-            $nextEv  = $eventsByDate[$next]?->first();
+            $prevEv  = $eventsByDate->get($prev)?->first();
+            $nextEv  = $eventsByDate->get($next)?->first();
             $hasPrev = $prevEv && $prevEv->name === $ev->name && $prevEv->type === $ev->type;
             $hasNext = $nextEv && $nextEv->name === $ev->name && $nextEv->type === $ev->type;
             if ($hasPrev && $hasNext) $rangePos[$dk] = 'middle';
@@ -195,7 +196,16 @@
             while ($cursor->lte($end)) { $months[] = $cursor->copy(); $cursor->addMonth(); }
         @endphp
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="relative">
+            {{-- Loading overlay — shown while any Livewire action is in flight --}}
+            <div wire:loading class="absolute inset-0 z-10 bg-white/60 flex items-center justify-center rounded-xl">
+                <svg class="animate-spin h-6 w-6 text-green-700" viewBox="0 0 24 24" fill="none">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                </svg>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4" wire:loading.class="opacity-50 pointer-events-none">
             @foreach($months as $month)
                 @php
                     $firstDay = $month->copy()->startOfMonth();
@@ -309,7 +319,8 @@
                     </div>
                 </div>
             @endforeach
-        </div>
+        </div>{{-- end grid --}}
+        </div>{{-- end relative wrapper --}}
     @else
         <x-feedback-status.empty-state icon="bx-calendar" title="No semester data" message="" />
     @endif

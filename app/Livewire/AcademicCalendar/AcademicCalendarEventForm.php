@@ -8,6 +8,7 @@ use App\Models\AuditLog;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 // use Livewire\WithFileUploads; // CSV import disabled for now
 
@@ -25,12 +26,20 @@ class AcademicCalendarEventForm extends Component
         $this->academicYear = $academicYear;
     }
 
+    /**
+     * Cached semester with events — re-evaluated only when Livewire re-renders.
+     * Using #[Computed] so it is memoised within a single request lifecycle.
+     */
+    #[Computed]
+    public function semester(): ?AcademicCalendar
+    {
+        return AcademicCalendar::with(['events' => fn($q) => $q->orderBy('date')])
+            ->find($this->semesterId);
+    }
+
     public function render()
     {
-        $semester = AcademicCalendar::with(['events' => fn($q) => $q->orderBy('date')])
-            ->find($this->semesterId);
-
-        return view('livewire.academic-calendar.event-form', compact('semester'));
+        return view('livewire.academic-calendar.event-form');
     }
 
     /**
@@ -96,6 +105,7 @@ class AcademicCalendarEventForm extends Component
             description: "Created {$type} event '{$name}' from {$dateStart} to {$dateEnd} ({$inserted} days) for {$this->academicYear} {$semester->semester} semester."
         );
 
+        unset($this->semester); // bust the computed cache so render() re-fetches
         $this->dispatch('event-saved');
         $this->dispatch('lw-toast', type: 'success', message: "{$inserted} event(s) added.");
     }
@@ -162,6 +172,7 @@ class AcademicCalendarEventForm extends Component
                 description: "Updated {$event->type} event '{$event->name}' on {$event->date} for {$this->academicYear} {$semester->semester} semester."
             );
 
+            unset($this->semester); // bust the computed cache so render() re-fetches
             $this->dispatch('event-saved');
             $this->dispatch('lw-toast', type: 'success', message: 'Event updated successfully.');
         } else {
@@ -174,6 +185,7 @@ class AcademicCalendarEventForm extends Component
                 description: "Created {$event->type} event '{$event->name}' on {$event->date} for {$this->academicYear} {$semester->semester} semester."
             );
 
+            unset($this->semester); // bust the computed cache so render() re-fetches
             $this->dispatch('event-saved');
             $this->dispatch('lw-toast', type: 'success', message: 'Event added successfully.');
         }
@@ -260,6 +272,7 @@ class AcademicCalendarEventForm extends Component
 
         $event->delete();
 
+        unset($this->semester); // bust the computed cache so render() re-fetches
         $this->dispatch('event-deleted');
         $this->dispatch('lw-toast', type: 'success', message: 'Event deleted.');
     }

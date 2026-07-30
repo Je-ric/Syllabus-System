@@ -24,6 +24,7 @@
                 <p x-show="editingId" x-cloak class="text-[13px] font-bold text-[#0f172a] inline-flex items-center gap-1.5">
                     <i class="bx bx-edit-alt"></i> Edit Event
                 </p>
+                @php $semester = $this->semester; @endphp
                 @if($semester)
                     <p class="text-[11px] text-[#94a3b8] mt-0.5">
                         Semester: {{ \Carbon\Carbon::parse($semester->start_date)->format('M j') }}
