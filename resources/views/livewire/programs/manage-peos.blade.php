@@ -41,13 +41,14 @@
         </template>
 
         {{-- PEO rows --}}
-        <div class="space-y-2">
+        <div class="space-y-2" :class="(isSaving || deletingId) ? 'pointer-events-none select-none opacity-60' : ''">
             <template x-for="(peo, index) in peos" :key="peo._key">
                 <div class="rounded-xl border transition-all duration-200"
                     :class="{
                         'border-emerald-300 bg-emerald-50/40 shadow-emerald-100': !peo.id,
                         'border-amber-300 bg-amber-50/30 shadow-amber-100':       peo.id && peo._dirty,
-                        'border-slate-200 bg-white shadow-slate-100':             peo.id && !peo._dirty
+                        'border-rose-200 bg-rose-50/40 shadow-rose-100':          peo.id && deletingId === peo.id,
+                        'border-slate-200 bg-white shadow-slate-100':             peo.id && !peo._dirty && deletingId !== peo.id
                     }"
                     style="box-shadow:0 1px 8px rgba(0,0,0,.05);">
 
@@ -59,7 +60,8 @@
                                 :class="{
                                     'bg-emerald-100 text-emerald-700 ring-2 ring-emerald-400': !peo.id,
                                     'bg-amber-100 text-amber-700 ring-2 ring-amber-400':       peo.id && peo._dirty,
-                                    'bg-emerald-50 text-emerald-800 ring-2 ring-emerald-300':  peo.id && !peo._dirty
+                                    'bg-rose-100 text-rose-600 ring-2 ring-rose-300':          peo.id && deletingId === peo.id,
+                                    'bg-emerald-50 text-emerald-800 ring-2 ring-emerald-300':  peo.id && !peo._dirty && deletingId !== peo.id
                                 }">
                                 <span class="font-bold uppercase" x-text="peo.peo_code"></span>
                             </span>
@@ -70,13 +72,15 @@
                             <textarea
                                 x-model="peo.peo_text"
                                 @input="markDirty(peo)"
+                                :disabled="isSaving || deletingId !== null"
                                 rows="3"
                                 placeholder="Describe what graduates will be professionally three to five years after graduation…"
                                 class="w-full rounded-lg border px-3 py-2 text-[13px] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all resize-none leading-relaxed"
                                 :class="{
                                     'border-amber-300 bg-amber-50/50 focus:border-amber-400 focus:ring-amber-100':       peo.id && peo._dirty,
                                     'border-emerald-300 bg-emerald-50/50 focus:border-emerald-400 focus:ring-emerald-100': !peo.id,
-                                    'border-slate-200 bg-white focus:border-emerald-400 focus:ring-emerald-100':           peo.id && !peo._dirty
+                                    'border-slate-200 bg-white focus:border-emerald-400 focus:ring-emerald-100':           peo.id && !peo._dirty,
+                                    'cursor-wait':                                                                         isSaving || deletingId !== null
                                 }"></textarea>
 
                             <template x-if="!peo.id">
@@ -91,18 +95,40 @@
                                     Modified — not saved yet.
                                 </p>
                             </template>
+                            <template x-if="peo.id && deletingId === peo.id">
+                                <p class="mt-1 flex items-center gap-1 text-[11px] text-rose-500 font-medium">
+                                    <svg class="animate-spin h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                    </svg>
+                                    Deleting…
+                                </p>
+                            </template>
                         </div>
 
                         {{-- Delete saved --}}
                         <button x-show="peo.id" type="button" @click="deletePeo(peo)"
-                            class="shrink-0 mt-0.5 p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                            :disabled="isSaving || deletingId !== null"
+                            class="shrink-0 mt-0.5 p-2 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-wait"
+                            :class="deletingId === peo.id
+                                ? 'text-rose-400 bg-rose-50'
+                                : 'text-slate-300 hover:text-rose-500 hover:bg-rose-50'"
                             title="Delete PEO">
-                            <i class="bx bx-trash text-base"></i>
+                            <template x-if="deletingId === peo.id">
+                                <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                </svg>
+                            </template>
+                            <template x-if="deletingId !== peo.id">
+                                <i class="bx bx-trash text-base"></i>
+                            </template>
                         </button>
 
                         {{-- Remove unsaved --}}
                         <button x-show="!peo.id" x-cloak type="button" @click="peos.splice(index, 1)"
-                            class="shrink-0 mt-0.5 p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                            :disabled="isSaving || deletingId !== null"
+                            class="shrink-0 mt-0.5 p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-wait"
                             title="Remove">
                             <i class="bx bx-x text-lg"></i>
                         </button>
@@ -125,18 +151,20 @@
 
         {{-- Action buttons --}}
         <div class="flex items-center gap-2 pt-1 border-t border-slate-100">
-            <x-ui.button variant="add-dashed" type="button" @click="addPeo()" class="flex-1">
+            <x-ui.button variant="add-dashed" type="button" @click="addPeo()"
+                x-bind:disabled="isSaving || deletingId !== null" class="flex-1">
                 <i class="bx bx-plus text-base"></i> Add PEO
             </x-ui.button>
 
             <template x-if="hasPending()">
-                <x-ui.button variant="cancel" type="button" @click="revert()">
+                <x-ui.button variant="cancel" type="button" @click="revert()"
+                    x-bind:disabled="deletingId !== null">
                     <i class="bx bx-undo text-base leading-none"></i> Revert
                 </x-ui.button>
             </template>
 
             <x-ui.button variant="add-button" type="button" @click="savePeos()"
-                x-bind:disabled="isSaving" class="whitespace-nowrap relative">
+                x-bind:disabled="isSaving || deletingId !== null" class="whitespace-nowrap relative">
                 <template x-if="hasPending()">
                     <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400 ring-2 ring-white animate-pulse"></span>
                 </template>
@@ -171,6 +199,7 @@
         return {
             peos:        initialPeos.map((p, i) => ({ ...p, _dirty: false, _original: p.peo_text, _key: p.id ?? ('new-' + i) })),
             isSaving:    false,
+            deletingId:  null,
             _keyCounter: initialPeos.length,
 
             init() {
@@ -233,6 +262,7 @@
                     confirmClass: 'bg-[#D21B14] hover:bg-[#E52F28] text-white'
                 });
                 if (!ok) return;
+                this.deletingId = peo.id;
                 const form = document.getElementById('peo-delete-form-' + peo.id);
                 if (form) form.submit();
             },

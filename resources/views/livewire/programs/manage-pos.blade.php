@@ -40,13 +40,14 @@
     </template>
 
     {{-- PO rows --}}
-    <div class="space-y-2">
+    <div class="space-y-2" :class="(isSaving || deletingId) ? 'pointer-events-none select-none opacity-60' : ''">
         <template x-for="(po, index) in pos" :key="po._key">
             <div class="rounded-xl border shadow-lg transition-all duration-200 overflow-hidden"
                 :class="{
                     'border-blue-300 bg-blue-50/30':       !po.id,
                     'border-amber-300 bg-amber-50/30':     po.id && po._dirty,
-                    'border-slate-200 bg-white':           po.id && !po._dirty
+                    'border-rose-200 bg-rose-50/40':       po.id && deletingId === po.id,
+                    'border-slate-200 bg-white':           po.id && !po._dirty && deletingId !== po.id
                 }">
 
                 {{-- PO text row --}}
@@ -58,7 +59,8 @@
                             :class="{
                                 'bg-blue-100 text-blue-700 ring-2 ring-blue-400':     !po.id,
                                 'bg-amber-100 text-amber-700 ring-2 ring-amber-400':  po.id && po._dirty,
-                                'bg-blue-50 text-blue-800 ring-2 ring-blue-200':      po.id && !po._dirty
+                                'bg-rose-100 text-rose-600 ring-2 ring-rose-300':     po.id && deletingId === po.id,
+                                'bg-blue-50 text-blue-800 ring-2 ring-blue-200':      po.id && !po._dirty && deletingId !== po.id
                             }">
                             <span class="font-bold uppercase" x-text="po.po_code"></span>
                         </span>
@@ -67,12 +69,14 @@
                     {{-- Textarea --}}
                     <div class="flex-1 min-w-0">
                         <textarea x-model="po.po_text" @input="markDirty(po)" rows="3"
+                            :disabled="isSaving || deletingId !== null"
                             placeholder="Describe the ability or competency graduates will have by the time of graduation…"
                             class="w-full rounded-lg border px-3 py-2 text-[13px] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all resize-none leading-relaxed"
                             :class="{
                                 'border-amber-300 bg-amber-50/50 focus:border-amber-400 focus:ring-amber-100':   po.id && po._dirty,
                                 'border-blue-300 bg-blue-50/50 focus:border-blue-400 focus:ring-blue-100':       !po.id,
-                                'border-slate-200 bg-white focus:border-blue-400 focus:ring-blue-100':           po.id && !po._dirty
+                                'border-slate-200 bg-white focus:border-blue-400 focus:ring-blue-100':           po.id && !po._dirty,
+                                'cursor-wait':                                                                    isSaving || deletingId !== null
                             }"></textarea>
 
                         <template x-if="!po.id">
@@ -87,18 +91,40 @@
                                 Modified — not saved yet.
                             </p>
                         </template>
+                        <template x-if="po.id && deletingId === po.id">
+                            <p class="mt-1 flex items-center gap-1 text-[11px] text-rose-500 font-medium">
+                                <svg class="animate-spin h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                </svg>
+                                Deleting…
+                            </p>
+                        </template>
                     </div>
 
                     {{-- Delete saved --}}
                     <button x-show="po.id" type="button" @click="deletePo(po)"
-                        class="shrink-0 mt-0.5 p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                        :disabled="isSaving || deletingId !== null"
+                        class="shrink-0 mt-0.5 p-2 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-wait"
+                        :class="deletingId === po.id
+                            ? 'text-rose-400 bg-rose-50'
+                            : 'text-slate-300 hover:text-rose-500 hover:bg-rose-50'"
                         title="Delete PO">
-                        <i class="bx bx-trash text-base"></i>
+                        <template x-if="deletingId === po.id">
+                            <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                            </svg>
+                        </template>
+                        <template x-if="deletingId !== po.id">
+                            <i class="bx bx-trash text-base"></i>
+                        </template>
                     </button>
 
                     {{-- Remove unsaved --}}
                     <button x-show="!po.id" x-cloak type="button" @click="pos.splice(index, 1)"
-                        class="shrink-0 mt-0.5 p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                        :disabled="isSaving || deletingId !== null"
+                        class="shrink-0 mt-0.5 p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-wait"
                         title="Remove">
                         <i class="bx bx-x text-lg"></i>
                     </button>
@@ -195,17 +221,19 @@
 
     {{-- Action buttons --}}
     <div class="flex items-center gap-2 pt-1 border-t border-slate-100">
-        <x-ui.button variant="add-dashed" type="button" @click="addPo()" class="flex-1">
+        <x-ui.button variant="add-dashed" type="button" @click="addPo()"
+            x-bind:disabled="isSaving || deletingId !== null" class="flex-1">
             <i class="bx bx-plus text-base"></i> Add PO
         </x-ui.button>
 
         <template x-if="hasPending()">
-            <x-ui.button variant="cancel" type="button" @click="revert()">
+            <x-ui.button variant="cancel" type="button" @click="revert()"
+                x-bind:disabled="deletingId !== null">
                 <i class="bx bx-undo text-base leading-none"></i> Revert
             </x-ui.button>
         </template>
 
-        <x-ui.button variant="add-button" type="button" @click="savePos()" x-bind:disabled="isSaving"
+        <x-ui.button variant="add-button" type="button" @click="savePos()" x-bind:disabled="isSaving || deletingId !== null"
             class="whitespace-nowrap relative">
             <template x-if="hasPending()">
                 <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400 ring-2 ring-white animate-pulse"></span>
@@ -245,7 +273,8 @@
                 peos: initialPeos,
                 mapping: initialMapping,
                 _mappingPending: {},
-                isSaving: false,
+                isSaving:   false,
+                deletingId: null,
                 _keyCounter: initialPos.length,
 
                 init() {
@@ -347,6 +376,7 @@
                         confirmClass: 'bg-[#D21B14] hover:bg-[#E52F28] text-white'
                     });
                     if (!ok) return;
+                    this.deletingId = po.id;
                     const form = document.getElementById('po-delete-form-' + po.id);
                     if (form) form.submit();
                 },
