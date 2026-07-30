@@ -79,6 +79,13 @@ class UserController extends Controller
 
         $user->update($validated);
 
+        AuditLog::record(
+            action: 'updated',
+            module: 'Profile',
+            referenceId: $user->id,
+            description: "User updated their profile."
+        );
+
         return redirect()
             ->route('profile.index')
             ->with('toast', [

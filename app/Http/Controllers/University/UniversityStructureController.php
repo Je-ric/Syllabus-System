@@ -21,7 +21,7 @@ class UniversityStructureController extends Controller
         return view('UniversityStructure.index', [
             'colleges'       => College::orderBy('name')->get(),
             'departments'    => Department::withRelations()->orderBy('name')->get(),
-            'programs'       => Program::with('departments')->get()->sortBy('name'),
+            'programs'       => Program::with('departments')->orderBy('name')->get(),
             'allDepartments' => Department::with('college')->orderBy('name')->get(),
         ]);
     }

@@ -100,39 +100,42 @@ class GoalObjectiveService
 
     public function storeGoal(College $college, string $text): CollegeGoal
     {
-        $goal = CollegeGoal::create([
-            'college_id'         => $college->id,
-            'college_goals_code' => $college->getNextGoalCode(),
-            'goal_text'          => $text,
-        ]);
+        return DB::transaction(function () use ($college, $text) {
+            $goal = CollegeGoal::create([
+                'college_id'         => $college->id,
+                'college_goals_code' => $college->getNextGoalCode(),
+                'goal_text'          => $text,
+            ]);
 
-        AuditLog::record(
-            action: 'created',
-            module: 'Goal',
-            referenceId: $goal->id,
-            description: "Created goal {$goal->college_goals_code} for college {$college->name}."
-        );
+            AuditLog::record(
+                action: 'created',
+                module: 'Goal',
+                referenceId: $goal->id,
+                description: "Created goal {$goal->college_goals_code} for college {$college->name}."
+            );
 
-        return $goal;
+            return $goal;
+        });
     }
 
     public function updateGoal(CollegeGoal $goal, string $text): void
     {
-        $goal->update(['goal_text' => $text]);
+        DB::transaction(function () use ($goal, $text) {
+            $goal->update(['goal_text' => $text]);
 
-        AuditLog::record(
-            action: 'updated',
-            module: 'Goal',
-            referenceId: $goal->id,
-            description: "Updated goal {$goal->college_goals_code} for college {$goal->college?->name}."
-        );
+            AuditLog::record(
+                action: 'updated',
+                module: 'Goal',
+                referenceId: $goal->id,
+                description: "Updated goal {$goal->college_goals_code} for college {$goal->college?->name}."
+            );
+        });
     }
 
     // @throws \Throwable
     public function destroyGoal(CollegeGoal $goal): void
     {
-        DB::beginTransaction();
-        try {
+        DB::transaction(function () use ($goal) {
             $college  = $goal->college;
             $goalCode = $goal->college_goals_code;
 
@@ -145,12 +148,7 @@ class GoalObjectiveService
                 referenceId: $goal->id,
                 description: "Deleted goal {$goalCode} for college {$college->name}."
             );
-
-            DB::commit();
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            throw $e;
-        }
+        });
     }
 
     // OBJECTIVES

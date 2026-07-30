@@ -18,7 +18,6 @@ use App\Http\Controllers\CQI\GoalController;
 use App\Http\Controllers\CQI\ObjectiveController;
 use App\Http\Controllers\CQI\ProgramController;
 use App\Http\Controllers\Syllabus\SyllabusController;
-use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -84,13 +83,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:admin,ovpaa'])->group(function () {
         Route::get('/academic-calendars', [AcademicCalendarController::class, 'index'])->name('academic.calendars.index');
         Route::get('/academic-calendars/create', [AcademicCalendarController::class, 'create'])->name('academic.calendars.create');
-        Route::post('/academic-calendars', [AcademicCalendarController::class, 'store'])
-            ->middleware(HandlePrecognitiveRequests::class)
-            ->name('academic.calendars.store');
         Route::get('/academic-calendars/{academicYear}/edit', [AcademicCalendarController::class, 'edit'])->name('academic.calendars.edit');
-        Route::put('/academic-calendars/{academicYear}', [AcademicCalendarController::class, 'update'])
-            ->middleware(HandlePrecognitiveRequests::class)
-            ->name('academic.calendars.update');
         Route::delete('/academic-calendars/{academicYear}', [AcademicCalendarController::class, 'destroy'])->name('academic.calendars.destroy');
         Route::post('/academic-calendars/{academicYear}/set-active', [AcademicCalendarController::class, 'setActive'])->name('academic.calendars.set-active');
 
@@ -113,17 +106,17 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::middleware(['role:admin,dean'])->group(function () {
-        Route::get('/college/goals', [GoalController::class, 'goal_index'])->name('goal.index');
-        Route::post('/college/goals', [GoalController::class, 'goal_store'])->name('goal.store');
-        Route::put('/college/goals/{goal}', [GoalController::class, 'goal_update'])->name('goal.update');
-        Route::delete('/college/goals/{goal}', [GoalController::class, 'goal_destroy'])->name('goal.destroy');
+        Route::get('/college/goals', [GoalController::class, 'index'])->name('goal.index');
+        Route::post('/college/goals', [GoalController::class, 'store'])->name('goal.store');
+        Route::put('/college/goals/{goal}', [GoalController::class, 'update'])->name('goal.update');
+        Route::delete('/college/goals/{goal}', [GoalController::class, 'destroy'])->name('goal.destroy');
     });
 
     Route::middleware(['role:admin,chair'])->group(function () {
-        Route::get('/department/objectives', [ObjectiveController::class, 'objective_index'])->name('objective.index');
-        Route::post('/department/objectives', [ObjectiveController::class, 'objective_store'])->name('objective.store');
-        Route::put('/department/objectives/{objective}', [ObjectiveController::class, 'objective_update'])->name('objective.update');
-        Route::delete('/department/objectives/{objective}', [ObjectiveController::class, 'objective_destroy'])->name('objective.destroy');
+        Route::get('/department/objectives', [ObjectiveController::class, 'index'])->name('objective.index');
+        Route::post('/department/objectives', [ObjectiveController::class, 'store'])->name('objective.store');
+        Route::put('/department/objectives/{objective}', [ObjectiveController::class, 'update'])->name('objective.update');
+        Route::delete('/department/objectives/{objective}', [ObjectiveController::class, 'destroy'])->name('objective.destroy');
 
         Route::get('/programs', [ProgramController::class, 'index'])->name('programs.index');
         Route::get('/programs/{program}', [ProgramController::class, 'show'])->name('programs.show');
@@ -152,7 +145,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/syllabus/courses/{programId}', [SyllabusController::class, 'showCourses'])->name('syllabus.courses');
         Route::get('/syllabus/wizard', [SyllabusController::class, 'wizard'])->name('syllabus.wizard');
         Route::get('/syllabus/form/{courseId}', [SyllabusController::class, 'showForm'])->name('syllabus.form');
-        Route::post('/syllabus', [SyllabusController::class, 'store'])->name('syllabus.store');
 
         // Saved version previews & downloads — must be before {syllabus} wildcard
         Route::get('/syllabus/saved/{completeSyllabus}/preview', [SyllabusController::class, 'previewSavedComplete'])->name('syllabus.saved.complete.preview');

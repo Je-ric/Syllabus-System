@@ -178,18 +178,8 @@ class CourseController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
-        $canDelete = $user->hasRole('admin');
 
-        if (!$canDelete && $user->hasRole('chair')) {
-            $chairAssignment = $user->assignments()->where('context', 'chair')->first();
-            if ($chairAssignment) {
-                $course->loadMissing('program.departments');
-                $programDeptIds = $course->program?->departments->pluck('id')->toArray() ?? [];
-                $canDelete = in_array($chairAssignment->department_id, $programDeptIds);
-            }
-        }
-
-        if (!$canDelete) {
+        if (! $this->courseService->canDelete($course, $user)) {
             return redirect()->route('courses.index', ['program_id' => $course->program_id])
                 ->with('toast', ['message' => 'Only admins or the department chair can delete courses.', 'type' => 'warning']);
         }
@@ -259,18 +249,18 @@ class CourseController extends Controller
         return [
             'program_id'           => [$course ? 'sometimes' : 'required', 'exists:programs,id'],
             'confirmed_submission' => ['accepted'],
-            'code'                 => ['required', 'string', $courseCodeRule],
-            'name'                 => ['required', 'string'],
-            'description'          => ['nullable', 'string'],
+            'code'                 => ['required', 'string', 'max:255', $courseCodeRule],
+            'name'                 => ['required', 'string', 'max:255'],
+            'description'          => ['nullable', 'string', 'max:5000'],
             'credits'              => ['required', 'integer', 'min:1'],
             'has_lec_lab'          => ['nullable', 'boolean'],
             'passing_mark'         => ['nullable', 'numeric', 'min:0', 'max:100'],
-            'lec_class_hours'      => ['nullable', 'string'],
-            'lab_class_hours'      => ['nullable', 'string'],
+            'lec_class_hours'      => ['nullable', 'string', 'max:50'],
+            'lab_class_hours'      => ['nullable', 'string', 'max:50'],
             'year_level'           => ['nullable', 'integer', 'between:1,5'],
             'semester'             => ['nullable', 'integer', 'in:1,2'],
-            'prerequisite'         => ['nullable', 'string'],
-            'corequisite'          => ['nullable', 'string'],
+            'prerequisite'         => ['nullable', 'string', 'max:255'],
+            'corequisite'          => ['nullable', 'string', 'max:255'],
             'po_mapping'           => ['nullable', 'array'],
             'po_mapping.*'         => ['nullable', 'in:I,E,D'],
         ];

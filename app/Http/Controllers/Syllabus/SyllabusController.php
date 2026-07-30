@@ -10,12 +10,9 @@ use App\Models\Syllabus;
 use App\Services\Syllabus\SyllabusDeleteService;
 use App\Services\Syllabus\SyllabusPreviewService;
 use App\Services\Syllabus\SyllabusSnapshotService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Storage;
-
-use Illuminate\Support\Facades\DB;
 
 class SyllabusController extends Controller
 {
@@ -99,46 +96,6 @@ class SyllabusController extends Controller
         return view('Syllabus.wizard', compact('syllabusId', 'courseId'));
     }
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'course_id'            => 'required|exists:courses,id',
-            'academic_calendar_id' => 'required|exists:academic_calendars,id',
-        ]);
-
-        $existing = Syllabus::where('course_id', $validated['course_id'])
-            ->where('academic_calendar_id', $validated['academic_calendar_id'])
-            ->first();
-
-        if ($existing) {
-            return redirect()->route('syllabus.edit', $existing->id)
-                ->with('toast', [
-                    'message' => 'Syllabus for this course already exists.',
-                    'type'    => 'info',
-                ]);
-        }
-
-        $syllabus = Syllabus::create([
-            'course_id'            => $validated['course_id'],
-            'academic_calendar_id' => $validated['academic_calendar_id'],
-            'status'               => 'draft',
-            'prepared_by'          => Auth::id(),
-        ]);
-
-        AuditLog::record(
-            action: 'created',
-            module: 'Syllabus',
-            referenceId: $syllabus->id,
-            description: "Created syllabus for course #{$syllabus->course_id}."
-        );
-
-        return redirect()->route('syllabus.edit', $syllabus->id)
-            ->with('toast', [
-                'message' => 'Syllabus created successfully.',
-                'type'    => 'success',
-            ]);
-    }
-
     public function destroy(Syllabus $syllabus)
     {
         // Only the preparer can delete their own syllabus.
@@ -167,10 +124,9 @@ class SyllabusController extends Controller
                 ]);
         }
 
-        // Cascade-delete all child records and disk files inside a transaction.
-        DB::transaction(function () use ($syllabus) {
-            $this->deleteService->delete($syllabus);
-        });
+        // Cascade-delete all child records and disk files.
+        // SyllabusDeleteService::delete() owns its own transaction internally.
+        $this->deleteService->delete($syllabus);
 
         AuditLog::record(
             action: 'deleted',
@@ -226,7 +182,14 @@ class SyllabusController extends Controller
     public function show(Syllabus $syllabus)
     {
         $this->authorizeSyllabusAccess($syllabus);
-        return redirect()->route('syllabus.preview.complete', ['syllabus' => $syllabus->id]);
+        return view('Syllabus.preview.complete', array_merge(
+            $this->previewService->buildCompleteData($syllabus),
+            [
+                'previewMode'        => 'live',
+                'previewVariant'     => 'complete',
+                'activeSavedVersion' => null,
+            ],
+        ));
     }
 
     // ── Previews ──────────────────────────────────────────────────────────────

@@ -15,7 +15,7 @@ class ObjectiveController extends Controller
 {
     public function __construct(private GoalObjectiveService $service) {}
 
-    public function objective_index(Request $request)
+    public function index(Request $request)
     {
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
@@ -86,7 +86,7 @@ class ObjectiveController extends Controller
         ));
     }
 
-    public function objective_store(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
             'college_id'     => ['required', 'exists:colleges,id'],
@@ -116,7 +116,7 @@ class ObjectiveController extends Controller
             ->with('toast', ['message' => 'Objective added successfully.', 'type' => 'success']);
     }
 
-    public function objective_update(Request $request, DepartmentObjective $objective)
+    public function update(Request $request, DepartmentObjective $objective)
     {
         $request->validate(['objective_text' => ['required', 'string']]);
 
@@ -137,7 +137,7 @@ class ObjectiveController extends Controller
             ->with('toast', ['message' => 'Objective updated successfully.', 'type' => 'success']);
     }
 
-    public function objective_destroy(DepartmentObjective $objective)
+    public function destroy(DepartmentObjective $objective)
     {
         $collegeId    = $objective->department->college_id;
         $departmentId = $objective->department_id;

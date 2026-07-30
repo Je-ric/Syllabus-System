@@ -50,6 +50,10 @@ class ManageQueue extends Component
 
         if (!$allValid) return;
 
+        $total     = count($intIds);
+        $succeeded = 0;
+        $failed    = 0;
+
         foreach ($intIds as $id) {
             try {
                 match ($action) {
@@ -58,13 +62,23 @@ class ManageQueue extends Component
                     'disable' => $service->disable($id),
                     'restore' => $service->restore($id),
                 };
+                $succeeded++;
             } catch (\Throwable) {
-                // continue on individual failure
+                $failed++;
             }
         }
 
         $this->resetPage();
         $this->dispatch('bulk-done');
+
+        if ($failed === 0) {
+            $label = ucfirst($action) . 'd';
+            $this->dispatch('lw-toast', type: 'success', message: "{$label} {$succeeded} " . str('user')->plural($succeeded) . ' successfully.');
+        } elseif ($succeeded === 0) {
+            $this->dispatch('lw-toast', type: 'error', message: "Bulk {$action} failed for all {$total} " . str('user')->plural($total) . '.');
+        } else {
+            $this->dispatch('lw-toast', type: 'warning', message: "{$succeeded} of {$total} users processed. {$failed} failed.");
+        }
     }
 
     private function buildQuery()
@@ -81,7 +95,7 @@ class ManageQueue extends Component
         return User::query()
             ->select(['id', 'name', 'email', 'email_verified_at', 'phone_number', 'office', 'account_status', 'created_at'])
             ->with('roles:id,name')
-            ->when(trim($this->search) !== '', function ($q) {
+            ->when(strlen(trim($this->search)) >= 2, function ($q) {
                 $term = '%' . trim($this->search) . '%';
                 $q->where(fn($s) =>
                     $s->where('name', 'like', $term)

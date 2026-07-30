@@ -5,6 +5,7 @@ namespace App\Services\Academic;
 use App\Models\Course;
 use App\Models\Program;
 use App\Models\AuditLog;
+use App\Models\User;
 use App\Services\Syllabus\SyllabusDeleteService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -108,6 +109,27 @@ class CourseService
     {
         $course->update(['status' => 'active']);
         $this->logAction('restored', $course);
+    }
+
+    // Returns true if the given user is allowed to delete the course.
+    // Admins can always delete. Chairs can only delete courses whose program
+    // belongs to a department they are assigned as chair of.
+    public function canDelete(Course $course, User $user): bool
+    {
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+
+        if ($user->hasRole('chair')) {
+            $chairAssignment = $user->assignments()->where('context', 'chair')->first();
+            if ($chairAssignment) {
+                $course->loadMissing('program.departments');
+                $programDeptIds = $course->program?->departments->pluck('id')->toArray() ?? [];
+                return in_array($chairAssignment->department_id, $programDeptIds);
+            }
+        }
+
+        return false;
     }
 
     // Delete a course and all its related data

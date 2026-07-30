@@ -11,6 +11,9 @@
             <i class="bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-[#94a3b8] text-base pointer-events-none"></i>
             <x-form.input type="text" wire:model.live.debounce.300ms="search"
                 placeholder="Search name, email, phone…" class="pl-9 py-2! text-[13px]" />
+            @if(strlen(trim($search)) === 1)
+                <p class="text-[11px] text-[#a1a1aa] mt-1 ml-1">Type at least 2 characters to search.</p>
+            @endif
         </div>
 
         <x-form.select wire:model.live="role" class="py-2! text-[13px] min-w-30">
@@ -19,6 +22,7 @@
             <option value="dean">Dean</option>
             <option value="chair">Chair</option>
             <option value="faculty">Faculty</option>
+            <option value="ovpaa">OVPAA</option>
         </x-form.select>
 
         <x-form.select wire:model.live="status" class="py-2! text-[13px] min-w-32.5">

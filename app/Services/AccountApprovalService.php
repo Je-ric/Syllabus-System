@@ -110,10 +110,13 @@ class AccountApprovalService
         return DB::transaction(function () use ($user, $roles) {
             $oldRoleNames = $user->roles->pluck('name')->toArray();
 
-            $roleNames = collect($roles)
-                ->push('faculty')
-                ->unique()
-                ->values();
+            // Always keep 'faculty' for non-ovpaa users.
+            // OVPAA is a distinct role and should not have 'faculty' forced onto them.
+            $roleNames = collect($roles);
+            if (! $roleNames->contains('ovpaa')) {
+                $roleNames = $roleNames->push('faculty');
+            }
+            $roleNames = $roleNames->unique()->values();
 
             $roleIds = $roleNames->map(function ($roleName) {
                 return Role::firstOrCreate(['name' => $roleName])->id;
@@ -148,7 +151,7 @@ class AccountApprovalService
 
             // Notify user for each meaningful role that was added or removed.
             // 'faculty' is excluded — it is always forced on and is not a meaningful admin action.
-            $notifiableRoles = ['admin', 'dean', 'chair'];
+            $notifiableRoles = ['admin', 'dean', 'chair', 'ovpaa'];
 
             $added   = array_diff($newRoleNames, $oldRoleNames);
             $removed = array_diff($oldRoleNames, $newRoleNames);

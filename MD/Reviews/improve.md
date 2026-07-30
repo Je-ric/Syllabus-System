@@ -53,90 +53,10 @@
 ---
 
 ## HIGH
-
-### 1. SyllabusController — Destroy method does nothing
-**Status: ❌ NOT FIXED**
-**File:** `app/Http/Controllers/SyllabusController.php` → `destroy()`
-**What's wrong:** The `destroy()` method just returns a toast saying deletion is not allowed, instead of actually deleting the syllabus. The `SyllabusDeleteService` exists and is injected but is never called from this route. The README says "Only draft syllabi can be deleted" and "Only the preparer can delete."
-**Fix needed:** Implement the delete logic — check `$syllabus->status === 'draft'`, check `$syllabus->prepared_by === Auth::id()`, then call `$this->deleteService->delete($syllabus)` inside a `DB::transaction()`. Return proper toast on success/failure.
-
----
-
-### 2. SyllabusWizard — Duplicate syllabus created on page reload
-**Status: ❌ NOT FIXED**
-**File:** `app/Livewire/Syllabus/SyllabusWizard.php` → `mount()`
-**What's wrong:** When `$syllabusId` is null and `$courseId` is provided, it immediately calls `Syllabus::create()` in `mount()`. If the user refreshes the page without a `syllabusId`, a second draft is created. The unique constraint `['course_id', 'academic_calendar_id']` won't catch it because `academic_calendar_id` is null at creation time, so duplicates can exist for the same `(course_id, null)` pair.
-**Fix needed:** Before calling `Syllabus::create()` in mount, do a `firstOrCreate` check: `Syllabus::where('course_id', $courseId)->where('prepared_by', Auth::id())->where('status', 'draft')->first()`. If found, use it instead of creating a new one.
-
----
-
-### 3. AccountApprovalController — `restore()` and `disable()` missing try/catch
-**Status: ❌ NOT FIXED**
-**File:** `app/Http/Controllers/AccountApprovalController.php` → `restore()`, `disable()`
-**What's wrong:** `approve()` and `reject()` have try/catch blocks. `restore()` and `disable()` do not — any DB error will throw an unhandled exception to the user.
-**Fix needed:** Wrap `restore()` and `disable()` calls in try/catch identical to `approve()` and `reject()`.
-
----
-
-### 4. SyllabusDeleteService — Not wrapped in a DB transaction
-**Status: ❌ NOT FIXED**
-**File:** `app/Services/Syllabus/SyllabusDeleteService.php` → `delete()`
-**What's wrong:** The method performs many deletes across multiple tables (components, outcomes, weeks, contents, evaluations, references, materials, revisions, reviewers, snapshots) but has no `DB::transaction()` around them. The docblock says "Must be called inside a DB transaction by the caller" — but in `SyllabusController::destroy()`, no transaction exists (the method doesn't delete anything anyway — see issue #1). In `CourseService::deleteCourse()`, it IS wrapped in a transaction, so that path is safe. The destroy controller path will not be safe once it's fixed.
-**Fix needed:** Either wrap inside `SyllabusDeleteService::delete()` itself, or ensure every caller always wraps it.
-
----
-
-### 5. OTPController — `verifyOTP()` accepts email from POST body (user-controlled)
-**Status: ❌ NOT FIXED**
-**File:** `app/Http/Controllers/OTPController.php` → `verifyOTP()`
-**What's wrong:** `$email = $request->input('email') ?? session('verify_email')`. The email is taken from the POST body first. A user could supply any email address in the POST body and verify the OTP for a different account if they know that account's OTP.
-**Fix needed:** Reverse the priority — use session first: `$email = session('verify_email') ?? $request->input('email')`. Session is server-controlled; POST body is user-controlled.
-
----
-
-### 6. UserController — `update()` does not audit profile changes
-**Status: ❌ NOT FIXED**
-**File:** `app/Http/Controllers/UserController.php` → `update()`
-**What's wrong:** Profile updates (name, email, phone, office) have no `AuditLog::record()` call. The standards require logging all updates.
-**Fix needed:** Add `AuditLog::record(action: 'updated', module: 'Profile', referenceId: $user->id, description: "User updated their profile.")` after `$user->update($validated)`.
-
----
-
-### 7. `ovpaa` role in routes but not defined anywhere
-**File:** `routes/web.php`
-**What's wrong:** Routes for academic calendars and syllabi use `role:admin,ovpaa` middleware — but `ovpaa` is not a defined role in `RoleSeeder`, `AccountApprovalService::assignRoles()` allowed list (`'roles.*' => 'in:admin,chair,dean,faculty'`), or the README. Any user with role `ovpaa` would have to be inserted manually in the DB.
-**Fix needed:** Either add `ovpaa` to the allowed roles in `assignRole()` validation and the seeder, or remove it from the route middleware if it's unused. (OVPAA is responsible for the academic calendar and semester dates and events)
-
 ---
 
 ## MEDIUM
-
-### 8. `ManageQueue::executeBulk()` — Silently skips failures, no user feedback
-**File:** `app/Livewire/AccountApproval/ManageQueue.php` → `executeBulk()`
-**What's wrong:** The `catch (\Throwable)` block continues silently. If some users fail to update, the admin has no idea which ones failed.
-**Fix needed:** Collect failed IDs, then dispatch a toast with the count of failures. E.g., "3 of 5 users processed. 2 failed."
-
 ---
-
-### 9. `GoalObjectiveService::storeGoal()` and `storeObjective()` — No transaction
-**File:** `app/Services/GoalObjectiveService.php` → `storeGoal()`, `storeObjective()`
-**What's wrong:** `destroyGoal` and `destroyObjective` are wrapped in transactions (correct), but `store` operations are not. If `AuditLog::record()` fails mid-way, the goal is saved without a log. Low risk since `AuditLog::record()` has its own try/catch, but the pattern is inconsistent.
-**Fix needed:** Wrap in `DB::transaction()` for consistency, matching the destroy pattern.
-
----
-
-### 10. `CourseController::courseRules()` — Validation field name mismatch
-**File:** `app/Http/Controllers/CourseController.php` → `courseRules()`
-**What's wrong:** The validation rule uses key `'code'` but `CourseService::createCourse()` reads `$data['code']` — this is consistent. However, the form field is likely named `code` in the HTML but the DB column is `course_code`. If ever a form changes, this silent mapping will break. The validation also has no `max:` length constraint on `name`, `description`, `prerequisite`, `corequisite`.
-**Fix needed:** Add `max:255` to string fields. Consider using the DB column name consistently.
-
----
-
-### 11. `AcademicCalendarController::store()` and `update()` — Delegated to Livewire but routes exist
-**File:** `app/Http/Controllers/AcademicCalendarController.php`
-**What's wrong:** The comment says "store / update are handled by Livewire AcademicCalendarForm component." Yet `store` and `update` routes exist in `web.php` pointing to this controller. The controller has no `store()` or `update()` methods — this will throw a `BadMethodCallException` if those routes are ever hit.
-**Fix needed:** Either remove the routes or add the controller methods that redirect to the Livewire form.
-
 ---
 
 ### 12. `SyllabusWizard::saveAsDone()` — Storage paths contain user-supplied data (unsanitized)
@@ -167,20 +87,6 @@
 
 ---
 
-### 16. `ManageQueue` search uses `LIKE` with no minimum character length
-**File:** `app/Livewire/AccountApproval/ManageQueue.php` → `buildQuery()`
-**What's wrong:** A single-character search (e.g., `a`) will do a full table scan with `%a%`. On a large user table this becomes expensive.
-**Fix needed:** Add a minimum search length: `when(strlen(trim($this->search)) >= 2, ...)`.
-
----
-
-### 17. `CourseController::destroy()` — Authorization logic is in the controller, not a service
-**File:** `app/Http/Controllers/CourseController.php` → `destroy()`
-**What's wrong:** The chair scope-check (load program → get departments → check if chair's department is in the list) is business logic living in the controller. The standards say services handle business logic, controllers only handle HTTP.
-**Fix needed:** Move the authorization check to `CourseService::canDelete(Course $course, User $user): bool`.
-
----
-
 ### 18. `UserController::update()` allows email change without re-verification
 **File:** `app/Http/Controllers/UserController.php` → `update()`
 **What's wrong:** A user can change their email address without any OTP re-verification. They could change it to a non-CLSU email since only the `unique:users,email` rule is applied — no domain restriction like in registration.
@@ -193,36 +99,7 @@
 **What's wrong:** Strings like `'draft'`, `'under_review'`, `'for_revision'`, `'approved'`, `'active'`, `'pending'`, `'rejected'`, `'disabled'`, `'dean'`, `'chair'`, `'faculty'`, `'admin'`, `'LEC'`, `'LAB'` appear hardcoded across many files (controllers, services, models). If one string changes, all must be updated manually.
 **Fix needed:** Create PHP Enums: `App\Enums\SyllabusStatus`, `App\Enums\AccountStatus`, `App\Enums\UserRole`, `App\Enums\ComponentType`. Use them everywhere.
 
----
-
 ## LOW
-
-### 20. `GoalController` and `ObjectiveController` — Method naming violates PSR conventions
-**Files:** `app/Http/Controllers/GoalController.php`, `ObjectiveController.php`
-**What's wrong:** Methods are named `goal_store`, `goal_update`, `goal_destroy`, `objective_index` (snake_case). Laravel convention and PSR use camelCase for methods.
-**Fix needed:** Rename to `store`, `update`, `destroy`, `index` — these are in their own dedicated controllers so there's no naming conflict.
-
----
-
-### 21. `SyllabusController` — `show()` just redirects to preview
-**File:** `app/Http/Controllers/SyllabusController.php` → `show()`
-**What's wrong:** `show()` immediately redirects to `syllabus.preview.complete`. This is a wasted HTTP round-trip that the user sees as two requests.
-**Fix needed:** Either remove the `show` route and link directly to `syllabus.preview.complete`, or render the view directly inside `show()`.
-
----
-
-### 22. `AcademicStructureController::index()` — N+1 potential
-**File:** `app/Http/Controllers/AcademicStructureController.php` → `index()`
-**What's wrong:** `Program::all()->sortBy('name')` — `all()` loads every program then sorts in PHP. For larger datasets this is inefficient.
-**Fix needed:** `Program::orderBy('name')->get()`.
-
----
-
-### 23. `SyllabusController` — `store()` is effectively dead code
-**File:** `app/Http/Controllers/SyllabusController.php` → `store()`
-**What's wrong:** The `wizard()` method already creates the syllabus. `store()` creates a second one. In practice, all syllabus creation goes through `wizard()`. The `store()` method exists but the system never sends users to POST `/syllabus` directly.
-**Fix needed:** Remove the `store()` method and its route, or clearly document what it's for.
-
 ---
 
 ### 24. Raw IDs exposed in URLs
@@ -259,11 +136,6 @@
 **Fix needed:** Move these to `.env` variables or a secrets manager. Add `*.json` (except `composer.json`/`package.json`) to `.gitignore` in `storage/app/`.
 
 ---
-
-### 29. `bootstrap/app.php` — `role:admin,ovpaa` on calendar routes instead of `role:admin`
-**File:** `routes/web.php`
-**What's wrong:** The README says academic calendars are admin-only. Routes use `role:admin,ovpaa` which introduces an undefined role (see issue #7).
-**Fix needed:** Change to `role:admin` if `ovpaa` is not a real role.
 
 ---
 

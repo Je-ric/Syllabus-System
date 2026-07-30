@@ -64,13 +64,19 @@ class AccountApprovalController extends Controller
             'user_id' => 'required|exists:users,id',
         ]);
 
-        $this->accountApprovalService->restore((int) $request->input('user_id'));
+        try {
+            $this->accountApprovalService->restore((int) $request->input('user_id'));
 
-        return redirect()->route('accounts.approval')
-            ->with('toast', [
-                'message' => 'User account restored to pending.',
-                'type' => 'success'
+            return redirect()->route('accounts.approval')
+                ->with('toast', [
+                    'message' => 'User account restored to pending.',
+                    'type' => 'success',
+                ]);
+        } catch (\Exception $e) {
+            return redirect()->route('accounts.approval')->withErrors([
+                'error' => 'An error occurred while restoring the user. Please try again.',
             ]);
+        }
     }
 
     public function disable(Request $request)
@@ -79,13 +85,19 @@ class AccountApprovalController extends Controller
             'user_id' => 'required|exists:users,id',
         ]);
 
-        $this->accountApprovalService->disable((int) $request->input('user_id'));
+        try {
+            $this->accountApprovalService->disable((int) $request->input('user_id'));
 
-        return redirect()->route('accounts.approval')
-            ->with('toast', [
-                'message' => 'User account disabled.',
-                'type' => 'success'
+            return redirect()->route('accounts.approval')
+                ->with('toast', [
+                    'message' => 'User account disabled.',
+                    'type' => 'success',
+                ]);
+        } catch (\Exception $e) {
+            return redirect()->route('accounts.approval')->withErrors([
+                'error' => 'An error occurred while disabling the user. Please try again.',
             ]);
+        }
     }
 
     public function assignRole(Request $request)
@@ -93,7 +105,7 @@ class AccountApprovalController extends Controller
         $request->validate([
             'user_id' => 'required|exists:users,id',
             'roles'   => 'required|array',
-            'roles.*' => 'in:admin,chair,dean,faculty',
+            'roles.*' => 'in:admin,chair,dean,faculty,ovpaa',
         ]);
 
         $roles = $request->input('roles', []);

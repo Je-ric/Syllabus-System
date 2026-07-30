@@ -13,7 +13,7 @@ class GoalController extends Controller
 {
     public function __construct(private GoalObjectiveService $service) {}
 
-    public function goal_index(Request $request)
+    public function index(Request $request)
     {
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
@@ -54,7 +54,7 @@ class GoalController extends Controller
         return view('GoalObjective.goal', compact('colleges', 'goals', 'selectedCollegeId', 'noAssignment'));
     }
 
-    public function goal_store(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
             'college_id' => ['required', 'exists:colleges,id'],
@@ -77,7 +77,7 @@ class GoalController extends Controller
             ->with('toast', ['message' => 'Goal added successfully.', 'type' => 'success']);
     }
 
-    public function goal_update(Request $request, CollegeGoal $goal)
+    public function update(Request $request, CollegeGoal $goal)
     {
         $request->validate(['goal_text' => ['required', 'string']]);
 
@@ -95,7 +95,7 @@ class GoalController extends Controller
             ->with('toast', ['message' => 'Goal updated successfully.', 'type' => 'success']);
     }
 
-    public function goal_destroy(Request $request, CollegeGoal $goal)
+    public function destroy(Request $request, CollegeGoal $goal)
     {
         $collegeId = $goal->college_id;
 

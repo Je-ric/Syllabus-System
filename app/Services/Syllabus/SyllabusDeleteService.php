@@ -3,6 +3,7 @@
 namespace App\Services\Syllabus;
 
 use App\Models\Syllabus;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 // Centralises cascade-delete for a single syllabus.
@@ -10,8 +11,17 @@ use Illuminate\Support\Facades\Storage;
 class SyllabusDeleteService
 {
     // Delete a syllabus and all its child records + disk files.
-    // Must be called inside a DB transaction by the caller.
+    // The transaction is owned here so every caller is safe regardless of context.
+    // Callers that already have an open transaction are fine — DB::transaction()
+    // is re-entrant via Laravel's savepoint mechanism.
     public function delete(Syllabus $syllabus): void
+    {
+        DB::transaction(function () use ($syllabus) {
+            $this->performDelete($syllabus);
+        });
+    }
+
+    private function performDelete(Syllabus $syllabus): void
     {
         foreach ($syllabus->completeSyllabi as $snapshot) {
             foreach (['pdf_path', 'abridged_path', 'evaluation_path'] as $field) {
