@@ -315,26 +315,6 @@ Validation logic currently lives inline in controllers (`CourseController::cours
 
 ---
 
-### `app/Actions/`
-
-**SKIP for now — don't create.**
-
-Actions (single-class invokables like `CreateSyllabus::handle()`) are useful when the same operation is triggered from multiple surfaces (controller + Livewire + CLI). In CSMS right now, each operation has exactly one entry point. Adding an Actions layer would just add an extra hop with no benefit.
-
-**Revisit when:** The approval workflow needs to be triggered from both a Livewire component AND an admin controller. At that point, `ApproveSyllabus::handle(Syllabus $syllabus, User $actor)` makes sense to avoid duplicating the state-machine logic.
-
----
-
-### `app/DTOs/`
-
-**SKIP for now — don't create.**
-
-DTOs are useful when data is passed across multiple layers with complex shapes. CSMS passes Eloquent models directly between controller → service → view, which is appropriate for a Laravel app of this size. The overhead of DTO classes is not justified.
-
-**Revisit when:** The approval workflow needs to emit a structured result (e.g., new status + notification payload + audit description). A `SyllabusApprovalResult` DTO would prevent that data from being returned as a loose array.
-
----
-
 ### `app/Events/` and `app/Listeners/`
 
 **USE — but only when the approval workflow is built.**
@@ -424,35 +404,6 @@ A dean who exists in the system but has no college assignment falls through to t
 **Fix needed:** Remove the `if ($user->hasRole('dean'))` fallback entirely. A dean with no assignment should get `collect()`, not all colleges.
 
 ---
-
-### `app/Notifications/`
-
-**USE — when the approval workflow is built.**
-
-CSMS currently uses `Mail` classes directly. Laravel `Notification` classes are strictly better because:
-- They support multiple channels (mail + database) from one class.
-- The `database` channel writes to a `notifications` table — enables in-app notification bell (see F3 in RECOMMENDED FEATURES).
-- `Notifiable` trait is already on the `User` model.
-
-| Notification | Replaces / New |
-|---|---|
-| `SyllabusSubmittedNotification` | New — notifies reviewers when a syllabus enters `under_review` |
-| `SyllabusApprovedNotification` | New — notifies preparer when syllabus is `approved` |
-| `SyllabusReturnedNotification` | New — notifies preparer when returned `for_revision` with notes |
-| `AccountStatusNotification` | Replaces `AccountStatusUpdated` Mailable |
-
-**Don't replace existing mails now** — it would be a refactor-only change. Do it when adding the approval workflow so both ship together.
-
----
-
-### `app/Observers/`
-
-**SKIP — don't create.**
-
-Observers fire on Eloquent events (creating, updated, deleted). In CSMS, all audit logging is explicit: `AuditLog::record()` is called manually and intentionally in each service. Making it implicit via an Observer would make it harder to trace what gets logged and when. The current explicit approach is correct for an audit-sensitive system.
-
-**Exception:** If `SoftDeletes` is added to `Syllabus` (see issue #13), a `SyllabusObserver::forceDeleted()` hook to clean up snapshot files could be clean. But only then.
-
 ---
 
 ### `app/Exceptions/`
@@ -540,22 +491,3 @@ CSMS has no tests at all. The approval workflow will involve multiple roles, sta
 **Unit tests** (`tests/Unit/`) are only worth writing for pure logic classes with no DB dependency: enum methods, the `ClsuEmail` rule, `ProgramCodeHelper`, and eventually the `InvalidSyllabusTransitionException` guard logic.
 
 ---
-
-## APPROVAL WORKFLOW — WHAT TO BUILD
-
-> Summary of all pieces needed before the Dean-approval flow can ship.
-
-| # | What | Where | Depends on |
-|---|---|---|---|
-| 1 | `SyllabusStatus` enum | `app/Enums/SyllabusStatus.php` | Nothing — create first |
-| 2 | `UserRole` enum | `app/Enums/UserRole.php` | Nothing — create first |
-| 3 | `ReviewerStatus` enum | `app/Enums/ReviewerStatus.php` | Nothing — create first |
-| 4 | `SyllabusPolicy` with `submit`, `approve`, `concur` gates | `app/Policies/SyllabusPolicy.php` | `SyllabusStatus` enum, `UserRole` enum |
-| 5 | Add `submit()`, `approve()`, `returnForRevision()` to `SyllabusApprovalService` | `app/Services/Syllabus/SyllabusApprovalService.php` | `SyllabusStatus` enum, `DB::transaction()` |
-| 6 | Fix `SyllabusController::destroy()` (issue #1) | `app/Http/Controllers/SyllabusController.php` | `SyllabusPolicy::delete` gate |
-| 7 | Dean approval UI — route + Livewire or controller action | New route + view | `SyllabusPolicy::approve`, `SyllabusApprovalService::approve()` |
-| 8 | Chair concur UI | New route + view | `SyllabusPolicy::concur`, `SyllabusApprovalService::approve()` (or separate method) |
-| 9 | Submit button in `ReviewStep` calls `SyllabusApprovalService::submit()` | `app/Livewire/Syllabus/Steps/ReviewStep.php` | All gates passing, `SyllabusStatus` enum |
-| 10 | `SyllabusSubmittedForReview` event + `NotifyReviewers` listener | `app/Events/`, `app/Listeners/` | Queue working |
-| 11 | `SyllabusApproved` event + `NotifyPreparer` listener | `app/Events/`, `app/Listeners/` | Queue working |
-| 12 | Feature tests for the above | `tests/Feature/Syllabus/SyllabusApprovalTest.php` | All above |
