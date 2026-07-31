@@ -4,7 +4,7 @@
     </x-modal.header>
 
     <form action="{{ route('goal.store') }}" method="POST" class="flex flex-col"
-        x-data="{ submitting: false }"
+        x-data="{ submitting: false, goalText: @js(old('goal_text', '')) }"
         x-on:submit="submitting = true">
         @csrf
         <input type="hidden" name="college_id" value="{{ $selectedCollegeId }}">
@@ -16,6 +16,7 @@
                     name="goal_text"
                     rows="5"
                     placeholder="Describe the college goal…"
+                    x-model="goalText"
                     ::readonly="submitting"
                     ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
                     required>{{ old('goal_text') }}</x-form.textarea>
@@ -25,7 +26,7 @@
             <x-modal.close-button modalId="addGoalModal" text="Cancel" ::disabled="submitting" />
             <x-ui.button type="submit" variant="add-button"
                 submitting="submitting" loadingText="Adding…"
-                ::disabled="submitting">
+                ::disabled="submitting || !goalText.trim()">
                 <i class="bx bx-plus"></i> Add Goal
             </x-ui.button>
         </x-modal.footer>

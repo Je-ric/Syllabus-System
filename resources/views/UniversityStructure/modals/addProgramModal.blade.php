@@ -9,6 +9,7 @@
     <form method="POST" action="{{ route('university.structure.program.store') }}" class="flex flex-col min-h-0"
         x-data="{
             submitting: false,
+            name: '',
             primaryDept: '',
             supportingDepts: []
         }"
@@ -28,6 +29,7 @@
                             type="text"
                             name="name"
                             placeholder="e.g. BS Computer Science"
+                            x-model="name"
                             ::readonly="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
                             required />
@@ -95,13 +97,13 @@
                                 @foreach($depts as $dept)
                                     <label class="flex items-center gap-2.5 px-3 py-2 hover:bg-[#F9FAFA]
                                                   cursor-pointer transition-colors duration-100"
-                                           :class="{ 'opacity-40 cursor-not-allowed pointer-events-none': primaryDept == {{ $dept->id }} }">
+                                           :class="{ 'opacity-40 cursor-not-allowed pointer-events-none': primaryDept == '{{ $dept->id }}' }">
                                         <input
                                             type="checkbox"
                                             name="supporting_department_ids[]"
                                             value="{{ $dept->id }}"
                                             x-model="supportingDepts"
-                                            :disabled="primaryDept == {{ $dept->id }}"
+                                            :disabled="primaryDept == '{{ $dept->id }}'"
                                             class="w-4 h-4 rounded text-[#00C075] border-[#C8D0DA]
                                                    focus:ring-[#00C075] focus:ring-offset-0 shrink-0">
                                         <span class="text-[12px] text-[#394056] leading-snug">{{ $dept->name }}</span>
@@ -119,7 +121,7 @@
             <x-modal.close-button modalId="addProgramModal" text="Cancel" ::disabled="submitting" />
             <x-ui.button type="submit" variant="add-button"
                 submitting="submitting" loadingText="Creating…"
-                ::disabled="submitting">
+                ::disabled="submitting || !name.trim() || !primaryDept">
                 <i class="bx bx-save"></i> Create Program
             </x-ui.button>
         </x-modal.footer>

@@ -19,8 +19,13 @@
 
     <x-modal.footer>
         <x-modal.close-button modalId="confirmCourseModal" text="Review Again" />
-        <x-ui.button type="button" variant="add-button" onclick="confirmCourseSubmit()">
-            <i class="bx bx-check"></i> Confirm & Create
-        </x-ui.button>
+        <div x-data="{ submitting: false }">
+            <x-ui.button type="button" variant="add-button"
+                submitting="submitting" loadingText="Creating…"
+                ::disabled="submitting"
+                x-on:click="submitting = true; confirmCourseSubmit()">
+                <i class="bx bx-check"></i> Confirm & Create
+            </x-ui.button>
+        </div>
     </x-modal.footer>
 </x-modal.dialog>

@@ -4,7 +4,11 @@
     </x-modal.header>
 
     <form action="{{ route('goal.update', $goal->id) }}" method="POST" class="flex flex-col"
-        x-data="{ submitting: false }"
+        x-data="{
+            submitting: false,
+            original: @js(trim($goal->goal_text)),
+            goalText: @js(trim($goal->goal_text))
+        }"
         x-on:submit="submitting = true">
         @csrf
         @method('PUT')
@@ -23,9 +27,10 @@
                         name="goal_text"
                         rows="5"
                         placeholder="Describe the college goal…"
+                        x-model="goalText"
                         ::readonly="submitting"
                         ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
-                        required>{{ $goal->goal_text }}</x-form.textarea>
+                        required></x-form.textarea>
                 </div>
             </div>
         </x-modal.body>
@@ -34,7 +39,7 @@
             <x-modal.close-button :modalId="'updateGoalModal_' . $goal->id" text="Cancel" ::disabled="submitting" />
             <x-ui.button type="submit" variant="save"
                 submitting="submitting" loadingText="Saving…"
-                ::disabled="submitting">
+                ::disabled="submitting || !goalText.trim() || goalText.trim() === original">
                 <i class="bx bx-save"></i> Save Changes
             </x-ui.button>
         </x-modal.footer>

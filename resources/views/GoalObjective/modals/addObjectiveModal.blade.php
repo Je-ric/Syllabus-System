@@ -4,7 +4,7 @@
     </x-modal.header>
 
     <form action="{{ route('objective.store') }}" method="POST" class="flex flex-col"
-        x-data="{ submitting: false }"
+        x-data="{ submitting: false, objectiveText: @js(old('objective_text', '')) }"
         x-on:submit="submitting = true">
         @csrf
         <input type="hidden" name="college_id" value="{{ $selectedCollegeId }}">
@@ -17,6 +17,7 @@
                     name="objective_text"
                     rows="5"
                     placeholder="Describe the department objective…"
+                    x-model="objectiveText"
                     ::readonly="submitting"
                     ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
                     required>{{ old('objective_text') }}</x-form.textarea>
@@ -26,7 +27,7 @@
             <x-modal.close-button modalId="addObjectiveModal" text="Cancel" ::disabled="submitting" />
             <x-ui.button type="submit" variant="add-button"
                 submitting="submitting" loadingText="Adding…"
-                ::disabled="submitting">
+                ::disabled="submitting || !objectiveText.trim()">
                 <i class="bx bx-plus"></i> Add Objective
             </x-ui.button>
         </x-modal.footer>

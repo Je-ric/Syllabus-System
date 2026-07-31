@@ -34,10 +34,14 @@
 
     <x-modal.footer>
         <x-modal.close-button :modalId="'deleteCourseModal_' . $course->id" text="Cancel" />
-        <form action="{{ route('courses.destroy', $course->id) }}" method="POST">
+        <form action="{{ route('courses.destroy', $course->id) }}" method="POST"
+            x-data="{ submitting: false }"
+            x-on:submit="submitting = true">
             @csrf
             @method('DELETE')
-            <x-ui.button type="submit" variant="danger">
+            <x-ui.button type="submit" variant="danger"
+                submitting="submitting" loadingText="Deleting…"
+                ::disabled="submitting">
                 <i class="bx bx-trash"></i> Delete Course
             </x-ui.button>
         </form>

@@ -14,8 +14,25 @@
     <form method="POST" action="{{ route('university.structure.program.update', $program) }}" class="flex flex-col min-h-0"
         x-data="{
             submitting: false,
+            name: @js($program->name),
             primaryDept: '{{ $primaryDeptId }}',
-            supportingDepts: {{ json_encode(array_map('strval', $supportingDeptIds)) }}
+            supportingDepts: {{ json_encode(array_map('strval', $supportingDeptIds)) }},
+            borNo: @js($program->bor_approval_no ?? ''),
+            borDate: @js($program->bor_approval_date ?? ''),
+            origName: @js($program->name),
+            origPrimaryDept: '{{ $primaryDeptId }}',
+            origSupportingDepts: {{ json_encode(array_map('strval', $supportingDeptIds)) }},
+            origBorNo: @js($program->bor_approval_no ?? ''),
+            origBorDate: @js($program->bor_approval_date ?? ''),
+            get hasChanged() {
+                if (this.name.trim() !== this.origName.trim()) return true;
+                if (this.primaryDept !== this.origPrimaryDept) return true;
+                if (this.borNo.trim() !== this.origBorNo.trim()) return true;
+                if (this.borDate !== this.origBorDate) return true;
+                const a = [...this.supportingDepts].sort();
+                const b = [...this.origSupportingDepts].sort();
+                return JSON.stringify(a) !== JSON.stringify(b);
+            }
         }"
         x-on:submit="submitting = true">
         @csrf
@@ -35,6 +52,7 @@
                             type="text"
                             name="name"
                             value="{{ $program->name }}"
+                            x-model="name"
                             ::readonly="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
                             required />
@@ -74,6 +92,7 @@
                             type="text"
                             name="bor_approval_no"
                             value="{{ $program->bor_approval_no }}"
+                            x-model="borNo"
                             ::readonly="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''" />
                     </div>
@@ -85,6 +104,7 @@
                             type="date"
                             name="bor_approval_date"
                             value="{{ $program->bor_approval_date }}"
+                            x-model="borDate"
                             ::readonly="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''" />
                     </div>
@@ -132,7 +152,7 @@
             <x-modal.close-button :modalId="'updateProgramModal_' . $program->id" text="Cancel" ::disabled="submitting" />
             <x-ui.button type="submit" variant="save"
                 submitting="submitting" loadingText="Saving…"
-                ::disabled="submitting">
+                ::disabled="submitting || !name.trim() || !primaryDept || !hasChanged">
                 <i class="bx bx-save"></i> Save Changes
             </x-ui.button>
         </x-modal.footer>

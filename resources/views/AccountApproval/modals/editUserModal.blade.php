@@ -9,7 +9,28 @@
 @endphp
 
 <x-modal.dialog :id="$modalId" maxWidth="max-w-lg" width="w-11/12" variant="edit">
-    <form method="POST" action="{{ route('account-approval.edit-user') }}" class="flex flex-col">
+    <form method="POST" action="{{ route('account-approval.edit-user') }}" class="flex flex-col"
+        x-data="{
+            submitting: false,
+            name: @js(old('name', $user->name)),
+            email: @js(old('email', $user->email)),
+            phone: @js(old('phone_number', $user->phone_number ?? '')),
+            office: @js(old('office', $user->office ?? '')),
+            origName: @js($user->name),
+            origEmail: @js($user->email),
+            origPhone: @js($user->phone_number ?? ''),
+            origOffice: @js($user->office ?? ''),
+            get hasChanged() {
+                return this.name.trim()  !== this.origName.trim()
+                    || this.email.trim() !== this.origEmail.trim()
+                    || this.phone.trim() !== this.origPhone.trim()
+                    || this.office.trim() !== this.origOffice.trim();
+            },
+            get canSubmit() {
+                return this.hasChanged && this.name.trim() !== '' && this.email.trim() !== '';
+            }
+        }"
+        x-on:submit="submitting = true">
         @csrf
         @method('PUT')
         <input type="hidden" name="user_id" value="{{ $user->id }}">
@@ -41,24 +62,38 @@
                     <div class="sm:col-span-2">
                         <x-modal.modal-label isRequired>Full Name</x-modal.modal-label>
                         <x-form.input type="text" name="name"
-                            value="{{ old('name', $user->name) }}" required />
+                            value="{{ old('name', $user->name) }}"
+                            x-model="name"
+                            ::readonly="submitting"
+                            ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
+                            required />
                     </div>
                     <div>
                         <x-modal.modal-label>Phone Number</x-modal.modal-label>
                         <x-form.input type="text" name="phone_number"
                             value="{{ old('phone_number', $user->phone_number) }}"
-                            placeholder="e.g. 09XX XXX XXXX" />
+                            placeholder="e.g. 09XX XXX XXXX"
+                            x-model="phone"
+                            ::readonly="submitting"
+                            ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''" />
                     </div>
                     <div>
                         <x-modal.modal-label isRequired>Email Address</x-modal.modal-label>
                         <x-form.input type="email" name="email"
-                            value="{{ old('email', $user->email) }}" required />
+                            value="{{ old('email', $user->email) }}"
+                            x-model="email"
+                            ::readonly="submitting"
+                            ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
+                            required />
                     </div>
                     <div class="sm:col-span-2">
                         <x-modal.modal-label>Office / Department</x-modal.modal-label>
                         <x-form.input type="text" name="office"
                             value="{{ old('office', $user->office) }}"
-                            placeholder="e.g. College of Engineering" />
+                            placeholder="e.g. College of Engineering"
+                            x-model="office"
+                            ::readonly="submitting"
+                            ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''" />
                     </div>
                 </div>
 
@@ -68,8 +103,10 @@
         </x-modal.body>
 
         <x-modal.footer>
-            <x-modal.close-button :modalId="$modalId" text="Cancel" />
-            <x-ui.button type="submit" variant="save">
+            <x-modal.close-button :modalId="$modalId" text="Cancel" ::disabled="submitting" />
+            <x-ui.button type="submit" variant="save"
+                submitting="submitting" loadingText="Saving…"
+                ::disabled="submitting || !canSubmit">
                 <i class="bx bx-save leading-none"></i> Save Changes
             </x-ui.button>
         </x-modal.footer>

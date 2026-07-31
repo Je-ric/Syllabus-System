@@ -10,9 +10,13 @@
     </x-modal.body>
     <x-modal.footer>
         <x-modal.close-button :modalId="'archiveCourseModal_' . $course->id" text="Cancel" />
-        <form action="{{ route('courses.archive', $course->id) }}" method="POST">
+        <form action="{{ route('courses.archive', $course->id) }}" method="POST"
+            x-data="{ submitting: false }"
+            x-on:submit="submitting = true">
             @csrf
-            <x-ui.button type="submit" variant="warning">
+            <x-ui.button type="submit" variant="warning"
+                submitting="submitting" loadingText="Archiving…"
+                ::disabled="submitting">
                 <i class="bx bx-archive"></i> Archive
             </x-ui.button>
         </form>

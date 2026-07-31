@@ -7,7 +7,7 @@
     </x-modal.header>
 
     <form method="POST" action="{{ route('university.structure.department.store') }}" class="flex flex-col"
-        x-data="{ submitting: false }"
+        x-data="{ submitting: false, name: '' }"
         x-on:submit="submitting = true">
         @csrf
         <input type="hidden" name="college_id" id="addDepartment_college_id" value="">
@@ -18,8 +18,9 @@
                     type="text"
                     name="name"
                     placeholder="e.g. Department of Computer Science"
+                    x-model="name"
                     ::readonly="submitting"
-                    ::class="submitting ? 'opacity-60 cursor-wait' : ''"
+                    ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
                     required />
             </div>
         </x-modal.body>
@@ -28,7 +29,7 @@
             <x-modal.close-button modalId="addDepartmentModal" text="Cancel" ::disabled="submitting" />
             <x-ui.button type="submit" variant="add-button"
                 submitting="submitting" loadingText="Creating…"
-                ::disabled="submitting">
+                ::disabled="submitting || !name.trim()">
                 <i class="bx bx-save"></i> Create Department
             </x-ui.button>
         </x-modal.footer>

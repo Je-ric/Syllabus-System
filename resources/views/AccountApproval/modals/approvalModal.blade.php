@@ -61,7 +61,9 @@
 @endphp
 
 <x-modal.dialog :id="$modalId" maxWidth="max-w-md" width="w-11/12" :variant="$hc['variant']">
-    <form method="POST" action="{{ route('account-approval.' . $action) }}" class="flex flex-col" wire:ignore.self>
+    <form method="POST" action="{{ route('account-approval.' . $action) }}" class="flex flex-col" wire:ignore.self
+        x-data="{ submitting: false }"
+        x-on:submit="submitting = true">
         @csrf
         <input type="hidden" name="user_id" value="{{ $user->id }}">
 
@@ -125,8 +127,19 @@
         </x-modal.body>
 
         <x-modal.footer>
-            <x-modal.close-button :modalId="$modalId" text="Cancel" />
-            <x-ui.button type="submit" :variant="$hc['btnVariant']">
+            <x-modal.close-button :modalId="$modalId" text="Cancel" ::disabled="submitting" />
+            @php
+                $loadingLabels = [
+                    'approve' => 'Approving…',
+                    'reject'  => 'Rejecting…',
+                    'restore' => 'Restoring…',
+                    'disable' => 'Disabling…',
+                ];
+                $loadingLabel = $loadingLabels[$action] ?? (ucfirst($action) . 'ing…');
+            @endphp
+            <x-ui.button type="submit" :variant="$hc['btnVariant']"
+                submitting="submitting" :loadingText="$loadingLabel"
+                ::disabled="submitting">
                 <i class="bx {{ $hc['btnIcon'] }} leading-none"></i>
                 {{ ucfirst($action) }}
             </x-ui.button>

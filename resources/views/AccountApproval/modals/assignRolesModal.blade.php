@@ -9,11 +9,31 @@
     onclose="this.querySelector('form')?.reset()">
     <form method="POST" action="{{ route('account-approval.assign-role') }}"
             class="flex flex-col h-full"
-            onsubmit="
-                const dean  = this.querySelector('input[name=&quot;roles[]&quot;][value=&quot;dean&quot;]')?.checked;
-                const chair = this.querySelector('input[name=&quot;roles[]&quot;][value=&quot;chair&quot;]')?.checked;
-                if (dean && chair) { alert('A user cannot hold both Dean and Chair roles simultaneously.'); return false; }
-                return true;
+            x-data="{
+                submitting: false,
+                roles: {
+                    admin: {{ $user->roles->contains('name', 'admin') ? 'true' : 'false' }},
+                    dean:  {{ $user->roles->contains('name', 'dean')  ? 'true' : 'false' }},
+                    chair: {{ $user->roles->contains('name', 'chair') ? 'true' : 'false' }},
+                },
+                orig: {
+                    admin: {{ $user->roles->contains('name', 'admin') ? 'true' : 'false' }},
+                    dean:  {{ $user->roles->contains('name', 'dean')  ? 'true' : 'false' }},
+                    chair: {{ $user->roles->contains('name', 'chair') ? 'true' : 'false' }},
+                },
+                get hasChanged() {
+                    return this.roles.admin !== this.orig.admin
+                        || this.roles.dean  !== this.orig.dean
+                        || this.roles.chair !== this.orig.chair;
+                }
+            }"
+            x-on:submit="
+                if (roles.dean && roles.chair) {
+                    $event.preventDefault();
+                    alert('A user cannot hold both Dean and Chair roles simultaneously.');
+                    return;
+                }
+                submitting = true;
             ">
         @csrf
         <input type="hidden" name="user_id" value="{{ $user->id }}">
@@ -80,6 +100,7 @@
                                     <i class="bx {{ $role['icon'] }} text-sm leading-none"></i>
                                 </span>
                                 <input type="checkbox" name="roles[]" value="{{ $role['name'] }}"
+                                    x-model="roles.{{ $role['name'] }}"
                                     class="ml-auto w-4 h-4 rounded border-[#e2e8f0] text-[#16a34a] focus:ring-[#bbf7d0] cursor-pointer"
                                     {{ $user->roles->contains('name', $role['name']) ? 'checked' : '' }}>
                             </div>
@@ -104,8 +125,10 @@
         </div>
 
         <x-modal.footer>
-            <x-modal.close-button :modalId="$modalId" text="Cancel" />
-            <x-ui.button type="submit" variant="save">
+            <x-modal.close-button :modalId="$modalId" text="Cancel" ::disabled="submitting" />
+            <x-ui.button type="submit" variant="save"
+                submitting="submitting" loadingText="Saving…"
+                ::disabled="submitting || !hasChanged">
                 <i class="bx bx-save leading-none"></i> Save Roles
             </x-ui.button>
         </x-modal.footer>

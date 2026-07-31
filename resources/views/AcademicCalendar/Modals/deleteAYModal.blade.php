@@ -31,14 +31,18 @@
         </div>
     </x-modal.body>
 
-    <x-modal.footer>
-        <x-modal.close-button :modalId="'deleteAYModal_' . str_replace('-', '_', $year)" text="Cancel" />
-        <form action="{{ route('academic.calendars.destroy', $year) }}" method="POST">
-            @csrf
-            @method('DELETE')
-            <x-ui.button type="submit" variant="danger">
-                <i class="bx bx-trash"></i> Delete A.Y.
-            </x-ui.button>
-        </form>
-    </x-modal.footer>
+        <x-modal.footer>
+            <x-modal.close-button :modalId="'deleteAYModal_' . str_replace('-', '_', $year)" text="Cancel" />
+            <form action="{{ route('academic.calendars.destroy', $year) }}" method="POST"
+                x-data="{ submitting: false }"
+                x-on:submit="submitting = true">
+                @csrf
+                @method('DELETE')
+                <x-ui.button type="submit" variant="danger"
+                    submitting="submitting" loadingText="Deleting…"
+                    ::disabled="submitting">
+                    <i class="bx bx-trash"></i> Delete A.Y.
+                </x-ui.button>
+            </form>
+        </x-modal.footer>
 </x-modal.dialog>
