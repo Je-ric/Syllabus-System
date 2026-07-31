@@ -6,7 +6,9 @@
         </div>
     </x-modal.header>
 
-    <form method="POST" action="{{ route('department.update', $dept) }}" class="flex flex-col">
+    <form method="POST" action="{{ route('university.structure.department.update', $dept) }}" class="flex flex-col"
+        x-data="{ submitting: false }"
+        x-on:submit="submitting = true">
         @csrf
         @method('PUT')
         <input type="hidden" name="college_id" value="{{ $dept->college_id }}">
@@ -18,12 +20,16 @@
                     type="text"
                     name="name"
                     value="{{ $dept->name }}"
+                    ::readonly="submitting"
+                    ::class="submitting ? 'opacity-60 cursor-wait' : ''"
                     required />
             </div>
         </x-modal.body>
         <x-modal.footer>
-            <x-modal.close-button :modalId="'updateDepartmentModal_' . $dept->id" text="Cancel" />
-            <x-ui.button type="submit" variant="save">
+            <x-modal.close-button :modalId="'updateDepartmentModal_' . $dept->id" text="Cancel" ::disabled="submitting" />
+            <x-ui.button type="submit" variant="save"
+                submitting="submitting" loadingText="Saving…"
+                ::disabled="submitting">
                 <i class="bx bx-save"></i> Save Changes
             </x-ui.button>
         </x-modal.footer>

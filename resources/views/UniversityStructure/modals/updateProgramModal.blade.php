@@ -11,11 +11,13 @@
         </div>
     </x-modal.header>
 
-    <form method="POST" action="{{ route('program.update', $program) }}" class="flex flex-col min-h-0"
+    <form method="POST" action="{{ route('university.structure.program.update', $program) }}" class="flex flex-col min-h-0"
         x-data="{
+            submitting: false,
             primaryDept: '{{ $primaryDeptId }}',
             supportingDepts: {{ json_encode(array_map('strval', $supportingDeptIds)) }}
-        }">
+        }"
+        x-on:submit="submitting = true">
         @csrf
         @method('PUT')
 
@@ -33,6 +35,8 @@
                             type="text"
                             name="name"
                             value="{{ $program->name }}"
+                            ::readonly="submitting"
+                            ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
                             required />
                     </div>
 
@@ -42,6 +46,8 @@
                             name="primary_department_id"
                             id="editPrimaryDept_{{ $program->id }}"
                             x-model="primaryDept"
+                            :disabled="submitting"
+                            ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
                             class="w-full px-3 py-2 text-[13px] border border-[#E3E8EB] rounded-[8px] bg-white
                                    focus:outline-none focus:ring-2 focus:ring-[#00C075] focus:border-transparent"
                             required>
@@ -56,6 +62,8 @@
                                 </optgroup>
                             @endforeach
                         </select>
+                        {{-- Mirror value so it submits even when select is disabled --}}
+                        <input type="hidden" name="primary_department_id" :value="primaryDept" x-show="submitting">
                         <p class="text-[11px] text-[#93A1AF] mt-1">Main department responsible for this program</p>
                     </div>
 
@@ -65,7 +73,9 @@
                             id="editBorNo_{{ $program->id }}"
                             type="text"
                             name="bor_approval_no"
-                            value="{{ $program->bor_approval_no }}" />
+                            value="{{ $program->bor_approval_no }}"
+                            ::readonly="submitting"
+                            ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''" />
                     </div>
 
                     <div>
@@ -74,7 +84,9 @@
                             id="editBorDate_{{ $program->id }}"
                             type="date"
                             name="bor_approval_date"
-                            value="{{ $program->bor_approval_date }}" />
+                            value="{{ $program->bor_approval_date }}"
+                            ::readonly="submitting"
+                            ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''" />
                     </div>
 
                 </div>
@@ -84,7 +96,8 @@
                     <x-modal.modal-label>Supporting Departments <span class="text-[#93A1AF] font-normal">(Optional)</span></x-modal.modal-label>
                     <p class="text-[11px] text-[#93A1AF] mb-2">Departments that also contribute to this program</p>
 
-                    <div class="border border-[#E3E8EB] rounded-[8px] divide-y divide-[#F1F3F5] overflow-y-auto max-h-64">
+                    <div class="border border-[#E3E8EB] rounded-[8px] divide-y divide-[#F1F3F5] overflow-y-auto max-h-64"
+                        ::class="submitting ? 'opacity-60 cursor-not-allowed pointer-events-none' : ''">
                         @foreach($allDepartments->groupBy('college.name') as $collegeName => $depts)
                             <div>
                                 <p class="text-[10.5px] font-bold uppercase tracking-wide text-[#72809E]
@@ -116,8 +129,10 @@
         </x-modal.body>
 
         <x-modal.footer>
-            <x-modal.close-button :modalId="'updateProgramModal_' . $program->id" text="Cancel" />
-            <x-ui.button type="submit" variant="save">
+            <x-modal.close-button :modalId="'updateProgramModal_' . $program->id" text="Cancel" ::disabled="submitting" />
+            <x-ui.button type="submit" variant="save"
+                submitting="submitting" loadingText="Saving…"
+                ::disabled="submitting">
                 <i class="bx bx-save"></i> Save Changes
             </x-ui.button>
         </x-modal.footer>

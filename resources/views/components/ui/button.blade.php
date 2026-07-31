@@ -1,9 +1,11 @@
 @props([
-    'href'       => null,
-    'type'       => 'button',
-    'variant'    => 'primary',
-    'loading'    => null,
-    'wireTarget' => null,
+    'href'        => null,
+    'type'        => 'button',
+    'variant'     => 'primary',
+    'loading'     => null,
+    'wireTarget'  => null,
+    'submitting'  => null,   {{-- Alpine expression, e.g. "submitting" or "isLoading". When set, shows spinner when truthy. --}}
+    'loadingText' => null,   {{-- Label shown while submitting, e.g. "Saving…". Defaults to slot content. --}}
 ])
 
 @php
@@ -109,6 +111,41 @@
 
 @if ($href)
     <a href="{{ $href }}" {{ $attributes->merge(['class' => $class]) }}>{{ $slot }}</a>
+@elseif ($submitting)
+    <button type="{{ $type }}"
+        {{ $attributes->merge(['class' => $class]) }}
+        @if ($shouldHandleLoading && !$attributes->has('wire:loading.attr')) wire:loading.attr="disabled" @endif
+        @if ($shouldHandleLoading && $autoTarget && !$attributes->has('wire:target')) wire:target="{{ $autoTarget }}" @endif>
+
+        {{-- Alpine submitting state --}}
+        <template x-if="!({{ $submitting }})">
+            <span class="inline-flex items-center gap-1.5 leading-none">{{ $slot }}</span>
+        </template>
+        <template x-if="{{ $submitting }}">
+            <span class="inline-flex items-center gap-1.5 leading-none">
+                <svg class="animate-spin h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                </svg>
+                {{ $loadingText ?? $slot }}
+            </span>
+        </template>
+
+        @if ($shouldHandleLoading)
+            @if (filled($loading))
+                <span wire:loading.remove @if($spinnerTarget) wire:target="{{ $spinnerTarget }}" @endif
+                      class="inline-flex items-center gap-1.5 leading-none sr-only">{{ $slot }}</span>
+                <span wire:loading @if($spinnerTarget) wire:target="{{ $spinnerTarget }}" @endif
+                      class="inline-flex items-center gap-1.5 leading-none sr-only">
+                    <svg class="animate-spin h-3.5 w-3.5 shrink-0 leading-none" viewBox="0 0 24 24" fill="none">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
+                    <span class="leading-none">{{ $loading }}</span>
+                </span>
+            @endif
+        @endif
+    </button>
 @else
     <button type="{{ $type }}"
         {{ $attributes->merge(['class' => $class]) }}

@@ -13,7 +13,7 @@
                     <span class="text-[13px] font-semibold text-[#0f172a] text-right max-w-[60%]">{{ $program->name }}</span>
                 </div>
                 <div class="flex items-center justify-between">
-                    <span class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#94a3b8]">BOR Approval Resolution No. </span>
+                    <span class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#94a3b8]">BOR Approval Resolution No.</span>
                     <span class="text-[13px] text-[#475569]">{{ $program->bor_approval_no }}</span>
                 </div>
                 @php $courseCount = $program->courses->count(); @endphp
@@ -33,10 +33,14 @@
 
     <x-modal.footer>
         <x-modal.close-button :modalId="'deleteProgramModal_' . $program->id" text="Cancel" />
-        <form action="{{ route('university.structure.program.destroy', $program->id) }}" method="POST">
+        <form action="{{ route('university.structure.program.destroy', $program->id) }}" method="POST"
+            x-data="{ submitting: false }"
+            x-on:submit="submitting = true">
             @csrf
             @method('DELETE')
-            <x-ui.button type="submit" variant="danger">
+            <x-ui.button type="submit" variant="danger"
+                submitting="submitting" loadingText="Deleting…"
+                ::disabled="submitting">
                 <i class="bx bx-trash"></i> Delete Program
             </x-ui.button>
         </form>

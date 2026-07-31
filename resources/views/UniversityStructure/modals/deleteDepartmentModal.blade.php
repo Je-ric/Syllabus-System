@@ -33,10 +33,14 @@
 
     <x-modal.footer>
         <x-modal.close-button :modalId="'deleteDepartmentModal_' . $dept->id" text="Cancel" />
-        <form action="{{ route('university.structure.department.destroy', $dept->id) }}" method="POST">
+        <form action="{{ route('university.structure.department.destroy', $dept->id) }}" method="POST"
+            x-data="{ submitting: false }"
+            x-on:submit="submitting = true">
             @csrf
             @method('DELETE')
-            <x-ui.button type="submit" variant="danger">
+            <x-ui.button type="submit" variant="danger"
+                submitting="submitting" loadingText="Deleting…"
+                ::disabled="submitting">
                 <i class="bx bx-trash"></i> Delete Department
             </x-ui.button>
         </form>
