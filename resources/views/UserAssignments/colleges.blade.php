@@ -78,14 +78,14 @@
                         </div>
                     </x-layout.card-section>
 
-                    @include('OrganizationalHierarchy.modals.assignDeanModal', [
+                    @include('UserAssignments.modals.assignDeanModal', [
                         'collegeId'      => $college->id,
                         'collegeName'    => $college->name,
                         'potentialDeans' => $potentialDeans,
                     ])
 
                     @if ($dean)
-                        @include('OrganizationalHierarchy.modals.removeDeanModal', [
+                        @include('UserAssignments.modals.removeDeanModal', [
                             'collegeId'   => $college->id,
                             'collegeName' => $college->name,
                             'userId'      => $dean->id,

@@ -33,11 +33,15 @@
 
     <x-modal.footer>
         <x-modal.close-button :modalId="'removeFacultyModal-' . $departmentId . '-' . $userId" text="Cancel" />
-        <form action="{{ route('user-assignments.remove-faculty') }}" method="POST">
+        <form action="{{ route('user-assignments.remove-faculty') }}" method="POST"
+            x-data="{ submitting: false }"
+            x-on:submit="submitting = true">
             @csrf
             <input type="hidden" name="department_id" value="{{ $departmentId }}">
             <input type="hidden" name="user_id" value="{{ $userId }}">
-            <x-ui.button type="submit" variant="danger">
+            <x-ui.button type="submit" variant="danger"
+                submitting="submitting" loadingText="Removing…"
+                ::disabled="submitting">
                 <i class="bx bx-trash"></i> Remove Faculty
             </x-ui.button>
         </form>

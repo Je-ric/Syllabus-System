@@ -142,7 +142,7 @@
                     </div>
 
                     @if ($canManageChair)
-                        @include('OrganizationalHierarchy.modals.assignChairModal', [
+                        @include('UserAssignments.modals.assignChairModal', [
                             'departmentId'    => $department->id,
                             'departmentName'  => $department->name,
                             'potentialChairs' => $potentialChairs,
@@ -150,7 +150,7 @@
                     @endif
 
                     @if ($canManageFaculty)
-                        @include('OrganizationalHierarchy.modals.assignFacultyModal', [
+                        @include('UserAssignments.modals.assignFacultyModal', [
                             'departmentId'       => $department->id,
                             'departmentName'     => $department->name,
                             'potentialFaculty'   => $potentialFaculty,
@@ -159,7 +159,7 @@
                     @endif
 
                     @if ($chair && $canManageChair)
-                        @include('OrganizationalHierarchy.modals.removeChairModal', [
+                        @include('UserAssignments.modals.removeChairModal', [
                             'departmentId'   => $department->id,
                             'departmentName' => $department->name,
                             'userId'         => $chair->id,
@@ -168,7 +168,7 @@
                     @endif
 
                     @foreach ($facultyList as $fa)
-                        @include('OrganizationalHierarchy.modals.removeFacultyModal', [
+                        @include('UserAssignments.modals.removeFacultyModal', [
                             'departmentId'   => $department->id,
                             'departmentName' => $department->name,
                             'userId'         => $fa->user->id,
