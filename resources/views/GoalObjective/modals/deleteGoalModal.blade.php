@@ -25,11 +25,24 @@
 
     <x-modal.footer>
         <x-modal.close-button :modalId="'deleteGoalModal_' . $goal->id" text="Cancel" />
-        <form action="{{ route('goal.destroy', $goal->id) }}" method="POST">
+        <form action="{{ route('goal.destroy', $goal->id) }}" method="POST"
+            x-data="{ submitting: false }"
+            x-on:submit="submitting = true">
             @csrf
             @method('DELETE')
-            <x-ui.button type="submit" variant="danger">
-                <i class="bx bx-trash"></i> Delete Goal
+            <x-ui.button type="submit" variant="danger" ::disabled="submitting">
+                <template x-if="!submitting">
+                    <span class="inline-flex items-center gap-1.5"><i class="bx bx-trash"></i> Delete Goal</span>
+                </template>
+                <template x-if="submitting">
+                    <span class="inline-flex items-center gap-1.5">
+                        <svg class="animate-spin h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                        </svg>
+                        Deleting…
+                    </span>
+                </template>
             </x-ui.button>
         </form>
     </x-modal.footer>
