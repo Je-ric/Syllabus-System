@@ -106,13 +106,9 @@
                     <p class="text-[13px] italic text-[#a1a1aa]">No course outcome linked</p>
                 @endif
             </div>
-            <button type="button" x-on:click="openModal('learning_outcomes')"
-                class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px]
-                       text-[12px] font-semibold text-[#166534] bg-white
-                       border border-[#86efac] hover:bg-[#f0fdf4]
-                       transition-colors duration-150">
+            <x-ui.button variant="sm-info" type="button" x-on:click="openModal('learning_outcomes')">
                 <i class="bx bx-edit-alt text-sm"></i> Change
-            </button>
+            </x-ui.button>
         </div>
     @endif
 
@@ -229,13 +225,9 @@
             <i class="bx bx-reset text-sm"></i> Reset
         </x-ui.button>
 
-        <button type="button" x-on:click="openModal('learning_outcomes')"
-            class="inline-flex items-center gap-2 px-4 py-2 text-[13px] font-semibold rounded-[10px]
-                   bg-[#16a34a] text-white border border-[#15803d]
-                   hover:bg-[#15803d] transition-colors duration-150
-                   focus:ring-2 focus:outline-none focus:ring-[#16a34a]/30">
+        <x-ui.button variant="save" type="button" x-on:click="openModal('learning_outcomes')">
             <i class="bx bx-edit text-sm leading-none"></i> Edit Week
-        </button>
+        </x-ui.button>
     </div>
 
 </div>

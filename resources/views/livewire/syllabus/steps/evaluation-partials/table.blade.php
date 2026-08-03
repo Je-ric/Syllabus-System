@@ -107,8 +107,8 @@
                                 <input type="text" wire:model.blur="inputs.{{ $outcomeInputId }}.outcome_label"
                                     placeholder="e.g. CO1"
                                     class="w-full text-xs rounded-lg border border-slate-200 bg-white
-                   px-2 py-1.5 focus:border-emerald-400 focus:ring-1
-                   focus:ring-emerald-100 focus:outline-none placeholder:text-slate-300" />
+                                           px-2 py-1.5 focus:border-emerald-400 focus:ring-2
+                                           focus:ring-emerald-100 focus:outline-none placeholder:text-slate-300" />
                             @else
                                 <span class="text-xs text-slate-300">—</span>
                             @endif
@@ -147,7 +147,7 @@
                                         x-model="lec[{{ $lecId }}]"
                                         min="0" max="100" step="1" placeholder="0"
                                         class="w-20 text-sm text-right rounded-lg border border-slate-200 bg-white
-                                               px-2 py-1.5 focus:border-emerald-400 focus:ring-1
+                                               px-2 py-1.5 focus:border-emerald-400 focus:ring-2
                                                focus:ring-emerald-100 focus:outline-none placeholder:text-slate-300" />
                                     <span class="text-xs text-slate-400">%</span>
                                 </div>

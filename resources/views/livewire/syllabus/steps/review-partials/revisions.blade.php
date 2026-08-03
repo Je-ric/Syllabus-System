@@ -129,25 +129,20 @@
 
                 <x-modal.footer>
                     <x-modal.close-button modalId="revision-modal" text="Cancel" x-bind:disabled="saving" />
-                    <button type="button" x-on:click="submit()" x-bind:disabled="saving"
-                        class="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg text-sm font-semibold text-white shadow-sm
-                               disabled:opacity-50 transition-colors"
-                        :style="editingId ? 'background: #d97706' : 'background: var(--clsu-green)'"
-                        x-on:mouseover="$el.style.background = editingId ? '#b45309' : 'var(--clsu-cobra)'"
-                        x-on:mouseleave="$el.style.background = editingId ? '#d97706' : 'var(--clsu-green)'">
-                        <span x-show="!saving" class="inline-flex items-center gap-1.5">
-                            <i x-show="editingId"  class="bx bx-save leading-none"></i>
-                            <i x-show="!editingId" class="bx bx-plus leading-none"></i>
-                            <span x-text="editingId ? 'Update' : 'Add Revision'"></span>
-                        </span>
-                        <span x-show="saving" x-cloak class="inline-flex items-center gap-1.5">
-                            <svg class="animate-spin h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                            </svg>
-                            Saving…
-                        </span>
-                    </button>
+                    <x-ui.button type="button" variant="save"
+                        x-show="!editingId"
+                        x-on:click="submit()"
+                        x-bind:disabled="saving"
+                        submitting="saving" loadingText="Saving…">
+                        <i class="bx bx-plus leading-none"></i> Add Revision
+                    </x-ui.button>
+                    <x-ui.button type="button" variant="warning"
+                        x-show="editingId" x-cloak
+                        x-on:click="submit()"
+                        x-bind:disabled="saving"
+                        submitting="saving" loadingText="Saving…">
+                        <i class="bx bx-save leading-none"></i> Update
+                    </x-ui.button>
                 </x-modal.footer>
             </x-modal.dialog>
 
@@ -162,25 +157,23 @@
                             x-on:click="if (confirm('This will renumber all revisions 0, 1, 2, … in their current order. Continue?')) $wire.resequenceRevisions()"
                             class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold text-slate-500
                                    border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-50 transition-colors">
-                            <span wire:loading.remove wire:target="resequenceRevisions" class="inline-flex items-center gap-1">
-                                <i class="bx bx-sort-a-z leading-none"></i> Resequence
-                            </span>
-                            <span wire:loading wire:target="resequenceRevisions" class="inline-flex items-center gap-1">
-                                <svg class="animate-spin h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                                </svg>
-                                Renumbering…
+                            <span class="inline-flex items-center justify-center gap-1">
+                                <span wire:loading.remove wire:target="resequenceRevisions" class="inline-flex items-center gap-1">
+                                    <i class="bx bx-sort-a-z leading-none"></i> Resequence
+                                </span>
+                                <span wire:loading wire:target="resequenceRevisions" class="inline-flex items-center gap-1">
+                                    <svg class="animate-spin h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                    </svg>
+                                    Renumbering…
+                                </span>
                             </span>
                         </button>
                     @endif
-                    <button type="button" x-on:click="openNew()"
-                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-semibold border transition-colors"
-                        style="background: #f0fdf4; color: var(--clsu-green); border-color: #bbf7d0;"
-                        onmouseover="this.style.background='#dcfce7'"
-                        onmouseout="this.style.background='#f0fdf4'">
+                    <x-ui.button type="button" variant="sm-success" x-on:click="openNew()">
                         <i class="bx bx-plus text-sm"></i> Add Revision
-                    </button>
+                    </x-ui.button>
                 </div>
             </div>
 

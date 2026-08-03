@@ -237,12 +237,9 @@
                                         <p class="text-xs font-bold uppercase tracking-widest text-slate-400">References</p>
                                         <p class="text-xs text-slate-500 mt-0.5">Books, journals, printed sources</p>
                                     </div>
-                                    <button type="button" x-on:click="addRef()"
-                                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-semibold
-                                               bg-emerald-50 text-emerald-700 border border-emerald-200
-                                               hover:bg-emerald-100 transition-colors">
+                                    <x-ui.button type="button" variant="sm-success" x-on:click="addRef()">
                                         <i class="bx bx-plus text-[14px]"></i> Add
-                                    </button>
+                                    </x-ui.button>
                                 </div>
 
                                 <div class="space-y-2.5">
@@ -276,12 +273,9 @@
                                         <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Online Materials</p>
                                         <p class="text-xs text-slate-500 mt-0.5">Links, slides, videos, web resources</p>
                                     </div>
-                                    <button type="button" x-on:click="addMat()"
-                                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-semibold
-                                               bg-blue-50 text-blue-700 border border-blue-200
-                                               hover:bg-blue-100 transition-colors">
+                                    <x-ui.button type="button" variant="sm-info" x-on:click="addMat()">
                                         <i class="bx bx-plus text-[14px]"></i> Add
-                                    </button>
+                                    </x-ui.button>
                                 </div>
 
                                 <div class="space-y-3">
@@ -327,14 +321,12 @@
                         border-t border-slate-100 bg-slate-50/60 shrink-0 rounded-b-2xl">
 
                 {{-- Danger zone --}}
-                <button type="button" x-on:click="resetWeek()" x-bind:disabled="saving"
-                    title="This permanently clears all content for this week."
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
-                           text-rose-400 hover:text-rose-600 hover:bg-rose-50 border border-rose-200
-                           hover:border-rose-300 disabled:opacity-40 transition-all duration-150">
-                    <i class="bx bx-reset text-[14px]"></i>
-                    Reset week
-                </button>
+                <x-ui.button type="button" variant="sm-danger"
+                    x-on:click="resetWeek()"
+                    x-bind:disabled="saving"
+                    title="This permanently clears all content for this week.">
+                    <i class="bx bx-reset text-[14px]"></i> Reset week
+                </x-ui.button>
 
                 {{-- Primary actions --}}
                 <div class="flex items-center gap-2">
@@ -345,41 +337,19 @@
                         Select a Course Outcome to save
                     </span>
 
-                    <button type="button" x-on:click="close()" x-bind:disabled="saving"
-                        class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-600
-                               border border-slate-200 bg-white hover:bg-slate-50
-                               disabled:opacity-40 transition-colors duration-150">
+                    <x-ui.button type="button" variant="cancel"
+                        x-on:click="close()"
+                        x-bind:disabled="saving">
                         Cancel
-                    </button>
+                    </x-ui.button>
 
-                    <button type="button" x-on:click="save()" x-bind:disabled="saving || coMissing"
-                        class="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg text-sm font-semibold
-                               text-white disabled:opacity-50 transition-all duration-150"
-                        :class="coMissing
-                            ? 'cursor-not-allowed'
-                            : 'cursor-pointer'"
-                        style="background: linear-gradient(135deg, #009639 0%, #16a34a 100%); box-shadow: 0 2px 8px rgba(0,150,57,0.35);">
-
-                        <template x-if="!saving">
-                            <span class="inline-flex items-center gap-1.5">
-                                <i class="bx bx-save text-[14px] leading-none"></i>
-                                Save week
-                            </span>
-                        </template>
-
-                        <template x-if="saving">
-                            <span class="inline-flex items-center gap-1.5">
-                                <svg class="animate-spin h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10"
-                                        stroke="currentColor" stroke-width="4"/>
-                                    <path class="opacity-75" fill="currentColor"
-                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                                </svg>
-                                Saving…
-                            </span>
-                        </template>
-
-                    </button>
+                    <x-ui.button type="button" variant="save"
+                        x-on:click="save()"
+                        x-bind:disabled="saving || coMissing"
+                        submitting="saving" loadingText="Saving…"
+                        ::class="coMissing ? 'cursor-not-allowed' : ''">
+                        <i class="bx bx-save text-[14px] leading-none"></i> Save week
+                    </x-ui.button>
                 </div>
 
             </div>

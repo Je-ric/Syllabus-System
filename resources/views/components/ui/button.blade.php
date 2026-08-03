@@ -84,6 +84,21 @@
                                        hover:bg-[#70FFCC] hover:border-[#00965F] focus:ring-[#00C075]/20',
         'sm-add'     => $wizardBtn . 'bg-[#00965F] text-white border border-[#06754E]
                                        hover:bg-[#06754E] active:bg-[#076042] focus:ring-[#00965F]/30 shadow-[0_1px_2px_rgba(16,24,40,0.08)]',
+
+        // ── Preview / open-in-new-tab buttons ─────────────────────────────────
+        // Three distinct flavors — emerald, blue, slate — horizontal pill with left icon accent
+        'preview-complete'    => $formBtn . 'bg-white text-[#06754E] border border-[#86efac]
+                                             hover:bg-[#f0fdf4] hover:border-[#4ade80] hover:text-[#15803d]
+                                             active:bg-[#dcfce7] focus:ring-[#16a34a]/20
+                                             shadow-[0_1px_3px_rgba(0,150,95,0.12)]',
+        'preview-abridged'    => $formBtn . 'bg-white text-[#1d4ed8] border border-[#bfdbfe]
+                                             hover:bg-[#eff6ff] hover:border-[#93c5fd] hover:text-[#1e40af]
+                                             active:bg-[#dbeafe] focus:ring-[#3b82f6]/20
+                                             shadow-[0_1px_3px_rgba(59,130,246,0.12)]',
+        'preview-assessment'  => $formBtn . 'bg-white text-[#334155] border border-[#cbd5e1]
+                                             hover:bg-[#f8fafc] hover:border-[#94a3b8] hover:text-[#1e293b]
+                                             active:bg-[#f1f5f9] focus:ring-[#64748b]/20
+                                             shadow-[0_1px_3px_rgba(100,116,139,0.12)]',
     ];
 
     $class = $styles[strval($variant)] ?? $styles['primary'];
@@ -133,15 +148,17 @@
 
         @if ($shouldHandleLoading)
             @if (filled($loading))
-                <span wire:loading.remove @if($spinnerTarget) wire:target="{{ $spinnerTarget }}" @endif
-                      class="inline-flex items-center gap-1.5 leading-none sr-only">{{ $slot }}</span>
-                <span wire:loading @if($spinnerTarget) wire:target="{{ $spinnerTarget }}" @endif
-                      class="inline-flex items-center gap-1.5 leading-none sr-only">
-                    <svg class="animate-spin h-3.5 w-3.5 shrink-0 leading-none" viewBox="0 0 24 24" fill="none">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                    </svg>
-                    <span class="leading-none">{{ $loading }}</span>
+                <span class="inline-flex items-center justify-center gap-1.5 leading-none">
+                    <span wire:loading.remove @if($spinnerTarget) wire:target="{{ $spinnerTarget }}" @endif
+                          class="inline-flex items-center gap-1.5 leading-none sr-only">{{ $slot }}</span>
+                    <span wire:loading @if($spinnerTarget) wire:target="{{ $spinnerTarget }}" @endif
+                          class="inline-flex items-center gap-1.5 leading-none sr-only">
+                        <svg class="animate-spin h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                        </svg>
+                        <span class="leading-none">{{ $loading }}</span>
+                    </span>
                 </span>
             @endif
         @endif
@@ -154,21 +171,24 @@
 
         @if ($shouldHandleLoading)
             @if (filled($loading))
-                <span wire:loading.remove @if($spinnerTarget) wire:target="{{ $spinnerTarget }}" @endif
-                      class="inline-flex items-center gap-1.5 leading-none">{{ $slot }}</span>
-                <span wire:loading @if($spinnerTarget) wire:target="{{ $spinnerTarget }}" @endif
-                      class="inline-flex items-center gap-1.5 leading-none">
-                    <svg class="animate-spin h-3.5 w-3.5 shrink-0 leading-none" viewBox="0 0 24 24" fill="none">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                    </svg>
-                    <span class="leading-none">{{ $loading }}</span>
+                {{-- Outer container holds both states at fixed height to prevent layout shift --}}
+                <span class="inline-flex items-center justify-center gap-1.5 leading-none">
+                    <span wire:loading.remove @if($spinnerTarget) wire:target="{{ $spinnerTarget }}" @endif
+                          class="inline-flex items-center gap-1.5 leading-none">{{ $slot }}</span>
+                    <span wire:loading @if($spinnerTarget) wire:target="{{ $spinnerTarget }}" @endif
+                          class="inline-flex items-center gap-1.5 leading-none">
+                        <svg class="animate-spin h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                        </svg>
+                        <span class="leading-none">{{ $loading }}</span>
+                    </span>
                 </span>
             @else
                 <span class="inline-flex items-center gap-1.5 leading-none">
-                    <span class="inline-flex items-center gap-1.5 leading-none">{{ $slot }}</span>
+                    {{ $slot }}
                     <svg wire:loading @if($spinnerTarget) wire:target="{{ $spinnerTarget }}" @endif
-                         class="animate-spin h-3.5 w-3.5 shrink-0 leading-none" viewBox="0 0 24 24" fill="none">
+                         class="animate-spin h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                     </svg>

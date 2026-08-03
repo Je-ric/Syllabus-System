@@ -32,17 +32,9 @@
                     variant="add-button"
                     wire:click="$parent.saveAsDone"
                     wire:loading.attr="disabled"
-                    wire:target="saveAsDone">
-                    <span wire:loading.remove wire:target="saveAsDone" class="inline-flex items-center gap-1.5">
-                        <i class="bx bx-save text-base leading-none"></i> Create version
-                    </span>
-                    <span wire:loading wire:target="saveAsDone" class="inline-flex items-center gap-1.5">
-                        <svg class="animate-spin h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                        </svg>
-                        Saving…
-                    </span>
+                    wire:target="saveAsDone"
+                    loading="Saving…">
+                    <i class="bx bx-save text-base leading-none"></i> Create version
                 </x-ui.button>
             </div>
         </div>

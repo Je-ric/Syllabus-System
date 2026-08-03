@@ -403,6 +403,7 @@
                 x-bind:disabled="_saving"
                 wire:loading.attr="disabled"
                 wire:target="save"
+                submitting="_saving" loadingText="Saving…"
                 x-on:click="async () => {
                     _saving = true;
                     await $nextTick();
@@ -414,16 +415,7 @@
                     await $wire.save();
                     _saving = false;
                 }">
-                <span x-show="!_saving" class="inline-flex items-center gap-1.5 leading-none">
-                    <i class="bx bx-save text-base leading-none"></i> Save All
-                </span>
-                <span x-show="_saving" x-cloak class="inline-flex items-center gap-1.5 leading-none">
-                    <svg class="animate-spin h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                    </svg>
-                    Saving…
-                </span>
+                <i class="bx bx-save text-base leading-none"></i> Save All
             </x-ui.button>
         </x-slot:action>
     </x-wizard.save-bar>

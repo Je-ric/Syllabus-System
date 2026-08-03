@@ -97,23 +97,13 @@
                                         Complete (OBTL)
                                     </p>
                                     <div class="flex flex-wrap gap-1.5">
-                                        <a href="{{ $completePreview }}" target="_blank" rel="noopener"
-                                           class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg
-                                                  text-white text-sm font-semibold transition-colors"
-                                           style="background: var(--clsu-green);"
-                                           onmouseover="this.style.background='var(--clsu-cobra)'"
-                                           onmouseout="this.style.background='var(--clsu-green)'">
+                                        <x-ui.button href="{{ $completePreview }}" variant="primary" target="_blank" rel="noopener">
                                             <i class="bx bx-link-external text-sm"></i> Open
-                                        </a>
+                                        </x-ui.button>
                                         @if ($completeDownload)
-                                            <a href="{{ $completeDownload }}"
-                                               class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg
-                                                      bg-white text-sm font-semibold border transition-colors"
-                                               style="color: var(--clsu-cobra); border-color: #bbf7d0;"
-                                               onmouseover="this.style.background='#f0fdf4'"
-                                               onmouseout="this.style.background='#ffffff'">
+                                            <x-ui.button href="{{ $completeDownload }}" variant="outline">
                                                 <i class="bx bx-download text-sm"></i> Download
-                                            </a>
+                                            </x-ui.button>
                                         @endif
                                     </div>
                                 </div>
@@ -125,19 +115,13 @@
                                     </p>
                                     @if ($hasAbridged)
                                         <div class="flex flex-wrap gap-1.5">
-                                            <a href="{{ $abridgedPreview }}" target="_blank" rel="noopener"
-                                               class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg
-                                                      bg-[#1e40af] text-white text-sm font-semibold
-                                                      hover:bg-[#1d4ed8] transition-colors">
+                                            <x-ui.button href="{{ $abridgedPreview }}" variant="secondary" target="_blank" rel="noopener">
                                                 <i class="bx bx-link-external text-sm"></i> Open
-                                            </a>
+                                            </x-ui.button>
                                             @if ($abridgedDownload)
-                                                <a href="{{ $abridgedDownload }}"
-                                                   class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg
-                                                          bg-white text-[#1e40af] text-sm font-semibold
-                                                          border border-[#bfdbfe] hover:bg-[#eff6ff] transition-colors">
+                                                <x-ui.button href="{{ $abridgedDownload }}" variant="cancel">
                                                     <i class="bx bx-download text-sm"></i> Download
-                                                </a>
+                                                </x-ui.button>
                                             @endif
                                         </div>
                                     @else
@@ -152,19 +136,13 @@
                                     </p>
                                     @if ($hasAssess)
                                         <div class="flex flex-wrap gap-1.5">
-                                            <a href="{{ $assessPreview }}" target="_blank" rel="noopener"
-                                               class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg
-                                                      bg-[#475569] text-white text-sm font-semibold
-                                                      hover:bg-[#334155] transition-colors">
+                                            <x-ui.button href="{{ $assessPreview }}" variant="secondary" target="_blank" rel="noopener">
                                                 <i class="bx bx-link-external text-sm"></i> Open
-                                            </a>
+                                            </x-ui.button>
                                             @if ($assessDownload)
-                                                <a href="{{ $assessDownload }}"
-                                                   class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg
-                                                          bg-white text-[#475569] text-sm font-semibold
-                                                          border border-[#e2e8f0] hover:bg-[#f8fafc] transition-colors">
+                                                <x-ui.button href="{{ $assessDownload }}" variant="cancel">
                                                     <i class="bx bx-download text-sm"></i> Download
-                                                </a>
+                                                </x-ui.button>
                                             @endif
                                         </div>
                                     @else

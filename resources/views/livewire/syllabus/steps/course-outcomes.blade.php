@@ -56,24 +56,27 @@
                     :class="{
                         'bg-emerald-50/50': !co.id,
                         'bg-amber-50/30':   co.id && co._dirty,
-                        'bg-white':         co.id && !co._dirty
+                        'bg-rose-50/40':    co.id && deletingId === co.id,
+                        'bg-white':         co.id && !co._dirty && deletingId !== co.id
                     }">
 
                     <span class="shrink-0 w-1 h-8 rounded-full"
                         :class="{
                             'bg-emerald-400': !co.id,
                             'bg-amber-400':   co.id && co._dirty,
-                            'bg-emerald-700': co.id && !co._dirty
+                            'bg-rose-400':    co.id && deletingId === co.id,
+                            'bg-emerald-700': co.id && !co._dirty && deletingId !== co.id
                         }"></span>
 
                     <span class="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-xl text-[11px] font-bold"
                         :class="{
                             'bg-emerald-100 text-emerald-700 ring-2 ring-emerald-400': !co.id,
                             'bg-amber-100 text-amber-700 ring-2 ring-amber-400':       co.id && co._dirty,
-                            'bg-emerald-50 text-emerald-800 ring-2 ring-emerald-300':  co.id && !co._dirty
+                            'bg-rose-100 text-rose-600 ring-2 ring-rose-300':          co.id && deletingId === co.id,
+                            'bg-emerald-50 text-emerald-800 ring-2 ring-emerald-300':  co.id && !co._dirty && deletingId !== co.id
                         }"
                         x-text="co.co_code">
-                </span>
+                    </span>
 
                     <div class="flex-1 min-w-0">
                         <textarea
@@ -81,12 +84,13 @@
                             x-on:input="markDirty(co)"
                             rows="3"
                             placeholder="Describe what students will be able to do after this outcome…"
-                            x-bind:disabled="isSaving"
+                            x-bind:disabled="isSaving || deletingId !== null"
                             class="w-full rounded-lg border px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all leading-relaxed disabled:opacity-50"
                             :class="{
-                                'border-amber-300 bg-amber-50/50 focus:border-amber-400 focus:ring-amber-100':       co.id && co._dirty,
+                                'border-amber-300 bg-amber-50/50 focus:border-amber-400 focus:ring-amber-100':         co.id && co._dirty,
                                 'border-emerald-300 bg-emerald-50/50 focus:border-emerald-400 focus:ring-emerald-100': !co.id,
-                                'border-slate-200 bg-white focus:border-emerald-400 focus:ring-emerald-100':           co.id && !co._dirty
+                                'border-rose-200 bg-rose-50/50 cursor-not-allowed':                                    co.id && deletingId === co.id,
+                                'border-slate-200 bg-white focus:border-emerald-400 focus:ring-emerald-100':           co.id && !co._dirty && deletingId !== co.id
                             }"></textarea>
                         <span x-show="!co.id" class="mt-0.5 flex items-center gap-1 text-xs text-emerald-600 font-medium">
                             <i class="bx bx-plus-circle text-sm shrink-0"></i> New — click <strong class="mx-0.5">Save All</strong>
@@ -94,12 +98,19 @@
                         <span x-show="co.id && co._dirty" x-cloak class="mt-0.5 flex items-center gap-1 text-xs text-amber-600 font-medium">
                             <i class="bx bx-edit-alt text-sm shrink-0"></i> Modified — not saved yet
                         </span>
+                        <span x-show="co.id && deletingId === co.id" x-cloak class="mt-0.5 flex items-center gap-1 text-xs text-rose-500 font-medium">
+                            <svg class="animate-spin h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                            </svg>
+                            Deleting…
+                        </span>
                     </div>
 
                     {{-- View detail (saved & unmodified only) --}}
-                    <button x-show="co.id && !co._dirty" type="button"
+                    <button x-show="co.id && !co._dirty && deletingId !== co.id" type="button"
                         x-on:click="viewModal = { co_code: co.co_code, description: co.description }; $nextTick(() => document.getElementById('co-view-modal').showModal())"
-                        x-bind:disabled="isSaving"
+                        x-bind:disabled="isSaving || deletingId !== null"
                         class="shrink-0 p-2 text-slate-300 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors disabled:opacity-40"
                         title="View full">
                         <i class="bx bx-expand-alt text-base"></i>
@@ -108,17 +119,28 @@
                     {{-- Delete saved row --}}
                     <button x-show="co.id" type="button"
                         x-on:click="deleteCo(co)"
-                        x-bind:disabled="isSaving"
-                        class="shrink-0 p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors disabled:opacity-40"
+                        x-bind:disabled="isSaving || deletingId !== null"
+                        class="shrink-0 p-2 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                        :class="deletingId === co.id
+                            ? 'text-rose-400 bg-rose-50'
+                            : 'text-slate-300 hover:text-rose-500 hover:bg-rose-50'"
                         title="Delete">
-                        <i class="bx bx-trash text-base"></i>
+                        <template x-if="deletingId === co.id">
+                            <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                            </svg>
+                        </template>
+                        <template x-if="deletingId !== co.id">
+                            <i class="bx bx-trash text-base"></i>
+                        </template>
                     </button>
 
                     {{-- Remove unsaved row --}}
                     <button x-show="!co.id" x-cloak type="button"
                         x-on:click="removeUnsaved(co, index)"
-                        x-bind:disabled="isSaving"
-                        class="shrink-0 p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors disabled:opacity-40"
+                        x-bind:disabled="isSaving || deletingId !== null"
+                        class="shrink-0 p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                         title="Remove">
                         <i class="bx bx-x text-lg"></i>
                     </button>
@@ -140,26 +162,20 @@
         {{-- Action row: Add + Revert (left), Save All (right) --}}
         <div class="flex items-center justify-between gap-2 pt-3 border-t border-[#e2e8f0]">
             <div class="flex items-center gap-2">
-                <x-ui.button variant="add-dashed" type="button" x-on:click="addCo()" x-bind:disabled="isSaving">
+                <x-ui.button variant="add-dashed" type="button" x-on:click="addCo()" x-bind:disabled="isSaving || deletingId !== null">
                     <i class="bx bx-plus text-base"></i> Add Course Outcome
                 </x-ui.button>
-                <x-ui.button x-show="hasPending()" x-cloak variant="cancel" type="button" x-on:click="revert()">
+                <x-ui.button x-show="hasPending()" x-cloak variant="cancel" type="button" x-on:click="revert()" x-bind:disabled="deletingId !== null">
                     <i class="bx bx-undo text-base leading-none"></i> Revert
                 </x-ui.button>
             </div>
-            <x-ui.button variant="add-button" type="button" x-on:click="saveAll()" x-bind:disabled="isSaving" class="whitespace-nowrap relative">
+            <x-ui.button variant="add-button" type="button" x-on:click="saveAll()"
+                x-bind:disabled="isSaving || deletingId !== null"
+                submitting="isSaving" loadingText="Saving…"
+                class="whitespace-nowrap relative">
                 <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400 ring-2 ring-white animate-pulse"
                     x-show="hasPending()" x-cloak></span>
-                <span x-show="!isSaving" class="inline-flex items-center gap-1.5 leading-none">
-                    <i class="bx bx-save text-base leading-none"></i> Save All
-                </span>
-                <span x-show="isSaving" x-cloak class="inline-flex items-center gap-1.5 leading-none">
-                    <svg class="animate-spin h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                    </svg>
-                    <span class="leading-none">Saving…</span>
-                </span>
+                <i class="bx bx-save text-base leading-none"></i> Save All
             </x-ui.button>
         </div>
 

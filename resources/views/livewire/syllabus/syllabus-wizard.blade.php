@@ -195,8 +195,10 @@
                 <div class="mt-4 flex justify-between items-center gap-3">
                     <div>
                         @if ($this->hasPreviousStep())
-                            <x-ui.button variant="cancel" wire:loading.attr="disabled"
+                            <x-ui.button variant="cancel"
+                                wire:loading.attr="disabled"
                                 wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview,saveAsDone"
+                                submitting="_navigating" loadingText="Saving…"
                                 x-on:click="tryNavigate(() => $wire.goPreviousStep())">
                                 <i class="bx bx-chevron-left"></i>
                                 <span class="hidden sm:inline">Previous</span>
@@ -205,10 +207,13 @@
                     </div>
                     <div>
                         @if ($this->hasNextStep())
-                            <x-ui.button variant="primary" wire:loading.attr="disabled"
+                            <x-ui.button variant="primary"
+                                wire:loading.attr="disabled"
                                 wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview,saveAsDone"
-                                loading="Saving…" x-on:click="tryNavigate(() => $wire.goNextStep())">
-                                <span class="hidden sm:inline">Next</span> <i class="bx bx-chevron-right"></i>
+                                submitting="_navigating" loadingText="Saving…"
+                                x-on:click="tryNavigate(() => $wire.goNextStep())">
+                                <span class="hidden sm:inline">Next</span>
+                                <i class="bx bx-chevron-right"></i>
                             </x-ui.button>
                         @endif
                     </div>
