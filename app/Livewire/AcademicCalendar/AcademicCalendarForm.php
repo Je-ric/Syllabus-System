@@ -9,6 +9,7 @@ use App\Models\SyllabusWeek;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 // use Livewire\Attributes\Validate;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 /**
@@ -36,6 +37,7 @@ class AcademicCalendarForm extends Component
     // Controls the confirm-create modal visibility (Alpine listens to this)
     public bool $showConfirmModal = false;
     public bool $showStaleWeeksWarning = false;
+    public bool $isRedirecting = false;
 
     // ── Mount ─────────────────────────────────────────────────────────────────
 
@@ -67,7 +69,8 @@ class AcademicCalendarForm extends Component
      * True only when academic_year matches YYYY-YYYY and has no validation error.
      * Used in the view to show the "Looks good" green tick without preg_match in Blade.
      */
-    public function getIsAcademicYearValidProperty(): bool
+    #[Computed]
+    public function isAcademicYearValid(): bool
     {
         return (bool) preg_match('/^\d{4}-\d{4}$/', $this->academic_year)
             && ! $this->getErrorBag()->has('academic_year');
@@ -79,8 +82,6 @@ class AcademicCalendarForm extends Component
 
     public function updated(string $property): void
     {
-        // For academic_year: only check format while typing, not DB uniqueness
-        // (uniqueness is checked on submit — avoids a DB hit on every keystroke)
         if ($property === 'academic_year') {
             $this->validateOnly('academic_year', [
                 'academic_year' => ['required', 'string', 'regex:/^\d{4}-\d{4}$/'],
@@ -88,16 +89,23 @@ class AcademicCalendarForm extends Component
             return;
         }
 
-        $this->validateOnly($property, $this->rules());
+        $dateRules = [
+            'start_date_1' => ['required', 'date'],
+            'end_date_1'   => ['required', 'date', 'after_or_equal:start_date_1'],
+            'start_date_2' => ['required', 'date', 'after:end_date_1'],
+            'end_date_2'   => ['required', 'date', 'after_or_equal:start_date_2'],
+        ];
+
+        $this->validateOnly($property, $dateRules);
 
         if ($property === 'start_date_1' && $this->end_date_1 !== '') {
-            $this->validateOnly('end_date_1', $this->rules());
+            $this->validateOnly('end_date_1', $dateRules);
         }
         if ($property === 'end_date_1' && $this->start_date_2 !== '') {
-            $this->validateOnly('start_date_2', $this->rules());
+            $this->validateOnly('start_date_2', $dateRules);
         }
         if ($property === 'start_date_2' && $this->end_date_2 !== '') {
-            $this->validateOnly('end_date_2', $this->rules());
+            $this->validateOnly('end_date_2', $dateRules);
         }
     }
 
@@ -158,6 +166,7 @@ class AcademicCalendarForm extends Component
         }
 
         $this->showConfirmModal = false;
+        $this->isRedirecting = true;
         $this->dispatch('lw-toast', type: 'success', message: 'Academic year created successfully. You can now add events.');
         $this->redirectRoute('academic.calendar.events.index', $validated['academic_year']);
     }
@@ -246,26 +255,22 @@ class AcademicCalendarForm extends Component
 
     private function rules(): array
     {
-        // Uniqueness: ignore the current AY when editing
-        $ayUnique = Rule::unique('academic_calendars', 'academic_year');
-        // if ($this->isEdit && $this->academicYear !== '') {
-        //     $ayUnique->where('academic_year', '!=', $this->academicYear);
-        // }
+        if ($this->isEdit) {
+            // On edit: skip unique check if AY is unchanged; if changed, block collision with other AYs
+            $ayRule = $this->academic_year === $this->academicYear
+                ? 'nullable'
+                : Rule::unique('academic_calendars', 'academic_year');
+        } else {
+            // On create: block if this AY already exists
+            $ayRule = Rule::unique('academic_calendars', 'academic_year');
+        }
 
         return [
-            'academic_year' => [
-                'required',
-                'string',
-                'regex:/^\d{4}-\d{4}$/',
-                // Only enforce unique on create, or on edit if AY changed
-                ! $this->isEdit || $this->academic_year !== $this->academicYear
-                    ? $ayUnique
-                    : 'nullable',
-            ],
-            'start_date_1' => ['required', 'date'],
-            'end_date_1'   => ['required', 'date', 'after_or_equal:start_date_1'],
-            'start_date_2' => ['required', 'date', 'after:end_date_1'],
-            'end_date_2'   => ['required', 'date', 'after_or_equal:start_date_2'],
+            'academic_year' => ['required', 'string', 'regex:/^\d{4}-\d{4}$/', $ayRule],
+            'start_date_1'  => ['required', 'date'],
+            'end_date_1'    => ['required', 'date', 'after_or_equal:start_date_1'],
+            'start_date_2'  => ['required', 'date', 'after:end_date_1'],
+            'end_date_2'    => ['required', 'date', 'after_or_equal:start_date_2'],
         ];
     }
 

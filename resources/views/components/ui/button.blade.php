@@ -4,8 +4,8 @@
     'variant'     => 'primary',
     'loading'     => null,
     'wireTarget'  => null,
-    'submitting'  => null,   {{-- Alpine expression, e.g. "submitting" or "isLoading". When set, shows spinner when truthy. --}}
-    'loadingText' => null,   {{-- Label shown while submitting, e.g. "Saving…". Defaults to slot content. --}}
+    'submitting'  => null,
+    'loadingText' => null,
 ])
 
 @php
@@ -68,7 +68,7 @@
         'gold'       => $formBtn . ' text-[#394056] bg-[linear-gradient(180deg,#FFC646_0%,#F5B126_100%)] hover:bg-[linear-gradient(180deg,#F5B126_0%,#D79400_100%)] active:bg-[#D79400] focus:ring-[#FFC646]/35 shadow-[0_1px_3px_rgba(215,148,0,0.30)]',
 
         'sidebar-tool' => $wizardBtn . ' text-[#344054] bg-white border border-transparent hover:bg-[#F8FAFC] hover:border-[#E4E7EC] active:bg-[#EEF2F6] active:border-[#D0D5DD] focus:ring-[#D0D5DD]/40 shadow-none',
-            
+
         // ── Small / wizard buttons ─────────────────────────────────────────────
         'sm-primary' => $wizardBtn . 'bg-[#D5FFF0] text-[#076042] border border-[#00965F] hover:bg-[#AEFFE2] hover:border-[#06754E] focus:ring-[#00965F]/20',
         'sm-cancel'  => $wizardBtn . 'bg-white text-[#394056] border border-[#D6DDE3] hover:bg-[#F1F3F5] hover:border-[#C1C8D4] focus:ring-[#D6DDE3]/20',

@@ -15,7 +15,7 @@
         x-transition:leave="transition ease-in duration-150"
         x-transition:leave-start="opacity-100 scale-100"
         x-transition:leave-end="opacity-0 scale-95"
-        x-on:click.outside="closeForm()"
+        x-on:click.outside="if (!document.querySelector('.flatpickr-calendar.open')) closeForm()"
         class="w-full max-w-xl rounded-2xl bg-white shadow-2xl overflow-hidden">
 
         <div class="flex items-center justify-between px-5 py-4 border-b border-[#e2e8f0] bg-[#f8fafc]">
@@ -67,33 +67,32 @@
                 </x-form.label>
 
                 <div class="mt-1.5 flex gap-3">
+                    {{-- Start date (always shown) --}}
                     <div class="flex-1">
                         <p class="text-[10px] font-semibold uppercase tracking-wide text-[#94a3b8] mb-1"
                            x-show="!editingId">Start</p>
-                        <input type="date" x-model="dateStart"
-                            x-on:change="if (!editingId && (!dateEnd || dateEnd < dateStart)) dateEnd = dateStart"
-                            min="{{ $semester?->start_date }}"
-                            max="{{ $semester?->end_date }}"
+                        <input type="text" id="ev-date-start-{{ $semesterId }}" readonly
+                            placeholder="Select a date"
                             class="w-full rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-[13px] text-[#0f172a]
-                                   hover:border-[#bbf7d0] focus:border-[#16a34a] focus:outline-none transition-colors"
+                                   placeholder:text-[#94a3b8] hover:border-[#bbf7d0] focus:border-[#16a34a] focus:outline-none
+                                   transition-colors cursor-pointer"
                             style="box-shadow:none"
                             onfocus="this.style.boxShadow='0 0 0 3px rgba(22,163,74,0.25)'"
                             onblur="this.style.boxShadow='none'" />
                     </div>
 
-                    <template x-if="!editingId">
-                        <div class="flex-1">
-                            <p class="text-[10px] font-semibold uppercase tracking-wide text-[#94a3b8] mb-1">End</p>
-                            <input type="date" x-model="dateEnd"
-                                :min="dateStart || '{{ $semester?->start_date }}'"
-                                max="{{ $semester?->end_date }}"
-                                class="w-full rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-[13px] text-[#0f172a]
-                                       hover:border-[#bbf7d0] focus:border-[#16a34a] focus:outline-none transition-colors"
-                                style="box-shadow:none"
-                                onfocus="this.style.boxShadow='0 0 0 3px rgba(22,163,74,0.25)'"
-                                onblur="this.style.boxShadow='none'" />
-                        </div>
-                    </template>
+                    {{-- End date (hidden when editing a single event) --}}
+                    <div class="flex-1" x-show="!editingId" x-cloak>
+                        <p class="text-[10px] font-semibold uppercase tracking-wide text-[#94a3b8] mb-1">End</p>
+                        <input type="text" id="ev-date-end-{{ $semesterId }}" readonly
+                            placeholder="Select a date"
+                            class="w-full rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-[13px] text-[#0f172a]
+                                   placeholder:text-[#94a3b8] hover:border-[#bbf7d0] focus:border-[#16a34a] focus:outline-none
+                                   transition-colors cursor-pointer"
+                            style="box-shadow:none"
+                            onfocus="this.style.boxShadow='0 0 0 3px rgba(22,163,74,0.25)'"
+                            onblur="this.style.boxShadow='none'" />
+                    </div>
                 </div>
 
                 <div x-show="isRange" x-cloak class="mt-2">

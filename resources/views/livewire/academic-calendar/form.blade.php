@@ -35,7 +35,7 @@
         <p class="text-[13px] text-[#94a3b8] mb-2">Format: YYYY-YYYY &nbsp;&middot;&nbsp; e.g. 2025-2026</p>
 
         <x-form.input
-            wire:model.live.debounce.400ms="academic_year"
+            wire:model.blur="academic_year"
             id="academic_year"
             placeholder="e.g. 2025-2026"
             class="max-w-xs" />
@@ -45,7 +45,7 @@
                 <i class="bx bx-error-circle"></i> {{ $message }}
             </p>
         @else
-            @if ($isAcademicYearValid)
+            @if ($this->isAcademicYearValid())
                 <p class="mt-1.5 flex items-center gap-1 text-[13px] text-[#16a34a]">
                     <i class="bx bx-check-circle"></i> Looks good
                 </p>
@@ -66,10 +66,10 @@
             {{-- Range picker: start --}}
             <div>
                 <x-form.label isRequired>Start Date</x-form.label>
-                <x-form.input type="date"
-                    wire:model.blur="start_date_1"
-                    :value="$start_date_1"
-                    class="mt-1.5" />
+                <input type="text" id="start_date_1_picker" readonly
+                    placeholder="Select a date"
+                    class="mt-1.5 w-full rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-sm text-[#0f172a] placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent transition cursor-pointer" />
+                <input type="hidden" id="start_date_1_val" wire:model="start_date_1" />
                 @error('start_date_1')
                     <p class="mt-1 flex items-center gap-1 text-xs text-rose-600">
                         <i class="bx bx-error-circle"></i> {{ $message }}
@@ -80,11 +80,10 @@
             {{-- Range picker: end --}}
             <div>
                 <x-form.label isRequired>End Date</x-form.label>
-                <x-form.input type="date"
-                    wire:model.blur="end_date_1"
-                    :value="$end_date_1"
-                    :min="$start_date_1 ?: null"
-                    class="mt-1.5" />
+                <input type="text" id="end_date_1_picker" readonly
+                    placeholder="Select a date"
+                    class="mt-1.5 w-full rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-sm text-[#0f172a] placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent transition cursor-pointer" />
+                <input type="hidden" id="end_date_1_val" wire:model="end_date_1" />
                 @error('end_date_1')
                     <p class="mt-1 flex items-center gap-1 text-xs text-rose-600">
                         <i class="bx bx-error-circle"></i> {{ $message }}
@@ -108,11 +107,10 @@
 
             <div>
                 <x-form.label isRequired>Start Date</x-form.label>
-                <x-form.input type="date"
-                    wire:model.blur="start_date_2"
-                    :value="$start_date_2"
-                    :min="$end_date_1 ?: null"
-                    class="mt-1.5" />
+                <input type="text" id="start_date_2_picker" readonly
+                    placeholder="Select a date"
+                    class="mt-1.5 w-full rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-sm text-[#0f172a] placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent transition cursor-pointer" />
+                <input type="hidden" id="start_date_2_val" wire:model="start_date_2" />
                 @error('start_date_2')
                     <p class="mt-1 flex items-center gap-1 text-xs text-rose-600">
                         <i class="bx bx-error-circle"></i> {{ $message }}
@@ -122,11 +120,10 @@
 
             <div>
                 <x-form.label isRequired>End Date</x-form.label>
-                <x-form.input type="date"
-                    wire:model.blur="end_date_2"
-                    :value="$end_date_2"
-                    :min="$start_date_2 ?: null"
-                    class="mt-1.5" />
+                <input type="text" id="end_date_2_picker" readonly
+                    placeholder="Select a date"
+                    class="mt-1.5 w-full rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-sm text-[#0f172a] placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent transition cursor-pointer" />
+                <input type="hidden" id="end_date_2_val" wire:model="end_date_2" />
                 @error('end_date_2')
                     <p class="mt-1 flex items-center gap-1 text-xs text-rose-600">
                         <i class="bx bx-error-circle"></i> {{ $message }}
@@ -264,4 +261,81 @@
             </x-modal.footer>
         </x-modal.dialog>
     @endif
+
+    {{-- Flash: shown while redirecting after create --}}
+    <template x-data x-if="$wire.isRedirecting">
+        <div class="fixed inset-x-0 top-10 z-[9999] flex justify-center pointer-events-none">
+            <div class="inline-flex items-center gap-3 px-5 py-3 rounded-2xl shadow-2xl border border-blue-200 bg-blue-50 text-blue-700 shadow-blue-100 text-[13px] font-semibold pointer-events-auto">
+                <svg class="animate-spin h-4 w-4 shrink-0 text-blue-500" viewBox="0 0 24 24" fill="none">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                </svg>
+                <span>Redirecting…</span>
+                <span class="opacity-30 select-none">|</span>
+                <span class="text-[11px] font-medium opacity-70">Do not close or navigate away.</span>
+            </div>
+        </div>
+    </template>
+
+    {{-- ── Flatpickr date pickers ──────────────────────────────────────────── --}}
+    @push('scripts')
+    <script>
+    (function () {
+        const baseConfig = {
+            dateFormat : 'Y-m-d',
+            altInput   : true,
+            altFormat  : 'F j, Y',
+            allowInput : false,
+        };
+
+        // Dispatch a native input event on the hidden wire:model input
+        // so Livewire picks up the value without triggering a re-render
+        // that would destroy the picker DOM elements.
+        function syncHidden(id, val) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.value = val;
+            el.dispatchEvent(new Event('input'));
+        }
+
+        const fp1Start = flatpickr('#start_date_1_picker', {
+            ...baseConfig,
+            defaultDate: '{{ $start_date_1 ?: '' }}' || null,
+            onChange([date], dateStr) {
+                syncHidden('start_date_1_val', dateStr);
+                fp1End.set('minDate', dateStr);
+            }
+        });
+
+        const fp1End = flatpickr('#end_date_1_picker', {
+            ...baseConfig,
+            defaultDate: '{{ $end_date_1 ?: '' }}' || null,
+            minDate: '{{ $start_date_1 ?: '' }}' || null,
+            onChange([date], dateStr) {
+                syncHidden('end_date_1_val', dateStr);
+                fp2Start.set('minDate', dateStr);
+            }
+        });
+
+        const fp2Start = flatpickr('#start_date_2_picker', {
+            ...baseConfig,
+            defaultDate: '{{ $start_date_2 ?: '' }}' || null,
+            minDate: '{{ $end_date_1 ?: '' }}' || null,
+            onChange([date], dateStr) {
+                syncHidden('start_date_2_val', dateStr);
+                fp2End.set('minDate', dateStr);
+            }
+        });
+
+        const fp2End = flatpickr('#end_date_2_picker', {
+            ...baseConfig,
+            defaultDate: '{{ $end_date_2 ?: '' }}' || null,
+            minDate: '{{ $start_date_2 ?: '' }}' || null,
+            onChange([date], dateStr) {
+                syncHidden('end_date_2_val', dateStr);
+            }
+        });
+    })();
+    </script>
+    @endpush
 </div>

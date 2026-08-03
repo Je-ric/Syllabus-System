@@ -13,6 +13,7 @@
         dateEnd:   '',
         saving:    false,
         hasAttempted: false,
+        _fpSyncing: false,
 
         /* ── calendar state ── */
         deletingIds: [],   // array now — supports multiple concurrent deletes safely
@@ -113,7 +114,61 @@
         if ($event.detail.id) { openEdit($event.detail); }
         else { openAdd($event.detail.date); }
     "
-    x-on:event-saved.window="closeForm();">
+    x-on:event-saved.window="closeForm();"
+    x-init="
+        // ── Flatpickr for event modal ────────────────────────────────────────
+        $nextTick(() => {
+            const semMin = '{{ $semester?->start_date ?? '' }}';
+            const semMax = '{{ $semester?->end_date ?? '' }}';
+            const semId  = '{{ $semesterId }}';
+
+            const fpConfig = {
+                dateFormat : 'Y-m-d',
+                altInput   : true,
+                altFormat  : 'F j, Y',
+                allowInput : false,
+                minDate    : semMin || null,
+                maxDate    : semMax || null,
+            };
+
+            const fpStartKey = '_evFpStart_' + semId;
+            const fpEndKey   = '_evFpEnd_'   + semId;
+
+            window[fpStartKey] = flatpickr('#ev-date-start-' + semId, {
+                ...fpConfig,
+                onChange([date], dateStr) {
+                    _fpSyncing = true;
+                    dateStart = dateStr;
+                    if (!editingId && (!dateEnd || dateEnd < dateStr)) {
+                        dateEnd = dateStr;
+                        window[fpEndKey]?.setDate(dateStr, false);
+                    }
+                    window[fpEndKey]?.set('minDate', dateStr);
+                    _fpSyncing = false;
+                }
+            });
+
+            window[fpEndKey] = flatpickr('#ev-date-end-' + semId, {
+                ...fpConfig,
+                onChange([date], dateStr) {
+                    _fpSyncing = true;
+                    dateEnd = dateStr;
+                    _fpSyncing = false;
+                }
+            });
+
+            $watch('dateStart', val => {
+                if (_fpSyncing) return;
+                val ? window[fpStartKey]?.setDate(val, false)
+                    : window[fpStartKey]?.clear();
+            });
+            $watch('dateEnd', val => {
+                if (_fpSyncing) return;
+                val ? window[fpEndKey]?.setDate(val, false)
+                    : window[fpEndKey]?.clear();
+            });
+        });
+    ">
 
     {{-- ══ CALENDAR VIEW ══════════════════════════════════════════════════════ --}}
 
@@ -326,5 +381,10 @@
     @endif
 
     @include('livewire.academic-calendar.partials.event-modal')
+
+    {{-- Flash message: shown while saving or deleting --}}
+    <div x-data="{ get isSaving() { return saving; }, get deletingId() { return deletingIds.length > 0; } }">
+        @include('livewire.programs.include.flash-message')
+    </div>
 
 </div>
