@@ -123,6 +123,13 @@ class Syllabus extends Model
         return $this->hasMany(CompleteSyllabus::class);
     }
 
+    // Used in: ReviewStep (Livewire) — loadReviewForm();
+    //          SyllabusReviewFormService — findOrCreate()
+    public function reviewForm()
+    {
+        return $this->hasOne(SyllabusReviewForm::class);
+    }
+
     // Used in: getLecComponent() - Syllabus; 
     //          getLabComponent() - Syllabus; 
     //          eagerLoad() - SyllabusPreviewService

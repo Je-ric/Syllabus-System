@@ -13,6 +13,7 @@ class SyllabusReviewer extends Model
         'syllabus_id',
         'user_id',
         'status',
+        'role',
     ];
 
     protected $casts = [
@@ -20,14 +21,15 @@ class SyllabusReviewer extends Model
         'user_id'     => 'integer',
     ];
 
-    // Used in: delete() - SyllabusDeleteService; 
+    // Used in: delete() - SyllabusDeleteService;
     //          eagerLoad() - SyllabusPreviewService
     public function syllabus()
     {
         return $this->belongsTo(Syllabus::class);
     }
 
-    // Used in: eagerLoad() - SyllabusPreviewService
+    // Used in: eagerLoad() - SyllabusPreviewService;
+    //          loadReviewerLists() - ReviewStep (Livewire)
     public function user()
     {
         return $this->belongsTo(User::class);

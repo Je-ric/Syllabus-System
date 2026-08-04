@@ -17,16 +17,18 @@ class CompleteSyllabus extends Model
         'pdf_path',
         'abridged_path',
         'evaluation_path',
+        'review_form_path',
         'version',
         'approved_at',
         'approved_by',
         'checksum',
         'checksum_abridged',
         'checksum_evaluation',
+        'checksum_review_form',
     ];
 
-    // Used in: previewSaved*() - SyllabusController; 
-    //          injectVersionsDrawer() - SyllabusSnapshotService; 
+    // Used in: previewSaved*() - SyllabusController;
+    //          injectVersionsDrawer() - SyllabusSnapshotService;
     //          sharedData() - SyllabusPreviewService
     public function syllabus()
     {
