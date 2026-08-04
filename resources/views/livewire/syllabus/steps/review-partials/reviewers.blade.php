@@ -25,13 +25,15 @@
         clearingApproved: false,
         clearingConcurred: false,
         selectedFaculty:  null,
+        selectedRole:     'member',
 
         async addReviewer() {
             if (!this.selectedFaculty) return;
             this.addingReviewer = true;
-            await $wire.$parent.addReviewer(this.selectedFaculty);
+            await $wire.$parent.addReviewer(this.selectedFaculty, this.selectedRole);
             this.addingReviewer = false;
             this.selectedFaculty = null;
+            this.selectedRole = 'member';
         },
         async removeReviewer(id) {
             this.removingId = id;
@@ -272,6 +274,12 @@
                                     @endforeach
                                 </x-form.select>
                             </div>
+                            <div class="w-32 shrink-0">
+                                <x-form.select x-model="selectedRole">
+                                    <option value="member">Member</option>
+                                    <option value="chair">Chair</option>
+                                </x-form.select>
+                            </div>
                             <x-ui.button type="button" variant="sm-add"
                                 x-on:click="addReviewer()"
                                 submitting="addingReviewer" loadingText="Adding…"
@@ -281,6 +289,8 @@
                         </div>
                         <p class="text-sm text-[#94a3b8] leading-relaxed">
                             Each reviewer appears in the printed syllabus signature section.
+                            <strong>Chair</strong> = CQI Committee Chair (required).
+                            <strong>Member</strong> = Committee member (Revision track only).
                         </p>
                     </div>
 
@@ -306,6 +316,13 @@
                                         <x-feedback-status.status-indicator
                                             :status="$reviewer['status'] === 'approved' ? 'success' : $reviewer['status']"
                                             :label="$reviewer['status'] === 'approved' ? 'Approved' : ucfirst($reviewer['status'])" />
+
+                                        @if (!empty($reviewer['role']))
+                                            <span class="text-xs px-1.5 py-0.5 rounded font-semibold
+                                                {{ $reviewer['role'] === 'chair' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">
+                                                {{ ucfirst($reviewer['role']) }}
+                                            </span>
+                                        @endif
 
                                         <button type="button"
                                             x-on:click="removeReviewer({{ $reviewer['id'] }})"

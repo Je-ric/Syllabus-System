@@ -4,6 +4,7 @@ namespace App\Services\Syllabus;
 
 use App\Models\CompleteSyllabus;
 use App\Models\Syllabus;
+use App\Services\Syllabus\SyllabusReviewFormService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -39,6 +40,7 @@ class SyllabusSnapshotService
         $html           = $this->generateCompleteHtml($syllabus);
         $htmlAbridged   = $this->generateAbridgedHtml($syllabus);
         $htmlAssessment = $this->generateAssessmentHtml($syllabus);
+        $htmlReviewForm = $this->generateReviewFormHtml($syllabus);
 
         $program    = $syllabus->course?->program;
         $department = $program?->departments?->first();
@@ -54,7 +56,7 @@ class SyllabusSnapshotService
         $courseCode     = $syllabus->course?->course_code             ?? 'COURSE';
 
         // Step A — reserve version number
-        [$version, $pathComplete, $pathAbridged, $pathAssessment] =
+        [$version, $pathComplete, $pathAbridged, $pathAssessment, $pathReviewForm] =
             DB::transaction(function () use ($syllabus, $collegeName, $departmentName, $programName, $facultyName, $courseCode, $academicYear, $semester) {
                 $version = (int) (CompleteSyllabus::where('syllabus_id', $syllabus->id)
                     ->lockForUpdate()
@@ -72,42 +74,47 @@ class SyllabusSnapshotService
 
                 return [
                     $version,
-                    $baseDir . '/Complete - '   . $courseCode . '.html',
-                    $baseDir . '/Abridged - '   . $courseCode . '.html',
-                    $baseDir . '/Assessment - ' . $courseCode . '.html',
+                    $baseDir . '/Complete - '    . $courseCode . '.html',
+                    $baseDir . '/Abridged - '    . $courseCode . '.html',
+                    $baseDir . '/Assessment - '  . $courseCode . '.html',
+                    $baseDir . '/ReviewForm - '  . $courseCode . '.html',
                 ];
             });
 
         // Step B — write files (outside transaction)
-        Storage::disk('syllabus_snapshots')->put($pathComplete,   $html);
-        Storage::disk('syllabus_snapshots')->put($pathAbridged,   $htmlAbridged);
-        Storage::disk('syllabus_snapshots')->put($pathAssessment, $htmlAssessment);
+        Storage::disk('syllabus_snapshots')->put($pathComplete,    $html);
+        Storage::disk('syllabus_snapshots')->put($pathAbridged,    $htmlAbridged);
+        Storage::disk('syllabus_snapshots')->put($pathAssessment,  $htmlAssessment);
+        Storage::disk('syllabus_snapshots')->put($pathReviewForm,  $htmlReviewForm);
 
         // Mirror to Google Drive — secondary, silent, never blocks save
         try {
             Storage::disk('google')->put($pathComplete,   $html);
             Storage::disk('google')->put($pathAbridged,   $htmlAbridged);
             Storage::disk('google')->put($pathAssessment, $htmlAssessment);
+            Storage::disk('google')->put($pathReviewForm, $htmlReviewForm);
         } catch (\Throwable) {
             // Non-fatal — local copy is the source of truth
         }
 
         // Step C — persist DB record now that files exist
-        DB::transaction(function () use ($syllabus, $pathComplete, $pathAbridged, $pathAssessment, $version, $academicYear, $semester, $html, $htmlAbridged, $htmlAssessment) {
+        DB::transaction(function () use ($syllabus, $pathComplete, $pathAbridged, $pathAssessment, $pathReviewForm, $version, $academicYear, $semester, $html, $htmlAbridged, $htmlAssessment, $htmlReviewForm) {
             CompleteSyllabus::create([
-                'syllabus_id'         => $syllabus->id,
-                'course_id'           => $syllabus->course_id,
-                'academic_year'       => $academicYear,
-                'semester'            => $semester,
-                'pdf_path'            => $pathComplete,
-                'abridged_path'       => $pathAbridged,
-                'evaluation_path'     => $pathAssessment,
-                'version'             => $version,
-                'approved_at'         => null,
-                'approved_by'         => null,
-                'checksum'            => hash('sha256', $html),
-                'checksum_abridged'   => hash('sha256', $htmlAbridged),
-                'checksum_evaluation' => hash('sha256', $htmlAssessment),
+                'syllabus_id'          => $syllabus->id,
+                'course_id'            => $syllabus->course_id,
+                'academic_year'        => $academicYear,
+                'semester'             => $semester,
+                'pdf_path'             => $pathComplete,
+                'abridged_path'        => $pathAbridged,
+                'evaluation_path'      => $pathAssessment,
+                'review_form_path'     => $pathReviewForm,
+                'version'              => $version,
+                'approved_at'          => null,
+                'approved_by'          => null,
+                'checksum'             => hash('sha256', $html),
+                'checksum_abridged'    => hash('sha256', $htmlAbridged),
+                'checksum_evaluation'  => hash('sha256', $htmlAssessment),
+                'checksum_review_form' => hash('sha256', $htmlReviewForm),
             ]);
 
             $syllabus->forceFill([
@@ -120,6 +127,30 @@ class SyllabusSnapshotService
     }
 
     // ── HTML snapshot generation ──────────────────────────────────────────────
+
+    public function generateReviewFormHtml(Syllabus $syllabus): string
+    {
+        $syllabus->loadMissing([
+            'course.program.departments.college',
+            'academicCalendar',
+            'preparer',
+            'components',
+            'reviewers.user',
+            'reviewForm.natureOfChange',
+            'reviewForm.attachments',
+            'reviewForm.checklistResponses',
+            'reviewForm.recommendedByChair',
+            'reviewForm.approvedByDean',
+            'reviewForm.partHVerifier',
+        ]);
+
+        return view('Syllabus.template.review_form', [
+            'syllabus'        => $syllabus,
+            'reviewForm'      => $syllabus->reviewForm,
+            'isSnapshot'      => true,
+            'inlineReviewCss' => $this->readCss('review.css'),
+        ])->render();
+    }
 
     public function generateCompleteHtml(Syllabus $syllabus): string
     {

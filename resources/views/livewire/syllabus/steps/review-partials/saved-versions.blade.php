@@ -53,6 +53,10 @@
                         $assessPreview  = $hasAssess ? ($assessIsExt ? $assessPath : route('syllabus.saved.assessment.preview',  $sv['id'])) : null;
                         $assessDownload = ($hasAssess && ! $assessIsExt) ? route('syllabus.saved.assessment.download', $sv['id']) : null;
 
+                        $rfPath     = (string) ($sv['review_form_path'] ?? '');
+                        $hasRf      = $rfPath !== '';
+                        $rfPreview  = $hasRf ? route('syllabus.saved.review-form.preview', $sv['id']) : null;
+
                         $savedAt = $sv['created_at']
                             ? \Illuminate\Support\Carbon::parse($sv['created_at'])->format('M d, Y  H:i')
                             : '';
@@ -89,7 +93,7 @@
                         </button>
 
                         <div x-show="vopen" x-collapse>
-                            <div class="p-4 grid grid-cols-1 sm:grid-cols-3 gap-3 bg-white">
+                            <div class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-white">
 
                                 {{-- Complete --}}
                                 <div>
@@ -149,6 +153,20 @@
                                         <p class="text-sm text-[#94a3b8] italic">Not available.</p>
                                     @endif
                                 </div>
+
+                                {{-- F.003 Review Form --}}
+                                @if ($hasRf)
+                                <div>
+                                    <p class="text-xs font-bold uppercase tracking-[0.12em] text-[#475569] mb-2">
+                                        F.003 Review Form
+                                    </p>
+                                    <div class="flex flex-wrap gap-1.5">
+                                        <x-ui.button href="{{ $rfPreview }}" variant="secondary" target="_blank" rel="noopener">
+                                            <i class="bx bx-link-external text-sm"></i> Open
+                                        </x-ui.button>
+                                    </div>
+                                </div>
+                                @endif
 
                             </div>
                         </div>

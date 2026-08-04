@@ -18,6 +18,7 @@ use App\Http\Controllers\CQI\GoalController;
 use App\Http\Controllers\CQI\ObjectiveController;
 use App\Http\Controllers\CQI\ProgramController;
 use App\Http\Controllers\Syllabus\SyllabusController;
+use App\Http\Controllers\Syllabus\SyllabusReviewFormController;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -145,6 +146,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/syllabus/courses/{programId}', [SyllabusController::class, 'showCourses'])->name('syllabus.courses');
         Route::get('/syllabus/wizard', [SyllabusController::class, 'wizard'])->name('syllabus.wizard');
         Route::get('/syllabus/form/{courseId}', [SyllabusController::class, 'showForm'])->name('syllabus.form');
+
+        // Review form preview (live)
+        Route::get('/syllabus/{syllabus}/review-form/preview', [SyllabusReviewFormController::class, 'preview'])
+            ->name('syllabus.review-form.preview');
+        Route::get('/syllabus/saved/{completeSyllabus}/review-form/preview', [SyllabusReviewFormController::class, 'previewSaved'])
+            ->name('syllabus.saved.review-form.preview');
 
         // Saved version previews & downloads — must be before {syllabus} wildcard
         Route::get('/syllabus/saved/{completeSyllabus}/preview', [SyllabusController::class, 'previewSavedComplete'])->name('syllabus.saved.complete.preview');

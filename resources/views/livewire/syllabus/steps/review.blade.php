@@ -8,6 +8,12 @@
         {{-- ── Previews ──────────────────────────────────────────────────── --}}
         @include('livewire.syllabus.steps.review-partials.previews')
 
+        {{-- ── F.003 Review Form (author panel) ─────────────────────────── --}}
+        @include('livewire.syllabus.steps.review-partials.review-form', [
+            'syllabus'   => $this->syllabus,
+            'reviewForm' => $reviewForm,
+        ])
+
         {{-- ── Review & Approval ─────────────────────────────────────────── --}}
         @include('livewire.syllabus.steps.review-partials.reviewers')
 

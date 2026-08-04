@@ -5,9 +5,11 @@ namespace App\Livewire\Syllabus\Steps;
 use App\Models\AuditLog;
 use App\Models\CompleteSyllabus;
 use App\Models\Syllabus;
+use App\Models\SyllabusReviewForm;
 use App\Models\SyllabusRevision;
 use App\Models\User;
 use App\Services\Syllabus\SyllabusApprovalService;
+use App\Services\Syllabus\SyllabusReviewFormService;
 use App\Services\Syllabus\SyllabusRevisionHistoryService;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Auth;
@@ -42,6 +44,9 @@ class ReviewStep extends Component
     // removeRevision() dispatches 'revision-deleted' so Alpine clears its flag.
     // resequenceRevisions() renumbers all rows 0,1,2,… by current order.
     public array $revisions = [];
+
+    // ── Review form ────────────────────────────────────────────────────────
+    public ?SyllabusReviewForm $reviewForm = null;
 
     // ── Approval ───────────────────────────────────────────────────────────
     public ?int $approvedBy         = null;
@@ -109,7 +114,93 @@ class ReviewStep extends Component
             'reviewers'    => $this->reviewers,
             'deanUsers'    => $this->deanUsers,
             'facultyUsers' => $this->facultyUsers,
+            'reviewForm'   => $this->reviewForm,
         ]);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // REVIEW FORM — AUTHOR MUTATIONS
+    // ══════════════════════════════════════════════════════════════════════
+
+    public function saveReviewFormClassification(string $classification): void
+    {
+        if (! $this->syllabus) return;
+        try {
+            $form = app(SyllabusReviewFormService::class)->findOrCreate($this->syllabus);
+            app(SyllabusReviewFormService::class)->setClassification($form, $classification);
+            $this->loadReviewForm();
+            $this->dispatch('lw-toast', type: 'success', message: 'Classification saved.');
+        } catch (\Throwable $e) {
+            report($e);
+            $this->dispatch('lw-toast', type: 'error', message: 'Unable to save classification.');
+        }
+    }
+
+    public function saveReviewFormChanges(array $selectedTypes): void
+    {
+        if (! $this->syllabus) return;
+        try {
+            $form = app(SyllabusReviewFormService::class)->findOrCreate($this->syllabus);
+            app(SyllabusReviewFormService::class)->syncNatureOfChange($form, $selectedTypes);
+            $this->loadReviewForm();
+            $this->dispatch('lw-toast', type: 'success', message: 'Nature of change saved.');
+        } catch (\Throwable $e) {
+            report($e);
+            $this->dispatch('lw-toast', type: 'error', message: 'Unable to save changes.');
+        }
+    }
+
+    public function saveReviewFormAttachments(array $attachments, string $otherLabel = ''): void
+    {
+        if (! $this->syllabus) return;
+        try {
+            $submitted = array_fill_keys($attachments, true);
+            if ($otherLabel) $submitted['other_label'] = $otherLabel;
+            $form = app(SyllabusReviewFormService::class)->findOrCreate($this->syllabus);
+            app(SyllabusReviewFormService::class)->syncAttachments($form, $submitted);
+            $this->loadReviewForm();
+            $this->dispatch('lw-toast', type: 'success', message: 'Attachments saved.');
+        } catch (\Throwable $e) {
+            report($e);
+            $this->dispatch('lw-toast', type: 'error', message: 'Unable to save attachments.');
+        }
+    }
+
+    public function submitReviewForm(): void
+    {
+        if (! $this->syllabus) return;
+        try {
+            $form = app(SyllabusReviewFormService::class)->findOrCreate($this->syllabus);
+            if (! $form->classification) {
+                $this->dispatch('lw-toast', type: 'error', message: 'Select a classification before submitting.');
+                return;
+            }
+            $form->update(['submitted_at' => now()]);
+            $this->loadReviewForm();
+            AuditLog::record(
+                action: 'submitted',
+                module: 'Syllabus Review Form',
+                referenceId: $this->syllabus->id,
+                description: "Faculty submitted F.003 review form for syllabus #{$this->syllabus->id}."
+            );
+            $this->dispatch('lw-toast', type: 'success', message: 'Review form submitted. Reviewers have been notified.');
+        } catch (\Throwable $e) {
+            report($e);
+            $this->dispatch('lw-toast', type: 'error', message: 'Unable to submit review form.');
+        }
+    }
+
+    public function savePartHResponse(string $response): void
+    {
+        if (! $this->syllabus || ! $this->reviewForm) return;
+        try {
+            app(SyllabusReviewFormService::class)->savePartHResponse($this->reviewForm, $response);
+            $this->loadReviewForm();
+            $this->dispatch('lw-toast', type: 'success', message: 'Response submitted.');
+        } catch (\Throwable $e) {
+            report($e);
+            $this->dispatch('lw-toast', type: 'error', message: $e->getMessage());
+        }
     }
 
     // ══════════════════════════════════════════════════════════════════════
@@ -304,12 +395,13 @@ class ReviewStep extends Component
         }
 
         $this->syllabus = Syllabus::query()->with([
-            'course.program.outcomes',
+            'course.program.departments.college',
             'course.programOutcomes',
             'components',
             'weeks',
             'academicCalendar',
             'revisions',
+            'preparer',
         ])->findOrFail($this->syllabusId);
 
         $this->course               = $this->syllabus->course
@@ -368,6 +460,7 @@ class ReviewStep extends Component
 
         $this->loadReviewerLists();
         $this->loadRevisions();
+        $this->loadReviewForm();
         $this->isLoaded = true;
     }
 
@@ -419,8 +512,24 @@ class ReviewStep extends Component
                     'user_name'  => $r->user->name,
                     'user_email' => $r->user->email,
                     'status'     => $r->status,
+                    'role'       => $r->role ?? 'member',
                 ])->values()->all()
             : [];
+    }
+
+    private function loadReviewForm(): void
+    {
+        if (! $this->syllabus) {
+            $this->reviewForm = null;
+            return;
+        }
+        $this->reviewForm = SyllabusReviewForm::with([
+            'natureOfChange',
+            'attachments',
+            'recommendedByChair',
+            'approvedByDean',
+            'partHVerifier',
+        ])->where('syllabus_id', $this->syllabus->id)->first();
     }
 
     private function loadRevisions(): void

@@ -10,6 +10,7 @@ use App\Models\Syllabus;
 use App\Services\Syllabus\SyllabusDeleteService;
 use App\Services\Syllabus\SyllabusPreviewService;
 use App\Services\Syllabus\SyllabusSnapshotService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Storage;

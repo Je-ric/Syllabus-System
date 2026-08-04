@@ -107,7 +107,7 @@ class SyllabusWizard extends Component
     // $parent.addReviewer() / $parent.removeReviewer(). After each mutation
     // we dispatch 'syllabus-reviewers-updated' so ReviewStep re-renders.
 
-    public function addReviewer(?int $reviewerUserId = null): void
+    public function addReviewer(?int $reviewerUserId = null, string $role = 'member'): void
     {
         if (! $this->syllabus) {
             $this->dispatch('lw-toast', type: 'error', message: 'No syllabus loaded.');
@@ -115,7 +115,7 @@ class SyllabusWizard extends Component
         }
 
         try {
-            app(SyllabusReviewService::class)->assignReviewer($this->syllabus, (int) $reviewerUserId);
+            app(SyllabusReviewService::class)->assignReviewer($this->syllabus, (int) $reviewerUserId, $role);
         } catch (ValidationException $e) {
             $message = collect($e->errors())->flatten()->first() ?? 'Unable to add reviewer.';
             $this->dispatch('lw-toast', type: 'error', message: $message);
@@ -126,7 +126,7 @@ class SyllabusWizard extends Component
             return;
         }
 
-        $this->dispatch('lw-toast', type: 'success', message: 'Reviewer assigned (auto-approved).');
+        $this->dispatch('lw-toast', type: 'success', message: 'Reviewer assigned.');
         $this->dispatch('syllabus-reviewers-updated');
     }
 
