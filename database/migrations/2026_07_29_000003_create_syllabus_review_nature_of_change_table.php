@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('syllabus_review_nature_of_change', function (Blueprint $table) {
+        Schema::create('syllabus_review_nature_of_changes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('review_form_id')
                 ->constrained('syllabus_review_forms')
@@ -48,6 +48,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('syllabus_review_nature_of_change');
+        Schema::dropIfExists('syllabus_review_nature_of_changes');
     }
 };
