@@ -15,23 +15,22 @@ Missing/Lacks
 
 Critical
     3. Use Faculty ID instead of clsu/clsu2 (I think we can use either clsu or ID. ) 
-    4. ~~Upload CSV calendar events~~ ✅ Fixed — CSV import (type, name, date columns) added to Manage Events page.
     5. Auto requisites (additional tables)
     Schedule should also reflect the week generation, exam weeks and some events are just 3 days, it means theres a remaining days for that week that user can still fill some details.
 
 Normal
-    2. Make the topics and learning outcomes using WYSIWYG Editor 
-        The current is textarea - Fixed using Quill.js
-    3. ~~Course Archive, not delete~~ ✅ Fixed — archive/restore actions added; Active/Archived toggle on course index; `status` column was already in migration.
-    4. ~~Calendar view in the Academic Year Events (not table)~~ ✅ Fixed — replaced events table with monthly calendar grid view.
 
 Less Priority
-    1. Improve validations for all inputs accross the system
-    2. UI improvements accross the system.
     3. Add types in academic calendar events.
     4. Course Number should be displayed in the Course Coverage (Weekly)
-    5. ~~Legend in syllabus creation.~~ ✅ Fixed — legend panel added to Weekly Coverage step.
 
 Known Bugs
-    1. ~~Organizational Hierarchy not visible by the dean and chairs of their coverage.~~ ✅ Fixed — hierarchy view routes now accessible to dean and chair roles.
 
+
+updateGoalModal / updateObjectiveModal — textarea has both value in slot AND x-model — double-binding causes x-model to always win over server old() on reload
+NEXT
+assignRolesModal — x-on:submit returns false to block but Alpine x-on:submit ignores return value — dean+chair block silently does nothing
+addDepartmentModal — college_id hidden input has empty value and no JS to populate it — will always fail server validation
+deleteAYModal — modal id uses str_replace('-','_',$year) but route passes $year as-is — ID inconsistency if year format changes
+approvalModal — loadingText uses ucfirst($action).'ing…' which produces wrong label for 'disable' → 'Disableing…'
+addProgramModal — primaryDept comparison uses == with integer dept id but Alpine stores it as string from x-model — strict type mismatch in :class binding
