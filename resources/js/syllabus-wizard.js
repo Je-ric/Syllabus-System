@@ -115,6 +115,7 @@ window.coManager = function coManager(initialOutcomes, syllabusId) {
             _key:      o.id ?? ('new-' + i),
         })),
         isSaving:    false,
+        deletingId:  null,
         _keyCounter: initialOutcomes.length,
         viewModal:   { co_code: '', description: '' },
 
@@ -192,11 +193,12 @@ window.coManager = function coManager(initialOutcomes, syllabusId) {
                 confirmClass: 'bg-rose-600 hover:bg-rose-700 text-white',
             });
             if (!ok) return;
-            this.isSaving = true;
+            this.deletingId = co.id;
             await this.$nextTick();
             try {
                 await this.$wire.call('deleteSingle', co.id);
             } finally {
+                this.deletingId = null;
                 this.isSaving = false;
             }
         },
