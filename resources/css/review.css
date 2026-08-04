@@ -1,313 +1,499 @@
 /* ============================================================
    review.css — F.003 Integrated OBTL Syllabus Review Form
    Used by: resources/views/Syllabus/template/review_form.blade.php
+   Rebuilt on the shared preview.css design system so the review
+   form renders with the same letterhead, toolbar, auto-paginated
+   A4 shell, and typography as the complete/abridged/assessment
+   templates. Review-form-only components (checklist, badges,
+   decision block, signatures, etc.) are appended at the end.
    ============================================================ */
 
-/* ── Reset & base ─────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-    font-family: 'Libre Franklin', Arial, sans-serif;
-    font-size: 10pt;
-    color: #111;
-    background: #e8e8e8;
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-/* ── Toolbar (live preview only) ──────────────────────────── */
-#rf-toolbar {
+:root {
+    --brand-ink: #0b1220;
+    --brand-cyan: #0e7490;
+    --brand-cyan-dark: #0b556b;
+    --panel: #ffffff;
+    --panel-muted: #f1f5f9;
+
+    --scrollbar-thumb: #ffb51b;
+    --scrollbar-thumb-hover: #e6a700;
+    --scrollbar-track: #f1f1f1;
+
+    --red: #e2231a;
+    --red-100: #c01e16;
+    --blue-50: #dde5eb;
+    --blue: #008dea;
+    --orange: #f9c150;
+    --white: #ffffff;
+    --white-50: #f1f2f3;
+    --gray: #dad8d8;
+    --gray-100: #979797;
+    --black-20: #525252;
+    --black-25: #3a3a3a;
+    --black-50: #313131;
+    --yellow: #cdfb13;
+    --clsu-yellow: #ffd700;
+    --clsu-gold: #e0a70d;
+    --clsu-cobra: #1a5f30;
+    --clsu-green: #009639;
+    --green: #92d12c;
+    --green-50: #4eab18;
+    --green-100: #038303;
+    --green-150: #003a10;
+    --green-grad: linear-gradient(
+        90deg,
+        rgba(0, 129, 2, 1) 0%,
+        rgba(149, 210, 45, 1) 100%
+    );
+
+    /* ── Typography tokens ───────────────────────────── */
+    --font-body:    Tahoma, 'Tahoma MT', Geneva, Verdana, sans-serif;
+    --font-table:   'Times New Roman', Times, serif;
+    --fs-body:      11pt;   /* Tahoma body text                    */
+    --fs-table:     9pt;    /* Times New Roman inside weekly tables */
+    --lh-body:      1.2;
+}
+
+/* ═══════════════════════════════════════════════
+   BASE
+═══════════════════════════════════════════════ */
+html,
+body {
+    font-family: var(--font-body);
+    font-size:   var(--fs-body);
+    line-height: var(--lh-body);
+    color: #111827;
+}
+
+body {
+    background: #f0f0f0;
+    min-height: 100vh;
+    padding: 56px 0 72px;
+}
+
+/* ═══════════════════════════════════════════════
+   TOOLBAR
+═══════════════════════════════════════════════ */
+#toolbar {
     position: fixed;
-    top: 0; left: 0; right: 0;
+    top: 0;
+    left: 0;
+    right: 0;
     height: 44px;
-    background: #002a0c;
-    color: #fff;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 20px;
-    z-index: 1000;
+    background: rgba(0, 129, 2, 1);
+    padding: 0 16px;
+    z-index: 9999;
+    font-size: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
     gap: 12px;
 }
-#rf-toolbar .t-title { font-size: 11pt; font-weight: 600; }
-#rf-toolbar .t-pages { font-size: 9pt; color: #aaa; margin-left: 8px; }
-#rf-toolbar button {
-    background: rgba(255,255,255,0.12);
-    border: 1px solid rgba(255,255,255,0.25);
-    color: #fff;
-    padding: 5px 14px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 9pt;
-    transition: background 0.15s;
-}
-#rf-toolbar button:hover { background: rgba(255,255,255,0.22); }
-#rf-toolbar .t-right { display: flex; gap: 8px; }
 
-/* ── A4 page shell ────────────────────────────────────────── */
-#rf-container { padding: 60px 0 40px; }
-
-.rf-page {
-    width: 210mm;
-    min-height: 297mm;
-    background: #fff;
-    margin: 0 auto 24px;
-    padding: 18mm 18mm 22mm;
-    position: relative;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.18);
-    page-break-after: always;
+#toolbar .t-left {
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    flex: 1;
 }
 
-@media print {
-    body { background: #fff; }
-    #rf-toolbar { display: none; }
-    #rf-container { padding: 0; }
-    .rf-page {
-        margin: 0;
-        box-shadow: none;
-        page-break-after: always;
-    }
-}
-
-/* ── Header ───────────────────────────────────────────────── */
-.rf-header {
-    text-align: center;
-    margin-bottom: 10px;
-    border-bottom: 2px solid #002a0c;
-    padding-bottom: 8px;
-}
-.rf-header .rf-office {
-    font-size: 9pt;
+#toolbar .t-title {
+    color: #ffffff;
+    font-weight: 700;
     letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: #444;
-}
-.rf-header .rf-form-title {
-    font-size: 13pt;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    margin: 3px 0 2px;
-}
-.rf-header .rf-form-subtitle {
-    font-size: 9pt;
-    font-style: italic;
-    color: #555;
-}
-.rf-header .rf-form-note {
-    font-size: 8.5pt;
-    font-style: italic;
-    color: #666;
-    margin-top: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-/* ── Section headings ─────────────────────────────────────── */
-.rf-section-heading {
-    font-size: 10pt;
-    font-weight: 700;
-    background: #002a0c;
+#toolbar .t-pages {
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+#toolbar .t-right {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+#toolbar .t-right button {
+    background: rgba(255, 255, 255, 0.15);
     color: #fff;
-    padding: 4px 8px;
-    margin: 12px 0 6px;
-    letter-spacing: 0.02em;
-}
-
-/* ── Key-value grid (Part A) ──────────────────────────────── */
-.rf-kv-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 4px;
-}
-.rf-kv-table td {
-    padding: 3px 6px;
-    vertical-align: top;
-    border: 1px solid #ccc;
-    font-size: 9.5pt;
-}
-.rf-kv-table td:first-child {
-    width: 42%;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 11px;
     font-weight: 600;
-    background: #f5f5f5;
+    cursor: pointer;
+    transition: all 120ms ease;
     white-space: nowrap;
 }
 
-/* ── Two-column layout (Part B, Part C) ──────────────────── */
+#toolbar .t-right button:hover {
+    background: rgba(255, 255, 255, 0.28);
+    border-color: rgba(255, 255, 255, 0.55);
+}
+
+/* keep old bare `button` selector working for snapshot-only Print button */
+#toolbar > button {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 120ms ease;
+}
+
+#toolbar > button:hover {
+    background: rgba(255, 255, 255, 0.28);
+}
+
+/* ═══════════════════════════════════════════════
+   A4 CONTAINER & PAGES
+═══════════════════════════════════════════════ */
+#a4-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 22px;
+    padding-top: 52px;
+}
+
+.a4-page {
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+    position: relative;
+    break-inside: auto;
+    margin: 0 auto 20px;
+}
+
+.a4-page.portrait {
+    width:   210mm;
+    height:  297mm;
+    padding: 19mm;
+}
+
+/* ═══════════════════════════════════════════════
+   PAGE TYPOGRAPHY
+═══════════════════════════════════════════════ */
+.a4-title {
+    text-align: center;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    font-size: var(--fs-body);
+    font-family: var(--font-body);
+    text-transform: uppercase;
+}
+
+.a4-subtitle {
+    text-align: center;
+    font-size: 11pt;
+    margin-top: 2px;
+    font-family: var(--font-body);
+}
+
+.a4-section {
+    margin-top: 16px;
+    break-inside: auto;
+    page-break-inside: auto;
+}
+
+.a4-section h3 {
+    font-size:   var(--fs-body);
+    font-family: var(--font-body);
+    font-weight: 700;
+    margin: 0 0 6px;
+    text-align: justify;
+}
+
+h3.a4-section {
+    margin: 10px 0 6px;
+}
+
+.title-numbered,
+.title-lettered {
+    font-family: var(--font-body);
+    font-size:   var(--fs-body);
+    font-weight: 700;
+}
+
+.title-numbered { text-transform: none; }
+.title-lettered { text-transform: uppercase; padding-top: 15px; }
+
+.table-indent {
+    margin-left: 25px;
+}
+
+p,
+ul li,
+strong,
+.a4-list,
+.a4-row {
+    font-family:    var(--font-body);
+    text-align:     justify;
+    letter-spacing: 0.04em;
+    line-height:    var(--lh-body);
+}
+
+p {
+    margin: 4px 0;
+    line-height: var(--lh-body);
+}
+
+ul {
+    padding-left: 80px;
+}
+
+ul li {
+    list-style-type: disc;
+    list-style-position: outside;
+    padding-left: 8px;
+}
+
+/* ═══════════════════════════════════════════════
+   TABLES – base (Tahoma 11 pt)
+═══════════════════════════════════════════════ */
+table {
+    break-inside:    auto;
+    width:           100%;
+    border-collapse: collapse;
+    border:          1px solid #000;
+    margin-top:      12px;
+    margin-bottom:   12px;
+    font-family:     var(--font-body);
+    font-size:       var(--fs-body);
+}
+
+table td,
+table th {
+    border:         1px solid #000;
+    padding:        4px;
+    vertical-align: top;
+}
+
+table th {
+    background: #d9d9d9;
+}
+
+/* Key-value info tables (Part A course identification, etc.) */
+.kv-table td:first-child {
+    width: 34%;
+    font-weight: 600;
+    white-space: nowrap;
+    background: #f5f5f5;
+}
+
+/* ═══════════════════════════════════════════════
+   PRINT
+═══════════════════════════════════════════════ */
+@media print {
+    @page portrait {
+        size:   A4 portrait;
+        margin: 0;
+    }
+
+    body {
+        background: none;
+        padding: 0;
+    }
+
+    #toolbar {
+        display: none !important;
+    }
+
+    #a4-container {
+        gap: 0;
+        padding-top: 0;
+    }
+
+    .a4-page {
+        margin: 0;
+        box-shadow: none;
+        page-break-after:  always;
+        break-after:       page;
+        page-break-inside: avoid;
+        overflow: hidden;
+    }
+
+    .a4-page:last-child {
+        page-break-after: auto;
+        break-after: auto;
+    }
+
+    table {
+        page-break-inside: auto;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════
+   REVIEW-FORM-SPECIFIC COMPONENTS
+   (not present in preview.css — extends the shared system above)
+   ════════════════════════════════════════════════════════════ */
+
+/* ── Two-column layout (Parts B, C) ──────────────────────── */
 .rf-two-col {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0;
-    border: 1px solid #ccc;
-    margin-bottom: 4px;
+    border: 1px solid #000;
+    margin: 8px 0 12px;
 }
 .rf-two-col .rf-col {
-    padding: 6px 8px;
-    border-right: 1px solid #ccc;
-    font-size: 9.5pt;
+    padding: 6px 10px;
+    border-right: 1px solid #000;
 }
 .rf-two-col .rf-col:last-child { border-right: none; }
 .rf-col-header {
+    grid-column: span 1;
     font-weight: 700;
-    font-size: 9pt;
-    background: #f0f0f0;
-    padding: 4px 8px;
-    border-bottom: 1px solid #ccc;
+    font-size: 10pt;
+    background: #d9d9d9;
+    padding: 5px 10px;
+    border-bottom: 1px solid #000;
+    border-right: 1px solid #000;
 }
+.rf-two-col > div:last-of-type .rf-col-header { border-right: none; }
 
-/* ── Checkbox list ────────────────────────────────────────── */
-.rf-check-list { list-style: none; padding: 0; margin: 4px 0; }
+/* ── Checkbox glyph ───────────────────────────────────────── */
+.rf-check-list { list-style: none; margin: 4px 0 4px 0; padding: 0; }
 .rf-check-list li {
     display: flex;
     align-items: flex-start;
     gap: 6px;
     padding: 2px 0;
-    font-size: 9.5pt;
+    font-size: 10pt;
 }
-.rf-check-list li .rf-box {
+.rf-box {
     display: inline-block;
     width: 12px;
     height: 12px;
-    border: 1.5px solid #555;
+    border: 1.5px solid #333;
     flex-shrink: 0;
-    margin-top: 1px;
+    margin-top: 2px;
     background: #fff;
     position: relative;
 }
-.rf-check-list li .rf-box.checked::after {
-    content: '✓';
+.rf-box.checked::after {
+    content: '\2713';
     position: absolute;
-    top: -2px;
+    top: -3px;
     left: 1px;
     font-size: 11px;
-    color: #002a0c;
+    color: var(--green-150);
     font-weight: 700;
 }
 
 /* ── Reviewer assignment block (Part B) ───────────────────── */
 .rf-reviewer-block {
-    border: 1px solid #ccc;
-    padding: 6px 8px;
-    margin-top: 4px;
-    font-size: 9.5pt;
+    border-top: 1px solid #ccc;
+    margin-top: 6px;
+    padding-top: 6px;
+    font-size: 10pt;
 }
-.rf-reviewer-block .rf-reviewer-label {
-    font-weight: 600;
-    margin-bottom: 3px;
-}
+.rf-reviewer-block .rf-reviewer-label { font-weight: 600; margin-bottom: 2px; }
 .rf-reviewer-block .rf-reviewer-name {
     border-bottom: 1px solid #888;
-    min-height: 18px;
+    min-height: 16px;
     margin-bottom: 6px;
     padding-bottom: 2px;
 }
 
 /* ── Checklist table (Part E) ─────────────────────────────── */
-.rf-checklist-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 8.5pt;
-    margin-bottom: 4px;
-}
 .rf-checklist-table th,
 .rf-checklist-table td {
-    border: 1px solid #bbb;
-    padding: 3px 5px;
-    vertical-align: middle;
+    font-size: 9pt;
 }
 .rf-checklist-table thead th {
-    background: #002a0c;
+    background: var(--green-150);
     color: #fff;
     text-align: center;
-    font-size: 8pt;
 }
-.rf-checklist-table tbody tr:nth-child(even) td { background: #f9f9f9; }
-.rf-checklist-table .criterion-col { width: 52%; }
+.rf-checklist-table .criterion-col { width: 52%; text-align: left; }
 .rf-checklist-table .response-col { width: 16%; text-align: center; }
 .rf-checklist-table .comments-col { width: 16%; }
 
 /* Response badges */
 .rf-badge {
     display: inline-block;
-    padding: 1px 6px;
+    padding: 1px 7px;
     border-radius: 3px;
-    font-size: 7.5pt;
-    font-weight: 600;
+    font-size: 8pt;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.03em;
 }
-.rf-badge-satisfied   { background: #d4edda; color: #155724; }
-.rf-badge-not         { background: #f8d7da; color: #721c24; }
-.rf-badge-na          { background: #e2e3e5; color: #383d41; }
+.rf-badge-satisfied { background: #d4edda; color: #155724; }
+.rf-badge-not       { background: #f8d7da; color: #721c24; }
+.rf-badge-na        { background: #e2e3e5; color: #383d41; }
 
 /* ── Decision block (Part F) ──────────────────────────────── */
 .rf-decision-block {
-    border: 1px solid #ccc;
+    border: 1px solid #000;
     padding: 8px 10px;
-    margin-bottom: 4px;
-    font-size: 9.5pt;
+    margin: 8px 0 12px;
+    font-size: 10pt;
 }
-.rf-decision-block .rf-decision-label { font-weight: 700; margin-bottom: 4px; }
+.rf-decision-label { font-weight: 700; margin-bottom: 4px; }
 .rf-decision-value {
     display: inline-block;
     padding: 2px 10px;
     border-radius: 4px;
-    font-weight: 600;
-    font-size: 9pt;
-}
-.rf-decision-approved   { background: #d4edda; color: #155724; }
-.rf-decision-corrections { background: #fff3cd; color: #856404; }
-.rf-decision-returned   { background: #f8d7da; color: #721c24; }
-.rf-decision-reclassified { background: #cce5ff; color: #004085; }
-
-/* ── Signature block (Part G) ─────────────────────────────── */
-.rf-sig-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 4px;
+    font-weight: 700;
     font-size: 9.5pt;
 }
-.rf-sig-table th,
-.rf-sig-table td {
-    border: 1px solid #bbb;
-    padding: 4px 6px;
-    vertical-align: top;
-}
-.rf-sig-table thead th {
-    background: #f0f0f0;
-    font-weight: 700;
-    text-align: center;
-    font-size: 9pt;
-}
+.rf-decision-approved    { background: #d4edda; color: #155724; }
+.rf-decision-corrections { background: #fff3cd; color: #856404; }
+.rf-decision-returned    { background: #f8d7da; color: #721c24; }
+.rf-decision-reclassified{ background: #cce5ff; color: #004085; }
+
+/* ── Signature table (Part G) ─────────────────────────────── */
 .rf-sig-table .sig-line {
-    border-bottom: 1px solid #555;
-    min-height: 28px;
+    border-bottom: 1px solid #333;
+    min-height: 26px;
     margin-top: 4px;
 }
 
 /* ── Part H (compliance response) ────────────────────────── */
 .rf-part-h {
-    border: 1px solid #ccc;
+    border: 1px solid #000;
     padding: 8px 10px;
-    margin-bottom: 4px;
-    font-size: 9.5pt;
+    margin: 8px 0 12px;
+    font-size: 10pt;
 }
-.rf-part-h .rf-response-text {
+.rf-response-text {
     background: #fafafa;
-    border: 1px solid #ddd;
+    border: 1px solid #ccc;
     padding: 6px 8px;
     min-height: 40px;
-    font-size: 9.5pt;
+    font-size: 10pt;
     white-space: pre-wrap;
 }
-.rf-part-h .rf-verified-by {
-    margin-top: 6px;
-    font-size: 9pt;
-    color: #444;
-}
+.rf-verified-by { margin-top: 6px; font-size: 9.5pt; color: #444; }
 
 /* ── Part I (approval authority) ─────────────────────────── */
 .rf-approval-block {
-    border: 1px solid #ccc;
+    border: 1px solid #000;
     padding: 8px 10px;
-    margin-bottom: 4px;
-    font-size: 9.5pt;
+    margin: 8px 0 12px;
+    font-size: 10pt;
 }
 .rf-approval-row {
     display: flex;
@@ -315,24 +501,10 @@ body {
     margin-bottom: 6px;
     align-items: flex-start;
 }
-.rf-approval-row .rf-approval-label { font-weight: 600; min-width: 160px; }
-.rf-approval-row .rf-approval-value { flex: 1; border-bottom: 1px solid #888; min-height: 18px; }
+.rf-approval-label { font-weight: 600; min-width: 190px; }
+.rf-approval-value { flex: 1; border-bottom: 1px solid #888; min-height: 18px; }
 
-/* ── Footer ───────────────────────────────────────────────── */
-.rf-page-footer {
-    position: absolute;
-    bottom: 14mm;
-    left: 18mm;
-    right: 18mm;
-    border-top: 1px solid #aaa;
-    padding-top: 4px;
-    font-size: 7.5pt;
-    color: #888;
-    display: flex;
-    justify-content: space-between;
-}
-
-/* ── Status pill (used in snapshot header) ────────────────── */
+/* ── Status pill (snapshot header, if used) ───────────────── */
 .rf-status-pill {
     display: inline-block;
     padding: 2px 10px;
@@ -342,17 +514,17 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
-.rf-status-draft       { background: #e2e3e5; color: #383d41; }
+.rf-status-draft        { background: #e2e3e5; color: #383d41; }
 .rf-status-under-review { background: #cce5ff; color: #004085; }
-.rf-status-approved    { background: #d4edda; color: #155724; }
+.rf-status-approved     { background: #d4edda; color: #155724; }
 
 /* ── Utility ──────────────────────────────────────────────── */
 .rf-mt-2  { margin-top: 2px; }
 .rf-mt-4  { margin-top: 4px; }
 .rf-mt-8  { margin-top: 8px; }
 .rf-mb-4  { margin-bottom: 4px; }
-.rf-small { font-size: 8.5pt; color: #555; }
-.rf-italic { font-style: italic; }
-.rf-bold   { font-weight: 700; }
-.rf-center { text-align: center; }
-.rf-empty  { color: #aaa; font-style: italic; }
+.rf-small { font-size: 9pt; color: #444; }
+.rf-italic{ font-style: italic; }
+.rf-bold  { font-weight: 700; }
+.rf-center{ text-align: center; }
+.rf-empty { color: #999; font-style: italic; }
