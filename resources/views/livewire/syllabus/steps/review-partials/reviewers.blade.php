@@ -315,7 +315,7 @@
                                     <div class="flex items-center gap-2 ml-2 shrink-0">
                                         <x-feedback-status.status-indicator
                                             :status="$reviewer['status'] === 'approved' ? 'success' : $reviewer['status']"
-                                            :label="$reviewer['status'] === 'approved' ? 'Approved' : ucfirst($reviewer['status'])" />
+                                            :label="$reviewer['status'] === 'approved' ? 'Completed' : ucfirst($reviewer['status'])" />
 
                                         @if (!empty($reviewer['role']))
                                             <span class="text-xs px-1.5 py-0.5 rounded font-semibold

@@ -34,7 +34,7 @@
             @if ($user->hasRole('admin') || $user->hasRole('faculty') || $user->hasRole('ovpaa'))
                 <nav aria-label="Syllabus">
                     <p class="nav-label">Syllabus</p>
-                    <x-ui.nav-link href="{{ route('syllabus.index') }}" icon="bxs-notepad" :active="request()->routeIs('syllabus.*')">
+                    <x-ui.nav-link href="{{ route('syllabus.index') }}" icon="bxs-notepad" :active="request()->routeIs('syllabus.index')">
                         Syllabi
                     </x-ui.nav-link>
                     @if ($user->hasRole('admin') || $user->hasRole('faculty'))
@@ -42,6 +42,16 @@
                             My Workload
                         </x-ui.nav-link>
                     @endif
+                </nav>
+            @endif
+
+            {{-- Review Queue — chairs assigned as reviewers + faculty reviewers + admin --}}
+            @if ($user->hasRole('admin') || $user->hasRole('chair') || $user->hasRole('faculty'))
+                <nav aria-label="Review">
+                    <p class="nav-label">CQI Review</p>
+                    <x-ui.nav-link href="{{ route('syllabus.review-queue.index') }}" icon="bx-clipboard-check" :active="request()->routeIs('syllabus.review-queue.*')">
+                        Review Queue
+                    </x-ui.nav-link>
                 </nav>
             @endif
 

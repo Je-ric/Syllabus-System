@@ -444,8 +444,12 @@ class SyllabusController extends Controller
             throw new AuthorizationException('Unauthorized');
         }
 
-        $isAdmin = $user->roles()->where('name', 'admin')->exists();
-        if ($syllabus->prepared_by !== $user->id && ! $isAdmin) {
+        $isAdmin      = $user->roles()->where('name', 'admin')->exists();
+        $isAuthor     = $syllabus->prepared_by === $user->id;
+        $isReviewer   = $syllabus->reviewers()->where('user_id', $user->id)->exists();
+        $isDean       = $user->hasRole('dean');
+
+        if (! ($isAdmin || $isAuthor || $isReviewer || $isDean)) {
             throw new AuthorizationException('Unauthorized');
         }
     }

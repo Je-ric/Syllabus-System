@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Syllabus;
+namespace App\Services\Syllabus\Weeks;
 
 // Simple value object returned by WeekReconciliationService::reconcile().
 // Lets the Livewire component build an accurate toast without knowing internals.

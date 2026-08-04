@@ -19,6 +19,7 @@ use App\Http\Controllers\CQI\ObjectiveController;
 use App\Http\Controllers\CQI\ProgramController;
 use App\Http\Controllers\Syllabus\SyllabusController;
 use App\Http\Controllers\Syllabus\SyllabusReviewFormController;
+use App\Http\Controllers\Syllabus\ReviewQueueController;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -140,13 +141,26 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/workload/sync', [WorkloadController::class, 'sync'])->name('workload.sync');
     });
 
+    // Reviewer queue — accessible by chairs, faculty assigned as reviewers, and admins.
+    Route::middleware(['role:admin,faculty,chair'])->group(function () {
+        Route::get('/syllabus-review-queue', [ReviewQueueController::class, 'index'])->name('syllabus.review-queue.index');
+    });
+
     Route::middleware(['role:admin,faculty,ovpaa'])->group(function () {
         Route::get('/syllabus', [SyllabusController::class, 'index'])->name('syllabus.index');
         Route::get('/syllabus/create', [SyllabusController::class, 'create'])->name('syllabus.create');
         Route::get('/syllabus/courses/{programId}', [SyllabusController::class, 'showCourses'])->name('syllabus.courses');
         Route::get('/syllabus/wizard', [SyllabusController::class, 'wizard'])->name('syllabus.wizard');
         Route::get('/syllabus/form/{courseId}', [SyllabusController::class, 'showForm'])->name('syllabus.form');
+        Route::get('/syllabus/{syllabus}/edit', [SyllabusController::class, 'edit'])->name('syllabus.edit');
+        Route::put('/syllabus/{syllabus}', [SyllabusController::class, 'update'])->name('syllabus.update');
+        Route::delete('/syllabus/{syllabus}', [SyllabusController::class, 'destroy'])->name('syllabus.destroy');
+        Route::view('/showcase', 'components.showcase');
+    });
 
+    // Read-only syllabus access — authors, chairs (reviewers), admins, ovpaa.
+    // authorizeSyllabusAccess() enforces per-record checks (author / assigned reviewer / admin).
+    Route::middleware(['role:admin,faculty,ovpaa,chair'])->group(function () {
         // Review form preview (live)
         Route::get('/syllabus/{syllabus}/review-form/preview', [SyllabusReviewFormController::class, 'preview'])
             ->name('syllabus.review-form.preview');
@@ -169,11 +183,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/syllabus/{syllabus}/preview/complete/download', [SyllabusController::class, 'downloadComplete'])->name('syllabus.preview.complete.download');
         Route::get('/syllabus/{syllabus}/preview/abridged/download', [SyllabusController::class, 'downloadAbridged'])->name('syllabus.preview.abridged.download');
         Route::get('/syllabus/{syllabus}/preview/assessment-plan/download', [SyllabusController::class, 'downloadAssessment'])->name('syllabus.preview.assessment.download');
-        Route::get('/syllabus/{syllabus}/edit', [SyllabusController::class, 'edit'])->name('syllabus.edit');
-        Route::put('/syllabus/{syllabus}', [SyllabusController::class, 'update'])->name('syllabus.update');
-        Route::delete('/syllabus/{syllabus}', [SyllabusController::class, 'destroy'])->name('syllabus.destroy');
 
-        Route::view('/showcase', 'components.showcase');
+        // Reviewer action page — chair/member fills checklist and records decision
+        Route::get('/syllabus/{syllabus}/review', [\App\Http\Controllers\Syllabus\ReviewQueueController::class, 'show'])
+            ->name('syllabus.reviewer.show');
     });
 
 });
