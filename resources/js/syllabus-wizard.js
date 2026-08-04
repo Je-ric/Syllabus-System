@@ -433,6 +433,14 @@ window.weekEditModal = function weekEditModal() {
             this.saving = true;
             try {
                 await this.$wire.saveWeekFromModal(this.weekNo, this.fields);
+                // Sync the accordion body's Alpine fields so re-opening the modal
+                // shows the fresh saved data without a page reload.
+                window.dispatchEvent(new CustomEvent('week-fields-updated', {
+                    detail: {
+                        weekNo: this.weekNo,
+                        fields: JSON.parse(JSON.stringify(this.fields)),
+                    }
+                }));
             } finally {
                 this.saving = false;
             }
@@ -451,6 +459,21 @@ window.weekEditModal = function weekEditModal() {
                 // Destroy quill BEFORE the wire call so close() won't try to save stale content.
                 this._destroyQuill();
                 await this.$wire.resetWeek(this.weekNo);
+                // Sync the accordion body's Alpine fields to blank after reset.
+                window.dispatchEvent(new CustomEvent('week-fields-updated', {
+                    detail: {
+                        weekNo: this.weekNo,
+                        fields: {
+                            course_outcome_id:   '',
+                            learning_outcomes:   '',
+                            assessment_task:     '',
+                            topic:               '',
+                            teaching_activities: '',
+                            references:          [{ text: '' }],
+                            materials:           [{ name: '', url: '' }],
+                        },
+                    }
+                }));
                 this.isOpen = false;
             } finally {
                 this.saving = false;

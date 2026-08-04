@@ -7,6 +7,7 @@ use App\Models\Reference;
 use App\Models\SyllabusWeek;
 use App\Models\WeekContent;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 // All read/write operations for WeekContent, Reference, and OnlineMaterial
 // rows, keyed to the Livewire component's $weekInputs array.
@@ -93,6 +94,12 @@ class WeekContentService
     // Persist one or all unlocked weeks using dirty-checking.
     // Only rows that actually changed are written.
     // Returns true when at least one row was written.
+    //
+    // Optimizations:
+    //   [2] When $onlyWeekNo is set, query only that week row instead of all weeks.
+    //   [3] Batch-load all existing WeekContent / Reference / OnlineMaterial rows
+    //       for the target week(s) upfront — no per-week N+1 queries.
+    //       All writes are wrapped in a single DB transaction.
     public function save(
         int $syllabusId,
         string $activeComponent,
@@ -100,142 +107,171 @@ class WeekContentService
         array $lockedWeeks,
         ?int $onlyWeekNo = null
     ): bool {
-        $weeks = SyllabusWeek::where('syllabus_id', $syllabusId)
-            ->orderBy('week_no')
-            ->get();
+        // [2] Scope the week query — only fetch the single target row when possible.
+        $weekQuery = SyllabusWeek::where('syllabus_id', $syllabusId)->orderBy('week_no');
+        if ($onlyWeekNo !== null) {
+            $weekQuery->where('week_no', $onlyWeekNo);
+        }
+        $weeks = $weekQuery->get();
 
         if ($weeks->isEmpty()) {
             return false;
         }
 
+        // Filter out locked weeks and weeks with no payload before hitting the DB.
+        $weeks = $weeks->filter(function ($week) use ($lockedWeeks, $weekInputs, $onlyWeekNo) {
+            if (isset($lockedWeeks[$week->week_no])) {
+                return false;
+            }
+            if (! isset($weekInputs['w' . $week->week_no])) {
+                return false;
+            }
+            return true;
+        });
+
+        if ($weeks->isEmpty()) {
+            return false;
+        }
+
+        // [3] Batch-load all existing data for the candidate weeks in 3 queries total,
+        //     keyed by syllabus_week_id so the inner loop does only in-memory lookups.
+        $weekIds = $weeks->pluck('id')->all();
+
+        $existingContents = WeekContent::whereIn('syllabus_week_id', $weekIds)
+            ->where('component_type', $activeComponent)
+            ->get()
+            ->keyBy('syllabus_week_id');
+
+        $existingRefs = Reference::where('syllabus_id', $syllabusId)
+            ->whereIn('syllabus_week_id', $weekIds)
+            ->where('component_type', $activeComponent)
+            ->orderBy('id')
+            ->get()
+            ->groupBy('syllabus_week_id');
+
+        $existingMats = OnlineMaterial::where('syllabus_id', $syllabusId)
+            ->whereIn('syllabus_week_id', $weekIds)
+            ->where('component_type', $activeComponent)
+            ->orderBy('id')
+            ->get()
+            ->groupBy('syllabus_week_id');
+
         $changed = false;
 
-        foreach ($weeks as $week) {
-            if ($onlyWeekNo !== null && (int) $week->week_no !== $onlyWeekNo) {
-                continue;
-            }
+        // [3] Wrap all writes in a single transaction.
+        DB::transaction(function () use (
+            $weeks, $weekInputs, $activeComponent, $syllabusId,
+            $existingContents, $existingRefs, $existingMats,
+            &$changed
+        ) {
+            foreach ($weeks as $week) {
+                $key     = 'w' . $week->week_no;
+                $payload = $weekInputs[$key];
 
-            // Never write to locked weeks
-            if (isset($lockedWeeks[$week->week_no])) {
-                continue;
-            }
+                $courseOutcomeId = (isset($payload['course_outcome_id'])
+                    && $payload['course_outcome_id'] !== ''
+                    && $payload['course_outcome_id'] !== null)
+                    ? (int) $payload['course_outcome_id']
+                    : null;
 
-            $key     = 'w' . $week->week_no;
-            $payload = $weekInputs[$key] ?? null;
+                $incoming = [
+                    'course_outcome_id'  => $courseOutcomeId,
+                    'learning_outcomes'  => trim((string) ($payload['learning_outcomes']   ?? '')),
+                    'assessment_task'    => trim((string) ($payload['assessment_task']     ?? '')),
+                    'topics'             => trim((string) ($payload['topic']               ?? '')),
+                    'tla'                => trim((string) ($payload['teaching_activities'] ?? '')),
+                ];
 
-            if ($payload === null) {
-                continue;
-            }
+                // Dirty-check content — in-memory lookup, no extra query.
+                $existing = $existingContents->get($week->id);
 
-            $courseOutcomeId = (isset($payload['course_outcome_id'])
-                && $payload['course_outcome_id'] !== ''
-                && $payload['course_outcome_id'] !== null)
-                ? (int) $payload['course_outcome_id']
-                : null;
+                $contentChanged = ! $existing || array_reduce(
+                    array_keys($incoming),
+                    fn (bool $carry, string $k) => $carry
+                        || ((string) ($existing->{$k} ?? '')) !== ((string) ($incoming[$k] ?? '')),
+                    false
+                );
 
-            $incoming = [
-                'course_outcome_id'  => $courseOutcomeId,
-                'learning_outcomes'  => trim((string) ($payload['learning_outcomes']   ?? '')),
-                'assessment_task'    => trim((string) ($payload['assessment_task']     ?? '')),
-                'topics'             => trim((string) ($payload['topic']               ?? '')),
-                'tla'                => trim((string) ($payload['teaching_activities'] ?? '')),
-            ];
+                // Dirty-check references — in-memory, no extra query.
+                $weekRefs = $existingRefs->get($week->id, collect());
+                $existingRefList = $weekRefs
+                    ->map(fn ($r) => trim((string) $r->reference_text))
+                    ->filter()->sort()->values()->all();
 
-            // Dirty-check content fields
-            $existing = WeekContent::where('syllabus_week_id', $week->id)
-                ->where('component_type', $activeComponent)
-                ->first();
+                $incomingRefs = collect((array) ($payload['references'] ?? []))
+                    ->map(fn ($r) => trim((string) ($r['text'] ?? '')))
+                    ->filter()->sort()->values()->all();
 
-            $contentChanged = ! $existing || array_reduce(
-                array_keys($incoming),
-                fn (bool $carry, string $k) => $carry
-                    || ((string) ($existing->{$k} ?? '')) !== ((string) ($incoming[$k] ?? '')),
-                false
-            );
+                $refsChanged = $existingRefList !== $incomingRefs;
 
-            // Dirty-check references (sort both sides — order is irrelevant)
-            $existingRefs = Reference::where('syllabus_id', $syllabusId)
-                ->where('syllabus_week_id', $week->id)
-                ->where('component_type', $activeComponent)
-                ->pluck('reference_text')
-                ->map(fn ($t) => trim((string) $t))
-                ->filter()->sort()->values()->all();
+                // Dirty-check materials — in-memory, no extra query.
+                $weekMats = $existingMats->get($week->id, collect());
+                $existingMatList = $weekMats
+                    ->map(fn ($m) => trim($m->material_name ?? '') . '|' . trim($m->url ?? ''))
+                    ->sort()->values()->all();
 
-            $incomingRefs = collect((array) ($payload['references'] ?? []))
-                ->map(fn ($r) => trim((string) ($r['text'] ?? '')))
-                ->filter()->sort()->values()->all();
+                $incomingMats = collect((array) ($payload['materials'] ?? []))
+                    ->map(fn ($m) => trim((string) ($m['name'] ?? '')) . '|' . trim((string) ($m['url'] ?? '')))
+                    ->filter(fn ($s) => $s !== '|')
+                    ->sort()->values()->all();
 
-            $refsChanged = $existingRefs !== $incomingRefs;
+                $matsChanged = $existingMatList !== $incomingMats;
 
-            // ── Dirty-check materials ─────────────────────────────────────────
-            $existingMats = OnlineMaterial::where('syllabus_id', $syllabusId)
-                ->where('syllabus_week_id', $week->id)
-                ->where('component_type', $activeComponent)
-                ->get()
-                ->map(fn ($m) => trim($m->material_name ?? '') . '|' . trim($m->url ?? ''))
-                ->sort()->values()->all();
+                if (! $contentChanged && ! $refsChanged && ! $matsChanged) {
+                    continue;
+                }
 
-            $incomingMats = collect((array) ($payload['materials'] ?? []))
-                ->map(fn ($m) => trim((string) ($m['name'] ?? '')) . '|' . trim((string) ($m['url'] ?? '')))
-                ->filter(fn ($s) => $s !== '|')
-                ->sort()->values()->all();
+                $changed = true;
 
-            $matsChanged = $existingMats !== $incomingMats;
+                // Write content
+                WeekContent::updateOrCreate(
+                    ['syllabus_week_id' => $week->id, 'component_type' => $activeComponent],
+                    $incoming
+                );
 
-            if (! $contentChanged && ! $refsChanged && ! $matsChanged) {
-                continue;
-            }
+                // Delete + re-insert references on change (simple; counts are small)
+                if ($refsChanged) {
+                    Reference::where('syllabus_id', $syllabusId)
+                        ->where('syllabus_week_id', $week->id)
+                        ->where('component_type', $activeComponent)
+                        ->delete();
 
-            $changed = true;
+                    foreach ((array) ($payload['references'] ?? []) as $ref) {
+                        $text = trim((string) ($ref['text'] ?? ''));
+                        if ($text !== '') {
+                            Reference::create([
+                                'syllabus_id'      => $syllabusId,
+                                'syllabus_week_id' => $week->id,
+                                'component_type'   => $activeComponent,
+                                'reference_text'   => $text,
+                            ]);
+                        }
+                    }
+                }
 
-            // Write content
-            WeekContent::updateOrCreate(
-                ['syllabus_week_id' => $week->id, 'component_type' => $activeComponent],
-                $incoming
-            );
+                // Delete + re-insert materials on change
+                if ($matsChanged) {
+                    OnlineMaterial::where('syllabus_id', $syllabusId)
+                        ->where('syllabus_week_id', $week->id)
+                        ->where('component_type', $activeComponent)
+                        ->delete();
 
-            // Delete + re-insert references on change (simple; counts are small)
-            if ($refsChanged) {
-                Reference::where('syllabus_id', $syllabusId)
-                    ->where('syllabus_week_id', $week->id)
-                    ->where('component_type', $activeComponent)
-                    ->delete();
-
-                foreach ((array) ($payload['references'] ?? []) as $ref) {
-                    $text = trim((string) ($ref['text'] ?? ''));
-                    if ($text !== '') {
-                        Reference::create([
-                            'syllabus_id'      => $syllabusId,
-                            'syllabus_week_id' => $week->id,
-                            'component_type'   => $activeComponent,
-                            'reference_text'   => $text,
-                        ]);
+                    foreach ((array) ($payload['materials'] ?? []) as $mat) {
+                        $name = trim((string) ($mat['name'] ?? ''));
+                        $url  = trim((string) ($mat['url']  ?? ''));
+                        if ($name !== '' || $url !== '') {
+                            OnlineMaterial::create([
+                                'syllabus_id'      => $syllabusId,
+                                'syllabus_week_id' => $week->id,
+                                'component_type'   => $activeComponent,
+                                'material_name'    => $name ?: 'Online Material',
+                                'url'              => $url,
+                            ]);
+                        }
                     }
                 }
             }
-
-            // Delete + re-insert materials on change
-            if ($matsChanged) {
-                OnlineMaterial::where('syllabus_id', $syllabusId)
-                    ->where('syllabus_week_id', $week->id)
-                    ->where('component_type', $activeComponent)
-                    ->delete();
-
-                foreach ((array) ($payload['materials'] ?? []) as $mat) {
-                    $name = trim((string) ($mat['name'] ?? ''));
-                    $url  = trim((string) ($mat['url']  ?? ''));
-                    if ($name !== '' || $url !== '') {
-                        OnlineMaterial::create([
-                            'syllabus_id'      => $syllabusId,
-                            'syllabus_week_id' => $week->id,
-                            'component_type'   => $activeComponent,
-                            'material_name'    => $name ?: 'Online Material',
-                            'url'              => $url,
-                        ]);
-                    }
-                }
-            }
-        }
+        });
 
         return $changed;
     }
@@ -256,26 +292,28 @@ class WeekContentService
             return null;
         }
 
-        // Blank the editable columns — keep the WeekContent row itself
-        WeekContent::where('syllabus_week_id', $week->id)
-            ->where('component_type', $activeComponent)
-            ->update([
-                'course_outcome_id'  => null,
-                'learning_outcomes'  => '',
-                'assessment_task'    => '',
-                'topics'             => '',
-                'tla'                => '',
-            ]);
+        DB::transaction(function () use ($syllabusId, $activeComponent, $week) {
+            // Blank the editable columns — keep the WeekContent row itself
+            WeekContent::where('syllabus_week_id', $week->id)
+                ->where('component_type', $activeComponent)
+                ->update([
+                    'course_outcome_id'  => null,
+                    'learning_outcomes'  => '',
+                    'assessment_task'    => '',
+                    'topics'             => '',
+                    'tla'                => '',
+                ]);
 
-        Reference::where('syllabus_id', $syllabusId)
-            ->where('syllabus_week_id', $week->id)
-            ->where('component_type', $activeComponent)
-            ->delete();
+            Reference::where('syllabus_id', $syllabusId)
+                ->where('syllabus_week_id', $week->id)
+                ->where('component_type', $activeComponent)
+                ->delete();
 
-        OnlineMaterial::where('syllabus_id', $syllabusId)
-            ->where('syllabus_week_id', $week->id)
-            ->where('component_type', $activeComponent)
-            ->delete();
+            OnlineMaterial::where('syllabus_id', $syllabusId)
+                ->where('syllabus_week_id', $week->id)
+                ->where('component_type', $activeComponent)
+                ->delete();
+        });
 
         return [
             'course_outcome_id'   => null,

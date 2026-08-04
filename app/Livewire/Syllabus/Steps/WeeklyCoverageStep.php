@@ -27,10 +27,11 @@ use Livewire\Component;
 //   refreshWeekDates()  — soft path: updates week dates/exam labels, keeps all content intact
 //   hardResetWeeks()    — destructive path: wipes everything and rebuilds from scratch
 //
-// This class is responsible only for:
-//   • Holding reactive Livewire state ($weekInputs, $activeComponent, …)
-//   • Bridging wire:click calls to service methods
-//   • Dispatching toast / event notifications
+// Optimizations applied:
+//   [1] saveWeekFromModal patches $weekInputs in-place — no loadData() after a single-week save.
+//   [2] WeekContentService::save() scopes SyllabusWeek query to onlyWeekNo when set.
+//   [3] WeekContentService::save() batch-loads existing data upfront; all writes in DB::transaction.
+//   [4] skipRender() called when nothing changed after save.
 class WeeklyCoverageStep extends Component
 {
     // ── Reactive state (serialised into Livewire snapshot) ────────────────────
@@ -63,7 +64,14 @@ class WeeklyCoverageStep extends Component
     public function render()
     {
         // syllabusWeeks is loaded by loadData() on mount/step-change.
-        // No need to re-query on every render.
+        // On single-week saves we skip loadData() [1], so we need to ensure
+        // syllabusWeeks is populated for render() on those paths too.
+        if ($this->syllabusWeeks->isEmpty() && $this->weeksGenerated) {
+            $this->syllabusWeeks = SyllabusWeek::where('syllabus_id', $this->syllabusId)
+                ->orderBy('week_no')
+                ->get();
+        }
+
         return view('livewire.syllabus.steps.weekly-coverage', [
             'syllabusWeeks' => $this->syllabusWeeks,
             'syllabus'      => $this->freshSyllabus(),
@@ -105,7 +113,6 @@ class WeeklyCoverageStep extends Component
 
     // ── Week generation ───────────────────────────────────────────────────────
 
-    // First-time generation — no weeks exist yet.
     public function generateWeeklyCoverage(): void
     {
         $syllabus = $this->freshSyllabus();
@@ -131,22 +138,11 @@ class WeeklyCoverageStep extends Component
         }
     }
 
-    // Soft path — update week dates and exam/non-teaching labels from the current
-    // calendar without touching any faculty-entered content (LOs, topics, TLAs,
-    // assessment tasks, references, materials, evaluation weights).
-    //
-    // Surplus tail weeks are removed when the new calendar is shorter; new empty
-    // weeks are appended when it is longer. A precise toast message describes
-    // exactly what changed.
-    //
-    // Guard: only the active calendar is allowed. Refreshing against a stale or
-    // inactive calendar would silently shift all week dates to wrong date ranges.
+    // Soft path — update week dates/exam labels without touching faculty content.
     public function refreshWeekDates(): void
     {
         $syllabus = $this->freshSyllabus();
 
-        // Reject if the syllabus is linked to a calendar that is no longer active.
-        // The faculty must go back to Step 1 and select the active calendar first.
         if ($syllabus?->academicCalendar && ! $syllabus->academicCalendar->is_active) {
             $this->dispatch('lw-toast', type: 'error',
                 message: 'Refresh Dates can only be used with the active academic calendar. Go to Step 1 and switch to the current active calendar first.');
@@ -172,10 +168,7 @@ class WeeklyCoverageStep extends Component
         $this->dispatch('syllabus-step-saved', step: 'weekly_coverage');
     }
 
-    // Destructive path — wipe all weeks and every piece of faculty-entered content,
-    // then rebuild fresh from the current calendar.
-    // This is irreversible. The blade must show an explicit confirmation dialog
-    // before calling this action.
+    // Destructive path — wipe all weeks and rebuild from scratch.
     public function hardResetWeeks(): void
     {
         $this->reloadCourseComponents();
@@ -190,7 +183,6 @@ class WeeklyCoverageStep extends Component
             return;
         }
 
-        // Clear in-memory state so stale inputs cannot bleed into the fresh load.
         $this->weekInputs  = [];
         $this->lockedWeeks = [];
         $this->weekEvents  = [];
@@ -203,14 +195,13 @@ class WeeklyCoverageStep extends Component
 
     // ── Week content ──────────────────────────────────────────────────────────
 
-    // Save week content submitted from the edit modal (Quill HTML content).
+    // [1] Save from the edit modal — patches weekInputs in-place, no full loadData().
     public function saveWeekFromModal(int $weekNo, array $fields): void
     {
         if ($weekNo <= 0 || isset($this->lockedWeeks[$weekNo])) {
             return;
         }
 
-        // Require a Course Outcome before saving (MVGO week 1 is exempt)
         $isMvgo = $weekNo === 1;
         if (! $isMvgo && empty($fields['course_outcome_id'])) {
             $this->dispatch('lw-toast', type: 'error',
@@ -218,7 +209,7 @@ class WeeklyCoverageStep extends Component
             return;
         }
 
-        // Sanitize material URLs — reject javascript: and data: schemes.
+        // Sanitize material URLs.
         $materials = array_map(function (array $mat): array {
             $url = trim((string) ($mat['url'] ?? ''));
             if ($url !== '' && ! preg_match('#^https?://#i', $url)) {
@@ -227,7 +218,7 @@ class WeeklyCoverageStep extends Component
             return ['name' => $mat['name'] ?? '', 'url' => $url];
         }, (array) ($fields['materials'] ?? []));
 
-        $this->weekInputs['w' . $weekNo] = [
+        $payload = [
             'course_outcome_id'   => $fields['course_outcome_id'] ?? null,
             'learning_outcomes'   => $fields['learning_outcomes'] ?? '',
             'assessment_task'     => $fields['assessment_task'] ?? '',
@@ -237,6 +228,9 @@ class WeeklyCoverageStep extends Component
             'materials'           => $materials ?: [['name' => '', 'url' => '']],
         ];
 
+        // [1] Patch in-place — weekInputs already has the new data, no reload needed.
+        $this->weekInputs['w' . $weekNo] = $payload;
+
         $changed = app(WeekContentService::class)->save(
             $this->syllabusId,
             $this->activeComponent,
@@ -245,30 +239,28 @@ class WeeklyCoverageStep extends Component
             $weekNo
         );
 
-        // Reload from DB so the next render gets fresh data into Alpine x-data
-        $this->loadData();
-
-        if ($changed) {
-            $this->dispatch('lw-toast', type: 'success', message: "Week {$weekNo} saved.");
+        // [4] Skip re-render when nothing changed.
+        if (! $changed) {
+            $this->skipRender();
+            $this->dispatch('week-modal-saved');
+            return;
         }
 
+        $this->dispatch('lw-toast', type: 'success', message: "Week {$weekNo} saved.");
         $this->dispatch('week-modal-saved');
     }
 
-    // Auto-save triggered by the Alpine $watch when a week is collapsed.
-    // Only shows a toast when something actually changed.
+    // Auto-save triggered when a week accordion collapses.
     public function saveWeek(int $weekNo): void
     {
         if ($weekNo <= 0 || isset($this->lockedWeeks[$weekNo])) {
             return;
         }
 
-        // Guard: if no inputs exist for this week yet, skip silently
         if (! isset($this->weekInputs['w' . $weekNo])) {
             return;
         }
 
-        // Skip save if no CO selected (non-MVGO) — don't block collapse, just skip
         if ($weekNo !== 1 && empty($this->weekInputs['w' . $weekNo]['course_outcome_id'] ?? null)) {
             return;
         }
@@ -281,17 +273,17 @@ class WeeklyCoverageStep extends Component
             $weekNo
         );
 
-        // Reload from DB so the next render gets fresh data into Alpine x-data
-        $this->loadData();
-
-        if ($changed) {
-            $this->dispatch('lw-toast', type: 'success', message: "Week {$weekNo} saved.");
+        // [4] Skip re-render when nothing changed.
+        if (! $changed) {
+            $this->skipRender();
+            return;
         }
+
+        $this->dispatch('lw-toast', type: 'success', message: "Week {$weekNo} saved.");
     }
 
     public function saveAllWeeklyEntries(): void
     {
-        // Check every editable week has a CO selected (skip MVGO week 1)
         foreach ($this->weekInputs as $key => $input) {
             $wn = (int) str_replace('w', '', $key);
             if ($wn === 1 || isset($this->lockedWeeks[$wn])) {
@@ -311,7 +303,7 @@ class WeeklyCoverageStep extends Component
             $this->lockedWeeks
         );
 
-        // Reload from DB so the next render gets fresh data into Alpine x-data
+        // Full save — reload so the accordion reflects any DB-side normalisation.
         $this->loadData();
 
         if ($changed) {
@@ -321,8 +313,7 @@ class WeeklyCoverageStep extends Component
         $this->dispatch('syllabus-step-saved', step: 'weekly_coverage');
     }
 
-    // Reset one editable week — clears all content from DB and blanks the
-    // form inputs in memory. Locked weeks are silently rejected.
+    // Reset one editable week.
     public function resetWeek(int $weekNo): void
     {
         $blank = app(WeekContentService::class)->reset(
@@ -333,7 +324,7 @@ class WeeklyCoverageStep extends Component
         );
 
         if ($blank === null) {
-            return; // locked or week not found
+            return;
         }
 
         $this->weekInputs['w' . $weekNo] = $blank;
@@ -382,7 +373,6 @@ class WeeklyCoverageStep extends Component
             return;
         }
 
-        // Save current component before switching
         app(WeekContentService::class)->save(
             $this->syllabusId,
             $this->activeComponent,
@@ -410,7 +400,6 @@ class WeeklyCoverageStep extends Component
         return Syllabus::with('academicCalendar', 'courseOutcomes')->find($this->syllabusId);
     }
 
-    // Reload course components + schedules for the offcanvas schedule drawer.
     private function reloadCourseComponents(): void
     {
         $this->courseComponents = CourseComponent::with('schedules')
@@ -423,8 +412,9 @@ class WeeklyCoverageStep extends Component
             ->toArray();
     }
 
-    // Full data reload — called on mount, step-changed, and calendar-updated.
-    // Never called from save paths to avoid overwriting in-flight edits.
+    // Full data reload — called on mount, step-changed, calendar-updated,
+    // and after bulk operations (generate, reset, save-all).
+    // NOT called on single-week modal saves [1].
     private function loadData(): void
     {
         $syllabus = $this->freshSyllabus();
@@ -456,12 +446,10 @@ class WeeklyCoverageStep extends Component
             ->get();
         $this->weeksGenerated = $this->syllabusWeeks->isNotEmpty();
 
-        // Compute locked weeks and event labels from the current calendar.
         $lock = app(WeekLockService::class)->computeLockedWeeks($syllabus, $this->syllabusWeeks);
         $this->lockedWeeks = $lock['lockedWeeks'];
         $this->weekEvents  = $lock['weekEvents'];
 
-        // Populate form inputs from DB for the active component.
         $this->weekInputs = app(WeekContentService::class)->populateInputs(
             $this->syllabusId,
             $this->activeComponent,

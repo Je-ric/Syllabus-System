@@ -435,8 +435,8 @@ class SyllabusPreviewService
             $lecContent = $week->contents?->where('component_type', 'LEC')?->first();
             $labContent = $week->contents?->where('component_type', 'LAB')?->first();
 
-            $lecTaskRaw = trim((string) ($lecContent?->assessment_task ?? ''));
-            $labTaskRaw = trim((string) ($labContent?->assessment_task ?? ''));
+            $lecTaskRaw = trim(strip_tags((string) ($lecContent?->assessment_task ?? '')));
+            $labTaskRaw = trim(strip_tags((string) ($labContent?->assessment_task ?? '')));
 
             if ($lecTaskRaw === '' && $labTaskRaw === '') {
                 continue;

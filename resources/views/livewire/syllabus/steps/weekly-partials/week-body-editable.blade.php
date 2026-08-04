@@ -90,7 +90,17 @@
                 fields:    JSON.parse(JSON.stringify(this.fields))
             });
         }
-    }">
+    }"
+    x-on:week-fields-updated.window="
+        if ($event.detail.weekNo === weekNo) {
+            fields = $event.detail.fields;
+        }
+    "
+    data-week-fields="@js($baseFields)">
+    {{-- data-week-fields is re-rendered by Livewire after each save so Alpine
+         can read the fresh server state. The week-modal-saved event triggers
+         weekEditModal to dispatch week-fields-updated with the saved fields,
+         which syncs this Alpine instance without a page reload. --}}
 
     {{-- CO mapping row --}}
     @if (!$isMvgo)

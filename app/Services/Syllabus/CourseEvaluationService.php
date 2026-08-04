@@ -95,8 +95,8 @@ class CourseEvaluationService
             $lecContent = $contentMap[$week->id]['LEC'] ?? null;
             $labContent = $contentMap[$week->id]['LAB'] ?? null;
 
-            $lecTask = trim((string) ($lecContent?->assessment_task ?? ''));
-            $labTask = trim((string) ($labContent?->assessment_task ?? ''));
+            $lecTask = trim(strip_tags((string) ($lecContent?->assessment_task ?? '')));
+            $labTask = trim(strip_tags((string) ($labContent?->assessment_task ?? '')));
 
             if ($lecTask === '' && $labTask === '') {
                 continue;
