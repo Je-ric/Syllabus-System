@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Syllabus;
+namespace App\Services\Syllabus\Review;
 
 use App\Data\ReviewCriteria;
 use App\Models\Syllabus;

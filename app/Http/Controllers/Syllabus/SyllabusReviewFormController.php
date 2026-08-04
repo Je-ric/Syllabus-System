@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Syllabus;
 use App\Http\Controllers\Controller;
 use App\Models\CompleteSyllabus;
 use App\Models\Syllabus;
-use App\Services\Syllabus\SyllabusSnapshotService;
+use App\Services\Syllabus\Snapshots\SyllabusSnapshotService;
 use Illuminate\Support\Facades\Auth;
 
 class SyllabusReviewFormController extends Controller

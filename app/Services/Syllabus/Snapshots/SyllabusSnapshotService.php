@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Services\Syllabus;
+namespace App\Services\Syllabus\Snapshots;
 
 use App\Models\CompleteSyllabus;
 use App\Models\Syllabus;
-use App\Services\Syllabus\SyllabusReviewFormService;
+// use App\Services\Syllabus\Review\SyllabusReviewFormService;
+use App\Services\Syllabus\Snapshots\SyllabusPreviewService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 

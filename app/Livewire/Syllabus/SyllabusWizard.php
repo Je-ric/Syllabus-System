@@ -3,8 +3,8 @@
 namespace App\Livewire\Syllabus;
 
 use App\Services\Syllabus\SyllabusCompletionService;
-use App\Services\Syllabus\SyllabusReviewService;
-use App\Services\Syllabus\SyllabusSnapshotService;
+use App\Services\Syllabus\Review\SyllabusReviewService;
+use App\Services\Syllabus\Snapshots\SyllabusSnapshotService;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;

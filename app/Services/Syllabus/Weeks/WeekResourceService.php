@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Syllabus;
+namespace App\Services\Syllabus\Weeks;
 
 // Pure in-memory array mutations for the references and materials
 // sub-arrays inside $weekInputs.

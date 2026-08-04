@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Syllabus;
+namespace App\Services\Syllabus\Weeks;
 
 use App\Models\AcademicCalendarEvent;
 use App\Models\Syllabus;

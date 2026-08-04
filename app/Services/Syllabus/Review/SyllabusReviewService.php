@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Syllabus;
+namespace App\Services\Syllabus\Review;
 
 use App\Models\Syllabus;
 use App\Models\SyllabusReviewer;

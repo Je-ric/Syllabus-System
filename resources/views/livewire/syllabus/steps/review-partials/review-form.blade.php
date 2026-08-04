@@ -67,7 +67,7 @@
 
 <div
     x-data="{
-        open: true,
+        open: false,
         classification: @js($classification),
         selectedChanges: @js($selectedChanges),
         attachments: @js($submittedAttachments->pluck('attachment_type')->toArray()),
@@ -127,7 +127,10 @@
                 <i class="bx bx-file text-base leading-none"></i>
             </span>
             <div>
-                <p class="text-sm font-bold text-[#0f172a]">F.003 Review Form</p>
+                <p class="text-sm font-bold text-[#0f172a]">
+                    F.003 Review Form
+                    <span class="ml-1.5 text-xs font-medium text-slate-400 normal-case">(Optional)</span>
+                </p>
                 <p class="text-xs text-[#94a3b8] mt-0.5">
                     Integrated OBTL Syllabus Review Form
                     @if ($isSubmitted)
@@ -135,7 +138,7 @@
                     @elseif ($classification)
                         &middot; <span class="font-semibold text-amber-600">Draft — {{ ucfirst($classification) }}</span>
                     @else
-                        &middot; <span class="text-slate-400">Not started</span>
+                        &middot; <span class="text-slate-400 italic">Optional — fill in when ready</span>
                     @endif
                 </p>
             </div>
