@@ -220,7 +220,42 @@ class SyllabusReviewPage extends Component
         $this->dispatch('lw-toast', type: 'success', message: 'Approval recommended.');
     }
 
-    // ── Private helpers ───────────────────────────────────────────────────────
+    public function verifyPartH(): void
+    {
+        $this->authorizeReviewer();
+
+        if (! $this->isChair) {
+            $this->dispatch('lw-toast', type: 'error', message: 'Only the CQI Chair can verify the faculty response.');
+            return;
+        }
+
+        $form = $this->reviewForm;
+
+        if (! $form?->part_h_faculty_response) {
+            $this->dispatch('lw-toast', type: 'error', message: 'No faculty response to verify.');
+            return;
+        }
+
+        if ($form->part_h_verified_at) {
+            $this->dispatch('lw-toast', type: 'info', message: 'Already verified.');
+            return;
+        }
+
+        app(SyllabusReviewFormService::class)->verifyPartH($form, Auth::id());
+
+        $this->reviewForm = $form->fresh();
+
+        AuditLog::record(
+            action: 'verified_part_h',
+            module: 'Syllabus Review',
+            referenceId: $this->syllabusId,
+            description: 'Chair verified faculty Part H response on syllabus #' . $this->syllabusId . '.'
+        );
+
+        $this->dispatch('lw-toast', type: 'success', message: 'Faculty response marked as verified.');
+    }
+
+    // ── Private helpers ─────────────────────────────────────────────────────────────────
 
     private function authorizeReviewer(): void
     {
