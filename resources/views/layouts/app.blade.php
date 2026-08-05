@@ -7,8 +7,10 @@
 <body class="min-h-screen">
 
     @php
-        $isWizardRoute = request()->routeIs('syllabus.wizard');
-        $user          = Auth::user();
+        $isWizardRoute   = request()->routeIs('syllabus.wizard');
+        $isReviewerRoute = request()->routeIs('syllabus.reviewer.show');
+        $isFullscreen    = $isWizardRoute || $isReviewerRoute;
+        $user            = Auth::user();
     @endphp
 
     {{-- Toast notifications --}}
@@ -20,15 +22,19 @@
     {{-- Mobile sidebar overlay --}}
     <div id="sidebar-overlay"
         class="fixed inset-0 bg-[#09090b]/40 backdrop-blur-sm z-30 hidden lg:hidden
-               {{ $isWizardRoute ? 'hidden!' : '' }}">
+               {{ $isFullscreen ? 'hidden!' : '' }}">
     </div>
 
-    @include('layouts.partials.sidebar')
+    @if (! $isReviewerRoute)
+        @include('layouts.partials.sidebar')
+    @endif
 
     {{-- Main content column --}}
-    <div class="flex flex-col min-h-screen {{ $isWizardRoute ? '' : 'lg:pl-60' }}">
+    <div class="flex flex-col min-h-screen {{ $isFullscreen ? '' : 'lg:pl-60' }}">
 
-        @include('layouts.partials.topbar')
+        @if (! $isReviewerRoute)
+            @include('layouts.partials.topbar')
+        @endif
 
         <main class="flex-1 w-full">
             @yield('content')

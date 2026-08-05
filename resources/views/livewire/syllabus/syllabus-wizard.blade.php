@@ -134,8 +134,10 @@
                 </div>
 
                 {{-- Step content card --}}
-                <div class="bg-white rounded-[16px] border border-[#e4e4e7]"
-                     style="box-shadow: 0 1px 8px rgba(0,0,0,0.05);">
+                {{-- class="bg-white rounded-[16px] border border-[#e4e4e7]" --}}
+                <div
+                     {{-- style="box-shadow: 0 1px 8px rgba(0,0,0,0.05);" --}}
+                     >
 
                     {{-- Step banner --}}
                     @php
@@ -170,22 +172,22 @@
                         </div>
                     @endif
 
-                    <div class="{{ $currentStep === 'academic_calendar' ? 'block' : 'hidden' }} p-5 sm:p-6">
+                    <div class="{{ $currentStep === 'academic_calendar' ? 'block' : 'hidden' }} py-5 sm:p-3">
                         <livewire:syllabus.steps.academic-calendar-step :syllabus-id="$syllabus->id" />
                     </div>
-                    <div class="{{ $currentStep === 'course_components' ? 'block' : 'hidden' }} p-5 sm:p-6">
+                    <div class="{{ $currentStep === 'course_components' ? 'block' : 'hidden' }} py-5 sm:p-3">
                         <livewire:syllabus.steps.components-step :syllabus-id="$syllabus->id" />
                     </div>
-                    <div class="{{ $currentStep === 'course_outcomes' ? 'block' : 'hidden' }} p-5 sm:p-6">
+                    <div class="{{ $currentStep === 'course_outcomes' ? 'block' : 'hidden' }} py-5 sm:p-3">
                         <livewire:syllabus.steps.course-outcomes-step :syllabus-id="$syllabus->id" />
                     </div>
-                    <div class="{{ $currentStep === 'weekly_coverage' ? 'block' : 'hidden' }} p-5 sm:p-6">
+                    <div class="{{ $currentStep === 'weekly_coverage' ? 'block' : 'hidden' }} py-5 sm:p-3">
                         <livewire:syllabus.steps.weekly-coverage-step :syllabus-id="$syllabus->id" />
                     </div>
-                    <div class="{{ $currentStep === 'course_evaluation' ? 'block' : 'hidden' }} p-5 sm:p-6">
+                    <div class="{{ $currentStep === 'course_evaluation' ? 'block' : 'hidden' }} py-5 sm:p-3">
                         <livewire:syllabus.steps.course-evaluation-step :syllabus-id="$syllabus->id" />
                     </div>
-                    <div class="{{ $currentStep === 'review' ? 'block' : 'hidden' }} p-5 sm:p-6">
+                    <div class="{{ $currentStep === 'review' ? 'block' : 'hidden' }} py-5 sm:p-3">
                         <livewire:syllabus.steps.review-step :syllabus-id="$syllabus->id" />
                     </div>
 
@@ -320,6 +322,26 @@
                             <i class="bx bx-skip-next text-sm text-[#d97706]"></i> Next Incomplete
                         </button>
                     </div>
+                @endif
+
+                {{-- Save as Done — Review step --}}
+                @if ($currentStep === 'review')
+                    <x-layout.card-section class="mt-3" title="Freeze Syllabus" icon="bx-save">
+                        <div class="flex flex-col gap-3">
+                            <div>
+                                <p class="text-xs text-slate-500 mt-0.5">Create an immutable snapshot of this syllabus.</p>
+                            </div>
+                            <x-ui.button
+                                type="button"
+                                variant="add-button"
+                                wire:click="$parent.saveAsDone"
+                                wire:loading.attr="disabled"
+                                wire:target="saveAsDone"
+                                loading="Saving…">
+                                <i class="bx bx-save text-base leading-none"></i> Create version
+                            </x-ui.button>
+                        </div>
+                    </x-layout.card-section>
                 @endif
 
                 {{-- Course Info + PO Reference — Course Outcomes step --}}

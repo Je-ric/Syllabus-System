@@ -177,7 +177,7 @@
                 <x-feedback-status.empty-state
                     icon="cloud-upload"
                     title="No Saved Versions"
-                    message="Click 'Save as Done' to create an immutable snapshot of this syllabus." />
+                    message="Click 'Create Version' to create an immutable snapshot of this syllabus." />
             @endif
 
         </div>

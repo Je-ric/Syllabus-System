@@ -27,6 +27,11 @@
         selectedFaculty:  null,
         selectedRole:     'member',
 
+        // progressive disclosure: only open the picker when nothing is
+        // assigned yet, or when the user explicitly asks to change it
+        editingApproved:  {{ $approvedBy  ? 'false' : 'true' }},
+        editingConcurred: {{ $concurredBy ? 'false' : 'true' }},
+
         async addReviewer() {
             if (!this.selectedFaculty) return;
             this.addingReviewer = true;
@@ -46,6 +51,7 @@
             await $wire.clearApproved();
             this.localApprovedBy = null;
             this.clearingApproved = false;
+            this.editingApproved = true;
         },
         async clearConcurredBy() {
             if (this.clearingConcurred) return;
@@ -53,6 +59,7 @@
             await $wire.clearConcurred();
             this.localConcurredBy = null;
             this.clearingConcurred = false;
+            this.editingConcurred = true;
         }
     }"
     class="rounded-xl border border-[#e2e8f0] bg-white overflow-hidden" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
@@ -86,169 +93,155 @@
     <div x-show="open" x-collapse>
         <div class="border-t border-[#e2e8f0] divide-y divide-[#e2e8f0]">
 
-            {{-- SECTION 1 — Signatories --}}
-            <div class="px-5 py-4">
+            {{-- SECTION 1 — Signatories (unified row list, matches Reviewers pattern below) --}}
+            <div class="px-5 py-3.5">
                 <p class="text-xs font-bold uppercase tracking-widest text-[#475569] mb-3">Signatories</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
 
-                    {{-- Prepared By --}}
-                    <div class="space-y-2">
-                        <x-form.label>
-                            Prepared By
-                            <span class="text-slate-300 font-normal normal-case tracking-normal">(Author)</span>
-                        </x-form.label>
+                <div class="rounded-lg border border-[#e2e8f0] divide-y divide-[#e2e8f0] overflow-hidden">
 
-                        @php
-                            $lecComp = $syllabus->components->firstWhere('type', 'LEC');
-                            $labComp = $syllabus->components->firstWhere('type', 'LAB');
-                        @endphp
+                    @php
+                        $lecComp = $syllabus->components->firstWhere('type', 'LEC');
+                        $labComp = $syllabus->components->firstWhere('type', 'LAB');
+                    @endphp
 
-                        {{-- LEC instructor (always shown) --}}
-                        <div class="flex items-center gap-3 rounded-xl px-4 py-3"
-                             style="border: 1px solid #bbf7d0; background: rgba(240,253,244,0.6);">
-                            <span class="inline-flex items-center justify-center w-9 h-9 rounded-full text-xs font-bold shrink-0"
-                                  style="background: #f0fdf4; color: var(--clsu-cobra);">
-                                {{ strtoupper(substr($lecComp?->instructor_name ?? $syllabus->preparer->name ?? 'U', 0, 1)) }}
+                    {{-- Prepared By — LEC (read-only, always shown) --}}
+                    <div class="flex items-center gap-3 px-4 py-2.5">
+                        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wide w-28 shrink-0">Prepared</span>
+                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold shrink-0"
+                              style="background: #f0fdf4; color: var(--clsu-cobra);">
+                            {{ strtoupper(substr($lecComp?->instructor_name ?? $syllabus->preparer->name ?? 'U', 0, 1)) }}
+                        </span>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-sm font-medium text-slate-800 truncate">
+                                {{ $lecComp?->instructor_name ?? $syllabus->preparer->name ?? 'N/A' }}
+                            </p>
+                            <p class="text-xs text-slate-400 truncate">
+                                {{ $lecComp?->instructor_email ?? $syllabus->preparer->email ?? '' }}
+                            </p>
+                        </div>
+                        <x-feedback-status.status-indicator variant="slate" class="shrink-0">LEC</x-feedback-status.status-indicator>
+                    </div>
+
+                    {{-- Prepared By — LAB (only when course has a lab component with an instructor) --}}
+                    @if ($labComp && $labComp->instructor_name)
+                        <div class="flex items-center gap-3 px-4 py-2.5">
+                            <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wide w-28 shrink-0"></span>
+                            <span class="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold shrink-0"
+                                  style="background: #eff6ff; color: #1d4ed8;">
+                                {{ strtoupper(substr($labComp->instructor_name, 0, 1)) }}
                             </span>
-                            <div class="min-w-0">
-                                <p class="text-sm font-semibold text-slate-800 truncate">
-                                    {{ $lecComp?->instructor_name ?? $syllabus->preparer->name ?? 'N/A' }}
-                                </p>
-                                <p class="text-xs text-slate-400 truncate">
-                                    {{ $lecComp?->instructor_email ?? $syllabus->preparer->email ?? '' }}
-                                </p>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-medium text-slate-800 truncate">{{ $labComp->instructor_name }}</p>
+                                <p class="text-xs text-slate-400 truncate">{{ $labComp->instructor_email ?? '' }}</p>
                             </div>
-                            <x-feedback-status.status-indicator variant="slate" class="ml-auto shrink-0">
-                                LEC
-                            </x-feedback-status.status-indicator>
+                            <x-feedback-status.status-indicator variant="slate" class="shrink-0">LAB</x-feedback-status.status-indicator>
                         </div>
+                    @endif
 
-                        {{-- LAB instructor (only when course has lab and instructor is set) --}}
-                        @if ($labComp && $labComp->instructor_name)
-                            <div class="flex items-center gap-3 rounded-xl px-4 py-3"
-                                 style="border: 1px solid #bfdbfe; background: rgba(239,246,255,0.6);">
-                                <span class="inline-flex items-center justify-center w-9 h-9 rounded-full text-xs font-bold shrink-0"
-                                      style="background: #eff6ff; color: #1d4ed8;">
-                                    {{ strtoupper(substr($labComp->instructor_name, 0, 1)) }}
-                                </span>
-                                <div class="min-w-0">
-                                    <p class="text-sm font-semibold text-slate-800 truncate">{{ $labComp->instructor_name }}</p>
-                                    <p class="text-xs text-slate-400 truncate">{{ $labComp->instructor_email ?? '' }}</p>
+                    {{-- Approved By (Dean) --}}
+                    <div class="px-4 py-2.5">
+                        <div class="flex items-center gap-3">
+                            <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wide w-28 shrink-0">Approved</span>
+
+                            {{-- Collapsed: chip + Change link --}}
+                            <template x-if="!editingApproved && getName(localApprovedBy)">
+                                <div class="flex items-center gap-2 min-w-0 flex-1">
+                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold shrink-0"
+                                          style="background: #f0fdf4; color: var(--clsu-cobra);"
+                                          x-text="getName(localApprovedBy)?.charAt(0)?.toUpperCase() ?? ''"></span>
+                                    <p class="text-sm font-medium text-slate-800 truncate" x-text="getName(localApprovedBy)"></p>
+                                    <button type="button" x-on:click="editingApproved = true"
+                                        class="ml-auto text-xs font-semibold shrink-0" style="color: var(--clsu-green);">
+                                        Change
+                                    </button>
+                                    <button type="button" x-on:click="clearApprovedBy()" x-bind:disabled="clearingApproved"
+                                        class="p-0.5 text-rose-400 hover:text-rose-600 transition-colors shrink-0">
+                                        <i x-show="!clearingApproved" class="bx bx-x text-base leading-none"></i>
+                                        <svg x-show="clearingApproved" x-cloak class="animate-spin h-3.5 w-3.5 text-rose-400" viewBox="0 0 24 24" fill="none">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                        </svg>
+                                    </button>
                                 </div>
-                                <x-feedback-status.status-indicator variant="slate" class="ml-auto shrink-0">
-                                    LAB
-                                </x-feedback-status.status-indicator>
-                            </div>
-                        @endif
-                    </div>
+                            </template>
 
-                    {{-- Approved By --}}
-                    <div class="space-y-2">
-                        <x-form.label>
-                            Approved By
-                            <span class="text-slate-300 font-normal normal-case tracking-normal">(Dean)</span>
-                        </x-form.label>
-
-                        <div x-show="getName(localApprovedBy)"
-                            class="flex items-center justify-between gap-2 rounded-xl px-3.5 py-2.5"
-                            style="border: 1px solid #bbf7d0; background: rgba(240,253,244,0.7);">
-                            <div class="flex items-center gap-2 min-w-0">
-                                <span class="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold shrink-0"
-                                      style="background: #f0fdf4; color: var(--clsu-cobra);"
-                                      x-text="getName(localApprovedBy)?.charAt(0)?.toUpperCase() ?? ''"></span>
-                                <p class="text-xs font-semibold text-slate-800 truncate"
-                                   x-text="getName(localApprovedBy)"></p>
-                            </div>
-                            <button type="button" x-on:click="clearApprovedBy()"
-                                x-bind:disabled="clearingApproved"
-                                class="shrink-0 p-0.5 text-rose-400 hover:text-rose-600 transition-colors">
-                                <i x-show="!clearingApproved" class="bx bx-x text-base leading-none"></i>
-                                <svg x-show="clearingApproved" x-cloak class="animate-spin h-3.5 w-3.5 text-rose-400"
-                                     viewBox="0 0 24 24" fill="none">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                                </svg>
-                            </button>
-                        </div>
-                        <div x-show="!getName(localApprovedBy)"
-                            class="rounded-xl border border-dashed border-slate-200 py-2.5 text-center flex items-center justify-center">
-                            <p class="text-xs text-slate-400">No dean assigned yet.</p>
-                        </div>
-
-                        <div class="flex items-center gap-2">
-                            <div class="flex-1">
-                                <x-form.select wire:model="approvedBy"
-                                    x-on:change="localApprovedBy = $event.target.value ? parseInt($event.target.value) : null">
-                                    <option value="">Select dean…</option>
-                                    @foreach ($deanUsers as $user)
-                                        <option value="{{ $user['id'] }}">{{ $user['name'] }}</option>
-                                    @endforeach
-                                </x-form.select>
-                            </div>
-                            <x-ui.button type="button" variant="sm-add"
-                                wire:click="saveApproved"
-                                wire:loading.attr="disabled"
-                                wire:target="saveApproved"
-                                loading="Saving…">
-                                <i class="bx bx-check"></i> Set
-                            </x-ui.button>
+                            {{-- Expanded: not assigned yet, or user clicked Change --}}
+                            <template x-if="editingApproved || !getName(localApprovedBy)">
+                                <div class="flex items-center gap-2 flex-1 min-w-0">
+                                    <div class="flex-1">
+                                        <x-form.select wire:model="approvedBy"
+                                            x-on:change="localApprovedBy = $event.target.value ? parseInt($event.target.value) : null">
+                                            <option value="">Select dean…</option>
+                                            @foreach ($deanUsers as $user)
+                                                <option value="{{ $user['id'] }}">{{ $user['name'] }}</option>
+                                            @endforeach
+                                        </x-form.select>
+                                    </div>
+                                    <x-ui.button type="button" variant="sm-add"
+                                        wire:click="saveApproved" x-on:click="editingApproved = false"
+                                        wire:loading.attr="disabled" wire:target="saveApproved" loading="Saving…">
+                                        <i class="bx bx-check"></i> Set
+                                    </x-ui.button>
+                                    <button type="button" x-show="getName(localApprovedBy)" x-on:click="editingApproved = false"
+                                        class="text-xs text-slate-400 hover:text-slate-600 shrink-0">Cancel</button>
+                                </div>
+                            </template>
                         </div>
                     </div>
 
-                    {{-- Concurred By --}}
-                    <div class="space-y-2">
-                        <x-form.label>
-                            Concurred By
-                            <span class="text-slate-300 font-normal normal-case tracking-normal">(Dean · optional)</span>
-                        </x-form.label>
+                    {{-- Concurred By (Dean · optional) --}}
+                    <div class="px-4 py-2.5">
+                        <div class="flex items-center gap-3">
+                            <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wide w-28 shrink-0">
+                                Concurred <span class="normal-case font-normal text-slate-300">(optional)</span>
+                            </span>
 
-                        <div x-show="getName(localConcurredBy)"
-                            class="flex items-center justify-between gap-2 rounded-xl px-3.5 py-2.5"
-                            style="border: 1px solid #bbf7d0; background: rgba(240,253,244,0.7);">
-                            <div class="flex items-center gap-2 min-w-0">
-                                <span class="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold shrink-0"
-                                      style="background: #f0fdf4; color: var(--clsu-cobra);"
-                                      x-text="getName(localConcurredBy)?.charAt(0)?.toUpperCase() ?? ''"></span>
-                                <p class="text-xs font-semibold text-slate-800 truncate"
-                                   x-text="getName(localConcurredBy)"></p>
-                            </div>
-                            <button type="button" x-on:click="clearConcurredBy()"
-                                x-bind:disabled="clearingConcurred"
-                                class="shrink-0 p-0.5 text-rose-400 hover:text-rose-600 transition-colors">
-                                <i x-show="!clearingConcurred" class="bx bx-x text-base leading-none"></i>
-                                <svg x-show="clearingConcurred" x-cloak class="animate-spin h-3.5 w-3.5 text-rose-400"
-                                     viewBox="0 0 24 24" fill="none">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                                </svg>
-                            </button>
-                        </div>
-                        <div x-show="!getName(localConcurredBy)"
-                            class="rounded-xl border border-dashed border-slate-200 py-2.5 text-center flex items-center justify-center">
-                            <p class="text-xs text-slate-400">No concurrence assigned.</p>
-                        </div>
+                            <template x-if="!editingConcurred && getName(localConcurredBy)">
+                                <div class="flex items-center gap-2 min-w-0 flex-1">
+                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold shrink-0"
+                                          style="background: #f0fdf4; color: var(--clsu-cobra);"
+                                          x-text="getName(localConcurredBy)?.charAt(0)?.toUpperCase() ?? ''"></span>
+                                    <p class="text-sm font-medium text-slate-800 truncate" x-text="getName(localConcurredBy)"></p>
+                                    <button type="button" x-on:click="editingConcurred = true"
+                                        class="ml-auto text-xs font-semibold shrink-0" style="color: var(--clsu-green);">
+                                        Change
+                                    </button>
+                                    <button type="button" x-on:click="clearConcurredBy()" x-bind:disabled="clearingConcurred"
+                                        class="p-0.5 text-rose-400 hover:text-rose-600 transition-colors shrink-0">
+                                        <i x-show="!clearingConcurred" class="bx bx-x text-base leading-none"></i>
+                                        <svg x-show="clearingConcurred" x-cloak class="animate-spin h-3.5 w-3.5 text-rose-400" viewBox="0 0 24 24" fill="none">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </template>
 
-                        <div class="flex items-center gap-2">
-                            <div class="flex-1">
-                                <x-form.select wire:model="concurredBy"
-                                    x-on:change="localConcurredBy = $event.target.value ? parseInt($event.target.value) : null">
-                                    <option value="">Select dean…</option>
-                                    @foreach ($deanUsers as $user)
-                                        <option value="{{ $user['id'] }}"
-                                            x-bind:disabled="localApprovedBy == {{ $user['id'] }}"
-                                            x-bind:class="localApprovedBy == {{ $user['id'] }} ? 'text-slate-300' : ''">
-                                            {{ $user['name'] }}
-                                        </option>
-                                    @endforeach
-                                </x-form.select>
-                            </div>
-                            <x-ui.button type="button" variant="sm-add"
-                                wire:click="saveConcurred"
-                                wire:loading.attr="disabled"
-                                wire:target="saveConcurred"
-                                loading="Saving…">
-                                <i class="bx bx-check"></i> Set
-                            </x-ui.button>
+                            <template x-if="editingConcurred || !getName(localConcurredBy)">
+                                <div class="flex items-center gap-2 flex-1 min-w-0">
+                                    <p x-show="!getName(localConcurredBy) && !editingConcurred" class="text-xs text-slate-400 shrink-0">Not assigned</p>
+                                    <div class="flex-1">
+                                        <x-form.select wire:model="concurredBy"
+                                            x-on:change="localConcurredBy = $event.target.value ? parseInt($event.target.value) : null">
+                                            <option value="">Select dean…</option>
+                                            @foreach ($deanUsers as $user)
+                                                <option value="{{ $user['id'] }}"
+                                                    x-bind:disabled="localApprovedBy == {{ $user['id'] }}"
+                                                    x-bind:class="localApprovedBy == {{ $user['id'] }} ? 'text-slate-300' : ''">
+                                                    {{ $user['name'] }}
+                                                </option>
+                                            @endforeach
+                                        </x-form.select>
+                                    </div>
+                                    <x-ui.button type="button" variant="sm-add"
+                                        wire:click="saveConcurred" x-on:click="editingConcurred = false"
+                                        wire:loading.attr="disabled" wire:target="saveConcurred" loading="Saving…">
+                                        <i class="bx bx-check"></i> Set
+                                    </x-ui.button>
+                                    <button type="button" x-show="getName(localConcurredBy)" x-on:click="editingConcurred = false"
+                                        class="text-xs text-slate-400 hover:text-slate-600 shrink-0">Cancel</button>
+                                </div>
+                            </template>
                         </div>
                     </div>
 
@@ -256,12 +249,12 @@
             </div>
 
             {{-- SECTION 2 — Additional Reviewers --}}
-            <div class="px-5 py-4">
+            <div class="px-5 py-3.5">
                 <p class="text-xs font-bold uppercase tracking-widest text-[#475569] mb-3">
                     Additional Reviewers <span class="text-[#94a3b8] font-normal normal-case tracking-normal">(Faculty)</span>
                 </p>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
                     {{-- Add form --}}
                     <div class="space-y-2">
@@ -287,7 +280,7 @@
                                 <i class="bx bx-plus leading-none"></i> Add
                             </x-ui.button>
                         </div>
-                        <p class="text-sm text-[#94a3b8] leading-relaxed">
+                        <p class="text-xs text-[#94a3b8] leading-relaxed">
                             Each reviewer appears in the printed syllabus signature section.
                             <strong>Chair</strong> = CQI Committee Chair (required).
                             <strong>Member</strong> = Committee member (Revision track only).

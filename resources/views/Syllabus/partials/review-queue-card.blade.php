@@ -55,13 +55,13 @@
     $barColor = $isPending ? 'bg-[#F5B126]' : 'bg-[#00965F]';
 @endphp
 
-<div class="flex flex-col rounded-[12px] bg-white border border-[#E3E8EB] overflow-hidden
+<div class="flex flex-col rounded-xl bg-white border border-[#E3E8EB] overflow-hidden
             hover:border-[#009639] hover:shadow-[0_4px_16px_rgba(0,150,57,0.10)]
             transition-all duration-200"
      style="box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06);">
 
     {{-- Top colour bar --}}
-    <div class="h-[3px] w-full {{ $barColor }}"></div>
+    <div class="h-0.75 w-full {{ $barColor }}"></div>
 
     {{-- Header --}}
     <div class="px-4 py-3 bg-[#FAFDFB] border-b border-[#E3E8EB]">
