@@ -78,16 +78,6 @@
                 'weekly_coverage'   => 'Some weeks have missing content',
                 'course_evaluation' => 'Evaluation weights incomplete',
             ];
-            // Use CSS variable steps so colors stay in sync with the design system.
-            // Each step gets a progressively darker shade of the CLSU green ramp.
-            $bannerVars = [
-                'academic_calendar' => 'color-mix(in srgb, var(--clsu-green) 55%, #fff)',
-                'course_components' => 'color-mix(in srgb, var(--clsu-green) 70%, #fff)',
-                'course_outcomes'   => 'var(--clsu-green)',
-                'weekly_coverage'   => 'color-mix(in srgb, var(--clsu-green) 100%, #000 5%)',
-                'course_evaluation' => 'color-mix(in srgb, var(--clsu-green) 100%, #000 20%)',
-                'review'            => 'color-mix(in srgb, var(--clsu-green) 100%, #000 40%)',
-            ];
         @endphp
 
         {{-- ══ Two-column layout ══════════════════════════════════════════════ --}}
@@ -138,30 +128,6 @@
                 <div
                      {{-- style="box-shadow: 0 1px 8px rgba(0,0,0,0.05);" --}}
                      >
-
-                    {{-- Step banner --}}
-                    @php
-                        $stepNums    = array_keys($navSteps);
-                        $stepNum     = (array_search($currentStep, $stepNums) ?: 0) + 1;
-                        $bannerColor = $bannerVars[$currentStep] ?? 'var(--clsu-green)';
-                        $bannerLabel = $navSteps[$currentStep]['label'] ?? '';
-                    @endphp
-                    <div class="flex items-center gap-3 px-5 py-2.5 border-b border-[#e4e4e7] rounded-t-[16px]"
-                         style="background: linear-gradient(135deg, color-mix(in srgb, {{ $bannerColor }} 8%, #fff) 0%, #ffffff 100%);">
-                        <span class="flex items-center justify-center w-6 h-6 rounded-full text-white text-[11px] font-bold shrink-0"
-                              style="background-color: {{ $bannerColor }};">
-                            {{ $stepNum }}
-                        </span>
-                        <span class="text-[12px] font-semibold tracking-wide" style="color: {{ $bannerColor }};">
-                            Step {{ $stepNum }} of 6 — {{ $bannerLabel }}
-                        </span>
-                        <div class="flex-1 ml-2 hidden sm:block">
-                            <div class="h-[3px] rounded-full bg-[#f4f4f5] overflow-hidden">
-                                <div class="h-full rounded-full transition-all duration-500"
-                                     style="width: {{ ($stepNum / 6) * 100 }}%; background-color: {{ $bannerColor }};"></div>
-                            </div>
-                        </div>
-                    </div>
 
                     @if ($currentStep !== 'academic_calendar' && $this->calendarIsInactive())
                         <div class="mx-5 sm:mx-6 mt-5 sm:mt-6">
