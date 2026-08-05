@@ -1,5 +1,5 @@
 <div
-    x-data="{ _pushing: false, _saving: false }"
+    x-data="{ _pushing: false, _saving: false, _dirty: false }"
     x-on:request-push-and-navigate.window="
         if (_pushing) return;
         _pushing = true;
@@ -22,6 +22,7 @@
         } catch { _saving = false; return; }
         await $wire.save();
         _saving = false;
+        _dirty = false;
     }">
     <x-wizard.step-header title="Course Components"
         description="Fill in instructor details and class delivery info for each component." />
@@ -32,33 +33,30 @@
 
             {{-- Instructor Profile --}}
             <div>
-                <p class="text-xs font-bold uppercase tracking-widest text-[#475569] mb-3 flex items-center gap-2">
+                <p class="text-xs font-bold uppercase tracking-widest text-[#475569] mb-1 flex items-center gap-2">
                     <span class="h-px w-4 bg-[#16a34a]"></span> Instructor Profile
                 </p>
+                <p class="mb-3 text-xs text-slate-400">Auto-populated from your account profile.</p>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <x-form.label>Instructor Name</x-form.label>
                         <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
                             {{ $lecUser?->name ?? '—' }}</p>
-                        <p class="mt-1 text-xs text-slate-400">Auto-populated from your account profile.</p>
                     </div>
                     <div>
                         <x-form.label>Instructor Email</x-form.label>
                         <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
                             {{ $lecUser?->email ?? '—' }}</p>
-                        <p class="mt-1 text-xs text-slate-400">Auto-populated from your account profile.</p>
                     </div>
                     <div>
                         <x-form.label>Phone</x-form.label>
                         <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
                             {{ $lecUser?->phone_number ?? '—' }}</p>
-                        <p class="mt-1 text-xs text-slate-400">Auto-populated from your account profile.</p>
                     </div>
                     <div>
                         <x-form.label>Office</x-form.label>
                         <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
                             {{ $lecUser?->office ?? '—' }}</p>
-                        <p class="mt-1 text-xs text-slate-400">Auto-populated from your account profile.</p>
                     </div>
                 </div>
             </div>
@@ -67,15 +65,15 @@
 
             {{-- Class Delivery --}}
             <div>
-                <p class="text-xs font-bold uppercase tracking-widest text-[#475569] mb-3 flex items-center gap-2">
+                <p class="text-xs font-bold uppercase tracking-widest text-[#475569] mb-1 flex items-center gap-2">
                     <span class="h-px w-4 bg-[#16a34a]"></span> Class Delivery
                 </p>
+                <p class="mb-3 text-xs text-[#94a3b8]">Class hours and passing mark are pulled from course settings.</p>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
                         <x-form.label>Class Hours</x-form.label>
                         <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
                             {{ $lec_class_hours }}</p>
-                        <p class="mt-1 text-xs text-[#94a3b8]">Set in course settings.</p>
                     </div>
                     <div>
                         <x-form.label>
@@ -86,7 +84,6 @@
                         </x-form.label>
                         <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
                             {{ $lec_performance_standard }}%</p>
-                        <p class="mt-1 text-xs text-[#94a3b8]">Set in course settings.</p>
                     </div>
                 </div>
             </div>
@@ -126,7 +123,8 @@
                     await this.$wire.pushConsultationHours(this.hours.map(h => ({ day: h.day, time: formatTime(h.startTime, h.endTime) })));
                 },
             }" x-on:lec-schedules-updated.window="schedules = $event.detail.schedules"
-                x-on:before-save-all.window="window._beforeSaveAllPromises.push(pushToWire())">
+                x-on:before-save-all.window="window._beforeSaveAllPromises.push(pushToWire())"
+                x-on:change.capture="$root._dirty = true">
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
@@ -174,8 +172,8 @@
                             <p class="text-xs font-bold uppercase tracking-widest text-[#475569]">Consultation Hours</p>
                             <button type="button" x-on:click="hours.push({ day: 'Monday', startTime: '', endTime: '' })"
                                 class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold
-                                       bg-amber-50 text-amber-600 border border-amber-200
-                                       hover:bg-amber-100 transition">
+                                       bg-[#f0fdf4] text-[#16a34a] border border-[#bbf7d0]
+                                       hover:bg-[#dcfce7] transition">
                                 <i class="bx bx-plus text-sm"></i> Add
                             </button>
                         </div>
@@ -190,11 +188,11 @@
                                         </x-form.select>
                                         <input type="time" x-model="row.startTime" aria-label="Start time"
                                             class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
-                                                   focus:border-amber-400 focus:outline-none focus:bg-white" />
+                                                   focus:border-emerald-400 focus:outline-none focus:bg-white" />
                                         <span class="text-xs text-slate-400 shrink-0">to</span>
                                         <input type="time" x-model="row.endTime" aria-label="End time"
                                             class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
-                                                   focus:border-amber-400 focus:outline-none focus:bg-white" />
+                                                   focus:border-emerald-400 focus:outline-none focus:bg-white" />
                                         <button type="button" x-on:click="hours.splice(i, 1)"
                                             class="p-1.5 text-[#94a3b8] hover:text-rose-500 hover:bg-rose-50 rounded-md transition">
                                             <i class="bx bx-trash text-sm"></i>
@@ -225,35 +223,41 @@
                 @js($lab_schedules ?? []),
                 @js($labConsultationHours ?? []))"
                 x-on:lab-instructor-selected.window="onInstructorSelected($event.detail)"
-                x-on:before-save-all.window="window._beforeSaveAllPromises.push(pushToWire())">
+                x-on:before-save-all.window="window._beforeSaveAllPromises.push(pushToWire())"
+                x-on:change.capture="$root._dirty = true">
                 <div class="space-y-5">
 
                     {{-- ── Instructor Selector ──────────────────────────────── --}}
-                    <div class="px-4 py-3 rounded-xl border transition-colors"
-                        :class="hasInstructor ? 'bg-blue-50/60 border-blue-200' : 'bg-amber-50 border-amber-200'">
-                        <label class="block text-xs font-bold uppercase tracking-widest mb-1.5"
-                            :class="hasInstructor ? 'text-blue-700' : 'text-amber-600'">
-                            Laboratory Instructor
-                            <span x-show="!hasInstructor" class="text-rose-500 normal-case font-medium">* Required</span>
-                        </label>
-                        <x-form.select x-model="selectedUserId" x-on:change="selectUser($event.target.value)"
-                            class="max-w-xl">
-                            <option value="">— Select a Laboratory Instructor —</option>
-                            @if ($lecUser)
-                                <option value="{{ $lecUser->id }}">{{ $lecUser->name }} — Same as LEC ({{ $lecUser->email }})</option>
-                            @endif
-                            @foreach ($labUsers as $u)
-                                @if (!$lecUser || $u['id'] !== $lecUser->id)
-                                    <option value="{{ $u['id'] }}">{{ $u['name'] }} ({{ $u['email'] }})</option>
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-widest text-[#475569] mb-3 flex items-center gap-2">
+                            <span class="h-px w-4 bg-[#2563eb]"></span> Select Instructor
+                        </p>
+                        <div class="px-4 py-3 rounded-xl border transition-colors"
+                            :class="hasInstructor ? 'bg-blue-50/60 border-blue-200' : 'bg-amber-50 border-amber-200'">
+                            <label class="block text-xs font-bold uppercase tracking-widest mb-1.5"
+                                :class="hasInstructor ? 'text-blue-700' : 'text-amber-600'">
+                                Laboratory Instructor
+                                <span x-show="!hasInstructor" class="text-rose-500 normal-case font-medium">* Required</span>
+                            </label>
+                            <x-form.select x-model="selectedUserId" x-on:change="selectUser($event.target.value)"
+                                class="max-w-xl">
+                                <option value="">— Select a Laboratory Instructor —</option>
+                                @if ($lecUser)
+                                    <option value="{{ $lecUser->id }}">{{ $lecUser->name }} — Same as LEC ({{ $lecUser->email }})</option>
                                 @endif
-                            @endforeach
-                        </x-form.select>
+                                @foreach ($labUsers as $u)
+                                    @if (!$lecUser || $u['id'] !== $lecUser->id)
+                                        <option value="{{ $u['id'] }}">{{ $u['name'] }} ({{ $u['email'] }})</option>
+                                    @endif
+                                @endforeach
+                            </x-form.select>
+                        </div>
                     </div>
 
                     {{-- ── Blocker ──────────────────────────────────────────── --}}
                     <div x-show="!hasInstructor" x-cloak
-                        class="flex flex-col items-center justify-center py-12 text-center rounded-xl border border-dashed border-amber-200 bg-amber-50/50">
-                        <div class="w-14 h-14 rounded-2xl bg-amber-100 flex items-center justify-center mb-4">
+                        class="flex flex-col items-center justify-center py-6 text-center rounded-xl border border-dashed border-amber-200 bg-amber-50/50">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center mb-3">
                             <i class="bx bx-user-circle text-2xl text-amber-500"></i>
                         </div>
                         <h3 class="text-sm font-bold text-slate-700 mb-1">Select a Laboratory Instructor first</h3>
@@ -264,9 +268,10 @@
 
                     {{-- ── Instructor Profile ───────────────────────────────── --}}
                     <div x-show="hasInstructor" x-cloak>
-                        <p class="text-xs font-bold uppercase tracking-widest text-[#475569] mb-3 flex items-center gap-2">
+                        <p class="text-xs font-bold uppercase tracking-widest text-[#475569] mb-1 flex items-center gap-2">
                             <span class="h-px w-4 bg-[#2563eb]"></span> Instructor Profile
                         </p>
+                        <p class="mb-3 text-xs text-slate-400">Auto-populated from the selected instructor's profile.</p>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <x-form.label>Instructor Name</x-form.label>
@@ -292,29 +297,26 @@
                     </div>
 
                     {{-- ── Class Delivery ───────────────────────────────────── --}}
-                    <template x-if="hasInstructor">
-                        <div>
-                            <div class="border-t border-[#e2e8f0] mb-5"></div>
-                            <p class="text-xs font-bold uppercase tracking-widest text-[#475569] mb-3 flex items-center gap-2">
-                                <span class="h-px w-4 bg-[#2563eb]"></span> Class Delivery
-                            </p>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                                <div>
-                                    <x-form.label>Class Hours</x-form.label>
-                                    <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
-                                        {{ $lab_class_hours ?? '—' }}</p>
-                                    <p class="mt-1 text-xs text-[#94a3b8]">Set in course settings.</p>
-                                </div>
-                                <div>
-                                    <x-form.label>Passing Mark <span
-                                            class="text-[#94a3b8] font-normal normal-case tracking-normal">(LEC &amp; LAB)</span></x-form.label>
-                                    <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
-                                        {{ $lec_performance_standard }}%</p>
-                                    <p class="mt-1 text-xs text-[#94a3b8]">Set in course settings.</p>
-                                </div>
+                    <div x-show="hasInstructor" x-cloak>
+                        <div class="border-t border-[#e2e8f0] mb-5"></div>
+                        <p class="text-xs font-bold uppercase tracking-widest text-[#475569] mb-1 flex items-center gap-2">
+                            <span class="h-px w-4 bg-[#2563eb]"></span> Class Delivery
+                        </p>
+                        <p class="mb-3 text-xs text-[#94a3b8]">Class hours and passing mark are pulled from course settings.</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <x-form.label>Class Hours</x-form.label>
+                                <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
+                                    {{ $lab_class_hours ?? '—' }}</p>
+                            </div>
+                            <div>
+                                <x-form.label>Passing Mark <span
+                                        class="text-[#94a3b8] font-normal normal-case tracking-normal">(LEC &amp; LAB)</span></x-form.label>
+                                <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
+                                    {{ $lec_performance_standard }}%</p>
                             </div>
                         </div>
-                    </template>
+                    </div>
 
                     {{-- ── Schedule + Consultation ──────────────────────────── --}}
                     <div x-show="hasInstructor" x-cloak>
@@ -364,7 +366,7 @@
                                     <p class="text-xs font-bold uppercase tracking-widest text-[#475569]">Consultation Hours</p>
                                     <button type="button" x-on:click="hours.push({ day: 'Monday', startTime: '', endTime: '' })"
                                         class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold
-                                               bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-100 transition">
+                                               bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition">
                                         <i class="bx bx-plus text-sm"></i> Add
                                     </button>
                                 </div>
@@ -379,11 +381,11 @@
                                                 </x-form.select>
                                                 <input type="time" x-model="row.startTime" aria-label="Start time"
                                                     class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
-                                                           focus:border-amber-400 focus:outline-none focus:bg-white" />
+                                                           focus:border-blue-400 focus:outline-none focus:bg-white" />
                                                 <span class="text-xs text-slate-400 shrink-0">to</span>
                                                 <input type="time" x-model="row.endTime" aria-label="End time"
                                                     class="flex-1 text-sm rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-3 py-2
-                                                           focus:border-amber-400 focus:outline-none focus:bg-white" />
+                                                           focus:border-blue-400 focus:outline-none focus:bg-white" />
                                                 <button type="button" x-on:click="hours.splice(i, 1)"
                                                     class="p-1.5 text-[#94a3b8] hover:text-rose-500 hover:bg-rose-50 rounded-md transition">
                                                     <i class="bx bx-trash text-sm"></i>
@@ -409,7 +411,7 @@
     @endif
 
     {{-- ── Sticky Save All footer ────────────────────────────────────────────── --}}
-    <x-wizard.save-bar hint="Changes in both LEC and LAB sections are saved together.">
+    <x-wizard.save-bar hint="{{ $course->has_lec_lab ? 'Changes in both LEC and LAB sections are saved together.' : 'Changes are saved together.' }}">
         <x-slot:action>
             <x-ui.button type="button" variant="save"
                 x-bind:disabled="_saving"
@@ -426,9 +428,14 @@
                     } catch { _saving = false; return; }
                     await $wire.save();
                     _saving = false;
+                    _dirty = false;
                 }">
                 <i class="bx bx-save text-base leading-none"></i> Save All
             </x-ui.button>
+            <span x-show="_dirty" x-cloak
+                class="inline-flex items-center gap-1 text-xs text-amber-600 font-medium">
+                <i class="bx bx-error-circle text-sm"></i> Unsaved changes
+            </span>
         </x-slot:action>
     </x-wizard.save-bar>
 
