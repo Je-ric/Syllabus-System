@@ -11,6 +11,7 @@ use Livewire\Component;
 class AcademicCalendarStep extends Component
 {
     public int    $syllabusId;
+    public int    $stepNumber           = 1;
     public ?int   $academic_calendar_id = null;
     public array  $academicCalendars    = [];   // plain arrays, not Eloquent models
     public bool   $isLoaded             = false;

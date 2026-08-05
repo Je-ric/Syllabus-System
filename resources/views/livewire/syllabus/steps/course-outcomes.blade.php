@@ -24,7 +24,8 @@
 
         <x-wizard.step-header
             title="Course Outcomes"
-            description="Define what students will achieve. Add outcomes below — changes are staged until you click Save All." />
+            description="Define what students will achieve. Add outcomes below — changes are staged until you click Save All."
+            :step="$stepNumber" />
 
         {{-- Pending changes bar --}}
         <template x-if="hasPending()">

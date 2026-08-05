@@ -311,10 +311,10 @@
                                             :label="$reviewer['status'] === 'approved' ? 'Completed' : ucfirst($reviewer['status'])" />
 
                                         @if (!empty($reviewer['role']))
-                                            <span class="text-xs px-1.5 py-0.5 rounded font-semibold
-                                                {{ $reviewer['role'] === 'chair' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">
-                                                {{ ucfirst($reviewer['role']) }}
-                                            </span>
+                                            <x-feedback-status.status-indicator
+                                                :status="$reviewer['role'] === 'chair' ? 'chair' : 'faculty'"
+                                                :label="ucfirst($reviewer['role'])"
+                                                size="sm" />
                                         @endif
 
                                         <button type="button"

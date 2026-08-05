@@ -36,6 +36,7 @@ class WeeklyCoverageStep extends Component
 {
     // ── Reactive state (serialised into Livewire snapshot) ────────────────────
     public int    $syllabusId;
+    public int    $stepNumber           = 4;
     public ?int   $academic_calendar_id = null;
     public bool   $weeksGenerated       = false;
     public array  $courseComponents     = [];

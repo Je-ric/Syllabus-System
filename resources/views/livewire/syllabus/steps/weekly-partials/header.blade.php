@@ -4,7 +4,8 @@
 
     <x-wizard.step-header
         title="Weekly Coverage"
-        description="Weeks are auto-generated from the academic calendar. Fill in coverage details per week.">
+        description="Weeks are auto-generated from the academic calendar. Fill in coverage details per week."
+        :step="$stepNumber">
 
         @if ($weeksGenerated)
             <div class="flex items-center gap-2 flex-wrap">

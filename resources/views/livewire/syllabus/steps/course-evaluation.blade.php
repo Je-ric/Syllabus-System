@@ -2,7 +2,8 @@
 
     <x-wizard.step-header
         title="Course Evaluation"
-        description="Set the weight (%) for each assessment task. Rows are pulled from Weekly Coverage. The 60% passing standard applies per semester." />
+        description="Set the weight (%) for each assessment task. Rows are pulled from Weekly Coverage. The 60% passing standard applies per semester."
+        :step="$stepNumber" />
 
     @if (count($rows) === 0)
         <x-feedback-status.empty-state

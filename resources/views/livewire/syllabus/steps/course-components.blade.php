@@ -25,65 +25,68 @@
         _dirty = false;
     }">
     <x-wizard.step-header title="Course Components"
-        description="Fill in instructor details and class delivery info for each component." />
+        description="Fill in instructor details and class delivery info for each component."
+        :step="$stepNumber" />
 
     {{-- ══ Lecture ═══════════════════════════════════════════════════════════ --}}
     <x-layout.card title="Lecture (LEC)" icon="book-open" color="emerald" class="mb-5">
-        <div class="space-y-5">
+        <div class="space-y-4">
 
-            {{-- Instructor Profile --}}
+            {{-- Instructor Profile — compact, clearly read-only contact card --}}
             <div>
                 <p class="text-xs font-bold uppercase tracking-widest text-[#475569] mb-1 flex items-center gap-2">
                     <span class="h-px w-4 bg-[#16a34a]"></span> Instructor Profile
                 </p>
-                <p class="mb-3 text-xs text-slate-400">Auto-populated from your account profile.</p>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <x-form.label>Instructor Name</x-form.label>
-                        <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
-                            {{ $lecUser?->name ?? '—' }}</p>
-                    </div>
-                    <div>
-                        <x-form.label>Instructor Email</x-form.label>
-                        <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
-                            {{ $lecUser?->email ?? '—' }}</p>
-                    </div>
-                    <div>
-                        <x-form.label>Phone</x-form.label>
-                        <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
-                            {{ $lecUser?->phone_number ?? '—' }}</p>
-                    </div>
-                    <div>
-                        <x-form.label>Office</x-form.label>
-                        <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
-                            {{ $lecUser?->office ?? '—' }}</p>
+                <p class="mb-2 text-xs text-slate-400">Auto-populated from your account profile.</p>
+
+                <div class="flex items-start gap-3 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-4 py-3">
+                    <span class="inline-flex items-center justify-center w-9 h-9 rounded-full text-sm font-bold shrink-0"
+                          style="background: #f0fdf4; color: #16a34a;">
+                        {{ strtoupper(substr($lecUser?->name ?? 'U', 0, 1)) }}
+                    </span>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-sm font-semibold text-slate-800 truncate">{{ $lecUser?->name ?? '—' }}</p>
+                        <p class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
+                            <span class="inline-flex items-center gap-1 min-w-0">
+                                <i class="bx bx-envelope text-[13px] text-slate-400 shrink-0"></i>
+                                <span class="truncate">{{ $lecUser?->email ?? '—' }}</span>
+                            </span>
+                            <span class="inline-flex items-center gap-1">
+                                <i class="bx bx-phone text-[13px] text-slate-400 shrink-0"></i>
+                                {{ $lecUser?->phone_number ?? '—' }}
+                            </span>
+                            <span class="inline-flex items-center gap-1">
+                                <i class="bx bx-map-pin text-[13px] text-slate-400 shrink-0"></i>
+                                {{ $lecUser?->office ?? '—' }}
+                            </span>
+                        </p>
                     </div>
                 </div>
             </div>
 
             <div class="border-t border-[#e2e8f0]"></div>
 
-            {{-- Class Delivery --}}
+            {{-- Class Delivery — one inline stat strip instead of two boxes --}}
             <div>
                 <p class="text-xs font-bold uppercase tracking-widest text-[#475569] mb-1 flex items-center gap-2">
                     <span class="h-px w-4 bg-[#16a34a]"></span> Class Delivery
                 </p>
-                <p class="mb-3 text-xs text-[#94a3b8]">Class hours and passing mark are pulled from course settings.</p>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <x-form.label>Class Hours</x-form.label>
-                        <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
-                            {{ $lec_class_hours }}</p>
+                <p class="mb-2 text-xs text-[#94a3b8]">Class hours and passing mark are pulled from course settings.</p>
+
+                <div class="flex flex-wrap items-center gap-x-6 gap-y-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-4 py-2.5">
+                    <div class="text-sm">
+                        <span class="text-xs text-slate-400 mr-1.5">Class Hours</span>
+                        <span class="font-semibold text-slate-700">{{ $lec_class_hours }}</span>
                     </div>
-                    <div>
-                        <x-form.label>
+                    <div class="w-px h-4 bg-[#e2e8f0]"></div>
+                    <div class="text-sm">
+                        <span class="text-xs text-slate-400 mr-1.5">
                             Passing Mark
                             @if ($course->has_lec_lab)
-                                <span class="text-[#94a3b8] font-normal normal-case tracking-normal">(LEC &amp; LAB)</span>
+                                <span class="normal-case">(LEC &amp; LAB)</span>
                             @endif
-                        </x-form.label>
-                        <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
-                            {{ $lec_performance_standard }}%</p>
+                        </span>
+                        <span class="font-semibold text-slate-700">{{ $lec_performance_standard }}%</span>
                     </div>
                 </div>
             </div>
@@ -225,7 +228,7 @@
                 x-on:lab-instructor-selected.window="onInstructorSelected($event.detail)"
                 x-on:before-save-all.window="window._beforeSaveAllPromises.push(pushToWire())"
                 x-on:change.capture="$root._dirty = true">
-                <div class="space-y-5">
+                <div class="space-y-4">
 
                     {{-- ── Instructor Selector ──────────────────────────────── --}}
                     <div>
@@ -266,61 +269,61 @@
                         </p>
                     </div>
 
-                    {{-- ── Instructor Profile ───────────────────────────────── --}}
+                    {{-- ── Instructor Profile — compact contact card ────────── --}}
                     <div x-show="hasInstructor" x-cloak>
                         <p class="text-xs font-bold uppercase tracking-widest text-[#475569] mb-1 flex items-center gap-2">
                             <span class="h-px w-4 bg-[#2563eb]"></span> Instructor Profile
                         </p>
-                        <p class="mb-3 text-xs text-slate-400">Auto-populated from the selected instructor's profile.</p>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <x-form.label>Instructor Name</x-form.label>
-                                <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]"
-                                    x-text="labName || '—'"></p>
-                            </div>
-                            <div>
-                                <x-form.label>Instructor Email</x-form.label>
-                                <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]"
-                                    x-text="labEmail || '—'"></p>
-                            </div>
-                            <div>
-                                <x-form.label>Phone</x-form.label>
-                                <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]"
-                                    x-text="labPhone || '—'"></p>
-                            </div>
-                            <div>
-                                <x-form.label>Office</x-form.label>
-                                <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]"
-                                    x-text="labOffice || '—'"></p>
+                        <p class="mb-2 text-xs text-slate-400">Auto-populated from the selected instructor's profile.</p>
+
+                        <div class="flex items-start gap-3 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-4 py-3">
+                            <span class="inline-flex items-center justify-center w-9 h-9 rounded-full text-sm font-bold shrink-0"
+                                  style="background: #eff6ff; color: #2563eb;"
+                                  x-text="(labName || 'U').charAt(0).toUpperCase()"></span>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-semibold text-slate-800 truncate" x-text="labName || '—'"></p>
+                                <p class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
+                                    <span class="inline-flex items-center gap-1 min-w-0">
+                                        <i class="bx bx-envelope text-[13px] text-slate-400 shrink-0"></i>
+                                        <span class="truncate" x-text="labEmail || '—'"></span>
+                                    </span>
+                                    <span class="inline-flex items-center gap-1">
+                                        <i class="bx bx-phone text-[13px] text-slate-400 shrink-0"></i>
+                                        <span x-text="labPhone || '—'"></span>
+                                    </span>
+                                    <span class="inline-flex items-center gap-1">
+                                        <i class="bx bx-map-pin text-[13px] text-slate-400 shrink-0"></i>
+                                        <span x-text="labOffice || '—'"></span>
+                                    </span>
+                                </p>
                             </div>
                         </div>
                     </div>
 
-                    {{-- ── Class Delivery ───────────────────────────────────── --}}
+                    {{-- ── Class Delivery — inline stat strip ───────────────── --}}
                     <div x-show="hasInstructor" x-cloak>
-                        <div class="border-t border-[#e2e8f0] mb-5"></div>
+                        <div class="border-t border-[#e2e8f0] mb-4"></div>
                         <p class="text-xs font-bold uppercase tracking-widest text-[#475569] mb-1 flex items-center gap-2">
                             <span class="h-px w-4 bg-[#2563eb]"></span> Class Delivery
                         </p>
-                        <p class="mb-3 text-xs text-[#94a3b8]">Class hours and passing mark are pulled from course settings.</p>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <x-form.label>Class Hours</x-form.label>
-                                <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
-                                    {{ $lab_class_hours ?? '—' }}</p>
+                        <p class="mb-2 text-xs text-[#94a3b8]">Class hours and passing mark are pulled from course settings.</p>
+
+                        <div class="flex flex-wrap items-center gap-x-6 gap-y-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] px-4 py-2.5">
+                            <div class="text-sm">
+                                <span class="text-xs text-slate-400 mr-1.5">Class Hours</span>
+                                <span class="font-semibold text-slate-700">{{ $lab_class_hours ?? '—' }}</span>
                             </div>
-                            <div>
-                                <x-form.label>Passing Mark <span
-                                        class="text-[#94a3b8] font-normal normal-case tracking-normal">(LEC &amp; LAB)</span></x-form.label>
-                                <p class="mt-1 px-3 py-2 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] text-sm text-[#475569]">
-                                    {{ $lec_performance_standard }}%</p>
+                            <div class="w-px h-4 bg-[#e2e8f0]"></div>
+                            <div class="text-sm">
+                                <span class="text-xs text-slate-400 mr-1.5">Passing Mark <span class="normal-case">(LEC &amp; LAB)</span></span>
+                                <span class="font-semibold text-slate-700">{{ $lec_performance_standard }}%</span>
                             </div>
                         </div>
                     </div>
 
                     {{-- ── Schedule + Consultation ──────────────────────────── --}}
                     <div x-show="hasInstructor" x-cloak>
-                        <div class="border-t border-[#e2e8f0] mb-5"></div>
+                        <div class="border-t border-[#e2e8f0] mb-4"></div>
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                             {{-- Class Schedule --}}

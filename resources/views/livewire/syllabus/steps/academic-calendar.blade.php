@@ -1,7 +1,8 @@
 <div>
     <x-wizard.step-header
         title="Academic Calendar"
-        description="Choose the academic year and semester for this syllabus. This determines the weeks and locked dates." />
+        description="Choose the academic year and semester for this syllabus. This determines the weeks and locked dates."
+        :step="$stepNumber" />
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
 

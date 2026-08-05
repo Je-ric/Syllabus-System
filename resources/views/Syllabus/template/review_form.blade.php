@@ -69,7 +69,7 @@
         $memberReviewers = $reviewers->where('role', 'member')->values();
 
         // Part C — selected change types
-        $selectedChanges = $reviewForm?->natureOfChanges?->pluck('change_type')->toArray() ?? [];
+        $selectedChanges = $reviewForm?->natureOfChange?->pluck('change_type')->toArray() ?? [];
 
         $updatingOptions = [
             'schedule_calendar'   => 'Schedule/calendar changes',

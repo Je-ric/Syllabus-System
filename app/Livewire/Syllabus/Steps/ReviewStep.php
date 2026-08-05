@@ -21,6 +21,7 @@ class ReviewStep extends Component
 {
     // ── Identity ───────────────────────────────────────────────────────────
     public int $syllabusId;
+    public int $stepNumber = 6;
 
     // ── Loaded syllabus state ──────────────────────────────────────────────
     public bool              $isLoaded             = false;

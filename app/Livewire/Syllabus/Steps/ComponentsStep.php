@@ -15,6 +15,7 @@ class ComponentsStep extends Component
     // ── Public state ──────────────────────────────────────────────────────────
 
     public int  $syllabusId;
+    public int  $stepNumber = 2;
     public bool $courseHasLab = false;
     public bool $isLoaded     = false;
 

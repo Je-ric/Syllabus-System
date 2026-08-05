@@ -11,6 +11,7 @@ class CourseEvaluationStep extends Component
     // ── Public state ──────────────────────────────────────────────────────────
 
     public int  $syllabusId;
+    public int  $stepNumber = 5;
 
     // True when the course has both LEC and LAB components.
     public bool $courseHasLab = false;

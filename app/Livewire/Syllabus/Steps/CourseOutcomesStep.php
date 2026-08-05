@@ -10,6 +10,7 @@ use Livewire\Component;
 class CourseOutcomesStep extends Component
 {
     public int $syllabusId;
+    public int $stepNumber = 3;
 
     // Each item: ['id' => int, 'co_code' => string, 'description' => string]
     public array $outcomes = [];
