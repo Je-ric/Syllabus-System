@@ -225,7 +225,7 @@
 
             {{-- ── Sticky right-side step navigator ──────────────────────────── --}}
             <aside class="hidden lg:block w-60 shrink-0"
-                style="position: sticky; top: 5rem; align-self: flex-start; max-height: calc(100vh - 6rem); overflow-y: auto;">
+                style="position: sticky; top: 1rem; align-self: flex-start; max-height: calc(100vh - 2rem); overflow-y: auto;">
 
                 {{-- Step navigator card --}}
                 <div class="rounded-[16px] border border-[#e4e4e7] bg-white overflow-hidden"
@@ -297,9 +297,10 @@
                 @if ($currentStep === 'weekly_coverage')
                     <div class="mt-3 rounded-[16px] border border-[#e4e4e7] bg-white overflow-hidden"
                          style="box-shadow: 0 1px 8px rgba(0,0,0,0.05);">
-                        {{-- Schedule and Calendar Info open drawers that live inside the weekly-coverage
-                             Livewire component. We dispatch custom events; the step component listens
-                             for them on its own x-data rather than relying on wizard-root Alpine vars. --}}
+                        {{-- Info group --}}
+                        <div class="px-4 pt-3 pb-1">
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-[#a1a1aa]">Info</p>
+                        </div>
                         <button type="button" x-on:click="$dispatch('open-schedule-drawer')"
                             class="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-medium text-[#52525b] hover:bg-[#f4f4f5] transition-colors">
                             <i class="bx bx-time text-sm text-[#a1a1aa]"></i> Schedule
@@ -308,7 +309,11 @@
                             class="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-medium text-[#52525b] hover:bg-[#f4f4f5] transition-colors">
                             <i class="bx bx-calendar text-sm text-[#a1a1aa]"></i> Calendar Info
                         </button>
-                        <div class="mx-4 border-t border-[#f4f4f5]"></div>
+                        {{-- Navigation group --}}
+                        <div class="mx-4 border-t border-[#f4f4f5] mt-1"></div>
+                        <div class="px-4 pt-3 pb-1">
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-[#a1a1aa]">Navigation</p>
+                        </div>
                         <button type="button" x-on:click="$dispatch('expand-all-weeks')"
                             class="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-medium text-[#52525b] hover:bg-[#f4f4f5] transition-colors">
                             <i class="bx bx-expand-alt text-sm text-[#a1a1aa]"></i> Expand All
@@ -320,6 +325,13 @@
                         <button type="button" x-on:click="$dispatch('jump-to-incomplete-week')"
                             class="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-medium text-[#92400e] hover:bg-[#fffbeb] transition-colors">
                             <i class="bx bx-skip-next text-sm text-[#d97706]"></i> Next Incomplete
+                        </button>
+                        {{-- Save All — reachable without scrolling back to the header --}}
+                        <div class="mx-4 border-t border-[#f4f4f5] mt-1"></div>
+                        <button type="button"
+                            x-on:click="$dispatch('sidebar-save-all-weeks')"
+                            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-medium text-[#166534] hover:bg-[#f0fdf4] transition-colors">
+                            <i class="bx bx-save text-sm text-[#16a34a]"></i> Save All
                         </button>
                     </div>
                 @endif
@@ -344,30 +356,43 @@
                     </x-layout.card-section>
                 @endif
 
-                {{-- Course Info + PO Reference — Course Outcomes step --}}
+                {{-- Tools — Course Outcomes step --}}
                 @if ($currentStep === 'course_outcomes')
-                    <div class="mt-3 space-y-2">
+                    <div class="mt-3 rounded-[16px] border border-[#e4e4e7] bg-white overflow-hidden"
+                         style="box-shadow: 0 1px 8px rgba(0,0,0,0.05);">
+                        <div class="px-4 pt-3 pb-1">
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-[#a1a1aa]">Info</p>
+                        </div>
                         <button type="button" x-on:click="$dispatch('open-course-info-drawer')"
-                            class="w-full flex items-center justify-between px-4 py-3 rounded-[14px] border border-[#e4e4e7] bg-white text-[13px] font-semibold text-[#18181b] hover:bg-[#f4f4f5] hover:border-[#d1fae5] transition-all"
-                            style="box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
-                            <span class="flex items-center gap-2.5">
-                                <span class="flex items-center justify-center w-7 h-7 rounded-[10px] bg-[#dcfce7] text-[#16a34a]">
-                                    <i class="bx bx-book text-sm leading-none"></i>
-                                </span>
-                                Course Info
-                            </span>
-                            <i class="bx bx-chevron-right text-[#a1a1aa]"></i>
+                            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-medium text-[#52525b] hover:bg-[#f4f4f5] transition-colors">
+                            <i class="bx bx-book text-sm text-[#a1a1aa]"></i> Course Info
                         </button>
                         <button type="button" x-on:click="$dispatch('open-po-ref-drawer')"
-                            class="w-full flex items-center justify-between px-4 py-3 rounded-[14px] border border-[#e4e4e7] bg-white text-[13px] font-semibold text-[#18181b] hover:bg-[#f4f4f5] hover:border-[#bfdbfe] transition-all"
-                            style="box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
-                            <span class="flex items-center gap-2.5">
-                                <span class="flex items-center justify-center w-7 h-7 rounded-[10px] bg-[#dbeafe] text-[#2563eb]">
-                                    <i class="bx bx-list-check text-sm leading-none"></i>
-                                </span>
-                                PO Reference
-                            </span>
-                            <i class="bx bx-chevron-right text-[#a1a1aa]"></i>
+                            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-medium text-[#52525b] hover:bg-[#f4f4f5] transition-colors">
+                            <i class="bx bx-list-check text-sm text-[#a1a1aa]"></i> PO Reference
+                        </button>
+                        <div class="mx-4 border-t border-[#f4f4f5] mt-1"></div>
+                        <div class="px-4 pt-3 pb-1">
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-[#a1a1aa]">Actions</p>
+                        </div>
+                        <button type="button" x-on:click="$dispatch('sidebar-save-all-co')"
+                            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-medium text-[#166534] hover:bg-[#f0fdf4] transition-colors">
+                            <i class="bx bx-save text-sm text-[#16a34a]"></i> Save All
+                        </button>
+                    </div>
+                @endif
+
+                {{-- Tools — Course Components step --}}
+                @if ($currentStep === 'course_components')
+                    <div class="mt-3 rounded-[16px] border border-[#e4e4e7] bg-white overflow-hidden"
+                         style="box-shadow: 0 1px 8px rgba(0,0,0,0.05);">
+                        <div class="px-4 pt-3 pb-1">
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-[#a1a1aa]">Actions</p>
+                        </div>
+                        <button type="button"
+                            x-on:click="$dispatch('sidebar-save-components')"
+                            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-medium text-[#166534] hover:bg-[#f0fdf4] transition-colors">
+                            <i class="bx bx-save text-sm text-[#16a34a]"></i> Save All
                         </button>
                     </div>
                 @endif

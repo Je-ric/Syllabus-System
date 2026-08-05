@@ -10,7 +10,19 @@
         } catch { _pushing = false; return; }
         await $wire.onPushAndNavigate($event.detail.toStep);
         _pushing = false;
-    ">
+    "
+    x-on:sidebar-save-components.window="async () => {
+        if (_saving) return;
+        _saving = true;
+        await $nextTick();
+        window._beforeSaveAllPromises = [];
+        window.dispatchEvent(new CustomEvent('before-save-all'));
+        try {
+            await Promise.all(window._beforeSaveAllPromises);
+        } catch { _saving = false; return; }
+        await $wire.save();
+        _saving = false;
+    }">
     <x-wizard.step-header title="Course Components"
         description="Fill in instructor details and class delivery info for each component." />
 

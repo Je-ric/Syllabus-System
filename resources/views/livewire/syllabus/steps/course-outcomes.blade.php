@@ -9,9 +9,10 @@
         @include('livewire.syllabus.steps.outcomes-partials.po-reference-drawer')
     </div>
 
-    <div x-data="coManager(@js(collect($outcomes)->values()->all()), @js($syllabusId))"
+    <div wire:ignore x-data="coManager(@js(collect($outcomes)->values()->all()), @js($syllabusId))"
          x-on:co-all-saved.window="onSaved($event.detail.outcomes)"
          x-on:co-save-failed.window="isSaving = false"
+         x-on:sidebar-save-all-co.window="saveAll()"
          x-on:request-co-flush-step.window="hasPending() ? saveAll() : $wire.dispatch('syllabus-step-saved', { step: 'course_outcomes' })"
          x-on:request-co-save-and-navigate.window="
              if (hasPending()) {
@@ -42,7 +43,7 @@
                         <span x-text="pendingSummary().modified + ' modified'"></span>
                     </span>
                 </template>
-                <span class="ml-auto text-xs text-amber-600">Click <strong>Save All</strong> to apply.</span>
+                <span class="text-xs text-amber-600">Click <strong>Save All</strong> to apply.</span>
             </div>
         </template>
 
@@ -165,7 +166,8 @@
                 <x-ui.button variant="add-dashed" type="button" x-on:click="addCo()" x-bind:disabled="isSaving || deletingId !== null">
                     <i class="bx bx-plus text-base"></i> Add Course Outcome
                 </x-ui.button>
-                <x-ui.button x-show="hasPending()" x-cloak variant="cancel" type="button" x-on:click="revert()" x-bind:disabled="deletingId !== null">
+                <span class="w-px h-6 bg-slate-200 mx-1"></span>
+                <x-ui.button x-show="hasPending()" x-cloak variant="cancel" type="button" x-on:click="revert()" x-bind:disabled="isSaving || deletingId !== null">
                     <i class="bx bx-undo text-base leading-none"></i> Revert
                 </x-ui.button>
             </div>

@@ -61,8 +61,6 @@
             $isMvgo   = ((int) $week->week_no === 1);
 
             $savedTopic = strip_tags($weekInputs[$wKey]['topic'] ?? '');
-            $refCount   = count(array_filter($weekInputs[$wKey]['references'] ?? [], fn($r) => trim($r['text'] ?? '') !== ''));
-            $matCount   = count(array_filter($weekInputs[$wKey]['materials'] ?? [], fn($m) => trim($m['name'] ?? '') !== '' || trim($m['url'] ?? '') !== ''));
 
             $lockLabel = match ($lockType) {
                 'exam'         => 'Exam Week',
@@ -164,21 +162,6 @@
                             <span class="w-2 h-2 rounded-full bg-[#d97706] shrink-0" title="Incomplete"></span>
                         @else
                             <span class="w-2 h-2 rounded-full bg-[#d4d4d8] shrink-0" title="Empty"></span>
-                        @endif
-                        @if (count($events) > 0)
-                            <x-feedback-status.status-indicator variant="brand" size="sm">
-                                {{ count($events) }} event{{ count($events) !== 1 ? 's' : '' }}
-                            </x-feedback-status.status-indicator>
-                        @endif
-                        @if ($refCount > 0)
-                            <x-feedback-status.status-indicator variant="brand" size="sm">
-                                {{ $refCount }} ref{{ $refCount !== 1 ? 's' : '' }}
-                            </x-feedback-status.status-indicator>
-                        @endif
-                        @if ($matCount > 0)
-                            <x-feedback-status.status-indicator variant="brand" size="sm">
-                                {{ $matCount }} mat{{ $matCount !== 1 ? 's' : '' }}
-                            </x-feedback-status.status-indicator>
                         @endif
                     @endif
                     <i class="bx text-[#a1a1aa] text-lg transition-transform duration-200"

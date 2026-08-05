@@ -7,23 +7,9 @@
         description="Weeks are auto-generated from the academic calendar. Fill in coverage details per week.">
 
         @if ($weeksGenerated)
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-wrap">
 
-                {{-- Soft path: updates week dates and exam labels from the current calendar.
-                     Faculty content (LOs, topics, TLAs, assessments, references) is kept intact. --}}
-                <x-ui.button variant="sm-info"
-                    wire:click="refreshWeekDates"
-                    wireTarget="refreshWeekDates"
-                    loading="Refreshing…">
-                    <i class="bx bx-calendar-check"></i> Refresh Dates
-                </x-ui.button>
-
-                {{-- Visual divider --}}
-                <span class="w-px h-5 bg-[#E4E7EC] shrink-0"></span>
-
-                {{-- Destructive path: wipes all weeks and content, rebuilds from scratch.
-                     Wire confirm is the only safety net here — the label must make the
-                     consequence unmistakably clear. --}}
+                {{-- Destructive path — leftmost so it's visually separated from the safe actions --}}
                 <x-ui.button variant="sm-danger"
                     wire:click="hardResetWeeks"
                     wireTarget="hardResetWeeks"
@@ -32,8 +18,25 @@
                     <i class="bx bx-trash"></i> Hard Reset
                 </x-ui.button>
 
-                {{-- Visual divider --}}
                 <span class="w-px h-5 bg-[#E4E7EC] shrink-0"></span>
+
+                {{-- Soft path: updates week dates and exam labels, keeps faculty content intact --}}
+                <div class="relative inline-flex items-center">
+                    <x-ui.button variant="sm-info"
+                        wire:click="refreshWeekDates"
+                        wireTarget="refreshWeekDates"
+                        loading="Refreshing…">
+                        <i class="bx bx-calendar-check"></i> Refresh Dates
+                    </x-ui.button>
+                    <span
+                        title="Updates week date ranges and exam labels from the current calendar. Your topics, learning outcomes, assessments, and references stay untouched."
+                        class="absolute -top-1.5 -right-1.5 flex items-center justify-center
+                               w-4 h-4 rounded-full bg-[#dbeafe] border border-[#bfdbfe]
+                               text-[9px] font-bold text-[#1d4ed8] cursor-help select-none
+                               hover:bg-[#bfdbfe] transition-colors">
+                        ?
+                    </span>
+                </div>
 
                 <x-ui.button variant="sm-add"
                     wire:click="saveAllWeeklyEntries"
@@ -58,15 +61,6 @@
     @if (! $weeksGenerated && ! $academic_calendar_id)
         <x-feedback-status.alert type="error" :showTitle="false">
             No academic calendar selected. Go back to Step 1 and select one before generating weeks.
-        </x-feedback-status.alert>
-    @endif
-
-    @if ($weeksGenerated)
-        <x-feedback-status.alert type="info" :showTitle="false" class="mt-3">
-            <strong>Refresh Dates</strong> updates week date ranges and exam labels from the current
-            calendar — your topics, learning outcomes, assessments, and references stay untouched.
-            Use <strong>Hard Reset</strong> only if you want to start over completely and rebuild
-            all weeks from scratch.
         </x-feedback-status.alert>
     @endif
 

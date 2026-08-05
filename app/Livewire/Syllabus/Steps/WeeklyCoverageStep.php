@@ -94,6 +94,12 @@ class WeeklyCoverageStep extends Component
         $this->loadData();
     }
 
+    #[On('sidebar-save-all-weeks')]
+    public function onSidebarSaveAll(): void
+    {
+        $this->saveAllWeeklyEntries();
+    }
+
     #[On('syllabus-save-step')]
     public function onSaveRequested(string $step): void
     {

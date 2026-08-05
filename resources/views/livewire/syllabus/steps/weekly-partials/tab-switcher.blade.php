@@ -2,11 +2,13 @@
 
 @if ($hasLEC && $hasLAB)
 
-    <div class="mb-5">
-        <p class="text-[11px] font-bold uppercase tracking-[0.1em] text-[#71717a] mb-2">Component</p>
+    <div class="mb-5 flex items-center justify-between gap-4 flex-wrap">
 
-        <div class="inline-flex p-1 rounded-[14px] border border-[#e4e4e7] bg-[#f4f4f5]"
-             style="box-shadow: inset 0 1px 3px rgba(0,0,0,0.04);">
+        <div>
+            <p class="text-[11px] font-bold uppercase tracking-[0.1em] text-[#71717a] mb-2">Component</p>
+
+            <div class="inline-flex p-1 rounded-[14px] border border-[#e4e4e7] bg-[#f4f4f5]"
+                 style="box-shadow: inset 0 1px 3px rgba(0,0,0,0.04);">
 
             {{-- LEC --}}
             <button
@@ -54,11 +56,27 @@
             class="mt-2 inline-flex items-center gap-1.5 text-[12px] text-[#71717a]">
             <i class="bx bx-loader-alt bx-spin text-sm"></i> Switching component…
         </div>
+
+        </div>{{-- end left column --}}
+
+        {{-- Dot legend — right-aligned on the same row as the tab switcher --}}
+        <div class="flex items-center gap-4 self-end pb-1">
+            <span class="flex items-center gap-1.5 text-xs text-slate-500">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span> Complete
+            </span>
+            <span class="flex items-center gap-1.5 text-xs text-slate-500">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-400 shrink-0"></span> Incomplete
+            </span>
+            <span class="flex items-center gap-1.5 text-xs text-slate-500">
+                <span class="w-2.5 h-2.5 rounded-full bg-slate-300 shrink-0"></span> Empty
+            </span>
+        </div>
+
     </div>
 
 @elseif ($hasLEC || $hasLAB)
 
-    <div class="mb-4">
+    <div class="mb-4 flex items-center justify-between gap-4 flex-wrap">
         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold border
             {{ $hasLEC
                 ? 'bg-[#f0fdf4] text-[#166634] border-[#d1fae5]'
@@ -66,6 +84,19 @@
             <span class="w-2 h-2 rounded-full {{ $hasLEC ? 'bg-[#16a34a]' : 'bg-[#2563eb]' }}"></span>
             {{ $hasLEC ? 'Lecture' : 'Laboratory' }}
         </span>
+
+        {{-- Dot legend — right-aligned on the same row as the component badge --}}
+        <div class="flex items-center gap-4">
+            <span class="flex items-center gap-1.5 text-xs text-slate-500">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span> Complete
+            </span>
+            <span class="flex items-center gap-1.5 text-xs text-slate-500">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-400 shrink-0"></span> Incomplete
+            </span>
+            <span class="flex items-center gap-1.5 text-xs text-slate-500">
+                <span class="w-2.5 h-2.5 rounded-full bg-slate-300 shrink-0"></span> Empty
+            </span>
+        </div>
     </div>
 
 @endif
