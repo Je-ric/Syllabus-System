@@ -38,7 +38,7 @@
     aria-modal="true"
     {{ $attributes->merge([
         'class' =>
-            'oswald fixed inset-y-0 z-50 flex flex-col bg-white w-full ' .
+            'inter fixed inset-y-0 z-50 flex flex-col bg-white w-full ' .
             $width . ' ' .
             ($position === 'left' ? 'left-0' : 'right-0')
     ]) }}

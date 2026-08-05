@@ -21,6 +21,7 @@
         lecStd: {{ $lecStdNum }},
         labStd: {{ $labStdNum }},
         hasLab: {{ $courseHasLab ? 'true' : 'false' }},
+        evalNotesOpen: false,
         async flushToWire() {
             const weights = {};
             Object.entries(this.lec).forEach(([id, v]) => { weights[id] = parseInt(v) || 0; });
@@ -33,46 +34,25 @@
         await flushToWire();
         await $wire.save();
         $dispatch('navigate-after-save', { step: $event.detail.toStep });
-    ">
+    "
+    x-on:open-eval-notes-drawer.window="evalNotesOpen = true"
+    x-on:sidebar-save-evaluation.window="$wire.save()">
 
+        @include('livewire.syllabus.steps.evaluation-partials.notes-drawer')
         @include('livewire.syllabus.steps.evaluation-partials.table')
-        @include('livewire.syllabus.steps.evaluation-partials.notes')
 
-        {{-- Sticky save bar --}}
-        <div class="sticky bottom-0 z-10 mt-4 flex items-center justify-between gap-4 px-5 py-3
+        {{-- Sticky save bar — status lives in the totals row above; bar is save-only --}}
+        <div class="sticky bottom-0 z-10 mt-4 flex items-center justify-end gap-3 px-5 py-3
                     rounded-xl border border-[#dedee2] bg-white/95 backdrop-blur-sm"
              style="box-shadow: 0 -2px 16px rgba(0,0,0,.10);">
 
-            <div class="flex items-center gap-4 text-sm">
-                {{-- LEC total --}}
-                <span class="flex items-center gap-1.5">
-                    <span class="w-2.5 h-2.5 rounded-full transition-colors"
-                        :class="lecTotal === lecStd && lecTotal > 0 ? 'bg-emerald-500' : (lecTotal > 0 ? 'bg-rose-400' : 'bg-slate-300')"></span>
-                    <span class="font-semibold transition-colors"
-                        :class="lecTotal === lecStd && lecTotal > 0 ? 'text-emerald-700' : (lecTotal > 0 ? 'text-rose-600' : 'text-slate-400')">
-                        LEC <span x-text="lecTotal"></span>&thinsp;/&thinsp;{{ $lecStdNum }}%
-                    </span>
-                    <span class="text-xs text-rose-500 font-normal"
-                        x-show="lecTotal > 0 && lecTotal !== lecStd"
-                        x-text="'must equal {{ $lecStdNum }}%'"></span>
-                </span>
-
-                @if ($courseHasLab)
-                    <span class="text-slate-200">|</span>
-                    {{-- LAB total --}}
-                    <span class="flex items-center gap-1.5">
-                        <span class="w-2.5 h-2.5 rounded-full transition-colors"
-                            :class="labTotal === labStd && labTotal > 0 ? 'bg-blue-500' : (labTotal > 0 ? 'bg-rose-400' : 'bg-slate-300')"></span>
-                        <span class="font-semibold transition-colors"
-                            :class="labTotal === labStd && labTotal > 0 ? 'text-blue-700' : (labTotal > 0 ? 'text-rose-600' : 'text-slate-400')">
-                            LAB <span x-text="labTotal"></span>&thinsp;/&thinsp;{{ $labStdNum }}%
-                        </span>
-                        <span class="text-xs text-rose-500 font-normal"
-                            x-show="labTotal > 0 && labTotal !== labStd"
-                            x-text="'must equal {{ $labStdNum }}%'"></span>
-                    </span>
-                @endif
-            </div>
+            {{-- Unsaved changes indicator — visible only when totals are non-zero but not yet saved --}}
+            <span class="flex items-center gap-1.5 text-xs text-amber-600 font-medium"
+                x-show="(lecTotal > 0 || labTotal > 0) && !$wire.__instance.effects.dirty?.length === false"
+                x-cloak>
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                Unsaved changes
+            </span>
 
             <x-ui.button variant="sm-add" wire:click="save" wireTarget="save" loading="Saving…">
                 <i class="bx bx-save"></i> Save Evaluation

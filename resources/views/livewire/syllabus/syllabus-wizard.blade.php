@@ -397,6 +397,31 @@
                     </div>
                 @endif
 
+                {{-- Tools — Course Evaluation step --}}
+                @if ($currentStep === 'course_evaluation')
+                    <div class="mt-3 rounded-[16px] border border-[#e4e4e7] bg-white overflow-hidden"
+                         style="box-shadow: 0 1px 8px rgba(0,0,0,0.05);">
+                        {{-- Info group --}}
+                        <div class="px-4 pt-3 pb-1">
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-[#a1a1aa]">Info</p>
+                        </div>
+                        <button type="button" x-on:click="$dispatch('open-eval-notes-drawer')"
+                            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-medium text-[#52525b] hover:bg-[#f4f4f5] transition-colors">
+                            <i class="bx bx-info-circle text-sm text-[#a1a1aa]"></i> Evaluation Notes
+                        </button>
+                        {{-- Actions group --}}
+                        <div class="mx-4 border-t border-[#f4f4f5] mt-1"></div>
+                        <div class="px-4 pt-3 pb-1">
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-[#a1a1aa]">Actions</p>
+                        </div>
+                        <button type="button"
+                            x-on:click="$dispatch('sidebar-save-evaluation')"
+                            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-medium text-[#166534] hover:bg-[#f0fdf4] transition-colors">
+                            <i class="bx bx-save text-sm text-[#16a34a]"></i> Save Evaluation
+                        </button>
+                    </div>
+                @endif
+
             </aside>
 
         </div>{{-- end two-column --}}
