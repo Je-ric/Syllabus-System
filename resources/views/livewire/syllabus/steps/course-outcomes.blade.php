@@ -22,6 +22,7 @@
          class="space-y-5">
 
         <x-wizard.step-header
+            :step="3" icon="bx-book-open"
             title="Course Outcomes"
             description="Define what students will achieve. Add outcomes below — changes are staged until you click Save All." />
 

@@ -1,5 +1,6 @@
 <div>
     <x-wizard.step-header
+        :step="6" icon="bx-check-shield"
         title="Review & Submit"
         description="Review all details before submitting for department chair review." />
 

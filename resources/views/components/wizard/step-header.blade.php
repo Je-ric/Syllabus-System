@@ -4,41 +4,56 @@
     'icon'        => null,
     'eyebrow'     => null,
     'step'        => null,
+    'total'       => 6,
 ])
 
-<div class="mb-6">
-    <div class="flex items-start justify-between gap-4">
-        <div class="flex items-start gap-3 flex-1 min-w-0">
+@php
+    $stepNum = $step !== null ? (int) $step : null;
+@endphp
 
-            {{-- Brand accent bar — Emerald 700 --}}
-            <div class="w-[3px] self-stretch rounded-full shrink-0 bg-[#00965F] min-h-[2.5rem]"></div>
+<div class="mb-6 relative overflow-hidden rounded-[14px] border border-[#e4e4e7]"
+     style="background: linear-gradient(115deg, color-mix(in srgb, #00965F 7%, #fff) 0%, #ffffff 55%);">
+
+    {{-- Brand accent bar — Emerald ramp --}}
+    <span class="absolute inset-y-0 left-0 w-[3px]"
+          style="background: linear-gradient(180deg,#00C075 0%,#00965F 100%);"></span>
+
+    <div class="flex items-start justify-between gap-4 pl-5 pr-4 py-4">
+        <div class="flex items-start gap-3.5 flex-1 min-w-0">
+
+            @if ($icon)
+                <span class="shrink-0 w-10 h-10 rounded-[12px] flex items-center justify-center text-white text-[20px]"
+                      style="background: linear-gradient(180deg,#00C075 0%,#00965F 100%);
+                             box-shadow: 0 3px 10px rgba(0,150,95,0.28);">
+                    <i class="bx {{ $icon }}"></i>
+                </span>
+            @endif
 
             <div class="min-w-0">
-                @if ($eyebrow)
-                    <div class="flex items-center gap-2 mb-1.5">
-                        <span class="h-px w-4 bg-[#00965F]"></span>
+
+                {{-- Eyebrow: step counter + progress ticks --}}
+                @if ($stepNum || $eyebrow)
+                    <div class="flex items-center gap-2 mb-1">
                         <span class="text-[10px] font-bold uppercase tracking-widest text-[#00965F]">
-                            {{ $eyebrow }}
+                            {{ $eyebrow ?? "Step {$stepNum} of {$total}" }}
                         </span>
+                        @if ($stepNum)
+                            <span class="flex items-center gap-[3px]">
+                                @for ($i = 1; $i <= $total; $i++)
+                                    <span class="h-[3px] rounded-full transition-all duration-300
+                                                 {{ $i === $stepNum ? 'w-4 bg-[#00965F]' : ($i < $stepNum ? 'w-2 bg-[#86efac]' : 'w-2 bg-[#e4e4e7]') }}"></span>
+                                @endfor
+                            </span>
+                        @endif
                     </div>
                 @endif
 
-                <div class="flex items-center gap-2.5 flex-wrap">
-                    @if ($step)
-                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-full
-                                     text-xs font-bold text-white shrink-0
-                                     bg-[linear-gradient(180deg,#00C075_0%,#00965F_100%)]"
-                              style="box-shadow: 0 2px 6px rgba(0,150,95,0.30);">
-                            {{ $step }}
-                        </span>
-                    @endif
-                    <h2 class="text-xl font-bold tracking-tight text-[#394056] leading-snug">
-                        {{ $title }}
-                    </h2>
-                </div>
+                <h2 class="text-xl font-bold tracking-tight text-[#394056] leading-snug">
+                    {{ $title }}
+                </h2>
 
                 @if ($description)
-                    <p class="mt-1.5 text-[13px] leading-relaxed text-[#72809E] max-w-2xl">
+                    <p class="mt-1 text-[13px] leading-relaxed text-[#72809E] max-w-2xl">
                         {{ $description }}
                     </p>
                 @endif

@@ -11,7 +11,7 @@
         await $wire.onPushAndNavigate($event.detail.toStep);
         _pushing = false;
     ">
-    <x-wizard.step-header title="Course Components"
+    <x-wizard.step-header :step="2" icon="bx-notepad" title="Course Components"
         description="Fill in instructor details and class delivery info for each component." />
 
     {{-- ══ Lecture ═══════════════════════════════════════════════════════════ --}}

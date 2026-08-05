@@ -3,6 +3,7 @@
 <div class="mb-5">
 
     <x-wizard.step-header
+        :step="4" icon="bx-calendar-week"
         title="Weekly Coverage"
         description="Weeks are auto-generated from the academic calendar. Fill in coverage details per week.">
 

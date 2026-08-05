@@ -1,6 +1,7 @@
 <div>
 
     <x-wizard.step-header
+        :step="5" icon="bx-bar-chart-alt-2"
         title="Course Evaluation"
         description="Set the weight (%) for each assessment task. Rows are pulled from Weekly Coverage. The 60% passing standard applies per semester." />
 

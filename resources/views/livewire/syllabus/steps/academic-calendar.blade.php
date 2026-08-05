@@ -1,5 +1,6 @@
 <div>
     <x-wizard.step-header
+        :step="1" icon="bx-calendar"
         title="Academic Calendar"
         description="Choose the academic year and semester for this syllabus. This determines the weeks and locked dates." />
 
