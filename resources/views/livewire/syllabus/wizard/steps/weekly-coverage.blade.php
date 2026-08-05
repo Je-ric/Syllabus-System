@@ -9,13 +9,13 @@
          x-on:open-calendar-info-drawer.window="calInfoOpen = true">
 
         {{-- Drawers --}}
-        @include('livewire.syllabus.steps.weekly-partials.schedule-drawer')
-        @include('livewire.syllabus.steps.weekly-partials.calendar-info-drawer')
+        @include('livewire.syllabus.wizard.steps.partials.weekly.schedule-drawer')
+        @include('livewire.syllabus.wizard.steps.partials.weekly.calendar-info-drawer')
 
     </div>
 
     {{-- ══ Header: title, buttons, info cards, stats ═══════════════════════════ --}}
-    @include('livewire.syllabus.steps.weekly-partials.header')
+    @include('livewire.syllabus.wizard.steps.partials.weekly.header')
 
     {{-- ══ Empty State ══════════════════════════════════════════════════════════ --}}
     @if ($syllabusWeeks->isEmpty())
@@ -38,10 +38,10 @@
         @php $hasLEC = isset($courseComponents['LEC']); $hasLAB = isset($courseComponents['LAB']); @endphp
 
         {{-- ══ LEC / LAB tab switcher ══════════════════════════════════════════ --}}
-        @include('livewire.syllabus.steps.weekly-partials.tab-switcher')
+        @include('livewire.syllabus.wizard.steps.partials.weekly.tab-switcher')
 
         {{-- ══ Week accordion ══════════════════════════════════════════════════ --}}
-        @include('livewire.syllabus.steps.weekly-partials.week-accordion')
+        @include('livewire.syllabus.wizard.steps.partials.weekly.week-accordion')
 
     @endif
 

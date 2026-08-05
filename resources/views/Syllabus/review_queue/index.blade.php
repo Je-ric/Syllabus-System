@@ -31,7 +31,7 @@
             @else
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     @foreach ($pending as $assignment)
-                        @include('Syllabus.partials.review-queue-card', [
+                        @include('Syllabus.review_queue.review-queue-card', [
                             'assignment' => $assignment,
                             'syllabus'   => $assignment->syllabus,
                         ])
@@ -50,7 +50,7 @@
             @else
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     @foreach ($done as $assignment)
-                        @include('Syllabus.partials.review-queue-card', [
+                        @include('Syllabus.review_queue.review-queue-card', [
                             'assignment' => $assignment,
                             'syllabus'   => $assignment->syllabus,
                         ])

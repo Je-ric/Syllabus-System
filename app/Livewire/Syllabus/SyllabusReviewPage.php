@@ -95,7 +95,7 @@ class SyllabusReviewPage extends Component
 
     public function render()
     {
-        return view('livewire.syllabus.syllabus-review-page', [
+        return view('livewire.syllabus.review-page.review-page', [
             'criteria'       => $this->buildCriteria(),
             'allResponded'   => $this->allResponded(),
             'progressPct'    => $this->progressPct(),

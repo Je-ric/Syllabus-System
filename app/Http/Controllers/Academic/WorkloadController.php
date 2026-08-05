@@ -27,7 +27,7 @@ class WorkloadController extends Controller
             ->orderByDesc('synced_at')
             ->get();
 
-        return view('Faculty.workload.index', compact('loads', 'user'));
+        return view('Syllabus.workload.index', compact('loads', 'user'));
     }
 
     /**

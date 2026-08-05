@@ -56,7 +56,7 @@ class ComponentsStep extends Component
         $lecUser   = $lecUserId ? User::with('consultationHours')->find($lecUserId) : null;
         $labUser   = $this->lab_user_id ? User::with('consultationHours')->find($this->lab_user_id) : null;
 
-        return view('livewire.syllabus.steps.course-components', [
+        return view('livewire.syllabus.wizard.steps.course-components', [
             'course'               => (object) ['has_lec_lab' => $this->courseHasLab],
             'labConsultationHours' => $this->labConsultationHours,
             'labUsers'             => $this->labUsers,

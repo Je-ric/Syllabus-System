@@ -73,7 +73,7 @@ class WeeklyCoverageStep extends Component
                 ->get();
         }
 
-        return view('livewire.syllabus.steps.weekly-coverage', [
+        return view('livewire.syllabus.wizard.steps.weekly-coverage', [
             'syllabusWeeks' => $this->syllabusWeeks,
             'syllabus'      => $this->freshSyllabus(),
         ]);

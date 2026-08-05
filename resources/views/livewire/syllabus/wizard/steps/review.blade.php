@@ -7,23 +7,23 @@
     <div class="space-y-4">
 
         {{-- ── Previews ──────────────────────────────────────────────────── --}}
-        @include('livewire.syllabus.steps.review-partials.previews')
+        @include('livewire.syllabus.wizard.steps.partials.review.previews')
 
         {{-- ── F.003 Review Form (author panel) ─────────────────────────── --}}
-        @include('livewire.syllabus.steps.review-partials.review-form', [
+        @include('livewire.syllabus.wizard.steps.partials.review.review-form', [
             'syllabus'   => $this->syllabus,
             'reviewForm' => $reviewForm,
         ])
 
         {{-- ── Review & Approval ─────────────────────────────────────────── --}}
-        @include('livewire.syllabus.steps.review-partials.reviewers')
+        @include('livewire.syllabus.wizard.steps.partials.review.reviewers')
 
         {{-- ── Revision History ──────────────────────────────────────────── --}}
-        @include('livewire.syllabus.steps.review-partials.revisions')
+        @include('livewire.syllabus.wizard.steps.partials.review.revisions')
 
 
         {{-- ── Saved Versions (archive) ──────────────────────────────────── --}}
-        @include('livewire.syllabus.steps.review-partials.saved-versions')
+        @include('livewire.syllabus.wizard.steps.partials.review.saved-versions')
 
     </div>
 

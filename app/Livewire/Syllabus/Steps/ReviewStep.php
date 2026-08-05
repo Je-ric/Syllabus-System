@@ -110,7 +110,7 @@ class ReviewStep extends Component
 
     public function render()
     {
-        return view('livewire.syllabus.steps.review', [
+        return view('livewire.syllabus.wizard.steps.review', [
             'course'       => $this->course,
             'reviewers'    => $this->reviewers,
             'deanUsers'    => $this->deanUsers,

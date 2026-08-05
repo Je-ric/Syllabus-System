@@ -5,8 +5,8 @@
     <div x-data="{ courseInfoOpen: false, poRefOpen: false }"
          x-on:open-course-info-drawer.window="courseInfoOpen = true"
          x-on:open-po-ref-drawer.window="poRefOpen = true">
-        @include('livewire.syllabus.steps.outcomes-partials.course-info-drawer')
-        @include('livewire.syllabus.steps.outcomes-partials.po-reference-drawer')
+        @include('livewire.syllabus.wizard.steps.partials.outcomes.course-info-drawer')
+        @include('livewire.syllabus.wizard.steps.partials.outcomes.po-reference-drawer')
     </div>
 
     <div wire:ignore x-data="coManager(@js(collect($outcomes)->values()->all()), @js($syllabusId))"
@@ -49,7 +49,7 @@
         </template>
 
         {{-- CO view-only modal --}}
-        @include('livewire.syllabus.steps.outcomes-partials.co-view-modal')
+        @include('livewire.syllabus.wizard.steps.partials.outcomes.co-view-modal')
 
         {{-- CO rows (compact) --}}
         <div class="rounded-xl border border-slate-200 overflow-hidden divide-y divide-slate-100" style="box-shadow:0 1px 4px rgba(0,0,0,.05);">

@@ -38,12 +38,12 @@ class SyllabusController extends Controller
     public function create(Request $request)
     {
         $programId = $request->query('program_id');
-        return view('Syllabus.selectCourse', $this->buildProgramSelectionData($programId));
+        return view('Syllabus.create.selectCourse', $this->buildProgramSelectionData($programId));
     }
 
     public function showCourses(int $programId)
     {
-        return view('Syllabus.selectCourse', $this->buildProgramSelectionData($programId));
+        return view('Syllabus.create.selectCourse', $this->buildProgramSelectionData($programId));
     }
 
     public function showForm($courseId)
@@ -94,7 +94,7 @@ class SyllabusController extends Controller
             $syllabusId = $syllabus->id;
         }
 
-        return view('Syllabus.wizard', compact('syllabusId', 'courseId'));
+        return view('Syllabus.create.wizard', compact('syllabusId', 'courseId'));
     }
 
     public function destroy(Syllabus $syllabus)

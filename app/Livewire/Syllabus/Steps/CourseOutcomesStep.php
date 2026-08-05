@@ -31,7 +31,7 @@ class CourseOutcomesStep extends Component
 
     public function render()
     {
-        return view('livewire.syllabus.steps.course-outcomes', [
+        return view('livewire.syllabus.wizard.steps.course-outcomes', [
             'courseInfo' => $this->courseInfo,
         ]);
     }

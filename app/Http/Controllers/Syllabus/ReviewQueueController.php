@@ -36,7 +36,7 @@ class ReviewQueueController extends Controller
         $pending = $assignments->filter(fn ($a) => $a->status === 'pending');
         $done    = $assignments->filter(fn ($a) => $a->status !== 'pending');
 
-        return view('Syllabus.review-queue', compact('assignments', 'pending', 'done'));
+        return view('Syllabus.review_queue.index', compact('assignments', 'pending', 'done'));
     }
 
     public function show(Syllabus $syllabus)
@@ -56,6 +56,6 @@ class ReviewQueueController extends Controller
             }
         }
 
-        return view('Syllabus.reviewer', compact('syllabus'));
+        return view('Syllabus.review_queue.show', compact('syllabus'));
     }
 }

@@ -39,8 +39,8 @@
     x-on:open-eval-notes-drawer.window="evalNotesOpen = true"
     x-on:sidebar-save-evaluation.window="$wire.save()">
 
-        @include('livewire.syllabus.steps.evaluation-partials.notes-drawer')
-        @include('livewire.syllabus.steps.evaluation-partials.table')
+        @include('livewire.syllabus.wizard.steps.partials.evaluation.notes-drawer')
+        @include('livewire.syllabus.wizard.steps.partials.evaluation.table')
 
         {{-- Sticky save bar — status lives in the totals row above; bar is save-only --}}
         <div class="sticky bottom-0 z-10 mt-4 flex items-center justify-end gap-3 px-5 py-3

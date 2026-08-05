@@ -64,7 +64,7 @@ class CourseEvaluationStep extends Component
 
     public function render()
     {
-        return view('livewire.syllabus.steps.course-evaluation');
+        return view('livewire.syllabus.wizard.steps.course-evaluation');
     }
 
     public function updated(string $propertyName): void

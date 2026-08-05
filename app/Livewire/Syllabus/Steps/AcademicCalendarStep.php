@@ -60,7 +60,7 @@ class AcademicCalendarStep extends Component
 
     public function render()
     {
-        return view('livewire.syllabus.steps.academic-calendar');
+        return view('livewire.syllabus.wizard.steps.academic-calendar');
     }
 
     private function loadData(): void

@@ -355,7 +355,7 @@ class SyllabusWizard extends Component
             'course_evaluation' => $completion->isMissing($syllabusId, 'course_evaluation', $hasLecLab),
         ];
 
-        return view('livewire.syllabus.syllabus-wizard');
+        return view('livewire.syllabus.wizard.wizard');
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

@@ -1,5 +1,5 @@
 {{-- weekly-partials/week-accordion.blade.php --}}
-@include('livewire.syllabus.steps.weekly-partials.week-edit-modal')
+@include('livewire.syllabus.wizard.steps.partials.weekly.week-edit-modal')
 
 @php
     $incompleteWeekNos = [];
@@ -175,11 +175,11 @@
                 class="pl-5 pr-4 pb-5 pt-4 border-t {{ $bodyBorder }} {{ $bodyBg }}">
 
                 @if ($isLocked)
-                    @include('livewire.syllabus.steps.weekly-partials.week-body-locked', [
+                    @include('livewire.syllabus.wizard.steps.partials.weekly.week-body-locked', [
                         'week' => $week, 'events' => $events, 'lockType' => $lockType, 'lockLabel' => $lockLabel,
                     ])
                 @else
-                    @include('livewire.syllabus.steps.weekly-partials.week-body-editable', [
+                    @include('livewire.syllabus.wizard.steps.partials.weekly.week-body-editable', [
                         'week' => $week, 'wKey' => $wKey, 'events' => $events, 'isMvgo' => $isMvgo,
                     ])
                 @endif

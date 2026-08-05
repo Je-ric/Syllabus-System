@@ -186,16 +186,16 @@
             {{-- ══ RIGHT: sidebar ═════════════════════════════════════════════ --}}
             <div class="space-y-5">
 
-                @include('livewire.syllabus.review-page-partials.syllabus-info')
+                @include('livewire.syllabus.review-page.partials.syllabus-info')
 
-                @include('livewire.syllabus.review-page-partials.reviewer-status')
+                @include('livewire.syllabus.review-page.partials.reviewer-status')
 
                 @if ($isChair)
-                    @include('livewire.syllabus.review-page-partials.chair-decision')
+                    @include('livewire.syllabus.review-page.partials.chair-decision')
                 @endif
 
                 @if ($reviewForm?->approved_by_dean_id)
-                    @include('livewire.syllabus.review-page-partials.dean-approval')
+                    @include('livewire.syllabus.review-page.partials.dean-approval')
                 @endif
 
             </div>
