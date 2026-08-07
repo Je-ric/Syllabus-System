@@ -7,7 +7,7 @@
 
     {{-- ══ Page header ══════════════════════════════════════════════════════════ --}}
     <x-layout.page-header
-        icon="bx-clipboard-check"
+        icon="bx-revision"
         title="Review: {{ $syllabus->course->course_code }} — {{ $syllabus->course->course_title }}"
         desc="{{ $isChair ? 'CQI Chair' : 'CQI Member' }} · {{ $syllabus->academicCalendar?->academic_year }} {{ $syllabus->academicCalendar?->semester }}">
 
@@ -190,16 +190,19 @@
 
                 @include('livewire.syllabus.review-page.partials.reviewer-status')
 
-                @if ($isChair)
-                    @include('livewire.syllabus.review-page.partials.chair-decision')
-                @endif
-
-                @if ($reviewForm?->approved_by_dean_id)
-                    @include('livewire.syllabus.review-page.partials.dean-approval')
-                @endif
-
             </div>
         </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            @if ($isChair)
+                @include('livewire.syllabus.review-page.partials.chair-decision')
+            @endif
+
+            @if ($reviewForm?->approved_by_dean_id)
+                @include('livewire.syllabus.review-page.partials.dean-approval')
+            @endif
+        </div>
+        
     </x-layout.panel>
 
 </div>

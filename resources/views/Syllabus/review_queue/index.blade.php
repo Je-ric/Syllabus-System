@@ -3,7 +3,7 @@
 @section('content')
 
 <x-layout.page-header
-    icon="bx-clipboard-check"
+    icon="bx-revision"
     title="Review Queue"
     desc="Syllabi assigned to you for CQI review">
 </x-layout.page-header>

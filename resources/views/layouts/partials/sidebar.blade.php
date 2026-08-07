@@ -14,7 +14,7 @@
         <div class="flex items-center justify-between">
             <x-ui.brand-logo />
             <button id="sidebar-close"
-                class="lg:hidden text-[#A5B2BD] hover:text-[#394056] transition p-1.5 rounded-[8px] hover:bg-[#F1F3F5]"
+                class="lg:hidden text-[#A5B2BD] hover:text-[#394056] transition p-1.5 rounded-lg hover:bg-[#F1F3F5]"
                 aria-label="Close navigation">
                 <i class="bx bx-x text-xl"></i>
             </button>
@@ -41,17 +41,10 @@
                         <x-ui.nav-link href="{{ route('workload.index') }}" icon="bx-briefcase" :active="request()->routeIs('workload.*')">
                             My Workload
                         </x-ui.nav-link>
+                        <x-ui.nav-link href="{{ route('syllabus.review-queue.index') }}" icon="bx-revision" :active="request()->routeIs('syllabus.review-queue.*')">
+                            CQI Review Queue
+                        </x-ui.nav-link>
                     @endif
-                </nav>
-            @endif
-
-            {{-- Review Queue — chairs assigned as reviewers + faculty reviewers + admin --}}
-            @if ($user->hasRole('admin') || $user->hasRole('chair') || $user->hasRole('faculty'))
-                <nav aria-label="Review">
-                    <p class="nav-label">CQI Review</p>
-                    <x-ui.nav-link href="{{ route('syllabus.review-queue.index') }}" icon="bx-clipboard-check" :active="request()->routeIs('syllabus.review-queue.*')">
-                        Review Queue
-                    </x-ui.nav-link>
                 </nav>
             @endif
 
@@ -123,7 +116,7 @@
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
                     <button type="submit" title="Sign out"
-                        class="flex items-center justify-center w-8 h-8 rounded-[8px]
+                        class="flex items-center justify-center w-8 h-8 rounded-lg
                                text-[#A5B2BD] hover:text-[#e11d48] hover:bg-[#fff1f2]
                                transition-colors duration-150">
                         <i class="bx bxs-log-out text-base"></i>
