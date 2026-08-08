@@ -8,6 +8,7 @@ use App\Models\SyllabusReviewForm;
 use App\Models\SyllabusReviewer;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -174,6 +175,7 @@ class SyllabusReviewFormService
             $form->update([
                 'decision'               => $decision,
                 'decision_made_at'       => now(),
+                'decision_made_by'       => Auth::id(),
                 'required_actions'       => $requiredActions,
                 'target_compliance_date' => $targetDate,
             ]);

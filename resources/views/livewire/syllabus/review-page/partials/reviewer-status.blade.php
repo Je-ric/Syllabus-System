@@ -20,6 +20,15 @@
         </div>
     </div>
 
+    @if (($assignment->status ?? '') !== 'approved')
+        <div class="mt-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
+            <p class="text-xs text-blue-800">
+                <i class="bx bx-tasks mr-1"></i>
+                <strong>Action Needed:</strong> Complete the review checklist below to record your assessment.
+            </p>
+        </div>
+    @endif
+
 </x-layout.card-section>
 
 {{-- ── Other reviewers ───────────────────────────────────────────────────── --}}
@@ -46,6 +55,18 @@
                 </div>
             @endforeach
         </div>
+
+        @php
+            $allCompleted = collect($otherReviewers)->every(fn($r) => $r['status'] === 'approved');
+        @endphp
+        @if (!$allCompleted)
+            <div class="mt-3 p-3 rounded-lg bg-amber-50 border border-amber-200">
+                <p class="text-xs text-amber-800">
+                    <i class="bx bx-time mr-1"></i>
+                    <strong>Waiting:</strong> All reviewers must complete their checklists before committee decision.
+                </p>
+            </div>
+        @endif
 
     </x-layout.card-section>
 @endif

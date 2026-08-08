@@ -1,6 +1,6 @@
 {{-- Partial: review-page-partials/chair-decision.blade.php
      Only rendered when $isChair is true. --}}
-<x-layout.card-section title="Committee Decision" icon="bx-gavel">
+<x-layout.card-section title="Committee Decision" icon="bx-gavel" :collapsible="true">
 
     @if ($reviewForm?->decision)
         @php
@@ -50,7 +50,28 @@
 
     @if (! $reviewForm?->recommended_by_chair_id)
         <div
-            x-data="{ needsActions: ['approved_with_corrections','returned_for_revision'].includes($wire.decision) }"
+            x-data="{
+                decisionRecorded: {{ $reviewForm?->decision ? 'true' : 'false' }},
+                needsActions: ['approved_with_corrections','returned_for_revision'].includes($wire.decision),
+                get decisionWarning() {
+                    if ($wire.decision === 'approved_with_corrections') {
+                        return 'Faculty must respond with corrections made before verification.';
+                    }
+                    if ($wire.decision === 'returned_for_revision') {
+                        return 'Faculty must make major revisions and resubmit for review.';
+                    }
+                    if ($wire.decision === 'reclassified_as_revision') {
+                        return 'This will reset the review process. Faculty must assign new reviewers.';
+                    }
+                    return '';
+                },
+                get decisionVariant() {
+                    if ($wire.decision === 'approved_with_corrections') return 'amber';
+                    if ($wire.decision === 'returned_for_revision') return 'rose';
+                    if ($wire.decision === 'reclassified_as_revision') return 'blue';
+                    return 'emerald';
+                }
+            }"
             x-on:livewire-updated.window="needsActions = ['approved_with_corrections','returned_for_revision'].includes($wire.decision)"
             class="space-y-3">
 
@@ -73,7 +94,38 @@
                 </select>
             </div>
 
-            <div x-show="needsActions" x-cloak class="space-y-2">
+            {{-- Decision-specific warnings and guidance --}}
+            <div x-show="decisionWarning && !decisionRecorded" x-cloak
+                 class="rounded-lg px-3 py-2.5 border"
+                 x-bind:class="{
+                    'bg-amber-50 border-amber-200': decisionVariant === 'amber',
+                    'bg-rose-50 border-rose-200': decisionVariant === 'rose',
+                    'bg-blue-50 border-blue-200': decisionVariant === 'blue'
+                 }">
+                <div class="flex items-start gap-2">
+                    <i class="bx bx-info-circle text-base shrink-0"
+                       x-bind:class="{
+                           'text-amber-600': decisionVariant === 'amber',
+                           'text-rose-600': decisionVariant === 'rose',
+                           'text-blue-600': decisionVariant === 'blue'
+                       }"></i>
+                    <p class="text-xs leading-relaxed"
+                       x-bind:class="{
+                           'text-amber-800': decisionVariant === 'amber',
+                           'text-rose-800': decisionVariant === 'rose',
+                           'text-blue-800': decisionVariant === 'blue'
+                       }"
+                       x-text="decisionWarning"></p>
+                </div>
+            </div>
+
+            <div x-show="needsActions && !decisionRecorded" x-cloak class="space-y-2">
+                <div class="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2">
+                    <p class="text-xs text-amber-800">
+                        <i class="bx bx-error-circle mr-1"></i>
+                        <strong>Required:</strong> You must specify the actions needed and a compliance deadline for this decision type.
+                    </p>
+                </div>
                 <div>
                     <label class="block text-[11px] font-bold text-[#72809E] uppercase tracking-widest mb-1.5">
                         Required Actions <span class="text-rose-400">*</span>
@@ -89,7 +141,7 @@
                 </div>
                 <div>
                     <label class="block text-[11px] font-bold text-[#72809E] uppercase tracking-widest mb-1.5">
-                        Compliance Deadline
+                        Compliance Deadline <span class="text-rose-400">*</span>
                     </label>
                     <input type="date" wire:model="targetDate"
                            class="w-full text-sm rounded-lg border border-[#E3E8EB] bg-white
@@ -151,56 +203,3 @@
     @endif
 
 </x-layout.card-section>
-
-{{-- Part H — Faculty response to required corrections (committee read + verify) --}}
-@if ($reviewForm?->decision === 'approved_with_corrections')
-<x-layout.card-section title="Part H — Faculty Response" icon="bx-reply">
-
-    @if ($reviewForm->part_h_faculty_response)
-
-        <div class="rounded-lg border border-[#E3E8EB] bg-[#FAFDFB] px-3 py-2.5 mb-3">
-            <p class="text-[11px] font-bold text-[#72809E] uppercase tracking-widest mb-1">Faculty's Response</p>
-            <p class="text-sm text-[#394056] whitespace-pre-wrap leading-relaxed">{{ $reviewForm->part_h_faculty_response }}</p>
-        </div>
-
-        @if ($reviewForm->part_h_verified_at)
-            <div class="flex items-center gap-2 rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-2.5">
-                <i class="bx bx-check-circle text-emerald-600 text-base shrink-0"></i>
-                <div>
-                    <p class="text-xs font-semibold text-emerald-800">Verified</p>
-                    <p class="text-[11px] text-emerald-600 mt-0.5">
-                        {{ $reviewForm->partHVerifier?->name ?? '—' }} &middot;
-                        {{ $reviewForm->part_h_verified_at?->format('M d, Y') }}
-                    </p>
-                </div>
-            </div>
-        @else
-            <div class="flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2.5 mb-3">
-                <i class="bx bx-time text-amber-500 text-base shrink-0"></i>
-                <p class="text-xs text-amber-800">Pending verification by a reviewer.</p>
-            </div>
-            @if ($isChair)
-                <x-ui.button
-                    type="button"
-                    variant="save"
-                    wire:click="verifyPartH"
-                    wire:loading.attr="disabled"
-                    wire:target="verifyPartH"
-                    wire:confirm="Mark this faculty response as verified?"
-                    loading="Verifying…"
-                    class="w-full justify-center">
-                    <i class="bx bx-check-double text-sm leading-none"></i>
-                    Mark as Verified
-                </x-ui.button>
-            @endif
-        @endif
-
-    @else
-        <div class="flex items-center gap-2 rounded-lg bg-[#F9FAFA] border border-[#E3E8EB] px-3 py-2.5">
-            <i class="bx bx-time text-[#C1C8D4] text-base shrink-0"></i>
-            <p class="text-xs text-[#93A1AF]">Faculty has not yet submitted a response to the required corrections.</p>
-        </div>
-    @endif
-
-</x-layout.card-section>
-@endif

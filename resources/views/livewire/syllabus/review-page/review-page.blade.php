@@ -27,7 +27,7 @@
     </x-layout.page-header>
 
     <x-layout.panel>
-        <div class="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-5">
+        <div class="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-5">
 
             {{-- ══ LEFT: checklist ════════════════════════════════════════════ --}}
             <div class="space-y-5">
@@ -70,6 +70,11 @@
                         Classification: <strong class="text-[#394056]">{{ ucfirst($classification) }}</strong>
                     </p>
                 </x-layout.card-section>
+
+                {{-- ── Part H Faculty Response (if applicable) ───────────────── --}}
+                @if ($reviewForm?->decision === 'approved_with_corrections')
+                    @include('livewire.syllabus.review-page.partials.faculty-response')
+                @endif
 
                 {{-- ── Criteria sections ────────────────────────────────────── --}}
                 @foreach ($criteria as $sectionKey => $section)
@@ -140,14 +145,11 @@
                                                         "
                                                         class="inline-flex items-center gap-1.5 px-3 py-1.5
                                                                rounded-lg border text-xs font-semibold
-                                                               transition-all duration-150 disabled:opacity-60
-                                                               disabled:cursor-wait">
+                                                               transition-all duration-150">
                                                         <template x-if="saving && response === '{{ $val }}'">
                                                             <svg class="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none">
-                                                                <circle class="opacity-25" cx="12" cy="12" r="10"
-                                                                        stroke="currentColor" stroke-width="4"/>
-                                                                <path class="opacity-75" fill="currentColor"
-                                                                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                                                             </svg>
                                                         </template>
                                                         <template x-if="!(saving && response === '{{ $val }}')">
@@ -190,19 +192,19 @@
 
                 @include('livewire.syllabus.review-page.partials.reviewer-status')
 
+                {{-- Committee Decision (Chair only - moved to sidebar) --}}
+                @if ($isChair)
+                    @include('livewire.syllabus.review-page.partials.chair-decision')
+                @endif
+
+                {{-- Dean Approval (if approved) --}}
+                @if ($reviewForm?->approved_by_dean_id)
+                    @include('livewire.syllabus.review-page.partials.dean-approval')
+                @endif
+
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            @if ($isChair)
-                @include('livewire.syllabus.review-page.partials.chair-decision')
-            @endif
-
-            @if ($reviewForm?->approved_by_dean_id)
-                @include('livewire.syllabus.review-page.partials.dean-approval')
-            @endif
-        </div>
-        
     </x-layout.panel>
 
 </div>

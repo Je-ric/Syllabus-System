@@ -16,6 +16,7 @@ class SyllabusReviewForm extends Model
         'submitted_at',
         'decision',
         'decision_made_at',
+        'decision_made_by',
         'required_actions',
         'target_compliance_date',
         'part_h_faculty_response',
@@ -32,6 +33,7 @@ class SyllabusReviewForm extends Model
 
     protected $casts = [
         'syllabus_id'               => 'integer',
+        'decision_made_by'          => 'integer',
         'part_h_verified_by'        => 'integer',
         'recommended_by_chair_id'   => 'integer',
         'approved_by_dean_id'       => 'integer',
@@ -86,6 +88,12 @@ class SyllabusReviewForm extends Model
     public function approvedByDean()
     {
         return $this->belongsTo(User::class, 'approved_by_dean_id');
+    }
+
+    // Used in: ReviewStep (Livewire) — show decision maker
+    public function decisionMaker()
+    {
+        return $this->belongsTo(User::class, 'decision_made_by');
     }
 
     // ── Helper methods ────────────────────────────────────────────────────────

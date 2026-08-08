@@ -12,6 +12,12 @@
     $classification = $rf?->classification;
     $isSubmitted    = $rf?->submitted_at !== null;
     $decision       = $rf?->decision;
+    
+    // Calculate default course lead from LEC/LAB components
+    $lecComp  = $syllabus->components->firstWhere('type', 'LEC');
+    $labComp  = $syllabus->components->firstWhere('type', 'LAB');
+    $defaultCourseLead = collect([$lecComp?->instructor_name, $labComp?->instructor_name])
+        ->filter()->unique()->implode(' & ') ?: ($syllabus->preparer?->name ?? '—');
 
     $updatingOptions = [
         'schedule_calendar'                     => 'Schedule/calendar changes',
@@ -73,11 +79,30 @@
         attachments: @js($submittedAttachments->pluck('attachment_type')->toArray()),
         otherLabel: @js($submittedAttachments->firstWhere('attachment_type', 'other')?->other_label ?? ''),
         partHResponse: @js($rf?->part_h_faculty_response ?? ''),
+        courseLeadName: @js($rf?->course_lead_name ?? $defaultCourseLead ?? ''),
         savingClass: false,
         savingChanges: false,
         savingAttachments: false,
         savingPartH: false,
+        savingCourseLead: false,
+        courseLeadSaved: false,
         submitting: false,
+        showClassificationHint: false,
+
+        get canSubmit() {
+            return this.classification && 
+                   this.selectedChanges.length > 0 && 
+                   this.attachments.length > 0 &&
+                   !(this.attachments.includes('other') && !this.otherLabel.trim());
+        },
+
+        get submitButtonText() {
+            if (!this.classification) return 'Select classification first';
+            if (this.selectedChanges.length === 0) return 'Select nature of change';
+            if (this.attachments.length === 0) return 'Select attachments';
+            if (this.attachments.includes('other') && !this.otherLabel.trim()) return 'Describe other attachment';
+            return 'Submit for Review';
+        },
 
         toggleChange(key) {
             const i = this.selectedChanges.indexOf(key);
@@ -99,6 +124,10 @@
             this.savingChanges = false;
         },
         async saveAttachments() {
+            if (this.attachments.includes('other') && !this.otherLabel.trim()) {
+                this.$dispatch('lw-toast', { type: 'error', message: 'Please describe the other attachment.' });
+                return;
+            }
             this.savingAttachments = true;
             await $wire.saveReviewFormAttachments(this.attachments, this.otherLabel);
             this.savingAttachments = false;
@@ -109,7 +138,20 @@
             await $wire.savePartHResponse(this.partHResponse);
             this.savingPartH = false;
         },
+        async saveCourseLead() {
+            if (!this.courseLeadName.trim()) return;
+            this.savingCourseLead = true;
+            this.courseLeadSaved = false;
+            await $wire.saveCourseLeadName(this.courseLeadName);
+            this.savingCourseLead = false;
+            this.courseLeadSaved = true;
+            setTimeout(() => this.courseLeadSaved = false, 2000);
+        },
         async submitReviewForm() {
+            if (!this.canSubmit) {
+                this.$dispatch('lw-toast', { type: 'error', message: this.submitButtonText });
+                return;
+            }
             this.submitting = true;
             await $wire.submitReviewForm();
             this.submitting = false;
@@ -166,6 +208,11 @@
                     $labComp  = $syllabus->components->firstWhere('type', 'LAB');
                     $facultyStr = collect([$lecComp?->instructor_name, $labComp?->instructor_name])
                         ->filter()->unique()->implode(', ') ?: ($syllabus->preparer?->name ?? '—');
+                    
+                    // Auto-populate course lead with both LEC and LAB instructors if available
+                    $defaultCourseLead = collect([$lecComp?->instructor_name, $labComp?->instructor_name])
+                        ->filter()->unique()->implode(' & ') ?: ($syllabus->preparer?->name ?? '—');
+                    
                     $partARows = [
                         'Degree Program'   => $program?->name ?? '—',
                         'College'          => $college?->name ?? '—',
@@ -178,7 +225,6 @@
                         'Class Hours/Week' => ($course?->lec_class_hours ?? 0).' hr lec'.($course?->lab_class_hours ? ' + '.$course->lab_class_hours.' hr lab' : ''),
                         'Semester & AY'    => ($calendar?->semester ?? '—').' '.($calendar?->academic_year ?? ''),
                         'Faculty Member/s' => $facultyStr,
-                        'Course Lead'      => $rf?->course_lead_name ?? $syllabus->preparer?->name ?? '—',
                     ];
                 @endphp
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3">
@@ -188,6 +234,28 @@
                             <p class="text-sm font-medium text-slate-800 truncate" title="{{ $value }}">{{ $value }}</p>
                         </div>
                     @endforeach
+                </div>
+                
+                {{-- Editable Course Lead Field --}}
+                <div class="mt-3 pt-3 border-t border-slate-100">
+                    <div class="flex items-center justify-between mb-1">
+                        <p class="text-xs text-slate-400">Course Lead</p>
+                        <p class="text-[10px] text-emerald-600">
+                            <i class="bx bx-edit-alt mr-0.5"></i>Editable by author
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="text" 
+                               x-model="courseLeadName"
+                               x-on:change="saveCourseLead()"
+                               placeholder="Enter course lead name…"
+                               class="flex-1 text-sm rounded-lg border border-[#e2e8f0] px-3 py-2 focus:outline-none focus:ring-1 focus:ring-emerald-400">
+                        <i x-show="savingCourseLead" x-cloak class="bx bx-loader-alt animate-spin text-emerald-600"></i>
+                        <i x-show="!savingCourseLead && courseLeadSaved" x-cloak class="bx bx-check-circle text-emerald-600"></i>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-1">
+                        Auto-populated from LEC/LAB instructors. Edit if different.
+                    </p>
                 </div>
             </div>
 
@@ -200,6 +268,14 @@
                     Select <strong>Updating</strong> for minor/routine changes only.
                     Select <strong>Revision</strong> when Course Outcomes, grading, core content, or CO-PO mapping changes, or when driven by stakeholder feedback, policy, or CQI findings.
                 </p>
+                @if (!$classification)
+                <div class="p-3 rounded-lg bg-blue-50 border border-blue-200 mb-3">
+                    <p class="text-xs text-blue-800">
+                        <i class="bx bx-lightbulb mr-1"></i>
+                        <strong>Remember:</strong> The classification determines the review process. Updating is reviewed by CQI Chair only; Revision requires full committee review.
+                    </p>
+                </div>
+                @endif
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <label x-bind:class="classification === 'updating'
                             ? 'border-emerald-400 bg-emerald-50/60 ring-1 ring-emerald-300'
@@ -243,7 +319,13 @@
                 <p class="text-xs font-bold uppercase tracking-widest text-[#475569] mb-3">
                     Part C — Nature of Change
                 </p>
-                <div x-show="classification === 'updating' || !classification">
+                <div x-show="selectedChanges.length === 0 && classification" x-cloak class="p-3 rounded-lg bg-amber-50 border border-amber-200 mb-3">
+                    <p class="text-xs text-amber-800">
+                        <i class="bx bx-info-circle mr-1"></i>
+                        <strong>Note:</strong> Select all applicable options. This helps reviewers understand the scope of changes.
+                    </p>
+                </div>
+                <div x-show="classification === 'updating'" x-cloak>
                     <p class="text-xs font-medium text-slate-500 mb-2">If Updating — check all applicable minor/routine changes:</p>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-1">
                         @foreach ($updatingOptions as $key => $label)
@@ -271,6 +353,12 @@
                         @endforeach
                     </div>
                 </div>
+                <div x-show="!classification" class="p-3 rounded-lg bg-amber-50 border border-amber-200">
+                    <p class="text-xs text-amber-700">
+                        <i class="bx bx-info-circle mr-1"></i>
+                        Select a classification above to see the applicable nature of change options.
+                    </p>
+                </div>
                 <div class="mt-3 flex justify-end">
                     <x-ui.button type="button" variant="sm-add"
                         x-on:click="saveChanges()"
@@ -291,6 +379,12 @@
                     Part D — Documentary Attachments
                 </p>
                 <p class="text-xs text-slate-500 mb-3">Check all documents you are submitting with the syllabus.</p>
+                <div x-show="attachments.length === 0" x-cloak class="p-3 rounded-lg bg-emerald-50 border border-emerald-200 mb-3">
+                    <p class="text-xs text-emerald-800">
+                        <i class="bx bx-check-shield mr-1"></i>
+                        <strong>Tip:</strong> Ensure all supporting documents are available. Reviewers may request additional evidence if needed.
+                    </p>
+                </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-1">
                     @foreach ($attachmentOptions as $key => $label)
                         <label class="flex items-center gap-2.5 text-sm cursor-pointer py-1.5 px-2 rounded-lg hover:bg-slate-50">
@@ -305,7 +399,11 @@
                 <div x-show="attachments.includes('other')" x-cloak class="mt-2">
                     <input type="text" x-model="otherLabel"
                            placeholder="Describe the other attachment…"
-                           class="w-full text-sm rounded-lg border border-[#e2e8f0] px-3 py-2 focus:outline-none focus:ring-1 focus:ring-emerald-400">
+                           x-bind:class="(attachments.includes('other') && !otherLabel.trim()) ? 'border-rose-300 focus:ring-rose-400' : 'border-[#e2e8f0] focus:ring-emerald-400'"
+                           class="w-full text-sm rounded-lg border px-3 py-2 focus:outline-none focus:ring-1">
+                    <p x-show="attachments.includes('other') && !otherLabel.trim()" x-cloak class="text-xs text-rose-600 mt-1">
+                        <i class="bx bx-error-circle mr-1"></i>Please describe the other attachment.
+                    </p>
                 </div>
                 <div class="mt-3 flex justify-end">
                     <x-ui.button type="button" variant="sm-add"
@@ -330,16 +428,23 @@
                         <p class="text-xs text-slate-500 mt-0.5">
                             Reviewers will be notified. You can still edit the syllabus itself after submitting.
                         </p>
+                        <div x-show="!canSubmit" x-cloak class="mt-2 p-2 rounded-lg bg-emerald-100 border border-emerald-200">
+                            <p class="text-[11px] text-emerald-800">
+                                <i class="bx bx-check-double mr-1"></i>
+                                <strong>Before submitting:</strong> Ensure classification, nature of change, and attachments are complete.
+                            </p>
+                        </div>
                     </div>
                     <x-ui.button type="button" variant="primary"
                         x-on:click="submitReviewForm()"
-                        x-bind:disabled="submitting || !classification">
+                        x-bind:disabled="submitting || !canSubmit"
+                        x-bind:class="!canSubmit ? 'opacity-70 cursor-not-allowed' : ''">
                         <i x-show="!submitting" class="bx bx-send leading-none"></i>
                         <svg x-show="submitting" x-cloak class="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                         </svg>
-                        <span x-text="submitting ? 'Submitting…' : 'Submit for Review'"></span>
+                        <span x-text="submitting ? 'Submitting…' : (canSubmit ? 'Submit for Review' : submitButtonText)"></span>
                     </x-ui.button>
                 </div>
             </div>
@@ -360,6 +465,39 @@
                         @endif
                     </div>
                 </div>
+
+                {{-- Decision maker info --}}
+                @if ($rf->decision_made_by)
+                    <div class="mt-2 flex items-center gap-2 text-xs text-slate-600">
+                        <i class="bx bx-user text-slate-400"></i>
+                        <span>Decision by: <strong>{{ $rf->decisionMaker?->name ?? '—' }}</strong></span>
+                    </div>
+                @endif
+
+                {{-- Decision-specific guidance --}}
+                @if ($decision === 'approved_with_corrections' && !$rf->part_h_verified_at)
+                    <div class="mt-3 p-3 rounded-xl bg-amber-50 border border-amber-200">
+                        <p class="text-xs text-amber-800">
+                            <i class="bx bx-info-circle mr-1"></i>
+                            <strong>Next Step:</strong> Complete Part H below to describe the corrections you made.
+                        </p>
+                    </div>
+                @elseif ($decision === 'returned_for_revision')
+                    <div class="mt-3 p-3 rounded-xl bg-rose-50 border border-rose-200">
+                        <p class="text-xs text-rose-800">
+                            <i class="bx bx-info-circle mr-1"></i>
+                            <strong>Next Step:</strong> Make the required revisions and resubmit for review.
+                        </p>
+                    </div>
+                @elseif ($decision === 'reclassified_as_revision')
+                    <div class="mt-3 p-3 rounded-xl bg-blue-50 border border-blue-200">
+                        <p class="text-xs text-blue-800">
+                            <i class="bx bx-info-circle mr-1"></i>
+                            <strong>Next Step:</strong> Assign new reviewers for the revision track.
+                        </p>
+                    </div>
+                @endif
+
                 @if ($rf->required_actions)
                     <div class="mt-3 p-3 rounded-xl bg-amber-50 border border-amber-200">
                         <p class="text-xs font-bold text-amber-800 mb-1">Required Actions:</p>
@@ -387,9 +525,18 @@
                             on {{ \Carbon\Carbon::parse($rf->part_h_verified_at)->format('M d, Y') }}</span>
                     </div>
                 @else
+                    @if (!$rf->part_h_faculty_response)
+                    <div class="p-3 rounded-lg bg-amber-50 border border-amber-200 mb-2">
+                        <p class="text-xs text-amber-800">
+                            <i class="bx bx-error-alt mr-1"></i>
+                            <strong>Required:</strong> Your response is needed before the syllabus can be fully approved.
+                        </p>
+                    </div>
+                    @endif
                     <p class="text-xs text-slate-500 mb-2">
                         Describe the corrections you made in response to the committee's required actions.
                     </p>
+                    @if (!$rf->part_h_faculty_response)
                     <textarea x-model="partHResponse" rows="4"
                         placeholder="Describe the corrections made…"
                         class="w-full text-sm rounded-xl border border-[#e2e8f0] px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-400 resize-none"></textarea>
@@ -405,6 +552,13 @@
                             <span x-text="savingPartH ? 'Saving…' : 'Submit Response'"></span>
                         </x-ui.button>
                     </div>
+                    @endif
+                @else
+                    @if ($rf->part_h_faculty_response)
+                    <div class="p-3 rounded-lg bg-slate-50 border border-slate-200 mb-2">
+                        <p class="text-xs text-slate-700">{{ $rf->part_h_faculty_response }}</p>
+                    </div>
+                    @endif
                 @endif
             </div>
             @endif
@@ -435,6 +589,21 @@
                         </div>
                     @endif
                 </div>
+                @if (!$rf->approved_by_dean_id && $rf->recommended_by_chair_id)
+                    <div class="mt-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
+                        <p class="text-xs text-blue-800">
+                            <i class="bx bx-time mr-1"></i>
+                            <strong>Next Step:</strong> Waiting for dean approval to complete the review process.
+                        </p>
+                    </div>
+                @elseif ($rf->approved_by_dean_id)
+                    <div class="mt-3 p-3 rounded-lg bg-emerald-50 border border-emerald-200">
+                        <p class="text-xs text-emerald-800">
+                            <i class="bx bx-check-circle mr-1"></i>
+                            <strong>Complete:</strong> The syllabus has been fully approved and is ready for implementation.
+                        </p>
+                    </div>
+                @endif
             </div>
             @endif
 
