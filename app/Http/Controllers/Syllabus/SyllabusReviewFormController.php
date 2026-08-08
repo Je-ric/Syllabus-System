@@ -32,6 +32,7 @@ class SyllabusReviewFormController extends Controller
             'reviewForm.recommendedByChair',
             'reviewForm.approvedByDean',
             'reviewForm.partHVerifier',
+            'reviewForm.decisionMaker',
         ]);
 
         return response(

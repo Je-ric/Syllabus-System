@@ -162,9 +162,15 @@ class SyllabusReviewPage extends Component
         }
 
         $needsActions = in_array($this->decision, ['approved_with_corrections', 'returned_for_revision'], true);
-        if ($needsActions && blank($this->requiredActions)) {
-            $this->dispatch('lw-toast', type: 'error', message: 'Required actions must be filled for this decision.');
-            return;
+        if ($needsActions) {
+            if (blank($this->requiredActions)) {
+                $this->dispatch('lw-toast', type: 'error', message: 'Required actions must be filled for this decision.');
+                return;
+            }
+            if (blank($this->targetDate)) {
+                $this->dispatch('lw-toast', type: 'error', message: 'Compliance deadline must be set for this decision.');
+                return;
+            }
         }
 
         $form = $this->getOrCreateForm();
