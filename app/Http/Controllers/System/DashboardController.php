@@ -16,6 +16,6 @@ class DashboardController extends Controller
         $user = Auth::user();
         $data = $this->dashboard->getDashboardData($user);
 
-        return view('dashboard.index', compact('user', 'data'));
+        return view('System.Dashboard.index', compact('user', 'data'));
     }
 }

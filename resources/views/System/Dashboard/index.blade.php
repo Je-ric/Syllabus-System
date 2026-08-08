@@ -36,23 +36,23 @@
     <x-layout.panel>
         <div class="space-y-4">
 
-            @include('dashboard.partials.active-semester', ['activeSemester' => $data['active_semester']])
+            @include('System.Dashboard.partials.active-semester', ['activeSemester' => $data['active_semester']])
 
             @switch($data['type'])
                 @case('admin')
-                    @include('dashboard.partials.admin')
+                    @include('System.Dashboard.partials.admin')
                     @break
 
                 @case('chair')
-                    @include('dashboard.partials.chair')
+                    @include('System.Dashboard.partials.chair')
                     @break
 
                 @case('dean')
-                    @include('dashboard.partials.dean')
+                    @include('System.Dashboard.partials.dean')
                     @break
 
                 @case('faculty')
-                    @include('dashboard.partials.faculty')
+                    @include('System.Dashboard.partials.faculty')
                     @break
 
                 @default
