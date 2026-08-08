@@ -13,7 +13,7 @@
                 <div class="rounded-[14px] border border-[#d1fae5] bg-white overflow-hidden">
                     <div class="px-4 py-2.5 bg-[#f0fdf4] border-b border-[#d1fae5] flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full bg-[#16a34a] shrink-0"></span>
-                        <p class="text-[11px] font-bold uppercase tracking-[0.1em] text-[#166534]">Lecture · LEC</p>
+                        <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#166534]">Lecture · LEC</p>
                     </div>
                     <div class="px-4 py-3 space-y-2">
                         <div class="flex items-center justify-between text-[12px] text-[#71717a] mb-1">
@@ -36,7 +36,7 @@
                 <div class="rounded-[14px] border border-[#bfdbfe] bg-white overflow-hidden">
                     <div class="px-4 py-2.5 bg-[#eff6ff] border-b border-[#bfdbfe] flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full bg-[#2563eb] shrink-0"></span>
-                        <p class="text-[11px] font-bold uppercase tracking-[0.1em] text-[#1e40af]">Laboratory · LAB</p>
+                        <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#1e40af]">Laboratory · LAB</p>
                     </div>
                     <div class="px-4 py-3 space-y-2">
                         <div class="flex items-center justify-between text-[12px] text-[#71717a] mb-1">

@@ -3,7 +3,7 @@
 
     <x-slot:footer>
         <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5">
-            <span class="text-[10px] font-bold uppercase tracking-widest text-[#93A1AF]">IED</span>
+            <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-[#93A1AF]">IED</span>
             <span class="flex items-center gap-1.5 text-[11px] text-[#4F5D6B]">
                 <x-feedback-status.ied-badge level="I" /> Introductory
             </span>
@@ -19,7 +19,7 @@
     @if (!empty($courseInfo['program_title']))
         <div class="rounded-2xl border border-[#E3E8EB] bg-[#F9FAFA] px-4 py-3 mb-4"
              style="box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06);">
-            <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-[#93A1AF] mb-0.5">Program</p>
+            <p class="text-[10px] font-bold uppercase tracking-[0.12em] text-[#93A1AF] mb-0.5">Program</p>
             <p class="text-[13px] font-medium text-[#1D2836]">{{ $courseInfo['program_title'] }}</p>
         </div>
     @endif
@@ -30,9 +30,9 @@
             <table class="w-full text-xs border-collapse">
                 <thead>
                     <tr class="bg-[#F1F3F5] border-b border-[#E3E8EB]">
-                        <th class="px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-[#93A1AF] w-14">PO</th>
-                        <th class="px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-[#93A1AF]">Description</th>
-                        <th class="px-3 py-2.5 text-center text-[10px] font-bold uppercase tracking-widest text-[#93A1AF] w-12">IED</th>
+                        <th class="px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-[0.12em] text-[#93A1AF] w-14">PO</th>
+                        <th class="px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-[0.12em] text-[#93A1AF]">Description</th>
+                        <th class="px-3 py-2.5 text-center text-[10px] font-bold uppercase tracking-[0.12em] text-[#93A1AF] w-12">IED</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#F1F3F5] bg-white">
