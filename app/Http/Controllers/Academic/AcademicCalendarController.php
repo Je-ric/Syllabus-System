@@ -17,12 +17,12 @@ class AcademicCalendarController extends Controller
             ->with('events')
             ->get();
 
-        return view('AcademicCalendar.index', compact('calendars'));
+        return view('Academic.AcademicCalendar.index', compact('calendars'));
     }
 
     public function create()
     {
-        return view('AcademicCalendar.form');
+        return view('Academic.AcademicCalendar.form');
     }
 
     public function edit(string $academicYear)
@@ -40,7 +40,7 @@ class AcademicCalendarController extends Controller
         $firstSemester  = $semesters->firstWhere('semester', '1st');
         $secondSemester = $semesters->firstWhere('semester', '2nd');
 
-        return view('AcademicCalendar.form', [
+        return view('Academic.AcademicCalendar.form', [
             'semesters'      => $semesters,
             'academicYear'   => $academicYear,
             'isEdit'         => true,

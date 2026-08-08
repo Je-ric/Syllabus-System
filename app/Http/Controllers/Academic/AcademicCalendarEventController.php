@@ -23,7 +23,7 @@ class AcademicCalendarEventController extends Controller
                 ->with('toast', ['message' => 'Academic year not found.', 'type' => 'error']);
         }
 
-        return view('AcademicCalendarEvent.index', compact('semesters', 'academicYear'));
+        return view('Academic.AcademicCalendarEvent.index', compact('semesters', 'academicYear'));
     }
 
     // store / update / destroy stay as plain form POSTs.

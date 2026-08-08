@@ -120,7 +120,7 @@
                                     onclick="document.getElementById('deleteAYModal_{{ str_replace('-', '_', $year) }}').showModal()">
                                     <i class="bx bx-trash"></i>
                                 </x-ui.button>
-                                @include('AcademicCalendar.modals.deleteAYModal', ['year' => $year, 'semesters' => $semesters])
+                                @include('Academic.AcademicCalendar.Modals.deleteAYModal', ['year' => $year, 'semesters' => $semesters])
                             @endif
                         </div>
                     </div>

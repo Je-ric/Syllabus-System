@@ -38,7 +38,7 @@ class CourseController extends Controller
             && $user->hasRole('chair')
             && !$user->getPrimaryDepartmentAssignment();
 
-        return view('Course.index', compact('program', 'groupedCourses', 'noAssignment'));
+        return view('Academic.Course.index', compact('program', 'groupedCourses', 'noAssignment'));
     }
 
     public function create(Request $request)
@@ -62,7 +62,7 @@ class CourseController extends Controller
         $pageTitle   = 'Create New Course';
         $submitLabel = 'Create Course';
 
-        return view('Course.form', compact(
+        return view('Academic.Course.form', compact(
             'program',
             'programOutcomes',
             'poSelections',
@@ -90,7 +90,7 @@ class CourseController extends Controller
         $pageTitle   = 'Edit Course';
         $submitLabel = 'Update Course';
 
-        return view('Course.form', compact(
+        return view('Academic.Course.form', compact(
             'course',
             'program',
             'programOutcomes',

@@ -165,7 +165,7 @@ All assignment methods run inside a DB transaction and record AuditLog.
 - If user has `chair` assignment:
   - Then redirect to `user-assignments.departments.index` with their department's college ID.
 - If none of the above:
-  - Then show `UserAssignments.no-assignment` view.
+  - Then show `UserManagement.UserAssignments.no-assignment` view.
 
 ### Departments Index Scoping (UserAssignmentsChecker)
 

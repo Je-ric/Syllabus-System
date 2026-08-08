@@ -16,9 +16,9 @@ Rules and flow for encoding College Goals and Department Objectives.
   - `app/Models/Department.php` (`getNextObjectiveCode()`, `resequenceObjectiveCodes()`)
   - `app/Models/DepartmentObjective.php`
 - Views
-  - `resources/views/GoalObjective/goal.blade.php` — College goals listing
-  - `resources/views/GoalObjective/objective.blade.php` — Department objectives listing
-  - `resources/views/GoalObjective/modals/` — Add/update/delete modals for goals and objectives
+  - `resources/views/CQI/GoalObjective/goal.blade.php` — College goals listing
+  - `resources/views/CQI/GoalObjective/objective.blade.php` — Department objectives listing
+  - `resources/views/CQI/GoalObjective/modals/` — Add/update/delete modals for goals and objectives
 - Routes
   - `routes/web.php` (goals routes — `role:admin,dean`)
     - `GET /goals` — index

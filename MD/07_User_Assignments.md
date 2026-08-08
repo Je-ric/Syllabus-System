@@ -16,10 +16,10 @@ Rules for organizational assignments and what appears in hierarchy views.
   - `app/Services/Authentication/AccountApprovalService.php` (on status change and role removal)
   - `app/Services/University/UniversityStructureService.php` (on academic structure delete)
 - Views
-  - `resources/views/UserAssignments/colleges.blade.php`
-  - `resources/views/UserAssignments/departments.blade.php`
-  - `resources/views/UserAssignments/no-assignment.blade.php`
-  - `resources/views/UserAssignments/modals/`
+  - `resources/views/UserManagement/UserAssignments/colleges.blade.php`
+  - `resources/views/UserManagement/UserAssignments/departments.blade.php`
+  - `resources/views/UserManagement/UserAssignments/no-assignment.blade.php`
+  - `resources/views/UserManagement/UserAssignments/modals/`
 - Routes
   - `routes/web.php`
     - `GET /user-assignments/colleges` — `role:admin` (colleges index / dean assignment)

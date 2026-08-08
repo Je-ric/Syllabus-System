@@ -18,7 +18,7 @@ class UniversityStructureController extends Controller
 
     public function index()
     {
-        return view('UniversityStructure.index', [
+        return view('University.UniversityStructure.index', [
             'colleges'       => College::orderBy('name')->get(),
             'departments'    => Department::withRelations()->orderBy('name')->get(),
             'programs'       => Program::with('departments')->orderBy('name')->get(),

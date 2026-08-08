@@ -234,9 +234,9 @@
 </x-layout.panel>
 
 @if ($formMethod === 'POST')
-    @include('Course.modals.confirmCourseModal')
+    @include('Academic.Course.modals.confirmCourseModal')
 @else
-    @include('Course.modals.confirmEditCourseModal')
+    @include('Academic.Course.modals.confirmEditCourseModal')
 @endif
 
 @endsection

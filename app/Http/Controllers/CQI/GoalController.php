@@ -51,7 +51,7 @@ class GoalController extends Controller
         // Dean with no college assignment
         $noAssignment = !$isAdmin && $user?->hasRole('dean') && !$user?->getPrimaryCollegeAssignment();
 
-        return view('GoalObjective.goal', compact('colleges', 'goals', 'selectedCollegeId', 'noAssignment'));
+        return view('CQI.GoalObjective.goal', compact('colleges', 'goals', 'selectedCollegeId', 'noAssignment'));
     }
 
     public function store(Request $request)

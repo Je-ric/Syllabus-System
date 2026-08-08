@@ -23,9 +23,9 @@ Rules for program-level PEO/PO management, code sequencing, and PO↔PEO mapping
 - Helper
   - `app/Helpers/ProgramCodeHelper.php`
 - Views (controller-rendered)
-  - `resources/views/Programs/index.blade.php` — Programs listing
-  - `resources/views/UniversityStructure/index.blade.php` — Academic structure management (colleges, departments, programs)
-  - `resources/views/UniversityStructure/modals/` — Add/update/delete modals for colleges, departments, and programs
+  - `resources/views/CQI/Programs/index.blade.php` — Programs listing
+  - `resources/views/University/UniversityStructure/index.blade.php` — Academic structure management (colleges, departments, programs)
+  - `resources/views/University/UniversityStructure/modals/` — Add/update/delete modals for colleges, departments, and programs
 - Views (Livewire)
   - `resources/views/livewire/programs/manage-peos.blade.php`
   - `resources/views/livewire/programs/manage-pos.blade.php`

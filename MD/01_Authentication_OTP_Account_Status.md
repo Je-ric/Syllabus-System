@@ -46,8 +46,8 @@ Beginner-friendly summary of what happens in registration, login, OTP (password 
   - `resources/views/Authentication/auth.blade.php` — Login + Register (single page, Alpine tab switch)
   - `resources/views/Authentication/waiting-approval.blade.php` — Post-registration holding screen
   - `resources/views/Authentication/viewDetails.blade.php` — User profile + password change
-  - `resources/views/AccountApproval/index.blade.php` — Admin account approval page
-  - `resources/views/AccountApproval/modals/` — Approval, role assignment, and edit user modals
+  - `resources/views/Authentication/AccountApproval/index.blade.php` — Admin account approval page
+  - `resources/views/Authentication/AccountApproval/modals/` — Approval, role assignment, and edit user modals
 - Routes
   - `routes/web.php`
     - `GET /auth` — show login/register page

@@ -16,12 +16,12 @@ Practical reference for how Academic Calendars and their semester events behave 
   - `app/Models/Syllabus.php`
   - `app/Models/SyllabusWeek.php`
 - Views (controller-rendered)
-  - `resources/views/AcademicCalendar/index.blade.php` — Academic years listing
-  - `resources/views/AcademicCalendar/form.blade.php` — Academic year form
-  - `resources/views/AcademicCalendar/Modals/cancelEditModal.blade.php` — Cancel edit confirmation
-  - `resources/views/AcademicCalendar/Modals/confirmAYModal.blade.php` — Create academic year confirmation
-  - `resources/views/AcademicCalendar/Modals/deleteAYModal.blade.php` — Delete academic year confirmation
-  - `resources/views/AcademicCalendarEvent/index.blade.php` — Events listing for a semester
+  - `resources/views/Academic/AcademicCalendar/index.blade.php` — Academic years listing
+  - `resources/views/Academic/AcademicCalendar/form.blade.php` — Academic year form
+  - `resources/views/Academic/AcademicCalendar/Modals/cancelEditModal.blade.php` — Cancel edit confirmation
+  - `resources/views/Academic/AcademicCalendar/Modals/confirmAYModal.blade.php` — Create academic year confirmation
+  - `resources/views/Academic/AcademicCalendar/Modals/deleteAYModal.blade.php` — Delete academic year confirmation
+  - `resources/views/Academic/AcademicCalendarEvent/index.blade.php` — Events listing for a semester
 - Views (Livewire)
   - `resources/views/livewire/academic-calendar/form.blade.php` — Calendar form component
   - `resources/views/livewire/academic-calendar/event-form.blade.php` — Event form component

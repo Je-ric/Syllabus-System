@@ -23,7 +23,7 @@ class UserAssignmentsController extends Controller
 
     public function collegesIndex()
     {
-        return view('UserAssignments.colleges', $this->userAssignmentsService->collegesIndexData());
+        return view('UserManagement.UserAssignments.colleges', $this->userAssignmentsService->collegesIndexData());
     }
 
     public function assignDean(Request $request)
@@ -66,7 +66,7 @@ class UserAssignmentsController extends Controller
         $actor = Auth::user();
 
         return view(
-            'UserAssignments.departments',
+            'UserManagement.UserAssignments.departments',
             $this->userAssignmentsService->departmentsIndexData($actor, (int) $collegeId)
         );
     }
@@ -182,6 +182,6 @@ class UserAssignmentsController extends Controller
             return redirect()->route('user-assignments.departments.index', $chairAssignment->department->college_id);
         }
 
-        return view('UserAssignments.no-assignment');
+        return view('UserManagement.UserAssignments.no-assignment');
     }
 }

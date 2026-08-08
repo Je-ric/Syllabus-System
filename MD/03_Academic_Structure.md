@@ -17,8 +17,8 @@ Practical reference for how CSMS manages the academic structure hierarchy.
 - Pivot
   - `program_departments` (program-to-department link with `role = primary` or `role = supporting`)
 - Views
-  - `resources/views/UniversityStructure/index.blade.php`
-  - `resources/views/UniversityStructure/modals/`
+  - `resources/views/University/UniversityStructure/index.blade.php`
+  - `resources/views/University/UniversityStructure/modals/`
 - Routes
   - `routes/web.php` (academic structure routes — `role:admin` only)
     - `GET /university-structure` — index

@@ -68,7 +68,7 @@
                 </x-navigation.link-tabs>
 
                 @if ($program->outcomes->isNotEmpty())
-                    @include('Course.offcanvasReference')
+                    @include('Academic.Course.offcanvasReference')
                 @endif
             </div>
 
@@ -243,12 +243,12 @@
 
     {{-- Modals --}}
     @foreach ($modalCourses as $course)
-        @include('Course.modals.viewCourseModal', ['course' => $course])
+        @include('Academic.Course.modals.viewCourseModal', ['course' => $course])
         @if (!$showArchived)
-            @include('Course.modals.archiveCourseModal', ['course' => $course])
+            @include('Academic.Course.modals.archiveCourseModal', ['course' => $course])
         @endif
         @if ($canDelete)
-            @include('Course.modals.deleteCourseModal', ['course' => $course])
+            @include('Academic.Course.modals.deleteCourseModal', ['course' => $course])
         @endif
     @endforeach
 

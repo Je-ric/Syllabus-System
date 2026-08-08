@@ -286,23 +286,23 @@
     @endif
 
 
-    @include('UniversityStructure.modals.addCollegeModal')
-    @include('UniversityStructure.modals.addDepartmentModal')
-    @include('UniversityStructure.modals.addProgramModal', ['allDepartments' => $allDepartments])
+    @include('University.UniversityStructure.modals.addCollegeModal')
+    @include('University.UniversityStructure.modals.addDepartmentModal')
+    @include('University.UniversityStructure.modals.addProgramModal', ['allDepartments' => $allDepartments])
 
     @foreach ($colleges as $college)
-        @include('UniversityStructure.modals.updateCollegeModal', ['college' => $college])
-        @include('UniversityStructure.modals.deleteCollegeModal',  ['college' => $college])
+        @include('University.UniversityStructure.modals.updateCollegeModal', ['college' => $college])
+        @include('University.UniversityStructure.modals.deleteCollegeModal',  ['college' => $college])
         @foreach ($departments->where('college_id', $college->id) as $dept)
-            @include('UniversityStructure.modals.updateDepartmentModal', ['dept' => $dept])
-            @include('UniversityStructure.modals.deleteDepartmentModal', ['dept' => $dept])
+            @include('University.UniversityStructure.modals.updateDepartmentModal', ['dept' => $dept])
+            @include('University.UniversityStructure.modals.deleteDepartmentModal', ['dept' => $dept])
         @endforeach
     @endforeach
 
     {{-- Program modals rendered once per unique program to avoid duplicates --}}
     @foreach ($programs as $program)
-        @include('UniversityStructure.modals.updateProgramModal', ['program' => $program, 'allDepartments' => $allDepartments])
-        @include('UniversityStructure.modals.deleteProgramModal', ['program' => $program])
+        @include('University.UniversityStructure.modals.updateProgramModal', ['program' => $program, 'allDepartments' => $allDepartments])
+        @include('University.UniversityStructure.modals.deleteProgramModal', ['program' => $program])
     @endforeach
 
 @endsection

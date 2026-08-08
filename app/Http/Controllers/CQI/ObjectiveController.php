@@ -76,7 +76,7 @@ class ObjectiveController extends Controller
         // Chair with no department assignment
         $noAssignment = !$isAdmin && $user?->hasRole('chair') && !$user?->getPrimaryDepartmentAssignment();
 
-        return view('GoalObjective.objective', compact(
+        return view('CQI.GoalObjective.objective', compact(
             'colleges',
             'departments',
             'objectives',

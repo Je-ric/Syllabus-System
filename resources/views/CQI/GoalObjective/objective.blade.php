@@ -179,12 +179,12 @@
     </x-layout.panel>
 
     @if ($selectedCollegeId && $selectedDepartmentId)
-        @include('GoalObjective.modals.addObjectiveModal')
+        @include('CQI.GoalObjective.modals.addObjectiveModal')
     @endif
 
     @foreach ($objectives as $objective)
-        @include('GoalObjective.modals.updateObjectiveModal', ['objective' => $objective])
-        @include('GoalObjective.modals.deleteObjectiveModal',  ['objective' => $objective])
+        @include('CQI.GoalObjective.modals.updateObjectiveModal', ['objective' => $objective])
+        @include('CQI.GoalObjective.modals.deleteObjectiveModal',  ['objective' => $objective])
     @endforeach
 
 @endsection

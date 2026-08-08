@@ -28,7 +28,7 @@ class ProgramController extends Controller
             && $user->hasRole('chair')
             && !$user->getPrimaryDepartmentAssignment();
 
-        return view('Programs.index', compact('program', 'noAssignment'));
+        return view('CQI.Programs.index', compact('program', 'noAssignment'));
     }
 
     public function show(Program $program)
@@ -40,7 +40,7 @@ class ProgramController extends Controller
             && $user->hasRole('chair')
             && !$user->getPrimaryDepartmentAssignment();
 
-        return view('Programs.index', compact('program', 'noAssignment'));
+        return view('CQI.Programs.index', compact('program', 'noAssignment'));
     }
 
 

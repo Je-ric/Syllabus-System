@@ -16,10 +16,10 @@ Rules for creating, updating, archiving, restoring, deleting, and PO mapping of 
   - `app/Models/Syllabus.php`
   - `app/Models/CompleteSyllabus.php`
 - Views
-  - `resources/views/Course/index.blade.php` — Course listing by program
-  - `resources/views/Course/form.blade.php` — Course create/edit form
-  - `resources/views/Course/modals/` — Archive, confirm edit, delete, view, and confirm modals
-  - `resources/views/Course/offcanvasReference.blade.php` — Reference offcanvas
+  - `resources/views/Academic/Course/index.blade.php` — Course listing by program
+  - `resources/views/Academic/Course/form.blade.php` — Course create/edit form
+  - `resources/views/Academic/Course/modals/` — Archive, confirm edit, delete, view, and confirm modals
+  - `resources/views/Academic/Course/offcanvasReference.blade.php` — Reference offcanvas
 - Routes
   - `routes/web.php` (course routes — `role:admin,chair`)
     - `GET /courses` — index

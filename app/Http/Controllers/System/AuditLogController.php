@@ -12,6 +12,6 @@ class AuditLogController extends Controller
     // This controller only loads the page view and applies route middleware.
     public function index(Request $request)
     {
-        return view('AuditLog.index');
+        return view('System.AuditLog.index');
     }
 }

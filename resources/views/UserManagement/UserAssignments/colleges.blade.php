@@ -78,14 +78,14 @@
                         </div>
                     </x-layout.card-section>
 
-                    @include('UserAssignments.modals.assignDeanModal', [
+                    @include('UserManagement.UserAssignments.modals.assignDeanModal', [
                         'collegeId'      => $college->id,
                         'collegeName'    => $college->name,
                         'potentialDeans' => $potentialDeans,
                     ])
 
                     @if ($dean)
-                        @include('UserAssignments.modals.removeDeanModal', [
+                        @include('UserManagement.UserAssignments.modals.removeDeanModal', [
                             'collegeId'   => $college->id,
                             'collegeName' => $college->name,
                             'userId'      => $dean->id,

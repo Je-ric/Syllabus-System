@@ -7,16 +7,16 @@ Only 2 pages have full search+filter: **Account Approval** (`ManageQueue`) and *
 | Page | View Path | Current Filtering | Missing |
 |------|-----------|-------------------|---------|
 | **Syllabus Index** | `Syllabus\index.blade.php` | Status tabs only | No search by course name/code, no academic year filter, no pagination, no sort |
-| **Courses Index** | `Course\index.blade.php` | Program selector + Active/Archived tabs | No search by course code/name, no pagination, no sort |
+| **Courses Index** | `Academic\Course\index.blade.php` | Program selector + Active/Archived tabs | No search by course code/name, no pagination, no sort |
 | **Select Course for Syllabus** | `Syllabus\selectCourse.blade.php` | Program selector only | No search, no pagination |
 | **College Goals** | `GoalObjective\goal.blade.php` | College dropdown only | No search by goal text |
 | **Department Objectives** | `GoalObjective\objective.blade.php` | College + Dept dropdowns | No search by objective text |
 | **Programs (PEOs/POs)** | `Programs\index.blade.php` | Program selector only | No search across PEO/PO text |
-| **Academic Calendars** | `AcademicCalendar\index.blade.php` | None | No search by year, no filter by status |
-| **Calendar Events** | `AcademicCalendarEvent\index.blade.php` | Semester tabs only | No search by event name/type/date |
-| **Academic Structure** | `UniversityStructure\index.blade.php` | None | No search for colleges/depts/programs |
-| **User Assignments (Colleges)** | `UserAssignments\colleges.blade.php` | None | No search for college name |
-| **User Assignments (Depts)** | `UserAssignments\departments.blade.php` | None | No search for dept/faculty name |
+| **Academic Calendars** | `Academic\AcademicCalendar\index.blade.php` | None | No search by year, no filter by status |
+| **Calendar Events** | `Academic\AcademicCalendarEvent\index.blade.php` | Semester tabs only | No search by event name/type/date |
+| **Academic Structure** | `University\UniversityStructure\index.blade.php` | None | No search for colleges/depts/programs |
+| **User Assignments (Colleges)** | `UserManagement\UserAssignments\colleges.blade.php` | None | No search for college name |
+| **User Assignments (Depts)** | `UserManagement\UserAssignments\departments.blade.php` | None | No search for dept/faculty name |
 
 ### Recommended Fix Pattern (Per Page)
 

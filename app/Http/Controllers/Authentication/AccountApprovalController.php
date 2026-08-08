@@ -15,7 +15,7 @@ class AccountApprovalController extends Controller
 
     public function index()
     {
-        return view('AccountApproval.index');
+        return view('Authentication.AccountApproval.index');
     }
 
     public function approve(Request $request)
