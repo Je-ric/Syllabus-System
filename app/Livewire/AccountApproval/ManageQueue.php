@@ -3,7 +3,7 @@
 namespace App\Livewire\AccountApproval;
 
 use App\Models\User;
-use App\Services\AccountApprovalService;
+use App\Services\Authentication\AccountApprovalService;
 use Livewire\Component;
 use Livewire\WithPagination;
 

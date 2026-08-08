@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Cais;
 
 use App\Exceptions\CaisApiException;
 use App\Http\Controllers\Controller;
-use App\Services\CaisApiService;
+use App\Services\System\CaisApiService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Exceptions\CaisApiException;
-use App\Services\CaisApiService;
+use App\Services\System\CaisApiService;
 use Illuminate\Console\Command;
 
 class CaisHealthCheck extends Command

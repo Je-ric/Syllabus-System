@@ -8,7 +8,7 @@ How user roles and organizational assignments work together in CSMS.
   - `app/Http/Controllers/Authentication/AccountApprovalController.php` — approval actions, role assignment, user editing
   - `app/Http/Controllers/UserManagement/UserAssignmentsController.php` — dean/chair/faculty assignment
 - Services
-  - `app/Services/AccountApprovalService.php` — approve, reject, restore, disable, assignRoles
+  - `app/Services/Authentication/AccountApprovalService.php` — approve, reject, restore, disable, assignRoles
   - `app/Services/UserAssignments/UserAssignmentsService.php` — assign/remove dean, chair, faculty
   - `app/Services/UserAssignments/UserAssignmentsChecker.php` — validation and authorization checks
 - Models
@@ -39,7 +39,7 @@ Both layers are required for consistent authorization.
 
 ## Conditions (If / Then)
 
-### Approve Account (AccountApprovalService::approve)
+### Approve Account (Authentication\AccountApprovalService::approve)
 
 - If approving a user:
   - Then set `account_status = active`.
@@ -47,7 +47,7 @@ Both layers are required for consistent authorization.
   - Then send status email via `AccountStatusUpdated` mail.
   - Then record AuditLog.
 
-### Reject Account (AccountApprovalService::reject)
+### Reject Account (Authentication\AccountApprovalService::reject)
 
 - If rejecting a user:
   - Then set `account_status = rejected`.
@@ -55,14 +55,14 @@ Both layers are required for consistent authorization.
   - Then send status email.
   - Then record AuditLog.
 
-### Restore Account (AccountApprovalService::restore)
+### Restore Account (Authentication\AccountApprovalService::restore)
 
 - If restoring a user:
   - Then set `account_status = pending`.
   - Then no assignment cleanup — user keeps previous assignments.
   - Then record AuditLog.
 
-### Disable Account (AccountApprovalService::disable)
+### Disable Account (Authentication\AccountApprovalService::disable)
 
 - If disabling a user:
   - Then set `account_status = disabled`.
@@ -70,7 +70,7 @@ Both layers are required for consistent authorization.
   - Then send status email.
   - Then record AuditLog.
 
-### Assign Roles (AccountApprovalController::assignRole → AccountApprovalService::assignRoles)
+### Assign Roles (Authentication\AccountApprovalController::assignRole → Authentication\AccountApprovalService::assignRoles)
 
 - If assigning roles:
   - Then `user_id` must exist.

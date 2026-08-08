@@ -7,7 +7,7 @@ Practical reference for how CSMS manages the academic structure hierarchy.
 - Controllers
   - `app/Http/Controllers/University/UniversityStructureController.php` — Academic structure CRUD
 - Services
-  - `app/Services/UniversityStructureService.php` — Academic structure business logic
+  - `app/Services/University/UniversityStructureService.php` — Academic structure business logic
 - Models
   - `app/Models/College.php`
   - `app/Models/Department.php`

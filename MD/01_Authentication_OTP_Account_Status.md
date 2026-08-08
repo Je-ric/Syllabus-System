@@ -13,7 +13,7 @@ Beginner-friendly summary of what happens in registration, login, OTP (password 
 
 ### Why OTP for Password Changes?
 - OTP verifies the user owns their email before allowing a password change.
-- OTP is issued via `OtpService` for purpose `password_change`.
+- OTP is issued via `Authentication\OtpService` for purpose `password_change`.
 - OTP expires in 10 minutes. Users can resend from the profile page.
 - If mail sending fails, the OTP record is still saved in DB — user can resend manually.
 
@@ -31,9 +31,9 @@ Beginner-friendly summary of what happens in registration, login, OTP (password 
   - `app/Http/Controllers/UserManagement/UserController.php` — User profile updates, consultation hours
   - `app/Http/Controllers/UserManagement/UserAssignmentsController.php` — User assignments management
 - Services
-  - `app/Services/CaisApiService.php`
-  - `app/Services/OtpService.php`
-  - `app/Services/AccountApprovalService.php`
+  - `app/Services/System/CaisApiService.php`
+  - `app/Services/Authentication/OtpService.php`
+  - `app/Services/Authentication/AccountApprovalService.php`
 - Models
   - `app/Models/User.php`
   - `app/Models/UserOtp.php`
@@ -174,23 +174,23 @@ Related docs:
   - Then validate new password: minimum 8 chars, must match confirmation, must be different from current password.
   - If current password is wrong: return field-level error.
   - If valid:
-    - Then issue OTP via `OtpService::issueForUser()` for purpose `password_change`.
+    - Then issue OTP via `Authentication\OtpService::issueForUser()` for purpose `password_change`.
     - Then store `['user_id', 'password_hash']` in session under `password_change_otp` key.
     - Then redirect to profile with info toast (or warning if mail failed).
 - If verifying OTP:
   - Then `otp` must be exactly 6 digits.
   - Then session must have a pending change for this user.
-  - Then `OtpService::validate()` checks: record exists, not expired, hash matches.
+  - Then `Authentication\OtpService::validate()` checks: record exists, not expired, hash matches.
   - If valid:
     - Then update password to the hashed value stored in session.
-    - Then clear OTP record via `OtpService::clear()`.
+    - Then clear OTP record via `Authentication\OtpService::clear()`.
     - Then clear session key.
     - Then redirect to profile with success toast.
   - If invalid: return field-level error on `otp`.
 - If resending OTP:
   - If user has role `admin`: blocked with warning toast.
   - If no pending session change exists: redirect with warning toast.
-  - Then issue a fresh OTP via `OtpService::issueForUser()`.
+  - Then issue a fresh OTP via `Authentication\OtpService::issueForUser()`.
   - Then redirect to profile with success or warning toast.
 
 ### Admin Account Status Actions

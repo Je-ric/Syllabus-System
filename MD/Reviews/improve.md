@@ -340,7 +340,7 @@ Right now, CSMS sends emails synchronously inside service methods (`Mail::to()->
 
 ---
 
-### A1. `AccountApprovalService::restore()` — No `DB::transaction()`
+### A1. `Authentication\AccountApprovalService::restore()` — No `DB::transaction()`
 **File:** `app/Services/AccountApprovalService.php` → `restore()`
 **What's wrong:** Every other method in `AccountApprovalService` (`approve`, `reject`, `disable`, `assignRoles`) is wrapped in `DB::transaction()`. `restore()` is not — it directly calls `$user->save()` and `AuditLog::record()` with no rollback protection.
 **Fix needed:** Wrap in `DB::transaction()` to match the pattern of the other methods.

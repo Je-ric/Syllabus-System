@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Authentication;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\AuditLog;
-use App\Services\AccountApprovalService;
+use App\Services\Authentication\AccountApprovalService;
 use Illuminate\Support\Facades\Auth;
 
 

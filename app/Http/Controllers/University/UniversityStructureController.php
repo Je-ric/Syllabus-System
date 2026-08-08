@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\College;
 use App\Models\Department;
 use App\Models\Program;
-use App\Services\UniversityStructureService;
+use App\Services\University\UniversityStructureService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 

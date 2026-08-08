@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\System;
 
 use App\Services\CaisAPI\CaisAuthService;
 use App\Services\CaisAPI\CaisCollegeService;

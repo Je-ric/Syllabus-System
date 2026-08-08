@@ -7,7 +7,7 @@ Rules for viewing and updating a user's own profile, managing consultation hours
 - Controller
   - `app/Http/Controllers/UserManagement/UserController.php` — index, update, changePassword, verifyPasswordOtp, resendPasswordOtp, storeConsultationHour, destroyConsultationHour
 - Service
-  - `app/Services/OtpService.php` — issueForUser, validate, clear, migrateLegacyOtp
+  - `app/Services/Authentication/OtpService.php` — issueForUser, validate, clear, migrateLegacyOtp
 - Models
   - `app/Models/User.php`
   - `app/Models/UserOtp.php`
@@ -69,7 +69,7 @@ Two-column layout:
     - `password` required, min 8 chars, must be confirmed (`password_confirmation`), must differ from `current_password`.
     - If `current_password` does not match stored hash: field error "Current password is incorrect."
     - If valid:
-      - Issue OTP for `password_change` via `OtpService::issueForUser()`.
+      - Issue OTP for `password_change` via `Authentication\OtpService::issueForUser()`.
       - Store pending user_id + password hash in session under `password_change_otp`.
       - Redirect to profile with info toast asking user to enter OTP.
 
@@ -78,13 +78,13 @@ Two-column layout:
 - If a user submits the OTP to confirm password change:
   - Then check session `password_change_otp` exists and matches `Auth::id()`.
   - If session missing or mismatched: redirect with warning toast ("No pending password change request found.").
-  - Then migrate legacy OTP if needed (`OtpService::migrateLegacyOtp()`).
+  - Then migrate legacy OTP if needed (`Authentication\OtpService::migrateLegacyOtp()`).
   - `otp` must be exactly 6 digits.
-  - Validate OTP via `OtpService::validate()` for `password_change` purpose.
+  - Validate OTP via `Authentication\OtpService::validate()` for `password_change` purpose.
   - If invalid or expired: field error on `otp`.
   - If valid:
     - Apply pending password hash via `forceFill`.
-    - Clear OTP for `password_change` via `OtpService::clear()`.
+    - Clear OTP for `password_change` via `Authentication\OtpService::clear()`.
     - Clear session `password_change_otp`.
     - Redirect with success toast.
 

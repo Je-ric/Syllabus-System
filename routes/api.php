@@ -5,7 +5,7 @@ use App\Http\Controllers\Cais\CaisDepartmentController;
 use App\Http\Controllers\Cais\CaisFacultyController;
 use App\Http\Controllers\Cais\CaisSemesterController;
 use App\Http\Controllers\Cais\CaisTeachingLoadController;
-use App\Services\CaisApiService;
+use App\Services\System\CaisApiService;
 use App\Services\CaisAPI\CaisAuthService;
 use Illuminate\Support\Facades\Route;
 

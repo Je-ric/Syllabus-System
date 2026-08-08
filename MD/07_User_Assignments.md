@@ -13,8 +13,8 @@ Rules for organizational assignments and what appears in hierarchy views.
   - `app/Models/User.php`
   - `app/Models/UserAssignment.php`
 - Cleanup triggered by
-  - `app/Services/AccountApprovalService.php` (on status change and role removal)
-  - `app/Services/UniversityStructureService.php` (on academic structure delete)
+  - `app/Services/Authentication/AccountApprovalService.php` (on status change and role removal)
+  - `app/Services/University/UniversityStructureService.php` (on academic structure delete)
 - Views
   - `resources/views/UserAssignments/colleges.blade.php`
   - `resources/views/UserAssignments/departments.blade.php`

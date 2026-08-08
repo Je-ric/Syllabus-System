@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Authentication;
 
 use App\Mail\AccountStatusUpdated;
 use App\Models\AuditLog;

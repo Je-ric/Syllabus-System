@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notification;
  * Notifies a user that their system role has been granted or revoked
  * via the Account Approval panel (admin action, no hierarchy placement).
  *
- * USAGE (from AccountApprovalService::assignRoles):
+ * USAGE (from Authentication\AccountApprovalService::assignRoles):
  *   $user->notify(new SystemRoleChangedNotification('dean',  'granted'));
  *   $user->notify(new SystemRoleChangedNotification('admin', 'revoked'));
  *

@@ -5,9 +5,9 @@ Beginner-friendly reference for OTP in CSMS: what it is, where it's stored, and 
 ## Files Used (Source of Truth)
 
 - Controllers
-  - `app/Http/Controllers/UserController.php` (password-change OTP flow)
+  - `app/Http/Controllers/UserManagement/UserController.php` (password-change OTP flow)
 - Service
-  - `app/Services/OtpService.php`
+  - `app/Services/Authentication/OtpService.php`
 - Models
   - `app/Models/UserOtp.php`
 - Mail
@@ -30,7 +30,7 @@ Beginner-friendly reference for OTP in CSMS: what it is, where it's stored, and 
   - `otp` (hashed)
   - `otp_expires_at`
 - Legacy support:
-  - If an old OTP exists in `users.otp`, `OtpService::migrateLegacyOtp()` moves it to `user_otps`.
+  - If an old OTP exists in `users.otp`, `Authentication\OtpService::migrateLegacyOtp()` moves it to `user_otps`.
 
 ## OTP Purposes
 
