@@ -5,12 +5,12 @@ How user roles and organizational assignments work together in CSMS.
 ## Files Used (Source of Truth)
 
 - Controllers
-  - `app/Http/Controllers/AccountApprovalController.php` — approval actions, role assignment, user editing
-  - `app/Http/Controllers/OrganizationalHierarchyController.php` — dean/chair/faculty assignment
+  - `app/Http/Controllers/Authentication/AccountApprovalController.php` — approval actions, role assignment, user editing
+  - `app/Http/Controllers/UserManagement/UserAssignmentsController.php` — dean/chair/faculty assignment
 - Services
   - `app/Services/AccountApprovalService.php` — approve, reject, restore, disable, assignRoles
-  - `app/Services/OrganizationalHierarchy/OrganizationalHierarchyService.php` — assign/remove dean, chair, faculty
-  - `app/Services/OrganizationalHierarchy/OrganizationalHierarchyChecker.php` — validation and authorization checks
+  - `app/Services/UserAssignments/UserAssignmentsService.php` — assign/remove dean, chair, faculty
+  - `app/Services/UserAssignments/UserAssignmentsChecker.php` — validation and authorization checks
 - Models
   - `app/Models/User.php`
   - `app/Models/UserRole.php`
@@ -95,7 +95,7 @@ Both layers are required for consistent authorization.
 - If `faculty` role is removed (edge case — faculty is always re-added):
   - Then delete all `user_assignments` where `context = faculty` for that user.
 
-### Edit User (AccountApprovalController::editUser)
+### Edit User (AccountApprovalController::editUser — Authentication)
 
 - If editing a user as admin:
   - Then validate: `name` required, `email` required + unique (excluding self), `phone_number` optional, `office` optional.
@@ -103,7 +103,7 @@ Both layers are required for consistent authorization.
   - Then record AuditLog.
   - Route is admin-only.
 
-### Assignments via OrganizationalHierarchyService
+### Assignments via UserAssignmentsService
 
 All assignment methods run inside a DB transaction and record AuditLog.
 
@@ -112,7 +112,7 @@ All assignment methods run inside a DB transaction and record AuditLog.
 - If assigning dean:
   - Then `college_id` and `user_id` must exist.
   - If actor is not admin:
-    - Then checks are delegated to `OrganizationalHierarchyChecker`.
+    - Then checks are delegated to `UserAssignmentsChecker`.
   - Then checks run in order:
     1. User must have role `dean` or `admin`.
     2. User must not be assigned as chair (mutual exclusivity).
@@ -156,18 +156,18 @@ All assignment methods run inside a DB transaction and record AuditLog.
 - Remove chair: admin-only (checked via `checkActorCanManageChair`), deletes and audits.
 - Remove faculty: admin-only (checked via `checkActorCanManageFaculty`), deletes and audits.
 
-### Hierarchy View Routing (OrganizationalHierarchyController::hierarchyView)
+### Hierarchy View Routing (UserAssignmentsController::hierarchyView)
 
 - If user is `admin`:
-  - Then redirect to `organizational.colleges.index` (full college list).
+  - Then redirect to `user-assignments.colleges.index` (full college list).
 - If user has `dean` assignment:
-  - Then redirect to `organizational.departments.index` with their college ID.
+  - Then redirect to `user-assignments.departments.index` with their college ID.
 - If user has `chair` assignment:
-  - Then redirect to `organizational.departments.index` with their department's college ID.
+  - Then redirect to `user-assignments.departments.index` with their department's college ID.
 - If none of the above:
-  - Then show `OrganizationalHierarchy.no-assignment` view.
+  - Then show `UserAssignments.no-assignment` view.
 
-### Departments Index Scoping (OrganizationalHierarchyChecker)
+### Departments Index Scoping (UserAssignmentsChecker)
 
 - If viewing `departmentsIndex`:
   - **Admin**: sees all departments, can manage chair and faculty.
@@ -192,7 +192,7 @@ All assignment methods run inside a DB transaction and record AuditLog.
 - Scopes: `dean()`, `chair()`, `faculty()`, `forCollege()`, `forDepartment()`, `forUser()`
 - Static helpers: `findAssignment()`, `removeAssignment()`
 
-## getPotentialUsers (OrganizationalHierarchyChecker)
+## getPotentialUsers (UserAssignmentsChecker)
 
 Used to populate dropdowns when assigning dean/chair/faculty:
 

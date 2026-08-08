@@ -4,10 +4,10 @@ Rules for creating, updating, archiving, restoring, deleting, and PO mapping of 
 
 ## Files Used (Source of Truth)
 
-- Controller
-  - `app/Http/Controllers/Academic/CourseController.php`
-- Service
-  - `app/Services/Academic/CourseService.php`
+- Controllers
+  - `app/Http/Controllers/Academic/CourseController.php` — Course CRUD operations
+- Services
+  - `app/Services/Academic/CourseService.php` — Course business logic
   - `app/Services/Syllabus/SyllabusDeleteService.php` — cascade-delete per syllabus (shared with `SyllabusController`)
 - Models
   - `app/Models/Course.php`
@@ -16,11 +16,21 @@ Rules for creating, updating, archiving, restoring, deleting, and PO mapping of 
   - `app/Models/Syllabus.php`
   - `app/Models/CompleteSyllabus.php`
 - Views
-  - `resources/views/Course/index.blade.php`
-  - `resources/views/Course/form.blade.php`
-  - `resources/views/Course/modals/`
+  - `resources/views/Course/index.blade.php` — Course listing by program
+  - `resources/views/Course/form.blade.php` — Course create/edit form
+  - `resources/views/Course/modals/` — Archive, confirm edit, delete, view, and confirm modals
+  - `resources/views/Course/offcanvasReference.blade.php` — Reference offcanvas
 - Routes
   - `routes/web.php` (course routes — `role:admin,chair`)
+    - `GET /courses` — index
+    - `GET /courses/create` — create form
+    - `POST /courses` — store
+    - `GET /courses/{course}` — show (redirects to index)
+    - `GET /courses/{course}/edit` — edit form
+    - `PUT /courses/{course}` — update
+    - `POST /courses/{course}/archive` — archive
+    - `POST /courses/{course}/restore` — restore
+    - `DELETE /courses/{course}` — delete
 
 ## Conditions (If / Then)
 

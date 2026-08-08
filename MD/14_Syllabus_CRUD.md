@@ -5,10 +5,10 @@ Rules for the syllabus listing page, creation entry point, and deletion. For wiz
 ## Files Used (Source of Truth)
 
 - Controller
-  - `app/Http/Controllers/SyllabusController.php` — index, create, wizard, show, edit, update, destroy, previews, downloads
+  - `app/Http/Controllers/Syllabus/SyllabusController.php` — index, create, wizard, show, edit, update, destroy, previews, downloads
 - Services
-  - `app/Services/Syllabus/SyllabusPreviewService.php` — builds view data for preview variants
-  - `app/Services/Syllabus/SyllabusSnapshotService.php` — generates self-contained HTML snapshots and serves saved-version files
+  - `app/Services/Syllabus/Snapshots/SyllabusPreviewService.php` — builds view data for preview variants
+  - `app/Services/Syllabus/Snapshots/SyllabusSnapshotService.php` — generates self-contained HTML snapshots and serves saved-version files
   - `app/Services/Syllabus/SyllabusDeleteService.php` — cascade-deletes a syllabus and all child records/disk files
 - Models
   - `app/Models/Syllabus.php`
@@ -16,7 +16,7 @@ Rules for the syllabus listing page, creation entry point, and deletion. For wiz
   - `app/Models/Course.php`
 - Views
   - `resources/views/Syllabus/index.blade.php`
-  - `resources/views/Syllabus/selectCourse.blade.php`
+  - `resources/views/Syllabus/create/selectCourse.blade.php`
   - `resources/views/Syllabus/preview/complete.blade.php`
   - `resources/views/Syllabus/preview/abridged.blade.php`
   - `resources/views/Syllabus/preview/assessment.blade.php`

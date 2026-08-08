@@ -5,7 +5,7 @@ Rules for viewing and updating a user's own profile, managing consultation hours
 ## Files Used (Source of Truth)
 
 - Controller
-  - `app/Http/Controllers/UserController.php` — index, update, changePassword, verifyPasswordOtp, resendPasswordOtp, storeConsultationHour, destroyConsultationHour
+  - `app/Http/Controllers/UserManagement/UserController.php` — index, update, changePassword, verifyPasswordOtp, resendPasswordOtp, storeConsultationHour, destroyConsultationHour
 - Service
   - `app/Services/OtpService.php` — issueForUser, validate, clear, migrateLegacyOtp
 - Models

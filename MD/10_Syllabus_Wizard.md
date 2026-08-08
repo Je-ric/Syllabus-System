@@ -11,30 +11,30 @@ Use this when changing logic, debugging behavior, or explaining the flow to non-
   - `app/Livewire/Syllabus/SyllabusWizard.php`
   - `resources/views/livewire/syllabus/syllabus-wizard.blade.php`
 - Step components
-  - `app/Livewire/Syllabus/Steps/AcademicCalendarStep.php`
-  - `app/Livewire/Syllabus/Steps/ComponentsStep.php`
-  - `app/Livewire/Syllabus/Steps/CourseOutcomesStep.php`
-  - `app/Livewire/Syllabus/Steps/WeeklyCoverageStep.php`
-  - `app/Livewire/Syllabus/Steps/CourseEvaluationStep.php`
-  - `app/Livewire/Syllabus/Steps/ReviewStep.php`
+  - `app/Livewire/Syllabus/Wizard/Steps/AcademicCalendarStep.php`
+  - `app/Livewire/Syllabus/Wizard/Steps/ComponentsStep.php`
+  - `app/Livewire/Syllabus/Wizard/Steps/CourseOutcomesStep.php`
+  - `app/Livewire/Syllabus/Wizard/Steps/WeeklyCoverageStep.php`
+  - `app/Livewire/Syllabus/Wizard/Steps/CourseEvaluationStep.php`
+  - `app/Livewire/Syllabus/Wizard/Steps/ReviewStep.php`
 - Step views
-  - `resources/views/livewire/syllabus/steps/academic-calendar.blade.php`
-  - `resources/views/livewire/syllabus/steps/course-components.blade.php`
-  - `resources/views/livewire/syllabus/steps/course-outcomes.blade.php`
-  - `resources/views/livewire/syllabus/steps/weekly-coverage.blade.php`
-  - `resources/views/livewire/syllabus/steps/course-evaluation.blade.php`
-  - `resources/views/livewire/syllabus/steps/review.blade.php`
+  - `resources/views/livewire/syllabus/wizard/steps/academic-calendar.blade.php`
+  - `resources/views/livewire/syllabus/wizard/steps/course-components.blade.php`
+  - `resources/views/livewire/syllabus/wizard/steps/course-outcomes.blade.php`
+  - `resources/views/livewire/syllabus/wizard/steps/weekly-coverage.blade.php`
+  - `resources/views/livewire/syllabus/wizard/steps/course-evaluation.blade.php`
+  - `resources/views/livewire/syllabus/wizard/steps/review.blade.php`
 - Service classes (business logic)
   - `app/Services/Syllabus/CourseOutcomeService.php`
-  - `app/Services/Syllabus/WeekGenerationService.php`
-  - `app/Services/Syllabus/WeekLockService.php`
-  - `app/Services/Syllabus/WeekContentService.php`
-  - `app/Services/Syllabus/WeekResourceService.php`
+  - `app/Services/Syllabus/Weeks/WeekGenerationService.php`
+  - `app/Services/Syllabus/Weeks/WeekLockService.php`
+  - `app/Services/Syllabus/Weeks/WeekContentService.php`
+  - `app/Services/Syllabus/Weeks/WeekResourceService.php`
   - `app/Services/Syllabus/CourseEvaluationService.php`
-  - `app/Services/Syllabus/SyllabusReviewService.php`
+  - `app/Services/Syllabus/Review/SyllabusReviewService.php`
   - `app/Services/Syllabus/SyllabusRevisionHistoryService.php`
-  - `app/Services/Syllabus/SyllabusApprovalService.php`
-  - `app/Services/Syllabus/SyllabusSnapshotService.php`
+  - `app/Services/Syllabus/Review/SyllabusApprovalService.php`
+  - `app/Services/Syllabus/Snapshots/SyllabusSnapshotService.php`
 - Models
   - `app/Models/Syllabus.php`
   - `app/Models/SyllabusWeek.php`

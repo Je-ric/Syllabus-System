@@ -5,20 +5,31 @@ Rules and flow for encoding College Goals and Department Objectives.
 ## Files Used (Source of Truth)
 
 - Controllers
-  - `app/Http/Controllers/CQI/GoalController.php`
-  - `app/Http/Controllers/CQI/ObjectiveController.php`
+  - `app/Http/Controllers/CQI/GoalController.php` — College goals CRUD
+  - `app/Http/Controllers/CQI/ObjectiveController.php` — Department objectives CRUD
+  - `app/Http/Controllers/CQI/ProgramController.php` — Program listing for PEO/PO management
 - Service
-  - `app/Services/CQI/GoalObjectiveService.php`
+  - `app/Services/CQI/GoalObjectiveService.php` — Goal and objective authorization checks
 - Models
   - `app/Models/College.php` (`getNextGoalCode()`, `resequenceGoalCodes()`)
   - `app/Models/CollegeGoal.php`
   - `app/Models/Department.php` (`getNextObjectiveCode()`, `resequenceObjectiveCodes()`)
   - `app/Models/DepartmentObjective.php`
 - Views
-  - `resources/views/GoalObjective/goal.blade.php`
-  - `resources/views/GoalObjective/objective.blade.php`
+  - `resources/views/GoalObjective/goal.blade.php` — College goals listing
+  - `resources/views/GoalObjective/objective.blade.php` — Department objectives listing
+  - `resources/views/GoalObjective/modals/` — Add/update/delete modals for goals and objectives
 - Routes
-  - `routes/web.php` (goals routes — `role:admin,dean`; objectives routes — `role:admin,chair`)
+  - `routes/web.php` (goals routes — `role:admin,dean`)
+    - `GET /goals` — index
+    - `POST /goals` — store
+    - `PUT /goals/{goal}` — update
+    - `DELETE /goals/{goal}` — delete
+  - `routes/web.php` (objectives routes — `role:admin,chair`)
+    - `GET /objectives` — index
+    - `POST /objectives` — store
+    - `PUT /objectives/{objective}` — update
+    - `DELETE /objectives/{objective}` — delete
 
 ## Conditions (If / Then)
 

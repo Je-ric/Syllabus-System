@@ -5,28 +5,28 @@ Practical reference for how Academic Calendars and their semester events behave 
 ## Files Used (Source of Truth)
 
 - Controllers
-  - `app/Http/Controllers/Academic/AcademicCalendarController.php`
-  - `app/Http/Controllers/Academic/AcademicCalendarEventController.php`
+  - `app/Http/Controllers/Academic/AcademicCalendarController.php` — Academic calendar CRUD
+  - `app/Http/Controllers/Academic/AcademicCalendarEventController.php` — Academic event management
 - Livewire
-  - `app/Livewire/AcademicCalendar/AcademicCalendarForm.php`
-  - `app/Livewire/AcademicCalendar/AcademicCalendarEventForm.php`
+  - `app/Livewire/AcademicCalendar/AcademicCalendarForm.php` — Calendar form handling (create, update)
+  - `app/Livewire/AcademicCalendar/AcademicCalendarEventForm.php` — Event form handling (single date, date range, delete)
 - Models
   - `app/Models/AcademicCalendar.php`
   - `app/Models/AcademicCalendarEvent.php`
   - `app/Models/Syllabus.php`
   - `app/Models/SyllabusWeek.php`
 - Views (controller-rendered)
-  - `resources/views/AcademicCalendar/index.blade.php`
-  - `resources/views/AcademicCalendar/form.blade.php`
-  - `resources/views/AcademicCalendar/Modals/cancelEditModal.blade.php`
-  - `resources/views/AcademicCalendar/Modals/confirmAYModal.blade.php`
-  - `resources/views/AcademicCalendar/Modals/deleteAYModal.blade.php`
-  - `resources/views/AcademicCalendar/Modals/event-modal.blade.php`
-  - `resources/views/AcademicCalendarEvent/index.blade.php`
+  - `resources/views/AcademicCalendar/index.blade.php` — Academic years listing
+  - `resources/views/AcademicCalendar/form.blade.php` — Academic year form
+  - `resources/views/AcademicCalendar/Modals/cancelEditModal.blade.php` — Cancel edit confirmation
+  - `resources/views/AcademicCalendar/Modals/confirmAYModal.blade.php` — Create academic year confirmation
+  - `resources/views/AcademicCalendar/Modals/deleteAYModal.blade.php` — Delete academic year confirmation
+  - `resources/views/AcademicCalendarEvent/index.blade.php` — Events listing for a semester
 - Views (Livewire)
-  - `resources/views/livewire/academic-calendar/form.blade.php`
-  - `resources/views/livewire/academic-calendar/event-form.blade.php`
-  - `resources/views/livewire/academic-calendar/partials/`
+  - `resources/views/livewire/academic-calendar/form.blade.php` — Calendar form component
+  - `resources/views/livewire/academic-calendar/event-form.blade.php` — Event form component
+  - `resources/views/livewire/academic-calendar/partials/event-modal.blade.php` — Event add/edit modal
+  - `resources/views/livewire/academic-calendar/partials/` — Other partials
 - Routes
   - `routes/web.php` (academic calendar + events routes — `role:admin,ovpaa`)
     - `GET /academic-calendars` — index

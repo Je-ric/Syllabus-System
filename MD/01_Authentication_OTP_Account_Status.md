@@ -18,17 +18,18 @@ Beginner-friendly summary of what happens in registration, login, OTP (password 
 - If mail sending fails, the OTP record is still saved in DB — user can resend manually.
 
 ### Why Admin Approval After Registration?
-- Registration creates an account with `pending` status and `email_verified_at = now()` directly.
+- Registration creates an account with `active` status and `email_verified_at = now()` directly.
 - Admin approval is the human gate that confirms the registrant is an actual faculty member.
-- Only after admin approval does the account become `active` and receive the `Faculty` role.
+- After admin approval, the account receives the `Faculty` role.
 - This ensures only verified, authorized faculty access the system.
 
 ## Files Used (Source of Truth)
 
 - Controllers
-  - `app/Http/Controllers/Authentication/AuthController.php`
-  - `app/Http/Controllers/Authentication/AccountApprovalController.php`
-  - `app/Http/Controllers/UserManagement/UserController.php`
+  - `app/Http/Controllers/Authentication/AuthController.php` — Login, register, logout
+  - `app/Http/Controllers/Authentication/AccountApprovalController.php` — Admin account approval, role assignment, user editing
+  - `app/Http/Controllers/UserManagement/UserController.php` — User profile updates, consultation hours
+  - `app/Http/Controllers/UserManagement/UserAssignmentsController.php` — User assignments management
 - Services
   - `app/Services/CaisApiService.php`
   - `app/Services/OtpService.php`
@@ -45,6 +46,8 @@ Beginner-friendly summary of what happens in registration, login, OTP (password 
   - `resources/views/Authentication/auth.blade.php` — Login + Register (single page, Alpine tab switch)
   - `resources/views/Authentication/waiting-approval.blade.php` — Post-registration holding screen
   - `resources/views/Authentication/viewDetails.blade.php` — User profile + password change
+  - `resources/views/AccountApproval/index.blade.php` — Admin account approval page
+  - `resources/views/AccountApproval/modals/` — Approval, role assignment, and edit user modals
 - Routes
   - `routes/web.php`
     - `GET /auth` — show login/register page
@@ -57,6 +60,16 @@ Beginner-friendly summary of what happens in registration, login, OTP (password 
     - `POST /profile/password` — initiate password change (auth)
     - `POST /profile/password/verify-otp` — verify OTP and commit password (auth)
     - `POST /profile/password/resend-otp` — resend OTP (auth)
+    - `POST /profile/consultation-hours` — add consultation hour (auth)
+    - `DELETE /profile/consultation-hours/{hour}` — remove consultation hour (auth)
+  - `routes/web.php` (account approval routes — `role:admin`)
+    - `GET /account-approval` — index
+    - `POST /account-approval/approve` — approve account
+    - `POST /account-approval/reject` — reject account
+    - `POST /account-approval/restore` — restore account
+    - `POST /account-approval/disable` — disable account
+    - `POST /account-approval/edit-user` — edit user details
+    - `POST /account-approval/assign-roles` — assign roles
 
 Related docs:
 - `MD/08_OTP_Flow_and_Service.md`
@@ -80,6 +93,13 @@ Related docs:
 - All three password fields (current, new, confirm) have Alpine show/hide toggles.
 - Uses `x-bind:type` to switch between `password` and `text`.
 - Password change requires OTP verification via email before the update is processed.
+- Includes consultation hours management (add/remove consultation hours).
+
+### AccountApproval views
+- `index.blade.php` — Admin dashboard for account approval and management
+- `modals/approvalModal.blade.php` — Approve/reject account modal
+- `modals/assignRolesModal.blade.php` — Role assignment modal
+- `modals/editUserModal.blade.php` — Edit user details modal
 
 ## Conditions (If / Then)
 
@@ -99,6 +119,7 @@ Related docs:
   - Then create user with:
     - `account_status = active`
     - `email_verified_at = now()`
+    - `phone_number` and `office` from form
   - Then record an AuditLog entry for the registration.
   - Then redirect to `waiting.approval` with a success message.
   - No role is assigned at registration — only after admin approval.
@@ -150,6 +171,7 @@ Related docs:
 - If user requests a password change:
   - If user has role `admin`: blocked with warning toast (admin cannot change password from this page).
   - Then validate current password via `Hash::check()`.
+  - Then validate new password: minimum 8 chars, must match confirmation, must be different from current password.
   - If current password is wrong: return field-level error.
   - If valid:
     - Then issue OTP via `OtpService::issueForUser()` for purpose `password_change`.
@@ -183,7 +205,7 @@ Related docs:
 - On `approve`: `faculty` role is attached if not already present.
 - On `approve`: `email_verified_at` is set to `now()` if null.
 
-### Admin Edit User (AccountApprovalController)
+### Admin Edit User (AccountApprovalController — Authentication)
 
 - Acting user must have role `admin` (checked explicitly, not just route middleware).
 - `name` required, max 255.
@@ -192,10 +214,26 @@ Related docs:
 - `office` optional, max 255.
 - Records an AuditLog entry after update.
 
-### Role Assignment (Admin — AccountApprovalController)
+### User Profile Update (UserController — UserManagement)
+
+- User cannot have role `admin` (blocked with warning toast).
+- `name` required, max 255.
+- `email` required, valid, unique excluding user's own id.
+- `phone_number` optional, max 30.
+- `office` optional, max 255.
+- Records an AuditLog entry after update.
+
+### Consultation Hours (UserController — UserManagement)
+
+- User can add consultation hours:
+  - `day` required, must be one of: Monday, Tuesday, Wednesday, Thursday, Friday.
+  - `time` required, max 100 chars.
+- User can delete their own consultation hours (aborts if hour doesn't belong to user).
+
+### Role Assignment (Admin — AccountApprovalController — Authentication)
 
 - User account must be `active`.
-- Allowed roles: `admin`, `chair`, `dean`, `faculty`.
+- Allowed roles: `admin`, `chair`, `dean`, `faculty`, `ovpaa`.
 - `faculty` is always forced into the role set (cannot be removed via this action).
 - Roles are synced — roles not in the submitted set are removed.
 - If submitted set contains both `dean` and `chair`: blocked with error toast (controller-level guard) and 422 (service-level guard).
@@ -211,7 +249,7 @@ Related docs:
 1. User registers with CLSU email → account created with `active` status, email auto-verified.
 2. User redirected to waiting-approval page.
 3. Admin approves user → `faculty` role attached, approval email sent.
-4. Admin assigns additional roles and organizational assignments as needed.
+4. Admin assigns additional roles (including `ovpaa`) and organizational assignments as needed.
 5. User can log in and use the system.
 
 ### Login (CAIS-first)

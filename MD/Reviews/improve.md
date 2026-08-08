@@ -271,7 +271,7 @@ CSMS has at least 19 hardcoded string literals scattered across controllers, ser
 |---|---|---|
 | `SyllabusStatus` | `Draft`, `UnderReview`, `ForRevision`, `Approved` | `Syllabus` model, `SyllabusController`, `SyllabusDeleteService`, `ReviewStep`, `SyllabusReviewService` |
 | `AccountStatus` | `Pending`, `Active`, `Rejected`, `Disabled` | `User` model, `AccountApprovalService`, `AccountApprovalController`, `AuthController`, `ManageQueue` |
-| `UserRole` | `Admin`, `Dean`, `Chair`, `Faculty` | `AccountApprovalService`, `OrganizationalHierarchyService`, `RoleMiddleware`, `ReviewStep`, `SyllabusController` |
+| `UserRole` | `Admin`, `Dean`, `Chair`, `Faculty` | `AccountApprovalService`, `UserAssignmentsService`, `RoleMiddleware`, `ReviewStep`, `SyllabusController` |
 | `ComponentType` | `Lec`, `Lab` | `CourseComponent` model, `Syllabus::getLecComponent()`, `CourseEvaluationService` |
 | `ReviewerStatus` | `Pending`, `Approved`, `Rejected` | `SyllabusReviewer` model, `SyllabusReviewService` — currently hardcoded inside `updateReviewerStatus()` |
 

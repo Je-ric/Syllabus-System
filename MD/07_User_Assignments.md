@@ -4,17 +4,17 @@ Rules for organizational assignments and what appears in hierarchy views.
 
 ## Files Used (Source of Truth)
 
-- Controller
-  - `app/Http/Controllers/UserManagement/UserAssignmentsController.php`
+- Controllers
+  - `app/Http/Controllers/UserManagement/UserAssignmentsController.php` — User assignments management
 - Services
-  - `app/Services/UserAssignments/UserAssignmentsService.php`
-  - `app/Services/UserAssignments/UserAssignmentsChecker.php`
+  - `app/Services/UserAssignments/UserAssignmentsService.php` — Assignment business logic
+  - `app/Services/UserAssignments/UserAssignmentsChecker.php` — Validation and authorization checks
 - Models
   - `app/Models/User.php`
   - `app/Models/UserAssignment.php`
 - Cleanup triggered by
   - `app/Services/AccountApprovalService.php` (on status change and role removal)
-  - `app/Services/UniversityStructureService.php` (on structure delete)
+  - `app/Services/UniversityStructureService.php` (on academic structure delete)
 - Views
   - `resources/views/UserAssignments/colleges.blade.php`
   - `resources/views/UserAssignments/departments.blade.php`

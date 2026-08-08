@@ -14,9 +14,9 @@ Only 2 pages have full search+filter: **Account Approval** (`ManageQueue`) and *
 | **Programs (PEOs/POs)** | `Programs\index.blade.php` | Program selector only | No search across PEO/PO text |
 | **Academic Calendars** | `AcademicCalendar\index.blade.php` | None | No search by year, no filter by status |
 | **Calendar Events** | `AcademicCalendarEvent\index.blade.php` | Semester tabs only | No search by event name/type/date |
-| **Academic Structure** | `AcademicStructure\index.blade.php` | None | No search for colleges/depts/programs |
-| **Org Hierarchy (Colleges)** | `OrganizationalHierarchy\colleges.blade.php` | None | No search for college name |
-| **Org Hierarchy (Depts)** | `OrganizationalHierarchy\departments.blade.php` | None | No search for dept/faculty name |
+| **Academic Structure** | `UniversityStructure\index.blade.php` | None | No search for colleges/depts/programs |
+| **User Assignments (Colleges)** | `UserAssignments\colleges.blade.php` | None | No search for college name |
+| **User Assignments (Depts)** | `UserAssignments\departments.blade.php` | None | No search for dept/faculty name |
 
 ### Recommended Fix Pattern (Per Page)
 

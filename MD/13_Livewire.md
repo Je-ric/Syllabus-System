@@ -10,11 +10,11 @@ Plain-language explanation of how Livewire is used in CSMS.
   - `app/Livewire/Programs/ManagePeos.php`
   - `app/Livewire/Programs/ManagePos.php`
   - `app/Livewire/Programs/PeoDisplay.php`
-  - `app/Livewire/Syllabus/SyllabusWizard.php`
-  - `app/Livewire/Syllabus/Steps/*`
+  - `app/Livewire/Syllabus/Wizard/SyllabusWizard.php`
+  - `app/Livewire/Syllabus/Wizard/Steps/*`
 - Views (examples)
   - `resources/views/livewire/programs/*`
-  - `resources/views/livewire/syllabus/*`
+  - `resources/views/livewire/syllabus/wizard/*`
 
 Related docs:
 - `MD/10_Syllabus_Wizard.md`

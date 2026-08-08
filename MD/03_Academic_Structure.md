@@ -4,10 +4,10 @@ Practical reference for how CSMS manages the academic structure hierarchy.
 
 ## Files Used (Source of Truth)
 
-- Controller
-  - `app/Http/Controllers/University/UniversityStructureController.php`
-- Service
-  - `app/Services/UniversityStructureService.php`
+- Controllers
+  - `app/Http/Controllers/University/UniversityStructureController.php` — Academic structure CRUD
+- Services
+  - `app/Services/UniversityStructureService.php` — Academic structure business logic
 - Models
   - `app/Models/College.php`
   - `app/Models/Department.php`
@@ -20,7 +20,17 @@ Practical reference for how CSMS manages the academic structure hierarchy.
   - `resources/views/UniversityStructure/index.blade.php`
   - `resources/views/UniversityStructure/modals/`
 - Routes
-  - `routes/web.php` (university structure routes — `role:admin` only)
+  - `routes/web.php` (academic structure routes — `role:admin` only)
+    - `GET /university-structure` — index
+    - `POST /university-structure/colleges` — store college
+    - `PUT /university-structure/colleges/{college}` — update college
+    - `DELETE /university-structure/colleges/{college}` — delete college
+    - `POST /university-structure/departments` — store department
+    - `PUT /university-structure/departments/{department}` — update department
+    - `DELETE /university-structure/departments/{department}` — delete department
+    - `POST /university-structure/programs` — store program
+    - `PUT /university-structure/programs/{program}` — update program
+    - `DELETE /university-structure/programs/{program}` — delete program
 
 ## Key Concepts
 

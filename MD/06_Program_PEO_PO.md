@@ -5,14 +5,14 @@ Rules for program-level PEO/PO management, code sequencing, and PO↔PEO mapping
 ## Files Used (Source of Truth)
 
 - Controllers
-  - `app/Http/Controllers/University/UniversityStructureController.php` — program CRUD (admin page)
+  - `app/Http/Controllers/University/UniversityStructureController.php` — academic structure CRUD (colleges, departments, programs)
   - `app/Http/Controllers/CQI/ProgramController.php` — program listing, show, PEO/PO delete routes
 - Livewire
-  - `app/Livewire/Programs/ManagePeos.php`
-  - `app/Livewire/Programs/ManagePos.php`
-  - `app/Livewire/Programs/PeoDisplay.php`
-  - `app/Livewire/Programs/MatrixView.php`
-  - `app/Livewire/Programs/ProgramSelector.php`
+  - `app/Livewire/Programs/ManagePeos.php` — PEO CRUD and reordering
+  - `app/Livewire/Programs/ManagePos.php` — PO CRUD, PEO mapping, and reordering
+  - `app/Livewire/Programs/PeoDisplay.php` — Read-only PEO display
+  - `app/Livewire/Programs/MatrixView.php` — PO↔PEO matrix view
+  - `app/Livewire/Programs/ProgramSelector.php` — Program selector component
 - Models
   - `app/Models/Program.php`
   - `app/Models/ProgramEducationalObjective.php` (table: `program_eos`)
@@ -23,7 +23,9 @@ Rules for program-level PEO/PO management, code sequencing, and PO↔PEO mapping
 - Helper
   - `app/Helpers/ProgramCodeHelper.php`
 - Views (controller-rendered)
-  - `resources/views/Programs/index.blade.php`
+  - `resources/views/Programs/index.blade.php` — Programs listing
+  - `resources/views/UniversityStructure/index.blade.php` — Academic structure management (colleges, departments, programs)
+  - `resources/views/UniversityStructure/modals/` — Add/update/delete modals for colleges, departments, and programs
 - Views (Livewire)
   - `resources/views/livewire/programs/manage-peos.blade.php`
   - `resources/views/livewire/programs/manage-pos.blade.php`
@@ -37,6 +39,17 @@ Rules for program-level PEO/PO management, code sequencing, and PO↔PEO mapping
     - `GET /programs/{program}` — show
     - `DELETE /programs/peo/{peo}` — delete PEO
     - `DELETE /programs/po/{po}` — delete PO
+  - `routes/web.php` (academic structure routes — `role:admin`)
+    - `GET /university-structure` — index
+    - `POST /university-structure/colleges` — store college
+    - `PUT /university-structure/colleges/{college}` — update college
+    - `DELETE /university-structure/colleges/{college}` — delete college
+    - `POST /university-structure/departments` — store department
+    - `PUT /university-structure/departments/{department}` — update department
+    - `DELETE /university-structure/departments/{department}` — delete department
+    - `POST /university-structure/programs` — store program
+    - `PUT /university-structure/programs/{program}` — update program
+    - `DELETE /university-structure/programs/{program}` — delete program
 
 ## Key Concepts
 

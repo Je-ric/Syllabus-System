@@ -5,7 +5,7 @@ How Audit Logs filtering, search, sorting, and pagination work.
 ## Files Used (Source of Truth)
 
 - Controller
-  - `app/Http/Controllers/AuditLogController.php`
+  - `app/Http/Controllers/System/AuditLogController.php`
 - Model
   - `app/Models/AuditLog.php`
 - Routes
