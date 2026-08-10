@@ -155,6 +155,145 @@ class DashboardService
     /**
      * @return array<string, mixed>
      */
+    private function getFacultyDashboard(User $user): array
+    {
+        $assignment = $user->getPrimaryDepartmentAssignment();
+        $department = $assignment?->department;
+
+        if (! $department) {
+            return [
+                'no_assignment' => true,
+                'department'    => null,
+                'college'       => null,
+                'stats'         => [],
+                'syllabus_stats'=> [],
+                'health'        => ['warnings' => [], 'mapping_issues' => []],
+                'has_draft'      => false,
+                'latest_draft_id'=> null,
+                'draft_syllabi_count' => 0,
+                'under_review_count' => 0,
+                'for_revision_count' => 0,
+                'approved_count' => 0,
+                'recent_syllabi' => [],
+            ];
+        }
+
+        // Get programs where the faculty teaches courses
+        $programIds = CourseComponent::where('user_id', $user->id)
+            ->whereHas('course', function ($query) {
+                $query->where('status', 'active');
+            })
+            ->with('course')
+            ->get()
+            ->pluck('course.program_id')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        if (empty($programIds)) {
+            return [
+                'no_assignment'  => false,
+                'no_courses'     => true,
+                'department'     => [
+                    'id'   => $department->id,
+                    'name' => $department->name,
+                ],
+                'college'        => [
+                    'id'   => $department->college?->id,
+                    'name' => $department->college?->name,
+                ],
+                'stats'          => $this->emptyScopeOverview(null, $department->college_id),
+                'syllabus_stats' => $this->emptySyllabusStats(),
+                'health'         => ['warnings' => [], 'mapping_issues' => []],
+                'has_draft'      => false,
+                'latest_draft_id'=> null,
+                'draft_syllabi_count' => 0,
+                'under_review_count' => 0,
+                'for_revision_count' => 0,
+                'approved_count' => 0,
+                'recent_syllabi' => [],
+            ];
+        }
+
+        $scopeStats = $this->buildScopeStats($programIds, null, $department->college_id);
+        $health = $this->academicHealth->summarizeForPrograms($programIds);
+
+        // Get faculty-specific syllabus statistics
+        $facultySyllabi = Syllabus::where('prepared_by', $user->id)
+            ->whereIn('course_id', function ($query) use ($programIds) {
+                $query->whereIn('program_id', $programIds);
+            })
+            ->get();
+
+        $draftSyllabiCount = $facultySyllabi->where('status', 'draft')->count();
+        $underReviewCount = $facultySyllabi->where('status', 'under_review')->count();
+        $forRevisionCount = $facultySyllabi->where('status', 'for_revision')->count();
+        $approvedCount = $facultySyllabi->where('status', 'approved')->count();
+
+        // Get latest draft syllabus
+        $latestDraft = $facultySyllabi->where('status', 'draft')
+            ->orderBy('updated_at', 'desc')
+            ->first();
+
+        // Get recent syllabus activity
+        $recentSyllabi = $facultySyllabi
+            ->orderBy('updated_at', 'desc')
+            ->take(5)
+            ->map(function ($syllabus) {
+                return [
+                    'id' => $syllabus->id,
+                    'course_code' => $syllabus->course?->course_code,
+                    'title' => $syllabus->course?->course_title,
+                    'status' => $syllabus->status,
+                    'status_label' => $this->getStatusLabel($syllabus->status),
+                    'updated_at' => $syllabus->updated_at?->diffForHumans(),
+                ];
+            })
+            ->all();
+
+        return [
+            'no_assignment'  => false,
+            'no_courses'     => false,
+            'department'     => [
+                'id'   => $department->id,
+                'name' => $department->name,
+            ],
+            'college'        => [
+                'id'   => $department->college?->id,
+                'name' => $department->college?->name,
+            ],
+            'stats'          => $scopeStats['overview'],
+            'syllabus_stats' => $scopeStats['syllabus'],
+            'health'         => $health,
+            'has_draft'      => $latestDraft !== null,
+            'latest_draft_id'=> $latestDraft?->id,
+            'draft_syllabi_count' => $draftSyllabiCount,
+            'under_review_count' => $underReviewCount,
+            'for_revision_count' => $forRevisionCount,
+            'approved_count' => $approvedCount,
+            'recent_syllabi' => $recentSyllabi,
+        ];
+    }
+
+    /**
+     * Get human-readable status label
+     */
+    private function getStatusLabel(string $status): string
+    {
+        return match($status) {
+            'draft' => 'Draft',
+            'under_review' => 'Under Review',
+            'for_revision' => 'For Revision',
+            'approved' => 'Approved',
+            'rejected' => 'Rejected',
+            default => ucfirst(str_replace('_', ' ', $status)),
+        };
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
     private function getDeanDashboard(User $user): array
     {
         $assignment = $user->getPrimaryCollegeAssignment();

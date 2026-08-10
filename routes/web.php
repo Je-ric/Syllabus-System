@@ -149,7 +149,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:admin,faculty,ovpaa'])->group(function () {
         Route::get('/syllabus', [SyllabusController::class, 'index'])->name('syllabus.index');
         Route::get('/syllabus/create', [SyllabusController::class, 'create'])->name('syllabus.create');
-        Route::get('/syllabus/courses/{programId}', [SyllabusController::class, 'showCourses'])->name('syllabus.courses');
+        Route::get('/syllabus/courses/{programId?}', [SyllabusController::class, 'showCourses'])->name('syllabus.courses');
         Route::get('/syllabus/wizard', [SyllabusController::class, 'wizard'])->name('syllabus.wizard');
         Route::get('/syllabus/form/{courseId}', [SyllabusController::class, 'showForm'])->name('syllabus.form');
         Route::get('/syllabus/{syllabus}/edit', [SyllabusController::class, 'edit'])->name('syllabus.edit');
