@@ -161,7 +161,7 @@ class SyllabusReviewPage extends Component
             return;
         }
 
-        $needsActions = in_array($this->decision, ['approved_with_corrections', 'returned_for_revision'], true);
+        $needsActions = $this->decision === 'returned_for_revision';
         if ($needsActions) {
             if (blank($this->requiredActions)) {
                 $this->dispatch('lw-toast', type: 'error', message: 'Required actions must be filled for this decision.');

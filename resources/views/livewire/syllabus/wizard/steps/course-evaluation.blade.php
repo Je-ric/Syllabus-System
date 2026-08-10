@@ -33,8 +33,7 @@
     x-on:request-eval-flush.window="await flushToWire()"
     x-on:request-eval-flush-and-navigate.window="
         await flushToWire();
-        await $wire.save();
-        $dispatch('navigate-after-save', { step: $event.detail.toStep });
+        await $wire.onEvalFlushAndNavigate($event.detail.toStep, $event.detail.previousStep);
     "
     x-on:open-eval-notes-drawer.window="evalNotesOpen = true"
     x-on:sidebar-save-evaluation.window="$wire.save()">

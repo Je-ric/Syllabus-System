@@ -18,6 +18,9 @@ class ComponentsStep extends Component
     public int  $stepNumber = 2;
     public bool $courseHasLab = false;
     public bool $isLoaded     = false;
+    
+    // Store initial state for dirty checking
+    private array $initialState = [];
 
     // LEC fields
     public ?int  $lec_user_id = null;
@@ -71,25 +74,59 @@ class ComponentsStep extends Component
     public function onStepChanged(string $step): void
     {
         if ($step !== 'course_components') return;
-        $this->reset(['lec_user_id', 'lab_user_id', 'lec_schedules', 'lab_schedules', 'userConsultationHours', 'labConsultationHours', 'labUsers']);
-        $this->isLoaded = false;
-        $this->loadData();
+        // Only reload data if not already loaded (prevent unnecessary DB queries)
+        if (! $this->isLoaded) {
+            $this->reset(['lec_user_id', 'lab_user_id', 'lec_schedules', 'lab_schedules', 'userConsultationHours', 'labConsultationHours', 'labUsers']);
+            $this->loadData();
+        }
     }
 
     #[On('syllabus-save-step')]
     public function onSaveRequested(string $step): void
     {
         if ($step !== 'course_components') return;
-        $this->saveComponents();
-        $this->dispatch('syllabus-step-saved', step: 'course_components');
+        try {
+            $this->saveComponents();
+            $this->dispatch('syllabus-step-saved', step: 'course_components');
+            // Update initial state after successful save
+            $this->updateInitialState();
+        } catch (\Throwable $e) {
+            report($e);
+            $this->dispatch('syllabus-step-save-failed', step: 'course_components', error: $e->getMessage());
+        }
     }
 
     #[On('request-push-and-navigate')]
-    public function onPushAndNavigate(string $toStep): void
+    public function onPushAndNavigate(string $toStep, ?string $previousStep = null): void
     {
-        $this->saveComponents();
-        $this->dispatch('lw-toast', type: 'success', message: 'Course Components saved.');
-        $this->dispatch('navigate-after-save', step: $toStep);
+        // Check if there are unsaved changes before proceeding
+        $isDirty = $this->checkIfDirty();
+        
+        try {
+            if ($isDirty) {
+                $this->saveComponents();
+                $this->dispatch('lw-toast', type: 'success', message: 'Course Components saved.');
+            }
+            $this->dispatch('navigate-after-save', step: $toStep);
+        } catch (\Throwable $e) {
+            report($e);
+            $this->dispatch('syllabus-step-save-failed', step: 'course_components', error: $e->getMessage(), previousStep: $previousStep);
+        }
+    }
+
+    private function checkIfDirty(): bool
+    {
+        // Check if any component data has changed from initial state
+        if (empty($this->initialState)) {
+            return false; // No initial state to compare against
+        }
+
+        return $this->lec_user_id !== $this->initialState['lec_user_id'] ||
+               $this->lab_user_id !== $this->initialState['lab_user_id'] ||
+               $this->lec_schedules !== $this->initialState['lec_schedules'] ||
+               $this->lab_schedules !== $this->initialState['lab_schedules'] ||
+               $this->userConsultationHours !== $this->initialState['userConsultationHours'] ||
+               $this->labConsultationHours !== $this->initialState['labConsultationHours'];
     }
 
     // ── Consultation Hours ────────────────────────────────────────────────────
@@ -120,16 +157,19 @@ class ComponentsStep extends Component
         }
         $this->userConsultationHours = $rows;
         $this->saveConsultationHours($rows);
+        $this->dispatch('syllabus-step-dirty', step: 'course_components', dirty: true);
     }
 
     public function pushLecSchedules(array $rows): void
     {
         $this->lec_schedules = $rows;
+        $this->dispatch('syllabus-step-dirty', step: 'course_components', dirty: true);
     }
 
     public function pushLabSchedules(array $rows): void
     {
         $this->lab_schedules = $rows;
+        $this->dispatch('syllabus-step-dirty', step: 'course_components', dirty: true);
     }
 
     public function saveLabConsultationHours(array $rows): void
@@ -152,6 +192,7 @@ class ComponentsStep extends Component
         if ($this->lab_user_id) {
             $this->saveLabConsultationHours($rows);
         }
+        $this->dispatch('syllabus-step-dirty', step: 'course_components', dirty: true);
     }
 
     /**
@@ -199,6 +240,21 @@ class ComponentsStep extends Component
         $this->saveComponents();
         $this->dispatch('lw-toast', type: 'success', message: 'Course Components saved.');
         $this->dispatch('syllabus-step-saved', step: 'course_components');
+        
+        // Update initial state after successful save
+        $this->updateInitialState();
+    }
+
+    private function updateInitialState(): void
+    {
+        $this->initialState = [
+            'lec_user_id' => $this->lec_user_id,
+            'lab_user_id' => $this->lab_user_id,
+            'lec_schedules' => $this->lec_schedules,
+            'lab_schedules' => $this->lab_schedules,
+            'userConsultationHours' => $this->userConsultationHours,
+            'labConsultationHours' => $this->labConsultationHours,
+        ];
     }
 
     // ── Dirty tracking ────────────────────────────────────────────────────────
@@ -275,6 +331,16 @@ class ComponentsStep extends Component
                 }
             }
         }
+
+        // Store initial state for dirty checking
+        $this->initialState = [
+            'lec_user_id' => $this->lec_user_id,
+            'lab_user_id' => $this->lab_user_id,
+            'lec_schedules' => $this->lec_schedules,
+            'lab_schedules' => $this->lab_schedules,
+            'userConsultationHours' => $this->userConsultationHours,
+            'labConsultationHours' => $this->labConsultationHours,
+        ];
 
         $this->isLoaded = true;
     }

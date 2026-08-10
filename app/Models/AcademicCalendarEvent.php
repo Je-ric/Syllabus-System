@@ -24,6 +24,11 @@ class AcademicCalendarEvent extends Model
         'other',
     ];
 
+    // Event type categories for week generation
+    public const TYPE_SKIP = 'break';
+    public const TYPE_LOCK = ['exam', 'non_teaching'];
+    public const TYPE_REFERENCE = ['holiday', 'other'];
+
     // Used in: destroy() - AcademicCalendarEventController
     public function calendar()
     {

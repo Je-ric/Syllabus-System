@@ -98,6 +98,18 @@ class AcademicCalendarEventForm extends Component
             AcademicCalendarEvent::insert($rows);
         }
 
+        // Add type-specific warnings for bulk events
+        if ($type === 'break' && $inserted > 0) {
+            $this->dispatch('lw-toast', type: 'info', 
+                message: "Break event created: {$inserted} week(s) will be SKIPPED in syllabi.");
+        }
+
+        if (in_array($type, ['exam', 'non_teaching']) && $inserted > 0) {
+            $typeLabel = $type === 'exam' ? 'Exam' : 'Non-Teaching';
+            $this->dispatch('lw-toast', type: 'info', 
+                message: "{$typeLabel} event created: {$inserted} week(s) will be LOCKED in syllabi.");
+        }
+
         AuditLog::record(
             action: 'created',
             module: 'Academic Calendar Event',
@@ -151,6 +163,23 @@ class AcademicCalendarEventForm extends Component
         }
 
         $validated = $validator->validated();
+
+        // Add type-specific warnings
+        if ($validated['type'] === 'break' && !$editingId) {
+            $this->dispatch('lw-toast', type: 'info', 
+                message: 'Break event created: This week will be SKIPPED in syllabi.');
+        }
+
+        if (in_array($validated['type'], ['exam', 'non_teaching']) && !$editingId) {
+            $typeLabel = $validated['type'] === 'exam' ? 'Exam' : 'Non-Teaching';
+            $this->dispatch('lw-toast', type: 'info', 
+                message: "{$typeLabel} event created: This week will be LOCKED in syllabi.");
+        }
+
+        if ($validated['type'] === 'holiday' && str_contains(strtolower($validated['name']), 'christmas')) {
+            $this->dispatch('lw-toast', type: 'warning', 
+                message: 'Tip: Use "Break" type to skip Christmas break, or "Holiday" for reference only.');
+        }
 
         // Guard: if editing, make sure the row still exists (avoids 404 if
         // it was deleted in another tab/request between form-open and submit)

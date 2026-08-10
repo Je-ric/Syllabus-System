@@ -99,6 +99,28 @@ class SyllabusWizard extends Component
         }
 
         $this->syllabus->refresh();
+        
+        // Persist current step to database after successful save
+        $this->syllabus->update(['current_step' => $this->currentStep]);
+    }
+
+    #[On('syllabus-step-save-failed')]
+    public function onStepSaveFailed(string $step, string $error, ?string $previousStep = null): void
+    {
+        if (! array_key_exists($step, $this->syllabus->getWizardSteps())) {
+            return;
+        }
+
+        // If we have a previous step and the current step differs, rollback navigation
+        if ($previousStep && $previousStep !== $this->currentStep) {
+            $this->currentStep = $previousStep;
+            $this->syllabus->update(['current_step' => $previousStep]);
+            $this->dispatch('syllabus-step-changed', step: $previousStep);
+            
+            $this->dispatch('lw-toast', type: 'error', message: "Save failed: {$error}. Returning to previous step.");
+        } else {
+            $this->dispatch('lw-toast', type: 'error', message: "Save failed: {$error}");
+        }
     }
 
     // ── Reviewer management ───────────────────────────────────────────────────
@@ -183,36 +205,62 @@ class SyllabusWizard extends Component
             return;
         }
 
-        // Block leaving the academic calendar step until a calendar is selected.
-        // if ($this->currentStep === 'academic_calendar' && empty($this->syllabus->academic_calendar_id)) {
-        //     $this->dispatch('lw-toast', type: 'warning', message: 'Select an academic calendar before continuing.');
-        //     return;
-        // }
-        // Step 2: Alpine holds schedule/consultation state — must push before saving.
+        // Store previous step for potential rollback
+        $previousStep = $this->currentStep;
+
+        // Step 2: Alpine holds schedule/consultation state — check if dirty before push
         if ($this->currentStep === 'course_components') {
-            $this->dispatch('request-push-and-navigate', toStep: $toStep);
+            if (($this->stepDirty['course_components'] ?? false) === true) {
+                $this->dispatch('request-push-and-navigate', toStep: $toStep, previousStep: $previousStep);
+            } else {
+                // No changes, navigate immediately but still persist step
+                $this->navigateImmediately($toStep);
+            }
             return;
         }
 
-        // Step 5: Alpine holds weight inputs — flush to Livewire before saving.
-        // Dispatches browser event; Alpine calls $wire.set() for each input,
-        // then syllabus-save-step fires in the same tick via onSaveRequested.
+        // Step 5: Alpine holds weight inputs — check if dirty before flush
         if ($this->currentStep === 'course_evaluation') {
-            $this->dispatch('request-eval-flush-and-navigate', toStep: $toStep);
+            if (($this->stepDirty['course_evaluation'] ?? false) === true) {
+                $this->dispatch('request-eval-flush-and-navigate', toStep: $toStep, previousStep: $previousStep);
+            } else {
+                // No changes, navigate immediately but still persist step
+                $this->navigateImmediately($toStep);
+            }
             return;
         }
 
-        // Step 3: if dirty, tell Alpine to save pending COs first, then navigate.
-        if ($this->currentStep === 'course_outcomes' && ($this->stepDirty['course_outcomes'] ?? false) === true) {
-            $this->dispatch('request-co-save-and-navigate', toStep: $toStep);
+        // Step 3: course_outcomes uses Alpine coManager - check if dirty before save
+        if ($this->currentStep === 'course_outcomes') {
+            if (($this->stepDirty['course_outcomes'] ?? false) === true) {
+                $this->dispatch('request-co-save-and-navigate', toStep: $toStep, previousStep: $previousStep);
+            } else {
+                // No changes, navigate immediately but still persist step
+                $this->navigateImmediately($toStep);
+            }
             return;
         }
 
-        $this->dispatch('syllabus-save-step', step: $this->currentStep);
+        // Check if current step has unsaved changes
+        $isDirty = $this->stepDirty[$this->currentStep] ?? false;
 
+        // Navigate immediately and persist step in background
+        $this->navigateImmediately($toStep);
+
+        // Only save previous step data in background if it has changes
+        if ($isDirty) {
+            $this->dispatch('syllabus-save-step', step: $previousStep, navigateToStep: $toStep);
+        }
+    }
+
+    private function navigateImmediately(string $toStep): void
+    {
         $this->currentStep = $toStep;
+        
+        // Persist step to database to maintain single source of truth
+        // This is done synchronously to ensure consistency but won't cause page reload
         $this->syllabus->update(['current_step' => $toStep]);
-
+        
         $this->dispatch('syllabus-step-changed', step: $toStep);
     }
 
@@ -224,6 +272,8 @@ class SyllabusWizard extends Component
         }
 
         $this->currentStep = $step;
+        
+        // Persist step to database to maintain single source of truth
         $this->syllabus->update(['current_step' => $step]);
 
         $this->dispatch('syllabus-step-changed', step: $step);

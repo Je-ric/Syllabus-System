@@ -13,6 +13,7 @@ use App\Services\Syllabus\Review\SyllabusReviewFormService;
 use App\Services\Syllabus\SyllabusRevisionHistoryService;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -72,7 +73,10 @@ class ReviewStep extends Component
     public function onStepChanged(string $step): void
     {
         if ($step === 'review') {
-            $this->loadData(force: true);
+            // Only reload data if not already loaded (prevent unnecessary DB queries)
+            if (! $this->isLoaded) {
+                $this->loadData(force: true);
+            }
         }
     }
 
@@ -201,6 +205,61 @@ class ReviewStep extends Component
         } catch (\Throwable $e) {
             report($e);
             $this->dispatch('lw-toast', type: 'error', message: $e->getMessage());
+        }
+    }
+
+    public function resubmitForReview(string $response): void
+    {
+        if (! $this->syllabus || ! $this->reviewForm) return;
+        try {
+            DB::transaction(function () use ($response) {
+                // Save the Part H response
+                app(SyllabusReviewFormService::class)->savePartHResponse($this->reviewForm, $response);
+
+                // Reset the decision to allow reviewers to review again
+                $this->reviewForm->update([
+                    'decision' => null,
+                    'decision_made_at' => null,
+                    'decision_made_by' => null,
+                    'required_actions' => null,
+                    'target_compliance_date' => null,
+                ]);
+
+                // Reset syllabus status to indicate it's ready for review
+                $this->syllabus->update(['status' => 'pending_review']);
+
+                // Reset reviewer statuses to pending
+                $this->syllabus->reviewers()->update(['status' => 'pending']);
+            });
+
+            $this->loadReviewForm();
+            $this->loadData(force: true);
+
+            AuditLog::record(
+                action: 'resubmitted_for_review',
+                module: 'Syllabus Review',
+                referenceId: $this->syllabus->id,
+                description: "Faculty resubmitted syllabus #{$this->syllabus->id} for review after revisions."
+            );
+
+            $this->dispatch('lw-toast', type: 'success', message: 'Syllabus resubmitted for review. Reviewers have been notified.');
+        } catch (\Throwable $e) {
+            report($e);
+            $this->dispatch('lw-toast', type: 'error', message: 'Unable to resubmit for review.');
+        }
+    }
+
+    public function saveCourseLeadName(string $name): void
+    {
+        if (! $this->syllabus) return;
+        try {
+            $form = app(SyllabusReviewFormService::class)->findOrCreate($this->syllabus);
+            $form->update(['course_lead_name' => trim($name)]);
+            $this->loadReviewForm();
+            $this->dispatch('lw-toast', type: 'success', message: 'Course lead saved.');
+        } catch (\Throwable $e) {
+            report($e);
+            $this->dispatch('lw-toast', type: 'error', message: 'Unable to save course lead.');
         }
     }
 

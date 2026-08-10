@@ -6,10 +6,13 @@
         icon="bx-calendar"
         title="Academic Calendars"
         desc="Manage academic year and semester dates">
+        <x-ui.help-trigger />
         <x-ui.button variant="add-button" href="{{ route('academic.calendars.create') }}">
             <i class="bx bx-plus"></i> Add Academic Year
         </x-ui.button>
     </x-layout.page-header>
+
+    <x-layout.help-panel module="academic-calendar" />
 
     <x-layout.panel>
         @if ($calendars->isEmpty())

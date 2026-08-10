@@ -87,6 +87,7 @@
         savingCourseLead: false,
         courseLeadSaved: false,
         submitting: false,
+        resubmitting: false,
         showClassificationHint: false,
 
         get canSubmit() {
@@ -137,6 +138,12 @@
             this.savingPartH = true;
             await $wire.savePartHResponse(this.partHResponse);
             this.savingPartH = false;
+        },
+        async resubmitForReview() {
+            if (!this.partHResponse.trim()) return;
+            this.resubmitting = true;
+            await $wire.resubmitForReview(this.partHResponse);
+            this.resubmitting = false;
         },
         async saveCourseLead() {
             if (!this.courseLeadName.trim()) return;
@@ -498,7 +505,7 @@
                     </div>
                 @endif
 
-                @if ($rf->required_actions)
+                @if ($decision === 'returned_for_revision' && $rf->required_actions)
                     <div class="mt-3 p-3 rounded-xl bg-amber-50 border border-amber-200">
                         <p class="text-xs font-bold text-amber-800 mb-1">Required Actions:</p>
                         <p class="text-sm text-amber-900 whitespace-pre-wrap">{{ $rf->required_actions }}</p>
@@ -513,18 +520,37 @@
             @endif
 
             {{-- Part H — Faculty compliance response --}}
-            @if ($decision === 'approved_with_corrections')
+            @if ($decision === 'approved_with_corrections' || $decision === 'returned_for_revision')
             <div class="px-5 py-4">
                 <p class="text-xs font-bold uppercase tracking-widest text-[#475569] mb-3">
                     Part H — Action Taken on Review Comments
                 </p>
+                {{-- Faculty response display (always shown if exists) --}}
+                @if ($rf->part_h_faculty_response)
+                    <div class="p-3 rounded-lg bg-slate-50 border border-slate-200 mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-xs font-bold text-slate-700">Faculty Response</p>
+                            @if ($rf->part_h_faculty_response_updated_at)
+                                <p class="text-[10px] text-slate-500">
+                                    Submitted {{ \Carbon\Carbon::parse($rf->part_h_faculty_response_updated_at)->format('M d, Y') }}
+                                </p>
+                            @endif
+                        </div>
+                        <p class="text-xs text-slate-600 whitespace-pre-wrap">{{ $rf->part_h_faculty_response }}</p>
+                    </div>
+                @endif
+
+                {{-- Verification status --}}
                 @if ($rf->part_h_verified_at)
-                    <div class="flex items-center gap-2 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-sm text-emerald-800">
+                    <div class="flex items-center gap-2 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-sm text-emerald-800 mb-3">
                         <i class="bx bx-check-circle text-lg shrink-0"></i>
                         <span>Verified by <strong>{{ $rf->partHVerifier?->name ?? '—' }}</strong>
                             on {{ \Carbon\Carbon::parse($rf->part_h_verified_at)->format('M d, Y') }}</span>
                     </div>
-                @else
+                @endif
+
+                {{-- Input form (shown if not verified or can be updated) --}}
+                @if (!$rf->part_h_verified_at)
                     @if (!$rf->part_h_faculty_response)
                     <div class="p-3 rounded-lg bg-amber-50 border border-amber-200 mb-2">
                         <p class="text-xs text-amber-800">
@@ -534,29 +560,51 @@
                     </div>
                     @endif
                     <p class="text-xs text-slate-500 mb-2">
-                        Describe the corrections you made in response to the committee's required actions.
+                        @if ($decision === 'returned_for_revision')
+                            Describe the revisions you made in response to the required actions.
+                        @else
+                            Describe the corrections you made in response to the committee's required actions.
+                        @endif
                     </p>
                     @if (!$rf->part_h_faculty_response)
                     <textarea x-model="partHResponse" rows="4"
-                        placeholder="Describe the corrections made…"
+                        placeholder="{{ $decision === 'returned_for_revision' ? 'Describe the revisions made…' : 'Describe the corrections made…' }}"
                         class="w-full text-sm rounded-xl border border-[#e2e8f0] px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-400 resize-none"></textarea>
-                    <div class="mt-2 flex justify-end">
-                        <x-ui.button type="button" variant="sm-add"
-                            x-on:click="savePartH()"
-                            x-bind:disabled="savingPartH || !partHResponse.trim()">
-                            <i x-show="!savingPartH" class="bx bx-check leading-none"></i>
-                            <svg x-show="savingPartH" x-cloak class="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                            </svg>
-                            <span x-text="savingPartH ? 'Saving…' : 'Submit Response'"></span>
-                        </x-ui.button>
-                    </div>
-                    @endif
-                @else
-                    @if ($rf->part_h_faculty_response)
-                    <div class="p-3 rounded-lg bg-slate-50 border border-slate-200 mb-2">
-                        <p class="text-xs text-slate-700">{{ $rf->part_h_faculty_response }}</p>
+                    <div class="mt-2 flex justify-end gap-2">
+                        @if ($decision === 'returned_for_revision')
+                            <x-ui.button type="button" variant="sm-add"
+                                x-on:click="savePartH()"
+                                x-bind:disabled="savingPartH || !partHResponse.trim()">
+                                <i x-show="!savingPartH" class="bx bx-save leading-none"></i>
+                                <svg x-show="savingPartH" x-cloak class="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                </svg>
+                                <span x-text="savingPartH ? 'Saving…' : 'Save Response'"></span>
+                            </x-ui.button>
+                            <x-ui.button type="button" variant="primary"
+                                x-on:click="resubmitForReview()"
+                                x-bind:disabled="resubmitting || !partHResponse.trim()"
+                                x-bind:class="!partHResponse.trim() ? 'opacity-50 cursor-not-allowed' : ''">
+                                <i x-show="!resubmitting" class="bx bx-send leading-none"></i>
+                                <svg x-show="resubmitting" x-cloak class="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                </svg>
+                                <span x-text="resubmitting ? 'Resubmitting…' : 'Resubmit for Review'"></span>
+                            </x-ui.button>
+                        @else
+                            <x-ui.button type="button" variant="sm-add"
+                                x-on:click="savePartH()"
+                                x-bind:disabled="savingPartH || !partHResponse.trim()">
+                                <i x-show="!savingPartH" class="bx bx-check leading-none"></i>
+                                <svg x-show="savingPartH" x-cloak class="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                </svg>
+                                <span x-text="savingPartH ? 'Saving…' : 'Submit Response'"></span>
+                            </x-ui.button>
+                        @endif
                     </div>
                     @endif
                 @endif

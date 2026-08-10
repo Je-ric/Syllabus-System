@@ -29,8 +29,10 @@ class AcademicCalendarStep extends Component
             return;
         }
 
-        $this->isLoaded = false; // Force refresh so new calendars are picked up
-        $this->loadData();
+        // Only reload data if not already loaded (prevent unnecessary DB queries)
+        if (! $this->isLoaded) {
+            $this->loadData();
+        }
     }
 
     #[On('syllabus-save-step')]
@@ -40,9 +42,14 @@ class AcademicCalendarStep extends Component
             return;
         }
 
-        if ($this->saveAcademicCalendar()) { // if save is successful, dispatch the saved event
-            // dispatch means
-            $this->dispatch('syllabus-step-saved', step: 'academic_calendar');
+        try {
+            if ($this->saveAcademicCalendar()) { // if save is successful, dispatch the saved event
+                // dispatch means
+                $this->dispatch('syllabus-step-saved', step: 'academic_calendar');
+            }
+        } catch (\Throwable $e) {
+            report($e);
+            $this->dispatch('syllabus-step-save-failed', step: 'academic_calendar', error: $e->getMessage());
         }
     }
 

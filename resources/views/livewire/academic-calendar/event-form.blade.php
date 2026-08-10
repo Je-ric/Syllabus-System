@@ -178,18 +178,18 @@
         {{-- Legend --}}
         @php
             $typeVariantMap = [
-                'holiday'      => ['bg' => 'bg-[#dcfce7]', 'text' => 'text-[#166534]', 'dot' => 'bg-[#16a34a]',  'bar' => '#16a34a'],
-                'exam'         => ['bg' => 'bg-[#fef3c7]', 'text' => 'text-[#92400e]', 'dot' => 'bg-amber-400',  'bar' => '#f59e0b'],
-                'break'        => ['bg' => 'bg-[#eff6ff]', 'text' => 'text-[#1e40af]', 'dot' => 'bg-blue-400',   'bar' => '#60a5fa'],
-                'non_teaching' => ['bg' => 'bg-[#fff1f2]', 'text' => 'text-rose-700',  'dot' => 'bg-rose-400',   'bar' => '#fb7185'],
-                'other'        => ['bg' => 'bg-[#f1f5f9]', 'text' => 'text-[#475569]', 'dot' => 'bg-slate-400',  'bar' => '#94a3b8'],
+                'holiday'      => ['bg' => 'bg-[#dcfce7]', 'text' => 'text-[#166534]', 'dot' => 'bg-[#16a34a]',  'bar' => '#16a34a', 'icon' => 'bx-info-circle'],
+                'exam'         => ['bg' => 'bg-[#fef3c7]', 'text' => 'text-[#92400e]', 'dot' => 'bg-amber-400',  'bar' => '#f59e0b', 'icon' => 'bx-lock'],
+                'break'        => ['bg' => 'bg-[#eff6ff]', 'text' => 'text-[#1e40af]', 'dot' => 'bg-blue-400',   'bar' => '#60a5fa', 'icon' => 'bx-skip-next'],
+                'non_teaching' => ['bg' => 'bg-[#fff1f2]', 'text' => 'text-rose-700',  'dot' => 'bg-rose-400',   'bar' => '#fb7185', 'icon' => 'bx-lock'],
+                'other'        => ['bg' => 'bg-[#f1f5f9]', 'text' => 'text-[#475569]', 'dot' => 'bg-slate-400',  'bar' => '#94a3b8', 'icon' => 'bx-info-circle'],
             ];
         @endphp
         <div class="flex flex-wrap gap-x-4 gap-y-1">
-            @foreach(['holiday' => 'Holiday', 'exam' => 'Exam', 'break' => 'Break', 'non_teaching' => 'Non-Teaching', 'other' => 'Other'] as $type => $label)
+            @foreach(['holiday' => 'Holiday (Ref)', 'exam' => 'Exam (Lock)', 'break' => 'Break (Skip)', 'non_teaching' => 'Non-Teaching (Lock)', 'other' => 'Other (Ref)'] as $type => $label)
                 @php $v = $typeVariantMap[$type]; @endphp
                 <span class="inline-flex items-center gap-1.5 text-xs {{ $v['text'] }}">
-                    <span class="w-2 h-2 rounded-full {{ $v['dot'] }}"></span>
+                    <i class="bx {{ $v['icon'] }} text-xs"></i>
                     {{ $label }}
                 </span>
             @endforeach

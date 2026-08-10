@@ -72,7 +72,7 @@
                 </x-layout.card-section>
 
                 {{-- ── Part H Faculty Response (if applicable) ───────────────── --}}
-                @if ($reviewForm?->decision === 'approved_with_corrections')
+                @if ($reviewForm?->decision === 'approved_with_corrections' || $reviewForm?->decision === 'returned_for_revision')
                     @include('livewire.syllabus.review-page.partials.faculty-response')
                 @endif
 

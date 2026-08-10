@@ -16,6 +16,19 @@
         </x-feedback-status.alert>
     @endif
 
+    {{-- Date Guidelines --}}
+    <x-feedback-status.alert type="info" :showTitle="false" class="mb-5">
+        <div class="space-y-1.5 text-[13px] text-[#3f3f46]">
+            <p><strong>Date Guidelines:</strong></p>
+            <ul class="list-disc pl-4 space-y-1">
+                <li>Semesters can span calendar years (e.g., 2nd sem: Nov 2025 - Apr 2026)</li>
+                <li>All dates must be within the semester range</li>
+                <li>Use "Break" event type for Christmas/semester breaks (skips weeks)</li>
+                <li>Use "Holiday" event type for class suspensions (reference only)</li>
+            </ul>
+        </div>
+    </x-feedback-status.alert>
+
     {{-- ── #11 Stale weeks warning ─────────────────────────────────────────── --}}
     @if ($showStaleWeeksWarning)
         <x-feedback-status.alert type="error" title="Syllabi with generated weeks exist for this calendar." class="mb-5">

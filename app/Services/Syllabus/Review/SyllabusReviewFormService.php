@@ -203,7 +203,10 @@ class SyllabusReviewFormService
             throw new \InvalidArgumentException('Part H response cannot be empty.');
         }
 
-        $form->update(['part_h_faculty_response' => $response]);
+        $form->update([
+            'part_h_faculty_response' => $response,
+            'part_h_faculty_response_updated_at' => now(),
+        ]);
     }
 
     public function verifyPartH(SyllabusReviewForm $form, int $verifierUserId): void

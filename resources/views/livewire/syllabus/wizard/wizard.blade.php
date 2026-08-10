@@ -15,6 +15,15 @@
     }"
     x-on:syllabus-step-changed.window="_navigating = false"
     x-on:lw-toast.window="if ($event.detail?.type === 'error') _navigating = false"
+    x-on:syllabus-step-save-failed.window="
+        _navigating = false;
+        // Handle rollback notification if needed
+        if ($event.detail.previousStep) {
+            window.dispatchEvent(new CustomEvent('lw-toast', {
+                detail: { type: 'warning', message: 'Returning to previous step due to save error.' }
+            }));
+        }
+    "
     x-on:livewire:navigated.window="_navigating = false">
 
     <x-layout.page-header icon="bx-book-open" title="{{ $syllabus->id ? 'Edit' : 'Create' }} Syllabus"
@@ -101,8 +110,7 @@
                                 @endphp
                                 <button type="button"
                                     x-on:click="tryNavigate(() => $wire.clickTab('{{ $step }}'))"
-                                    wire:loading.attr="disabled"
-                                    wire:target="clickTab,goPreviousStep,goNextStep,submitForReview,saveAsDone"
+                                    x-bind:disabled="_navigating"
                                     class="relative flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-[12px] font-medium transition-colors focus:outline-none disabled:opacity-50
                                            {{ $isCurrent ? 'bg-[#f0fdf4] text-[#15803d] border border-[#86efac]' : 'text-[#71717a] hover:bg-[#f4f4f5] border border-transparent' }}">
                                     <span class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0
@@ -124,7 +132,7 @@
                 </div>
 
                 {{-- Step content card --}}
-                {{-- class="bg-white rounded-[16px] border border-[#e4e4e7]" --}}
+                {{-- class="bg-white rounded-2xl border border-[#e4e4e7]" --}}
                 <div
                      {{-- style="box-shadow: 0 1px 8px rgba(0,0,0,0.05);" --}}
                      >
@@ -164,9 +172,7 @@
                     <div>
                         @if ($this->hasPreviousStep())
                             <x-ui.button variant="cancel"
-                                wire:loading.attr="disabled"
-                                wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview,saveAsDone"
-                                submitting="_navigating" loadingText="Saving…"
+                                x-bind:disabled="_navigating"
                                 x-on:click="tryNavigate(() => $wire.goPreviousStep())">
                                 <i class="bx bx-chevron-left"></i>
                                 <span class="hidden sm:inline">Previous</span>
@@ -176,9 +182,7 @@
                     <div>
                         @if ($this->hasNextStep())
                             <x-ui.button variant="primary"
-                                wire:loading.attr="disabled"
-                                wire:target="clickTab,goPreviousStep,goNextStep,saveCurrentStep,submitForReview,saveAsDone"
-                                submitting="_navigating" loadingText="Saving…"
+                                x-bind:disabled="_navigating"
                                 x-on:click="tryNavigate(() => $wire.goNextStep())">
                                 <span class="hidden sm:inline">Next</span>
                                 <i class="bx bx-chevron-right"></i>
@@ -194,7 +198,7 @@
                 style="position: sticky; top: 1rem; align-self: flex-start; max-height: calc(100vh - 2rem); overflow-y: auto;">
 
                 {{-- Step navigator card --}}
-                <div class="rounded-[16px] border border-[#e4e4e7] bg-white overflow-hidden"
+                <div class="rounded-2xl border border-[#e4e4e7] bg-white overflow-hidden"
                      style="box-shadow: 0 1px 8px rgba(0,0,0,0.06);">
 
                     {{-- Nav header --}}
@@ -207,7 +211,7 @@
                         <div class="mt-2 flex items-center gap-1">
                             @foreach ($navSteps as $step => $meta)
                                 @php $idx = array_search($step, $stepsOrder, true); @endphp
-                                <div class="flex-1 h-[3px] rounded-full transition-all duration-300
+                                <div class="flex-1 h-0.75 rounded-full transition-all duration-300
                                     {{ $currentStep === $step
                                         ? 'bg-[#ffd700]'
                                         : ($currentIndex !== false && $idx < $currentIndex
@@ -261,7 +265,7 @@
 
                 {{-- Tools — Weekly Coverage step --}}
                 @if ($currentStep === 'weekly_coverage')
-                    <div class="mt-3 rounded-[16px] border border-[#e4e4e7] bg-white overflow-hidden"
+                    <div class="mt-3 rounded-2xl border border-[#e4e4e7] bg-white overflow-hidden"
                          style="box-shadow: 0 1px 8px rgba(0,0,0,0.05);">
                         {{-- Info group --}}
                         <div class="px-4 pt-3 pb-1">
@@ -324,7 +328,7 @@
 
                 {{-- Tools — Course Outcomes step --}}
                 @if ($currentStep === 'course_outcomes')
-                    <div class="mt-3 rounded-[16px] border border-[#e4e4e7] bg-white overflow-hidden"
+                    <div class="mt-3 rounded-2xl border border-[#e4e4e7] bg-white overflow-hidden"
                          style="box-shadow: 0 1px 8px rgba(0,0,0,0.05);">
                         <div class="px-4 pt-3 pb-1">
                             <p class="text-[10px] font-bold uppercase tracking-widest text-[#a1a1aa]">Info</p>
@@ -350,7 +354,7 @@
 
                 {{-- Tools — Course Components step --}}
                 @if ($currentStep === 'course_components')
-                    <div class="mt-3 rounded-[16px] border border-[#e4e4e7] bg-white overflow-hidden"
+                    <div class="mt-3 rounded-2xl border border-[#e4e4e7] bg-white overflow-hidden"
                          style="box-shadow: 0 1px 8px rgba(0,0,0,0.05);">
                         <div class="px-4 pt-3 pb-1">
                             <p class="text-[10px] font-bold uppercase tracking-widest text-[#a1a1aa]">Actions</p>
@@ -365,7 +369,7 @@
 
                 {{-- Tools — Course Evaluation step --}}
                 @if ($currentStep === 'course_evaluation')
-                    <div class="mt-3 rounded-[16px] border border-[#e4e4e7] bg-white overflow-hidden"
+                    <div class="mt-3 rounded-2xl border border-[#e4e4e7] bg-white overflow-hidden"
                          style="box-shadow: 0 1px 8px rgba(0,0,0,0.05);">
                         {{-- Info group --}}
                         <div class="px-4 pt-3 pb-1">

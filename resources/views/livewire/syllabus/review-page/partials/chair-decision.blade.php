@@ -31,7 +31,7 @@
             </span>
         </div>
 
-        @if ($reviewForm->required_actions)
+        @if ($reviewForm->decision === 'returned_for_revision' && $reviewForm->required_actions)
             <div class="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2.5 mb-3">
                 <p class="text-[11px] font-bold text-amber-700 mb-1">Required Actions:</p>
                 <p class="text-xs text-amber-900 whitespace-pre-wrap leading-relaxed">{{ $reviewForm->required_actions }}</p>
@@ -51,8 +51,15 @@
     @if (! $reviewForm?->recommended_by_chair_id)
         <div
             x-data="{
-                decisionRecorded: {{ $reviewForm?->decision ? 'true' : 'false' }},
-                needsActions: ['approved_with_corrections','returned_for_revision'].includes($wire.decision),
+                originalRequiredActions: @js($reviewForm?->required_actions ?? ''),
+                originalTargetDate: @js($reviewForm?->target_compliance_date?->format('Y-m-d') ?? ''),
+                originalDecision: @js($reviewForm?->decision ?? ''),
+                needsActions: $wire.decision === 'returned_for_revision',
+                get hasChanges() {
+                    return $wire.decision !== this.originalDecision ||
+                           $wire.requiredActions !== this.originalRequiredActions ||
+                           $wire.targetDate !== this.originalTargetDate;
+                },
                 get decisionWarning() {
                     if ($wire.decision === 'approved_with_corrections') {
                         return 'Faculty must respond with corrections made before verification.';
@@ -72,7 +79,7 @@
                     return 'emerald';
                 }
             }"
-            x-on:livewire-updated.window="needsActions = ['approved_with_corrections','returned_for_revision'].includes($wire.decision)"
+            x-on:livewire-updated.window="needsActions = $wire.decision === 'returned_for_revision'"
             class="space-y-3">
 
             <div>
@@ -80,7 +87,7 @@
                     Decision
                 </label>
                 <select wire:model="decision"
-                        x-on:change="needsActions = ['approved_with_corrections','returned_for_revision'].includes($event.target.value)"
+                        x-on:change="needsActions = $event.target.value === 'returned_for_revision'"
                         class="w-full text-sm rounded-lg border border-[#E3E8EB] bg-white
                                px-3 py-2 text-[#394056]
                                focus:outline-none focus:border-[#00C075]
@@ -95,7 +102,7 @@
             </div>
 
             {{-- Decision-specific warnings and guidance --}}
-            <div x-show="decisionWarning && !decisionRecorded" x-cloak
+            <div x-show="decisionWarning" x-cloak
                  class="rounded-lg px-3 py-2.5 border"
                  x-bind:class="{
                     'bg-amber-50 border-amber-200': decisionVariant === 'amber',
@@ -119,7 +126,7 @@
                 </div>
             </div>
 
-            <div x-show="needsActions && !decisionRecorded" x-cloak class="space-y-2">
+            <div x-show="needsActions" x-cloak class="space-y-2">
                 <div class="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2">
                     <p class="text-xs text-amber-800">
                         <i class="bx bx-error-circle mr-1"></i>
@@ -158,9 +165,11 @@
                 wire:loading.attr="disabled"
                 wire:target="saveDecision"
                 loading="Saving…"
+                x-bind:disabled="!hasChanges"
+                x-bind:class="!hasChanges ? 'opacity-50 cursor-not-allowed' : ''"
                 class="w-full justify-center">
                 <i class="bx bx-save text-sm leading-none"></i>
-                Save Decision
+                <span x-text="originalDecision ? 'Update Decision' : 'Save Decision'"></span>
             </x-ui.button>
         </div>
     @endif

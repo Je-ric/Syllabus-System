@@ -11,9 +11,13 @@ class CourseOutcomesStep extends Component
 {
     public int $syllabusId;
     public int $stepNumber = 3;
+    public bool $isLoaded = false;
 
     // Each item: ['id' => int, 'co_code' => string, 'description' => string]
     public array $outcomes = [];
+    
+    // Store initial state for dirty checking
+    private array $initialOutcomes = [];
 
     // Each item: ['po_code' => string, 'po_text' => string, 'ied' => string]
     public array $programOutcomes = [];
@@ -42,7 +46,10 @@ class CourseOutcomesStep extends Component
     public function onStepChanged(string $step): void
     {
         if ($step === 'course_outcomes') {
-            $this->loadData();
+            // Only reload data if not already loaded (prevent unnecessary DB queries)
+            if (! $this->isLoaded) {
+                $this->loadData();
+            }
         }
     }
 
@@ -63,9 +70,15 @@ class CourseOutcomesStep extends Component
      * Called via Alpine when the parent dispatches 'request-co-save-and-navigate'.
      * Alpine's coManager saves pending changes, then calls this method to proceed.
      */
-    public function onCoSaveAndNavigate(string $toStep): void
+    public function onCoSaveAndNavigate(string $toStep, ?string $previousStep = null): void
     {
-        $this->dispatch('navigate-after-save', step: $toStep);
+        try {
+            // Alpine's coManager handles the save, we just dispatch navigation
+            $this->dispatch('navigate-after-save', step: $toStep);
+        } catch (\Throwable $e) {
+            report($e);
+            $this->dispatch('syllabus-step-save-failed', step: 'course_outcomes', error: $e->getMessage(), previousStep: $previousStep);
+        }
     }
 
     // ── Actions ───────────────────────────────────────────────────────────────
@@ -131,6 +144,33 @@ class CourseOutcomesStep extends Component
         $this->dispatch('lw-toast', type: 'success', message: 'Course Outcomes saved.');
         $this->dispatch('syllabus-step-saved', step: 'course_outcomes');
         $this->dispatch('syllabus-course-outcomes-updated');
+        
+        // Update initial state after successful save
+        $this->initialOutcomes = $this->outcomes;
+    }
+
+    private function checkIfDirty(): bool
+    {
+        // Check if any outcomes have changed from initial state
+        if (empty($this->initialOutcomes)) {
+            return false; // No initial state to compare against
+        }
+
+        // Simple comparison - count and content
+        if (count($this->outcomes) !== count($this->initialOutcomes)) {
+            return true;
+        }
+
+        foreach ($this->outcomes as $index => $outcome) {
+            if (!isset($this->initialOutcomes[$index])) {
+                return true;
+            }
+            if ($outcome !== $this->initialOutcomes[$index]) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // ── Private ───────────────────────────────────────────────────────────────
@@ -178,5 +218,10 @@ class CourseOutcomesStep extends Component
         } else {
             $this->courseInfo = [];
         }
+        
+        // Store initial state for dirty checking
+        $this->initialOutcomes = $this->outcomes;
+        
+        $this->isLoaded = true;
     }
 }

@@ -18,7 +18,7 @@
              if (hasPending()) {
                  await saveAll();
              }
-             await $wire.onCoSaveAndNavigate($event.detail.toStep);
+             await $wire.onCoSaveAndNavigate($event.detail.toStep, $event.detail.previousStep);
          "
          class="space-y-5">
 

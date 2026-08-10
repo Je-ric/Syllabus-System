@@ -20,6 +20,7 @@ class SyllabusReviewForm extends Model
         'required_actions',
         'target_compliance_date',
         'part_h_faculty_response',
+        'part_h_faculty_response_updated_at',
         'part_h_verified_by',
         'part_h_verified_at',
         'recommended_by_chair_id',
@@ -32,18 +33,19 @@ class SyllabusReviewForm extends Model
     ];
 
     protected $casts = [
-        'syllabus_id'               => 'integer',
-        'decision_made_by'          => 'integer',
-        'part_h_verified_by'        => 'integer',
-        'recommended_by_chair_id'   => 'integer',
-        'approved_by_dean_id'       => 'integer',
-        'submitted_at'              => 'datetime',
-        'decision_made_at'          => 'datetime',
-        'part_h_verified_at'        => 'datetime',
-        'recommended_by_chair_at'   => 'datetime',
-        'approved_by_dean_at'       => 'datetime',
-        'filed_at'                  => 'datetime',
-        'target_compliance_date'    => 'date',
+        'syllabus_id'                        => 'integer',
+        'decision_made_by'                   => 'integer',
+        'part_h_verified_by'                 => 'integer',
+        'recommended_by_chair_id'            => 'integer',
+        'approved_by_dean_id'               => 'integer',
+        'submitted_at'                      => 'datetime',
+        'decision_made_at'                  => 'datetime',
+        'part_h_faculty_response_updated_at' => 'datetime',
+        'part_h_verified_at'                => 'datetime',
+        'recommended_by_chair_at'           => 'datetime',
+        'approved_by_dean_at'               => 'datetime',
+        'filed_at'                          => 'datetime',
+        'target_compliance_date'            => 'date',
     ];
 
     // ── Relationships ─────────────────────────────────────────────────────────

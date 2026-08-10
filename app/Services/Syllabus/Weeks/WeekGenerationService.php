@@ -2,6 +2,7 @@
 
 namespace App\Services\Syllabus\Weeks;
 
+use App\Models\AcademicCalendarEvent;
 use App\Models\OnlineMaterial;
 use App\Models\Reference;
 use App\Models\Syllabus;
@@ -21,7 +22,11 @@ use Illuminate\Support\Facades\Log;
 // For updating dates while keeping existing faculty content, use
 // WeekReconciliationService::reconcile() instead.
 //
-// Break weeks are SKIPPED (no row created, week numbers stay sequential).
+// Event Type Impact:
+//   - SKIP (break): Week is entirely skipped, no row created
+//   - LOCK (exam, non_teaching): Week is created but locked for editing
+//   - REFERENCE (holiday, other): Week is created normally, fully editable
+//
 // Exam / non-teaching labels are written into WeekContent rows at creation
 // time so WeekLockService remains a pure read.
 //
@@ -105,7 +110,17 @@ class WeekGenerationService
         $sequence = $this->sequenceBuilder->build($calendar, (int) $syllabus->academic_calendar_id);
 
         if (empty($sequence)) {
-            throw new \RuntimeException('The selected calendar produced no teachable weeks. Check the calendar dates and break events.');
+            $stats = $this->sequenceBuilder->getGenerationStats($calendar, (int) $syllabus->academic_calendar_id);
+            $message = 'The selected calendar produced no teachable weeks. ';
+            
+            if ($stats['skippedWeeks'] > 0) {
+                $message .= "All {$stats['skippedWeeks']} weeks were skipped due to break events. ";
+                $message .= 'Reduce the number of break events or adjust the calendar date range.';
+            } else {
+                $message .= 'Check the calendar date range and ensure it spans at least one week.';
+            }
+            
+            throw new \RuntimeException($message);
         }
 
         // Exam labels assigned in encounter order across weeks.
@@ -132,14 +147,16 @@ class WeekGenerationService
                 $lecTask      = '';
                 $labTask      = '';
 
-                if ($lockingEvent?->type === 'exam') {
-                    $termLabel = $examTermLabels[min($examsSeen, 2)];
-                    $examsSeen++;
-                    $lecTask = $termLabel . ' Exam';
-                    $labTask = $termLabel . ' Practical Exam';
-                } elseif ($lockingEvent?->type === 'non_teaching') {
-                    $lecTask = 'Non-Teaching Week';
-                    $labTask = 'Non-Teaching Week';
+                if ($lockingEvent && in_array($lockingEvent->type, AcademicCalendarEvent::TYPE_LOCK, true)) {
+                    if ($lockingEvent->type === 'exam') {
+                        $termLabel = $examTermLabels[min($examsSeen, 2)];
+                        $examsSeen++;
+                        $lecTask = $termLabel . ' Exam';
+                        $labTask = $termLabel . ' Practical Exam';
+                    } elseif ($lockingEvent->type === 'non_teaching') {
+                        $lecTask = 'Non-Teaching Week';
+                        $labTask = 'Non-Teaching Week';
+                    }
                 }
 
                 if ($hasLEC) {
@@ -168,9 +185,16 @@ class WeekGenerationService
             return count($sequence);
         });
 
+        // Log generation statistics for debugging
+        $stats = $this->sequenceBuilder->getGenerationStats($calendar, (int) $syllabus->academic_calendar_id);
+        
         Log::info('[WeekGenerationService] weeks created', [
-            'syllabusId' => $syllabus->id,
-            'total'      => $totalCreated,
+            'syllabusId'    => $syllabus->id,
+            'total'         => $totalCreated,
+            'skippedWeeks'  => $stats['skippedWeeks'],
+            'lockedWeeks'   => $stats['lockedWeeks'],
+            'breakEvents'   => $stats['breakEvents']->count(),
+            'lockEvents'    => $stats['lockEvents']->count(),
         ]);
 
         return $totalCreated > 0;

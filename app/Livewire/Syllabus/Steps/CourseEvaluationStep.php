@@ -12,6 +12,10 @@ class CourseEvaluationStep extends Component
 
     public int  $syllabusId;
     public int  $stepNumber = 5;
+    public bool $isLoaded = false;
+    
+    // Store initial state for dirty checking
+    private array $initialInputs = [];
 
     // True when the course has both LEC and LAB components.
     public bool $courseHasLab = false;
@@ -71,6 +75,8 @@ class CourseEvaluationStep extends Component
     {
         if (str_starts_with($propertyName, 'inputs.') && str_ends_with($propertyName, '.weight')) {
             $this->recomputeTotalsFromInputs();
+            // Mark step as dirty when weights change
+            $this->dispatch('syllabus-step-dirty', step: 'course_evaluation', dirty: true);
         }
     }
 
@@ -80,7 +86,10 @@ class CourseEvaluationStep extends Component
     public function onStepChanged(string $step): void
     {
         if ($step === 'course_evaluation') {
-            $this->loadData();
+            // Only reload data if not already loaded (prevent unnecessary DB queries)
+            if (! $this->isLoaded) {
+                $this->loadData();
+            }
         }
     }
 
@@ -90,8 +99,33 @@ class CourseEvaluationStep extends Component
         if ($step !== 'course_evaluation') {
             return;
         }
-        $this->persistEvaluation();
-        $this->dispatch('syllabus-step-saved', step: 'course_evaluation');
+        try {
+            $this->persistEvaluation();
+            $this->dispatch('syllabus-step-saved', step: 'course_evaluation');
+            // Update initial state after successful save
+            $this->initialInputs = $this->inputs;
+        } catch (\Throwable $e) {
+            report($e);
+            $this->dispatch('syllabus-step-save-failed', step: 'course_evaluation', error: $e->getMessage());
+        }
+    }
+
+    #[On('request-eval-flush-and-navigate')]
+    public function onEvalFlushAndNavigate(string $toStep, ?string $previousStep = null): void
+    {
+        // Check if there are unsaved changes before proceeding
+        $isDirty = $this->checkIfDirty();
+        
+        try {
+            if ($isDirty) {
+                $this->persistEvaluation();
+                $this->dispatch('lw-toast', type: 'success', message: 'Course Evaluation saved.');
+            }
+            $this->dispatch('navigate-after-save', step: $toStep);
+        } catch (\Throwable $e) {
+            report($e);
+            $this->dispatch('syllabus-step-save-failed', step: 'course_evaluation', error: $e->getMessage(), previousStep: $previousStep);
+        }
     }
 
     // ── Public actions ────────────────────────────────────────────────────────
@@ -101,6 +135,35 @@ class CourseEvaluationStep extends Component
         $this->persistEvaluation();
         $this->dispatch('lw-toast', type: 'success', message: 'Course Evaluation saved.');
         $this->dispatch('syllabus-step-saved', step: 'course_evaluation');
+        
+        // Update initial state after successful save
+        $this->initialInputs = $this->inputs;
+    }
+
+    private function checkIfDirty(): bool
+    {
+        // Check if any inputs have changed from initial state
+        if (empty($this->initialInputs)) {
+            return false; // No initial state to compare against
+        }
+
+        foreach ($this->inputs as $id => $input) {
+            if (!isset($this->initialInputs[$id])) {
+                return true; // New input added
+            }
+            if ($this->inputs[$id] !== $this->initialInputs[$id]) {
+                return true; // Input value changed
+            }
+        }
+
+        // Check if any inputs were removed
+        foreach ($this->initialInputs as $id => $input) {
+            if (!isset($this->inputs[$id])) {
+                return true; // Input was removed
+            }
+        }
+
+        return false;
     }
 
     // Accepts the full Alpine weights map in one round-trip, replacing the
@@ -133,6 +196,11 @@ class CourseEvaluationStep extends Component
         $this->rows              = $payload['rows'];
         $this->inputs            = $payload['inputs'];
         $this->recomputeTotalsFromInputs();
+        
+        // Store initial state for dirty checking
+        $this->initialInputs = $this->inputs;
+        
+        $this->isLoaded = true;
     }
 
     private function persistEvaluation(): void

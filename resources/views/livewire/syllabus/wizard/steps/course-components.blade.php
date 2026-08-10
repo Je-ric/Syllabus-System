@@ -8,7 +8,7 @@
         try {
             await Promise.all(window._beforeSaveAllPromises);
         } catch { _pushing = false; return; }
-        await $wire.onPushAndNavigate($event.detail.toStep);
+        await $wire.onPushAndNavigate($event.detail.toStep, $event.detail.previousStep);
         _pushing = false;
     "
     x-on:sidebar-save-components.window="async () => {

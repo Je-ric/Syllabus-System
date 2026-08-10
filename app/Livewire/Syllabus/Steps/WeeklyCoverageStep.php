@@ -39,6 +39,7 @@ class WeeklyCoverageStep extends Component
     public int    $stepNumber           = 4;
     public ?int   $academic_calendar_id = null;
     public bool   $weeksGenerated       = false;
+    public bool   $isLoaded             = false;
     public array  $courseComponents     = [];
     public string $activeComponent      = 'LEC';
     public array  $courseOutcomes       = [];
@@ -85,7 +86,10 @@ class WeeklyCoverageStep extends Component
     public function onStepChanged(string $step): void
     {
         if ($step === 'weekly_coverage') {
-            $this->loadData();
+            // Only reload data if not already loaded (prevent unnecessary DB queries)
+            if (! $this->isLoaded) {
+                $this->loadData();
+            }
         }
     }
 
@@ -101,6 +105,17 @@ class WeeklyCoverageStep extends Component
         $this->saveAllWeeklyEntries();
     }
 
+    // Confirmation methods for modal dialogs
+    public function confirmHardReset(): void
+    {
+        $this->dispatch('confirm-hard-reset');
+    }
+
+    public function confirmRefreshDates(): void
+    {
+        $this->dispatch('confirm-refresh-dates');
+    }
+
     #[On('syllabus-save-step')]
     public function onSaveRequested(string $step): void
     {
@@ -108,14 +123,19 @@ class WeeklyCoverageStep extends Component
             return;
         }
 
-        app(WeekContentService::class)->save(
-            $this->syllabusId,
-            $this->activeComponent,
-            $this->weekInputs,
-            $this->lockedWeeks
-        );
+        try {
+            app(WeekContentService::class)->save(
+                $this->syllabusId,
+                $this->activeComponent,
+                $this->weekInputs,
+                $this->lockedWeeks
+            );
 
-        $this->dispatch('syllabus-step-saved', step: 'weekly_coverage');
+            $this->dispatch('syllabus-step-saved', step: 'weekly_coverage');
+        } catch (\Throwable $e) {
+            report($e);
+            $this->dispatch('syllabus-step-save-failed', step: 'weekly_coverage', error: $e->getMessage());
+        }
     }
 
     // ── Week generation ───────────────────────────────────────────────────────
@@ -140,7 +160,21 @@ class WeeklyCoverageStep extends Component
 
         if ($ok) {
             $this->loadData();
-            $this->dispatch('lw-toast', type: 'success', message: 'Weekly coverage generated.');
+            
+            // Get generation statistics for better user feedback
+            $stats = app(\App\Services\Syllabus\Weeks\CalendarWeekSequenceBuilder::class)
+                ->getGenerationStats($syllabus->academicCalendar, (int) $syllabus->academic_calendar_id);
+            
+            $message = "Weekly coverage generated ({$stats['totalWeeks']} weeks";
+            if ($stats['skippedWeeks'] > 0) {
+                $message .= ", {$stats['skippedWeeks']} skipped";
+            }
+            if ($stats['lockedWeeks'] > 0) {
+                $message .= ", {$stats['lockedWeeks']} locked";
+            }
+            $message .= ").";
+            
+            $this->dispatch('lw-toast', type: 'success', message: $message);
             $this->dispatch('syllabus-step-saved', step: 'weekly_coverage');
         }
     }
@@ -462,5 +496,7 @@ class WeeklyCoverageStep extends Component
             $this->activeComponent,
             $this->syllabusWeeks
         );
+        
+        $this->isLoaded = true;
     }
 }

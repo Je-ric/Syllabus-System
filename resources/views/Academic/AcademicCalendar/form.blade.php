@@ -6,10 +6,13 @@
         icon="bx-calendar"
         title="{{ isset($isEdit) ? 'Edit Academic Calendar' : 'Create Academic Calendar' }}"
         desc="Academic Year and Semester Dates">
+        <x-ui.help-trigger />
         <x-ui.button variant="cancel" href="{{ route('academic.calendars.index') }}">
             <i class="bx bx-arrow-back"></i> Back
         </x-ui.button>
     </x-layout.page-header>
+
+    <x-layout.help-panel module="academic-calendar" />
 
     <x-layout.panel>
         @if(isset($hasEvents) && $hasEvents)

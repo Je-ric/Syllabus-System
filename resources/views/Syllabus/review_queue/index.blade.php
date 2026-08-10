@@ -20,7 +20,7 @@
         :tabs="$tabs"
         :defaultTab="'pending'"
         :stateKey="'review-queue'">
-
+        
         {{-- ── Needs Review tab ─────────────────────────────────── --}}
         <x-slot name="slot_pending">
             @if ($pending->isEmpty())
