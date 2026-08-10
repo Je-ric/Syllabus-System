@@ -43,7 +43,8 @@ Practical reference for how the F.003 review form, reviewer assignments, and app
 - **Checklist responses**: Per-reviewer, per-criterion responses (satisfied/not_satisfied/not_applicable) with optional comments.
 - **Decision types**: `approved_as_updating`, `approved_as_revision`, `approved_with_corrections`, `returned_for_revision`, `reclassified_as_revision`.
 - **Reviewer roles**: Chair (records decision, recommends approval) and Members (complete checklist only).
-- **Part H compliance**: For `approved_with_corrections` decisions, faculty must respond and verifier must confirm compliance.
+- **Part H compliance**: For `approved_with_corrections` and `returned_for_revision` decisions, faculty must respond using Part H. For `approved_with_corrections`, verifier must confirm compliance. For `returned_for_revision`, faculty can resubmit for review.
+- **Required actions**: Only required for `returned_for_revision` decisions (not for `approved_with_corrections`). Chair can update required actions/comments and deadline for `returned_for_revision` decisions.
 - **Snapshots**: Review form HTML is frozen and stored on disk when syllabus is approved for archival purposes.
 
 ## Conditions (If / Then)
@@ -107,7 +108,7 @@ Practical reference for how the F.003 review form, reviewer assignments, and app
 - If chair saves decision:
   - Then user must have chair role (checked in assignment, not just user role).
   - Then decision must be one of: approved_as_updating, approved_as_revision, approved_with_corrections, returned_for_revision, reclassified_as_revision.
-  - If decision is `approved_with_corrections` or `returned_for_revision`:
+  - If decision is `returned_for_revision`:
     - Then required_actions must be filled.
     - Then target_compliance_date must be set.
   - Then `SyllabusReviewFormService::recordDecision()` is called.
@@ -120,6 +121,12 @@ Practical reference for how the F.003 review form, reviewer assignments, and app
     - Then classification is set to `revision`.
   - Then AuditLog recorded.
 
+- If chair updates decision for `returned_for_revision`:
+  - Then required actions and deadline fields are shown (even if decision unchanged).
+  - Then chair can modify required_actions and target_compliance_date.
+  - Then save button is disabled if no changes detected.
+  - Then button text shows "Update Decision" when updating existing decision.
+
 ### Chair Recommendation (SyllabusReviewPage Livewire)
 
 - If chair recommends approval:
@@ -129,16 +136,25 @@ Practical reference for how the F.003 review form, reviewer assignments, and app
   - Then recommended_by_chair_id and recommended_by_chair_at are set.
   - Then AuditLog recorded.
 
-### Part H Faculty Response (SyllabusReviewPage Livewire)
+### Part H Faculty Response (ReviewStep Livewire)
 
-- If decision is `approved_with_corrections`:
-  - Then Part H panel is shown to faculty.
+- If decision is `approved_with_corrections` or `returned_for_revision`:
+  - Then Part H panel is shown to faculty in review form.
   - If faculty saves response:
     - Then part_h_faculty_response is saved.
     - Then AuditLog recorded.
-  - If faculty marks as complete:
-    - Then part_h_faculty_response is saved with completion flag.
-    - Then AuditLog recorded.
+  - If decision is `approved_with_corrections`:
+    - Then faculty sees "Submit Response" button.
+    - Then response awaits verification by chair/admin.
+  - If decision is `returned_for_revision`:
+    - Then faculty sees "Save Response" and "Resubmit for Review" buttons.
+    - If faculty clicks "Resubmit for Review":
+      - Then part_h_faculty_response is saved.
+      - Then decision, required_actions, and target_compliance_date are reset.
+      - Then syllabus status is set to `pending_review`.
+      - Then all reviewer statuses are reset to `pending`.
+      - Then AuditLog recorded.
+      - Then reviewers are notified of resubmission.
 
 ### Part H Verification (SyllabusReviewPage Livewire)
 
@@ -236,12 +252,27 @@ Practical reference for how the F.003 review form, reviewer assignments, and app
 
 ### Approved with Corrections Flow
 
-1. Chair records decision as "Approved with Corrections" with required actions and compliance date.
-2. Faculty sees Part H panel in review page.
-3. Faculty enters response to required actions.
-4. Faculty marks as complete when done.
+1. Chair records decision as "Approved with Corrections" (no required actions/date needed).
+2. Faculty sees Part H panel in review form.
+3. Faculty enters response describing corrections made.
+4. Faculty clicks "Submit Response".
 5. Verifier (chair/admin) confirms compliance.
 6. Part H is verified and syllabus proceeds to dean approval.
+
+### Returned for Revision Flow
+
+1. Chair records decision as "Returned for Revision" with required actions and compliance deadline.
+2. Faculty sees required actions and deadline in review form.
+3. Faculty sees Part H panel to describe revisions made.
+4. Faculty can save response draft or resubmit for review.
+5. If faculty clicks "Resubmit for Review":
+   - Part H response is saved.
+   - Decision, required actions, and deadline are reset.
+   - Syllabus status changes to `pending_review`.
+   - All reviewer statuses reset to `pending`.
+   - Reviewers are notified to review again.
+6. Reviewers complete checklist for revised syllabus.
+7. Chair records new decision based on revised content.
 
 ## UI Notes
 
@@ -260,7 +291,9 @@ Practical reference for how the F.003 review form, reviewer assignments, and app
 - Progress bar shows completion percentage for current reviewer.
 - Right panel: syllabus info, other reviewers status, decision form (chair only).
 - Warning banner if F.003 not yet submitted by author.
-- Faculty response panel shown for Part H compliance decisions.
+- Chair decision form shows required actions/date fields only for `returned_for_revision` decisions.
+- Chair can update required actions and deadline for existing `returned_for_revision` decisions.
+- Save button disabled when no changes detected, shows "Update Decision" when updating.
 - All saves use async Alpine.js calls with loading states.
 
 ### ReviewStep (wizard/steps/review.blade.php)
@@ -271,6 +304,9 @@ Practical reference for how the F.003 review form, reviewer assignments, and app
 - Dean approval button (appears when all prerequisites met).
 - Live preview button opens review_form.blade.php in new tab.
 - Shows saved versions drawer for historical review form snapshots.
+- Part H panel shown for `approved_with_corrections` and `returned_for_revision` decisions.
+- For `returned_for_revision`: shows required actions, deadline, and resubmit functionality.
+- For `approved_with_corrections`: shows response textarea for corrections description.
 
 Related docs:
 - `MD/10_Syllabus_Creation_and_Management.md`

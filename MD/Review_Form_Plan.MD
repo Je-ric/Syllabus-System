@@ -437,39 +437,6 @@ Per `.amazonq/rules/08-system-planning-and-flow.md` — notifications fire at ev
 
 ---
 
-## Routes
-
-```php
-// All routes below require auth middleware.
-// Access control: reviewer must be in syllabus_reviewers for this syllabus, OR have dean role.
-
-Route::get('/syllabus/review/{syllabus}',
-    [SyllabusReviewController::class, 'show'])
-    ->name('syllabus.review.show');
-
-Route::post('/syllabus/review/{syllabus}/checklist',
-    [SyllabusReviewController::class, 'saveChecklist'])
-    ->name('syllabus.review.checklist.save');
-
-Route::post('/syllabus/review/{syllabus}/decision',
-    [SyllabusReviewController::class, 'recordDecision'])
-    ->name('syllabus.review.decision');
-
-Route::post('/syllabus/review/{syllabus}/verify-part-h',
-    [SyllabusReviewController::class, 'verifyPartH'])
-    ->name('syllabus.review.part-h.verify');
-
-Route::post('/syllabus/review/{syllabus}/recommend',
-    [SyllabusReviewController::class, 'recommend'])
-    ->name('syllabus.review.recommend');
-
-Route::post('/syllabus/review/{syllabus}/dean-approve',
-    [SyllabusReviewController::class, 'deanApprove'])
-    ->name('syllabus.review.dean-approve');
-```
-
----
-
 ## Two User Interfaces
 
 ### Interface 1 — Author Side (inside the wizard Review tab)
@@ -506,28 +473,6 @@ Located at `/syllabus/review/{syllabus}`. Wraps the `SyllabusReviewChecklist` Li
 
 For **Updating track**: only the Chair has a checklist column. Members are not assigned.
 For **Revision track**: Chair + both members each fill their own column independently.
-
----
-
-## Service API: `SyllabusReviewFormService`
-
-All methods follow the project's error-handling rules: try-catch, log on failure, rethrow or dispatch toast — never silently swallow.
-
-```php
-findOrCreate(Syllabus $syllabus): SyllabusReviewForm
-setClassification(SyllabusReviewForm, string $classification): void
-syncNatureOfChange(SyllabusReviewForm, array $selectedTypes): void
-syncAttachments(SyllabusReviewForm, array $submitted): void
-saveChecklistResponse(SyllabusReviewForm, int $reviewerUserId, string $criterionCode, string $response, ?string $comments): void
-recordDecision(SyllabusReviewForm, string $decision, ?string $requiredActions, ?string $targetDate): void
-savePartHResponse(SyllabusReviewForm, string $response): void
-verifyPartH(SyllabusReviewForm, int $verifierUserId): void
-recommendApproval(SyllabusReviewForm, int $chairUserId): void
-recordDeanApproval(SyllabusReviewForm, int $deanUserId): void
-generateReviewFormHtml(SyllabusReviewForm): string
-isChecklistComplete(SyllabusReviewForm, int $reviewerUserId): bool
-buildSnapshot(SyllabusReviewForm): array
-```
 
 Side effects per method:
 - `recordDecision()` → fires notification + triggers reclassification reset if applicable (DB transaction wraps the reset)

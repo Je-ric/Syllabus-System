@@ -25,12 +25,3 @@ Less Priority
     4. Course Number should be displayed in the Course Coverage (Weekly)
 
 Known Bugs
-
-
-updateGoalModal / updateObjectiveModal — textarea has both value in slot AND x-model — double-binding causes x-model to always win over server old() on reload
-NEXT
-assignRolesModal — x-on:submit returns false to block but Alpine x-on:submit ignores return value — dean+chair block silently does nothing
-addDepartmentModal — college_id hidden input has empty value and no JS to populate it — will always fail server validation
-deleteAYModal — modal id uses str_replace('-','_',$year) but route passes $year as-is — ID inconsistency if year format changes
-approvalModal — loadingText uses ucfirst($action).'ing…' which produces wrong label for 'disable' → 'Disableing…'
-addProgramModal — primaryDept comparison uses == with integer dept id but Alpine stores it as string from x-model — strict type mismatch in :class binding

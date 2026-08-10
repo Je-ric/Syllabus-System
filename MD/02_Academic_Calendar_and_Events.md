@@ -23,10 +23,12 @@ Practical reference for how Academic Calendars and their semester events behave 
   - `resources/views/Academic/AcademicCalendar/Modals/deleteAYModal.blade.php` — Delete academic year confirmation
   - `resources/views/Academic/AcademicCalendarEvent/index.blade.php` — Events listing for a semester
 - Views (Livewire)
-  - `resources/views/livewire/academic-calendar/form.blade.php` — Calendar form component
-  - `resources/views/livewire/academic-calendar/event-form.blade.php` — Event form component
-  - `resources/views/livewire/academic-calendar/partials/event-modal.blade.php` — Event add/edit modal
+  - `resources/views/livewire/academic-calendar/form.blade.php` — Calendar form component with date guidelines
+  - `resources/views/livewire/academic-calendar/event-form.blade.php` — Event form component with type legend
+  - `resources/views/livewire/academic-calendar/partials/event-modal.blade.php` — Event add/edit modal with type guidance and quick buttons
   - `resources/views/livewire/academic-calendar/partials/` — Other partials
+- Help Views
+  - `resources/views/help/academic-calendar.blade.php` — User-facing help manual for calendar management
 - Routes
   - `routes/web.php` (academic calendar + events routes — `role:admin,ovpaa`)
     - `GET /academic-calendars` — index
@@ -50,6 +52,52 @@ Practical reference for how Academic Calendars and their semester events behave 
 - Store and update of the calendar form are handled by the `AcademicCalendarForm` Livewire component; the POST/PUT controller methods do not exist.
 - Event add, edit, delete, and bulk range are handled by the `AcademicCalendarEventForm` Livewire component; the POST/PUT controller event methods do not exist.
 - CSV import is present in the codebase but **currently disabled** (commented out with `WithFileUploads`).
+
+## Recent UI/UX Improvements
+
+### Event Type Clarity
+- Added visual categorization of event types in the event modal (Reference/Skip/Lock)
+- Added quick-type buttons for common events (Suspension, Christmas Break, Semester Break, Exam, Non-Teaching)
+- Added dynamic guidance based on selected event type
+- Added type-specific toast warnings when creating events
+- Updated legend in event calendar view to show impact (Ref/Skip/Lock)
+- Enhanced event form with color-coded type guidance boxes
+
+### Calendar Form Improvements
+- Added date guidelines banner explaining cross-year semester support
+- Added reminders about event type impacts
+- Improved user guidance for proper event type selection
+
+### Documentation
+- Created comprehensive help manual at `resources/views/help/academic-calendar.blade.php`
+- Updated this MD file with event type impact documentation
+- Added event type selection guide
+
+## Event Types and Their Impact
+
+Events are categorized into three types based on how they affect syllabus week generation:
+
+### Reference Events (Week Created, Editable)
+- **`holiday`** — Informational reference for faculty planning (e.g., class suspensions, observances)
+- **`other`** — General informational events (e.g., deadlines, reminders)
+- **Impact**: Weeks are created normally and remain editable by faculty. Faculty can see these dates when planning assessments, TLA, and topics.
+
+### Skip Events (No Week Created)
+- **`break`** — Skips week entirely (e.g., Christmas break, semester breaks, health breaks)
+- **Impact**: No syllabus week row is created for that period. The week is completely skipped in the syllabus weekly coverage.
+
+### Lock Events (Week Created, Locked)
+- **`exam`** — Locks week as "Exam Week" (e.g., midterm exams, final exams)
+- **`non_teaching`** — Locks week as "Non-Teaching Week" (e.g., institutional events)
+- **Impact**: Week is created but locked. Faculty cannot edit the content. Auto-filled with "1st Term Exam", "2nd Term Exam", "Final Term Exam", or "Non-Teaching Week".
+
+## Event Type Selection Guide
+
+- Use **`holiday`** for: Class suspensions, holiday observances (reference only, week remains editable)
+- Use **`break`** for: Christmas break, semester breaks, health breaks, summer break (week skipped entirely)
+- Use **`exam`** for: Midterm exams, final exams, practical exams (week locked as exam)
+- Use **`non_teaching`** for: Institutional non-teaching days, special events (week locked as non-teaching)
+- Use **`other`** for: General informational events, reminders (reference only, week remains editable)
 
 ## Conditions (If / Then)
 
@@ -135,6 +183,10 @@ Practical reference for how Academic Calendars and their semester events behave 
   - Then `event-saved` dispatched (refreshes list) + error toast. No crash.
 - If all validations pass:
   - Then event is created or updated.
+  - Then type-specific warning toast is dispatched:
+    - If `break`: "Break event created: This week will be SKIPPED in syllabi."
+    - If `exam` or `non_teaching`: "Exam/Non-Teaching event created: This week will be LOCKED in syllabi."
+    - If `holiday` with "christmas" in name: "Tip: Use 'Break' type to skip Christmas break, or 'Holiday' for reference only."
   - Then AuditLog recorded.
   - Then `event-saved` dispatched + success toast.
 
@@ -149,6 +201,9 @@ Practical reference for how Academic Calendars and their semester events behave 
 - If all validations pass:
   - Then existing event dates in the range are fetched and flipped into a skip map.
   - Then one row is inserted per day in the range not already covered (bulk `insert`).
+  - Then type-specific warning toast is dispatched:
+    - If `break`: "Break event created: X week(s) will be SKIPPED in syllabi."
+    - If `exam` or `non_teaching`: "Exam/Non-Teaching event created: X week(s) will be LOCKED in syllabi."
   - Then AuditLog recorded.
   - Then success toast shows how many events were added (e.g. "3 event(s) added.").
 
