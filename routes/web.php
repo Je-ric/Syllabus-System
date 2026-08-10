@@ -104,6 +104,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/user-assignments/assign-chair', [UserAssignmentsController::class, 'assignChair'])->name('user-assignments.assign-chair');
         Route::post('/user-assignments/remove-chair', [UserAssignmentsController::class, 'removeChair'])->name('user-assignments.remove-chair');
         Route::post('/user-assignments/assign-faculty', [UserAssignmentsController::class, 'assignFaculty'])->name('user-assignments.assign-faculty');
+        Route::post('/user-assignments/bulk-assign-faculty', [UserAssignmentsController::class, 'bulkAssignFaculty'])->name('user-assignments.bulk-assign-faculty');
         Route::post('/user-assignments/remove-faculty', [UserAssignmentsController::class, 'removeFaculty'])->name('user-assignments.remove-faculty');
     });
 

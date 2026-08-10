@@ -52,7 +52,7 @@
 
                             @if ($canManageFaculty)
                                 <x-ui.button
-                                    onclick="document.getElementById('assignFacultyModal-{{ $department->id }}').showModal()"
+                                    onclick="document.getElementById('bulkAssignFacultyModal-{{ $department->id }}').showModal()"
                                     variant="add-button"
                                     class="shrink-0 text-xs">
                                     <i class="bx bx-user-plus"></i> Add Faculty
@@ -113,7 +113,7 @@
                                 </x-slot>
 
                                 @if ($facultyList->count() > 0)
-                                    <div class="divide-y divide-slate-100">
+                                    <div class="divide-y divide-slate-100 overflow-y-auto max-h-56 pr-1">
                                         @foreach ($facultyList as $fa)
                                             <div class="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0">
                                                 <div class="min-w-0">
@@ -150,7 +150,7 @@
                     @endif
 
                     @if ($canManageFaculty)
-                        @include('UserManagement.UserAssignments.modals.assignFacultyModal', [
+                        @include('UserManagement.UserAssignments.modals.bulkAssignFacultyModal', [
                             'departmentId'       => $department->id,
                             'departmentName'     => $department->name,
                             'potentialFaculty'   => $potentialFaculty,

@@ -83,7 +83,7 @@
                         University Faculties
                     </x-ui.nav-link>
                     <x-ui.nav-link href="{{ route('university.structure.index') }}" icon="bxs-layer" :active="request()->routeIs('university.structure.*')">
-                        Academic Structure
+                        University Structure
                     </x-ui.nav-link>
                     <x-ui.nav-link href="{{ route('accounts.approval') }}" icon="bxs-user-detail" :active="request()->routeIs('accounts.approval')">
                         User Management

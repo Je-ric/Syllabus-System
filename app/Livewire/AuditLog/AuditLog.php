@@ -24,7 +24,10 @@ class AuditLog extends Component
 
     // ── UI state ──────────────────────────────────────────────────────────
     public bool   $liveRefresh   = true;
+    public int    $pollInterval  = 30; // Default to 30s instead of 10s
     public string $lastRefreshed = '';
+    public bool   $isPageVisible = true;
+    public bool   $isLoading     = false;
 
     // ── Cached filter options (loaded once in mount) ──────────────────────
     public array $users   = [];
@@ -63,7 +66,9 @@ class AuditLog extends Component
 
     public function refresh(): void
     {
+        $this->isLoading = true;
         $this->lastRefreshed = now()->format('H:i:s');
+        $this->isLoading = false;
     }
 
     #[Computed]

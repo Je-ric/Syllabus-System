@@ -66,7 +66,7 @@
                             x-model="primaryDept"
                             :disabled="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
-                            class="w-full px-3 py-2 text-[13px] border border-[#E3E8EB] rounded-[8px] bg-white
+                            class="w-full px-3 py-2 text-[13px] border border-[#E3E8EB] rounded-lg bg-white
                                    focus:outline-none focus:ring-2 focus:ring-[#00C075] focus:border-transparent"
                             required>
                             <option value="">Select primary department</option>
@@ -80,8 +80,6 @@
                                 </optgroup>
                             @endforeach
                         </select>
-                        {{-- Mirror value so it submits even when select is disabled --}}
-                        <input type="hidden" name="primary_department_id" :value="primaryDept" x-show="submitting">
                         <p class="text-[11px] text-[#93A1AF] mt-1">Main department responsible for this program</p>
                     </div>
 
@@ -116,7 +114,7 @@
                     <x-modal.modal-label>Supporting Departments <span class="text-[#93A1AF] font-normal">(Optional)</span></x-modal.modal-label>
                     <p class="text-[11px] text-[#93A1AF] mb-2">Departments that also contribute to this program</p>
 
-                    <div class="border border-[#E3E8EB] rounded-[8px] divide-y divide-[#F1F3F5] overflow-y-auto max-h-64"
+                    <div class="border border-[#E3E8EB] rounded-lg divide-y divide-[#F1F3F5] overflow-y-auto max-h-64"
                         ::class="submitting ? 'opacity-60 cursor-not-allowed pointer-events-none' : ''">
                         @foreach($allDepartments->groupBy('college.name') as $collegeName => $depts)
                             <div>

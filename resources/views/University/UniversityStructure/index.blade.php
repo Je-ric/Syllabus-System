@@ -2,6 +2,13 @@
 
 @section('content')
 
+    <script>
+        function openAddDepartmentModal(collegeId) {
+            document.getElementById('addDepartment_college_id').value = collegeId;
+            document.getElementById('addDepartmentModal').showModal();
+        }
+    </script>
+
     <x-layout.page-header
         icon="bx-buildings"
         title="Academic Structure Management"
@@ -27,7 +34,7 @@
                         {{-- Header --}}
                         <div class="flex items-center justify-between gap-2 px-4 py-3 border-b border-[#E3E8EB] bg-[#F1F3F5]">
                             <div class="flex items-center gap-2">
-                                <span class="flex items-center justify-center w-7 h-7 rounded-[8px] bg-[#D5FFF0] text-[#06754E]">
+                                <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-[#D5FFF0] text-[#06754E]">
                                     <i class="bx bxs-school text-sm leading-none"></i>
                                 </span>
                                 <p class="text-[11px] font-bold uppercase tracking-[0.08em] text-[#394056]">Colleges</p>
@@ -54,7 +61,7 @@
 
                                     <div class="flex items-center justify-between gap-2">
                                         <div class="flex items-center gap-2.5 min-w-0">
-                                            <span class="shrink-0 w-8 h-8 rounded-[8px] flex items-center justify-center transition-colors"
+                                            <span class="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
                                                 :class="selectedCollege === {{ $college->id }} ? 'bg-[#D5FFF0]' : 'bg-[#F1F3F5]'">
                                                 <i class="bx bxs-school text-sm leading-none transition-colors"
                                                    :class="selectedCollege === {{ $college->id }} ? 'text-[#06754E]' : 'text-[#72809E]'"></i>
@@ -122,7 +129,7 @@
                                             {{-- Department header --}}
                                             <div class="flex items-center justify-between px-4 py-3 bg-[#F9FAFA] border-b border-[#E3E8EB] rounded-t-[12px]">
                                                 <div class="flex items-center gap-2.5">
-                                                    <span class="w-7 h-7 rounded-[8px] bg-[#DAF1FF] flex items-center justify-center shrink-0">
+                                                    <span class="w-7 h-7 rounded-lg bg-[#DAF1FF] flex items-center justify-center shrink-0">
                                                         <i class="bx bx-building text-[#143D57] text-sm leading-none"></i>
                                                     </span>
                                                     <div>

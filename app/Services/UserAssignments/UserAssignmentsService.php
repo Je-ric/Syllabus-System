@@ -147,6 +147,71 @@ class UserAssignmentsService
         );
     }
 
+    public function bulkAssignFaculty(int $departmentId, array $userIds, ?User $actor): array
+    {
+        $department = Department::findOrFail($departmentId);
+
+        if ($toast = $this->checker->checkActorCanManageFaculty($actor, $department, 'assign')) {
+            return ['toast' => $toast];
+        }
+
+        if (empty($userIds)) {
+            return [
+                'toast' => [
+                    'message' => 'No users selected for assignment.',
+                    'type' => 'error',
+                ],
+            ];
+        }
+
+        $users = User::whereIn('id', $userIds)->get();
+        $assignedCount = 0;
+        $skippedCount = 0;
+        $failedUsers = [];
+
+        return $this->runInTransaction(
+            function() use ($department, $users, &$assignedCount, &$skippedCount, &$failedUsers) {
+                foreach ($users as $user) {
+                    if ($toast = $this->runChecks($user, [
+                        ['checkTargetHasRoleOrAdmin', ['faculty', 'User must have faculty role assigned.']],
+                        ['checkAlreadyAssigned', ['faculty', null, $department->id, '', 'info']],
+                    ])) {
+                        $skippedCount++;
+                        continue;
+                    }
+
+                    try {
+                        $this->createFacultyAssignment($user, $department);
+                        $assignedCount++;
+                    } catch (Throwable $e) {
+                        $failedUsers[] = $user->name;
+                    }
+                }
+
+                if ($assignedCount === 0) {
+                    throw new \Exception('No faculty members were assigned.');
+                }
+            },
+            'Failed to assign faculty members. Please try again.',
+            $this->getBulkAssignmentMessage($assignedCount, $skippedCount, $failedUsers, $department->name)
+        );
+    }
+
+    private function getBulkAssignmentMessage(int $assignedCount, int $skippedCount, array $failedUsers, string $departmentName): string
+    {
+        $message = "Assigned {$assignedCount} faculty member(s) to {$departmentName}";
+
+        if ($skippedCount > 0) {
+            $message .= ". {$skippedCount} skipped (already assigned)";
+        }
+
+        if (!empty($failedUsers)) {
+            $message .= ". Failed: " . implode(', ', $failedUsers);
+        }
+
+        return $message . '.';
+    }
+
     // ── REMOVE METHODS ───────────────────────────────────────────────────────────
 
     public function removeDean(int $collegeId, int $userId): array

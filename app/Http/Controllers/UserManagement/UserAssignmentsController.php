@@ -132,6 +132,26 @@ class UserAssignmentsController extends Controller
         return back()->with('toast', $result['toast']);
     }
 
+    public function bulkAssignFaculty(Request $request)
+    {
+        $request->validate([
+            'department_id' => 'required|exists:departments,id',
+            'user_ids'      => 'required|array',
+            'user_ids.*'    => 'required|exists:users,id',
+        ]);
+
+        /** @var \App\Models\User|null $actor */
+        $actor = Auth::user();
+
+        $result = $this->userAssignmentsService->bulkAssignFaculty(
+            (int) $request->input('department_id'),
+            array_map('intval', $request->input('user_ids')),
+            $actor
+        );
+
+        return back()->with('toast', $result['toast']);
+    }
+
     public function removeFaculty(Request $request)
     {
         $request->validate([

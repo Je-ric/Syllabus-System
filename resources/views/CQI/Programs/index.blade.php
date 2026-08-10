@@ -21,7 +21,7 @@
                 :autoRedirect="true" />
         </x-layout.card-section>
 
-        <x-layout.card-section title="University Mission" icon="bx-flag">
+        <x-layout.card-section title="University Mission" icon="bx-flag" class="mb-5">
             <p class="text-[13px] text-slate-500 leading-relaxed">
                 CLSU shall develop globally competitive, work-ready, socially-responsible and empowered human resources
                 who value life-long learning; and to generate, disseminate, and apply knowledge and technologies for
