@@ -6,7 +6,9 @@ use App\Models\CourseComponent;
 use App\Models\CourseComponentSchedule;
 use App\Models\Syllabus;
 use App\Models\User;
+use App\Models\UserConsultationHour;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -354,38 +356,67 @@ class ComponentsStep extends Component
             $this->lec_user_id = Auth::id();
         }
 
-        $lec = CourseComponent::updateOrCreate(
-            ['syllabus_id' => $this->syllabusId, 'type' => 'LEC'],
-            $this->buildPayload('lec')
-        );
-        $this->syncSchedules($lec, $this->lec_schedules);
-
-        if ($this->courseHasLab) {
-            $lab = CourseComponent::updateOrCreate(
-                ['syllabus_id' => $this->syllabusId, 'type' => 'LAB'],
-                $this->buildPayload('lab')
+        DB::transaction(function () {
+            $lec = CourseComponent::updateOrCreate(
+                ['syllabus_id' => $this->syllabusId, 'type' => 'LEC'],
+                $this->buildPayload('lec')
             );
-            $this->syncSchedules($lab, $this->lab_schedules);
-        }
+            $this->syncSchedules($lec, $this->lec_schedules);
+
+            if ($this->courseHasLab) {
+                $lab = CourseComponent::updateOrCreate(
+                    ['syllabus_id' => $this->syllabusId, 'type' => 'LAB'],
+                    $this->buildPayload('lab')
+                );
+                $this->syncSchedules($lab, $this->lab_schedules);
+            }
+        });
     }
 
     private function syncSchedules(CourseComponent $component, array $schedules): void
     {
-        \Illuminate\Support\Facades\DB::transaction(function () use ($component, $schedules) {
-            $component->schedules()->delete();
+        // Prepare new schedule data
+        $newSchedules = collect($schedules)
+            ->map(fn ($s) => [
+                'day'  => trim($s['day']  ?? ''),
+                'time' => trim($s['time'] ?? ''),
+            ])
+            ->filter(fn ($s) => $s['day'] !== '' && $s['time'] !== '')
+            ->values()
+            ->all();
 
-            foreach ($schedules as $s) {
-                $day  = trim($s['day']  ?? '');
-                $time = trim($s['time'] ?? '');
-                if ($day !== '' && $time !== '') {
-                    CourseComponentSchedule::create([
-                        'course_component_id' => $component->id,
-                        'day'                 => $day,
-                        'time'                => $time,
-                    ]);
-                }
+        // Get existing schedules
+        $existingSchedules = $component->schedules()->get();
+        
+        // Delete schedules that no longer exist
+        $existingSchedules->each(function ($existing) use ($newSchedules) {
+            $exists = collect($newSchedules)->contains(function ($new) use ($existing) {
+                return $new['day'] === $existing->day && $new['time'] === $existing->time;
+            });
+            if (!$exists) {
+                $existing->delete();
             }
         });
+
+        // Insert only new schedules (batch insert for performance)
+        $schedulesToInsert = collect($newSchedules)
+            ->filter(function ($new) use ($existingSchedules) {
+                return !$existingSchedules->contains(function ($existing) use ($new) {
+                    return $existing->day === $new['day'] && $existing->time === $new['time'];
+                });
+            })
+            ->map(fn ($s) => [
+                'course_component_id' => $component->id,
+                'day'                 => $s['day'],
+                'time'                => $s['time'],
+                'created_at'          => now(),
+                'updated_at'          => now(),
+            ])
+            ->all();
+
+        if (!empty($schedulesToInsert)) {
+            DB::table('course_component_schedules')->insert($schedulesToInsert);
+        }
     }
 
     private function buildPayload(string $prefix): array
@@ -402,20 +433,54 @@ class ComponentsStep extends Component
 
     // ── Private: consultation hours ───────────────────────────────────────────
 
-    // Delete and re-insert consultation hours for a user, then return the
-    // saved rows as plain arrays. Used by both LEC and LAB save paths.
+    // Optimized consultation hours persistence - uses sync instead of delete/recreate
+    // Returns the saved rows as plain arrays. Used by both LEC and LAB save paths.
     private function persistConsultationHours(User $user, array $rows): array
     {
-        $user->consultationHours()->delete();
+        // Normalize input data
+        $newHours = collect($rows)
+            ->map(fn ($row) => [
+                'day'  => trim($row['day']  ?? ''),
+                'time' => trim($row['time'] ?? ''),
+            ])
+            ->filter(fn ($h) => $h['day'] !== '' && $h['time'] !== '')
+            ->values()
+            ->all();
 
-        foreach ($rows as $row) {
-            $day  = trim($row['day']  ?? '');
-            $time = trim($row['time'] ?? '');
-            if ($day !== '' && $time !== '') {
-                $user->consultationHours()->create(['day' => $day, 'time' => $time]);
+        // Get existing consultation hours
+        $existingHours = $user->consultationHours()->get();
+        
+        // Sync: delete removed, add new, keep unchanged
+        $existingHours->each(function ($existing) use ($newHours) {
+            $exists = collect($newHours)->contains(function ($new) use ($existing) {
+                return $new['day'] === $existing->day && $new['time'] === $existing->time;
+            });
+            if (!$exists) {
+                $existing->delete();
             }
+        });
+
+        // Batch insert new hours
+        $hoursToInsert = collect($newHours)
+            ->filter(function ($new) use ($existingHours) {
+                return !$existingHours->contains(function ($existing) use ($new) {
+                    return $existing->day === $new['day'] && $existing->time === $new['time'];
+                });
+            })
+            ->map(fn ($h) => [
+                'user_id'     => $user->id,
+                'day'         => $h['day'],
+                'time'        => $h['time'],
+                'created_at'  => now(),
+                'updated_at'  => now(),
+            ])
+            ->all();
+
+        if (!empty($hoursToInsert)) {
+            DB::table('user_consultation_hours')->insert($hoursToInsert);
         }
 
+        // Return refreshed data
         return $user->fresh()->consultationHours
             ->map(fn ($h) => ['day' => $h->day, 'time' => $h->time])
             ->values()->all();

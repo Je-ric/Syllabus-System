@@ -32,11 +32,17 @@
     }"
     x-on:request-eval-flush.window="await flushToWire()"
     x-on:request-eval-flush-and-navigate.window="
+        $dispatch('syllabus-save-started');
         await flushToWire();
         await $wire.onEvalFlushAndNavigate($event.detail.toStep, $event.detail.previousStep);
+        $dispatch('syllabus-save-finished');
     "
     x-on:open-eval-notes-drawer.window="evalNotesOpen = true"
-    x-on:sidebar-save-evaluation.window="$wire.save()">
+    x-on:sidebar-save-evaluation.window="
+        $dispatch('syllabus-save-started');
+        $wire.save();
+        $dispatch('syllabus-save-finished');
+    ">
 
         @include('livewire.syllabus.wizard.steps.partials.evaluation.notes-drawer')
         @include('livewire.syllabus.wizard.steps.partials.evaluation.table')
@@ -54,7 +60,7 @@
                 Unsaved changes
             </span>
 
-            <x-ui.button variant="sm-add" wire:click="save" wireTarget="save" loading="Saving…">
+            <x-ui.button variant="sm-add" x-on:click="$dispatch('sidebar-save-evaluation')" wireTarget="save" loading="Saving…">
                 <i class="bx bx-save"></i> Save Evaluation
             </x-ui.button>
 

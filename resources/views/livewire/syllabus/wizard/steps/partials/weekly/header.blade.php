@@ -37,7 +37,7 @@
                 </div>
 
                 <x-ui.button variant="sm-add"
-                    wire:click="saveAllWeeklyEntries"
+                    x-on:click="$dispatch('syllabus-save-started'); $wire.saveAllWeeklyEntries()"
                     wireTarget="saveAllWeeklyEntries"
                     loading="Saving…">
                     <i class="bx bx-save"></i> Save All
@@ -93,7 +93,7 @@
                         Cancel
                     </button>
                     <button type="button"
-                            x-on:click="$wire.hardResetWeeks(); $dispatch('close-hard-reset-modal')"
+                            x-on:click="$dispatch('syllabus-save-started'); $wire.hardResetWeeks(); $dispatch('close-hard-reset-modal')"
                             class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors">
                         Yes, Reset Everything
                     </button>
@@ -132,7 +132,7 @@
                         Cancel
                     </button>
                     <button type="button"
-                            x-on:click="$wire.refreshWeekDates(); $dispatch('close-refresh-modal')"
+                            x-on:click="$dispatch('syllabus-save-started'); $wire.refreshWeekDates(); $dispatch('close-refresh-modal')"
                             class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
                         Yes, Refresh Dates
                     </button>

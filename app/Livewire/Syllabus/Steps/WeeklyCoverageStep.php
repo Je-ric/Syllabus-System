@@ -155,6 +155,7 @@ class WeeklyCoverageStep extends Component
             );
         } catch (\RuntimeException $e) {
             $this->dispatch('lw-toast', type: 'error', message: $e->getMessage());
+            $this->dispatch('syllabus-save-finished');
             return;
         }
 
@@ -177,6 +178,8 @@ class WeeklyCoverageStep extends Component
             $this->dispatch('lw-toast', type: 'success', message: $message);
             $this->dispatch('syllabus-step-saved', step: 'weekly_coverage');
         }
+        
+        $this->dispatch('syllabus-save-finished');
     }
 
     // Soft path — update week dates/exam labels without touching faculty content.
@@ -187,6 +190,7 @@ class WeeklyCoverageStep extends Component
         if ($syllabus?->academicCalendar && ! $syllabus->academicCalendar->is_active) {
             $this->dispatch('lw-toast', type: 'error',
                 message: 'Refresh Dates can only be used with the active academic calendar. Go to Step 1 and switch to the current active calendar first.');
+            $this->dispatch('syllabus-save-finished');
             return;
         }
 
@@ -199,6 +203,7 @@ class WeeklyCoverageStep extends Component
             );
         } catch (\RuntimeException $e) {
             $this->dispatch('lw-toast', type: 'error', message: $e->getMessage());
+            $this->dispatch('syllabus-save-finished');
             return;
         }
 
@@ -207,6 +212,7 @@ class WeeklyCoverageStep extends Component
         $toastType = $result->hasNoChanges() ? 'info' : 'success';
         $this->dispatch('lw-toast', type: $toastType, message: $result->toMessage());
         $this->dispatch('syllabus-step-saved', step: 'weekly_coverage');
+        $this->dispatch('syllabus-save-finished');
     }
 
     // Destructive path — wipe all weeks and rebuild from scratch.
@@ -221,6 +227,7 @@ class WeeklyCoverageStep extends Component
             );
         } catch (\RuntimeException $e) {
             $this->dispatch('lw-toast', type: 'error', message: $e->getMessage());
+            $this->dispatch('syllabus-save-finished');
             return;
         }
 
@@ -232,6 +239,7 @@ class WeeklyCoverageStep extends Component
 
         $this->dispatch('lw-toast', type: 'success', message: 'Weeks rebuilt from scratch. All previous content has been cleared.');
         $this->dispatch('syllabus-step-saved', step: 'weekly_coverage');
+        $this->dispatch('syllabus-save-finished');
     }
 
     // ── Week content ──────────────────────────────────────────────────────────
@@ -333,6 +341,7 @@ class WeeklyCoverageStep extends Component
             if (empty($input['course_outcome_id'] ?? null)) {
                 $this->dispatch('lw-toast', type: 'error',
                     message: "Week {$wn} needs a Course Outcome before saving all weeks.");
+                $this->dispatch('syllabus-save-finished');
                 return;
             }
         }
@@ -352,6 +361,7 @@ class WeeklyCoverageStep extends Component
         }
 
         $this->dispatch('syllabus-step-saved', step: 'weekly_coverage');
+        $this->dispatch('syllabus-save-finished');
     }
 
     // Reset one editable week.

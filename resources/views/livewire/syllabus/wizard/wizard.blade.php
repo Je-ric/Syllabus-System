@@ -24,7 +24,9 @@
             }));
         }
     "
-    x-on:livewire:navigated.window="_navigating = false">
+    x-on:livewire:navigated.window="_navigating = false"
+    x-on:syllabus-save-started.window="_navigating = true"
+    x-on:syllabus-save-finished.window="_navigating = false">
 
     <x-layout.page-header icon="bx-book-open" title="{{ $syllabus->id ? 'Edit' : 'Create' }} Syllabus"
         desc="{{ $course->course_code }} — {{ $course->course_title }}">

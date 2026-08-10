@@ -217,6 +217,7 @@ window.coManager = function coManager(initialOutcomes, syllabusId) {
                 return;
             }
             this.isSaving = true;
+            window.dispatchEvent(new CustomEvent('syllabus-save-started'));
             await this.$nextTick();
             try {
                 await this.$wire.call('saveAll',
@@ -224,6 +225,7 @@ window.coManager = function coManager(initialOutcomes, syllabusId) {
                 );
             } catch {
                 this.isSaving = false;
+                window.dispatchEvent(new CustomEvent('syllabus-save-finished'));
             }
         },
 
@@ -238,6 +240,7 @@ window.coManager = function coManager(initialOutcomes, syllabusId) {
             // Use nextTick to ensure DOM update completes before removing saving state
             this.$nextTick(() => {
                 this.isSaving = false;
+                window.dispatchEvent(new CustomEvent('syllabus-save-finished'));
                 this.$wire.dispatch('syllabus-step-dirty', { step: 'course_outcomes', dirty: false });
             });
         },

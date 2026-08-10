@@ -107,6 +107,7 @@ class CourseOutcomesStep extends Component
 
     /**
      * Persist all pending additions and edits in one shot.
+     * Optimized with batch operations to reduce database calls.
      *
      * @param  array  $drafts  [{ id: int|null, description: string, isNew: bool }]
      */
@@ -115,17 +116,32 @@ class CourseOutcomesStep extends Component
         $service = app(CourseOutcomeService::class);
 
         try {
+            // Separate new and existing outcomes for batch processing
+            $newOutcomes = [];
+            $existingOutcomes = [];
+            
             foreach ($drafts as $draft) {
                 $description = trim($draft['description'] ?? '');
-
                 if ($description === '') {
                     continue;
                 }
 
                 if (!empty($draft['isNew'])) {
-                    $service->create($this->syllabusId, $description);
+                    $newOutcomes[] = $description;
                 } else {
-                    $service->update($this->syllabusId, (int) $draft['id'], $description);
+                    $existingOutcomes[(int) $draft['id']] = $description;
+                }
+            }
+
+            // Use batch create for new outcomes (single DB operation + single resync)
+            if (!empty($newOutcomes)) {
+                $service->createBatch($this->syllabusId, $newOutcomes);
+            }
+
+            // Batch update existing outcomes (within transaction)
+            if (!empty($existingOutcomes)) {
+                foreach ($existingOutcomes as $id => $description) {
+                    $service->update($this->syllabusId, $id, $description);
                 }
             }
         } catch (\InvalidArgumentException $e) {

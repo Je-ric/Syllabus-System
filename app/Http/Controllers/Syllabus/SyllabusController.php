@@ -41,7 +41,7 @@ class SyllabusController extends Controller
         return view('Syllabus.create.selectCourse', $this->buildProgramSelectionData($programId));
     }
 
-    public function showCourses(int $programId)
+    public function showCourses(?int $programId = null)
     {
         return view('Syllabus.create.selectCourse', $this->buildProgramSelectionData($programId));
     }

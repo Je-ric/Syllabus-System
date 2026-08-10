@@ -3,26 +3,30 @@
     x-on:request-push-and-navigate.window="
         if (_pushing) return;
         _pushing = true;
+        $dispatch('syllabus-save-started');
         window._beforeSaveAllPromises = [];
         window.dispatchEvent(new CustomEvent('before-save-all'));
         try {
             await Promise.all(window._beforeSaveAllPromises);
-        } catch { _pushing = false; return; }
+        } catch { _pushing = false; $dispatch('syllabus-save-finished'); return; }
         await $wire.onPushAndNavigate($event.detail.toStep, $event.detail.previousStep);
         _pushing = false;
+        $dispatch('syllabus-save-finished');
     "
     x-on:sidebar-save-components.window="async () => {
         if (_saving) return;
         _saving = true;
+        $dispatch('syllabus-save-started');
         await $nextTick();
         window._beforeSaveAllPromises = [];
         window.dispatchEvent(new CustomEvent('before-save-all'));
         try {
             await Promise.all(window._beforeSaveAllPromises);
-        } catch { _saving = false; return; }
+        } catch { _saving = false; $dispatch('syllabus-save-finished'); return; }
         await $wire.save();
         _saving = false;
         _dirty = false;
+        $dispatch('syllabus-save-finished');
     }">
     <x-wizard.step-header title="Course Components"
         description="Fill in instructor details and class delivery info for each component."
