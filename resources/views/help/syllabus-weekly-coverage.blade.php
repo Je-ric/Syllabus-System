@@ -1,8 +1,11 @@
-{{-- Help: Step 4 — Weekly Coverage --}}
+{{-- Help: Step 4 — Weekly Coverage — Updated with latest system changes --}}
 
 <x-layout.accordion title="What This Step Does" icon="info-circle" color="emerald" :open="true">
     <p class="text-[13.5px] text-[#3f3f46] leading-relaxed">
         You fill in the topic, learning activities, assessment tasks, and CO mappings for each week of the semester. Weeks are auto-generated from the academic calendar you selected in Step 1.
+    </p>
+    <p class="text-[13.5px] text-[#3f3f46] leading-relaxed mt-2">
+        This is the most detailed step of the syllabus wizard and typically takes the most time to complete.
     </p>
 </x-layout.accordion>
 
@@ -10,6 +13,7 @@
     <div class="space-y-2 text-[13.5px] text-[#3f3f46]">
         <p>If no weeks exist yet, click <strong>Generate Weeks</strong>. This creates one row per 7-day block between the calendar's start and end dates.</p>
         <p class="mt-1">To regenerate (e.g. after changing the calendar), click <strong>Regenerate</strong> — a confirmation is required because all existing week content will be deleted.</p>
+        <p class="mt-1 text-[12px] text-[#71717a]">Week generation respects calendar events: breaks are skipped, exam/non-teaching weeks are locked.</p>
     </div>
 </x-layout.accordion>
 
@@ -38,33 +42,42 @@
         </li>
         <li class="flex gap-2.5">
             <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">2</span>
-            <span>Fill in the <strong>Topic</strong>, <strong>Learning Activities</strong>, and <strong>Assessment Task</strong>.</span>
+            <span>Fill in the <strong>Topic</strong>, <strong>Learning Activities</strong>, and <strong>Assessment Task</strong> fields.</span>
         </li>
         <li class="flex gap-2.5">
             <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">3</span>
-            <span>Select one or more <strong>Course Outcomes (COs)</strong> that this week addresses.</span>
+            <span>Select COs that this week addresses using the CO selector.</span>
         </li>
         <li class="flex gap-2.5">
             <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">4</span>
-            <span>Collapse the week or click <strong>Save All</strong> — auto-save triggers on collapse.</span>
+            <span>Click <strong>Save Week</strong> to persist changes for that week.</span>
         </li>
     </ol>
-    <p class="mt-2 text-[12.5px] text-[#71717a]">If the course has both LEC and LAB, use the tab switcher to fill in each component separately.</p>
 </x-layout.accordion>
 
-<x-layout.accordion title="Sidebar Tools" icon="settings" color="slate">
-    <ul class="space-y-2 text-[13.5px] text-[#3f3f46]">
-        <li class="flex gap-2"><i class="bx bx-time text-[#a1a1aa] shrink-0 mt-0.5"></i><span><strong>Schedule</strong> — opens a drawer showing the class schedule for reference.</span></li>
-        <li class="flex gap-2"><i class="bx bx-calendar text-[#a1a1aa] shrink-0 mt-0.5"></i><span><strong>Calendar Info</strong> — shows the academic calendar events (exams, breaks, holidays).</span></li>
-        <li class="flex gap-2"><i class="bx bx-expand-alt text-[#a1a1aa] shrink-0 mt-0.5"></i><span><strong>Expand All / Collapse All</strong> — opens or closes all week accordions at once.</span></li>
-        <li class="flex gap-2"><i class="bx bx-skip-next text-[#d97706] shrink-0 mt-0.5"></i><span><strong>Next Incomplete</strong> — jumps to the first week that still has missing content.</span></li>
-    </ul>
+<x-layout.accordion title="CO Mapping" icon="link" color="purple">
+    <div class="space-y-2 text-[13px] text-[#3f3f46]">
+        <p>Each week can be mapped to multiple COs. This connects your weekly content to the Course Outcomes you defined in Step 3.</p>
+        <p class="mt-1">The CO selector shows all COs for this course. Click to toggle selection — selected COs are highlighted.</p>
+        <p class="mt-1 text-[12px] text-[#71717a]">CO mapping is important for demonstrating coverage of program outcomes in accreditation reports.</p>
+    </div>
 </x-layout.accordion>
 
 <x-layout.accordion title="Common Mistakes" icon="error-circle" color="rose">
-    <ul class="space-y-2 text-[13.5px] text-[#3f3f46]">
-        <li class="flex gap-2"><i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i><span>Forgetting to generate weeks — the step is empty until you click Generate Weeks.</span></li>
-        <li class="flex gap-2"><i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i><span>Regenerating weeks after filling content — all existing content is permanently deleted.</span></li>
-        <li class="flex gap-2"><i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i><span>Leaving weeks with no CO selected — incomplete weeks are flagged with an amber dot and block submission.</span></li>
+    <ul class="space-y-2 text-[13px] text-[#3f3f46]">
+        <li class="flex gap-2"><i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i><span>Not saving each week individually — use the Save Week button at the bottom of each week.</span></li>
+        <li class="flex gap-2"><i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i><span>Leaving topics blank — each week should have a meaningful topic description.</span></li>
+        <li class="flex gap-2"><i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i><span>Not mapping COs to weeks — this is required for PO-PEO alignment analysis.</span></li>
+        <li class="flex gap-2"><i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i><span>Forgetting to add assessment tasks — assessments without weights cannot be evaluated in Step 5.</span></li>
+    </ul>
+</x-layout.accordion>
+
+<x-layout.accordion title="Tips" icon="bulb" color="amber">
+    <ul class="space-y-2 text-[13px] text-[#3f3f46]">
+        <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Save each week as you complete it — don't wait until you've filled all weeks.</span></li>
+        <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Use specific, actionable learning activities that students can realistically complete.</span></li>
+        <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Ensure assessment tasks match what you'll actually grade in Step 5.</span></li>
+        <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Map COs broadly — most weeks should address 2-4 COs for good coverage.</span></li>
+        <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Use the calendar info drawer to verify week dates and special events.</span></li>
     </ul>
 </x-layout.accordion>

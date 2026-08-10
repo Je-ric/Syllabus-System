@@ -1,9 +1,10 @@
-{{-- Help content: Courses --}}
+{{-- Help content: Courses — Updated with latest system organization --}}
 
 <x-layout.accordion title="Overview" icon="info-circle" color="emerald" :open="true">
     <div class="space-y-2 text-[13px] text-[#3f3f46] leading-relaxed">
         <p>Courses are the individual subjects within a program. Each course belongs to a specific year level and semester, carries credit units, and is mapped to Program Outcomes (POs) using IED levels.</p>
-        <p class="mt-1">A course must have at least one PO mapping before a syllabus can be created for it.</p>
+        <p class="mt-1">A course must have at least one PO mapping before a syllabus can be created for it. This ensures alignment between course content and program outcomes.</p>
+        <p class="mt-1">Access course management via <strong>Academic → Courses</strong> in the navigation menu.</p>
     </div>
 </x-layout.accordion>
 
@@ -13,7 +14,7 @@
         <ul class="space-y-1.5 mt-1">
             <li class="flex gap-2">
                 <i class="bx bx-chevron-right text-[#a1a1aa] shrink-0 mt-0.5"></i>
-                <span><strong>Course Code & Title</strong></span>
+                <span><strong>Course Code & Title</strong> — unique identifier and descriptive name</span>
             </li>
             <li class="flex gap-2">
                 <i class="bx bx-chevron-right text-[#a1a1aa] shrink-0 mt-0.5"></i>
@@ -132,7 +133,11 @@
         </li>
         <li class="flex gap-2">
             <i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i>
-            <span>Archive a course instead of deleting it when you want to retire it without losing historical syllabus data.</span>
+            <span>Use the reference panel to review PO definitions while mapping — click <strong>Program Outcomes</strong> to open it.</span>
+        </li>
+        <li class="flex gap-2">
+            <i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i>
+            <span>Archive courses that are no longer offered but may be needed in the future rather than deleting them.</span>
         </li>
     </ul>
 </x-layout.accordion>
@@ -141,36 +146,19 @@
     <ul class="space-y-2 text-[13px] text-[#3f3f46]">
         <li class="flex gap-2">
             <i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i>
-            <span>Deleting a course that has existing syllabi — all syllabus data is permanently lost. Archive instead if unsure.</span>
+            <span>Creating a course without PO mappings — this prevents syllabus creation.</span>
         </li>
         <li class="flex gap-2">
             <i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i>
-            <span>Saving a course with no PO mappings — faculty won't be able to create a syllabus for it until at least one PO is mapped.</span>
+            <span>Using inconsistent course codes — follow your institution's coding standard.</span>
         </li>
         <li class="flex gap-2">
             <i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i>
-            <span>Setting LAB class hours without enabling <strong>Has Laboratory</strong> — the LAB hours field only appears when "Yes" is selected.</span>
+            <span>Deleting a course with existing syllabi — archive instead to preserve the syllabi.</span>
+        </li>
+        <li class="flex gap-2">
+            <i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i>
+            <span>Not setting class hours correctly — this affects the syllabus weekly coverage generation.</span>
         </li>
     </ul>
-</x-layout.accordion>
-
-<x-layout.accordion title="Frequently Asked Questions" icon="question-mark" color="slate">
-    <div class="space-y-3 text-[13px] text-[#3f3f46]">
-        <div>
-            <p class="font-semibold text-[#09090b]">Who can manage courses?</p>
-            <p class="mt-0.5 text-[#52525b]">Admins (all programs) and Chairs (programs within their assigned department only). Only Admins and Chairs can delete courses.</p>
-        </div>
-        <div>
-            <p class="font-semibold text-[#09090b]">Can I change the program a course belongs to?</p>
-            <p class="mt-0.5 text-[#52525b]">No — the program is set when the course is created and cannot be changed. Delete and recreate the course under the correct program if needed.</p>
-        </div>
-        <div>
-            <p class="font-semibold text-[#09090b]">Why can't I see the Add Course button?</p>
-            <p class="mt-0.5 text-[#52525b]">A program must be selected first. Use the college → department → program dropdowns at the top of the page.</p>
-        </div>
-        <div>
-            <p class="font-semibold text-[#09090b]">What happens to syllabi when a course is archived?</p>
-            <p class="mt-0.5 text-[#52525b]">Nothing — syllabi are preserved. Archiving only hides the course from the active listing.</p>
-        </div>
-    </div>
 </x-layout.accordion>

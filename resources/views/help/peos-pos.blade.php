@@ -1,4 +1,4 @@
-{{-- Help content: PEOs & POs (Programs module) --}}
+{{-- Help content: PEOs & POs (Programs module) — Updated with latest system organization --}}
 
 <x-layout.accordion title="Overview" icon="info-circle" color="emerald" :open="true">
     <div class="space-y-2 text-[13.5px] text-[#3f3f46] leading-relaxed">
@@ -14,6 +14,7 @@
             </li>
         </ul>
         <p class="mt-2">Each PO can be mapped to one or more PEOs. The <strong>Matrix View</strong> tab shows the full mapping at a glance.</p>
+        <p class="mt-1">Access this module via <strong>CQI → Programs</strong> in the navigation menu.</p>
     </div>
 </x-layout.accordion>
 
@@ -111,6 +112,10 @@
             <i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i>
             <span>A course must have at least one PO mapping before a syllabus can be created for it.</span>
         </li>
+        <li class="flex gap-2">
+            <i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i>
+            <span>Use the Matrix View to verify that all PEOs have adequate PO coverage before course mapping.</span>
+        </li>
     </ul>
 </x-layout.accordion>
 
@@ -132,6 +137,10 @@
             <i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i>
             <span>Adding a blank row and clicking Save All — you'll be warned to fill it in first.</span>
         </li>
+        <li class="flex gap-2">
+            <i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i>
+            <span>Not mapping POs to PEOs — the matrix view helps ensure adequate coverage.</span>
+        </li>
     </ul>
 </x-layout.accordion>
 
@@ -151,7 +160,11 @@
         </div>
         <div>
             <p class="font-semibold text-[#09090b]">What does the Matrix View show?</p>
-            <p class="mt-0.5 text-[#52525b]">A read-only grid of every PO (rows) against every PEO (columns), with a checkmark where a mapping exists. The footer row shows how many POs map to each PEO.</p>
+            <p class="mt-0.5 text-[#52525b]">A read-only grid of every PO (rows) against every PEO (columns), with a checkmark where a mapping exists. This helps verify coverage balance.</p>
+        </div>
+        <div>
+            <p class="font-semibold text-[#09090b]">How many PEOs and POs should a program have?</p>
+            <p class="mt-0.5 text-[#52525b]">This varies by program and accreditation requirements. Typically 3-5 PEOs and 8-12 POs are common.</p>
         </div>
     </div>
 </x-layout.accordion>

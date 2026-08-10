@@ -1,8 +1,11 @@
-{{-- Help: Step 3 — Course Outcomes --}}
+{{-- Help: Step 3 — Course Outcomes — Updated with latest system changes --}}
 
 <x-layout.accordion title="What This Step Does" icon="info-circle" color="emerald" :open="true">
     <p class="text-[13.5px] text-[#3f3f46] leading-relaxed">
         You define what students will be able to do after completing this course. Each Course Outcome (CO) is a measurable statement. COs are later linked to Program Outcomes (POs) in the weekly coverage step.
+    </p>
+    <p class="text-[13.5px] text-[#3f3f46] leading-relaxed mt-2">
+        COs should be specific, measurable, and aligned with the course's content and assessment methods.
     </p>
 </x-layout.accordion>
 
@@ -38,18 +41,37 @@
 
 <x-layout.accordion title="Reference Panels" icon="book-open" color="blue">
     <div class="space-y-2 text-[13.5px] text-[#3f3f46]">
-        <p>Two reference panels are available in the right sidebar while on this step:</p>
+        <p>Click <strong>View POs</strong> to open a reference panel showing the Program Outcomes for this course. This helps you align COs with POs.</p>
+        <p class="mt-1">COs are linked to POs in Step 4 (Weekly Coverage) — you'll select which POs each CO addresses.</p>
+    </div>
+</x-layout.accordion>
+
+<x-layout.accordion title="Writing Good COs" icon="edit" color="purple">
+    <div class="space-y-2 text-[13px] text-[#3f3f46]">
+        <p>Effective COs should be:</p>
         <ul class="space-y-1.5 mt-1">
-            <li class="flex gap-2"><i class="bx bx-book text-[#16a34a] shrink-0 mt-0.5"></i><span><strong>Course Info</strong> — shows the course code, title, description, units, and class hours.</span></li>
-            <li class="flex gap-2"><i class="bx bx-list-check text-[#2563eb] shrink-0 mt-0.5"></i><span><strong>PO Reference</strong> — shows all Program Outcomes for this course's program, useful when writing COs that align to POs.</span></li>
+            <li class="flex gap-2"><i class="bx bx-check text-[#6b21a8] shrink-0 mt-0.5"></i><span><strong>Measurable</strong> — students can demonstrate achievement</span></li>
+            <li class="flex gap-2"><i class="bx bx-check text-[#6b21a8] shrink-0 mt-0.5"></i><span><strong>Specific</strong> — clear and unambiguous</span></li>
+            <li class="flex gap-2"><i class="bx bx-check text-[#6b21a8] shrink-0 mt-0.5"></i><span><strong>Action-oriented</strong> — start with verbs (Demonstrate, Apply, Analyze, etc.)</span></li>
+            <li class="flex gap-2"><i class="bx bx-check text-[#6b21a8] shrink-0 mt-0.5"></i><span><strong>Aligned</strong> — support course content and assessments</span></li>
         </ul>
     </div>
 </x-layout.accordion>
 
 <x-layout.accordion title="Common Mistakes" icon="error-circle" color="rose">
-    <ul class="space-y-2 text-[13.5px] text-[#3f3f46]">
-        <li class="flex gap-2"><i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i><span>Navigating away before clicking <strong>Save All</strong> — unsaved rows are lost.</span></li>
-        <li class="flex gap-2"><i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i><span>Leaving a blank CO row — you'll be warned to fill it in before adding another or saving.</span></li>
-        <li class="flex gap-2"><i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i><span>At least one saved CO is required before you can submit the syllabus for review.</span></li>
+    <ul class="space-y-2 text-[13px] text-[#3f3f46]">
+        <li class="flex gap-2"><i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i><span>Writing vague COs like "Understand the topic" — use measurable verbs instead.</span></li>
+        <li class="flex gap-2"><i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i><span>Having too many COs — 5-8 is typically sufficient for most courses.</span></li>
+        <li class="flex gap-2"><i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i><span>Not aligning COs with course content — ensure you can actually teach and assess each CO.</span></li>
+        <li class="flex gap-2"><i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i><span>Navigating away without saving — unsaved COs are lost.</span></li>
+    </ul>
+</x-layout.accordion>
+
+<x-layout.accordion title="Tips" icon="bulb" color="amber">
+    <ul class="space-y-2 text-[13px] text-[#3f3f46]">
+        <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Use Bloom's Taxonomy verbs for measurable outcomes (e.g., Define, Explain, Apply, Analyze, Evaluate, Create).</span></li>
+        <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Reference the course's POs when writing COs to ensure alignment.</span></li>
+        <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Each CO should be assessable through your course evaluations.</span></li>
+        <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>You need at least one CO to proceed to the next step.</span></li>
     </ul>
 </x-layout.accordion>

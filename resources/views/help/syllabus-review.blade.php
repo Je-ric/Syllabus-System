@@ -1,8 +1,11 @@
-{{-- Help: Step 6 — Review & Submit --}}
+{{-- Help: Step 6 — Review & Submit — Updated with latest system changes --}}
 
 <x-layout.accordion title="What This Step Does" icon="info-circle" color="emerald" :open="true">
     <p class="text-[13.5px] text-[#3f3f46] leading-relaxed">
         This is the final step. You review the complete syllabus, manage signatories and reviewers, create a saved version snapshot, and submit for review when everything is ready.
+    </p>
+    <p class="text-[13.5px] text-[#3f3f46] leading-relaxed mt-2">
+        Once submitted, the syllabus enters the approval workflow and cannot be edited until returned for revision.
     </p>
 </x-layout.accordion>
 
@@ -10,7 +13,7 @@
     <div class="space-y-2 text-[13.5px] text-[#3f3f46]">
         <p>Two preview links are available:</p>
         <ul class="space-y-1.5 mt-1">
-            <li class="flex gap-2"><i class="bx bx-file text-[#52525b] shrink-0 mt-0.5"></i><span><strong>Abridged</strong> — a condensed view of the syllabus.</span></li>
+            <li class="flex gap-2"><i class="bx bx-file text-[#52525b] shrink-0 mt-0.5"></i><span><strong>Abridged</strong> — a condensed view of the syllabus for quick review.</span></li>
             <li class="flex gap-2"><i class="bx bx-file-blank text-[#52525b] shrink-0 mt-0.5"></i><span><strong>Complete</strong> — the full syllabus as it will appear when submitted.</span></li>
         </ul>
         <p class="mt-1 text-[12.5px] text-[#71717a]">Previews open in a new tab. Use them to check formatting before submitting.</p>
@@ -20,7 +23,8 @@
 <x-layout.accordion title="Signatories & Reviewers" icon="user-check" color="blue">
     <div class="space-y-2 text-[13.5px] text-[#3f3f46]">
         <p>Assign the required signatories (e.g. department chair, dean) and reviewers for this syllabus. These appear on the printed syllabus and in the review workflow.</p>
-        <p class="mt-1 text-[12.5px] text-[#71717a]">Signatories and reviewers must be set before submitting.</p>
+        <p class="mt-1 text-[12.5px] text-[#71717a]">Signatories and reviewers must be set before submitting. Use the dropdowns to select from available users.</p>
+        <p class="mt-1 text-[12.5px] text-[#71717a]">Reviewers can include faculty members who will evaluate the syllabus content for accuracy and completeness.</p>
     </div>
 </x-layout.accordion>
 
@@ -32,6 +36,7 @@
             <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Does <strong>not</strong> submit for review — it only saves a snapshot.</span></li>
             <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Previous versions are listed below and can be downloaded at any time.</span></li>
         </ul>
+        <p class="mt-2 text-[12px] text-[#71717a]">Use this to save progress before submitting, or to maintain a history of revisions.</p>
     </div>
 </x-layout.accordion>
 
@@ -43,6 +48,37 @@
         <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>At least one course outcome saved (Step 3)</span></li>
         <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>At least one week exists (Step 4)</span></li>
         <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Evaluation weights complete and totals correct (Step 5)</span></li>
+        <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Signatories and reviewers assigned</span></li>
     </ul>
     <p class="mt-2 text-[12.5px] text-[#71717a]">Incomplete steps are flagged with an amber dot in the step navigator on the left.</p>
+</x-layout.accordion>
+
+<x-layout.accordion title="After Submission" icon="send" color="purple">
+    <div class="space-y-2 text-[13.5px] text-[#3f3f46]">
+        <p>Once submitted, the syllabus status changes to <strong>Under Review</strong>:</p>
+        <ul class="space-y-1.5 mt-1">
+            <li class="flex gap-2"><i class="bx bx-chevron-right text-[#a1a1aa] shrink-0 mt-0.5"></i><span>The syllabus becomes read-only</span></li>
+            <li class="flex gap-2"><i class="bx bx-chevron-right text-[#a1a1aa] shrink-0 mt-0.5"></i><span>Assigned reviewers are notified</span></li>
+            <li class="flex gap-2"><i class="bx bx-chevron-right text-[#a1a1aa] shrink-0 mt-0.5"></i><span>Track progress via the <strong>Review Queue</strong></span></li>
+            <li class="flex gap-2"><i class="bx bx-chevron-right text-[#a1a1aa] shrink-0 mt-0.5"></i><span>If returned for revision, you can edit and resubmit</span></li>
+        </ul>
+    </div>
+</x-layout.accordion>
+
+<x-layout.accordion title="Common Mistakes" icon="error-circle" color="rose">
+    <ul class="space-y-2 text-[13px] text-[#3f3f46]">
+        <li class="flex gap-2"><i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i><span>Not previewing before submitting — always check the complete preview.</span></li>
+        <li class="flex gap-2"><i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i><span>Forgetting to assign signatories — this blocks submission.</span></li>
+        <li class="flex gap-2"><i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i><span>Submitting with incomplete steps — check the step navigator for amber dots.</span></li>
+        <li class="flex gap-2"><i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i><span>Not creating a version snapshot — save a version before submitting as a backup.</span></li>
+    </ul>
+</x-layout.accordion>
+
+<x-layout.accordion title="Tips" icon="bulb" color="amber">
+    <ul class="space-y-2 text-[13px] text-[#3f3f46]">
+        <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Create a version snapshot before submitting as a backup.</span></li>
+        <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Review the complete preview to ensure formatting is correct.</span></li>
+        <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Assign appropriate reviewers based on course content and expertise.</span></li>
+        <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Use the Review Queue to track approval progress after submission.</span></li>
+    </ul>
 </x-layout.accordion>
