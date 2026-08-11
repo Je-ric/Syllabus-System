@@ -136,6 +136,7 @@ class UserAssignmentsService
         if ($toast = $this->runChecks($user, [
             ['checkTargetHasRoleOrAdmin', ['faculty', 'User must have faculty role assigned.']],
             ['checkAlreadyAssigned', ['faculty', null, $department->id, "User is already faculty of {$department->name}.", 'info']],
+            ['checkFacultyCrossDepartmentConflict'],
         ])) {
             return $toast;
         }
@@ -175,6 +176,7 @@ class UserAssignmentsService
                     if ($toast = $this->runChecks($user, [
                         ['checkTargetHasRoleOrAdmin', ['faculty', 'User must have faculty role assigned.']],
                         ['checkAlreadyAssigned', ['faculty', null, $department->id, '', 'info']],
+                        ['checkFacultyCrossDepartmentConflict'],
                     ])) {
                         $skippedCount++;
                         continue;
@@ -219,10 +221,17 @@ class UserAssignmentsService
         $college = College::findOrFail($collegeId);
         $user = User::findOrFail($userId);
 
+        // Check for dependent data and provide warning
+        $departmentCount = $college->departments()->count();
+        $message = 'Dean assignment removed.';
+        if ($departmentCount > 0) {
+            $message = "Dean assignment removed. Note: {$college->name} has {$departmentCount} department(s) that may need oversight.";
+        }
+
         return $this->runInTransaction(
             fn() => $this->removeAndAudit('dean', $user, $college->id, null, "Removed {$user->name} as dean of {$college->name}.", $college->name),
             'Failed to remove dean assignment. Please try again.',
-            'Dean assignment removed.'
+            $message
         );
     }
 

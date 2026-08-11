@@ -118,6 +118,20 @@ class UniversityStructureController extends Controller
             'bor_approval_no'             => ['nullable', 'string'],
             'bor_approval_date'           => ['nullable', 'date'],
         ]);
+        
+        // Additional validation: if approval number is provided, date should also be provided
+        if (!empty($data['bor_approval_no']) && empty($data['bor_approval_date'])) {
+            return back()->withErrors(['bor_approval_date' => 'BOR approval date is required when BOR approval number is provided.'])->withInput();
+        }
+        
+        // Validate that BOR approval date is not in the future
+        if (!empty($data['bor_approval_date'])) {
+            $approvalDate = \Carbon\Carbon::parse($data['bor_approval_date']);
+            if ($approvalDate->isFuture()) {
+                return back()->withErrors(['bor_approval_date' => 'BOR approval date cannot be in the future.'])->withInput();
+            }
+        }
+        
         try {
             $this->service->storeProgram($data);
         } catch (\Throwable) {
@@ -137,6 +151,20 @@ class UniversityStructureController extends Controller
             'bor_approval_no'             => ['nullable', 'string'],
             'bor_approval_date'           => ['nullable', 'date'],
         ]);
+        
+        // Additional validation: if approval number is provided, date should also be provided
+        if (!empty($data['bor_approval_no']) && empty($data['bor_approval_date'])) {
+            return back()->withErrors(['bor_approval_date' => 'BOR approval date is required when BOR approval number is provided.'])->withInput();
+        }
+        
+        // Validate that BOR approval date is not in the future (only if date is being changed)
+        if (!empty($data['bor_approval_date']) && $data['bor_approval_date'] != $program->bor_approval_date) {
+            $approvalDate = \Carbon\Carbon::parse($data['bor_approval_date']);
+            if ($approvalDate->isFuture()) {
+                return back()->withErrors(['bor_approval_date' => 'BOR approval date cannot be in the future.'])->withInput();
+            }
+        }
+        
         try {
             $error = $this->service->updateProgram($program, $data);
         } catch (\Throwable) {

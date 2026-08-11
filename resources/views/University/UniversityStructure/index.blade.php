@@ -11,28 +11,81 @@
 
     <x-layout.page-header
         icon="bx-buildings"
-        title="Academic Structure Management"
+        title="University Structure Management"
         desc="Manage colleges, departments, and academic programs across the institution">
+        <x-ui.help-trigger />
         <x-ui.button variant="add-button"
                 onclick="document.getElementById('addCollegeModal').showModal()">
             <i class="bx bx-plus text-base leading-none"></i> Add College
         </x-ui.button>
     </x-layout.page-header>
 
+    <x-layout.help-panel module="university-structure" />
+
+    <script>
+        function filterStructure(searchTerm) {
+            const term = searchTerm.toLowerCase();
+            const collegeButtons = document.querySelectorAll('[data-college-search]');
+            const departments = document.querySelectorAll('[data-department-search]');
+            const programs = document.querySelectorAll('[data-program-search]');
+
+            collegeButtons.forEach(button => {
+                const name = button.getAttribute('data-college-search').toLowerCase();
+                if (name.includes(term)) {
+                    button.style.display = '';
+                } else {
+                    button.style.display = 'none';
+                }
+            });
+
+            departments.forEach(dept => {
+                const name = dept.getAttribute('data-department-search').toLowerCase();
+                if (name.includes(term)) {
+                    dept.style.display = '';
+                } else {
+                    dept.style.display = 'none';
+                }
+            });
+
+            programs.forEach(program => {
+                const name = program.getAttribute('data-program-search').toLowerCase();
+                if (name.includes(term)) {
+                    program.style.display = '';
+                } else {
+                    program.style.display = 'none';
+                }
+            });
+        }
+    </script>
+
     @if($colleges->count())
 
-    <div x-data="{ selectedCollege: {{ $colleges->first()->id }} }">
+    <div x-data="{ selectedCollege: {{ $colleges->first()->id }}, searchTerm: '' }">
 
         <x-layout.panel>
+            {{-- Search bar --}}
+            <div class="mb-4">
+                <div class="relative">
+                    <input
+                        type="text"
+                        x-model="searchTerm"
+                        @input="filterStructure(searchTerm)"
+                        placeholder="Search colleges, departments, or programs..."
+                        class="w-full pl-10 pr-4 py-2.5 text-sm border border-[#e2e8f0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00c075] focus:border-transparent"
+                    >
+                    <i class="bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                </div>
+            </div>
+
             <div class="grid grid-cols-12 gap-5">
 
                 {{-- ── LEFT: College list ──────────────────────────────────────── --}}
                 <div class="col-span-4">
-                    <div class="rounded-[12px] border border-[#E3E8EB] bg-white overflow-hidden"
+                    <div class="rounded-[12px] border border-[#E3E8EB] bg-white overflow-visible"
                          style="box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06);">
 
                         {{-- Header --}}
-                        <div class="flex items-center justify-between gap-2 px-4 py-3 border-b border-[#E3E8EB] bg-[#F1F3F5]">
+                        <div class="flex items-center justify-between gap-2 px-4 py-3 border-b border-[#E3E8EB] bg-[#F1F3F5] rounded-t-[12px]">
                             <div class="flex items-center gap-2">
                                 <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-[#D5FFF0] text-[#06754E]">
                                     <i class="bx bxs-school text-sm leading-none"></i>
@@ -57,7 +110,8 @@
                                     class="w-full text-left px-4 py-3 transition-colors duration-150 border-l-[3px]"
                                     :class="selectedCollege === {{ $college->id }}
                                         ? 'bg-[#EDFFF8] border-l-[#00C075]'
-                                        : 'bg-white border-l-transparent hover:bg-[#F9FAFA]'">
+                                        : 'bg-white border-l-transparent hover:bg-[#F9FAFA]'"
+                                    data-college-search="{{ $college->name }}">
 
                                     <div class="flex items-center justify-between gap-2">
                                         <div class="flex items-center gap-2.5 min-w-0">
@@ -124,7 +178,8 @@
                                     @forelse($departments->where('college_id', $college->id) as $dept)
 
                                         <div class="rounded-[12px] border border-[#E3E8EB] bg-white overflow-visible"
-                                             style="box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06);">
+                                             style="box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06);"
+                                             data-department-search="{{ $dept->name }}">
 
                                             {{-- Department header --}}
                                             <div class="flex items-center justify-between px-4 py-3 bg-[#F9FAFA] border-b border-[#E3E8EB] rounded-t-[12px]">
@@ -171,7 +226,8 @@
                                                         $role = $program->pivot->role;
                                                         $otherDepts = $program->departments->where('id', '!=', $dept->id);
                                                     @endphp
-                                                    <div class="flex items-center justify-between px-4 py-2.5 hover:bg-[#F9FAFA] transition-colors duration-150">
+                                                    <div class="flex items-center justify-between px-4 py-2.5 hover:bg-[#F9FAFA] transition-colors duration-150"
+                                                         data-program-search="{{ $program->name }}">
                                                         <div class="flex items-center gap-2.5 min-w-0">
                                                             <span class="w-6 h-6 rounded-[7px] flex items-center justify-center shrink-0
                                                                 {{ $role === 'primary' ? 'bg-[#D5FFF0]' : 'bg-[#FFF3CD]' }}">
@@ -182,13 +238,25 @@
                                                                 <div class="flex items-center gap-1.5 flex-wrap">
                                                                     <p class="text-[13px] font-medium text-[#394056] truncate">{{ $program->name }}</p>
                                                                     @if($role === 'primary')
-                                                                        <span class="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#D5FFF0] text-[#06754E] border border-[#00965F]">
-                                                                            Primary
-                                                                        </span>
+                                                                        <div class="group relative shrink-0">
+                                                                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#D5FFF0] text-[#06754E] border border-[#00965F] cursor-help">
+                                                                                Primary
+                                                                            </span>
+                                            <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 p-2 bg-slate-800 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+                                                <p class="font-semibold mb-1">Primary Department</p>
+                                                <p class="text-slate-300">Main department responsible for program administration and curriculum.</p>
+                                            </div>
+                                        </div>
                                                                     @else
-                                                                        <span class="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#FFF3CD] text-[#856404] border border-[#FFC107]">
-                                                                            Supporting
-                                                                        </span>
+                                                                        <div class="group relative shrink-0">
+                                                                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#FFF3CD] text-[#856404] border border-[#FFC107] cursor-help">
+                                                                                Supporting
+                                                                            </span>
+                                            <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 p-2 bg-slate-800 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+                                                <p class="font-semibold mb-1">Supporting Department</p>
+                                                <p class="text-slate-300">Collaborates on program but does not administer it. Provides interdisciplinary support.</p>
+                                            </div>
+                                        </div>
                                                                     @endif
                                                                 </div>
                                                                 <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">

@@ -160,6 +160,20 @@ class UserAssignmentsChecker
         return null;
     }
 
+    public function checkFacultyCrossDepartmentConflict(User $target): ?array
+    {
+        // Check if user is faculty in too many departments (limit to 5 for practical management)
+        $facultyCount = $target->assignments()->where('context', 'faculty')->count();
+        if ($facultyCount >= 5) {
+            return [
+                'message' => 'User is already assigned to 5 departments. Limit faculty assignments to ensure effective management.',
+                'type' => 'warning',
+            ];
+        }
+
+        return null;
+    }
+
     public function getPotentialUsers(array $roles, ?string $excludeContext = null)
     {
         $query = User::whereHas('roles', function ($query) use ($roles) {
