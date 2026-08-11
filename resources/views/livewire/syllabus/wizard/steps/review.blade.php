@@ -10,10 +10,10 @@
         @include('livewire.syllabus.wizard.steps.partials.review.previews')
 
         {{-- ── F.003 Review Form (author panel) ─────────────────────────── --}}
-        @include('livewire.syllabus.wizard.steps.partials.review.review-form', [
+        {{-- @include('livewire.syllabus.wizard.steps.partials.review.review-form', [
             'syllabus'   => $this->syllabus,
             'reviewForm' => $reviewForm,
-        ])
+        ]) --}}
 
         {{-- ── Review & Approval ─────────────────────────────────────────── --}}
         @include('livewire.syllabus.wizard.steps.partials.review.reviewers')
