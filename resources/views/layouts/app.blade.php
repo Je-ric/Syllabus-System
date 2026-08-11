@@ -46,7 +46,14 @@
     @include('layouts.partials.session-expired-modal')
 
     @livewireScripts
-    <script src="https://cdn.jsdelivr.net/gh/livewire/sortable@v1.x.x/dist/livewire-sortable.js"></script>
+    <script>
+    // Only load Livewire Sortable if Livewire is available
+    if (typeof window.Livewire !== 'undefined') {
+        var script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/gh/livewire/sortable@v1.x.x/dist/livewire-sortable.js';
+        document.head.appendChild(script);
+    }
+</script>
     @stack('scripts')
 
     {{-- Sidebar toggle --}}
