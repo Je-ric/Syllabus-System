@@ -9,7 +9,7 @@
         <x-feedback-status.empty-state
             icon="bx-calendar-event"
             title="No assessment tasks yet"
-            message="Fill in assessment tasks in the Weekly Coverage step first. Exam weeks are auto-detected from calendar events." />
+            message="Fill in assessment tasks in the Weekly Coverage step first. Exam weeks are auto-detected from calendar events and will appear even without assessment tasks." />
     @else
 
     {{-- Alpine owns the live totals. wire:model.blur syncs to Livewire on blur (for saving).

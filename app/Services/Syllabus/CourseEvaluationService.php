@@ -98,15 +98,27 @@ class CourseEvaluationService
             $lecTask = trim(strip_tags((string) ($lecContent?->assessment_task ?? '')));
             $labTask = trim(strip_tags((string) ($labContent?->assessment_task ?? '')));
 
-            if ($lecTask === '' && $labTask === '') {
-                continue;
-            }
+            // Skip non-teaching weeks
             if ($lecTask === 'Non-Teaching Week' || $labTask === 'Non-Teaching Week') {
                 continue;
             }
 
-            $isExam = str_contains(strtolower($lecTask), 'exam')
+            // Determine if this is an exam week
+            // Priority: 1) is_exam_week flag, 2) assessment task contains "exam"
+            $isExam = (bool) $week->is_exam_week
+                   || str_contains(strtolower($lecTask), 'exam')
                    || str_contains(strtolower($labTask), 'exam');
+
+            // For exam weeks, include even without assessment tasks
+            // For non-exam weeks, require at least one assessment task
+            if (! $isExam && $lecTask === '' && $labTask === '') {
+                continue;
+            }
+
+            // Provide default task label for exam weeks without assessment tasks
+            if ($isExam && $lecTask === '' && $labTask === '') {
+                $lecTask = 'Exam';
+            }
 
             $termLabel = null;
             if ($isExam) {
@@ -124,12 +136,13 @@ class CourseEvaluationService
 
             // LEC side
             $lecRow = null;
-            if ($lecTask !== '') {
+            // For exam weeks, include LEC row even if task is empty (as long as WeekContent exists)
+            if ($lecContent && ($lecTask !== '' || $isExam)) {
                 $lecEval = $evalMap->get($lecContent->id);
                 $lecRow  = [
                     'week_content_id' => $lecContent->id,
                     'co_code'         => $lecContent->courseOutcome?->co_code,
-                    'task_label'      => $lecTask,
+                    'task_label'      => $lecTask !== '' ? $lecTask : 'Exam',
                 ];
                 $inputs[$lecContent->id] = [
                     'weight'        => $lecEval?->weight !== null ? (string) $lecEval->weight : '',
@@ -140,12 +153,13 @@ class CourseEvaluationService
 
             // LAB side
             $labRow = null;
-            if ($courseHasLab && $labTask !== '') {
+            // For exam weeks, include LAB row even if task is empty (as long as WeekContent exists)
+            if ($courseHasLab && $labContent && ($labTask !== '' || $isExam)) {
                 $labEval = $evalMap->get($labContent->id);
                 $labRow  = [
                     'week_content_id' => $labContent->id,
                     'co_code'         => $labContent->courseOutcome?->co_code,
-                    'task_label'      => $labTask,
+                    'task_label'      => $labTask !== '' ? $labTask : 'Exam',
                 ];
                 $inputs[$labContent->id] = [
                     'weight'        => $labEval?->weight !== null ? (string) $labEval->weight : '',

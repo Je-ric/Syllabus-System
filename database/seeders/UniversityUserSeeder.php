@@ -34,6 +34,8 @@ class UniversityUserSeeder extends Seeder
             ['name' => 'Alyssa Domingo',       'email' => 'alyssa.domingo@clsu.edu.ph',       'role' => 'faculty'],
         ];
 
+        $facultyRole = Role::where('name', 'faculty')->first();
+
         foreach ($users as $data) {
             $user = User::firstOrCreate(
                 ['email' => $data['email']],
@@ -50,8 +52,13 @@ class UniversityUserSeeder extends Seeder
             if ($role && ! $user->roles()->where('roles.id', $role->id)->exists()) {
                 $user->roles()->attach($role);
             }
+
+            // Ensure every user also has the faculty role
+            if ($facultyRole && ! $user->roles()->where('roles.id', $facultyRole->id)->exists()) {
+                $user->roles()->attach($facultyRole);
+            }
         }
 
-        $this->command->info('20 university users seeded successfully.');
+        $this->command->info('20 university users seeded successfully (all with faculty role).');
     }
 }

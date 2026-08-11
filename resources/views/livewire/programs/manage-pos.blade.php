@@ -1,5 +1,6 @@
 {{-- manage-pos.blade.php --}}
-<div x-data="{ peoDrawer: false, ...posManager(@js($pos), @js($peos), @js($mapping)) }" class="space-y-4">
+<div x-data="{ peoDrawer: false, ...posManager(@js($pos), @js($peos), @js($mapping)) }" class="space-y-4"
+    @open-peo-drawer.window="peoDrawer = true">
 
     @include('livewire.programs.partials.confirm-modal', ['confirmNs' => 'po'])
     @include('livewire.programs.include.flash-message')
@@ -151,7 +152,7 @@
                             </template>
                         </div>
                         <template x-if="po.id && peos.length > 0">
-                            <button type="button" @click="peoDrawer = true"
+                            <button type="button" @click="$dispatch('open-peo-drawer')"
                                 class="inline-flex items-center gap-1 text-[11px] text-emerald-600 font-semibold cursor-pointer hover:text-emerald-700 hover:underline">
                                 <i class="bx bx-book-open text-sm"></i> View PEOs
                             </button>

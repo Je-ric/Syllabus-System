@@ -37,14 +37,14 @@
                     <x-ui.nav-link href="{{ route('syllabus.index') }}" icon="bxs-notepad" :active="request()->routeIs('syllabus.index')">
                         Syllabi
                     </x-ui.nav-link>
-                    @if ($user->hasRole('admin') || $user->hasRole('faculty'))
+                    <!-- @if ($user->hasRole('admin') || $user->hasRole('faculty'))
                         <x-ui.nav-link href="{{ route('workload.index') }}" icon="bx-briefcase" :active="request()->routeIs('workload.*')">
                             My Workload
                         </x-ui.nav-link>
                         <x-ui.nav-link href="{{ route('syllabus.review-queue.index') }}" icon="bx-revision" :active="request()->routeIs('syllabus.review-queue.*')">
                             CQI Review Queue
                         </x-ui.nav-link>
-                    @endif
+                    @endif -->
                 </nav>
             @endif
 

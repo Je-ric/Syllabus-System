@@ -15,6 +15,6 @@
     </x-feedback-status.alert>
 @else
     <x-feedback-status.alert type="warning" title="No active semester"
-        message="No academic calendar is marked as active. Set one under Academic Calendars."
+        message="No academic calendar is marked as active. Wait for the Office of the Vice President of Academic Affairs."
         class="mb-4" />
 @endif

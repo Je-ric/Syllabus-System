@@ -14,6 +14,8 @@ return new class extends Migration
             $table->enum('semester', ['1st', '2nd']);
             $table->date('start_date');
             $table->date('end_date');
+            $table->unsignedBigInteger('cais_semester_id')->nullable()->index();
+            $table->boolean('is_active')->default(false);
             $table->timestamps();
         });
     }

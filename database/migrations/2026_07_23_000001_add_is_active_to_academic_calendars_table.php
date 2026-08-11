@@ -8,15 +8,19 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('academic_calendars', function (Blueprint $table) {
-            $table->boolean('is_active')->default(false)->after('cais_semester_id');
-        });
+        if (!Schema::hasColumn('academic_calendars', 'is_active')) {
+            Schema::table('academic_calendars', function (Blueprint $table) {
+                $table->boolean('is_active')->default(false)->after('cais_semester_id');
+            });
+        }
     }
 
     public function down(): void
     {
-        Schema::table('academic_calendars', function (Blueprint $table) {
-            $table->dropColumn('is_active');
-        });
+        if (Schema::hasColumn('academic_calendars', 'is_active')) {
+            Schema::table('academic_calendars', function (Blueprint $table) {
+                $table->dropColumn('is_active');
+            });
+        }
     }
 };
