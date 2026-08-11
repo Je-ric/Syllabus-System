@@ -5,6 +5,8 @@
     <style>
         [x-cloak] { display: none !important; }
     </style>
+
+    <link rel="stylesheet" href="{{ asset('css/auth.css') }}">
 </head>
 <body
     class="relative min-h-screen bg-cover bg-center bg-no-repeat"
