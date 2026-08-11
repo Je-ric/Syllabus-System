@@ -46,6 +46,7 @@
     @include('layouts.partials.session-expired-modal')
 
     @livewireScripts
+    <script src="https://cdn.jsdelivr.net/gh/livewire/livewire@3.x.x/dist/livewire.js"></script>
     @stack('scripts')
 
     {{-- Sidebar toggle --}}
