@@ -20,6 +20,18 @@ class AuthController extends Controller
         return view('Authentication.auth');
     }
 
+    // Show login page
+    public function showLogin()
+    {
+        return view('Authentication.Auth.login');
+    }
+
+    // Show register page
+    public function showRegister()
+    {
+        return view('Authentication.Auth.register');
+    }
+
     // Registration
     public function register(Request $request)
     {
@@ -114,7 +126,7 @@ class AuthController extends Controller
         $user = User::where('email', $email)->first();
 
         if (! $user || ! Hash::check($password, $user->password)) {
-            return redirect()->route('auth.show')
+            return redirect()->route('auth.login')
                 ->with('toast', ['message' => 'Invalid email or password.', 'type' => 'error'])
                 ->withInput($request->only('email'));
         }
@@ -128,7 +140,7 @@ class AuthController extends Controller
             $msg = $user->account_status === 'rejected'
                 ? 'Your account registration was rejected.'
                 : 'Your account has been disabled by an administrator.';
-            return redirect()->route('auth.show')
+            return redirect()->route('auth.login')
                 ->with('toast', ['message' => $msg, 'type' => 'error'])
                 ->withInput($request->only('email'));
         }
@@ -167,6 +179,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('auth.show');
+        return redirect()->route('auth.login');
     }
 }

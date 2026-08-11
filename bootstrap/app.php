@@ -32,7 +32,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => RoleMiddleware::class,
         ]);
 
-        $middleware->redirectGuestsTo(fn() => route('auth.show'));
+        $middleware->redirectGuestsTo(fn() => route('auth.login'));
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

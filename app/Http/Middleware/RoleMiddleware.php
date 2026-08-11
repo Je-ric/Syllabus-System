@@ -14,7 +14,7 @@ class RoleMiddleware
         $user = Auth::user();
 
         if (!$user) {
-            return redirect()->route('auth.show');
+            return redirect()->route('auth.login');
         }
 
         if (!$user->roles()->whereIn('name', $roles)->exists()) {

@@ -29,7 +29,11 @@ Route::get('/', function () {
 })->name('home');
 
 
-Route::get('/auth', [AuthController::class, 'show'])->name('auth.show');
+Route::get('/auth/login', [AuthController::class, 'showLogin'])->name('auth.login');
+Route::get('/auth/register', [AuthController::class, 'showRegister'])->name('auth.register');
+Route::get('/auth', function () {
+    return redirect()->route('auth.login');
+})->name('auth.show');
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

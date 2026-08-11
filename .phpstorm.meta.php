@@ -2535,7 +2535,7 @@ namespace PHPSTORM_META {
         registerArgumentsSet('routes', 
 'default-livewire.update','livewire.upload-file',
 'livewire.preview-file',
-'home','auth.show','login','register','logout',
+'home','auth.login','auth.register','auth.show','login','register','logout',
 'waiting.approval','dashboard','profile.index','profile.update','profile.password.change',
 'profile.password.verify-otp','profile.password.resend-otp','profile.consultation.store','profile.consultation.destroy','accounts.approval',
 'account-approval.approve','account-approval.reject','account-approval.restore','account-approval.disable','account-approval.assign-role',

@@ -56,7 +56,7 @@
                     @endforeach
                 </div>
 
-                <a href="{{ route('auth.show') }}"
+                <a href="{{ route('auth.login') }}"
                    class="block w-full text-center auth-secondary text-white py-2.5 rounded-xl font-semibold shadow-sm transition">
                     <span class="inline-flex items-center justify-center gap-2">
                         <i class="bx bx-arrow-back text-lg leading-none"></i>

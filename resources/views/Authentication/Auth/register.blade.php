@@ -2,22 +2,15 @@
 <html lang="en">
 <head>
     @include('includes.head-assets')
-    <style>
-        [x-cloak] { display: none !important; }
-    </style>
-
-    {{-- <link rel="stylesheet" href="{{ asset('css/auth.css') }}"> --}}
 </head>
 <body
     class="relative min-h-screen bg-cover bg-center bg-no-repeat"
-    {{-- style="background-image: url('{{ asset('assets/CLSU-Siever-1.jpeg') }}');" --}}
 >
 @if (session('toast'))
     <x-feedback-status.toast :message="session('toast')['message']" :type="session('toast')['type']" />
 @endif
 <div
     class="relative flex justify-center items-center min-h-screen px-4 py-8 overflow-hidden"
-    x-data="{ mode: '{{ old('_mode', 'login') }}' }"
 >
 
     <div class="w-full max-w-5xl
@@ -35,58 +28,8 @@
             @include('includes.error-lists')
             @include('includes.session-success')
 
-            {{-- ════ LOGIN ════ --}}
-            <div x-show="mode === 'login'" x-transition.opacity>
-
-                <div class="mb-7">
-                    <p class="text-[11px] uppercase tracking-[0.3em] text-slate-400 mb-1">Account Access</p>
-                    <h2 class="text-2xl font-bold text-slate-800">Welcome back</h2>
-                    <p class="text-sm text-slate-500 mt-1">Sign in to your CSMS account to continue.</p>
-                </div>
-
-                <form method="POST" action="{{ route('login') }}" class="space-y-4">
-                    @csrf
-                    <input type="hidden" name="_mode" value="login">
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Email Address</label>
-                        <input type="email" name="email"
-                               value="{{ old('email') }}"
-                               placeholder="you@clsu.edu.ph"
-                               class="auth-input" required autofocus>
-                    </div>
-
-                    <div x-data="{ show: false }">
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Password</label>
-                        <div class="relative">
-                            <input :type="show ? 'text' : 'password'" name="password"
-                                   placeholder="Enter your password"
-                                   class="auth-input pr-11" required>
-                            <button type="button"
-                                    @click="show = !show"
-                                    class="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-600 transition-colors">
-                                <i :class="show ? 'bx bx-hide' : 'bx bx-show'" class="text-lg leading-none"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="w-full auth-secondary text-white py-2.5 rounded-xl font-semibold shadow-sm transition">
-                        Sign In
-                    </button>
-                </form>
-
-                <div class="mt-5 text-sm text-slate-500">
-                    <p>
-                        Don't have an account?
-                        <button type="button" class="text-emerald-700 font-semibold hover:underline" @click="mode = 'register'">
-                            Create one
-                        </button>
-                    </p>
-                </div>
-            </div>
-
             {{-- ════ REGISTER ════ --}}
-            <div x-show="mode === 'register'" x-transition.opacity>
+            <div>
 
                 <div class="mb-6">
                     <p class="text-[11px] uppercase tracking-[0.3em] text-slate-400 mb-1">New Account</p>
@@ -127,28 +70,28 @@
                         <p class="text-[11px] text-slate-400 mt-1">Must be a valid @clsu.edu.ph or @clsu2.edu.ph address.</p>
                     </div>
 
-                    <div x-data="{ show: false }">
+                    <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1.5">Password</label>
                         <div class="relative">
-                            <input :type="show ? 'text' : 'password'" name="password"
+                            <input type="password" name="password" id="register-password"
                                    placeholder="Minimum 8 characters"
                                    class="auth-input pr-11" required>
-                            <button type="button" @click="show = !show"
+                            <button type="button" onclick="togglePassword('register-password', this)"
                                     class="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-600 transition-colors">
-                                <i :class="show ? 'bx bx-hide' : 'bx bx-show'" class="text-lg leading-none"></i>
+                                <i class="bx bx-show text-lg leading-none"></i>
                             </button>
                         </div>
                     </div>
 
-                    <div x-data="{ show: false }">
+                    <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1.5">Confirm Password</label>
                         <div class="relative">
-                            <input :type="show ? 'text' : 'password'" name="password_confirmation"
+                            <input type="password" name="password_confirmation" id="register-password-confirm"
                                    placeholder="Re-enter your password"
                                    class="auth-input pr-11" required>
-                            <button type="button" @click="show = !show"
+                            <button type="button" onclick="togglePassword('register-password-confirm', this)"
                                     class="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-600 transition-colors">
-                                <i :class="show ? 'bx bx-hide' : 'bx bx-show'" class="text-lg leading-none"></i>
+                                <i class="bx bx-show text-lg leading-none"></i>
                             </button>
                         </div>
                     </div>
@@ -160,9 +103,9 @@
 
                 <p class="text-sm text-slate-500 mt-4">
                     Already have an account?
-                    <button type="button" class="text-emerald-700 font-semibold hover:underline" @click="mode = 'login'">
+                    <a href="{{ route('auth.login') }}" class="text-emerald-700 font-semibold hover:underline">
                         Sign in
-                    </button>
+                    </a>
                 </p>
             </div>
         </div>
@@ -196,22 +139,19 @@
                     </div>
                     @endforeach
                 </div>
-
-                {{-- RBAC note --}}
-                {{-- <div class="rounded-xl bg-white/10 border border-white/20 px-4 py-3">
-                    <p class="text-xs font-semibold text-white mb-1.5 flex items-center gap-1.5">
-                        <i class="bx bx-shield-quarter text-sm"></i> Role-Based Access
-                    </p>
-                    <p class="text-[11px] text-emerald-100/80 leading-relaxed">
-                        All accounts start as <strong class="text-white">Faculty</strong> after approval. Admins may additionally assign <strong class="text-white">Chair</strong>, <strong class="text-white">Dean</strong>, or <strong class="text-white">Admin</strong> roles. A user cannot hold Chair and Dean simultaneously.
-                    </p>
-                </div> --}}
             </div>
         </div>
 
     </div>
 </div>
-</div>
-@livewireScripts
+
+<script>
+function togglePassword(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon = btn.querySelector('i');
+    input.type = input.type === 'password' ? 'text' : 'password';
+    icon.className = input.type === 'password' ? 'bx bx-show text-lg leading-none' : 'bx bx-hide text-lg leading-none';
+}
+</script>
 </body>
 </html>

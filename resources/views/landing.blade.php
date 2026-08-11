@@ -184,7 +184,7 @@
                 <a href="#access" class="tab-link hover:text-ink">Access &amp; security</a>
             </div>
 
-            <a href="{{ route('auth.show') }}"
+            <a href="{{ route('auth.login') }}"
                class="btn-flat inline-flex items-center gap-2 font-semibold text-sm px-5 py-2.5">
                 Sign in
                 <i class="bx bx-right-arrow-alt text-base" aria-hidden="true"></i>
@@ -208,7 +208,7 @@
                 </p>
 
                 <div class="flex flex-wrap items-center gap-4">
-                    <a href="{{ route('auth.show') }}"
+                    <a href="{{ route('auth.login') }}"
                        class="btn-flat inline-flex items-center gap-2 font-semibold px-6 py-3.5 text-base">
                         Sign in to CSMS
                     </a>
@@ -338,7 +338,7 @@
             <p class="text-paper/70 mb-9 leading-relaxed max-w-md mx-auto">
                 New to CSMS? Registration is on the same page — just sign up and wait for admin approval.
             </p>
-            <a href="{{ route('auth.show') }}"
+            <a href="{{ route('auth.login') }}"
                class="inline-flex items-center gap-2 bg-gold text-ink font-semibold px-8 py-4 text-base rounded-[var(--radius-sm)] shadow-lg hover:bg-paper transition-colors">
                 Go to sign-in
                 <i class="bx bx-right-arrow-alt text-xl" aria-hidden="true"></i>
@@ -361,7 +361,7 @@
                     <a href="#workflow" class="tab-link hover:text-paper">How it works</a>
                     <a href="#roles" class="tab-link hover:text-paper">Who it's for</a>
                     <a href="#access" class="tab-link hover:text-paper">Access &amp; security</a>
-                    <a href="{{ route('auth.show') }}" class="tab-link hover:text-paper">Sign in</a>
+                    <a href="{{ route('auth.login') }}" class="tab-link hover:text-paper">Sign in</a>
                 </nav>
             </div>
             <div class="pt-6 border-t border-paper/10 flex flex-col sm:flex-row justify-between gap-2 text-xs text-paper/40">

@@ -97,7 +97,7 @@
 
         @guest
             <nav aria-label="Account">
-                <x-ui.nav-link href="{{ route('auth.show') }}" icon="bxs-log-in-circle">
+                <x-ui.nav-link href="{{ route('auth.login') }}" icon="bxs-log-in-circle">
                     Login / Register
                 </x-ui.nav-link>
             </nav>
