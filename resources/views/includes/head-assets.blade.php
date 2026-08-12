@@ -20,15 +20,4 @@
 {{-- <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script> --}}
 {{-- Alpine Core --}}
 {{-- <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script> --}}
-<style>
-    [x-cloak] { display: none !important; }
-</style>
-<script>
-    // Simple timeout to remove x-cloak after page load
-    setTimeout(() => {
-        document.querySelectorAll('[x-cloak]').forEach(el => {
-            el.removeAttribute('x-cloak');
-        });
-    }, 100);
-</script>
 @vite(['resources/css/app.css', 'resources/js/app.js'])
