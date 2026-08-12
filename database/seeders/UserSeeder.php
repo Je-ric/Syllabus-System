@@ -60,6 +60,14 @@ class UserSeeder extends Seeder
             if ($role && !$user->roles()->where('name', $role->name)->exists()) {
                 $user->roles()->attach($role);
             }
+
+            // Add faculty role to all users except admin
+            if ($data['role'] !== 'admin') {
+                $facultyRole = Role::where('name', 'faculty')->first();
+                if ($facultyRole && !$user->roles()->where('name', 'faculty')->exists()) {
+                    $user->roles()->attach($facultyRole);
+                }
+            }
         }
 
         $this->command->info('Default users seeded successfully.');
