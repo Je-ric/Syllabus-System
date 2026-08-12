@@ -2,6 +2,11 @@
 <html lang="en">
 <head>
     @include('includes.head-assets')
+    <style>
+    [x-cloak] {
+        display: none !important;
+    }
+    </style>
 </head>
 
 <body class="min-h-screen">
