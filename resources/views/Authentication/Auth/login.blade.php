@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
     @include('includes.head-assets')
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
 </head>
 <body
     class="relative min-h-screen bg-cover bg-center bg-no-repeat"
@@ -9,6 +12,8 @@
 @if (session('toast'))
     <x-feedback-status.toast :message="session('toast')['message']" :type="session('toast')['type']" />
 @endif
+<x-feedback-status.toast />
+@livewireScripts
 <div
     class="relative flex justify-center items-center min-h-screen px-4 py-8 overflow-hidden"
 >
@@ -25,8 +30,29 @@
         {{-- ── Left: Forms ── --}}
         <div class="p-8 md:p-10 flex flex-col justify-center bg-white">
 
-            @include('includes.error-lists')
             @include('includes.session-success')
+
+            @error('email')
+                <div class="mb-3 p-3 rounded-lg bg-rose-50 border border-rose-200">
+                    <p class="text-[13px] text-rose-600 flex items-center gap-1">
+                        <i class="bx bx-error-circle"></i> {{ $message }}
+                    </p>
+                </div>
+            @enderror
+            @error('password')
+                <div class="mb-3 p-3 rounded-lg bg-rose-50 border border-rose-200">
+                    <p class="text-[13px] text-rose-600 flex items-center gap-1">
+                        <i class="bx bx-error-circle"></i> {{ $message }}
+                    </p>
+                </div>
+            @enderror
+            @error('login')
+                <div class="mb-3 p-3 rounded-lg bg-rose-50 border border-rose-200">
+                    <p class="text-[13px] text-rose-600 flex items-center gap-1">
+                        <i class="bx bx-error-circle"></i> {{ $message }}
+                    </p>
+                </div>
+            @enderror
 
             {{-- ════ LOGIN ════ --}}
             <div>

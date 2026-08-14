@@ -127,6 +127,7 @@ class AuthController extends Controller
 
         if (! $user || ! Hash::check($password, $user->password)) {
             return redirect()->route('auth.login')
+                ->withErrors(['login' => 'Invalid email or password.'])
                 ->with('toast', ['message' => 'Invalid email or password.', 'type' => 'error'])
                 ->withInput($request->only('email'));
         }
@@ -141,6 +142,7 @@ class AuthController extends Controller
                 ? 'Your account registration was rejected.'
                 : 'Your account has been disabled by an administrator.';
             return redirect()->route('auth.login')
+                ->withErrors(['login' => $msg])
                 ->with('toast', ['message' => $msg, 'type' => 'error'])
                 ->withInput($request->only('email'));
         }
