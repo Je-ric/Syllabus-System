@@ -120,6 +120,7 @@ class AcademicCalendarEventForm extends Component
         unset($this->semester); // bust the computed cache so render() re-fetches
         $this->dispatch('event-saved');
         $this->dispatch('lw-toast', type: 'success', message: "{$inserted} event(s) added.");
+        $this->dispatch('reload-page');
     }
 
     /**
@@ -204,6 +205,7 @@ class AcademicCalendarEventForm extends Component
             unset($this->semester); // bust the computed cache so render() re-fetches
             $this->dispatch('event-saved');
             $this->dispatch('lw-toast', type: 'success', message: 'Event updated successfully.');
+            $this->dispatch('reload-page');
         } else {
             $event = $semester->events()->create($validated);
 
@@ -217,6 +219,7 @@ class AcademicCalendarEventForm extends Component
             unset($this->semester); // bust the computed cache so render() re-fetches
             $this->dispatch('event-saved');
             $this->dispatch('lw-toast', type: 'success', message: 'Event added successfully.');
+            $this->dispatch('reload-page');
         }
     }
 
@@ -304,5 +307,6 @@ class AcademicCalendarEventForm extends Component
         unset($this->semester); // bust the computed cache so render() re-fetches
         $this->dispatch('event-deleted');
         $this->dispatch('lw-toast', type: 'success', message: 'Event deleted.');
+        $this->dispatch('reload-page');
     }
 }

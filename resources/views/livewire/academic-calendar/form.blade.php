@@ -45,13 +45,18 @@
     {{-- ── Academic Year ───────────────────────────────────────────────────── --}}
     <div class="mb-5 rounded-xl border border-[#e2e8f0] bg-white p-5" style="box-shadow: 0 2px 16px rgba(0,0,0,.07);">
         <x-form.label for="academic_year" isRequired>Academic Year</x-form.label>
-        <p class="text-[13px] text-[#94a3b8] mb-2">Format: YYYY-YYYY &nbsp;&middot;&nbsp; e.g. 2025-2026</p>
+        <p class="text-[13px] text-[#94a3b8] mb-2">Select the academic year &nbsp;&middot;&nbsp; Format: YYYY-YYYY</p>
 
-        <x-form.input
+        <select
             wire:model.blur="academic_year"
             id="academic_year"
-            placeholder="e.g. 2025-2026"
-            class="max-w-xs" />
+            class="w-full max-w-xs rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-sm text-[#0f172a] focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent transition">
+            <option value="">-- Select Academic Year --</option>
+            <option value="2026-2027">2026-2027</option>
+            <option value="2027-2028">2027-2028</option>
+            <option value="2028-2029">2028-2029</option>
+            <option value="2029-2030">2029-2030</option>
+        </select>
 
         @error('academic_year')
             <p class="mt-1.5 flex items-center gap-1 text-[13px] text-rose-600">
