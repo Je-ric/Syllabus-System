@@ -3,7 +3,7 @@
      style="box-shadow: rgba(0, 0, 0, 0.04) 0px 4px 12px 0px;">
 
     {{-- Column header --}}
-    <div class="grid grid-cols-[2.5rem_2rem_1fr_auto] md:grid-cols-[2.5rem_2rem_2fr_1fr_1fr_auto] gap-x-3 items-center
+    <div class="grid grid-cols-[2.5rem_1fr_auto] md:grid-cols-[2.5rem_2fr_1fr_1fr_auto] gap-x-3 items-center
                 px-5 py-3 bg-[#fafafa] border-b border-[#ececee]
                 text-[11px] font-bold uppercase tracking-[0.14em] text-[#a1a1aa] select-none">
         <div class="flex items-center justify-center" @click.stop>
@@ -11,7 +11,6 @@
                 class="w-4 h-4 rounded-[6px] border-[#ececee]"
                 style="accent-color: var(--clsu-green);">
         </div>
-        <div class="flex items-center justify-center">#</div>
         <div>User</div>
         <div class="hidden md:block">Status</div>
         <div class="hidden md:block">Roles</div>
@@ -39,7 +38,7 @@
             class="cursor-pointer transition-colors select-none"
             :class="open ? 'bg-[color-mix(in_srgb,var(--clsu-green)_6%,white)]' : 'bg-white hover:bg-[#fafafa]'">
 
-            <div class="grid grid-cols-[2.5rem_2rem_1fr_auto] md:grid-cols-[2.5rem_2rem_2fr_1fr_1fr_auto] gap-x-3 items-center px-5 py-3.5">
+            <div class="grid grid-cols-[2.5rem_1fr_auto] md:grid-cols-[2.5rem_2fr_1fr_1fr_auto] gap-x-3 items-center px-5 py-3.5">
 
                 {{-- Checkbox --}}
                 <div class="flex items-center justify-center" @click.stop>
@@ -53,18 +52,16 @@
                         style="accent-color: var(--clsu-green);">
                 </div>
 
-                {{-- Counter --}}
-                <div class="flex items-center justify-center">
-                    <span class="text-[13px] font-medium text-[#71717a]">{{ $counter }}</span>
-                </div>
-
-                {{-- Avatar + name --}}
+                {{-- Avatar + name + counter --}}
                 <div class="flex items-center gap-3 min-w-0">
                     <span class="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full border border-[#ececee] font-bold text-[13px] {{ $avatarCls }}">
                         {{ strtoupper(substr($user->name, 0, 1)) }}
                     </span>
                     <div class="min-w-0">
-                        <p class="text-[13px] font-semibold text-[#09090b] truncate">{{ $user->name }}</p>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[13px] font-medium text-[#71717a]">{{ $counter }}.</span>
+                            <p class="text-[13px] font-semibold text-[#09090b] truncate">{{ $user->name }}</p>
+                        </div>
                         <div class="flex items-center gap-1.5 flex-wrap">
                             <p class="text-[12px] text-[#a1a1aa] truncate">{{ $user->email }}</p>
                             @if($user->email_verified_at)
