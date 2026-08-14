@@ -15,13 +15,13 @@
         x-data="{
             submitting: false,
             name: @js($program->name),
-            primaryDept: '{{ $primaryDeptId }}',
-            supportingDepts: {{ json_encode(array_map('strval', $supportingDeptIds)) }},
+            primaryDept: @js((string) ($primaryDeptId ?? '')),
+            supportingDepts: @js(array_map('strval', $supportingDeptIds)),
             borNo: @js($program->bor_approval_no ?? ''),
             borDate: @js($program->bor_approval_date ?? ''),
             origName: @js($program->name),
-            origPrimaryDept: '{{ $primaryDeptId }}',
-            origSupportingDepts: {{ json_encode(array_map('strval', $supportingDeptIds)) }},
+            origPrimaryDept: @js((string) ($primaryDeptId ?? '')),
+            origSupportingDepts: @js(array_map('strval', $supportingDeptIds)),
             origBorNo: @js($program->bor_approval_no ?? ''),
             origBorDate: @js($program->bor_approval_date ?? ''),
             get hasChanged() {
@@ -60,15 +60,14 @@
 
                     <div>
                         <x-modal.modal-label for="editPrimaryDept_{{ $program->id }}" isRequired>Primary Department</x-modal.modal-label>
+                        <input type="hidden" name="primary_department_id" x-model="primaryDept">
                         <select
-                            name="primary_department_id"
                             id="editPrimaryDept_{{ $program->id }}"
                             x-model="primaryDept"
                             :disabled="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
                             class="w-full px-3 py-2 text-[13px] border border-[#E3E8EB] rounded-lg bg-white
-                                   focus:outline-none focus:ring-2 focus:ring-[#00C075] focus:border-transparent"
-                            required>
+                                   focus:outline-none focus:ring-2 focus:ring-[#00C075] focus:border-transparent">
                             <option value="">Select primary department</option>
                             @foreach($allDepartments->groupBy('college.name') as $collegeName => $depts)
                                 <optgroup label="{{ $collegeName }}">
@@ -132,7 +131,6 @@
                                             value="{{ $dept->id }}"
                                             x-model="supportingDepts"
                                             :disabled="primaryDept == '{{ $dept->id }}'"
-                                            {{ in_array($dept->id, $supportingDeptIds) ? 'checked' : '' }}
                                             class="w-4 h-4 rounded text-[#00C075] border-[#C8D0DA]
                                                    focus:ring-[#00C075] focus:ring-offset-0 shrink-0">
                                         <span class="text-[12px] text-[#394056] leading-snug">{{ $dept->name }}</span>

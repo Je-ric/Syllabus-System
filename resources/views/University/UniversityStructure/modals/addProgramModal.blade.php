@@ -37,15 +37,14 @@
 
                     <div>
                         <x-modal.modal-label for="add_primary_department_id" isRequired>Primary Department</x-modal.modal-label>
+                        <input type="hidden" name="primary_department_id" x-model="primaryDept">
                         <select
-                            name="primary_department_id"
                             id="add_primary_department_id"
                             x-model="primaryDept"
                             :disabled="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
                             class="w-full px-3 py-2 text-[13px] border border-[#E3E8EB] rounded-lg bg-white
-                                   focus:outline-none focus:ring-2 focus:ring-[#00C075] focus:border-transparent"
-                            required>
+                                   focus:outline-none focus:ring-2 focus:ring-[#00C075] focus:border-transparent">
                             <option value="">Select primary department</option>
                             @foreach($allDepartments->groupBy('college.name') as $collegeName => $depts)
                                 <optgroup label="{{ $collegeName }}">

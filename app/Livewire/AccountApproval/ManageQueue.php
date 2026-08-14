@@ -22,7 +22,13 @@ class ManageQueue extends Component
     {
         if (in_array($property, ['search', 'role', 'status', 'sort'])) {
             $this->resetPage();
+            $this->dispatch('filter-changed');
         }
+    }
+
+    public function updatingPage(): void
+    {
+        $this->dispatch('page-changed');
     }
 
     /**
@@ -68,7 +74,8 @@ class ManageQueue extends Component
             }
         }
 
-        $this->resetPage();
+        // Don't reset page - let users stay on current page but refresh data
+        // The component will automatically re-render with updated user statuses
         $this->dispatch('bulk-done');
 
         if ($failed === 0) {
@@ -79,6 +86,11 @@ class ManageQueue extends Component
         } else {
             $this->dispatch('lw-toast', type: 'warning', message: "{$succeeded} of {$total} users processed. {$failed} failed.");
         }
+    }
+
+    public function resetBulkState(): void
+    {
+        $this->dispatch('bulk-state-reset');
     }
 
     private function buildQuery()

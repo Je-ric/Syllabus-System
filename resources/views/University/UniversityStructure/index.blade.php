@@ -4,8 +4,19 @@
 
     <script>
         function openAddDepartmentModal(collegeId) {
-            document.getElementById('addDepartment_college_id').value = collegeId;
-            document.getElementById('addDepartmentModal').showModal();
+            const input = document.getElementById('addDepartment_college_id');
+            if (input) input.value = collegeId;
+            const modal = document.getElementById('addDepartmentModal');
+            if (modal) modal.showModal();
+        }
+
+        function tryOpenAddProgramModal() {
+            const modal = document.getElementById('addProgramModal');
+            if (modal) {
+                modal.showModal();
+            } else {
+                console.error('addProgramModal not found');
+            }
         }
     </script>
 
@@ -318,7 +329,7 @@
                                                 class="w-full flex items-center justify-center gap-1.5 py-2 text-[12px] font-semibold
                                                        text-[#00965F] hover:bg-[#EDFFF8] border-t border-dashed border-[#00C075]
                                                        transition-all duration-150 rounded-b-[12px]"
-                                                onclick="document.getElementById('addProgramModal').showModal()">
+                                                onclick="tryOpenAddProgramModal()">
                                                 <i class="bx bx-plus text-sm leading-none"></i>
                                                 Add Program
                                             </button>

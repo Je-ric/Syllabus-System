@@ -110,32 +110,38 @@ class UniversityStructureController extends Controller
 
     public function storeProgram(Request $request)
     {
-        $data = $request->validate([
-            'name'                        => ['required', 'string', Rule::unique('programs', 'name')],
-            'primary_department_id'       => ['required', 'exists:departments,id'],
-            'supporting_department_ids'   => ['nullable', 'array'],
-            'supporting_department_ids.*' => ['exists:departments,id'],
-            'bor_approval_no'             => ['nullable', 'string'],
-            'bor_approval_date'           => ['nullable', 'date'],
-        ]);
-        
-        // Additional validation: if approval number is provided, date should also be provided
-        if (!empty($data['bor_approval_no']) && empty($data['bor_approval_date'])) {
-            return back()->withErrors(['bor_approval_date' => 'BOR approval date is required when BOR approval number is provided.'])->withInput();
-        }
-        
-        // Validate that BOR approval date is not in the future
-        if (!empty($data['bor_approval_date'])) {
-            $approvalDate = \Carbon\Carbon::parse($data['bor_approval_date']);
-            if ($approvalDate->isFuture()) {
-                return back()->withErrors(['bor_approval_date' => 'BOR approval date cannot be in the future.'])->withInput();
-            }
-        }
-        
         try {
+            $data = $request->validate([
+                'name'                        => ['required', 'string', Rule::unique('programs', 'name')],
+                'primary_department_id'       => ['required', 'exists:departments,id'],
+                'supporting_department_ids'   => ['nullable', 'array'],
+                'supporting_department_ids.*' => ['exists:departments,id'],
+                'bor_approval_no'             => ['nullable', 'string'],
+                'bor_approval_date'           => ['nullable', 'date'],
+            ]);
+            
+            // Additional validation: if approval number is provided, date should also be provided
+            if (!empty($data['bor_approval_no']) && empty($data['bor_approval_date'])) {
+                return back()->withErrors(['bor_approval_date' => 'BOR approval date is required when BOR approval number is provided.'])->withInput();
+            }
+            
+            // Validate that BOR approval date is not in the future
+            if (!empty($data['bor_approval_date'])) {
+                $approvalDate = \Carbon\Carbon::parse($data['bor_approval_date']);
+                if ($approvalDate->isFuture()) {
+                    return back()->withErrors(['bor_approval_date' => 'BOR approval date cannot be in the future.'])->withInput();
+                }
+            }
+            
             $this->service->storeProgram($data);
-        } catch (\Throwable) {
-            return back()->withErrors(['error' => 'Failed to add program. Please try again.'])->withInput();
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Throwable $e) {
+            \Log::error('Failed to add program', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return back()->withErrors(['error' => 'Failed to add program: ' . $e->getMessage()])->withInput();
         }
 
         return back()->with('toast', ['message' => 'Program added successfully.', 'type' => 'success']);

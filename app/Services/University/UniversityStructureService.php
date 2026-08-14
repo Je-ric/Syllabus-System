@@ -161,16 +161,32 @@ class UniversityStructureService
                 'bor_approval_date' => $data['bor_approval_date'] ?? null,
             ]);
 
-            // Attach primary department
-            $program->departments()->attach($data['primary_department_id'], ['role' => 'primary']);
+            $deptIds = array_merge(
+                [$data['primary_department_id']],
+                $data['supporting_department_ids'] ?? []
+            );
+            $depts = Department::whereIn('id', $deptIds)->get()->keyBy('id');
 
-            // Attach supporting departments if any
-            if (!empty($data['supporting_department_ids'])) {
-                foreach ($data['supporting_department_ids'] as $supportingDeptId) {
-                    // Skip if the supporting department is the same as primary
-                    if ($supportingDeptId != $data['primary_department_id']) {
-                        $program->departments()->attach($supportingDeptId, ['role' => 'supporting']);
-                    }
+            $primaryDepartment = $depts->get($data['primary_department_id']);
+            if (!$primaryDepartment) {
+                throw new \Exception("Primary department not found: {$data['primary_department_id']}");
+            }
+
+            $program->departments()->attach($data['primary_department_id'], [
+                'role'               => 'primary',
+                'cais_department_id' => $primaryDepartment->cais_department_id ?? null,
+            ]);
+
+            foreach ($data['supporting_department_ids'] ?? [] as $supportingDeptId) {
+                if ($supportingDeptId == $data['primary_department_id']) {
+                    continue;
+                }
+                $supportingDept = $depts->get($supportingDeptId);
+                if ($supportingDept) {
+                    $program->departments()->attach($supportingDeptId, [
+                        'role'               => 'supporting',
+                        'cais_department_id' => $supportingDept->cais_department_id ?? null,
+                    ]);
                 }
             }
 
@@ -184,6 +200,10 @@ class UniversityStructureService
             DB::commit();
         } catch (\Throwable $e) {
             DB::rollBack();
+            \Log::error('Failed to store program', [
+                'error' => $e->getMessage(),
+                'data'  => $data,
+            ]);
             throw $e;
         }
 
@@ -207,18 +227,34 @@ class UniversityStructureService
                 'bor_approval_date' => $data['bor_approval_date'] ?? null,
             ]);
 
-            // Prepare departments array for sync
+            $deptIds = array_merge(
+                [$data['primary_department_id']],
+                $data['supporting_department_ids'] ?? []
+            );
+            $depts = Department::whereIn('id', $deptIds)->get()->keyBy('id');
+
+            $primaryDepartment = $depts->get($data['primary_department_id']);
+            if (!$primaryDepartment) {
+                throw new \Exception("Primary department not found: {$data['primary_department_id']}");
+            }
+
             $departmentsToSync = [
-                $data['primary_department_id'] => ['role' => 'primary']
+                $data['primary_department_id'] => [
+                    'role'               => 'primary',
+                    'cais_department_id' => $primaryDepartment->cais_department_id ?? null,
+                ]
             ];
 
-            // Add supporting departments
-            if (!empty($data['supporting_department_ids'])) {
-                foreach ($data['supporting_department_ids'] as $supportingDeptId) {
-                    // Skip if the supporting department is the same as primary
-                    if ($supportingDeptId != $data['primary_department_id']) {
-                        $departmentsToSync[$supportingDeptId] = ['role' => 'supporting'];
-                    }
+            foreach ($data['supporting_department_ids'] ?? [] as $supportingDeptId) {
+                if ($supportingDeptId == $data['primary_department_id']) {
+                    continue;
+                }
+                $supportingDept = $depts->get($supportingDeptId);
+                if ($supportingDept) {
+                    $departmentsToSync[$supportingDeptId] = [
+                        'role'               => 'supporting',
+                        'cais_department_id' => $supportingDept->cais_department_id ?? null,
+                    ];
                 }
             }
 
@@ -234,6 +270,10 @@ class UniversityStructureService
             DB::commit();
         } catch (\Throwable $e) {
             DB::rollBack();
+            \Log::error('Failed to update program', [
+                'program_id' => $program->id,
+                'error'      => $e->getMessage(),
+            ]);
             throw $e;
         }
 

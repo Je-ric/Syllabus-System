@@ -3,7 +3,7 @@
      style="box-shadow: rgba(0, 0, 0, 0.04) 0px 4px 12px 0px;">
 
     {{-- Column header --}}
-    <div class="grid grid-cols-[2.5rem_1fr_auto] md:grid-cols-[2.5rem_2fr_1fr_1fr_auto] gap-x-3 items-center
+    <div class="grid grid-cols-[2.5rem_2rem_1fr_auto] md:grid-cols-[2.5rem_2rem_2fr_1fr_1fr_auto] gap-x-3 items-center
                 px-5 py-3 bg-[#fafafa] border-b border-[#ececee]
                 text-[11px] font-bold uppercase tracking-[0.14em] text-[#a1a1aa] select-none">
         <div class="flex items-center justify-center" @click.stop>
@@ -11,6 +11,7 @@
                 class="w-4 h-4 rounded-[6px] border-[#ececee]"
                 style="accent-color: var(--clsu-green);">
         </div>
+        <div class="flex items-center justify-center">#</div>
         <div>User</div>
         <div class="hidden md:block">Status</div>
         <div class="hidden md:block">Roles</div>
@@ -30,6 +31,7 @@
             default    => 'bg-[#f4f4f5] text-[#71717a]',
         };
         $uid = (string) $user->id;
+        $counter = ($users->currentPage() - 1) * $users->perPage() + $loop->index + 1;
     @endphp
 
         <div x-data="{ open: false }"
@@ -37,7 +39,7 @@
             class="cursor-pointer transition-colors select-none"
             :class="open ? 'bg-[color-mix(in_srgb,var(--clsu-green)_6%,white)]' : 'bg-white hover:bg-[#fafafa]'">
 
-            <div class="grid grid-cols-[2.5rem_1fr_auto] md:grid-cols-[2.5rem_2fr_1fr_1fr_auto] gap-x-3 items-center px-5 py-3.5">
+            <div class="grid grid-cols-[2.5rem_2rem_1fr_auto] md:grid-cols-[2.5rem_2rem_2fr_1fr_1fr_auto] gap-x-3 items-center px-5 py-3.5">
 
                 {{-- Checkbox --}}
                 <div class="flex items-center justify-center" @click.stop>
@@ -49,6 +51,11 @@
                         :class="(!canSelect('{{ $uid }}') && !isSelected('{{ $uid }}')) ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'"
                         class="w-4 h-4 rounded-[6px] border-[#ececee]"
                         style="accent-color: var(--clsu-green);">
+                </div>
+
+                {{-- Counter --}}
+                <div class="flex items-center justify-center">
+                    <span class="text-[13px] font-medium text-[#71717a]">{{ $counter }}</span>
                 </div>
 
                 {{-- Avatar + name --}}
@@ -211,7 +218,48 @@
         <p class="text-[13px] text-[#71717a]">
             Showing {{ $users->firstItem() }}–{{ $users->lastItem() }} of {{ $users->total() }}
         </p>
-        {{ $users->links() }}
+        <div class="flex items-center gap-1">
+            {{-- Previous --}}
+            @if($users->onFirstPage())
+                <span class="px-3 py-1.5 text-[12px] text-[#a1a1aa] cursor-not-allowed">
+                    <i class="bx bx-chevron-left"></i>
+                </span>
+            @else
+                <a href="{{ $users->previousPageUrl() }}" 
+                   class="px-3 py-1.5 text-[12px] text-[#71717a] hover:text-[#09090b] hover:bg-[#f4f4f5] rounded transition-colors">
+                    <i class="bx bx-chevron-left"></i>
+                </a>
+            @endif
+
+            {{-- Page numbers --}}
+            @foreach($users->getUrlRange(1, $users->lastPage()) as $page => $url)
+                @if($page == $users->currentPage())
+                    <span class="px-3 py-1.5 text-[12px] font-semibold text-white rounded transition-colors"
+                          style="background-color: var(--clsu-green);">
+                        {{ $page }}
+                    </span>
+                @elseif($url)
+                    <a href="{{ $url }}" 
+                       class="px-3 py-1.5 text-[12px] text-[#71717a] hover:text-[#09090b] hover:bg-[#f4f4f5] rounded transition-colors">
+                        {{ $page }}
+                    </a>
+                @else
+                    <span class="px-3 py-1.5 text-[12px] text-[#a1a1aa]">...</span>
+                @endif
+            @endforeach
+
+            {{-- Next --}}
+            @if($users->hasMorePages())
+                <a href="{{ $users->nextPageUrl() }}" 
+                   class="px-3 py-1.5 text-[12px] text-[#71717a] hover:text-[#09090b] hover:bg-[#f4f4f5] rounded transition-colors">
+                    <i class="bx bx-chevron-right"></i>
+                </a>
+            @else
+                <span class="px-3 py-1.5 text-[12px] text-[#a1a1aa] cursor-not-allowed">
+                    <i class="bx bx-chevron-right"></i>
+                </span>
+            @endif
+        </div>
     </div>
 @endif
 

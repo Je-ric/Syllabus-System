@@ -44,17 +44,17 @@
                 {{-- Left Column: Event Type Selection --}}
                 <div class="space-y-4">
                     <x-form.label isRequired>Type</x-form.label>
-                    
+
                     {{-- Quick Type Buttons - Reference Events --}}
                     <div class="space-y-2 mb-3">
                         <p class="text-[11px] font-semibold text-[#71717a] mb-1.5">Reference Events</p>
                         <div class="flex flex-wrap gap-2">
-                            <button type="button" 
+                            <button type="button"
                                 x-on:click="type = 'holiday'; name = 'Class Suspension'"
                                 class="text-[11px] px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 flex items-center gap-1">
                                 <i class="bx bx-info-circle text-xs"></i> Suspension
                             </button>
-                            <button type="button" 
+                            <button type="button"
                                 x-on:click="type = 'other'; name = 'Department Meeting'"
                                 class="text-[11px] px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 flex items-center gap-1">
                                 <i class="bx bx-info-circle text-xs"></i> Meeting
@@ -66,17 +66,17 @@
                     <div class="space-y-2 mb-3">
                         <p class="text-[11px] font-semibold text-[#71717a] mb-1.5">Skip Events</p>
                         <div class="flex flex-wrap gap-2">
-                            <button type="button" 
+                            <button type="button"
                                 x-on:click="type = 'break'; name = 'Christmas Break'"
                                 class="text-[11px] px-2 py-1 rounded bg-amber-100 text-amber-700 hover:bg-amber-200 flex items-center gap-1">
                                 <i class="bx bx-skip-next text-xs"></i> Christmas Break
                             </button>
-                            <button type="button" 
+                            <button type="button"
                                 x-on:click="type = 'break'; name = 'Semester Break'"
                                 class="text-[11px] px-2 py-1 rounded bg-amber-100 text-amber-700 hover:bg-amber-200 flex items-center gap-1">
                                 <i class="bx bx-skip-next text-xs"></i> Semester Break
                             </button>
-                            <button type="button" 
+                            <button type="button"
                                 x-on:click="type = 'break'; name = 'Health Break'"
                                 class="text-[11px] px-2 py-1 rounded bg-amber-100 text-amber-700 hover:bg-amber-200 flex items-center gap-1">
                                 <i class="bx bx-skip-next text-xs"></i> Health Break
@@ -88,22 +88,22 @@
                     <div class="space-y-2 mb-3">
                         <p class="text-[11px] font-semibold text-[#71717a] mb-1.5">Lock Events</p>
                         <div class="flex flex-wrap gap-2">
-                            <button type="button" 
+                            <button type="button"
                                 x-on:click="type = 'exam'; name = 'First Term Exam'"
                                 class="text-[11px] px-2 py-1 rounded bg-red-100 text-red-700 hover:bg-red-200 flex items-center gap-1">
                                 <i class="bx bx-lock text-xs"></i> 1st Term Exam
                             </button>
-                            <button type="button" 
+                            <button type="button"
                                 x-on:click="type = 'exam'; name = 'Midterm Exam'"
                                 class="text-[11px] px-2 py-1 rounded bg-red-100 text-red-700 hover:bg-red-200 flex items-center gap-1">
                                 <i class="bx bx-lock text-xs"></i> Midterm Exam
                             </button>
-                            <button type="button" 
+                            <button type="button"
                                 x-on:click="type = 'exam'; name = 'Final Exam'"
                                 class="text-[11px] px-2 py-1 rounded bg-red-100 text-red-700 hover:bg-red-200 flex items-center gap-1">
                                 <i class="bx bx-lock text-xs"></i> Final Exam
                             </button>
-                            <button type="button" 
+                            <button type="button"
                                 x-on:click="type = 'non_teaching'; name = 'Institutional Event'"
                                 class="text-[11px] px-2 py-1 rounded bg-red-100 text-red-700 hover:bg-red-200 flex items-center gap-1">
                                 <i class="bx bx-lock text-xs"></i> Non-Teaching
@@ -117,11 +117,11 @@
                         style="box-shadow:none"
                         onfocus="this.style.boxShadow='0 0 0 3px rgba(22,163,74,0.25)'"
                         onblur="this.style.boxShadow='none'">
-                        <option value="holiday">📌 Holiday (Reference)</option>
-                        <option value="other">📌 Other (Reference)</option>
-                        <option value="break">⏭️ Break (Skip Week)</option>
-                        <option value="exam">🔒 Exam (Lock Week)</option>
-                        <option value="non_teaching">🔒 Non-Teaching (Lock Week)</option>
+                        <option value="holiday">Holiday (Reference)</option>
+                        <option value="other">Other (Reference)</option>
+                        <option value="break">⏭Break (Skip Week)</option>
+                        <option value="exam">Exam (Lock Week)</option>
+                        <option value="non_teaching">Non-Teaching (Lock Week)</option>
                     </select>
 
                     {{-- Dynamic guidance based on selection --}}

@@ -9,25 +9,46 @@
         conflictMsg: '',
 
         init() {
-            {{-- Re-sync statusMap whenever Livewire re-renders (fixes stale state after bulk) --}}
-            $wire.$on('bulk-done', () => {
-                this.selected      = [];
-                this.selectedStatus = null;
-                this.executing     = false;
-                this.bulkModal     = false;
+            // Re-sync statusMap whenever Livewire re-renders
+            Livewire.hook('message.processed', ({ component, message }) => {
+                this.$nextTick(() => {
+                    const el = this.$el.querySelector('[data-status-map]');
+                    if (el) {
+                        try { 
+                            this.statusMap = JSON.parse(el.dataset.statusMap); 
+                            // Recalculate selectedStatus based on updated statusMap
+                            this.recalculateSelectedStatus();
+                        } catch(e) {}
+                    }
+                });
             });
 
-            Livewire.hook('commit', ({ component, commit, respond, succeed, fail }) => {
-                succeed(({ snapshot, effect }) => {
-                    this.$nextTick(() => {
-                        const newMap = @js($users->pluck('account_status', 'id')->toArray());
-                        {{-- newMap above is evaluated once at render; we need runtime values --}}
-                        {{-- Instead read from the re-rendered DOM's data attribute --}}
-                        const el = this.$el.querySelector('[data-status-map]');
-                        if (el) {
-                            try { this.statusMap = JSON.parse(el.dataset.statusMap); } catch(e) {}
-                        }
-                    });
+            // Handle bulk operation completion - only clear selection data (server-confirmed state)
+            $wire.$on('bulk-done', () => {
+                this.$nextTick(() => {
+                    this.selected      = [];
+                    this.selectedStatus = null;
+                    // Don't touch executing/bulkModal here - let the promise chain handle UI state
+                });
+            });
+
+            // Handle page changes
+            $wire.$on('page-changed', () => {
+                this.$nextTick(() => {
+                    this.selected      = [];
+                    this.selectedStatus = null;
+                    this.executing     = false;
+                    this.bulkModal     = false;
+                });
+            });
+
+            // Handle filter changes
+            $wire.$on('filter-changed', () => {
+                this.$nextTick(() => {
+                    this.selected      = [];
+                    this.selectedStatus = null;
+                    this.executing     = false;
+                    this.bulkModal     = false;
                 });
             });
         },
@@ -41,8 +62,8 @@
             if (!v) { this.selected = []; this.selectedStatus = null; return; }
             const statuses = [...new Set(this.pageIds.map(id => this.statusMap[id]))];
             if (statuses.length > 1) { this.showConflict('All users on this page must share the same status to select all.'); return; }
-            this.selected      = [...this.pageIds];
-            this.selectedStatus = statuses[0];
+            this.selected = [...this.pageIds];
+            this.selectedStatus = statuses[0]; // All users have the same status
         },
 
         toggleRow(id) {
@@ -50,15 +71,38 @@
             const i = this.selected.indexOf(id);
             if (i !== -1) {
                 this.selected.splice(i, 1);
-                if (this.selected.length === 0) this.selectedStatus = null;
+                // Always recalculate selectedStatus after removal
+                if (this.selected.length === 0) {
+                    this.selectedStatus = null;
+                } else {
+                    const remainingStatuses = this.selected.map(id => this.statusMap[id]);
+                    const uniqueStatuses = [...new Set(remainingStatuses)];
+                    this.selectedStatus = uniqueStatuses.length === 1 ? uniqueStatuses[0] : null;
+                }
                 return;
             }
-            if (this.selectedStatus && rowStatus !== this.selectedStatus) {
-                this.showConflict('Only same-status users can be bulk-selected.');
-                return;
+            // Check for status conflict before adding
+            if (this.selected.length > 0) {
+                const existingStatuses = this.selected.map(id => this.statusMap[id]);
+                const uniqueExisting = [...new Set(existingStatuses)];
+                if (uniqueExisting.length === 1 && rowStatus !== uniqueExisting[0]) {
+                    this.showConflict('Only same-status users can be bulk-selected.');
+                    return;
+                }
             }
             this.selected.push(id);
-            this.selectedStatus = rowStatus;
+            // Always recalculate selectedStatus based on current statusMap
+            this.recalculateSelectedStatus();
+        },
+
+        recalculateSelectedStatus() {
+            if (this.selected.length === 0) {
+                this.selectedStatus = null;
+                return;
+            }
+            const allSelectedStatuses = this.selected.map(id => this.statusMap[id]);
+            const uniqueStatuses = [...new Set(allSelectedStatuses)];
+            this.selectedStatus = uniqueStatuses.length === 1 ? uniqueStatuses[0] : null;
         },
 
         isSelected(id)  { return this.selected.includes(id); },
@@ -84,12 +128,26 @@
 
         bulkModal: false,
         bulkAction: '',
-        openBulk(action) { if (!this.selected.length) return; this.bulkAction = action; this.bulkModal = true; },
+        openBulk(action) { 
+            if (!this.selected.length) return; 
+            this.bulkAction = action; 
+            this.$nextTick(() => {
+                this.bulkModal = true;
+            });
+        },
 
         syncAndExecute() {
             this.executing = true;
             $wire.executeBulk([...this.selected], this.bulkAction)
-                .catch(() => { this.executing = false; });
+                .then(() => {
+                    // Reload page on success to reset all state
+                    window.location.reload();
+                })
+                .catch(() => { 
+                    this.$nextTick(() => {
+                        this.executing = false;
+                    });
+                });
         },
     }"
     class="space-y-4">
