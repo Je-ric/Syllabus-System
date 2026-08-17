@@ -94,7 +94,8 @@ class ReviewStep extends Component
     public function onReviewersUpdated(): void
     {
         if ($this->isLoaded) {
-            $this->syllabus?->refresh();
+            // $this->syllabus?->refresh();
+            $this->syllabus?->load('reviewers');
             $this->loadReviewerLists();
         }
     }

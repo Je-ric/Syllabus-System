@@ -86,10 +86,18 @@ class CourseEvaluationStep extends Component
     public function onStepChanged(string $step): void
     {
         if ($step === 'course_evaluation') {
-            // Only reload data if not already loaded (prevent unnecessary DB queries)
-            if (! $this->isLoaded) {
-                $this->loadData();
-            }
+            // if(! $this->isLoaded){
+            //     $this->loadData();
+            // }
+            $this->loadData();
+        }
+    }
+
+    #[On('syllabus-step-saved')]
+    public function onAnyStepSaved(string $step): void
+    {
+        if ($step === 'weekly_coverage') {
+            $this->loadData();
         }
     }
 
