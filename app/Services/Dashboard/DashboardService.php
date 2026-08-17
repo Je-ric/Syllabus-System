@@ -5,7 +5,6 @@ namespace App\Services\Dashboard;
 use App\Models\AcademicCalendar;
 use App\Models\College;
 use App\Models\Course;
-use App\Models\CourseComponent;
 use App\Models\Department;
 use App\Models\Program;
 use App\Models\Syllabus;
@@ -180,12 +179,17 @@ class DashboardService
         }
 
         // Get programs where the faculty teaches courses
-        $programIds = CourseComponent::where('user_id', $user->id)
-            ->whereHas('course', function ($query) {
-                $query->where('status', 'active');
-            })
-            ->with('course')
-            ->get()
+        // $programIds = CourseComponent::where('user_id', $user->id)
+        //     ->whereHas('course', function ($query) {
+        //         $query->where('status', 'active');
+        //     })
+        //     ->with('course')
+        //     ->get()
+        // Get programs where the faculty teaches courses (via their syllabus components)
+        $programIds = Syllabus::where('prepared_by', $user->id)
+            ->whereHas('course', fn ($q) => $q->where('status', 'active'))
+            ->with('course:id,program_id')
+            ->get('course_id')
             ->pluck('course.program_id')
             ->filter()
             ->unique()

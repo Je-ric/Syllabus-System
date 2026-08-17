@@ -39,6 +39,7 @@ class CourseComponent extends Model
 
     public function course()
     {
-        return $this->belongsTo(Course::class);
+        // return $this->belongsTo(Course::class);
+        return $this->hasOneThrough(Course::class, Syllabus::class, 'id', 'id', 'syllabus_id', 'course_id');
     }
 }
