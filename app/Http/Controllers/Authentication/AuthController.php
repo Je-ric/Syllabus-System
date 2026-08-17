@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Authentication;
 
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
+use App\Models\Role;
 use App\Models\User;
 use App\Services\System\CaisApiService;
 use Illuminate\Http\Request;
@@ -64,6 +65,11 @@ class AuthController extends Controller
             'phone_number'   => $request->phone_number,
             'office'         => $request->office,
         ]);
+
+        $facultyRole = Role::where('name', 'faculty')->first();
+        if ($facultyRole) {
+            $user->roles()->attach($facultyRole->id);
+        }
 
         AuditLog::record(
             action: 'registered',
