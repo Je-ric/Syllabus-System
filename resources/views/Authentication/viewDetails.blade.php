@@ -311,7 +311,8 @@
                         </p>
 
                         {{-- Step 1 --}}
-                        <div class="rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-5">
+                        <div class="rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-5"
+                             id="change-password-step1">
                             <p class="text-[12px] font-semibold text-[#475569] mb-3">Step 1 — Set New Password</p>
                             <form method="POST" action="{{ route('profile.password.change') }}"
                                   class="grid md:grid-cols-2 gap-4 text-sm">
@@ -319,32 +320,41 @@
                                 <div class="md:col-span-2">
                                     <x-form.label>Current Password</x-form.label>
                                     <div x-data="{ show: false }" class="relative mt-1.5">
-                                        <x-form.input name="current_password" x-bind:type="show ? 'text' : 'password'" class="pr-11" required />
+                                        <x-form.input name="current_password" x-bind:type="show ? 'text' : 'password'" class="pr-11 @error('current_password') border-rose-400 @enderror" required />
                                         <button type="button" @click="show = !show"
                                             class="absolute inset-y-0 right-0 flex items-center px-3 text-[#94a3b8] hover:text-[#475569] transition">
                                             <i :class="show ? 'bx bx-hide' : 'bx bx-show'" class="text-lg leading-none"></i>
                                         </button>
                                     </div>
+                                    @error('current_password')
+                                        <p class="text-rose-600 text-xs mt-1 flex items-center gap-1"><i class="bx bx-error-circle"></i> {{ $message }}</p>
+                                    @enderror
                                 </div>
                                 <div>
                                     <x-form.label>New Password</x-form.label>
                                     <div x-data="{ show: false }" class="relative mt-1.5">
-                                        <x-form.input name="password" x-bind:type="show ? 'text' : 'password'" class="pr-11" required />
+                                        <x-form.input name="password" x-bind:type="show ? 'text' : 'password'" class="pr-11 @error('password') border-rose-400 @enderror" required />
                                         <button type="button" @click="show = !show"
                                             class="absolute inset-y-0 right-0 flex items-center px-3 text-[#94a3b8] hover:text-[#475569] transition">
                                             <i :class="show ? 'bx bx-hide' : 'bx bx-show'" class="text-lg leading-none"></i>
                                         </button>
                                     </div>
+                                    @error('password')
+                                        <p class="text-rose-600 text-xs mt-1 flex items-center gap-1"><i class="bx bx-error-circle"></i> {{ $message }}</p>
+                                    @enderror
                                 </div>
                                 <div>
                                     <x-form.label>Confirm New Password</x-form.label>
                                     <div x-data="{ show: false }" class="relative mt-1.5">
-                                        <x-form.input name="password_confirmation" x-bind:type="show ? 'text' : 'password'" class="pr-11" required />
+                                        <x-form.input name="password_confirmation" x-bind:type="show ? 'text' : 'password'" class="pr-11 @error('password_confirmation') border-rose-400 @enderror" required />
                                         <button type="button" @click="show = !show"
                                             class="absolute inset-y-0 right-0 flex items-center px-3 text-[#94a3b8] hover:text-[#475569] transition">
                                             <i :class="show ? 'bx bx-hide' : 'bx bx-show'" class="text-lg leading-none"></i>
                                         </button>
                                     </div>
+                                    @error('password_confirmation')
+                                        <p class="text-rose-600 text-xs mt-1 flex items-center gap-1"><i class="bx bx-error-circle"></i> {{ $message }}</p>
+                                    @enderror
                                 </div>
                                 <div class="md:col-span-2 flex justify-end">
                                     <x-ui.button type="submit" variant="save">Send OTP</x-ui.button>
@@ -385,3 +395,11 @@
 </x-layout.panel>
 
 @endsection
+
+@if ($errors->hasAny(['current_password', 'password', 'password_confirmation']))
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('change-password-step1')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+</script>
+@endif
