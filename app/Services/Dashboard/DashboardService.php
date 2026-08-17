@@ -5,6 +5,7 @@ namespace App\Services\Dashboard;
 use App\Models\AcademicCalendar;
 use App\Models\College;
 use App\Models\Course;
+use App\Models\CourseComponent;
 use App\Models\Department;
 use App\Models\Program;
 use App\Models\Syllabus;
@@ -233,12 +234,12 @@ class DashboardService
 
         // Get latest draft syllabus
         $latestDraft = $facultySyllabi->where('status', 'draft')
-            ->orderBy('updated_at', 'desc')
+            ->sortByDesc('updated_at')
             ->first();
 
         // Get recent syllabus activity
         $recentSyllabi = $facultySyllabi
-            ->orderBy('updated_at', 'desc')
+            ->sortByDesc('updated_at')
             ->take(5)
             ->map(function ($syllabus) {
                 return [
