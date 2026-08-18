@@ -18,8 +18,6 @@
     <x-layout.help-panel module="goals" />
 
     <x-layout.panel>
-        @include('includes.error-lists')
-
         <div class="space-y-4">
 
             @if ($noAssignment)
