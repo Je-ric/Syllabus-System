@@ -57,13 +57,18 @@ class GoalController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'college_id' => ['required', 'exists:colleges,id'],
-            'goal_text'  => ['required', 'string', 'max:5000', new NoInjectionRule()],
-        ], [
-            'goal_text.required' => 'Goal description is required.',
-            'goal_text.max' => 'Goal description must not exceed 5000 characters.',
-        ]);
+        try {
+            $request->validate([
+                'college_id' => ['required', 'exists:colleges,id'],
+                'goal_text'  => ['required', 'string', 'max:5000', new NoInjectionRule()],
+            ], [
+                'goal_text.required' => 'Goal description is required.',
+                'goal_text.max' => 'Goal description must not exceed 5000 characters.',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput()
+                ->with('toast', ['message' => 'Please fix the highlighted fields before submitting.', 'type' => 'error']);
+        }
 
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
@@ -83,12 +88,17 @@ class GoalController extends Controller
 
     public function update(Request $request, CollegeGoal $goal)
     {
-        $request->validate([
-            'goal_text' => ['required', 'string', 'max:5000', new NoInjectionRule()],
-        ], [
-            'goal_text.required' => 'Goal description is required.',
-            'goal_text.max' => 'Goal description must not exceed 5000 characters.',
-        ]);
+        try {
+            $request->validate([
+                'goal_text' => ['required', 'string', 'max:5000', new NoInjectionRule()],
+            ], [
+                'goal_text.required' => 'Goal description is required.',
+                'goal_text.max' => 'Goal description must not exceed 5000 characters.',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput()
+                ->with('toast', ['message' => 'Please fix the highlighted fields before submitting.', 'type' => 'error']);
+        }
 
         /** @var \App\Models\User|null $user */
         $user = Auth::user();

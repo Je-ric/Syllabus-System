@@ -32,27 +32,19 @@
 
             @include('includes.session-success')
 
-            @error('email')
-                <div class="mb-3 p-3 rounded-lg bg-rose-50 border border-rose-200">
-                    <p class="text-[13px] text-rose-600 flex items-center gap-1">
-                        <i class="bx bx-error-circle"></i> {{ $message }}
-                    </p>
-                </div>
-            @enderror
-            @error('password')
-                <div class="mb-3 p-3 rounded-lg bg-rose-50 border border-rose-200">
-                    <p class="text-[13px] text-rose-600 flex items-center gap-1">
-                        <i class="bx bx-error-circle"></i> {{ $message }}
-                    </p>
-                </div>
-            @enderror
-            @error('login')
-                <div class="mb-3 p-3 rounded-lg bg-rose-50 border border-rose-200">
-                    <p class="text-[13px] text-rose-600 flex items-center gap-1">
-                        <i class="bx bx-error-circle"></i> {{ $message }}
-                    </p>
-                </div>
-            @enderror
+            {{-- Generic / catch-block errors --}}
+            @if ($errors->has('error'))
+                <x-feedback-status.alert type="error" :showTitle="false" class="mb-4">
+                    <strong>Something went wrong:</strong> {{ $errors->first('error') }}
+                </x-feedback-status.alert>
+            @endif
+
+            {{-- General validation summary (when multiple fields fail at once) --}}
+            @if ($errors->any() && !$errors->has('error'))
+                <x-feedback-status.alert type="error" :showTitle="false" class="mb-4">
+                    Please fix the highlighted fields below before submitting.
+                </x-feedback-status.alert>
+            @endif
 
             {{-- ════ LOGIN ════ --}}
             <div>
@@ -72,7 +64,17 @@
                         <input type="email" name="email"
                                value="{{ old('email') }}"
                                placeholder="you@clsu.edu.ph"
-                               class="auth-input" required autofocus>
+                               class="auth-input @error('email') border-rose-400 @enderror" required autofocus>
+                        @error('email')
+                            <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
+                                <i class="bx bx-error-circle"></i> {{ $message }}
+                            </p>
+                        @enderror
+                        @error('login')
+                            <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
+                                <i class="bx bx-error-circle"></i> {{ $message }}
+                            </p>
+                        @enderror
                     </div>
 
                     <div>
@@ -80,12 +82,17 @@
                         <div class="relative">
                             <input type="password" name="password" id="login-password"
                                    placeholder="Enter your password"
-                                   class="auth-input pr-11" required>
+                                   class="auth-input pr-11 @error('password') border-rose-400 @enderror" required>
                             <button type="button" onclick="togglePassword('login-password', this)"
                                     class="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-600 transition-colors">
                                 <i class="bx bx-show text-lg leading-none"></i>
                             </button>
                         </div>
+                        @error('password')
+                            <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
+                                <i class="bx bx-error-circle"></i> {{ $message }}
+                            </p>
+                        @enderror
                     </div>
 
                     <button type="submit" class="w-full auth-secondary text-white py-2.5 rounded-xl font-semibold shadow-sm transition">

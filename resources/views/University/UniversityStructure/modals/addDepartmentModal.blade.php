@@ -1,3 +1,5 @@
+@php $hasErrors = $errors->hasAny(['name']) && old('_modal') === 'addDepartment'; @endphp
+
 <x-modal.dialog id="addDepartmentModal" maxWidth="max-w-md" width="w-11/12" variant="add">
     <x-modal.header modalId="addDepartmentModal" variant="add">
         <div>
@@ -7,21 +9,46 @@
     </x-modal.header>
 
     <form method="POST" action="{{ route('university.structure.department.store') }}" class="flex flex-col"
-        x-data="{ submitting: false, name: '' }"
-        x-on:submit="submitting = true">
+        x-data="{ submitting: false, name: @js(old('name', '')) }"
+        x-on:submit="submitting = true"
+        x-init="@js($hasErrors) && $nextTick(() => document.getElementById('addDepartmentModal')?.showModal())">
         @csrf
-        <input type="hidden" name="college_id" id="addDepartment_college_id" value="">
+        <input type="hidden" name="_modal" value="addDepartment">
+        <input type="hidden" name="college_id" id="addDepartment_college_id" value="{{ old('college_id', '') }}">
         <x-modal.body>
-            <div>
-                <x-modal.modal-label isRequired>Department Name</x-modal.modal-label>
-                <x-form.input
-                    type="text"
-                    name="name"
-                    placeholder="e.g. Department of Computer Science"
-                    x-model="name"
-                    ::readonly="submitting"
-                    ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
-                    required />
+            <div class="space-y-3">
+                {{-- Generic / catch-block errors --}}
+                @if ($errors->has('error'))
+                    <x-feedback-status.alert type="error" :showTitle="false" class="mb-4">
+                        <strong>Something went wrong:</strong> {{ $errors->first('error') }}
+                    </x-feedback-status.alert>
+                @endif
+
+                {{-- Validation summary --}}
+                @if ($hasErrors)
+                    <x-feedback-status.alert type="error" :showTitle="false">
+                        Please fix the highlighted fields below before submitting.
+                    </x-feedback-status.alert>
+                @endif
+                <div>
+                    <x-modal.modal-label isRequired>Department Name</x-modal.modal-label>
+                    <x-form.input
+                        type="text"
+                        name="name"
+                        value="{{ old('name', '') }}"
+                        placeholder="e.g. Department of Computer Science"
+                        x-model="name"
+                        ::readonly="submitting"
+                        ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
+                        required />
+                    @if ($hasErrors)
+                        @error('name')
+                            <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
+                                <i class="bx bx-error-circle"></i> {{ $message }}
+                            </p>
+                        @enderror
+                    @endif
+                </div>
             </div>
         </x-modal.body>
 

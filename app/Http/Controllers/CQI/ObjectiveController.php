@@ -89,17 +89,22 @@ class ObjectiveController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'college_id'     => ['required', 'exists:colleges,id'],
-            'department_id'  => [
-                'required',
-                Rule::exists('departments', 'id')->where('college_id', $request->college_id),
-            ],
-            'objective_text' => ['required', 'string', 'max:5000', new NoInjectionRule()],
-        ], [
-            'objective_text.required' => 'Objective description is required.',
-            'objective_text.max' => 'Objective description must not exceed 5000 characters.',
-        ]);
+        try {
+            $request->validate([
+                'college_id'     => ['required', 'exists:colleges,id'],
+                'department_id'  => [
+                    'required',
+                    Rule::exists('departments', 'id')->where('college_id', $request->college_id),
+                ],
+                'objective_text' => ['required', 'string', 'max:5000', new NoInjectionRule()],
+            ], [
+                'objective_text.required' => 'Objective description is required.',
+                'objective_text.max' => 'Objective description must not exceed 5000 characters.',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput()
+                ->with('toast', ['message' => 'Please fix the highlighted fields before submitting.', 'type' => 'error']);
+        }
 
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
@@ -122,12 +127,17 @@ class ObjectiveController extends Controller
 
     public function update(Request $request, DepartmentObjective $objective)
     {
-        $request->validate([
-            'objective_text' => ['required', 'string', 'max:5000', new NoInjectionRule()],
-        ], [
-            'objective_text.required' => 'Objective description is required.',
-            'objective_text.max' => 'Objective description must not exceed 5000 characters.',
-        ]);
+        try {
+            $request->validate([
+                'objective_text' => ['required', 'string', 'max:5000', new NoInjectionRule()],
+            ], [
+                'objective_text.required' => 'Objective description is required.',
+                'objective_text.max' => 'Objective description must not exceed 5000 characters.',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput()
+                ->with('toast', ['message' => 'Please fix the highlighted fields before submitting.', 'type' => 'error']);
+        }
 
         /** @var \App\Models\User|null $user */
         $user = Auth::user();

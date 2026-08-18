@@ -1,6 +1,7 @@
 @php
     $primaryDeptId     = $program->departments->where('pivot.role', 'primary')->first()?->id;
     $supportingDeptIds = $program->departments->where('pivot.role', 'supporting')->pluck('id')->toArray();
+    $hasErrors = $errors->hasAny(['name', 'primary_department_id', 'bor_approval_no', 'bor_approval_date']) && old('_modal') === 'updateProgram_' . $program->id;
 @endphp
 
 <x-modal.dialog id="updateProgramModal_{{ $program->id }}" maxWidth="max-w-6xl" width="w-2xl sm:w-full" variant="edit">
@@ -14,11 +15,11 @@
     <form method="POST" action="{{ route('university.structure.program.update', $program) }}" class="flex flex-col min-h-0"
         x-data="{
             submitting: false,
-            name: @js($program->name),
-            primaryDept: @js((string) ($primaryDeptId ?? '')),
-            supportingDepts: @js(array_map('strval', $supportingDeptIds)),
-            borNo: @js($program->bor_approval_no ?? ''),
-            borDate: @js($program->bor_approval_date ?? ''),
+            name: @js(old('name', $program->name)),
+            primaryDept: @js(old('primary_department_id', (string) ($primaryDeptId ?? ''))),
+            supportingDepts: @js(old('supporting_department_ids', array_map('strval', $supportingDeptIds))),
+            borNo: @js(old('bor_approval_no', $program->bor_approval_no ?? '')),
+            borDate: @js(old('bor_approval_date', $program->bor_approval_date ?? '')),
             origName: @js($program->name),
             origPrimaryDept: @js((string) ($primaryDeptId ?? '')),
             origSupportingDepts: @js(array_map('strval', $supportingDeptIds)),
@@ -34,11 +35,27 @@
                 return JSON.stringify(a) !== JSON.stringify(b);
             }
         }"
-        x-on:submit="submitting = true">
+        x-on:submit="submitting = true"
+        x-init="@js($hasErrors) && $nextTick(() => document.getElementById('updateProgramModal_{{ $program->id }}')?.showModal())">
         @csrf
         @method('PUT')
+        <input type="hidden" name="_modal" value="updateProgram_{{ $program->id }}">
 
         <x-modal.body>
+            {{-- Generic / catch-block errors --}}
+            @if ($errors->has('error'))
+                <x-feedback-status.alert type="error" :showTitle="false" class="mb-4">
+                    <strong>Something went wrong:</strong> {{ $errors->first('error') }}
+                </x-feedback-status.alert>
+            @endif
+
+            {{-- Validation summary --}}
+            @if ($hasErrors)
+                <x-feedback-status.alert type="error" :showTitle="false" class="mb-4">
+                    Please fix the highlighted fields below before submitting.
+                </x-feedback-status.alert>
+            @endif
+
             {{-- Two-column grid on md+, single column on mobile --}}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
 
@@ -51,11 +68,18 @@
                             id="editProgramName_{{ $program->id }}"
                             type="text"
                             name="name"
-                            value="{{ $program->name }}"
+                            value="{{ old('name', $program->name) }}"
                             x-model="name"
                             ::readonly="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
                             required />
+                        @if ($hasErrors)
+                            @error('name')
+                                <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
+                                    <i class="bx bx-error-circle"></i> {{ $message }}
+                                </p>
+                            @enderror
+                        @endif
                     </div>
 
                     <div>
@@ -72,7 +96,7 @@
                             @foreach($allDepartments->groupBy('college.name') as $collegeName => $depts)
                                 <optgroup label="{{ $collegeName }}">
                                     @foreach($depts as $dept)
-                                        <option value="{{ $dept->id }}" {{ $dept->id == $primaryDeptId ? 'selected' : '' }}>
+                                        <option value="{{ $dept->id }}" {{ old('primary_department_id', $dept->id == $primaryDeptId ? $dept->id : '') == $dept->id ? 'selected' : '' }}>
                                             {{ $dept->name }}
                                         </option>
                                     @endforeach
@@ -80,6 +104,13 @@
                             @endforeach
                         </select>
                         <p class="text-[11px] text-[#93A1AF] mt-1">Main department responsible for this program</p>
+                        @if ($hasErrors)
+                            @error('primary_department_id')
+                                <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
+                                    <i class="bx bx-error-circle"></i> {{ $message }}
+                                </p>
+                            @enderror
+                        @endif
                     </div>
 
                     <div>
@@ -88,10 +119,17 @@
                             id="editBorNo_{{ $program->id }}"
                             type="text"
                             name="bor_approval_no"
-                            value="{{ $program->bor_approval_no }}"
+                            value="{{ old('bor_approval_no', $program->bor_approval_no) }}"
                             x-model="borNo"
                             ::readonly="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''" />
+                        @if ($hasErrors)
+                            @error('bor_approval_no')
+                                <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
+                                    <i class="bx bx-error-circle"></i> {{ $message }}
+                                </p>
+                            @enderror
+                        @endif
                     </div>
 
                     <div>
@@ -100,10 +138,17 @@
                             id="editBorDate_{{ $program->id }}"
                             type="date"
                             name="bor_approval_date"
-                            value="{{ $program->bor_approval_date }}"
+                            value="{{ old('bor_approval_date', $program->bor_approval_date) }}"
                             x-model="borDate"
                             ::readonly="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''" />
+                        @if ($hasErrors)
+                            @error('bor_approval_date')
+                                <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
+                                    <i class="bx bx-error-circle"></i> {{ $message }}
+                                </p>
+                            @enderror
+                        @endif
                     </div>
 
                 </div>

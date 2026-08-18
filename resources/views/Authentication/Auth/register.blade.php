@@ -32,48 +32,19 @@
 
             @include('includes.session-success')
 
-            @error('name')
-                <div class="mb-3 p-3 rounded-lg bg-rose-50 border border-rose-200">
-                    <p class="text-[13px] text-rose-600 flex items-center gap-1">
-                        <i class="bx bx-error-circle"></i> {{ $message }}
-                    </p>
-                </div>
-            @enderror
-            @error('phone_number')
-                <div class="mb-3 p-3 rounded-lg bg-rose-50 border border-rose-200">
-                    <p class="text-[13px] text-rose-600 flex items-center gap-1">
-                        <i class="bx bx-error-circle"></i> {{ $message }}
-                    </p>
-                </div>
-            @enderror
-            @error('office')
-                <div class="mb-3 p-3 rounded-lg bg-rose-50 border border-rose-200">
-                    <p class="text-[13px] text-rose-600 flex items-center gap-1">
-                        <i class="bx bx-error-circle"></i> {{ $message }}
-                    </p>
-                </div>
-            @enderror
-            @error('email')
-                <div class="mb-3 p-3 rounded-lg bg-rose-50 border border-rose-200">
-                    <p class="text-[13px] text-rose-600 flex items-center gap-1">
-                        <i class="bx bx-error-circle"></i> {{ $message }}
-                    </p>
-                </div>
-            @enderror
-            @error('password')
-                <div class="mb-3 p-3 rounded-lg bg-rose-50 border border-rose-200">
-                    <p class="text-[13px] text-rose-600 flex items-center gap-1">
-                        <i class="bx bx-error-circle"></i> {{ $message }}
-                    </p>
-                </div>
-            @enderror
-            @error('password_confirmation')
-                <div class="mb-3 p-3 rounded-lg bg-rose-50 border border-rose-200">
-                    <p class="text-[13px] text-rose-600 flex items-center gap-1">
-                        <i class="bx bx-error-circle"></i> {{ $message }}
-                    </p>
-                </div>
-            @enderror
+            {{-- Generic / catch-block errors --}}
+            @if ($errors->has('error'))
+                <x-feedback-status.alert type="error" :showTitle="false" class="mb-4">
+                    <strong>Something went wrong:</strong> {{ $errors->first('error') }}
+                </x-feedback-status.alert>
+            @endif
+
+            {{-- General validation summary (when multiple fields fail at once) --}}
+            @if ($errors->any() && !$errors->has('error'))
+                <x-feedback-status.alert type="error" :showTitle="false" class="mb-4">
+                    Please fix the highlighted fields below before submitting.
+                </x-feedback-status.alert>
+            @endif
 
             {{-- ════ REGISTER ════ --}}
             <div>
@@ -94,29 +65,49 @@
                                placeholder="e.g. Juan dela Cruz"
                                pattern="[\p{L}\s]+"
                                title="Name must contain letters and spaces only"
-                               class="auth-input" required>
+                               class="auth-input @error('name') border-rose-400 @enderror" required>
+                        @error('name')
+                            <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
+                                <i class="bx bx-error-circle"></i> {{ $message }}
+                            </p>
+                        @enderror
                     </div>
 
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1.5">Phone Number</label>
                         <input type="text" name="phone_number" value="{{ old('phone_number') }}"
                                placeholder="e.g. 09XX-XXX-XXXX"
-                               class="auth-input" required>
+                               class="auth-input @error('phone_number') border-rose-400 @enderror" required>
+                        @error('phone_number')
+                            <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
+                                <i class="bx bx-error-circle"></i> {{ $message }}
+                            </p>
+                        @enderror
                     </div>
 
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1.5">Office / Department</label>
                         <input type="text" name="office" value="{{ old('office') }}"
                                placeholder="Where can we find you?"
-                               class="auth-input" required>
+                               class="auth-input @error('office') border-rose-400 @enderror" required>
+                        @error('office')
+                            <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
+                                <i class="bx bx-error-circle"></i> {{ $message }}
+                            </p>
+                        @enderror
                     </div>
 
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1.5">Email Address</label>
                         <input type="email" name="email" value="{{ old('email') }}"
                                placeholder="you@clsu.edu.ph or you@clsu2.edu.ph"
-                               class="auth-input" required>
+                               class="auth-input @error('email') border-rose-400 @enderror" required>
                         <p class="text-[11px] text-slate-400 mt-1">Must be a valid @clsu.edu.ph or @clsu2.edu.ph address.</p>
+                        @error('email')
+                            <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
+                                <i class="bx bx-error-circle"></i> {{ $message }}
+                            </p>
+                        @enderror
                     </div>
 
                     <div>
@@ -124,12 +115,17 @@
                         <div class="relative">
                             <input type="password" name="password" id="register-password"
                                    placeholder="Minimum 8 characters"
-                                   class="auth-input pr-11" required>
+                                   class="auth-input pr-11 @error('password') border-rose-400 @enderror" required>
                             <button type="button" onclick="togglePassword('register-password', this)"
                                     class="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-600 transition-colors">
                                 <i class="bx bx-show text-lg leading-none"></i>
                             </button>
                         </div>
+                        @error('password')
+                            <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
+                                <i class="bx bx-error-circle"></i> {{ $message }}
+                            </p>
+                        @enderror
                     </div>
 
                     <div>
@@ -137,12 +133,17 @@
                         <div class="relative">
                             <input type="password" name="password_confirmation" id="register-password-confirm"
                                    placeholder="Re-enter your password"
-                                   class="auth-input pr-11" required>
+                                   class="auth-input pr-11 @error('password_confirmation') border-rose-400 @enderror" required>
                             <button type="button" onclick="togglePassword('register-password-confirm', this)"
                                     class="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-600 transition-colors">
                                 <i class="bx bx-show text-lg leading-none"></i>
                             </button>
                         </div>
+                        @error('password_confirmation')
+                            <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
+                                <i class="bx bx-error-circle"></i> {{ $message }}
+                            </p>
+                        @enderror
                     </div>
 
                     <button type="submit" class="w-full auth-primary text-white py-2.5 rounded-xl font-semibold shadow-sm transition">

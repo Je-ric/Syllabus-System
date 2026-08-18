@@ -5,6 +5,7 @@ namespace App\Livewire\AcademicCalendar;
 use App\Models\AcademicCalendar;
 use App\Models\AcademicCalendarEvent;
 use App\Models\AuditLog;
+use App\Rules\NoInjectionRule;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -54,7 +55,7 @@ class AcademicCalendarEventForm extends Component
             compact('type', 'name', 'dateStart', 'dateEnd'),
             [
                 'type'      => ['required', Rule::in(AcademicCalendarEvent::TYPES)],
-                'name'      => ['required', 'string', 'max:255'],
+                'name'      => ['required', 'string', 'max:255', new NoInjectionRule()],
                 'dateStart' => ['required', 'date', 'after_or_equal:' . $semester->start_date, 'before_or_equal:' . $semester->end_date],
                 'dateEnd'   => ['required', 'date', 'after_or_equal:dateStart', 'before_or_equal:' . $semester->end_date],
             ]
@@ -140,7 +141,7 @@ class AcademicCalendarEventForm extends Component
 
         $validator = Validator::make(compact('type', 'name', 'date'), [
             'type' => ['required', Rule::in(AcademicCalendarEvent::TYPES)],
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255', new NoInjectionRule()],
             'date' => [
                 'required', 'date',
                 'after_or_equal:' . $semester->start_date,
@@ -223,63 +224,6 @@ class AcademicCalendarEventForm extends Component
         }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CSV Import — disabled for now
-    |--------------------------------------------------------------------------
-    | Re-enable by uncommenting WithFileUploads trait/use, $csvFile property,
-    | and this method, plus the Import CSV button + modal include in the view.
-    */
-    // public function importCsv(): void
-    // {
-    //     $this->validate(['csvFile' => ['required', 'file', 'mimes:csv,txt', 'max:512']]);
-    //
-    //     $semester = AcademicCalendar::findOrFail($this->semesterId);
-    //     $handle   = fopen($this->csvFile->getRealPath(), 'r');
-    //     $header   = fgetcsv($handle); // skip header row
-    //
-    //     $imported = 0;
-    //     $skipped  = 0;
-    //
-    //     while (($row = fgetcsv($handle)) !== false) {
-    //         if (count($row) < 3) { $skipped++; continue; }
-    //
-    //         [$type, $name, $date] = array_map('trim', $row);
-    //
-    //         $v = Validator::make(
-    //             compact('type', 'name', 'date'),
-    //             [
-    //                 'type' => ['required', Rule::in(AcademicCalendarEvent::TYPES)],
-    //                 'name' => ['required', 'string', 'max:255'],
-    //                 'date' => [
-    //                     'required', 'date',
-    //                     'after_or_equal:' . $semester->start_date,
-    //                     'before_or_equal:' . $semester->end_date,
-    //                     Rule::unique('academic_calendar_events', 'date')
-    //                         ->where('academic_calendar_id', $this->semesterId),
-    //                 ],
-    //             ]
-    //         );
-    //
-    //         if ($v->fails()) { $skipped++; continue; }
-    //
-    //         $semester->events()->create($v->validated());
-    //         $imported++;
-    //     }
-    //
-    //     fclose($handle);
-    //     $this->csvFile = null;
-    //
-    //     AuditLog::record(
-    //         action: 'imported',
-    //         module: 'Academic Calendar Event',
-    //         referenceId: $this->semesterId,
-    //         description: "CSV import: {$imported} events added, {$skipped} skipped for {$this->academicYear} {$semester->semester} semester."
-    //     );
-    //
-    //     $this->dispatch('event-saved');
-    //     $this->dispatch('lw-toast', type: 'success', message: "{$imported} event(s) imported, {$skipped} skipped.");
-    // }
 
     public function deleteEvent(int $eventId): void
     {

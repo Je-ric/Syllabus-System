@@ -144,6 +144,7 @@ class AccountApprovalController extends Controller
 
     public function editUser(Request $request)
     {
+        try {
         $request->validate([
             'user_id'      => 'required|exists:users,id',
             'name'         => ['required', 'string', 'min:2', 'max:255', 'regex:/^[\p{L}\s]+$/u', new NoInjectionRule()],
@@ -164,6 +165,12 @@ class AccountApprovalController extends Controller
             'phone_number.regex' => 'Phone number can only contain digits, spaces, and standard phone characters.',
             'office.regex' => 'Office can only contain letters, numbers, spaces, and basic punctuation.',
         ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->back()
+                ->withErrors($e->errors())
+                ->withInput()
+                ->with('toast', ['message' => 'Please fix the highlighted fields before submitting.', 'type' => 'error']);
+        }
 
         // Only admins may edit other users' accounts
         // Route is already admin-only, but guard explicitly as a safety net

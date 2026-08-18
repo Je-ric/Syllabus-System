@@ -1,3 +1,5 @@
+@php $hasErrors = $errors->hasAny(['name']) && old('_modal') === 'updateDepartment_' . $dept->id; @endphp
+
 <x-modal.dialog id="updateDepartmentModal_{{ $dept->id }}" maxWidth="max-w-md" width="w-11/12" variant="edit">
     <x-modal.header modalId="updateDepartmentModal_{{ $dept->id }}" variant="edit">
         <div>
@@ -10,24 +12,49 @@
         x-data="{
             submitting: false,
             original: @js($dept->name),
-            name: @js($dept->name)
+            name: @js(old('name', $dept->name))
         }"
-        x-on:submit="submitting = true">
+        x-on:submit="submitting = true"
+        x-init="@js($hasErrors) && $nextTick(() => document.getElementById('updateDepartmentModal_{{ $dept->id }}')?.showModal())">
         @csrf
         @method('PUT')
         <input type="hidden" name="college_id" value="{{ $dept->college_id }}">
+        <input type="hidden" name="_modal" value="updateDepartment_{{ $dept->id }}">
         <x-modal.body>
-            <div>
-                <x-modal.modal-label for="editDeptName_{{ $dept->id }}" isRequired>Department Name</x-modal.modal-label>
-                <x-form.input
-                    id="editDeptName_{{ $dept->id }}"
-                    type="text"
-                    name="name"
-                    value="{{ $dept->name }}"
-                    x-model="name"
-                    ::readonly="submitting"
-                    ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
-                    required />
+            <div class="space-y-3">
+                {{-- Generic / catch-block errors --}}
+                @if ($errors->has('error'))
+                    <x-feedback-status.alert type="error" :showTitle="false" class="mb-4">
+                        <strong>Something went wrong:</strong> {{ $errors->first('error') }}
+                    </x-feedback-status.alert>
+                @endif
+
+                {{-- Validation summary --}}
+                @if ($hasErrors)
+                    <x-feedback-status.alert type="error" :showTitle="false">
+                        Please fix the highlighted fields below before submitting.
+                    </x-feedback-status.alert>
+                @endif
+
+                <div>
+                    <x-modal.modal-label for="editDeptName_{{ $dept->id }}" isRequired>Department Name</x-modal.modal-label>
+                    <x-form.input
+                        id="editDeptName_{{ $dept->id }}"
+                        type="text"
+                        name="name"
+                        value="{{ old('name', $dept->name) }}"
+                        x-model="name"
+                        ::readonly="submitting"
+                        ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
+                        required />
+                    @if ($hasErrors)
+                        @error('name')
+                            <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
+                                <i class="bx bx-error-circle"></i> {{ $message }}
+                            </p>
+                        @enderror
+                    @endif
+                </div>
             </div>
         </x-modal.body>
         <x-modal.footer>

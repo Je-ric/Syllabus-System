@@ -51,6 +51,20 @@
         <x-modal.body>
             <div class="space-y-4">
 
+                {{-- Generic / catch-block errors --}}
+                @if ($errors->has('error'))
+                    <x-feedback-status.alert type="error" :showTitle="false" class="mb-4">
+                        <strong>Something went wrong:</strong> {{ $errors->first('error') }}
+                    </x-feedback-status.alert>
+                @endif
+
+                {{-- Validation summary --}}
+                @if ($hasEditErrors)
+                    <x-feedback-status.alert type="error" :showTitle="false">
+                        Please fix the highlighted fields below before submitting.
+                    </x-feedback-status.alert>
+                @endif
+
                 {{-- Identity strip --}}
                 <div class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#f8fafc] border border-[#e2e8f0]">
                     <span class="shrink-0 inline-flex items-center justify-center w-10 h-10 rounded-full font-bold text-base {{ $avatarColors }}">
@@ -76,7 +90,11 @@
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
                             required />
                         @if($hasEditErrors)
-                            @error('name') <p class="mt-1 text-[12px] text-red-600">{{ $message }}</p> @enderror
+                            @error('name')
+                                <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
+                                    <i class="bx bx-error-circle"></i> {{ $message }}
+                                </p>
+                            @enderror
                         @endif
                     </div>
                     <div>
@@ -88,7 +106,11 @@
                             ::readonly="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''" />
                         @if($hasEditErrors)
-                            @error('phone_number') <p class="mt-1 text-[12px] text-red-600">{{ $message }}</p> @enderror
+                            @error('phone_number')
+                                <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
+                                    <i class="bx bx-error-circle"></i> {{ $message }}
+                                </p>
+                            @enderror
                         @endif
                     </div>
                     <div>
@@ -100,7 +122,11 @@
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
                             required />
                         @if($hasEditErrors)
-                            @error('email') <p class="mt-1 text-[12px] text-red-600">{{ $message }}</p> @enderror
+                            @error('email')
+                                <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
+                                    <i class="bx bx-error-circle"></i> {{ $message }}
+                                </p>
+                            @enderror
                         @endif
                     </div>
                     <div class="sm:col-span-2">
@@ -112,7 +138,11 @@
                             ::readonly="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''" />
                         @if($hasEditErrors)
-                            @error('office') <p class="mt-1 text-[12px] text-red-600">{{ $message }}</p> @enderror
+                            @error('office')
+                                <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
+                                    <i class="bx bx-error-circle"></i> {{ $message }}
+                                </p>
+                            @enderror
                         @endif
                     </div>
                 </div>

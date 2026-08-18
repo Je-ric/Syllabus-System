@@ -1,3 +1,5 @@
+@php $hasErrors = $errors->hasAny(['goal_text']); @endphp
+
 <x-modal.dialog id="updateGoalModal_{{ $goal->id }}" maxWidth="max-w-lg" width="w-11/12" variant="edit">
     <x-modal.header modalId="updateGoalModal_{{ $goal->id }}" variant="edit">
         Edit Goal
@@ -7,13 +9,28 @@
         x-data="{
             submitting: false,
             original: @js(trim($goal->goal_text)),
-            goalText: @js(trim($goal->goal_text))
+            goalText: @js(old('goal_text', trim($goal->goal_text)))
         }"
-        x-on:submit="submitting = true">
+        x-on:submit="submitting = true"
+        x-init="@js($hasErrors) && $nextTick(() => document.getElementById('updateGoalModal_{{ $goal->id }}')?.showModal())">
         @csrf
         @method('PUT')
         <x-modal.body>
             <div class="space-y-4">
+                {{-- Generic / catch-block errors --}}
+                @if ($errors->has('error'))
+                    <x-feedback-status.alert type="error" :showTitle="false" class="mb-4">
+                        <strong>Something went wrong:</strong> {{ $errors->first('error') }}
+                    </x-feedback-status.alert>
+                @endif
+
+                {{-- Validation summary --}}
+                @if ($hasErrors)
+                    <x-feedback-status.alert type="error" :showTitle="false">
+                        Please fix the highlighted fields below before submitting.
+                    </x-feedback-status.alert>
+                @endif
+
                 <div class="flex items-center gap-2">
                     <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#94a3b8]">Editing</p>
                     <span class="font-mono text-[11px] font-bold text-[#166534] bg-[#f0fdf4] border border-[#bbf7d0] px-2 py-0.5 rounded-md">
@@ -30,7 +47,14 @@
                         x-model="goalText"
                         ::readonly="submitting"
                         ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
-                        required></x-form.textarea>
+                        required>{{ old('goal_text', $goal->goal_text) }}</x-form.textarea>
+                    @if ($hasErrors)
+                        @error('goal_text')
+                            <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
+                                <i class="bx bx-error-circle"></i> {{ $message }}
+                            </p>
+                        @enderror
+                    @endif
                 </div>
             </div>
         </x-modal.body>

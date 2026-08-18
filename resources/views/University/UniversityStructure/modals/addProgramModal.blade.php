@@ -1,3 +1,5 @@
+@php $hasErrors = $errors->hasAny(['name', 'primary_department_id', 'bor_approval_no', 'bor_approval_date']) && old('_modal') === 'addProgram'; @endphp
+
 <x-modal.dialog id="addProgramModal" maxWidth="max-w-6xl" width="w-2xl sm:w-full" variant="add">
     <x-modal.header modalId="addProgramModal" variant="add">
         <div>
@@ -9,15 +11,30 @@
     <form method="POST" action="{{ route('university.structure.program.store') }}" class="flex flex-col min-h-0"
         x-data="{
             submitting: false,
-            name: '',
-            primaryDept: '',
-            supportingDepts: []
+            name: @js(old('name', '')),
+            primaryDept: @js(old('primary_department_id', '')),
+            supportingDepts: @js(old('supporting_department_ids', []))
         }"
-        x-on:submit="submitting = true">
+        x-on:submit="submitting = true"
+        x-init="@js($hasErrors) && $nextTick(() => document.getElementById('addProgramModal')?.showModal())">
         @csrf
+        <input type="hidden" name="_modal" value="addProgram">
 
         <x-modal.body>
-            {{-- Two-column grid on md+, single column on mobile --}}
+            {{-- Generic / catch-block errors --}}
+            @if ($errors->has('error'))
+                <x-feedback-status.alert type="error" :showTitle="false" class="mb-4">
+                    <strong>Something went wrong:</strong> {{ $errors->first('error') }}
+                </x-feedback-status.alert>
+            @endif
+
+            {{-- Validation summary --}}
+            @if ($hasErrors)
+                <x-feedback-status.alert type="error" :showTitle="false" class="mb-4">
+                    Please fix the highlighted fields below before submitting.
+                </x-feedback-status.alert>
+            @endif
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
 
                 {{-- LEFT COLUMN --}}
@@ -28,11 +45,19 @@
                         <x-form.input
                             type="text"
                             name="name"
+                            value="{{ old('name', '') }}"
                             placeholder="e.g. BS Computer Science"
                             x-model="name"
                             ::readonly="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
                             required />
+                        @if ($hasErrors)
+                            @error('name')
+                                <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
+                                    <i class="bx bx-error-circle"></i> {{ $message }}
+                                </p>
+                            @enderror
+                        @endif
                     </div>
 
                     <div>
@@ -49,12 +74,19 @@
                             @foreach($allDepartments->groupBy('college.name') as $collegeName => $depts)
                                 <optgroup label="{{ $collegeName }}">
                                     @foreach($depts as $dept)
-                                        <option value="{{ $dept->id }}">{{ $dept->name }}</option>
+                                        <option value="{{ $dept->id }}" {{ old('primary_department_id') == $dept->id ? 'selected' : '' }}>{{ $dept->name }}</option>
                                     @endforeach
                                 </optgroup>
                             @endforeach
                         </select>
                         <p class="text-[11px] text-[#93A1AF] mt-1">Main department responsible for this program</p>
+                        @if ($hasErrors)
+                            @error('primary_department_id')
+                                <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
+                                    <i class="bx bx-error-circle"></i> {{ $message }}
+                                </p>
+                            @enderror
+                        @endif
                     </div>
 
                     <div>
@@ -62,9 +94,17 @@
                         <x-form.input
                             type="text"
                             name="bor_approval_no"
+                            value="{{ old('bor_approval_no', '') }}"
                             placeholder="e.g. BOR Res. No. 123"
                             ::readonly="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''" />
+                        @if ($hasErrors)
+                            @error('bor_approval_no')
+                                <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
+                                    <i class="bx bx-error-circle"></i> {{ $message }}
+                                </p>
+                            @enderror
+                        @endif
                     </div>
 
                     <div>
@@ -72,8 +112,16 @@
                         <x-form.input
                             type="date"
                             name="bor_approval_date"
+                            value="{{ old('bor_approval_date', '') }}"
                             ::readonly="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''" />
+                        @if ($hasErrors)
+                            @error('bor_approval_date')
+                                <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
+                                    <i class="bx bx-error-circle"></i> {{ $message }}
+                                </p>
+                            @enderror
+                        @endif
                     </div>
 
                 </div>
@@ -101,6 +149,7 @@
                                             value="{{ $dept->id }}"
                                             x-model="supportingDepts"
                                             :disabled="primaryDept == '{{ $dept->id }}'"
+                                            {{ in_array($dept->id, old('supporting_department_ids', [])) ? 'checked' : '' }}
                                             class="w-4 h-4 rounded text-[#00C075] border-[#C8D0DA]
                                                    focus:ring-[#00C075] focus:ring-offset-0 shrink-0">
                                         <span class="text-[12px] text-[#394056] leading-snug">{{ $dept->name }}</span>

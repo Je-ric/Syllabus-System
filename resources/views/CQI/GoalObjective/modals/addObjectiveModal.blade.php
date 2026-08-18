@@ -1,3 +1,5 @@
+@php $hasErrors = $errors->hasAny(['objective_text']); @endphp
+
 <x-modal.dialog id="addObjectiveModal" maxWidth="max-w-lg" width="w-11/12" variant="add">
     <x-modal.header modalId="addObjectiveModal" variant="add">
         Add New Objective
@@ -5,22 +7,46 @@
 
     <form action="{{ route('objective.store') }}" method="POST" class="flex flex-col"
         x-data="{ submitting: false, objectiveText: @js(old('objective_text', '')) }"
-        x-on:submit="submitting = true">
+        x-on:submit="submitting = true"
+        x-init="@js($hasErrors) && $nextTick(() => document.getElementById('addObjectiveModal')?.showModal())">
         @csrf
         <input type="hidden" name="college_id" value="{{ $selectedCollegeId }}">
         <input type="hidden" name="department_id" value="{{ $selectedDepartmentId }}">
         <x-modal.body>
-            <div>
-                <x-modal.modal-label for="add_objective_text" isRequired>Objective Description</x-modal.modal-label>
-                <x-form.textarea
-                    id="add_objective_text"
-                    name="objective_text"
-                    rows="5"
-                    placeholder="Describe the department objective…"
-                    x-model="objectiveText"
-                    ::readonly="submitting"
-                    ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
-                    required>{{ old('objective_text') }}</x-form.textarea>
+            <div class="space-y-3">
+                {{-- Generic / catch-block errors --}}
+                @if ($errors->has('error'))
+                    <x-feedback-status.alert type="error" :showTitle="false" class="mb-4">
+                        <strong>Something went wrong:</strong> {{ $errors->first('error') }}
+                    </x-feedback-status.alert>
+                @endif
+
+                {{-- Validation summary --}}
+                @if ($hasErrors)
+                    <x-feedback-status.alert type="error" :showTitle="false">
+                        Please fix the highlighted fields below before submitting.
+                    </x-feedback-status.alert>
+                @endif
+
+                <div>
+                    <x-modal.modal-label for="add_objective_text" isRequired>Objective Description</x-modal.modal-label>
+                    <x-form.textarea
+                        id="add_objective_text"
+                        name="objective_text"
+                        rows="5"
+                        placeholder="Describe the department objective…"
+                        x-model="objectiveText"
+                        ::readonly="submitting"
+                        ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
+                        required>{{ old('objective_text') }}</x-form.textarea>
+                    @if ($hasErrors)
+                        @error('objective_text')
+                            <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
+                                <i class="bx bx-error-circle"></i> {{ $message }}
+                            </p>
+                        @enderror
+                    @endif
+                </div>
             </div>
         </x-modal.body>
         <x-modal.footer>
