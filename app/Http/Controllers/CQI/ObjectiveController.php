@@ -7,6 +7,7 @@ use App\Models\College;
 use App\Models\Department;
 use App\Models\DepartmentObjective;
 use App\Services\CQI\GoalObjectiveService;
+use App\Rules\NoInjectionRule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -94,7 +95,10 @@ class ObjectiveController extends Controller
                 'required',
                 Rule::exists('departments', 'id')->where('college_id', $request->college_id),
             ],
-            'objective_text' => ['required', 'string'],
+            'objective_text' => ['required', 'string', 'max:5000', new NoInjectionRule()],
+        ], [
+            'objective_text.required' => 'Objective description is required.',
+            'objective_text.max' => 'Objective description must not exceed 5000 characters.',
         ]);
 
         /** @var \App\Models\User|null $user */
@@ -118,7 +122,12 @@ class ObjectiveController extends Controller
 
     public function update(Request $request, DepartmentObjective $objective)
     {
-        $request->validate(['objective_text' => ['required', 'string']]);
+        $request->validate([
+            'objective_text' => ['required', 'string', 'max:5000', new NoInjectionRule()],
+        ], [
+            'objective_text.required' => 'Objective description is required.',
+            'objective_text.max' => 'Objective description must not exceed 5000 characters.',
+        ]);
 
         /** @var \App\Models\User|null $user */
         $user = Auth::user();

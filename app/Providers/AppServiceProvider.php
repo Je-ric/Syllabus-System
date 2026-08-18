@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Helpers\Sanitizer;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Blade;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -15,6 +17,15 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->environment('production')) {
             URL::forceScheme('https');
         }
+
+        // Register custom Blade directives for XSS protection
+        Blade::directive('safe', function ($expression) {
+            return "<?php echo e(App\Helpers\Sanitizer::clean($expression)); ?>";
+        });
+
+        Blade::directive('safeName', function ($expression) {
+            return "<?php echo e(App\Helpers\Sanitizer::sanitizeName($expression)); ?>";
+        });
 
         Storage::extend('google', function ($app, $config) {
             if (! class_exists(\Google\Client::class)) {

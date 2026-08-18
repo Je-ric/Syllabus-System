@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\College;
 use App\Models\CollegeGoal;
 use App\Services\CQI\GoalObjectiveService;
+use App\Rules\NoInjectionRule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -58,7 +59,10 @@ class GoalController extends Controller
     {
         $request->validate([
             'college_id' => ['required', 'exists:colleges,id'],
-            'goal_text'  => ['required', 'string'],
+            'goal_text'  => ['required', 'string', 'max:5000', new NoInjectionRule()],
+        ], [
+            'goal_text.required' => 'Goal description is required.',
+            'goal_text.max' => 'Goal description must not exceed 5000 characters.',
         ]);
 
         /** @var \App\Models\User|null $user */
@@ -79,7 +83,12 @@ class GoalController extends Controller
 
     public function update(Request $request, CollegeGoal $goal)
     {
-        $request->validate(['goal_text' => ['required', 'string']]);
+        $request->validate([
+            'goal_text' => ['required', 'string', 'max:5000', new NoInjectionRule()],
+        ], [
+            'goal_text.required' => 'Goal description is required.',
+            'goal_text.max' => 'Goal description must not exceed 5000 characters.',
+        ]);
 
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
