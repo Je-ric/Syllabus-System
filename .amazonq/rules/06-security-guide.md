@@ -100,3 +100,6 @@ Apply rate limiting to:
 - [ ] File upload abuse — validate type, size, rename, store safely
 - [ ] Mass assignment — use `$fillable` or `$guarded` on all models
 - [ ] Open redirect — validate redirect URLs
+
+
+Block and Validate not Sanitize and save

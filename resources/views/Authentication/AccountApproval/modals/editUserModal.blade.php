@@ -36,7 +36,7 @@
             }
         }"
         x-on:submit="submitting = true"
-        x-init="@js($hasEditErrors) && $nextTick(() => document.getElementById(@js($modalId))?.showModal())">
+        x-init="@js($hasEditErrors) && $nextTick(() => { const modal = document.getElementById(@js($modalId)); if (modal) modal.showModal(); })">
         @csrf
         @method('PUT')
         <input type="hidden" name="user_id" value="{{ $user->id }}">
@@ -70,6 +70,8 @@
                         <x-form.input type="text" name="name"
                             value="{{ old('name', $user->name) }}"
                             x-model="name"
+                            pattern="[\p{L}\s]+"
+                            title="Name must contain letters and spaces only"
                             ::readonly="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
                             required />

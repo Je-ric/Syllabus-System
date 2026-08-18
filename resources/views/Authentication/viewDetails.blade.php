@@ -148,7 +148,9 @@
                         <div>
                             <x-form.label class="block">Name</x-form.label>
                             <x-form.input type="text" name="name" class="mt-1.5"
-                                :value="old('name', $user->name)" required :disabled="$isAdmin" />
+                                :value="old('name', $user->name)" required :disabled="$isAdmin"
+                                pattern="[\p{L}\s]+"
+                                title="Name must contain letters and spaces only" />
                             @error('name')<span class="text-rose-600 text-xs">{{ $message }}</span>@enderror
                         </div>
                         <div>

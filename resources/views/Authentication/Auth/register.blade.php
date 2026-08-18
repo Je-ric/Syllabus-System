@@ -92,6 +92,8 @@
                         <label class="block text-xs font-semibold text-slate-600 mb-1.5">Full Name</label>
                         <input type="text" name="name" value="{{ old('name') }}"
                                placeholder="e.g. Juan dela Cruz"
+                               pattern="[\p{L}\s]+"
+                               title="Name must contain letters and spaces only"
                                class="auth-input" required>
                     </div>
 

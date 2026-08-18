@@ -7,6 +7,7 @@ use App\Models\Course;
 use App\Models\Program;
 use App\Models\User;
 use App\Services\Academic\CourseService;
+use App\Rules\NoInjectionRule;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -105,7 +106,7 @@ class CourseController extends Controller
 
     public function store(Request $request)
     {
-        $validatedData = $request->validate($this->courseRules());
+        $validatedData = $request->validate($this->courseRules(), $this->courseMessages());
 
         $program = Program::findOrFail($validatedData['program_id']);
         if ($redirect = $this->authorizeProgram($program)) return $redirect;
@@ -127,8 +128,8 @@ class CourseController extends Controller
 
         } catch (\Exception $e) {
             return redirect()->back()->withErrors([
-                'error' => 'An error occurred while creating the course. Please try again.',
-            ]);
+                'error' => $e->getMessage() ?: 'An error occurred while creating the course. Please try again.',
+            ])->withInput();
         }
 
     }
@@ -147,7 +148,7 @@ class CourseController extends Controller
 
     public function update(Request $request, Course $course)
     {
-        $validatedData = $request->validate($this->courseRules($course));
+        $validatedData = $request->validate($this->courseRules($course), $this->courseMessages());
         if ($redirect = $this->authorizeProgram($course->program)) return $redirect;
 
         try {
@@ -162,7 +163,7 @@ class CourseController extends Controller
             ])->withInput();
         } catch (\Throwable $e) {
             return redirect()->back()->withErrors([
-                'error' => 'An error occurred while updating the course. Please try again.',
+                'error' => $e->getMessage() ?: 'An error occurred while updating the course. Please try again.',
             ])->withInput();
         }
 
@@ -191,7 +192,7 @@ class CourseController extends Controller
         } catch (\Throwable $e) {
             return redirect()
                 ->route('courses.index', ['program_id' => $programId])
-                ->withErrors(['error' => 'Failed to delete the course. Please try again.']);
+                ->with('toast', ['message' => 'Failed to delete the course. Please try again.', 'type' => 'error']);
         }
 
         return redirect()
@@ -249,20 +250,33 @@ class CourseController extends Controller
         return [
             'program_id'           => [$course ? 'sometimes' : 'required', 'exists:programs,id'],
             'confirmed_submission' => ['accepted'],
-            'code'                 => ['required', 'string', 'max:255', $courseCodeRule],
-            'name'                 => ['required', 'string', 'max:255'],
-            'description'          => ['nullable', 'string', 'max:5000'],
-            'credits'              => ['required', 'integer', 'min:1'],
+            'code'                 => ['required', 'string', 'max:50', 'regex:/^[A-Z0-9\-\.]+$/', $courseCodeRule],
+            'name'                 => ['required', 'string', 'min:2', 'max:255', 'regex:/^[\p{L}\s\-\.\,0-9]+$/u', new NoInjectionRule()],
+            'description'          => ['nullable', 'string', 'max:5000', new NoInjectionRule()],
+            'credits'              => ['required', 'integer', 'min:1', 'max:5'],
             'has_lec_lab'          => ['nullable', 'boolean'],
             'passing_mark'         => ['nullable', 'numeric', 'min:0', 'max:100'],
             'lec_class_hours'      => ['nullable', 'string', 'max:50'],
             'lab_class_hours'      => ['nullable', 'string', 'max:50'],
             'year_level'           => ['nullable', 'integer', 'between:1,5'],
             'semester'             => ['nullable', 'integer', 'in:1,2'],
-            'prerequisite'         => ['nullable', 'string', 'max:255'],
-            'corequisite'          => ['nullable', 'string', 'max:255'],
+            'prerequisite'         => ['nullable', 'string', 'max:255', 'regex:/^[A-Z0-9\-\.\,\s]*$/', new NoInjectionRule()],
+            'corequisite'          => ['nullable', 'string', 'max:255', 'regex:/^[A-Z0-9\-\.\,\s]*$/', new NoInjectionRule()],
             'po_mapping'           => ['nullable', 'array'],
             'po_mapping.*'         => ['nullable', 'in:I,E,D'],
+        ];
+    }
+
+    protected function courseMessages(): array
+    {
+        return [
+            'code.regex'              => 'Course code can only contain uppercase letters, numbers, hyphens, and periods.',
+            'name.regex'              => 'Course name must contain only letters, numbers, spaces, and basic punctuation.',
+            'name.min'                => 'Course name must be at least 2 characters.',
+            'credits.min'             => 'Credit units must be at least 1.',
+            'credits.max'             => 'Credit units must not exceed 5.',
+            'prerequisite.regex'      => 'Prerequisites can only contain uppercase letters, numbers, and basic punctuation.',
+            'corequisite.regex'       => 'Corequisites can only contain uppercase letters, numbers, and basic punctuation.',
         ];
     }
 

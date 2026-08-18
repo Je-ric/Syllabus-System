@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\Role;
 use App\Models\User;
+use App\Rules\NoInjectionRule;
 use App\Services\System\CaisApiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -37,9 +38,9 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'name'  => 'required|string|max:255',
-            'phone_number' => 'required|string|max:20',
-            'office' => 'required|string|max:255',
+            'name'  => ['required', 'string', 'min:2', 'max:255', 'regex:/^[\p{L}\s]+$/u', new NoInjectionRule()],
+            'phone_number' => 'required|string|max:20|regex:/^[0-9\s\-\+\(\)]+$/',
+            'office' => ['required', 'string', 'max:255', 'regex:/^[\p{L}\s\-\.\,0-9]+$/u', new NoInjectionRule()],
             'email' => [
                 'required',
                 'email',
@@ -53,7 +54,13 @@ class AuthController extends Controller
                     }
                 },
             ],
-            'password' => 'required|min:6|confirmed',
+            'password' => 'required|min:8|confirmed|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/',
+        ], [
+            'name.regex' => 'Name must contain letters and spaces only — no numbers or special characters.',
+            'name.min' => 'Name must be at least 2 characters.',
+            'phone_number.regex' => 'Phone number can only contain digits, spaces, and standard phone characters.',
+            'office.regex' => 'Office can only contain letters, numbers, spaces, and basic punctuation.',
+            'password.regex' => 'Password must contain at least one uppercase letter, one lowercase letter, and one number.',
         ]);
 
         $user = User::create([
@@ -88,8 +95,12 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email'    => 'required|email',
-            'password' => 'required|string',
+            'email'    => ['required', 'email', new NoInjectionRule()],
+            'password' => ['required', 'string', new NoInjectionRule()],
+        ], [
+            'email.required' => 'Email is required.',
+            'email.email' => 'Please enter a valid email address.',
+            'password.required' => 'Password is required.',
         ]);
 
         $email    = $request->email;

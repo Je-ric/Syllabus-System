@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\User;
 use App\Models\UserConsultationHour;
+use App\Rules\NoInjectionRule;
 use App\Services\Authentication\OtpService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -38,7 +39,7 @@ class UserController extends Controller
     {
         $validated = $request->validate([
             'day'  => ['required', 'in:Monday,Tuesday,Wednesday,Thursday,Friday'],
-            'time' => ['required', 'string', 'max:100'],
+            'time' => ['required', 'string', 'max:100', new NoInjectionRule()],
         ]);
 
         UserConsultationHour::create([
@@ -71,10 +72,15 @@ class UserController extends Controller
         }
 
         $validated = $request->validate([
-            'name'         => ['required', 'string', 'max:255'],
+            'name'         => ['required', 'string', 'min:2', 'max:255', 'regex:/^[\p{L}\s]+$/u', new NoInjectionRule()],
             'email'        => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
-            'phone_number' => ['nullable', 'string', 'max:30'],
-            'office'       => ['nullable', 'string', 'max:255'],
+            'phone_number' => ['nullable', 'string', 'max:30', 'regex:/^[0-9\s\-\+\(\)]*$/'],
+            'office'       => ['nullable', 'string', 'max:255', 'regex:/^[\p{L}\s\-\.\,0-9]*$/u', new NoInjectionRule()],
+        ], [
+            'name.regex' => 'Name must contain letters and spaces only — no numbers or special characters.',
+            'name.min' => 'Name must be at least 2 characters.',
+            'phone_number.regex' => 'Phone number can only contain digits, spaces, and standard phone characters.',
+            'office.regex' => 'Office can only contain letters, numbers, spaces, and basic punctuation.',
         ]);
 
         $user->update($validated);

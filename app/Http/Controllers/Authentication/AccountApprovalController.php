@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Authentication;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\AuditLog;
+use App\Rules\NoInjectionRule;
 use App\Services\Authentication\AccountApprovalService;
 use Illuminate\Support\Facades\Auth;
 
@@ -145,7 +146,7 @@ class AccountApprovalController extends Controller
     {
         $request->validate([
             'user_id'      => 'required|exists:users,id',
-            'name'         => 'required|string|max:255',
+            'name'         => ['required', 'string', 'min:2', 'max:255', 'regex:/^[\p{L}\s]+$/u', new NoInjectionRule()],
             'email'        => [
                 'required',
                 'email',
@@ -153,11 +154,15 @@ class AccountApprovalController extends Controller
                 'regex:/@(clsu\.edu\.ph|clsu2\.edu\.ph)$/i',
                 \Illuminate\Validation\Rule::unique('users', 'email')->ignore($request->input('user_id')),
             ],
-            'phone_number' => 'nullable|string|max:30',
-            'office'       => 'nullable|string|max:255',
+            'phone_number' => 'nullable|string|max:30|regex:/^[0-9\s\-\+\(\)]*$/',
+            'office'       => ['nullable', 'string', 'max:255', 'regex:/^[\p{L}\s\-\.\,0-9]*$/u', new NoInjectionRule()],
         ], [
             'email.regex' => 'Email must be a @clsu.edu.ph or @clsu2.edu.ph address.',
             'email.unique' => 'This email is already in use by another account.',
+            'name.regex' => 'Name must contain letters and spaces only — no numbers or special characters.',
+            'name.min' => 'Name must be at least 2 characters.',
+            'phone_number.regex' => 'Phone number can only contain digits, spaces, and standard phone characters.',
+            'office.regex' => 'Office can only contain letters, numbers, spaces, and basic punctuation.',
         ]);
 
         // Only admins may edit other users' accounts

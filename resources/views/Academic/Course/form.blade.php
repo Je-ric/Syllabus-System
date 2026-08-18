@@ -21,6 +21,20 @@
         </x-feedback-status.alert>
     @endif
 
+    {{-- Generic / catch-block errors --}}
+    @if ($errors->has('error'))
+        <x-feedback-status.alert type="error" class="mb-4">
+            <strong>Something went wrong:</strong> {{ $errors->first('error') }}
+        </x-feedback-status.alert>
+    @endif
+
+    {{-- General validation summary (when multiple fields fail at once) --}}
+    @if ($errors->any() && !$errors->has('error'))
+        <x-feedback-status.alert type="error" class="mb-4">
+            Please fix the highlighted fields below before submitting.
+        </x-feedback-status.alert>
+    @endif
+
     <form action="{{ $formAction }}" method="POST" id="courseForm" class="space-y-5">
         @csrf
         @if ($formMethod !== 'POST')
@@ -66,8 +80,14 @@
                 {{-- Credits + Lab + Year + Semester --}}
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <x-form.field label="Credit Units" for="credits" :isRequired="true" error="credits">
-                        <x-form.input id="credits" type="number" name="credits" min="0"
-                            value="{{ old('credits', $course->credit_units ?? '') }}" required />
+                        <x-form.select id="credits" name="credits" required>
+                            <option value="">Select Credits</option>
+                            @for ($i = 1; $i <= 5; $i++)
+                                <option value="{{ $i }}" {{ old('credits', $course->credit_units ?? '') == $i ? 'selected' : '' }}>
+                                    {{ $i }} {{ str('unit')->plural($i) }}
+                                </option>
+                            @endfor
+                        </x-form.select>
                     </x-form.field>
 
                     <div class="space-y-1">
@@ -121,14 +141,14 @@
                 <div x-data="{ hasLab: '{{ old('has_lec_lab', isset($course) ? ($course->has_lec_lab ? '1' : '0') : '0') }}' === '1' }"
                      x-on:change.capture="$nextTick(() => { const el = document.querySelector('[name=has_lec_lab]:checked'); hasLab = el?.value === '1'; })"
                      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <x-form.field label="Passing Mark" for="passing_mark">
+                    <x-form.field label="Passing Mark" for="passing_mark" error="passing_mark">
                         <x-form.select id="passing_mark" name="passing_mark">
                             @foreach(['50.00'=>'50%','55.00'=>'55%','60.00'=>'60%','65.00'=>'65%','70.00'=>'70%','75.00'=>'75%','80.00'=>'80%'] as $val => $label)
                                 <option value="{{ $val }}" {{ old('passing_mark', number_format($course->passing_mark ?? 60, 2, '.', '')) == $val ? 'selected' : '' }}>{{ $label }}</option>
                             @endforeach
                         </x-form.select>
                     </x-form.field>
-                    <x-form.field label="LEC Class Hours" for="lec_class_hours">
+                    <x-form.field label="LEC Class Hours" for="lec_class_hours" error="lec_class_hours">
                         <x-form.select id="lec_class_hours" name="lec_class_hours">
                             @foreach(['1 hr','1 hr and 30 min','2 hr','2 hr and 30 min','3 hr'] as $h)
                                 <option value="{{ $h }}" {{ old('lec_class_hours', $course->lec_class_hours ?? '3 hr') == $h ? 'selected' : '' }}>{{ $h }}</option>
@@ -136,7 +156,7 @@
                         </x-form.select>
                     </x-form.field>
                     <div x-show="hasLab" x-cloak>
-                        <x-form.field label="LAB Class Hours" for="lab_class_hours">
+                        <x-form.field label="LAB Class Hours" for="lab_class_hours" error="lab_class_hours">
                             <x-form.select id="lab_class_hours" name="lab_class_hours">
                                 @foreach(['1 hr','1 hr and 30 min','2 hr','2 hr and 30 min','3 hr'] as $h)
                                     <option value="{{ $h }}" {{ old('lab_class_hours', $course->lab_class_hours ?? '3 hr') == $h ? 'selected' : '' }}>{{ $h }}</option>
@@ -148,11 +168,11 @@
 
                 {{-- Prerequisite + Corequisite --}}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <x-form.field label="Prerequisite (None if not applicable)" for="prerequisite">
+                    <x-form.field label="Prerequisite (None if not applicable)" for="prerequisite" error="prerequisite">
                         <x-form.input id="prerequisite" type="text" name="prerequisite"
                             value="{{ old('prerequisite', $course->prerequisite ?? '') }}" />
                     </x-form.field>
-                    <x-form.field label="Corequisite (None if not applicable)" for="corequisite">
+                    <x-form.field label="Corequisite (None if not applicable)" for="corequisite" error="corequisite">
                         <x-form.input id="corequisite" type="text" name="corequisite"
                             value="{{ old('corequisite', $course->corequisite ?? '') }}" />
                     </x-form.field>
