@@ -1,4 +1,4 @@
-@php $hasErrors = $errors->hasAny(['name']) && old('_modal') === 'addCollege'; @endphp
+@php $hasErrors = $errors->hasAny(['name']) && session('_modal') === 'addCollege'; @endphp
 
 <x-modal.dialog id="addCollegeModal" maxWidth="max-w-md" width="w-11/12" variant="add">
     <x-modal.header modalId="addCollegeModal" variant="add">

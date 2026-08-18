@@ -1,7 +1,7 @@
 @php
     $primaryDeptId     = $program->departments->where('pivot.role', 'primary')->first()?->id;
     $supportingDeptIds = $program->departments->where('pivot.role', 'supporting')->pluck('id')->toArray();
-    $hasErrors = $errors->hasAny(['name', 'primary_department_id', 'bor_approval_no', 'bor_approval_date']) && old('_modal') === 'updateProgram_' . $program->id;
+    $hasErrors = $errors->hasAny(['name', 'primary_department_id', 'bor_approval_no', 'bor_approval_date']) && session('_modal') === 'updateProgram_' . $program->id;
 @endphp
 
 <x-modal.dialog id="updateProgramModal_{{ $program->id }}" maxWidth="max-w-6xl" width="w-2xl sm:w-full" variant="edit">

@@ -1,4 +1,4 @@
-@php $hasErrors = $errors->hasAny(['objective_text']); @endphp
+@php $hasErrors = $errors->hasAny(['objective_text']) && session('_modal') === 'addObjective'; @endphp
 
 <x-modal.dialog id="addObjectiveModal" maxWidth="max-w-lg" width="w-11/12" variant="add">
     <x-modal.header modalId="addObjectiveModal" variant="add">
@@ -12,6 +12,7 @@
         @csrf
         <input type="hidden" name="college_id" value="{{ $selectedCollegeId }}">
         <input type="hidden" name="department_id" value="{{ $selectedDepartmentId }}">
+        <input type="hidden" name="_modal" value="addObjective">
         <x-modal.body>
             <div class="space-y-3">
                 {{-- Generic / catch-block errors --}}

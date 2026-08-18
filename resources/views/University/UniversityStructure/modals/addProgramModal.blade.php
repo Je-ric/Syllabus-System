@@ -1,4 +1,4 @@
-@php $hasErrors = $errors->hasAny(['name', 'primary_department_id', 'bor_approval_no', 'bor_approval_date']) && old('_modal') === 'addProgram'; @endphp
+@php $hasErrors = $errors->hasAny(['name', 'primary_department_id', 'bor_approval_no', 'bor_approval_date']) && session('_modal') === 'addProgram'; @endphp
 
 <x-modal.dialog id="addProgramModal" maxWidth="max-w-6xl" width="w-2xl sm:w-full" variant="add">
     <x-modal.header modalId="addProgramModal" variant="add">

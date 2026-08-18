@@ -1,4 +1,4 @@
-@php $hasErrors = $errors->hasAny(['goal_text']); @endphp
+@php $hasErrors = $errors->hasAny(['goal_text']) && session('_modal') === 'addGoal'; @endphp
 
 <x-modal.dialog id="addGoalModal" maxWidth="max-w-xl" width="w-11/12" variant="add">
     <x-modal.header modalId="addGoalModal" variant="add">
@@ -11,6 +11,7 @@
         x-init="@js($hasErrors) && $nextTick(() => document.getElementById('addGoalModal')?.showModal())">
         @csrf
         <input type="hidden" name="college_id" value="{{ $selectedCollegeId }}">
+        <input type="hidden" name="_modal" value="addGoal">
         <x-modal.body>
             <div class="space-y-3">
                 {{-- Generic / catch-block errors --}}

@@ -67,6 +67,7 @@ class GoalController extends Controller
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return back()->withErrors($e->errors())->withInput()
+                ->with('_modal', 'addGoal')
                 ->with('toast', ['message' => 'Please fix the highlighted fields before submitting.', 'type' => 'error']);
         }
 
@@ -97,6 +98,7 @@ class GoalController extends Controller
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return back()->withErrors($e->errors())->withInput()
+                ->with('_modal', 'updateGoal_' . $goal->id)
                 ->with('toast', ['message' => 'Please fix the highlighted fields before submitting.', 'type' => 'error']);
         }
 

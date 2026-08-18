@@ -42,6 +42,7 @@ class UniversityStructureController extends Controller
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return back()->withErrors($e->errors())->withInput()
+                ->with('_modal', 'addCollege')
                 ->with('toast', ['message' => 'Please fix the highlighted fields before submitting.', 'type' => 'error']);
         }
         $this->service->storeCollege($data);
@@ -60,6 +61,7 @@ class UniversityStructureController extends Controller
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return back()->withErrors($e->errors())->withInput()
+                ->with('_modal', 'updateCollege_' . $college->id)
                 ->with('toast', ['message' => 'Please fix the highlighted fields before submitting.', 'type' => 'error']);
         }
         $this->service->updateCollege($college, $data);
@@ -97,6 +99,7 @@ class UniversityStructureController extends Controller
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return back()->withErrors($e->errors())->withInput()
+                ->with('_modal', 'addDepartment')
                 ->with('toast', ['message' => 'Please fix the highlighted fields before submitting.', 'type' => 'error']);
         }
         $this->service->storeDepartment($data);
@@ -116,6 +119,7 @@ class UniversityStructureController extends Controller
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return back()->withErrors($e->errors())->withInput()
+                ->with('_modal', 'updateDepartment_' . $department->id)
                 ->with('toast', ['message' => 'Please fix the highlighted fields before submitting.', 'type' => 'error']);
         }
         $this->service->updateDepartment($department, $data);
@@ -156,25 +160,28 @@ class UniversityStructureController extends Controller
                 'name.min' => 'Program name must be at least 2 characters.',
                 'bor_approval_no.regex' => 'BOR approval number can only contain letters, numbers, hyphens, slashes, and periods.',
             ]);
-            
+
             // Additional validation: if approval number is provided, date should also be provided
         if (!empty($data['bor_approval_no']) && empty($data['bor_approval_date'])) {
             return back()->withErrors(['bor_approval_date' => 'BOR approval date is required when BOR approval number is provided.'])->withInput()
+                ->with('_modal', 'addProgram')
                 ->with('toast', ['message' => 'Please fix the highlighted fields before submitting.', 'type' => 'error']);
         }
-        
+
         // Validate that BOR approval date is not in the future
         if (!empty($data['bor_approval_date'])) {
             $approvalDate = \Carbon\Carbon::parse($data['bor_approval_date']);
             if ($approvalDate->isFuture()) {
                 return back()->withErrors(['bor_approval_date' => 'BOR approval date cannot be in the future.'])->withInput()
+                    ->with('_modal', 'addProgram')
                     ->with('toast', ['message' => 'Please fix the highlighted fields before submitting.', 'type' => 'error']);
             }
         }
-        
+
             $this->service->storeProgram($data);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return back()->withErrors($e->errors())->withInput()
+                ->with('_modal', 'addProgram')
                 ->with('toast', ['message' => 'Please fix the highlighted fields before submitting.', 'type' => 'error']);
         } catch (\Throwable $e) {
             \Log::error('Failed to add program', [
@@ -204,28 +211,32 @@ class UniversityStructureController extends Controller
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return back()->withErrors($e->errors())->withInput()
+                ->with('_modal', 'updateProgram_' . $program->id)
                 ->with('toast', ['message' => 'Please fix the highlighted fields before submitting.', 'type' => 'error']);
         }
-        
+
         // Additional validation: if approval number is provided, date should also be provided
         if (!empty($data['bor_approval_no']) && empty($data['bor_approval_date'])) {
             return back()->withErrors(['bor_approval_date' => 'BOR approval date is required when BOR approval number is provided.'])->withInput()
+                ->with('_modal', 'updateProgram_' . $program->id)
                 ->with('toast', ['message' => 'Please fix the highlighted fields before submitting.', 'type' => 'error']);
         }
-        
+
         // Validate that BOR approval date is not in the future (only if date is being changed)
         if (!empty($data['bor_approval_date']) && $data['bor_approval_date'] != $program->bor_approval_date) {
             $approvalDate = \Carbon\Carbon::parse($data['bor_approval_date']);
             if ($approvalDate->isFuture()) {
                 return back()->withErrors(['bor_approval_date' => 'BOR approval date cannot be in the future.'])->withInput()
+                    ->with('_modal', 'updateProgram_' . $program->id)
                     ->with('toast', ['message' => 'Please fix the highlighted fields before submitting.', 'type' => 'error']);
             }
         }
-        
+
         try {
             $error = $this->service->updateProgram($program, $data);
         } catch (\Throwable) {
             return back()->withErrors(['error' => 'Failed to update program. Please try again.'])->withInput()
+                ->with('_modal', 'updateProgram_' . $program->id)
                 ->with('toast', ['message' => 'Failed to update program. Please try again.', 'type' => 'error']);
         }
 

@@ -1,4 +1,4 @@
-@php $hasErrors = $errors->hasAny(['objective_text']); @endphp
+@php $hasErrors = $errors->hasAny(['objective_text']) && session('_modal') === 'updateObjective_' . $objective->id; @endphp
 
 <x-modal.dialog id="updateObjectiveModal_{{ $objective->id }}" maxWidth="max-w-lg" width="w-11/12" variant="edit">
     <x-modal.header modalId="updateObjectiveModal_{{ $objective->id }}" variant="edit">
@@ -15,6 +15,7 @@
         x-init="@js($hasErrors) && $nextTick(() => document.getElementById('updateObjectiveModal_{{ $objective->id }}')?.showModal())">
         @csrf
         @method('PUT')
+        <input type="hidden" name="_modal" value="updateObjective_{{ $objective->id }}">
         <x-modal.body>
             <div class="space-y-4">
                 {{-- Generic / catch-block errors --}}
