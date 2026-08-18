@@ -60,7 +60,7 @@ class AuthController extends Controller
             'name'           => $request->name,
             'email'          => $request->email,
             'password'       => Hash::make($request->password),
-            'account_status' => 'active',
+            'account_status' => 'pending',
             'email_verified_at' => now(),
             'phone_number'   => $request->phone_number,
             'office'         => $request->office,
