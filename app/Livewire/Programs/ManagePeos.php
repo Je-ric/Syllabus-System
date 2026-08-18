@@ -5,6 +5,7 @@ namespace App\Livewire\Programs;
 use App\Models\Program;
 use App\Models\ProgramEducationalObjective;
 use App\Models\AuditLog;
+use App\Helpers\SecurityValidator;
 // use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -50,8 +51,13 @@ class ManagePeos extends Component
         try {
             DB::transaction(function () use ($peosData): void {
                 foreach ($peosData as $index => $row) {
-                    if (trim((string) ($row['peo_text'] ?? '')) === '') {
+                    $text = trim((string) ($row['peo_text'] ?? ''));
+                    if ($text === '') {
                         throw new \RuntimeException('PEO row ' . ($index + 1) . ' is blank.');
+                    }
+                    if (SecurityValidator::containsAnyInjection($text)) {
+                        $type = SecurityValidator::getInjectionType($text);
+                        throw new \RuntimeException('PEO row ' . ($index + 1) . " contains {$type} injection and is not allowed.");
                     }
                 }
 
@@ -89,7 +95,7 @@ class ManagePeos extends Component
             });
         } catch (\Throwable $e) {
             report($e);
-            $this->dispatch('lw-toast', type: 'error', message: 'Failed to save PEOs. Please try again.');
+            $this->dispatch('lw-toast', type: 'error', message: $e->getMessage());
             return;
         }
 

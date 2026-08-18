@@ -77,19 +77,26 @@
                                 placeholder="Describe what graduates will be professionally three to five years after graduation…"
                                 class="w-full rounded-lg border px-3 py-2 text-[13px] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all resize-none leading-relaxed"
                                 :class="{
-                                    'border-amber-300 bg-amber-50/50 focus:border-amber-400 focus:ring-amber-100':       peo.id && peo._dirty,
-                                    'border-emerald-300 bg-emerald-50/50 focus:border-emerald-400 focus:ring-emerald-100': !peo.id,
-                                    'border-slate-200 bg-white focus:border-emerald-400 focus:ring-emerald-100':           peo.id && !peo._dirty,
+                                    'border-rose-400 bg-rose-50/60 focus:border-rose-400 focus:ring-rose-100':             hasInjection(peo.peo_text),
+                                    'border-amber-300 bg-amber-50/50 focus:border-amber-400 focus:ring-amber-100':         !hasInjection(peo.peo_text) && peo.id && peo._dirty,
+                                    'border-emerald-300 bg-emerald-50/50 focus:border-emerald-400 focus:ring-emerald-100': !hasInjection(peo.peo_text) && !peo.id,
+                                    'border-slate-200 bg-white focus:border-emerald-400 focus:ring-emerald-100':           !hasInjection(peo.peo_text) && peo.id && !peo._dirty,
                                     'cursor-wait':                                                                         isSaving || deletingId !== null
                                 }"></textarea>
 
-                            <template x-if="!peo.id">
+                            <template x-if="hasInjection(peo.peo_text)">
+                                <p class="mt-1 flex items-center gap-1 text-[11px] text-rose-600 font-semibold">
+                                    <i class="bx bx-error text-sm shrink-0"></i>
+                                    Injection detected — scripts and HTML tags are not allowed.
+                                </p>
+                            </template>
+                            <template x-if="!hasInjection(peo.peo_text) && !peo.id">
                                 <p class="mt-1 flex items-center gap-1 text-[11px] text-emerald-600 font-medium">
                                     <i class="bx bx-plus-circle text-sm shrink-0"></i>
                                     New — click <strong class="mx-0.5">Save All</strong> to persist.
                                 </p>
                             </template>
-                            <template x-if="peo.id && peo._dirty">
+                            <template x-if="!hasInjection(peo.peo_text) && peo.id && peo._dirty">
                                 <p class="mt-1 flex items-center gap-1 text-[11px] text-amber-600 font-medium">
                                     <i class="bx bx-edit-alt text-sm shrink-0"></i>
                                     Modified — not saved yet.
@@ -212,6 +219,11 @@
                 });
             },
 
+            hasInjection(text) {
+                if (!text) return false;
+                return /<[^>]+>|javascript:|on\w+\s*=|<script|<\/script|--\s|union\s+select|drop\s+table|insert\s+into|delete\s+from|update\s+\w+\s+set/i.test(text);
+            },
+
             markDirty(peo) {
                 if (peo.id) peo._dirty = (peo.peo_text !== peo._original);
             },
@@ -272,6 +284,12 @@
                     window.dispatchEvent(new CustomEvent('lw-toast', { detail: { type: 'info', message: 'No changes to save.' } }));
                     return;
                 }
+                if (this.peos.some(p => this.hasInjection(p.peo_text))) {
+                    window.dispatchEvent(new CustomEvent('lw-toast', {
+                        detail: { type: 'error', message: 'One or more PEOs contain invalid content (scripts or HTML). Please fix them before saving.' }
+                    }));
+                    return;
+                }
                 const ok = await this.confirm({
                     title: 'Save all PEOs?',
                     message: 'This will save all new and modified PEOs and re-sequence codes.',
@@ -282,7 +300,16 @@
 
                 this.isSaving = true;
                 @this.call('savePeos', this.peos.map(p => ({ id: p.id, peo_text: p.peo_text })))
-                    .catch(() => {})
+                    .then(() => {
+                        // Success is handled by the 'peos-saved' event
+                    })
+                    .catch((error) => {
+                        // Display detailed error message to user
+                        const errorMessage = error?.message || 'Failed to save PEOs. Please try again.';
+                        window.dispatchEvent(new CustomEvent('lw-toast', { 
+                            detail: { type: 'error', message: errorMessage } 
+                        }));
+                    })
                     .finally(() => { this.isSaving = false; });
             }
         };

@@ -5,6 +5,7 @@ namespace App\Livewire\Programs;
 use App\Models\Program;
 use App\Models\ProgramOutcome;
 use App\Models\AuditLog;
+use App\Helpers\SecurityValidator;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -69,8 +70,13 @@ class ManagePos extends Component
         try {
             DB::transaction(function () use ($posData, $mappingData): void {
                 foreach ($posData as $index => $row) {
-                    if (trim((string) ($row['po_text'] ?? '')) === '') {
+                    $text = trim((string) ($row['po_text'] ?? ''));
+                    if ($text === '') {
                         throw new \RuntimeException('PO row ' . ($index + 1) . ' is blank.');
+                    }
+                    if (SecurityValidator::containsAnyInjection($text)) {
+                        $type = SecurityValidator::getInjectionType($text);
+                        throw new \RuntimeException('PO row ' . ($index + 1) . " contains {$type} injection and is not allowed.");
                     }
                 }
 
@@ -115,7 +121,7 @@ class ManagePos extends Component
             });
         } catch (\Throwable $e) {
             report($e);
-            $this->dispatch('lw-toast', type: 'error', message: 'Failed to save POs. Please try again.');
+            $this->dispatch('lw-toast', type: 'error', message: $e->getMessage());
             return;
         }
 

@@ -74,19 +74,26 @@
                             placeholder="Describe the ability or competency graduates will have by the time of graduation…"
                             class="w-full rounded-lg border px-3 py-2 text-[13px] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all resize-none leading-relaxed"
                             :class="{
-                                'border-amber-300 bg-amber-50/50 focus:border-amber-400 focus:ring-amber-100':   po.id && po._dirty,
-                                'border-blue-300 bg-blue-50/50 focus:border-blue-400 focus:ring-blue-100':       !po.id,
-                                'border-slate-200 bg-white focus:border-blue-400 focus:ring-blue-100':           po.id && !po._dirty,
-                                'cursor-wait':                                                                    isSaving || deletingId !== null
+                                'border-rose-400 bg-rose-50/60 focus:border-rose-400 focus:ring-rose-100':           hasInjection(po.po_text),
+                                'border-amber-300 bg-amber-50/50 focus:border-amber-400 focus:ring-amber-100':       !hasInjection(po.po_text) && po.id && po._dirty,
+                                'border-blue-300 bg-blue-50/50 focus:border-blue-400 focus:ring-blue-100':           !hasInjection(po.po_text) && !po.id,
+                                'border-slate-200 bg-white focus:border-blue-400 focus:ring-blue-100':               !hasInjection(po.po_text) && po.id && !po._dirty,
+                                'cursor-wait':                                                                        isSaving || deletingId !== null
                             }"></textarea>
 
-                        <template x-if="!po.id">
+                        <template x-if="hasInjection(po.po_text)">
+                            <p class="mt-1 flex items-center gap-1 text-[11px] text-rose-600 font-semibold">
+                                <i class="bx bx-error text-sm shrink-0"></i>
+                                Injection detected — scripts and HTML tags are not allowed.
+                            </p>
+                        </template>
+                        <template x-if="!hasInjection(po.po_text) && !po.id">
                             <p class="mt-1 flex items-center gap-1 text-[11px] text-blue-600 font-medium">
                                 <i class="bx bx-plus-circle text-sm shrink-0"></i>
                                 New — click <strong class="mx-0.5">Save All</strong> to persist.
                             </p>
                         </template>
-                        <template x-if="po.id && po._dirty">
+                        <template x-if="!hasInjection(po.po_text) && po.id && po._dirty">
                             <p class="mt-1 flex items-center gap-1 text-[11px] text-amber-600 font-medium">
                                 <i class="bx bx-edit-alt text-sm shrink-0"></i>
                                 Modified — not saved yet.
@@ -293,6 +300,11 @@
                     if (po.id) po._dirty = (po.po_text !== po._original);
                 },
 
+                hasInjection(text) {
+                    if (!text) return false;
+                    return /<[^>]+>|javascript:|on\w+\s*=|<script|<\/script|--\s|union\s+select|drop\s+table|insert\s+into|delete\s+from|update\s+\w+\s+set/i.test(text);
+                },
+
                 hasPending() { return this.pos.some(p => !p.id || p._dirty); },
 
                 pendingSummary() {
@@ -387,6 +399,12 @@
                         window.dispatchEvent(new CustomEvent('lw-toast', { detail: { type: 'info', message: 'No changes to save.' } }));
                         return;
                     }
+                    if (this.pos.some(p => this.hasInjection(p.po_text))) {
+                        window.dispatchEvent(new CustomEvent('lw-toast', {
+                            detail: { type: 'error', message: 'One or more POs contain invalid content (scripts or HTML). Please fix them before saving.' }
+                        }));
+                        return;
+                    }
                     const ok = await this.confirm({
                         title: 'Save all POs?',
                         message: 'This will save all new and modified POs and re-sequence codes.',
@@ -397,7 +415,16 @@
 
                     this.isSaving = true;
                     @this.call('savePos', this.pos.map(p => ({ id: p.id, po_text: p.po_text })), this.mapping)
-                        .catch(() => {})
+                        .then(() => {
+                            // Success is handled by the 'pos-saved' event
+                        })
+                        .catch((error) => {
+                            // Display detailed error message to user
+                            const errorMessage = error?.message || 'Failed to save POs. Please try again.';
+                            window.dispatchEvent(new CustomEvent('lw-toast', { 
+                                detail: { type: 'error', message: errorMessage } 
+                            }));
+                        })
                         .finally(() => { this.isSaving = false; });
                 }
             };
