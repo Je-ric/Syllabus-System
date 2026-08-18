@@ -9,6 +9,11 @@
 @endphp
 
 <x-modal.dialog :id="$modalId" maxWidth="max-w-lg" width="w-11/12" variant="edit">
+    @php
+        $hasEditErrors = $errors->hasAny(['name', 'email', 'phone_number', 'office'])
+                      && (string) old('user_id') === (string) $user->id;
+    @endphp
+
     <form method="POST" action="{{ route('account-approval.edit-user') }}" class="flex flex-col"
         x-data="{
             submitting: false,
@@ -30,7 +35,8 @@
                 return this.hasChanged && this.name.trim() !== '' && this.email.trim() !== '';
             }
         }"
-        x-on:submit="submitting = true">
+        x-on:submit="submitting = true"
+        x-init="@js($hasEditErrors) && $nextTick(() => document.getElementById(@js($modalId))?.showModal())">
         @csrf
         @method('PUT')
         <input type="hidden" name="user_id" value="{{ $user->id }}">
@@ -67,6 +73,9 @@
                             ::readonly="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
                             required />
+                        @if($hasEditErrors)
+                            @error('name') <p class="mt-1 text-[12px] text-red-600">{{ $message }}</p> @enderror
+                        @endif
                     </div>
                     <div>
                         <x-modal.modal-label>Phone Number</x-modal.modal-label>
@@ -76,15 +85,21 @@
                             x-model="phone"
                             ::readonly="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''" />
+                        @if($hasEditErrors)
+                            @error('phone_number') <p class="mt-1 text-[12px] text-red-600">{{ $message }}</p> @enderror
+                        @endif
                     </div>
                     <div>
                         <x-modal.modal-label isRequired>Email Address</x-modal.modal-label>
-                        <x-form.input type="email" name="email"
+                        <x-form.input type="text" name="email"
                             value="{{ old('email', $user->email) }}"
                             x-model="email"
                             ::readonly="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
                             required />
+                        @if($hasEditErrors)
+                            @error('email') <p class="mt-1 text-[12px] text-red-600">{{ $message }}</p> @enderror
+                        @endif
                     </div>
                     <div class="sm:col-span-2">
                         <x-modal.modal-label>Office / Department</x-modal.modal-label>
@@ -94,6 +109,9 @@
                             x-model="office"
                             ::readonly="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''" />
+                        @if($hasEditErrors)
+                            @error('office') <p class="mt-1 text-[12px] text-red-600">{{ $message }}</p> @enderror
+                        @endif
                     </div>
                 </div>
 

@@ -26,7 +26,7 @@
             </div>
 
             <x-feedback-status.alert type="error" :showTitle="false">
-                This will permanently delete the department and all its programs, courses, and syllabi.
+                This will permanently delete the department and all its programs and objectives. Cannot delete if courses exist under programs.
             </x-feedback-status.alert>
         </div>
     </x-modal.body>

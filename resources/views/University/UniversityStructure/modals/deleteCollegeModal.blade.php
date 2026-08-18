@@ -22,7 +22,7 @@
             </div>
 
             <x-feedback-status.alert type="error" :showTitle="false">
-                This will permanently delete the college and all its departments, programs, courses, and syllabi.
+                This will permanently delete the college and all its departments, programs, and objectives. Cannot delete if courses exist under programs.
             </x-feedback-status.alert>
         </div>
     </x-modal.body>

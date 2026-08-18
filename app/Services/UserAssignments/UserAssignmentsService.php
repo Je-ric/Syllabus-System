@@ -170,33 +170,54 @@ class UserAssignmentsService
         $skippedCount = 0;
         $failedUsers = [];
 
-        return $this->runInTransaction(
-            function() use ($department, $users, &$assignedCount, &$skippedCount, &$failedUsers) {
-                foreach ($users as $user) {
-                    if ($toast = $this->runChecks($user, [
-                        ['checkTargetHasRoleOrAdmin', ['faculty', 'User must have faculty role assigned.']],
-                        ['checkAlreadyAssigned', ['faculty', null, $department->id, '', 'info']],
-                        ['checkFacultyCrossDepartmentConflict'],
-                    ])) {
-                        $skippedCount++;
-                        continue;
-                    }
+        try {
+            DB::beginTransaction();
 
-                    try {
-                        $this->createFacultyAssignment($user, $department);
-                        $assignedCount++;
-                    } catch (Throwable $e) {
-                        $failedUsers[] = $user->name;
-                    }
+            foreach ($users as $user) {
+                if ($toast = $this->runChecks($user, [
+                    ['checkTargetHasRoleOrAdmin', ['faculty', 'User must have faculty role assigned.']],
+                    ['checkAlreadyAssigned', ['faculty', null, $department->id, '', 'info']],
+                    ['checkFacultyCrossDepartmentConflict'],
+                ])) {
+                    $skippedCount++;
+                    continue;
                 }
 
-                if ($assignedCount === 0) {
-                    throw new \Exception('No faculty members were assigned.');
+                try {
+                    $this->createFacultyAssignment($user, $department);
+                    $assignedCount++;
+                } catch (Throwable $e) {
+                    $failedUsers[] = $user->name;
                 }
-            },
-            'Failed to assign faculty members. Please try again.',
-            $this->getBulkAssignmentMessage($assignedCount, $skippedCount, $failedUsers, $department->name)
-        );
+            }
+
+            if ($assignedCount === 0) {
+                DB::rollBack();
+                return [
+                    'toast' => [
+                        'message' => 'No faculty members were assigned. All selected users are already assigned or invalid.',
+                        'type' => 'error',
+                    ],
+                ];
+            }
+
+            DB::commit();
+
+            return [
+                'toast' => [
+                    'message' => $this->getBulkAssignmentMessage($assignedCount, $skippedCount, $failedUsers, $department->name),
+                    'type' => 'success',
+                ],
+            ];
+        } catch (Throwable $e) {
+            DB::rollBack();
+            return [
+                'toast' => [
+                    'message' => 'Failed to assign faculty members. Please try again.',
+                    'type' => 'error',
+                ],
+            ];
+        }
     }
 
     private function getBulkAssignmentMessage(int $assignedCount, int $skippedCount, array $failedUsers, string $departmentName): string

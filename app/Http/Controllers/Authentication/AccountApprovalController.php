@@ -146,9 +146,18 @@ class AccountApprovalController extends Controller
         $request->validate([
             'user_id'      => 'required|exists:users,id',
             'name'         => 'required|string|max:255',
-            'email'        => 'required|email|max:255|unique:users,email,' . $request->input('user_id'),
+            'email'        => [
+                'required',
+                'email',
+                'max:255',
+                'regex:/@(clsu\.edu\.ph|clsu2\.edu\.ph)$/i',
+                \Illuminate\Validation\Rule::unique('users', 'email')->ignore($request->input('user_id')),
+            ],
             'phone_number' => 'nullable|string|max:30',
             'office'       => 'nullable|string|max:255',
+        ], [
+            'email.regex' => 'Email must be a @clsu.edu.ph or @clsu2.edu.ph address.',
+            'email.unique' => 'This email is already in use by another account.',
         ]);
 
         // Only admins may edit other users' accounts
