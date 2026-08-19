@@ -51,6 +51,7 @@
         cancel()  { this.show = false; if (this._resolve) this._resolve(false); }
     }"
     @confirm-dialog:{{ $ns }}.window="open($event.detail)"
+    @click="cancel()"
     x-show="show"
     x-cloak
     class="fixed inset-0 z-[60] flex items-center justify-center p-4"

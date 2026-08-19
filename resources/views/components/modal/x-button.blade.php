@@ -2,7 +2,9 @@
 <button type="button" onclick="this.closest('dialog')?.close()"
     class="shrink-0 rounded-lg p-1.5
            text-[#A5B2BD] hover:text-[#394056] hover:bg-[#F1F3F5]
-           transition-colors duration-150 focus:outline-none"
+           active:scale-90
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C075]/30
+           transition-all duration-150"
     aria-label="Close">
     <i class="bx bx-x text-xl leading-none"></i>
 </button>

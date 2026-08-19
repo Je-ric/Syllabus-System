@@ -153,6 +153,52 @@ details summary::-webkit-details-marker {
 
 [x-cloak] { display: none !important; }
 
+/* ── Native <dialog> entrance / exit animation ───────────────────────────── */
+/* @starting-style + allow-discrete lets display:none→block actually transition.
+   Chrome/Edge/Safari animate; Firefox falls back to instant open (no error). */
+dialog.modal {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+    transition:
+        opacity 180ms ease,
+        transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1),
+        overlay 180ms ease allow-discrete,
+        display 180ms ease allow-discrete;
+}
+dialog.modal[open] {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+}
+@starting-style {
+    dialog.modal[open] {
+        opacity: 0;
+        transform: scale(0.96) translateY(8px);
+    }
+}
+dialog.modal::backdrop {
+    background: rgba(9, 9, 11, 0.45);
+    backdrop-filter: blur(3px);
+    opacity: 0;
+    transition:
+        opacity 180ms ease,
+        display 180ms ease allow-discrete,
+        overlay 180ms ease allow-discrete;
+}
+dialog.modal[open]::backdrop {
+    opacity: 1;
+}
+@starting-style {
+    dialog.modal[open]::backdrop {
+        opacity: 1;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    dialog.modal,
+    dialog.modal::backdrop {
+        transition: none;
+    }
+}
+
 .no-scrollbar::-webkit-scrollbar {
     display: none; /* Chrome, Safari */
 }
