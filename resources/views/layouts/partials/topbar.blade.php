@@ -4,7 +4,8 @@
                {{ $isWizardRoute ? 'hidden' : '' }}"
         style="box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06);">
 
-    <div class="px-4 sm:px-6 h-14 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+    <div class="px-4 sm:px-6 h-14 flex items-center justify-between gap-3
+                md:grid md:grid-cols-[1fr_auto_1fr]">
 
         {{-- Left: hamburger + brand text --}}
         <div class="flex items-center gap-3 min-w-0">
@@ -29,9 +30,9 @@
             </div>
         </div>
 
-        {{-- Center: active semester pill --}}
+        {{-- Center: active semester pill (md+ only) --}}
         @if (isset($activeSemester) && $activeSemester)
-            <div class="hidden md:flex items-center gap-2">
+            <div class="hidden md:flex items-center justify-center gap-2">
                 <span class="relative flex h-2 w-2 shrink-0">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00C075] opacity-60"></span>
                     <span class="relative inline-flex rounded-full h-2 w-2 bg-[#00965F]"></span>
@@ -41,7 +42,7 @@
                 </span>
             </div>
         @else
-            <div class="hidden md:flex items-center gap-2">
+            <div class="hidden md:flex items-center justify-center gap-2">
                 <span class="h-2 w-2 rounded-full bg-[#C1C8D4] shrink-0"></span>
                 <span class="text-[12px] font-semibold text-[#A5B2BD] whitespace-nowrap">No active semester</span>
             </div>
@@ -49,7 +50,7 @@
 
         {{-- Right: notification bell + profile pill --}}
         @auth
-            <div class="flex items-center gap-2 shrink-0 justify-end">
+            <div class="flex items-center gap-2 shrink-0 md:justify-end">
 
                 @include('layouts.partials.notification-bell', [
                     'initialUnreadCount' => $user

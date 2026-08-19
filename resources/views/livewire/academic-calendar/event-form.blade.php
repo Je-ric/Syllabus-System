@@ -74,8 +74,8 @@
         },
 
         initFlatpickr() {
-            const semMin = '{{ $semester?->start_date ?? '' }}';
-            const semMax = '{{ $semester?->end_date ?? '' }}';
+            const semMin = '{{ $semester?->start_date ? \Carbon\Carbon::parse($semester->start_date)->format('Y-m-d') : '' }}';
+            const semMax = '{{ $semester?->end_date ? \Carbon\Carbon::parse($semester->end_date)->format('Y-m-d') : '' }}';
             const semId  = '{{ $semesterId }}';
 
             const fpConfig = {
@@ -83,8 +83,16 @@
                 altInput   : true,
                 altFormat  : 'F j, Y',
                 allowInput : false,
+                disableMobile: true,
                 minDate    : semMin || null,
                 maxDate    : semMax || null,
+                disable: [
+                    function(date) {
+                        if (semMin && date < new Date(semMin)) return true;
+                        if (semMax && date > new Date(semMax)) return true;
+                        return false;
+                    }
+                ]
             };
 
             const fpStartKey = '_evFpStart_' + semId;

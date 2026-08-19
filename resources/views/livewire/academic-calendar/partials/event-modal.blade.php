@@ -184,6 +184,14 @@
                             </div>
                         </div>
 
+                        @if($semester?->start_date && $semester?->end_date)
+                            <p class="text-[11px] text-[#72809E] mt-1 flex items-center gap-1">
+                                <i class="bx bx-info-circle text-[#16a34a]"></i>
+                                Valid dates: {{ \Carbon\Carbon::parse($semester->start_date)->format('F j, Y') }}
+                                to {{ \Carbon\Carbon::parse($semester->end_date)->format('F j, Y') }}
+                            </p>
+                        @endif
+
                         <div x-show="isRange" x-cloak class="mt-2">
                             <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#166534] bg-[#dcfce7] rounded-full px-2.5 py-0.5">
                                 <i class="bx bx-calendar-check text-xs"></i>
