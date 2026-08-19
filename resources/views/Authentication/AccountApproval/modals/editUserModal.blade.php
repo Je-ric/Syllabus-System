@@ -14,7 +14,7 @@
                       && (string) old('user_id') === (string) $user->id;
     @endphp
 
-    <form method="POST" action="{{ route('account-approval.edit-user') }}" class="flex flex-col"
+    <form method="POST" action="{{ route('account-approval.edit-user') }}" class="flex flex-col max-h-[85vh]"
         x-data="{
             submitting: false,
             name: @js($user->name),
@@ -72,7 +72,7 @@
             </div>
         </x-modal.header>
 
-        <x-modal.body>
+        <x-modal.body class="overflow-y-auto flex-1">
             <div class="space-y-4">
 
                 {{-- Generic / catch-block errors --}}
@@ -106,7 +106,7 @@
                     <div class="sm:col-span-2">
                         <x-modal.modal-label isRequired>Full Name</x-modal.modal-label>
                         <x-form.input type="text" name="name"
-                            value="{{ $hasEditErrors ? old('name') : $user->name }}"
+                            value="{{ $user->name }}"
                             x-model="name"
                             pattern="[\p{L}\s]+"
                             title="Name must contain letters and spaces only"
@@ -124,7 +124,7 @@
                     <div>
                         <x-modal.modal-label>Phone Number</x-modal.modal-label>
                         <x-form.input type="text" name="phone_number"
-                            value="{{ $hasEditErrors ? (old('phone_number') ?? '') : ($user->phone_number ?? '') }}"
+                            value="{{ $user->phone_number ?? '' }}"
                             placeholder="e.g. 09XX XXX XXXX"
                             x-model="phone"
                             ::readonly="submitting"
@@ -140,7 +140,7 @@
                     <div>
                         <x-modal.modal-label isRequired>Email Address</x-modal.modal-label>
                         <x-form.input type="text" name="email"
-                            value="{{ $hasEditErrors ? old('email') : $user->email }}"
+                            value="{{ $user->email }}"
                             x-model="email"
                             ::readonly="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
@@ -156,7 +156,7 @@
                     <div class="sm:col-span-2">
                         <x-modal.modal-label>Office / Department</x-modal.modal-label>
                         <x-form.input type="text" name="office"
-                            value="{{ $hasEditErrors ? (old('office') ?? '') : ($user->office ?? '') }}"
+                            value="{{ $user->office ?? '' }}"
                             placeholder="e.g. College of Engineering"
                             x-model="office"
                             ::readonly="submitting"
