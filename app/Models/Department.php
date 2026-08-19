@@ -71,7 +71,10 @@ class Department extends Model
     // Used in: index() - AcademicStructureController
     public function scopeWithRelations($query)
     {
-        return $query->with('college', 'programs');
+        return $query->with(['college', 'programs' => function($q) {
+            $q->select('programs.id', 'programs.name', 'programs.bor_approval_no', 'programs.bor_approval_date')
+              ->withPivot('role', 'cais_department_id');
+        }]);
     }
 
     // Used in: objective_store() - ObjectiveController

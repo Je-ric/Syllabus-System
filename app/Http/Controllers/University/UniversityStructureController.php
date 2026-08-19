@@ -19,33 +19,41 @@ class UniversityStructureController extends Controller
 
     public function index()
     {
-        $colleges = College::orderBy('name')->get();
-        $departments = Department::withRelations()->orderBy('name')->get();
-        $programs = Program::with('departments')->orderBy('name')->get();
-        $allDepartments = Department::with('college')->orderBy('name')->get();
+        $colleges = College::withCount('departments')->orderBy('name')->get();
 
-        // Pre-compute counts for performance
-        $collegeData = $colleges->map(function ($college) use ($departments, $programs) {
+        $departments = Department::withRelations()
+            ->withCount('programs')
+            ->orderBy('name')
+            ->get();
+
+        $allDepartments = Department::select('id', 'name', 'college_id')
+            ->with('college:id,name')
+            ->orderBy('name')
+            ->get();
+
+        $programs = Program::with(['departments'])
+            ->withCount('courses')
+            ->orderBy('name')
+            ->get();
+
+        $collegeData = $colleges->map(function ($college) use ($departments) {
             $collegeDepts = $departments->where('college_id', $college->id);
-            $collegeDeptIds = $collegeDepts->pluck('id');
 
-            $collegePrograms = $programs->filter(function ($program) use ($collegeDeptIds) {
-                return $program->departments->pluck('id')->intersect($collegeDeptIds)->isNotEmpty();
-            });
+            $programCount = $collegeDepts->sum(fn ($dept) => $dept->programs->count());
 
             return [
-                'college' => $college,
-                'dept_count' => $collegeDepts->count(),
-                'program_count' => $collegePrograms->count(),
-                'departments' => $collegeDepts,
+                'college'       => $college,
+                'dept_count'    => $collegeDepts->count(),
+                'program_count' => $programCount,
+                'departments'   => $collegeDepts,
             ];
         });
 
         return view('University.UniversityStructure.index', [
             'colleges'       => $colleges,
             'departments'    => $departments,
-            'programs'       => $programs,
             'allDepartments' => $allDepartments,
+            'programs'       => $programs,
             'collegeData'    => $collegeData,
         ]);
     }

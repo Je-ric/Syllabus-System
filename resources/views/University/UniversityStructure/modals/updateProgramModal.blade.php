@@ -1,30 +1,30 @@
 @php
-    $primaryDeptId     = $program->departments->where('pivot.role', 'primary')->first()?->id;
-    $supportingDeptIds = $program->departments->where('pivot.role', 'supporting')->pluck('id')->toArray();
-    $hasErrors = $errors->hasAny(['name', 'primary_department_id', 'bor_approval_no', 'bor_approval_date']) && session('_modal') === 'updateProgram_' . $program->id;
+    $editErrors  = $errors->hasAny(['name', 'primary_department_id', 'bor_approval_no', 'bor_approval_date'])
+                   && str_starts_with(session('_modal', ''), 'updateProgram_');
+    $editModalId = session('_modal', '');
 @endphp
 
-<x-modal.dialog id="updateProgramModal_{{ $program->id }}" maxWidth="max-w-6xl" width="w-2xl sm:w-full" variant="edit">
-    <x-modal.header modalId="updateProgramModal_{{ $program->id }}" variant="edit">
+<x-modal.dialog id="updateProgramModal" maxWidth="max-w-6xl" width="w-2xl sm:w-full" variant="edit">
+    <x-modal.header modalId="updateProgramModal" variant="edit">
         <div>
             <p class="text-[15px] font-bold text-[#0f172a]">Edit Program</p>
-            <p class="text-[13px] text-[#94a3b8] truncate max-w-xs">{{ $program->name }}</p>
+            <p id="updateProgramModal_subtitle" class="text-[13px] text-[#94a3b8] truncate max-w-xs"></p>
         </div>
     </x-modal.header>
 
-    <form method="POST" action="{{ route('university.structure.program.update', $program) }}" class="flex flex-col min-h-0"
+    <form id="updateProgramModal_form" method="POST" class="flex flex-col min-h-0"
         x-data="{
             submitting: false,
-            name: @js($program->name),
-            primaryDept: @js((string) ($primaryDeptId ?? '')),
-            supportingDepts: @js(array_map('strval', $supportingDeptIds)),
-            borNo: @js($program->bor_approval_no ?? ''),
-            borDate: @js($program->bor_approval_date ?? ''),
-            origName: @js($program->name),
-            origPrimaryDept: @js((string) ($primaryDeptId ?? '')),
-            origSupportingDepts: @js(array_map('strval', $supportingDeptIds)),
-            origBorNo: @js($program->bor_approval_no ?? ''),
-            origBorDate: @js($program->bor_approval_date ?? ''),
+            name: '',
+            primaryDept: '',
+            supportingDepts: [],
+            borNo: '',
+            borDate: '',
+            origName: '',
+            origPrimaryDept: '',
+            origSupportingDepts: [],
+            origBorNo: '',
+            origBorDate: '',
             get hasChanged() {
                 if (this.name.trim() !== this.origName.trim()) return true;
                 if (this.primaryDept !== this.origPrimaryDept) return true;
@@ -33,73 +33,37 @@
                 const a = [...this.supportingDepts].sort();
                 const b = [...this.origSupportingDepts].sort();
                 return JSON.stringify(a) !== JSON.stringify(b);
-            },
-            resetForm() {
-                this.name = this.origName;
-                this.primaryDept = this.origPrimaryDept;
-                this.supportingDepts = [...this.origSupportingDepts];
-                this.borNo = this.origBorNo;
-                this.borDate = this.origBorDate;
             }
         }"
-        x-on:submit="submitting = true"
-        x-init="
-            const modal = document.getElementById('updateProgramModal_{{ $program->id }}');
-            if (modal) {
-                modal.addEventListener('open', () => {
-                    this.resetForm();
-                });
-            }
-            @if($hasErrors)
-                $nextTick(() => { 
-                    if (modal) {
-                        this.name = @js(old('name'));
-                        this.primaryDept = @js(old('primary_department_id'));
-                        this.supportingDepts = @js(old('supporting_department_ids', []));
-                        this.borNo = @js(old('bor_approval_no', ''));
-                        this.borDate = @js(old('bor_approval_date', ''));
-                        modal.showModal();
-                    }
-                });
-            @endif
-        ">
+        x-on:submit="submitting = true">
         @csrf
         @method('PUT')
-        <input type="hidden" name="_modal" value="updateProgram_{{ $program->id }}">
+        <input type="hidden" name="_modal" id="updateProgramModal_modalKey" value="">
+        <input type="hidden" name="primary_department_id" x-model="primaryDept">
 
         <x-modal.body>
-            {{-- Generic / catch-block errors --}}
-            @if ($errors->has('error'))
-                <x-feedback-status.alert type="error" :showTitle="false" class="mb-4">
-                    <strong>Something went wrong:</strong> {{ $errors->first('error') }}
-                </x-feedback-status.alert>
-            @endif
-
-            {{-- Validation summary --}}
-            @if ($hasErrors)
+            @if ($editErrors)
                 <x-feedback-status.alert type="error" :showTitle="false" class="mb-4">
                     Please fix the highlighted fields below before submitting.
                 </x-feedback-status.alert>
             @endif
 
-            {{-- Two-column grid on md+, single column on mobile --}}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
 
                 {{-- LEFT COLUMN --}}
                 <div class="flex flex-col gap-4">
 
                     <div>
-                        <x-modal.modal-label for="editProgramName_{{ $program->id }}" isRequired>Program Name</x-modal.modal-label>
+                        <x-modal.modal-label for="updateProgramModal_name" isRequired>Program Name</x-modal.modal-label>
                         <x-form.input
-                            id="editProgramName_{{ $program->id }}"
+                            id="updateProgramModal_name"
                             type="text"
                             name="name"
-                            value="{{ $program->name }}"
                             x-model="name"
                             ::readonly="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
                             required />
-                        @if ($hasErrors)
+                        @if ($editErrors)
                             @error('name')
                                 <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
                                     <i class="bx bx-error-circle"></i> {{ $message }}
@@ -109,10 +73,9 @@
                     </div>
 
                     <div>
-                        <x-modal.modal-label for="editPrimaryDept_{{ $program->id }}" isRequired>Primary Department</x-modal.modal-label>
-                        <input type="hidden" name="primary_department_id" x-model="primaryDept">
+                        <x-modal.modal-label for="updateProgramModal_primaryDept" isRequired>Primary Department</x-modal.modal-label>
                         <select
-                            id="editPrimaryDept_{{ $program->id }}"
+                            id="updateProgramModal_primaryDept"
                             x-model="primaryDept"
                             :disabled="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
@@ -128,7 +91,7 @@
                             @endforeach
                         </select>
                         <p class="text-[11px] text-[#93A1AF] mt-1">Main department responsible for this program</p>
-                        @if ($hasErrors)
+                        @if ($editErrors)
                             @error('primary_department_id')
                                 <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
                                     <i class="bx bx-error-circle"></i> {{ $message }}
@@ -138,16 +101,15 @@
                     </div>
 
                     <div>
-                        <x-modal.modal-label for="editBorNo_{{ $program->id }}">BOR Approval Resolution No.</x-modal.modal-label>
+                        <x-modal.modal-label for="updateProgramModal_borNo">BOR Approval Resolution No.</x-modal.modal-label>
                         <x-form.input
-                            id="editBorNo_{{ $program->id }}"
+                            id="updateProgramModal_borNo"
                             type="text"
                             name="bor_approval_no"
-                            value="{{ $program->bor_approval_no }}"
                             x-model="borNo"
                             ::readonly="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''" />
-                        @if ($hasErrors)
+                        @if ($editErrors)
                             @error('bor_approval_no')
                                 <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
                                     <i class="bx bx-error-circle"></i> {{ $message }}
@@ -157,16 +119,15 @@
                     </div>
 
                     <div>
-                        <x-modal.modal-label for="editBorDate_{{ $program->id }}">BOR Approval Date</x-modal.modal-label>
+                        <x-modal.modal-label for="updateProgramModal_borDate">BOR Approval Date</x-modal.modal-label>
                         <x-form.input
-                            id="editBorDate_{{ $program->id }}"
+                            id="updateProgramModal_borDate"
                             type="date"
                             name="bor_approval_date"
-                            value="{{ $program->bor_approval_date }}"
                             x-model="borDate"
                             ::readonly="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''" />
-                        @if ($hasErrors)
+                        @if ($editErrors)
                             @error('bor_approval_date')
                                 <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
                                     <i class="bx bx-error-circle"></i> {{ $message }}
@@ -177,7 +138,7 @@
 
                 </div>
 
-                {{-- RIGHT COLUMN — Supporting Departments --}}
+                {{-- RIGHT COLUMN — Supporting Departments (rendered once) --}}
                 <div class="flex flex-col gap-1">
                     <x-modal.modal-label>Supporting Departments <span class="text-[#93A1AF] font-normal">(Optional)</span></x-modal.modal-label>
                     <p class="text-[11px] text-[#93A1AF] mb-2">Departments that also contribute to this program</p>
@@ -214,7 +175,7 @@
         </x-modal.body>
 
         <x-modal.footer>
-            <x-modal.close-button :modalId="'updateProgramModal_' . $program->id" text="Cancel" ::disabled="submitting" />
+            <x-modal.close-button modalId="updateProgramModal" text="Cancel" ::disabled="submitting" />
             <x-ui.button type="submit" variant="save"
                 submitting="submitting" loadingText="Saving…"
                 ::disabled="submitting || !name.trim() || !primaryDept || !hasChanged">
@@ -223,3 +184,40 @@
         </x-modal.footer>
     </form>
 </x-modal.dialog>
+
+<script>
+function openEditProgramModal(id, name, primaryDept, supportingDepts, borNo, borDate, routeBase) {
+    const modal = document.getElementById('updateProgramModal');
+    const form  = document.getElementById('updateProgramModal_form');
+    form.action = routeBase + '/' + id;
+    document.getElementById('updateProgramModal_subtitle').textContent = name;
+    document.getElementById('updateProgramModal_modalKey').value = 'updateProgram_' + id;
+    const data = Alpine.$data(form);
+    data.name               = name;
+    data.primaryDept        = String(primaryDept);
+    data.supportingDepts    = supportingDepts.map(String);
+    data.borNo              = borNo;
+    data.borDate            = borDate;
+    data.origName           = name;
+    data.origPrimaryDept    = String(primaryDept);
+    data.origSupportingDepts = supportingDepts.map(String);
+    data.origBorNo          = borNo;
+    data.origBorDate        = borDate;
+    data.submitting         = false;
+    modal.showModal();
+}
+
+@if ($editErrors)
+    document.addEventListener('alpine:init', () => {
+        openEditProgramModal(
+            @js(explode('_', $editModalId)[1] ?? ''),
+            @js(old('name', '')),
+            @js(old('primary_department_id', '')),
+            @js(old('supporting_department_ids', [])),
+            @js(old('bor_approval_no', '')),
+            @js(old('bor_approval_date', '')),
+            '{{ rtrim(url('/university-structure/program'), '/') }}'
+        );
+    });
+@endif
+</script>

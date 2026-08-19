@@ -1,5 +1,5 @@
-<x-modal.dialog id="deleteCollegeModal_{{ $college->id }}" maxWidth="max-w-md" width="w-11/12" variant="delete">
-    <x-modal.header modalId="deleteCollegeModal_{{ $college->id }}" variant="delete">
+<x-modal.dialog id="deleteCollegeModal" maxWidth="max-w-md" width="w-11/12" variant="delete">
+    <x-modal.header modalId="deleteCollegeModal" variant="delete">
         <span class="text-[#9f1239]">Delete College</span>
     </x-modal.header>
 
@@ -10,15 +10,12 @@
             <div class="rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-4 space-y-2">
                 <div class="flex items-center justify-between">
                     <span class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#94a3b8]">College</span>
-                    <span class="text-[13px] font-semibold text-[#0f172a]">{{ $college->name }}</span>
+                    <span id="deleteCollegeModal_name" class="text-[13px] font-semibold text-[#0f172a]"></span>
                 </div>
-                @php $deptCount = $college->departments->count(); @endphp
-                @if ($deptCount > 0)
-                    <div class="flex items-center justify-between">
-                        <span class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#94a3b8]">Departments</span>
-                        <span class="text-[13px] font-semibold text-rose-600">{{ $deptCount }}</span>
-                    </div>
-                @endif
+                <div id="deleteCollegeModal_deptRow" class="hidden flex items-center justify-between">
+                    <span class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#94a3b8]">Departments</span>
+                    <span id="deleteCollegeModal_deptCount" class="text-[13px] font-semibold text-rose-600"></span>
+                </div>
             </div>
 
             <x-feedback-status.alert type="error" :showTitle="false">
@@ -28,8 +25,8 @@
     </x-modal.body>
 
     <x-modal.footer>
-        <x-modal.close-button :modalId="'deleteCollegeModal_' . $college->id" text="Cancel" />
-        <form action="{{ route('university.structure.college.destroy', $college->id) }}" method="POST"
+        <x-modal.close-button modalId="deleteCollegeModal" text="Cancel" />
+        <form id="deleteCollegeModal_form" method="POST"
             x-data="{ submitting: false }"
             x-on:submit="submitting = true">
             @csrf
@@ -42,3 +39,19 @@
         </form>
     </x-modal.footer>
 </x-modal.dialog>
+
+<script>
+function openDeleteCollegeModal(id, name, deptCount, routeBase) {
+    document.getElementById('deleteCollegeModal_name').textContent = name;
+    document.getElementById('deleteCollegeModal_form').action = routeBase + '/' + id;
+    const deptRow = document.getElementById('deleteCollegeModal_deptRow');
+    if (deptCount > 0) {
+        deptRow.classList.remove('hidden');
+        document.getElementById('deleteCollegeModal_deptCount').textContent = deptCount;
+    } else {
+        deptRow.classList.add('hidden');
+    }
+    Alpine.$data(document.getElementById('deleteCollegeModal_form')).submitting = false;
+    document.getElementById('deleteCollegeModal').showModal();
+}
+</script>

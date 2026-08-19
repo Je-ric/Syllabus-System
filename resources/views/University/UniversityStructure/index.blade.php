@@ -2,6 +2,10 @@
 
 @section('content')
 
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+
     <script>
         function openAddDepartmentModal(collegeId) {
             const input = document.getElementById('addDepartment_college_id');
@@ -18,6 +22,7 @@
                 console.error('addProgramModal not found');
             }
         }
+
     </script>
 
     <x-layout.page-header
@@ -34,37 +39,53 @@
     <x-layout.help-panel module="university-structure" />
 
     <script>
+        // Optimized search with better debouncing and minimal DOM queries
+        let searchTimeout;
         function filterStructure(searchTerm) {
-            const term = searchTerm.toLowerCase();
-            const collegeButtons = document.querySelectorAll('[data-college-search]');
-            const departments = document.querySelectorAll('[data-department-search]');
-            const programs = document.querySelectorAll('[data-program-search]');
+            clearTimeout(searchTimeout);
+            
+            if (!searchTerm.trim()) {
+                // Show all elements when search is empty
+                document.querySelectorAll('[data-college-search], [data-department-search], [data-program-search]')
+                    .forEach(el => el.style.display = '');
+                return;
+            }
 
-            // Debounce function for better performance
-            let timeout;
-            clearTimeout(timeout);
-            timeout = setTimeout(() => {
-                collegeButtons.forEach(button => {
-                    const name = button.getAttribute('data-college-search').toLowerCase();
-                    button.style.display = name.includes(term) ? '' : 'none';
-                });
+            searchTimeout = setTimeout(() => {
+                const term = searchTerm.toLowerCase();
+                
+                // Cache queries to minimize DOM operations
+                const collegeButtons = document.querySelectorAll('[data-college-search]');
+                const departments = document.querySelectorAll('[data-department-search]');
+                const programs = document.querySelectorAll('[data-program-search]');
 
-                departments.forEach(dept => {
-                    const name = dept.getAttribute('data-department-search').toLowerCase();
-                    dept.style.display = name.includes(term) ? '' : 'none';
-                });
+                // Batch DOM updates using requestAnimationFrame for smoother rendering
+                requestAnimationFrame(() => {
+                    collegeButtons.forEach(button => {
+                        const name = button.getAttribute('data-college-search').toLowerCase();
+                        button.style.display = name.includes(term) ? '' : 'none';
+                    });
 
-                programs.forEach(program => {
-                    const name = program.getAttribute('data-program-search').toLowerCase();
-                    program.style.display = name.includes(term) ? '' : 'none';
+                    departments.forEach(dept => {
+                        const name = dept.getAttribute('data-department-search').toLowerCase();
+                        dept.style.display = name.includes(term) ? '' : 'none';
+                    });
+
+                    programs.forEach(program => {
+                        const name = program.getAttribute('data-program-search').toLowerCase();
+                        program.style.display = name.includes(term) ? '' : 'none';
+                    });
                 });
-            }, 100);
+            }, 300); // Increased debounce for better performance
         }
     </script>
 
     @if($colleges->count())
 
-    <div x-data="{ selectedCollege: {{ $colleges->first()->id }}, searchTerm: '' }">
+    <div x-data="{ 
+        selectedCollege: {{ $colleges->first()->id }}, 
+        searchTerm: ''
+    }">
 
         <x-layout.panel>
             {{-- Search bar --}}
@@ -130,7 +151,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="dropdown dropdown-end shrink-0" @click.stop>
+                                        <div class="dropdown dropdown-end shrink-0" onclick="event.stopPropagation()">
                                             <label tabindex="0"
                                                 class="w-7 h-7 rounded-[7px] flex items-center justify-center text-[#B4C0CA] hover:text-[#06754E] hover:bg-[#D5FFF0] cursor-pointer transition-all duration-150">
                                                 <i class="bx bx-dots-vertical-rounded text-base leading-none"></i>
@@ -140,13 +161,13 @@
                                                 style="box-shadow: 0 4px 16px rgba(16,24,40,0.10);">
                                                 <li>
                                                     <a class="flex items-center gap-2 px-3 py-1.5 rounded-[7px] hover:bg-[#F1F3F5] text-[#394056] text-[13px]"
-                                                       onclick="document.getElementById('updateCollegeModal_{{ $college->id }}').showModal()">
+                                                       onclick="openEditCollegeModal({{ $college->id }}, @js($college->name), '{{ url('university-structure/college') }}')">
                                                         <i class="bx bx-edit-alt text-[#3197D6] text-sm"></i> Edit
                                                     </a>
                                                 </li>
                                                 <li>
                                                     <a class="flex items-center gap-2 px-3 py-1.5 rounded-[7px] hover:bg-[#FFE3E2] text-[#D21B14] text-[13px]"
-                                                       onclick="document.getElementById('deleteCollegeModal_{{ $college->id }}').showModal()">
+                                                       onclick="openDeleteCollegeModal({{ $college->id }}, @js($college->name), {{ $college->departments_count }}, '{{ url('university-structure/college') }}')">
                                                         <i class="bx bx-trash text-sm"></i> Delete
                                                     </a>
                                                 </li>
@@ -164,7 +185,7 @@
                 <div class="col-span-8">
                     @foreach($collegeData as $data)
                         @php $college = $data['college']; @endphp
-                        <div x-if="selectedCollege === {{ $college->id }}" x-cloak>
+                        <div x-show="selectedCollege === {{ $college->id }}" x-cloak>
 
                             <x-layout.card-section icon="bx-sitemap" title="Departments & Programs"
                                 :subtitle="$college->name">
@@ -197,7 +218,7 @@
                                                     </div>
                                                 </div>
 
-                                                <div class="dropdown dropdown-end">
+                                                <div class="dropdown dropdown-end" onclick="event.stopPropagation()">
                                                     <label tabindex="0"
                                                         class="w-7 h-7 rounded-[7px] flex items-center justify-center text-[#B4C0CA] hover:text-[#143D57] hover:bg-[#DAF1FF] cursor-pointer transition-all duration-150">
                                                         <i class="bx bx-dots-vertical-rounded text-base leading-none"></i>
@@ -207,13 +228,13 @@
                                                         style="box-shadow: 0 4px 16px rgba(16,24,40,0.10);">
                                                         <li>
                                                             <a class="flex items-center gap-2 px-3 py-1.5 rounded-[7px] hover:bg-[#F1F3F5] text-[#394056] text-[13px]"
-                                                               onclick="document.getElementById('updateDepartmentModal_{{ $dept->id }}').showModal()">
+                                                               onclick="openEditDepartmentModal({{ $dept->id }}, @js($dept->name), {{ $dept->college_id }}, '{{ url('university-structure/department') }}')">
                                                                 <i class="bx bx-edit-alt text-[#3197D6] text-sm"></i> Edit
                                                             </a>
                                                         </li>
                                                         <li>
                                                             <a class="flex items-center gap-2 px-3 py-1.5 rounded-[7px] hover:bg-[#FFE3E2] text-[#D21B14] text-[13px]"
-                                                               onclick="document.getElementById('deleteDepartmentModal_{{ $dept->id }}').showModal()">
+                                                               onclick="openDeleteDepartmentModal({{ $dept->id }}, @js($dept->name), @js($college->name), {{ $dept->programs_count }}, '{{ url('university-structure/department') }}')">
                                                                 <i class="bx bx-trash text-sm"></i> Delete
                                                             </a>
                                                         </li>
@@ -224,10 +245,7 @@
                                             {{-- Program rows --}}
                                             <div class="divide-y divide-[#F1F3F5]">
                                                 @forelse($dept->programs as $program)
-                                                    @php
-                                                        $role = $program->pivot->role;
-                                                        $otherDepts = $program->departments->where('id', '!=', $dept->id);
-                                                    @endphp
+                                                    @php $role = $program->pivot->role; @endphp
                                                     <div class="flex items-center justify-between px-4 py-2.5 hover:bg-[#F9FAFA] transition-colors duration-150"
                                                          data-program-search="{{ $program->name }}">
                                                         <div class="flex items-center gap-2.5 min-w-0">
@@ -284,7 +302,7 @@
                                                             </div>
                                                         </div>
 
-                                                        <div class="dropdown dropdown-end shrink-0 relative">
+                                                        <div class="dropdown dropdown-end shrink-0 relative" onclick="event.stopPropagation()">
                                                             <label tabindex="0"
                                                                 class="w-7 h-7 rounded-[7px] flex items-center justify-center text-[#B4C0CA] hover:text-[#06754E] hover:bg-[#D5FFF0] cursor-pointer transition-all duration-150">
                                                                 <i class="bx bx-dots-vertical-rounded text-base leading-none"></i>
@@ -294,13 +312,13 @@
                                                                 style="box-shadow: 0 4px 16px rgba(16,24,40,0.10);">
                                                                 <li>
                                                                     <a class="flex items-center gap-2 px-3 py-1.5 rounded-[7px] hover:bg-[#F1F3F5] text-[#394056] text-[13px]"
-                                                                       onclick="document.getElementById('updateProgramModal_{{ $program->id }}').showModal()">
+                                                                       onclick="openEditProgramModal({{ $program->id }}, @js($program->name), @js((string)($program->departments->where('pivot.role','primary')->first()?->id ?? '')), @js($program->departments->where('pivot.role','supporting')->pluck('id')->map(fn($id)=>(string)$id)->values()->all()), @js($program->bor_approval_no ?? ''), @js($program->bor_approval_date ?? ''), '{{ url('university-structure/program') }}')">
                                                                         <i class="bx bx-edit-alt text-[#3197D6] text-sm"></i> Edit
                                                                     </a>
                                                                 </li>
                                                                 <li>
                                                                     <a class="flex items-center gap-2 px-3 py-1.5 rounded-[7px] hover:bg-[#FFE3E2] text-[#D21B14] text-[13px]"
-                                                                       onclick="document.getElementById('deleteProgramModal_{{ $program->id }}').showModal()">
+                                                                       onclick="openDeleteProgramModal({{ $program->id }}, @js($program->name), @js($program->bor_approval_no ?? ''), {{ $program->courses_count }}, '{{ url('university-structure/program') }}')">
                                                                         <i class="bx bx-trash text-sm"></i> Delete
                                                                     </a>
                                                                 </li>
@@ -363,33 +381,19 @@
     @endif
 
 
+    {{-- Always loaded basic modals --}}
     @include('University.UniversityStructure.modals.addCollegeModal')
     @include('University.UniversityStructure.modals.addDepartmentModal')
     @include('University.UniversityStructure.modals.addProgramModal', ['allDepartments' => $allDepartments])
 
-    @foreach ($colleges as $college)
-        @include('University.UniversityStructure.modals.updateCollegeModal', ['college' => $college])
-        @include('University.UniversityStructure.modals.deleteCollegeModal',  ['college' => $college])
-        @foreach ($departments->where('college_id', $college->id) as $dept)
-            @include('University.UniversityStructure.modals.updateDepartmentModal', ['dept' => $dept])
-            @include('University.UniversityStructure.modals.deleteDepartmentModal', ['dept' => $dept])
-        @endforeach
-    @endforeach
-
-    {{-- Program modals rendered once per unique program to avoid duplicates --}}
-    @foreach ($programs as $program)
-        @include('University.UniversityStructure.modals.updateProgramModal', ['program' => $program, 'allDepartments' => $allDepartments])
-        @include('University.UniversityStructure.modals.deleteProgramModal', ['program' => $program])
-    @endforeach
+    {{-- Shared edit/delete modals — one per entity type, filled via JS --}}
+    @include('University.UniversityStructure.modals.updateCollegeModal')
+    @include('University.UniversityStructure.modals.deleteCollegeModal')
+    @include('University.UniversityStructure.modals.updateDepartmentModal')
+    @include('University.UniversityStructure.modals.deleteDepartmentModal')
+    @include('University.UniversityStructure.modals.updateProgramModal', ['allDepartments' => $allDepartments])
+    @include('University.UniversityStructure.modals.deleteProgramModal')
 
 @endsection
 
-@push('scripts')
-<script>
-function openAddDepartmentModal(collegeId) {
-    const input = document.getElementById('addDepartment_college_id');
-    if (input) input.value = collegeId;
-    document.getElementById('addDepartmentModal').showModal();
-}
-</script>
-@endpush
+
