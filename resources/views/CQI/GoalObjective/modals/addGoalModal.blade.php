@@ -6,9 +6,24 @@
     </x-modal.header>
 
     <form action="{{ route('goal.store') }}" method="POST" class="flex flex-col"
-        x-data="{ submitting: false, goalText: @js(old('goal_text', '')) }"
+        x-data="{ submitting: false, goalText: '' }"
         x-on:submit="submitting = true"
-        x-init="@js($hasErrors) && $nextTick(() => document.getElementById('addGoalModal')?.showModal())">
+        x-init="
+            const modal = document.getElementById('addGoalModal');
+            if (modal) {
+                modal.addEventListener('open', () => {
+                    this.goalText = '';
+                });
+            }
+            @if($hasErrors)
+                $nextTick(() => { 
+                    if (modal) {
+                        this.goalText = @js(old('goal_text'));
+                        modal.showModal();
+                    }
+                });
+            @endif
+        ">
         @csrf
         <input type="hidden" name="college_id" value="{{ $selectedCollegeId }}">
         <input type="hidden" name="_modal" value="addGoal">
@@ -38,7 +53,7 @@
                         x-model="goalText"
                         ::readonly="submitting"
                         ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
-                        required>{{ old('goal_text') }}</x-form.textarea>
+                        required></x-form.textarea>
                     @if ($hasErrors)
                         @error('goal_text')
                             <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">

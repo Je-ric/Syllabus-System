@@ -17,10 +17,10 @@
     <form method="POST" action="{{ route('account-approval.edit-user') }}" class="flex flex-col"
         x-data="{
             submitting: false,
-            name: @js(old('name', $user->name)),
-            email: @js(old('email', $user->email)),
-            phone: @js(old('phone_number', $user->phone_number ?? '')),
-            office: @js(old('office', $user->office ?? '')),
+            name: @js($user->name),
+            email: @js($user->email),
+            phone: @js($user->phone_number ?? ''),
+            office: @js($user->office ?? ''),
             origName: @js($user->name),
             origEmail: @js($user->email),
             origPhone: @js($user->phone_number ?? ''),
@@ -33,10 +33,34 @@
             },
             get canSubmit() {
                 return this.hasChanged && this.name.trim() !== '' && this.email.trim() !== '';
+            },
+            resetForm() {
+                this.name = this.origName;
+                this.email = this.origEmail;
+                this.phone = this.origPhone;
+                this.office = this.origOffice;
             }
         }"
         x-on:submit="submitting = true"
-        x-init="@js($hasEditErrors) && $nextTick(() => { const modal = document.getElementById(@js($modalId)); if (modal) modal.showModal(); })">
+        x-init="
+            const modal = document.getElementById(@js($modalId));
+            if (modal) {
+                modal.addEventListener('open', () => {
+                    this.resetForm();
+                });
+            }
+            @if($hasEditErrors)
+                $nextTick(() => { 
+                    if (modal) {
+                        this.name = @js(old('name'));
+                        this.email = @js(old('email'));
+                        this.phone = @js(old('phone_number') ?? '');
+                        this.office = @js(old('office') ?? '');
+                        modal.showModal();
+                    }
+                });
+            @endif
+        ">
         @csrf
         @method('PUT')
         <input type="hidden" name="user_id" value="{{ $user->id }}">
@@ -82,7 +106,7 @@
                     <div class="sm:col-span-2">
                         <x-modal.modal-label isRequired>Full Name</x-modal.modal-label>
                         <x-form.input type="text" name="name"
-                            value="{{ old('name', $user->name) }}"
+                            value="{{ $hasEditErrors ? old('name') : $user->name }}"
                             x-model="name"
                             pattern="[\p{L}\s]+"
                             title="Name must contain letters and spaces only"
@@ -100,7 +124,7 @@
                     <div>
                         <x-modal.modal-label>Phone Number</x-modal.modal-label>
                         <x-form.input type="text" name="phone_number"
-                            value="{{ old('phone_number', $user->phone_number) }}"
+                            value="{{ $hasEditErrors ? (old('phone_number') ?? '') : ($user->phone_number ?? '') }}"
                             placeholder="e.g. 09XX XXX XXXX"
                             x-model="phone"
                             ::readonly="submitting"
@@ -116,7 +140,7 @@
                     <div>
                         <x-modal.modal-label isRequired>Email Address</x-modal.modal-label>
                         <x-form.input type="text" name="email"
-                            value="{{ old('email', $user->email) }}"
+                            value="{{ $hasEditErrors ? old('email') : $user->email }}"
                             x-model="email"
                             ::readonly="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
@@ -132,7 +156,7 @@
                     <div class="sm:col-span-2">
                         <x-modal.modal-label>Office / Department</x-modal.modal-label>
                         <x-form.input type="text" name="office"
-                            value="{{ old('office', $user->office) }}"
+                            value="{{ $hasEditErrors ? (old('office') ?? '') : ($user->office ?? '') }}"
                             placeholder="e.g. College of Engineering"
                             x-model="office"
                             ::readonly="submitting"

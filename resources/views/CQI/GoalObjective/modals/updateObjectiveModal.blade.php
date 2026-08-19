@@ -9,10 +9,25 @@
         x-data="{
             submitting: false,
             original: @js(trim($objective->objective_text)),
-            objectiveText: @js(old('objective_text', trim($objective->objective_text)))
+            objectiveText: @js(trim($objective->objective_text))
         }"
         x-on:submit="submitting = true"
-        x-init="@js($hasErrors) && $nextTick(() => document.getElementById('updateObjectiveModal_{{ $objective->id }}')?.showModal())">
+        x-init="
+            const modal = document.getElementById('updateObjectiveModal_{{ $objective->id }}');
+            if (modal) {
+                modal.addEventListener('open', () => {
+                    this.objectiveText = this.original;
+                });
+            }
+            @if($hasErrors)
+                $nextTick(() => { 
+                    if (modal) {
+                        this.objectiveText = @js(old('objective_text'));
+                        modal.showModal();
+                    }
+                });
+            @endif
+        ">
         @csrf
         @method('PUT')
         <input type="hidden" name="_modal" value="updateObjective_{{ $objective->id }}">
@@ -48,7 +63,7 @@
                         x-model="objectiveText"
                         ::readonly="submitting"
                         ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
-                        required>{{ old('objective_text', $objective->objective_text) }}</x-form.textarea>
+                        required>{{ $objective->objective_text }}</x-form.textarea>
                     @if ($hasErrors)
                         @error('objective_text')
                             <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">

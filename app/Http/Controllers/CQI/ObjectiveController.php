@@ -118,6 +118,9 @@ class ObjectiveController extends Controller
 
         $this->service->storeObjective($department, $request->objective_text);
 
+        // Clear old input after successful submission
+        $request->session()->forget('_old_input');
+
         return redirect()
             ->route('objective.index', [
                 'college_id'    => $request->college_id,
@@ -149,6 +152,9 @@ class ObjectiveController extends Controller
         }
 
         $this->service->updateObjective($objective, $request->objective_text);
+
+        // Clear old input after successful submission
+        $request->session()->forget('_old_input');
 
         return redirect()
             ->route('objective.index', [

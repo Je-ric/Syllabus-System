@@ -6,9 +6,24 @@
     </x-modal.header>
 
     <form action="{{ route('objective.store') }}" method="POST" class="flex flex-col"
-        x-data="{ submitting: false, objectiveText: @js(old('objective_text', '')) }"
+        x-data="{ submitting: false, objectiveText: '' }"
         x-on:submit="submitting = true"
-        x-init="@js($hasErrors) && $nextTick(() => document.getElementById('addObjectiveModal')?.showModal())">
+        x-init="
+            const modal = document.getElementById('addObjectiveModal');
+            if (modal) {
+                modal.addEventListener('open', () => {
+                    this.objectiveText = '';
+                });
+            }
+            @if($hasErrors)
+                $nextTick(() => { 
+                    if (modal) {
+                        this.objectiveText = @js(old('objective_text'));
+                        modal.showModal();
+                    }
+                });
+            @endif
+        ">
         @csrf
         <input type="hidden" name="college_id" value="{{ $selectedCollegeId }}">
         <input type="hidden" name="department_id" value="{{ $selectedDepartmentId }}">
@@ -39,7 +54,7 @@
                         x-model="objectiveText"
                         ::readonly="submitting"
                         ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
-                        required>{{ old('objective_text') }}</x-form.textarea>
+                        required></x-form.textarea>
                     @if ($hasErrors)
                         @error('objective_text')
                             <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">

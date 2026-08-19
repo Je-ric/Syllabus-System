@@ -12,10 +12,25 @@
         x-data="{
             submitting: false,
             original: @js($dept->name),
-            name: @js(old('name', $dept->name))
+            name: @js($dept->name)
         }"
         x-on:submit="submitting = true"
-        x-init="@js($hasErrors) && $nextTick(() => document.getElementById('updateDepartmentModal_{{ $dept->id }}')?.showModal())">
+        x-init="
+            const modal = document.getElementById('updateDepartmentModal_{{ $dept->id }}');
+            if (modal) {
+                modal.addEventListener('open', () => {
+                    this.name = this.original;
+                });
+            }
+            @if($hasErrors)
+                $nextTick(() => { 
+                    if (modal) {
+                        this.name = @js(old('name'));
+                        modal.showModal();
+                    }
+                });
+            @endif
+        ">
         @csrf
         @method('PUT')
         <input type="hidden" name="college_id" value="{{ $dept->college_id }}">
@@ -42,7 +57,7 @@
                         id="editDeptName_{{ $dept->id }}"
                         type="text"
                         name="name"
-                        value="{{ old('name', $dept->name) }}"
+                        value="{{ $dept->name }}"
                         x-model="name"
                         ::readonly="submitting"
                         ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"

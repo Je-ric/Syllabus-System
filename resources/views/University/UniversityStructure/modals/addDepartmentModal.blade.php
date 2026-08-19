@@ -9,9 +9,24 @@
     </x-modal.header>
 
     <form method="POST" action="{{ route('university.structure.department.store') }}" class="flex flex-col"
-        x-data="{ submitting: false, name: @js(old('name', '')) }"
+        x-data="{ submitting: false, name: '' }"
         x-on:submit="submitting = true"
-        x-init="@js($hasErrors) && $nextTick(() => document.getElementById('addDepartmentModal')?.showModal())">
+        x-init="
+            const modal = document.getElementById('addDepartmentModal');
+            if (modal) {
+                modal.addEventListener('open', () => {
+                    this.name = '';
+                });
+            }
+            @if($hasErrors)
+                $nextTick(() => { 
+                    if (modal) {
+                        this.name = @js(old('name'));
+                        modal.showModal();
+                    }
+                });
+            @endif
+        ">
         @csrf
         <input type="hidden" name="_modal" value="addDepartment">
         <input type="hidden" name="college_id" id="addDepartment_college_id" value="{{ old('college_id', '') }}">
@@ -35,7 +50,6 @@
                     <x-form.input
                         type="text"
                         name="name"
-                        value="{{ old('name', '') }}"
                         placeholder="e.g. Department of Computer Science"
                         x-model="name"
                         ::readonly="submitting"

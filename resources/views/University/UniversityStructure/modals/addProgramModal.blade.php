@@ -11,12 +11,40 @@
     <form method="POST" action="{{ route('university.structure.program.store') }}" class="flex flex-col min-h-0"
         x-data="{
             submitting: false,
-            name: @js(old('name', '')),
-            primaryDept: @js(old('primary_department_id', '')),
-            supportingDepts: @js(old('supporting_department_ids', []))
+            name: '',
+            primaryDept: '',
+            supportingDepts: [],
+            borNo: '',
+            borDate: '',
+            resetForm() {
+                this.name = '';
+                this.primaryDept = '';
+                this.supportingDepts = [];
+                this.borNo = '';
+                this.borDate = '';
+            }
         }"
         x-on:submit="submitting = true"
-        x-init="@js($hasErrors) && $nextTick(() => document.getElementById('addProgramModal')?.showModal())">
+        x-init="
+            const modal = document.getElementById('addProgramModal');
+            if (modal) {
+                modal.addEventListener('open', () => {
+                    this.resetForm();
+                });
+            }
+            @if($hasErrors)
+                $nextTick(() => { 
+                    if (modal) {
+                        this.name = @js(old('name'));
+                        this.primaryDept = @js(old('primary_department_id'));
+                        this.supportingDepts = @js(old('supporting_department_ids', []));
+                        this.borNo = @js(old('bor_approval_no', ''));
+                        this.borDate = @js(old('bor_approval_date', ''));
+                        modal.showModal();
+                    }
+                });
+            @endif
+        ">
         @csrf
         <input type="hidden" name="_modal" value="addProgram">
 
@@ -45,7 +73,6 @@
                         <x-form.input
                             type="text"
                             name="name"
-                            value="{{ old('name', '') }}"
                             placeholder="e.g. BS Computer Science"
                             x-model="name"
                             ::readonly="submitting"
@@ -74,7 +101,7 @@
                             @foreach($allDepartments->groupBy('college.name') as $collegeName => $depts)
                                 <optgroup label="{{ $collegeName }}">
                                     @foreach($depts as $dept)
-                                        <option value="{{ $dept->id }}" {{ old('primary_department_id') == $dept->id ? 'selected' : '' }}>{{ $dept->name }}</option>
+                                        <option value="{{ $dept->id }}">{{ $dept->name }}</option>
                                     @endforeach
                                 </optgroup>
                             @endforeach
@@ -94,8 +121,8 @@
                         <x-form.input
                             type="text"
                             name="bor_approval_no"
-                            value="{{ old('bor_approval_no', '') }}"
                             placeholder="e.g. BOR Res. No. 123"
+                            x-model="borNo"
                             ::readonly="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''" />
                         @if ($hasErrors)
@@ -112,7 +139,7 @@
                         <x-form.input
                             type="date"
                             name="bor_approval_date"
-                            value="{{ old('bor_approval_date', '') }}"
+                            x-model="borDate"
                             ::readonly="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''" />
                         @if ($hasErrors)
@@ -149,7 +176,6 @@
                                             value="{{ $dept->id }}"
                                             x-model="supportingDepts"
                                             :disabled="primaryDept == '{{ $dept->id }}'"
-                                            {{ in_array($dept->id, old('supporting_department_ids', [])) ? 'checked' : '' }}
                                             class="w-4 h-4 rounded text-[#00C075] border-[#C8D0DA]
                                                    focus:ring-[#00C075] focus:ring-offset-0 shrink-0">
                                         <span class="text-[12px] text-[#394056] leading-snug">{{ $dept->name }}</span>

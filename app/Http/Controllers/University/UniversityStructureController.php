@@ -19,11 +19,34 @@ class UniversityStructureController extends Controller
 
     public function index()
     {
+        $colleges = College::orderBy('name')->get();
+        $departments = Department::withRelations()->orderBy('name')->get();
+        $programs = Program::with('departments')->orderBy('name')->get();
+        $allDepartments = Department::with('college')->orderBy('name')->get();
+
+        // Pre-compute counts for performance
+        $collegeData = $colleges->map(function ($college) use ($departments, $programs) {
+            $collegeDepts = $departments->where('college_id', $college->id);
+            $collegeDeptIds = $collegeDepts->pluck('id');
+
+            $collegePrograms = $programs->filter(function ($program) use ($collegeDeptIds) {
+                return $program->departments->pluck('id')->intersect($collegeDeptIds)->isNotEmpty();
+            });
+
+            return [
+                'college' => $college,
+                'dept_count' => $collegeDepts->count(),
+                'program_count' => $collegePrograms->count(),
+                'departments' => $collegeDepts,
+            ];
+        });
+
         return view('University.UniversityStructure.index', [
-            'colleges'       => College::orderBy('name')->get(),
-            'departments'    => Department::withRelations()->orderBy('name')->get(),
-            'programs'       => Program::with('departments')->orderBy('name')->get(),
-            'allDepartments' => Department::with('college')->orderBy('name')->get(),
+            'colleges'       => $colleges,
+            'departments'    => $departments,
+            'programs'       => $programs,
+            'allDepartments' => $allDepartments,
+            'collegeData'    => $collegeData,
         ]);
     }
 
@@ -47,6 +70,9 @@ class UniversityStructureController extends Controller
         }
         $this->service->storeCollege($data);
 
+        // Clear old input after successful submission
+        $request->session()->forget('_old_input');
+
         return back()->with('toast', ['message' => 'College added successfully.', 'type' => 'success']);
     }
 
@@ -65,6 +91,9 @@ class UniversityStructureController extends Controller
                 ->with('toast', ['message' => 'Please fix the highlighted fields before submitting.', 'type' => 'error']);
         }
         $this->service->updateCollege($college, $data);
+
+        // Clear old input after successful submission
+        $request->session()->forget('_old_input');
 
         return back()->with('toast', ['message' => 'College updated successfully.', 'type' => 'success']);
     }
@@ -104,6 +133,9 @@ class UniversityStructureController extends Controller
         }
         $this->service->storeDepartment($data);
 
+        // Clear old input after successful submission
+        $request->session()->forget('_old_input');
+
         return back()->with('toast', ['message' => 'Department added successfully.', 'type' => 'success']);
     }
 
@@ -123,6 +155,9 @@ class UniversityStructureController extends Controller
                 ->with('toast', ['message' => 'Please fix the highlighted fields before submitting.', 'type' => 'error']);
         }
         $this->service->updateDepartment($department, $data);
+
+        // Clear old input after successful submission
+        $request->session()->forget('_old_input');
 
         return back()->with('toast', ['message' => 'Department updated successfully.', 'type' => 'success']);
     }
@@ -179,6 +214,9 @@ class UniversityStructureController extends Controller
         }
 
             $this->service->storeProgram($data);
+
+            // Clear old input after successful submission
+            $request->session()->forget('_old_input');
         } catch (\Illuminate\Validation\ValidationException $e) {
             return back()->withErrors($e->errors())->withInput()
                 ->with('_modal', 'addProgram')
@@ -242,6 +280,9 @@ class UniversityStructureController extends Controller
 
         if ($error)
             return back()->with('toast', ['message' => $error, 'type' => 'error']);
+
+        // Clear old input after successful submission
+        $request->session()->forget('_old_input');
 
         return back()->with('toast', ['message' => 'Program updated successfully.', 'type' => 'success']);
     }

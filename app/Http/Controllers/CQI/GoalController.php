@@ -82,6 +82,9 @@ class GoalController extends Controller
 
         $this->service->storeGoal($college, $request->goal_text);
 
+        // Clear old input after successful submission
+        $request->session()->forget('_old_input');
+
         return redirect()
             ->route('goal.index', ['college_id' => $request->college_id])
             ->with('toast', ['message' => 'Goal added successfully.', 'type' => 'success']);
@@ -110,6 +113,9 @@ class GoalController extends Controller
         }
 
         $this->service->updateGoal($goal, $request->goal_text);
+
+        // Clear old input after successful submission
+        $request->session()->forget('_old_input');
 
         return redirect()
             ->route('goal.index', ['college_id' => $goal->college_id])

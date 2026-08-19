@@ -190,6 +190,9 @@ class AccountApprovalController extends Controller
             description: "Admin edited user {$user->name} ({$user->email})."
         );
 
+        // Clear old input after successful submission
+        $request->session()->forget('_old_input');
+
         return redirect()->route('accounts.approval')
             ->with('toast', ['message' => "User {$user->name} updated successfully.", 'type' => 'success']);
     }

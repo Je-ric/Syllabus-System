@@ -15,11 +15,11 @@
     <form method="POST" action="{{ route('university.structure.program.update', $program) }}" class="flex flex-col min-h-0"
         x-data="{
             submitting: false,
-            name: @js(old('name', $program->name)),
-            primaryDept: @js(old('primary_department_id', (string) ($primaryDeptId ?? ''))),
-            supportingDepts: @js(old('supporting_department_ids', array_map('strval', $supportingDeptIds))),
-            borNo: @js(old('bor_approval_no', $program->bor_approval_no ?? '')),
-            borDate: @js(old('bor_approval_date', $program->bor_approval_date ?? '')),
+            name: @js($program->name),
+            primaryDept: @js((string) ($primaryDeptId ?? '')),
+            supportingDepts: @js(array_map('strval', $supportingDeptIds)),
+            borNo: @js($program->bor_approval_no ?? ''),
+            borDate: @js($program->bor_approval_date ?? ''),
             origName: @js($program->name),
             origPrimaryDept: @js((string) ($primaryDeptId ?? '')),
             origSupportingDepts: @js(array_map('strval', $supportingDeptIds)),
@@ -33,10 +33,36 @@
                 const a = [...this.supportingDepts].sort();
                 const b = [...this.origSupportingDepts].sort();
                 return JSON.stringify(a) !== JSON.stringify(b);
+            },
+            resetForm() {
+                this.name = this.origName;
+                this.primaryDept = this.origPrimaryDept;
+                this.supportingDepts = [...this.origSupportingDepts];
+                this.borNo = this.origBorNo;
+                this.borDate = this.origBorDate;
             }
         }"
         x-on:submit="submitting = true"
-        x-init="@js($hasErrors) && $nextTick(() => document.getElementById('updateProgramModal_{{ $program->id }}')?.showModal())">
+        x-init="
+            const modal = document.getElementById('updateProgramModal_{{ $program->id }}');
+            if (modal) {
+                modal.addEventListener('open', () => {
+                    this.resetForm();
+                });
+            }
+            @if($hasErrors)
+                $nextTick(() => { 
+                    if (modal) {
+                        this.name = @js(old('name'));
+                        this.primaryDept = @js(old('primary_department_id'));
+                        this.supportingDepts = @js(old('supporting_department_ids', []));
+                        this.borNo = @js(old('bor_approval_no', ''));
+                        this.borDate = @js(old('bor_approval_date', ''));
+                        modal.showModal();
+                    }
+                });
+            @endif
+        ">
         @csrf
         @method('PUT')
         <input type="hidden" name="_modal" value="updateProgram_{{ $program->id }}">
@@ -68,7 +94,7 @@
                             id="editProgramName_{{ $program->id }}"
                             type="text"
                             name="name"
-                            value="{{ old('name', $program->name) }}"
+                            value="{{ $program->name }}"
                             x-model="name"
                             ::readonly="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
@@ -96,9 +122,7 @@
                             @foreach($allDepartments->groupBy('college.name') as $collegeName => $depts)
                                 <optgroup label="{{ $collegeName }}">
                                     @foreach($depts as $dept)
-                                        <option value="{{ $dept->id }}" {{ old('primary_department_id', $dept->id == $primaryDeptId ? $dept->id : '') == $dept->id ? 'selected' : '' }}>
-                                            {{ $dept->name }}
-                                        </option>
+                                        <option value="{{ $dept->id }}">{{ $dept->name }}</option>
                                     @endforeach
                                 </optgroup>
                             @endforeach
@@ -119,7 +143,7 @@
                             id="editBorNo_{{ $program->id }}"
                             type="text"
                             name="bor_approval_no"
-                            value="{{ old('bor_approval_no', $program->bor_approval_no) }}"
+                            value="{{ $program->bor_approval_no }}"
                             x-model="borNo"
                             ::readonly="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''" />
@@ -138,7 +162,7 @@
                             id="editBorDate_{{ $program->id }}"
                             type="date"
                             name="bor_approval_date"
-                            value="{{ old('bor_approval_date', $program->bor_approval_date) }}"
+                            value="{{ $program->bor_approval_date }}"
                             x-model="borDate"
                             ::readonly="submitting"
                             ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''" />
