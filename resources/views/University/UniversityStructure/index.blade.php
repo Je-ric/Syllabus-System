@@ -40,32 +40,25 @@
             const departments = document.querySelectorAll('[data-department-search]');
             const programs = document.querySelectorAll('[data-program-search]');
 
-            collegeButtons.forEach(button => {
-                const name = button.getAttribute('data-college-search').toLowerCase();
-                if (name.includes(term)) {
-                    button.style.display = '';
-                } else {
-                    button.style.display = 'none';
-                }
-            });
+            // Debounce function for better performance
+            let timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                collegeButtons.forEach(button => {
+                    const name = button.getAttribute('data-college-search').toLowerCase();
+                    button.style.display = name.includes(term) ? '' : 'none';
+                });
 
-            departments.forEach(dept => {
-                const name = dept.getAttribute('data-department-search').toLowerCase();
-                if (name.includes(term)) {
-                    dept.style.display = '';
-                } else {
-                    dept.style.display = 'none';
-                }
-            });
+                departments.forEach(dept => {
+                    const name = dept.getAttribute('data-department-search').toLowerCase();
+                    dept.style.display = name.includes(term) ? '' : 'none';
+                });
 
-            programs.forEach(program => {
-                const name = program.getAttribute('data-program-search').toLowerCase();
-                if (name.includes(term)) {
-                    program.style.display = '';
-                } else {
-                    program.style.display = 'none';
-                }
-            });
+                programs.forEach(program => {
+                    const name = program.getAttribute('data-program-search').toLowerCase();
+                    program.style.display = name.includes(term) ? '' : 'none';
+                });
+            }, 100);
         }
     </script>
 
@@ -110,11 +103,8 @@
 
                         {{-- College rows --}}
                         <div class="divide-y divide-[#F1F3F5]">
-                            @foreach($colleges as $college)
-                                @php
-                                    $deptCount    = $departments->where('college_id', $college->id)->count();
-                                    $programCount = $departments->where('college_id', $college->id)->flatMap(fn($d) => $d->programs)->count();
-                                @endphp
+                            @foreach($collegeData as $data)
+                                @php $college = $data['college']; @endphp
 
                                 <button
                                     @click="selectedCollege = {{ $college->id }}"
@@ -122,7 +112,7 @@
                                     :class="selectedCollege === {{ $college->id }}
                                         ? 'bg-[#EDFFF8] border-l-[#00C075]'
                                         : 'bg-white border-l-transparent hover:bg-[#F9FAFA]'"
-                                    data-college-search="{{ $college->name }}">
+                                    x-show="!searchTerm || '{{ $college->name }}'.toLowerCase().includes(searchTerm.toLowerCase())">
 
                                     <div class="flex items-center justify-between gap-2">
                                         <div class="flex items-center gap-2.5 min-w-0">
@@ -134,8 +124,8 @@
                                             <div class="min-w-0">
                                                 <p class="text-[13px] font-semibold text-[#394056] truncate leading-tight">{{ $college->name }}</p>
                                                 <p class="text-[11px] text-[#93A1AF] mt-0.5">
-                                                    {{ $deptCount }} dept{{ $deptCount !== 1 ? 's' : '' }}
-                                                    &middot; {{ $programCount }} program{{ $programCount !== 1 ? 's' : '' }}
+                                                    {{ $data['dept_count'] }} dept{{ $data['dept_count'] !== 1 ? 's' : '' }}
+                                                    &middot; {{ $data['program_count'] }} program{{ $data['program_count'] !== 1 ? 's' : '' }}
                                                 </p>
                                             </div>
                                         </div>
@@ -172,8 +162,9 @@
 
                 {{-- ── RIGHT: Departments + Programs ──────────────────────────── --}}
                 <div class="col-span-8">
-                    @foreach($colleges as $college)
-                        <div x-show="selectedCollege === {{ $college->id }}" x-cloak>
+                    @foreach($collegeData as $data)
+                        @php $college = $data['college']; @endphp
+                        <div x-if="selectedCollege === {{ $college->id }}" x-cloak>
 
                             <x-layout.card-section icon="bx-sitemap" title="Departments & Programs"
                                 :subtitle="$college->name">
@@ -186,7 +177,7 @@
                                 </x-slot>
 
                                 <div class="space-y-3">
-                                    @forelse($departments->where('college_id', $college->id) as $dept)
+                                    @forelse($data['departments'] as $dept)
 
                                         <div class="rounded-[12px] border border-[#E3E8EB] bg-white overflow-visible"
                                              style="box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06);"
