@@ -49,9 +49,9 @@
 
         <div class="flex items-center gap-3 min-w-0">
             @if ($icon)
-                <span class="shrink-0 flex items-center justify-center w-8 h-8 rounded-md
-                             bg-[#D5FFF0] border border-[#00C075]">
-                    <i class="bx {{ $icon }} text-base leading-none text-[#06754E]"></i>
+                <span class="shrink-0 flex items-center justify-center w-9 h-9 rounded-[10px]
+                            bg-[#06754E] border border-[#AEFFE2]">
+                    <i class="bx {{ $icon }} text-base leading-none text-[#EDFFF8]"></i>
                 </span>
             @endif
 
