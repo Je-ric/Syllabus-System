@@ -16,6 +16,7 @@
         $isReviewerRoute = request()->routeIs('syllabus.reviewer.show');
         $isFullscreen    = $isWizardRoute || $isReviewerRoute;
         $user            = Auth::user();
+        $activeSemester  = \App\Models\AcademicCalendar::active()->first();
     @endphp
 
     {{-- Toast notifications --}}

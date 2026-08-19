@@ -2,50 +2,150 @@
 <html lang="en">
 <head>
     @include('includes.head-assets')
+    <title>503 — Service Unavailable | CSMS</title>
     <style>
         [x-cloak] { display: none !important; }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            background: #F4F6F9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 20% 10%, rgba(92,107,192,0.07) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 80% 85%, rgba(92,107,192,0.05) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(92,107,192,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(92,107,192,0.04) 1px, transparent 1px);
+            background-size: 48px 48px;
+            pointer-events: none;
+        }
+
+        .card {
+            position: relative; z-index: 1; width: 100%; max-width: 480px;
+            background: #fff; border-radius: 20px; border: 1px solid #E3E8EB;
+            box-shadow: 0 8px 48px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.04);
+            overflow: hidden;
+            animation: slideUp 0.4s cubic-bezier(.22,.68,0,1.2) both;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(24px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0)    scale(1); }
+        }
+
+        .accent-rail { height: 3px; background: linear-gradient(90deg, #5C6BC0 0%, #3F51B5 40%, rgba(92,107,192,0) 100%); }
+
+        .error-code {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(5rem, 20vw, 7rem);
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            line-height: 1;
+            background: linear-gradient(135deg, #C5CAE9 0%, #9FA8DA 50%, #7986CB 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            user-select: none;
+        }
+
+        .icon-badge {
+            width: 64px; height: 64px; border-radius: 18px;
+            background: linear-gradient(145deg, #E8EAF6 0%, #C5CAE9 100%);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1.25rem;
+            box-shadow: 0 4px 14px rgba(92,107,192,0.2);
+        }
+        .icon-badge i {
+            font-size: 2rem;
+            color: #5C6BC0;
+            animation: spin 3s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+
+        .body-wrap { padding: 2rem 2rem 1.5rem; text-align: center; }
+        h1.title { font-size: 1.2rem; font-weight: 800; color: #1D2836; margin-bottom: 0.5rem; letter-spacing: -0.02em; }
+        p.desc { font-size: 0.8125rem; color: #72809E; line-height: 1.6; max-width: 340px; margin: 0 auto 1.75rem; }
+
+        .actions { display: flex; flex-direction: column; gap: 0.625rem; }
+        @media (min-width: 400px) { .actions { flex-direction: row; justify-content: center; } }
+
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 0.45rem; padding: 0.6rem 1.25rem; border-radius: 9px;
+            font-size: 0.8125rem; font-weight: 600; font-family: 'Inter', sans-serif;
+            cursor: pointer; transition: all 0.18s ease; border: none;
+            text-decoration: none; white-space: nowrap;
+        }
+        .btn-primary { background: linear-gradient(180deg, #00C075 0%, #009639 100%); color: #fff; box-shadow: 0 2px 8px rgba(0,150,57,0.35); }
+        .btn-primary:hover { background: linear-gradient(180deg, #009639 0%, #06754E 100%); transform: translateY(-1px); }
+        .btn-ghost { background: #fff; color: #394056; border: 1.5px solid #D6DDE3; }
+        .btn-ghost:hover { background: #F1F3F5; border-color: #C1C8D4; transform: translateY(-1px); }
+
+        .card-footer { background: #FAFBFC; border-top: 1px solid #F1F3F5; padding: 0.75rem 1.5rem; text-align: center; }
+        .card-footer p { font-size: 0.7rem; color: #A5B2BD; }
+        .card-footer strong { color: #72809E; }
     </style>
 </head>
-<body class="min-h-screen bg-linear-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
-    <div class="max-w-2xl w-full text-center">
-        <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-200">
-            <div class="p-8 md:p-12">
-                <div class="flex justify-center mb-6">
-                    <div class="w-24 h-24 rounded-full bg-orange-100 flex items-center justify-center">
-                        <i class="bx bx-cog text-5xl text-orange-500 animate-spin"></i>
-                    </div>
-                </div>
-                
-                <h1 class="text-6xl font-bold text-slate-800 mb-2">503</h1>
-                <h2 class="text-2xl font-semibold text-slate-700 mb-4">Service Unavailable</h2>
-                
-                <p class="text-slate-500 mb-8 max-w-md mx-auto">
-                    Our service is temporarily unavailable for maintenance. We'll be back shortly.
-                </p>
-                
-                <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                    <button onclick="window.location.reload()" 
-                            class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-white transition-colors"
-                            style="background: var(--clsu-green);"
-                            onmouseover="this.style.background='var(--clsu-cobra)'"
-                            onmouseout="this.style.background='var(--clsu-green)'">
-                        <i class="bx bx-refresh text-lg"></i>
-                        Try Again
-                    </button>
-                    <a href="{{ route('dashboard') }}" 
-                            class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-slate-600 border border-slate-300 bg-white hover:bg-slate-50 transition-colors">
-                        <i class="bx bx-home-alt text-lg"></i>
-                        Return to Dashboard
-                    </a>
-                </div>
+<body>
+
+    <div class="card">
+        <div class="accent-rail"></div>
+
+        <div class="body-wrap">
+            <div class="icon-badge">
+                <i class='bx bx-cog'></i>
             </div>
-            
-            <div class="bg-slate-50 px-8 py-4 border-t border-slate-200">
-                <p class="text-xs text-slate-400">
-                    Scheduled maintenance is in progress. Please check back soon.
-                </p>
+
+            <div class="error-code">503</div>
+
+            <h1 class="title">Service Unavailable</h1>
+            <p class="desc">
+                The system is temporarily down for scheduled maintenance.
+                We'll be back up shortly — thank you for your patience.
+            </p>
+
+            <div class="actions">
+                <button onclick="window.location.reload()" class="btn btn-primary">
+                    <i class='bx bx-refresh'></i>
+                    Try Again
+                </button>
+                <a href="{{ route('dashboard') }}" class="btn btn-ghost">
+                    <i class='bx bx-home-alt'></i>
+                    Dashboard
+                </a>
             </div>
         </div>
+
+        <div class="card-footer">
+            <p>Scheduled <strong>maintenance</strong> is in progress. Please check back soon.</p>
+        </div>
     </div>
+
 </body>
 </html>

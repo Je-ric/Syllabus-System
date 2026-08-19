@@ -194,4 +194,28 @@ Route::middleware(['auth'])->group(function () {
             ->name('syllabus.reviewer.show');
     });
 
+
+    Route::get('/test-403', function () {
+        return view('errors.403');
+    })->name('test.403');
+
+    Route::get('/test-404', function () {
+        return view('errors.404');
+    })->name('test.404');
+
+    Route::get('/test-500', function () {
+        return view('errors.500');
+    })->name('test.500');
+
+    Route::get('/test-503', function () {
+        return view('errors.503');
+    })->name('test.503');
+
+    Route::get('/test-429', function () {
+        return view('errors.429');
+    })->name('test.429');
+
+    Route::get('/test-419', function () {
+        return view('errors.419');
+    })->name('test.419');
 });
