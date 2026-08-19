@@ -66,82 +66,14 @@
             this.saving    = false;
             this.hasAttempted = false;
             this.showForm  = true;
-        },
 
-        openEdit(detail) {
-            this.editingId = detail.id;
-            this.type      = detail.type  ?? 'holiday';
-            this.name      = detail.name  ?? '';
-            this.dateStart = detail.date  ?? '';
-            this.dateEnd   = detail.date  ?? '';
-            this.saving    = false;
-            this.hasAttempted = false;
-            this.showForm  = true;
-            
-            // Update Flatpickr with the new date when editing
+            // Reinitialize Flatpickr when opening the modal
             $nextTick(() => {
-                const semId = '{{ $semesterId }}';
-                const fpStartKey = '_evFpStart_' + semId;
-                if (window[fpStartKey] && this.dateStart) {
-                    window[fpStartKey].setDate(this.dateStart, false);
-                }
+                this.initFlatpickr();
             });
         },
 
-        closeForm() {
-            this.showForm  = false;
-            this.editingId = null;
-            this.dateStart = '';
-            this.dateEnd   = '';
-            this.name      = '';
-            this.saving    = false;
-            this.hasAttempted = false;
-        },
-
-        async submit() {
-            this.hasAttempted = true;
-            if (!this.name.trim() || !this.dateStart) return;
-            if (this.dateEnd && this.dateEnd < this.dateStart) {
-                [this.dateStart, this.dateEnd] = [this.dateEnd, this.dateStart];
-            }
-            
-            // Get the actual value from Flatpickr to ensure we have the latest selection
-            const semId = '{{ $semesterId }}';
-            const fpStartKey = '_evFpStart_' + semId;
-            const actualDate = window[fpStartKey]?.selectedDates[0];
-            if (actualDate) {
-                const year = actualDate.getFullYear();
-                const month = String(actualDate.getMonth() + 1).padStart(2, '0');
-                const day = String(actualDate.getDate()).padStart(2, '0');
-                this.dateStart = `${year}-${month}-${day}`;
-            }
-            
-            this.saving = true;
-            if (this.editingId) {
-                await $wire.saveEvent(this.editingId, this.type, this.name, this.dateStart);
-            } else {
-                await $wire.saveEventRange(this.type, this.name, this.dateStart, this.dateEnd || this.dateStart);
-            }
-            this.saving = false;
-            return true;
-        },
-
-        async remove(id) {
-            if (this.isDeleting(id)) return; // guard: already in flight, ignore repeat clicks
-            this.deletingIds.push(id);
-            await $wire.deleteEvent(id);
-            this.deletingIds = this.deletingIds.filter(x => x !== id);
-        }
-    }"
-    x-on:event-load-form.window="
-        if ($event.detail.id) { openEdit($event.detail); }
-        else { openAdd($event.detail.date); }
-    "
-    x-on:event-saved.window="closeForm();"
-    x-on:reload-page.window="setTimeout(() => window.location.reload(), 500);"
-    x-init="
-        // ── Flatpickr for event modal ────────────────────────────────────────
-        $nextTick(() => {
+        initFlatpickr() {
             const semMin = '{{ $semester?->start_date ?? '' }}';
             const semMax = '{{ $semester?->end_date ?? '' }}';
             const semId  = '{{ $semesterId }}';
@@ -158,49 +90,180 @@
             const fpStartKey = '_evFpStart_' + semId;
             const fpEndKey   = '_evFpEnd_'   + semId;
 
-            window[fpStartKey] = flatpickr('#ev-date-start-' + semId, {
-                ...fpConfig,
-                onChange([date], dateStr) {
-                    _userSelecting = true;
-                    _fpSyncing = true;
-                    dateStart = dateStr;
-                    if (!editingId && (!dateEnd || dateEnd < dateStr)) {
-                        dateEnd = dateStr;
-                        window[fpEndKey]?.setDate(dateStr, false);
+            // Only destroy and reinitialize if instances don't exist or are broken
+            if (!window[fpStartKey] || !window[fpStartKey].input) {
+                if (window[fpStartKey]) {
+                    window[fpStartKey].destroy();
+                }
+                if (window[fpEndKey]) {
+                    window[fpEndKey].destroy();
+                }
+
+                // Store component reference for callbacks
+                const component = this;
+
+                window[fpStartKey] = flatpickr('#ev-date-start-' + semId, {
+                    ...fpConfig,
+                    onChange([date], dateStr) {
+                        component._userSelecting = true;
+                        component._fpSyncing = true;
+                        component.dateStart = dateStr;
+                        if (!component.editingId && (!component.dateEnd || component.dateEnd < dateStr)) {
+                            component.dateEnd = dateStr;
+                            window[fpEndKey]?.setDate(dateStr, false);
+                        }
+                        window[fpEndKey]?.set('minDate', dateStr);
+                        component._fpSyncing = false;
+                        setTimeout(() => { component._userSelecting = false; }, 100);
+                    },
+                    onClose(selectedDates, dateStr, instance) {
+                        // Ensure dateStart is updated when Flatpickr closes
+                        if (dateStr) {
+                            component._userSelecting = true;
+                            component.dateStart = dateStr;
+                            setTimeout(() => { component._userSelecting = false; }, 100);
+                        }
                     }
-                    window[fpEndKey]?.set('minDate', dateStr);
-                    _fpSyncing = false;
-                    setTimeout(() => { _userSelecting = false; }, 100);
-                },
-                onClose(selectedDates, dateStr, instance) {
-                    // Ensure dateStart is updated when Flatpickr closes
-                    if (dateStr) {
-                        _userSelecting = true;
-                        dateStart = dateStr;
-                        setTimeout(() => { _userSelecting = false; }, 100);
+                });
+
+                window[fpEndKey] = flatpickr('#ev-date-end-' + semId, {
+                    ...fpConfig,
+                    onChange([date], dateStr) {
+                        component._fpSyncing = true;
+                        component.dateEnd = dateStr;
+                        component._fpSyncing = false;
                     }
+                });
+
+                $watch('dateStart', val => {
+                    if (component._fpSyncing || component._userSelecting) return;
+                    val ? window[fpStartKey]?.setDate(val, false)
+                        : window[fpStartKey]?.clear();
+                });
+                $watch('dateEnd', val => {
+                    if (component._fpSyncing || component._userSelecting) return;
+                    val ? window[fpEndKey]?.setDate(val, false)
+                        : window[fpEndKey]?.clear();
+                });
+            } else {
+                // If instances exist, just update the date if needed
+                if (this.dateStart) {
+                    window[fpStartKey].setDate(this.dateStart, false);
+                }
+                if (this.dateEnd) {
+                    window[fpEndKey].setDate(this.dateEnd, false);
+                }
+            }
+        },
+
+        openEdit(detail) {
+            this.editingId = detail.id;
+            this.type      = detail.type  ?? 'holiday';
+            this.name      = detail.name  ?? '';
+            this.dateStart = detail.date  ?? '';
+            this.dateEnd   = detail.date  ?? '';
+            this.saving    = false;
+            this.hasAttempted = false;
+            this.showForm  = true;
+
+            // Reinitialize Flatpickr when opening the modal and set the date
+            $nextTick(() => {
+                this.initFlatpickr();
+                const semId = '{{ $semesterId }}';
+                const fpStartKey = '_evFpStart_' + semId;
+                if (window[fpStartKey] && this.dateStart) {
+                    window[fpStartKey].setDate(this.dateStart, false);
                 }
             });
+        },
 
-            window[fpEndKey] = flatpickr('#ev-date-end-' + semId, {
-                ...fpConfig,
-                onChange([date], dateStr) {
-                    _fpSyncing = true;
-                    dateEnd = dateStr;
-                    _fpSyncing = false;
-                }
-            });
+        closeForm() {
+            this.showForm  = false;
+            this.editingId = null;
+            this.dateStart = '';
+            this.dateEnd   = '';
+            this.name      = '';
+            this.saving    = false;
+            this.hasAttempted = false;
 
-            $watch('dateStart', val => {
-                if (_fpSyncing || _userSelecting) return;
-                val ? window[fpStartKey]?.setDate(val, false)
-                    : window[fpStartKey]?.clear();
-            });
-            $watch('dateEnd', val => {
-                if (_fpSyncing || _userSelecting) return;
-                val ? window[fpEndKey]?.setDate(val, false)
-                    : window[fpEndKey]?.clear();
-            });
+            // Destroy Flatpickr instances when closing modal
+            const semId = '{{ $semesterId }}';
+            const fpStartKey = '_evFpStart_' + semId;
+            const fpEndKey = '_evFpEnd_' + semId;
+            if (window[fpStartKey]) {
+                window[fpStartKey].destroy();
+                window[fpStartKey] = null;
+            }
+            if (window[fpEndKey]) {
+                window[fpEndKey].destroy();
+                window[fpEndKey] = null;
+            }
+        },
+
+        async submit() {
+            this.hasAttempted = true;
+            if (!this.name.trim() || !this.dateStart) return;
+            if (this.dateEnd && this.dateEnd < this.dateStart) {
+                [this.dateStart, this.dateEnd] = [this.dateEnd, this.dateStart];
+            }
+
+            // Get the actual value from Flatpickr to ensure we have the latest selection
+            const semId = '{{ $semesterId }}';
+            const fpStartKey = '_evFpStart_' + semId;
+            const actualDate = window[fpStartKey]?.selectedDates[0];
+            if (actualDate) {
+                const year = actualDate.getFullYear();
+                const month = String(actualDate.getMonth() + 1).padStart(2, '0');
+                const day = String(actualDate.getDate()).padStart(2, '0');
+                this.dateStart = `${year}-${month}-${day}`;
+            }
+
+            this.saving = true;
+            let success = false;
+            if (this.editingId) {
+                success = await $wire.saveEvent(this.editingId, this.type, this.name, this.dateStart);
+            } else {
+                success = await $wire.saveEventRange(this.type, this.name, this.dateStart, this.dateEnd || this.dateStart);
+            }
+            this.saving = false;
+
+            // Close modal on success or validation error
+            if (success) {
+                this.closeForm();
+            } else {
+                // Close modal on validation error - toast will be shown by Livewire
+                this.closeForm();
+            }
+
+            return success;
+        },
+
+        async remove(id) {
+            if (this.isDeleting(id)) return; // guard: already in flight, ignore repeat clicks
+            this.deletingIds.push(id);
+            await $wire.deleteEvent(id);
+            this.deletingIds = this.deletingIds.filter(x => x !== id);
+        }
+    }"
+    x-on:event-load-form.window="
+        if ($event.detail.id) { openEdit($event.detail); }
+        else { openAdd($event.detail.date); }
+    "
+    x-on:event-saved.window="closeForm();"
+    x-on:reload-page.window="setTimeout(() => window.location.reload(), 500);"
+    x-init="
+        // ── Initialize Flatpickr for event modal ────────────────────────────────────────
+        $nextTick(() => {
+            this.initFlatpickr();
+        });
+
+        // Watch for modal visibility changes to reinitialize Flatpickr
+        $watch('showForm', (val) => {
+            if (val) {
+                $nextTick(() => {
+                    this.initFlatpickr();
+                });
+            }
         });
     ">
 
