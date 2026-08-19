@@ -1,10 +1,10 @@
 {{-- Layout partial: sticky top header — mobile hamburger, brand text, notification bell, profile pill --}}
 
-<header class="sticky top-0 z-20 bg-white border-b border-[#E3E8EB]
+<header class="sticky top-0 z-20 bg-white
                {{ $isWizardRoute ? 'hidden' : '' }}"
         style="box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06);">
 
-    <div class="px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
+    <div class="px-4 sm:px-6 h-14 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
 
         {{-- Left: hamburger + brand text --}}
         <div class="flex items-center gap-3 min-w-0">
@@ -20,18 +20,36 @@
             </button>
             <span class="hidden sm:block h-5 w-px bg-[#E3E8EB] shrink-0"></span>
             <div class="hidden sm:flex flex-col justify-center min-w-0 gap-0.5">
-                <p class="topbar-univ-label leading-none">
+                <p class="text-[10.5px] font-bold uppercase tracking-[0.14em] text-[#00965F] leading-none mb-0.5">
                     Central Luzon State University
                 </p>
-                <p class="topbar-system-name leading-none truncate">
+                <p class="text-[14px] font-extrabold text-[#1D2836] leading-tight tracking-tight truncate">
                     Course Syllabus Management System
                 </p>
             </div>
         </div>
 
+        {{-- Center: active semester pill --}}
+        @if (isset($activeSemester) && $activeSemester)
+            <div class="hidden md:flex items-center gap-2">
+                <span class="relative flex h-2 w-2 shrink-0">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00C075] opacity-60"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-[#00965F]"></span>
+                </span>
+                <span class="text-[12px] font-semibold text-[#394056] whitespace-nowrap">
+                    {{ $activeSemester->semester }} Sem &bull; A.Y. {{ $activeSemester->academic_year }}
+                </span>
+            </div>
+        @else
+            <div class="hidden md:flex items-center gap-2">
+                <span class="h-2 w-2 rounded-full bg-[#C1C8D4] shrink-0"></span>
+                <span class="text-[12px] font-semibold text-[#A5B2BD] whitespace-nowrap">No active semester</span>
+            </div>
+        @endif
+
         {{-- Right: notification bell + profile pill --}}
         @auth
-            <div class="flex items-center gap-2 shrink-0">
+            <div class="flex items-center gap-2 shrink-0 justify-end">
 
                 @include('layouts.partials.notification-bell', [
                     'initialUnreadCount' => $user
@@ -63,4 +81,8 @@
         @endauth
 
     </div>
+
+    {{-- Accent rail — matches page-header gradient --}}
+    <div class="h-[2.5px] w-full"
+         style="background:linear-gradient(90deg,#00D88B 0%,#00C075 35%,rgba(0,216,139,0) 100%);"></div>
 </header>

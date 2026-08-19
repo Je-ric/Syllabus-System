@@ -37,7 +37,17 @@
                 </div>
 
                 <x-ui.button variant="sm-add"
-                    x-on:click="$dispatch('syllabus-save-started'); $wire.saveAllWeeklyEntries()"
+                    x-on:click="async () => {
+                        $dispatch('syllabus-save-started');
+                        try {
+                            await $wire.saveAllWeeklyEntries();
+                        } catch (error) {
+                            const errorMessage = error?.message || 'Failed to save weeks. Please try again.';
+                            window.dispatchEvent(new CustomEvent('lw-toast', {
+                                detail: { type: 'error', message: errorMessage }
+                            }));
+                        }
+                    }"
                     wireTarget="saveAllWeeklyEntries"
                     loading="Saving…">
                     <i class="bx bx-save"></i> Save All

@@ -6,7 +6,7 @@
     'class'   => '',
 ])
 
-<div {{ $attributes->merge(['class' => 'relative w-full bg-white ' . $class]) }}>
+<div {{ $attributes->merge(['class' => 'relative w-full bg-transparent ' . $class]) }}>
 
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-6 py-5">
 
@@ -42,8 +42,4 @@
             </div>
         @endif
     </div>
-
-    {{-- Accent rail — same gradient language as x-modal.dialog's top rail --}}
-    <div class="h-[2.5px] w-full"
-         style="background:linear-gradient(90deg,#00D88B 0%,#00C075 35%,rgba(0,216,139,0) 100%);"></div>
 </div>

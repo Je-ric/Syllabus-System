@@ -117,9 +117,9 @@
                                 </span>
                                 <p class="text-[11px] font-bold uppercase tracking-[0.08em] text-[#394056]">Colleges</p>
                             </div>
-                            <span class="text-[10.5px] font-bold px-2 py-0.5 rounded-full bg-[#D5FFF0] text-[#06754E] border border-[#00965F]">
+                            <x-feedback-status.status-indicator variant="brand" size="sm">
                                 {{ $colleges->count() }}
-                            </span>
+                            </x-feedback-status.status-indicator>
                         </div>
 
                         {{-- College rows --}}
@@ -212,9 +212,9 @@
                                                     </span>
                                                     <div>
                                                         <span class="text-[13px] font-semibold text-[#394056]">{{ $dept->name }}</span>
-                                                        <span class="ml-2 text-[10.5px] font-bold px-1.5 py-0.5 rounded-full bg-[#DAF1FF] text-[#143D57] border border-[#143D57]">
-                                                            {{ $dept->programs->count() }} program{{ $dept->programs->count() !== 1 ? 's' : '' }}
-                                                        </span>
+                                                        <x-feedback-status.status-indicator variant="blue" size="sm">
+                                                            {{ $dept->programs->count() }}
+                                                        </x-feedback-status.status-indicator>
                                                     </div>
                                                 </div>
 
@@ -260,7 +260,7 @@
                                                                     @if($role === 'primary')
                                                                         <div class="group relative shrink-0">
                                                                             <x-feedback-status.status-indicator variant="brand" label="Primary" size="sm" class="cursor-help" />
-                                                                            <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 p-2 bg-slate-800 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+                                                                            <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 p-2 bg-slate-800 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[999]">
                                                                                 <p class="font-semibold mb-1">Primary Department</p>
                                                                                 <p class="text-slate-300">Main department responsible for program administration and curriculum.</p>
                                                                             </div>
@@ -268,7 +268,7 @@
                                                                     @else
                                                                         <div class="group relative shrink-0">
                                                                             <x-feedback-status.status-indicator variant="amber" label="Supporting" size="sm" class="cursor-help" />
-                                                                            <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 p-2 bg-slate-800 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+                                                                            <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 p-2 bg-slate-800 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[999]">
                                                                                 <p class="font-semibold mb-1">Supporting Department</p>
                                                                                 <p class="text-slate-300">Collaborates on program but does not administer it. Provides interdisciplinary support.</p>
                                                                             </div>

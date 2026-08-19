@@ -23,11 +23,11 @@
     @forelse($users as $user)
     @php
         $avatarCls = match($user->account_status) {
-            'active'   => 'bg-[color-mix(in_srgb,var(--clsu-green)_14%,white)] text-[color:var(--clsu-cobra,var(--clsu-green))]',
-            'pending'  => 'bg-[#fef3c7] text-[#92400e]',
-            'rejected' => 'bg-[#ffe4e6] text-[#9f1239]',
-            'disabled' => 'bg-[#f4f4f5] text-[#71717a]',
-            default    => 'bg-[#f4f4f5] text-[#71717a]',
+            'active'   => 'bg-[#D5FFF0] text-[#06754E]',
+            'pending'  => 'bg-[#FFF6E2] text-[#875200]',
+            'rejected' => 'bg-[#FFE3E2] text-[#9D1F1A]',
+            'disabled' => 'bg-[#F1F3F5] text-[#72809E]',
+            default    => 'bg-[#F1F3F5] text-[#72809E]',
         };
         $uid = (string) $user->id;
         $counter = ($users->currentPage() - 1) * $users->perPage() + $loop->index + 1;

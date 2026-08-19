@@ -106,25 +106,27 @@
         @endguest
     </div>
 
-    {{-- User card --}}
+    {{-- Sign out --}}
     @auth
-        <div class="shrink-0 border-t border-[#F1F3F5] p-3.5">
-            <div class="flex items-center gap-2.5 p-2 rounded-[10px] bg-[#FAFDFB] border border-[#F1F3F5]">
-                <x-ui.user-avatar :name="$user->name" size="md" />
-                <div class="min-w-0 flex-1">
-                    <p class="text-[13px] font-semibold text-[#09090b] truncate">{{ $user->name ?? 'User' }}</p>
-                    <p class="text-[11px] text-[#71717a] capitalize">{{ $user->roles->first()?->name ?? 'Member' }}</p>
-                </div>
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" title="Sign out"
-                        class="flex items-center justify-center w-8 h-8 rounded-lg
-                               text-[#A5B2BD] hover:text-[#e11d48] hover:bg-[#fff1f2]
-                               transition-colors duration-150">
-                        <i class="bx bxs-log-out text-base"></i>
-                    </button>
-                </form>
-            </div>
+        <div class="shrink-0 border-t border-[#F1F3F5] p-2.5">
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit"
+                    class="w-full flex items-center justify-center gap-2.5
+                        px-3 py-2.5 rounded-[9px]
+                        border border-[#72809E]
+                        text-[#72809E] text-[13px] font-semibold
+                        hover:text-[#e11d48]
+                        hover:border-[#e11d48]
+                        hover:bg-[#fff1f2]
+                        active:bg-[#ffe4e6]
+                        active:text-[#be123c]
+                        active:border-[#be123c]
+                        transition-all duration-150">
+                    <i class="bx bxs-log-out text-base leading-none"></i>
+                    Sign Out
+                </button>
+            </form>
         </div>
     @endauth
 </aside>

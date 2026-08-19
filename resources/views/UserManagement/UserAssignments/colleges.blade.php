@@ -74,7 +74,7 @@
                                         <button type="button" class="text-slate-400 hover:text-slate-600 transition-colors">
                                             <i class="bx bx-info-circle text-sm"></i>
                                         </button>
-                                        <div class="absolute right-0 top-full mt-2 w-64 p-3 bg-slate-800 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+                                        <div class="absolute right-0 top-full mt-2 w-64 p-3 bg-slate-800 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[999]">
                                             <p class="font-semibold mb-1">College Dean</p>
                                             <p class="text-slate-300">Manages all departments within a college. Oversees academic and administrative operations at the college level.</p>
                                         </div>
