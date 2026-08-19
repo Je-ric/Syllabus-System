@@ -1,20 +1,21 @@
 @props(['level'])
 
 @php
-    // Light bg + text = border (pill pattern, consistent with design system)
-    // I → Blue 200 bg, Blue 900 text+border
-    // E → Amber 200 bg, Amber 900 text+border
-    // D → Emerald 100 bg, Emerald 800 text+border
+    // Light bg + saturated text, ring one step lighter than text (not equal to it) —
+    // consistent with status-indicator and alert components.
+    // I → Blue    (Introductory)
+    // E → Amber   (Enabling)
+    // D → Emerald (Demonstrating)
     $colors = [
-        'I' => 'bg-[#DAF1FF] text-[#143D57] ring-1 ring-inset ring-[#143D57]',
-        'E' => 'bg-[#FFF6E2] text-[#875200] ring-1 ring-inset ring-[#875200]',
-        'D' => 'bg-[#D5FFF0] text-[#06754E] ring-1 ring-inset ring-[#06754E]',
+        'I' => 'bg-[#DAF1FF] text-[#143D57] ring-1 ring-inset ring-[#AEDFFF]',
+        'E' => 'bg-[#FFF6E2] text-[#875200] ring-1 ring-inset ring-[#FFE9B5]',
+        'D' => 'bg-[#D5FFF0] text-[#06754E] ring-1 ring-inset ring-[#AEFFE2]',
     ];
-    $classes = $colors[$level] ?? 'bg-[#F1F3F5] text-[#394056] ring-1 ring-inset ring-[#394056]';
+    $classes = $colors[$level] ?? 'bg-[#F1F3F5] text-[#394056] ring-1 ring-inset ring-[#E3E8EB]';
 @endphp
 
-<span class="inline-flex items-center justify-center px-2 py-0.5 w-7
-            text-[0.65rem] font-bold rounded-full tracking-wide {{ $classes }}">
+<span class="inline-flex items-center justify-center w-7 px-2 py-[3px]
+            text-[0.65rem] font-bold rounded-[7px] tracking-wide {{ $classes }}">
     {{ $level ?? '–' }}
 </span>
 
@@ -24,11 +25,11 @@ x-feedback-status.ied-badge
 Displays an IED (Introductory / Enabling / Demonstrating) level badge.
 Used in course-outcome mapping tables.
 
-Colors (light bg + text = border, pill style):
-    I → Blue   (Introductory)
-    E → Amber  (Enabling)
+Colors (light bg + saturated text, ring one step lighter than text):
+    I → Blue    (Introductory)
+    E → Amber   (Enabling)
     D → Emerald (Demonstrating)
-    – → Slate  (no mapping / fallback)
+    – → Slate   (no mapping / fallback)
 
 USAGE:
 Static:

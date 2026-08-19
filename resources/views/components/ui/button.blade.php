@@ -199,3 +199,60 @@
         @endif
     </button>
 @endif
+
+
+<style>
+    /* ── Button motion polish ─────────────────────────────────────────── */
+    /* Fixes: gradient backgrounds don't crossfade with `transition-all`,
+    and table-* buttons have no press/active feedback at all. */
+
+    [class*="bg-[linear-gradient"] {
+        position: relative;
+        isolation: isolate;
+        transition: transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1),
+                    box-shadow 200ms ease,
+                    filter 200ms ease;
+    }
+
+    /* Crossfade trick: stack the hover gradient as a pseudo-element and
+    fade its opacity in, instead of swapping background-image directly. */
+    [class*="bg-[linear-gradient"]::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        border-radius: inherit;
+        opacity: 0;
+        transition: opacity 220ms ease;
+        background: inherit;
+        filter: brightness(0.93);
+    }
+    [class*="bg-[linear-gradient"]:hover::before {
+        opacity: 1;
+    }
+
+    /* Lift on hover, press on click — applies to every button variant */
+    button, a.inline-flex {
+        transition: transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1),
+                    box-shadow 200ms ease,
+                    background-color 200ms ease,
+                    border-color 200ms ease,
+                    color 200ms ease;
+    }
+    button:not(:disabled):hover, a.inline-flex:hover {
+        transform: translateY(-1px);
+    }
+    button:not(:disabled):active, a.inline-flex:active {
+        transform: translateY(0) scale(0.96);
+        transition-duration: 90ms;
+    }
+
+    /* Solid (non-gradient) colored buttons get a subtle glow on hover */
+    [class*="shadow-[0_1px"]:hover {
+        filter: brightness(1.04);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        * { transition-duration: 0.01ms !important; }
+    }
+</style>
