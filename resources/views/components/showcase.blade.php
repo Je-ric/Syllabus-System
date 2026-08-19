@@ -81,7 +81,7 @@
                     shadow-[0_1px_2px_rgba(16,24,40,0.04),0_1px_3px_rgba(16,24,40,0.06)]">
             <p class="text-[10.5px] font-semibold uppercase tracking-widest text-[#93A1AF] mb-4">Small / Wizard — Pills</p>
             <div class="flex flex-wrap gap-3">
-                @foreach (['sm-primary','sm-cancel','sm-danger','sm-warning','sm-info','sm-success','sm-soft','sm-add'] as $v)
+                @foreach (['sm-primary','sm-cancel','sm-danger','sm-warning','sm-info','sm-success','sm-add'] as $v)
                     <div class="flex flex-col items-center gap-1.5">
                         <x-ui.button variant="{{ $v }}">
                             {{ ucwords(str_replace(['sm-','-'], ['', ' '], $v)) }}
@@ -461,46 +461,6 @@
         </div>
     </section>
 
-
-    {{-- ─── 10. Accordion ─────────────────────────────────────────────── --}}
-    <section class="space-y-4">
-        <div class="flex items-center gap-3">
-            <h2 class="text-base font-bold text-[#394056]">10. Accordion</h2>
-            <x-ui.code-badge variant="grey">x-layout.accordion</x-ui.code-badge>
-        </div>
-
-        <div class="bg-white border border-[#E3E8EB] rounded-[12px] p-6
-                    shadow-[0_1px_2px_rgba(16,24,40,0.04),0_1px_3px_rgba(16,24,40,0.06)]">
-            <p class="text-[10.5px] font-semibold uppercase tracking-widest text-[#93A1AF] mb-4">Color variants</p>
-            <div class="space-y-3">
-                <x-layout.accordion title="Course Outcomes" icon="target" color="emerald" :open="true"
-                    badge="3 mapped" badgeVariant="brand">
-                    <p class="text-sm text-[#72809E]">Expanded by default. Body content goes here.</p>
-                </x-layout.accordion>
-
-                <x-layout.accordion title="Assigned Sections" icon="calendar" color="blue">
-                    <x-slot name="actions">
-                        <x-ui.button variant="sm-add"><i class="bx bx-plus"></i> Add</x-ui.button>
-                    </x-slot>
-                    <p class="text-sm text-[#72809E]">Collapsed by default. Click to expand.</p>
-                </x-layout.accordion>
-
-                <x-layout.accordion title="Pending Requirements" icon="time" color="amber" badge="2 pending" badgeVariant="amber">
-                    <p class="text-sm text-[#72809E]">Warning-toned accordion with a badge.</p>
-                </x-layout.accordion>
-
-                <x-layout.accordion title="Archived Records" icon="archive" color="rose">
-                    <p class="text-sm text-[#72809E]">Rose/danger-toned for destructive or archived content.</p>
-                </x-layout.accordion>
-
-                <x-layout.accordion title="Plain (no icon, slate)" color="slate">
-                    <p class="text-sm text-[#72809E]">Default slate color, no icon.</p>
-                </x-layout.accordion>
-            </div>
-        </div>
-    </section>
-
-
     {{-- ─── 11. Table ─────────────────────────────────────────────────── --}}
     {{-- <section class="space-y-4">
         <div class="flex items-center gap-3">
@@ -615,57 +575,261 @@
     </section> --}}
 
 
-    {{-- ─── 12. Offcanvas ─────────────────────────────────────────────── --}}
-    {{-- <section class="space-y-4">
+    {{-- ─── 12. Toast Notifications ───────────────────────────────────────── --}}
+    <section class="space-y-4">
         <div class="flex items-center gap-3">
-            <h2 class="text-base font-bold text-[#394056]">12. Offcanvas</h2>
-            <x-ui.code-badge variant="grey">x-layout.offcanvas</x-ui.code-badge>
+            <h2 class="text-base font-bold text-[#394056]">12. Toast Notifications</h2>
+            <x-ui.code-badge variant="grey">x-feedback-status.toast</x-ui.code-badge>
         </div>
 
         <div class="bg-white border border-[#E3E8EB] rounded-[12px] p-6
-                    shadow-[0_1px_2px_rgba(16,24,40,0.04),0_1px_3px_rgba(16,24,40,0.06)]"
-             x-data="{ panelOpen: false }">
+                    shadow-[0_1px_2px_rgba(16,24,40,0.04),0_1px_3px_rgba(16,24,40,0.06)]">
             <p class="text-xs text-[#72809E] mb-4">
-                Click the button to open the offcanvas panel. Uses backdrop blur + directional slide animation.
+                Click buttons to trigger toast notifications. Toasts auto-dismiss after 5.2s, pause on hover.
             </p>
-            <div class="flex gap-3">
-                <x-ui.button variant="primary" x-on:click="panelOpen = true">
-                    <i class="bx bx-layout"></i> Open Offcanvas
-                </x-ui.button>
+            <div class="flex flex-wrap gap-3">
+                <button onclick="window.dispatchEvent(new CustomEvent('lw-toast', { detail: { type: 'success', message: 'Course syllabus saved successfully!' } }))"
+                    class="inline-flex items-center gap-1.5 px-4 py-2 text-[13.5px] font-semibold rounded-[7px] text-white bg-[linear-gradient(180deg,#00C075_0%,#00965F_100%)] hover:bg-[linear-gradient(180deg,#00965F_0%,#06754E_100%)] active:bg-[#06754E] transition-all duration-200">
+                    <i class="bx bx-check"></i> Success Toast
+                </button>
+                <button onclick="window.dispatchEvent(new CustomEvent('lw-toast', { detail: { type: 'error', message: 'Failed to save. Please try again.' } }))"
+                    class="inline-flex items-center gap-1.5 px-4 py-2 text-[13.5px] font-semibold rounded-[7px] text-white bg-[linear-gradient(180deg,#E52F28_0%,#BA1F19_100%)] hover:bg-[linear-gradient(180deg,#D21B14_0%,#9D1F1A_100%)] active:bg-[#9D1F1A] transition-all duration-200">
+                    <i class="bx bx-x"></i> Error Toast
+                </button>
+                <button onclick="window.dispatchEvent(new CustomEvent('lw-toast', { detail: { type: 'warning', message: 'Please complete all required fields.' } }))"
+                    class="inline-flex items-center gap-1.5 px-4 py-2 text-[13.5px] font-semibold rounded-[7px] text-[#394056] bg-[linear-gradient(180deg,#FFC646_0%,#F5B126_100%)] hover:bg-[linear-gradient(180deg,#F5B126_0%,#D79400_100%)] active:bg-[#D79400] transition-all duration-200">
+                    <i class="bx bx-error"></i> Warning Toast
+                </button>
+                <button onclick="window.dispatchEvent(new CustomEvent('lw-toast', { detail: { type: 'info', message: 'Your changes have been recorded.' } }))"
+                    class="inline-flex items-center gap-1.5 px-4 py-2 text-[13.5px] font-semibold rounded-[7px] text-white bg-[linear-gradient(180deg,#3197D6_0%,#1F7AB8_100%)] hover:bg-[linear-gradient(180deg,#1F7AB8_0%,#194C6E_100%)] active:bg-[#194C6E] transition-all duration-200">
+                    <i class="bx bx-info-circle"></i> Info Toast
+                </button>
             </div>
+        </div>
+    </section>
 
-            <x-layout.offcanvas
-                title="Course Details"
-                subtitle="AY 2024–25 · Semester 1"
-                icon="bx bx-book-open"
-                open="panelOpen">
-                <x-slot name="footer">
-                    <div class="flex items-center justify-end gap-2">
-                        <x-ui.button variant="cancel" x-on:click="panelOpen = false">Cancel</x-ui.button>
-                        <x-ui.button variant="save"><i class="bx bx-save"></i> Save Changes</x-ui.button>
-                    </div>
-                </x-slot>
-                <div class="space-y-4">
-                    <x-feedback-status.alert type="info" :showTitle="false"
-                        message="Review the details below before saving." />
-                    <x-layout.section-heading number="1" label="Course Information" />
-                    <div class="space-y-1">
-                        <p class="text-xs font-semibold text-[#72809E] uppercase tracking-wider">Course Code</p>
-                        <p class="text-sm font-semibold text-[#394056]">CS 101</p>
-                    </div>
-                    <div class="space-y-1">
-                        <p class="text-xs font-semibold text-[#72809E] uppercase tracking-wider">Description</p>
-                        <p class="text-sm text-[#394056]">Introduction to Computer Science fundamentals.</p>
-                    </div>
-                    <x-layout.section-heading number="2" label="Status" />
-                    <div class="flex items-center gap-2">
-                        <x-feedback-status.status-indicator status="active" size="lg" />
-                        <span class="text-sm text-[#72809E]">Currently active and visible to students.</span>
+
+    {{-- ─── 13. Form Components ──────────────────────────────────────────── --}}
+    <section class="space-y-5">
+        <div class="flex items-center gap-3">
+            <h2 class="text-base font-bold text-[#394056]">13. Form Components</h2>
+            <x-ui.code-badge variant="grey">x-form.*</x-ui.code-badge>
+        </div>
+
+        {{-- Inputs --}}
+        <div class="bg-white border border-[#E3E8EB] rounded-[12px] p-6
+                    shadow-[0_1px_2px_rgba(16,24,40,0.04),0_1px_3px_rgba(16,24,40,0.06)]">
+            <p class="text-[10.5px] font-semibold uppercase tracking-widest text-[#93A1AF] mb-4">x-form.input — text variants</p>
+            <div class="space-y-3">
+                <div>
+                    <x-form.label>Default Input</x-form.label>
+                    <x-form.input type="text" placeholder="Enter text..." />
+                </div>
+                <div>
+                    <x-form.label>Email Input</x-form.label>
+                    <x-form.input type="email" placeholder="user@example.com" />
+                </div>
+                <div>
+                    <x-form.label>Disabled Input</x-form.label>
+                    <x-form.input type="text" placeholder="Disabled field" disabled />
+                </div>
+            </div>
+        </div>
+
+        {{-- Select & Textarea --}}
+        <div class="bg-white border border-[#E3E8EB] rounded-[12px] p-6
+                    shadow-[0_1px_2px_rgba(16,24,40,0.04),0_1px_3px_rgba(16,24,40,0.06)]">
+            <p class="text-[10.5px] font-semibold uppercase tracking-widest text-[#93A1AF] mb-4">x-form.select & x-form.textarea</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <x-form.label>Select Dropdown</x-form.label>
+                    <x-form.select>
+                        <option value="">Choose an option</option>
+                        <option value="1">Option 1</option>
+                        <option value="2">Option 2</option>
+                        <option value="3">Option 3</option>
+                    </x-form.select>
+                </div>
+                <div>
+                    <x-form.label>Textarea</x-form.label>
+                    <x-form.textarea rows="3" placeholder="Enter your message..." />
+                </div>
+            </div>
+        </div>
+
+        {{-- Checkbox & Radio --}}
+        <div class="bg-white border border-[#E3E8EB] rounded-[12px] p-6
+                    shadow-[0_1px_2px_rgba(16,24,40,0.04),0_1px_3px_rgba(16,24,40,0.06)]">
+            <p class="text-[10.5px] font-semibold uppercase tracking-widest text-[#93A1AF] mb-4">x-form.checkbox & x-form.radio</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <p class="text-xs font-semibold text-[#394056] mb-2">Checkboxes</p>
+                    <div class="space-y-2">
+                        <x-form.checkbox label="Enable notifications" id="check1" />
+                        <x-form.checkbox label="Accept terms and conditions" id="check2" />
+                        <x-form.checkbox label="Subscribe to newsletter" id="check3" />
                     </div>
                 </div>
-            </x-layout.offcanvas>
+                <div>
+                    <p class="text-xs font-semibold text-[#394056] mb-2">Radio Buttons</p>
+                    <div class="space-y-2">
+                        <x-form.radio label="Option A" name="radio-group" value="a" id="radio1" />
+                        <x-form.radio label="Option B" name="radio-group" value="b" id="radio2" />
+                        <x-form.radio label="Option C" name="radio-group" value="c" id="radio3" />
+                    </div>
+                </div>
+            </div>
         </div>
-    </section> --}}
+    </section>
+
+
+    {{-- ─── 14. Navigation Components ───────────────────────────────────── --}}
+    <section class="space-y-5">
+        <div class="flex items-center gap-3">
+            <h2 class="text-base font-bold text-[#394056]">14. Navigation Components</h2>
+            <x-ui.code-badge variant="grey">x-navigation.*</x-ui.code-badge>
+        </div>
+
+        {{-- Link Tabs --}}
+        <div class="bg-white border border-[#E3E8EB] rounded-[12px] p-6
+                    shadow-[0_1px_2px_rgba(16,24,40,0.04),0_1px_3px_rgba(16,24,40,0.06)]">
+            <p class="text-[10.5px] font-semibold uppercase tracking-widest text-[#93A1AF] mb-4">x-navigation.link-tabs</p>
+            <x-navigation.link-tabs
+                :tabs="[
+                    ['id' => 'overview', 'label' => 'Overview', 'href' => '#', 'icon' => 'bx-home'],
+                    ['id' => 'courses', 'label' => 'Courses', 'href' => '#', 'icon' => 'bx-book', 'count' => 12],
+                    ['id' => 'faculty', 'label' => 'Faculty', 'href' => '#', 'icon' => 'bx-user'],
+                    ['id' => 'settings', 'label' => 'Settings', 'href' => '#', 'icon' => 'bx-cog'],
+                ]"
+                active="courses"
+            />
+        </div>
+
+        {{-- Modern Tabs --}}
+        <div class="bg-white border border-[#E3E8EB] rounded-[12px] p-6
+                    shadow-[0_1px_2px_rgba(16,24,40,0.04),0_1px_3px_rgba(16,24,40,0.06)]">
+            <p class="text-[10.5px] font-semibold uppercase tracking-widest text-[#93A1AF] mb-4">x-navigation.tabs-modern</p>
+            <x-navigation.tabs-modern
+                :tabs="[
+                    ['id' => 'details', 'label' => 'Course Details', 'icon' => 'bx-info-circle'],
+                    ['id' => 'outcomes', 'label' => 'Learning Outcomes', 'icon' => 'bx-target-lock', 'count' => 5],
+                    ['id' => 'schedule', 'label' => 'Schedule', 'icon' => 'bx-calendar'],
+                ]"
+                defaultTab="details"
+                title="Course Information"
+                description="Manage course details and learning outcomes"
+            >
+                @php
+                    $slot_details = '<p class="text-sm text-[#72809E]">Course details content would appear here.</p>';
+                    $slot_outcomes = '<p class="text-sm text-[#72809E]">Learning outcomes mapping would appear here.</p>';
+                    $slot_schedule = '<p class="text-sm text-[#72809E]">Schedule information would appear here.</p>';
+                @endphp
+            </x-navigation.tabs-modern>
+        </div>
+    </section>
+
+
+    {{-- ─── 15. Wizard Components ────────────────────────────────────────── --}}
+    <section class="space-y-5">
+        <div class="flex items-center gap-3">
+            <h2 class="text-base font-bold text-[#394056]">15. Wizard Components</h2>
+            <x-ui.code-badge variant="grey">x-wizard.*</x-ui.code-badge>
+        </div>
+
+        {{-- Info Cards --}}
+        <div class="bg-white border border-[#E3E8EB] rounded-[12px] p-6
+                    shadow-[0_1px_2px_rgba(16,24,40,0.04),0_1px_3px_rgba(16,24,40,0.06)]">
+            <p class="text-[10.5px] font-semibold uppercase tracking-widest text-[#93A1AF] mb-4">x-wizard.info-card — color variants</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <x-wizard.info-card color="slate" title="General" icon="info-circle">
+                    <p class="text-xs text-[#72809E]">Basic information about the course.</p>
+                </x-wizard.info-card>
+                <x-wizard.info-card color="emerald" title="Requirements" icon="check-circle">
+                    <p class="text-xs text-[#72809E]">Prerequisites and requirements.</p>
+                </x-wizard.info-card>
+                <x-wizard.info-card color="blue" title="Schedule" icon="calendar">
+                    <p class="text-xs text-[#72809E]">Class schedule and timeline.</p>
+                </x-wizard.info-card>
+                <x-wizard.info-card color="amber" title="Warnings" icon="error">
+                    <p class="text-xs text-[#72809E]">Important warnings and notes.</p>
+                </x-wizard.info-card>
+            </div>
+        </div>
+
+        {{-- Info Row --}}
+        <div class="bg-white border border-[#E3E8EB] rounded-[12px] p-6
+                    shadow-[0_1px_2px_rgba(16,24,40,0.04),0_1px_3px_rgba(16,24,40,0.06)]">
+            <p class="text-[10.5px] font-semibold uppercase tracking-widest text-[#93A1AF] mb-4">x-wizard.info-row</p>
+            <div class="space-y-2">
+                <x-wizard.info-row label="Course Code" value="CS 101" />
+                <x-wizard.info-row label="Units" value="3.0" />
+                <x-wizard.info-row label="Semester" value="1st Sem 2024-2025" />
+                <x-wizard.info-row label="Status" value="Active" />
+            </div>
+        </div>
+
+        {{-- Step Header --}}
+        <div class="bg-white border border-[#E3E8EB] rounded-[12px] p-6
+                    shadow-[0_1px_2px_rgba(16,24,40,0.04),0_1px_3px_rgba(16,24,40,0.06)]">
+            <p class="text-[10.5px] font-semibold uppercase tracking-widest text-[#93A1AF] mb-4">x-wizard.step-header</p>
+            <x-wizard.step-header
+                step="1"
+                title="Basic Information"
+                description="Enter the fundamental details about this course"
+            />
+        </div>
+    </section>
+
+
+    {{-- ─── 16. Additional UI Components ───────────────────────────────────── --}}
+    <section class="space-y-5">
+        <div class="flex items-center gap-3">
+            <h2 class="text-base font-bold text-[#394056]">16. Additional UI Components</h2>
+            <x-ui.code-badge variant="grey">x-ui.* (additional)</x-ui.code-badge>
+        </div>
+
+        {{-- User Avatar --}}
+        <div class="bg-white border border-[#E3E8EB] rounded-[12px] p-6
+                    shadow-[0_1px_2px_rgba(16,24,40,0.04),0_1px_3px_rgba(16,24,40,0.06)]">
+            <p class="text-[10.5px] font-semibold uppercase tracking-widest text-[#93A1AF] mb-4">x-ui.user-avatar — size variants</p>
+            <div class="flex items-center gap-4">
+                <div class="flex flex-col items-center gap-1.5">
+                    <x-ui.user-avatar name="Maria Santos" size="sm" />
+                    <span class="font-mono text-[9.5px] text-[#B4C0CA]">sm</span>
+                </div>
+                <div class="flex flex-col items-center gap-1.5">
+                    <x-ui.user-avatar name="Maria Santos" size="md" />
+                    <span class="font-mono text-[9.5px] text-[#B4C0CA]">md</span>
+                </div>
+                <div class="flex flex-col items-center gap-1.5">
+                    <x-ui.user-avatar name="Maria Santos" size="lg" />
+                    <span class="font-mono text-[9.5px] text-[#B4C0CA]">lg</span>
+                </div>
+            </div>
+        </div>
+
+        {{-- Empty State --}}
+        <div class="bg-white border border-[#E3E8EB] rounded-[12px] p-6
+                    shadow-[0_1px_2px_rgba(16,24,40,0.04),0_1px_3px_rgba(16,24,40,0.06)]">
+            <p class="text-[10.5px] font-semibold uppercase tracking-widest text-[#93A1AF] mb-4">x-feedback-status.empty-state</p>
+            <x-feedback-status.empty-state
+                title="No courses found"
+                description="There are no courses available for the current semester."
+                icon="bx-book-open"
+            />
+        </div>
+
+        {{-- Progress Bar --}}
+        <div class="bg-white border border-[#E3E8EB] rounded-[12px] p-6
+                    shadow-[0_1px_2px_rgba(16,24,40,0.04),0_1px_3px_rgba(16,24,40,0.06)]">
+            <p class="text-[10.5px] font-semibold uppercase tracking-widest text-[#93A1AF] mb-4">x-feedback-status.progress-bar</p>
+            <div class="space-y-4">
+                <x-feedback-status.progress-bar current="75" total="100" color="bg-[#16a34a]" />
+                <x-feedback-status.progress-bar current="45" total="100" color="bg-[#3b82f6]" />
+                <x-feedback-status.progress-bar current="90" total="100" color="bg-[#d97706]" />
+            </div>
+        </div>
+    </section>
 
 </div>
 @endsection
