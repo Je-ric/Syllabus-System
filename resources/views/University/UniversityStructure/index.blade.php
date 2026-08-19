@@ -259,24 +259,20 @@
                                                                     <p class="text-[13px] font-medium text-[#394056] truncate">{{ $program->name }}</p>
                                                                     @if($role === 'primary')
                                                                         <div class="group relative shrink-0">
-                                                                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#D5FFF0] text-[#06754E] border border-[#00965F] cursor-help">
-                                                                                Primary
-                                                                            </span>
-                                            <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 p-2 bg-slate-800 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
-                                                <p class="font-semibold mb-1">Primary Department</p>
-                                                <p class="text-slate-300">Main department responsible for program administration and curriculum.</p>
-                                            </div>
-                                        </div>
+                                                                            <x-feedback-status.status-indicator variant="brand" label="Primary" size="sm" class="cursor-help" />
+                                                                            <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 p-2 bg-slate-800 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+                                                                                <p class="font-semibold mb-1">Primary Department</p>
+                                                                                <p class="text-slate-300">Main department responsible for program administration and curriculum.</p>
+                                                                            </div>
+                                                                        </div>
                                                                     @else
                                                                         <div class="group relative shrink-0">
-                                                                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#FFF3CD] text-[#856404] border border-[#FFC107] cursor-help">
-                                                                                Supporting
-                                                                            </span>
-                                            <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 p-2 bg-slate-800 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
-                                                <p class="font-semibold mb-1">Supporting Department</p>
-                                                <p class="text-slate-300">Collaborates on program but does not administer it. Provides interdisciplinary support.</p>
-                                            </div>
-                                        </div>
+                                                                            <x-feedback-status.status-indicator variant="amber" label="Supporting" size="sm" class="cursor-help" />
+                                                                            <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 p-2 bg-slate-800 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+                                                                                <p class="font-semibold mb-1">Supporting Department</p>
+                                                                                <p class="text-slate-300">Collaborates on program but does not administer it. Provides interdisciplinary support.</p>
+                                                                            </div>
+                                                                        </div>
                                                                     @endif
                                                                 </div>
                                                                 <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
@@ -288,16 +284,6 @@
                                                                             @endif
                                                                         </p>
                                                                     @endif
-                                                                    {{-- @if($otherDepts->count())
-                                                                        <span class="text-[10px] text-[#93A1AF]">&middot;</span>
-                                                                        @foreach($otherDepts as $other)
-                                                                            <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-[#F1F3F5] text-[#72809E] border border-[#E3E8EB]"
-                                                                                  title="{{ $other->pivot->role === 'primary' ? 'Primary' : 'Supporting' }}: {{ $other->name }}">
-                                                                                {{ Str::limit($other->name, 30) }}
-                                                                                ({{ $other->pivot->role === 'primary' ? 'P' : 'S' }})
-                                                                            </span>
-                                                                        @endforeach
-                                                                    @endif --}}
                                                                 </div>
                                                             </div>
                                                         </div>

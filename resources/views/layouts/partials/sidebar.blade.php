@@ -10,14 +10,16 @@
     style="box-shadow: 1px 0 0 rgba(16,24,40,0.02), 4px 0 24px -8px rgba(16,24,40,0.06);">
 
     {{-- Brand --}}
-    <div class="shrink-0 px-4 pt-5 pb-4 border-b border-[#F1F3F5]">
-        <div class="flex items-center justify-between">
+    <div class="shrink-0 px-4 pt-6 pb-5 border-b border-[#F0F2F5] relative">
+        {{-- Mobile close button top-right --}}
+        <button id="sidebar-close"
+            class="lg:hidden absolute top-3 right-3 text-[#A5B2BD] hover:text-[#394056] transition p-1.5 rounded-lg hover:bg-[#F1F3F5]"
+            aria-label="Close navigation">
+            <i class="bx bx-x text-xl"></i>
+        </button>
+        {{-- Centered logo lockup --}}
+        <div class="flex justify-center">
             <x-ui.brand-logo />
-            <button id="sidebar-close"
-                class="lg:hidden text-[#A5B2BD] hover:text-[#394056] transition p-1.5 rounded-lg hover:bg-[#F1F3F5]"
-                aria-label="Close navigation">
-                <i class="bx bx-x text-xl"></i>
-            </button>
         </div>
     </div>
 

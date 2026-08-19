@@ -19,12 +19,12 @@
                 <i class="bx bx-menu text-xl"></i>
             </button>
             <span class="hidden sm:block h-5 w-px bg-[#E3E8EB] shrink-0"></span>
-            <div class="hidden sm:block min-w-0">
-                <p class="text-[9px] uppercase tracking-[0.28em] text-[#93A1AF] leading-none">
+            <div class="hidden sm:flex flex-col justify-center min-w-0 gap-0.5">
+                <p class="topbar-univ-label leading-none">
                     Central Luzon State University
                 </p>
-                <p class="brand-title text-[13.5px] font-bold text-[#394056] leading-tight truncate">
-                    Course Syllabus Management
+                <p class="topbar-system-name leading-none truncate">
+                    Course Syllabus Management System
                 </p>
             </div>
         </div>
