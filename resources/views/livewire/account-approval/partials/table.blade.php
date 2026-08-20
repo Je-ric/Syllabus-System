@@ -1,3 +1,63 @@
+{{-- Action Icon Legend --}}
+<!-- <div class="flex flex-wrap items-center gap-x-3 gap-y-2 px-3 py-2.5 rounded-[10px] bg-[#f8fafc] border border-[#e8ecf0] mb-3">
+    <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-[#94a3b8] mr-1">Legend</span>
+    <div class="w-px h-3.5 bg-[#e2e8f0] mx-0.5"></div>
+    <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+
+        <div class="flex items-center gap-1.5">
+            <span class="inline-flex items-center justify-center rounded-full bg-[#D5FFF0] border border-[#6EE7B7]" style="width:18px;height:18px;">
+                <i class="bx bx-check text-[9px] text-[#06754E]"></i>
+            </span>
+            <span class="text-[11.5px] font-semibold text-[#06754E]">Approve</span>
+            <span class="text-[10.5px] text-[#b0b8c8]">/ Activate</span>
+        </div>
+        <div class="w-px h-3 bg-[#e2e8f0]"></div>
+
+        <div class="flex items-center gap-1.5">
+            <span class="inline-flex items-center justify-center rounded-full bg-[#FFE3E2] border border-[#FCA5A5]" style="width:18px;height:18px;">
+                <i class="bx bx-x text-[9px] text-[#9D1F1A]"></i>
+            </span>
+            <span class="text-[11.5px] font-semibold text-[#9D1F1A]">Reject</span>
+        </div>
+        <div class="w-px h-3 bg-[#e2e8f0]"></div>
+
+        <div class="flex items-center gap-1.5">
+            <span class="inline-flex items-center justify-center rounded-full bg-[#F1F3F5] border border-[#D1D5DB]" style="width:18px;height:18px;">
+                <i class="bx bx-pause text-[9px] text-[#72809E]"></i>
+            </span>
+            <span class="text-[11.5px] font-semibold text-[#72809E]">Disable</span>
+        </div>
+        <div class="w-px h-3 bg-[#e2e8f0]"></div>
+
+        <div class="flex items-center gap-1.5">
+            <span class="inline-flex items-center justify-center rounded-full bg-[#DBEAFE] border border-[#93C5FD]" style="width:18px;height:18px;">
+                <i class="bx bx-revision text-[9px] text-[#1D4ED8]"></i>
+            </span>
+            <span class="text-[11.5px] font-semibold text-[#1D4ED8]">Restore</span>
+        </div>
+        <div class="w-px h-3 bg-[#e2e8f0]"></div>
+
+        <div class="flex items-center gap-1.5">
+            <span class="inline-flex items-center justify-center rounded-full bg-[#EDE9FE] border border-[#C4B5FD]" style="width:18px;height:18px;">
+                <i class="bx bx-shield text-[9px] text-[#6D28D9]"></i>
+            </span>
+            <span class="text-[11.5px] font-semibold text-[#6D28D9]">Manage roles</span>
+        </div>
+        <div class="w-px h-3 bg-[#e2e8f0]"></div>
+
+        <div class="flex items-center gap-1.5">
+            <span class="inline-flex items-center justify-center rounded-full bg-[#F1F3F5] border border-[#D1D5DB]" style="width:18px;height:18px;">
+                <i class="bx bx-edit text-[9px] text-[#475569]"></i>
+            </span>
+            <span class="text-[11.5px] font-semibold text-[#475569]">Edit</span>
+        </div>
+    </div>
+    <div class="ml-auto flex items-center gap-1 text-[10.5px] text-[#b0b8c8]">
+        <i class="bx bx-mouse text-xs"></i>
+        <span>Hover icons for tooltips</span>
+    </div>
+</div> -->
+
 <x-table.container>
     <x-table.table class="min-w-[700px]">
         <x-table.head :sticky="true">
@@ -8,10 +68,10 @@
                         style="accent-color: var(--clsu-green);">
                 </x-table.th>
                 <x-table.th>User</x-table.th>
-                <x-table.th class="hidden md:table-cell">Status</x-table.th>
-                <x-table.th class="hidden md:table-cell">Roles</x-table.th>
-                <x-table.th class="hidden md:table-cell">Phone</x-table.th>
-                <x-table.th class="hidden md:table-cell">Office</x-table.th>
+                <x-table.th>Status</x-table.th>
+                <x-table.th>Roles</x-table.th>
+                <x-table.th>Phone</x-table.th>
+                <x-table.th>Office</x-table.th>
                 <x-table.th class="w-32 text-right">Actions</x-table.th>
             </x-table.row>
         </x-table.head>
@@ -76,11 +136,11 @@
                         </div>
                     </x-table.td>
 
-                    <x-table.td class="hidden md:table-cell">
+                    <x-table.td>
                         <x-feedback-status.status-indicator :status="$user->account_status" />
                     </x-table.td>
 
-                    <x-table.td class="hidden md:table-cell">
+                    <x-table.td>
                         <div class="flex flex-wrap gap-1">
                             @forelse($user->roles as $role)
                                 <x-feedback-status.status-indicator :status="$role->name" />
@@ -90,44 +150,44 @@
                         </div>
                     </x-table.td>
 
-                    <x-table.td class="hidden md:table-cell text-[13px] text-[#475569]">
+                    <x-table.td class="text-[13px] text-[#475569]">
                         {{ $user->phone_number ?: '—' }}
                     </x-table.td>
 
-                    <x-table.td class="hidden md:table-cell text-[13px] text-[#475569]">
+                    <x-table.td class="text-[13px] text-[#475569]">
                         {{ $user->office ?: '—' }}
                     </x-table.td>
 
                     <x-table.td class="text-right" @click.stop>
-                        <div class="flex items-center justify-end gap-1 flex-wrap">
+                        <div class="flex items-center justify-end gap-1">
                             @if($user->account_status === 'pending')
-                                <x-ui.button variant="table-confirm" onclick="document.getElementById('approveModal-{{ $user->id }}').showModal()">
-                                    <i class="bx bx-check leading-none"></i> Approve
+                                <x-ui.button variant="table-confirm" title="Approve account" onclick="document.getElementById('approveModal-{{ $user->id }}').showModal()">
+                                    <i class="bx bx-check leading-none"></i>
                                 </x-ui.button>
-                                <x-ui.button variant="table-danger" onclick="document.getElementById('rejectModal-{{ $user->id }}').showModal()">
-                                    <i class="bx bx-x leading-none"></i> Reject
+                                <x-ui.button variant="table-danger" title="Reject account" onclick="document.getElementById('rejectModal-{{ $user->id }}').showModal()">
+                                    <i class="bx bx-x leading-none"></i>
                                 </x-ui.button>
                             @elseif($user->account_status === 'disabled')
-                                <x-ui.button variant="table-confirm" onclick="document.getElementById('approveModal-{{ $user->id }}').showModal()">
-                                    <i class="bx bx-check leading-none"></i> Activate
+                                <x-ui.button variant="table-confirm" title="Activate account" onclick="document.getElementById('approveModal-{{ $user->id }}').showModal()">
+                                    <i class="bx bx-check leading-none"></i>
                                 </x-ui.button>
                             @elseif($user->account_status === 'rejected')
-                                <x-ui.button variant="table-restore" onclick="document.getElementById('restoreModal-{{ $user->id }}').showModal()">
-                                    <i class="bx bx-revision leading-none"></i> Restore
+                                <x-ui.button variant="table-restore" title="Restore account" onclick="document.getElementById('restoreModal-{{ $user->id }}').showModal()">
+                                    <i class="bx bx-revision leading-none"></i>
                                 </x-ui.button>
                             @elseif($user->account_status === 'active')
-                                <x-ui.button variant="table-disable" onclick="document.getElementById('disableModal-{{ $user->id }}').showModal()">
-                                    <i class="bx bx-pause leading-none"></i> Disable
+                                <x-ui.button variant="table-disable" title="Disable account" onclick="document.getElementById('disableModal-{{ $user->id }}').showModal()">
+                                    <i class="bx bx-pause leading-none"></i>
                                 </x-ui.button>
                             @endif
 
                             @if($user->account_status === 'active')
-                                <x-ui.button variant="table-manage" onclick="document.getElementById('assignRoleModal-{{ $user->id }}').showModal()">
+                                <x-ui.button variant="table-manage" title="Manage roles" onclick="document.getElementById('assignRoleModal-{{ $user->id }}').showModal()">
                                     <i class="bx bx-shield leading-none"></i>
                                 </x-ui.button>
                             @endif
 
-                            <x-ui.button variant="table-edit" onclick="document.getElementById('editUserModal-{{ $user->id }}').showModal()">
+                            <x-ui.button variant="table-edit" title="Edit user" onclick="document.getElementById('editUserModal-{{ $user->id }}').showModal()">
                                 <i class="bx bx-edit leading-none"></i>
                             </x-ui.button>
                         </div>
