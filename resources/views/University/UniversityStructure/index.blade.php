@@ -284,7 +284,7 @@
                         @php $college = $data['college']; @endphp
                         <div x-show="selectedCollege === {{ $college->id }}" x-cloak>
 
-                            <x-layout.card-section icon="bx-sitemap" title="Departments &amp; Programs"
+                            <x-layout.card-section icon="bx-sitemap" title="Departments & Programs"
                                 :subtitle="$college->name">
 
                                 <x-slot name="actions">
