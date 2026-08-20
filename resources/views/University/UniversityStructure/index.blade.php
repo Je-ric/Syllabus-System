@@ -84,8 +84,7 @@
 
     <div x-data="{ 
         selectedCollege: {{ $colleges->first()->id }}, 
-        searchTerm: '',
-        collegeListOpen: true
+        searchTerm: ''
     }">
 
         <x-layout.panel>
@@ -111,97 +110,181 @@
                          style="box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06);">
 
                         {{-- Header --}}
-                        <div class="flex items-center justify-between gap-2 px-4 py-3 border-b border-[#E3E8EB] bg-[#F1F3F5] rounded-t-[12px] cursor-pointer md:cursor-default"
-                             @click.md.prevent="" @click="collegeListOpen = !collegeListOpen">
+                        <div class="flex items-center justify-between gap-2 px-4 py-3 border-b border-[#E3E8EB] bg-[#F1F3F5] rounded-t-[12px]">
                             <div class="flex items-center gap-2">
                                 <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-[#D5FFF0] text-[#06754E]">
                                     <i class="bx bxs-school text-sm leading-none"></i>
                                 </span>
                                 <p class="text-[11px] font-bold uppercase tracking-[0.08em] text-[#394056]">Colleges</p>
                             </div>
-                            <div class="flex items-center gap-2">
-                                <x-feedback-status.status-indicator variant="brand" size="sm">
-                                    {{ $colleges->count() }}
-                                </x-feedback-status.status-indicator>
-                                <i class="bx text-[#72809E] text-sm leading-none md:hidden transition-transform duration-200"
-                                   :class="collegeListOpen ? 'bx-chevron-up' : 'bx-chevron-down'"></i>
-                            </div>
+                            <x-feedback-status.status-indicator variant="brand" size="sm">
+                                {{ $colleges->count() }}
+                            </x-feedback-status.status-indicator>
                         </div>
 
                         {{-- College rows --}}
-                        <div class="divide-y divide-[#F1F3F5] overflow-hidden"
-                             x-show="collegeListOpen"
-                             x-transition:enter="transition-all duration-200 ease-out"
-                             x-transition:enter-start="opacity-0 max-h-0"
-                             x-transition:enter-end="opacity-100 max-h-[600px]"
-                             x-transition:leave="transition-all duration-200 ease-in"
-                             x-transition:leave-start="opacity-100 max-h-[600px]"
-                             x-transition:leave-end="opacity-0 max-h-0">
+                        <div class="divide-y divide-[#F1F3F5]">
                             @foreach($collegeData as $data)
                                 @php $college = $data['college']; @endphp
 
-                                <button
-                                    @click="selectedCollege = {{ $college->id }}; collegeListOpen = window.innerWidth >= 768 ? true : false"
-                                    class="w-full text-left px-4 py-3 transition-colors duration-150 border-l-[3px]"
-                                    :class="selectedCollege === {{ $college->id }}
-                                        ? 'bg-[#EDFFF8] border-l-[#00C075]'
-                                        : 'bg-white border-l-transparent hover:bg-[#F9FAFA]'"
-                                    x-show="!searchTerm || '{{ $college->name }}'.toLowerCase().includes(searchTerm.toLowerCase())">
+                                <div x-show="!searchTerm || '{{ $college->name }}'.toLowerCase().includes(searchTerm.toLowerCase())">
 
-                                    <div class="flex items-center justify-between gap-2">
-                                        <div class="flex items-center gap-2.5 min-w-0">
-                                            <span class="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
-                                                :class="selectedCollege === {{ $college->id }} ? 'bg-[#D5FFF0]' : 'bg-[#F1F3F5]'">
-                                                <i class="bx bxs-school text-sm leading-none transition-colors"
-                                                   :class="selectedCollege === {{ $college->id }} ? 'text-[#06754E]' : 'text-[#72809E]'"></i>
-                                            </span>
-                                            <div class="min-w-0">
-                                                <p class="text-[13px] font-semibold text-[#394056] truncate leading-tight">{{ $college->name }}</p>
-                                                <p class="text-[11px] text-[#93A1AF] mt-0.5">
-                                                    {{ $data['dept_count'] }} dept{{ $data['dept_count'] !== 1 ? 's' : '' }}
-                                                    &middot; {{ $data['program_count'] }} program{{ $data['program_count'] !== 1 ? 's' : '' }}
-                                                </p>
+                                    {{-- College selector button --}}
+                                    <button
+                                        @click="selectedCollege = {{ $college->id }}"
+                                        class="w-full text-left px-4 py-3 transition-colors duration-150 border-l-[3px]"
+                                        :class="selectedCollege === {{ $college->id }}
+                                            ? 'bg-[#EDFFF8] border-l-[#00C075]'
+                                            : 'bg-white border-l-transparent hover:bg-[#F9FAFA]'">
+
+                                        <div class="flex items-center justify-between gap-2">
+                                            <div class="flex items-center gap-2.5 min-w-0">
+                                                <span class="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+                                                    :class="selectedCollege === {{ $college->id }} ? 'bg-[#D5FFF0]' : 'bg-[#F1F3F5]'">
+                                                    <i class="bx bxs-school text-sm leading-none transition-colors"
+                                                       :class="selectedCollege === {{ $college->id }} ? 'text-[#06754E]' : 'text-[#72809E]'"></i>
+                                                </span>
+                                                <div class="min-w-0">
+                                                    <p class="text-[13px] font-semibold text-[#394056] truncate leading-tight">{{ $college->name }}</p>
+                                                    <p class="text-[11px] text-[#93A1AF] mt-0.5">
+                                                        {{ $data['dept_count'] }} dept{{ $data['dept_count'] !== 1 ? 's' : '' }}
+                                                        &middot; {{ $data['program_count'] }} program{{ $data['program_count'] !== 1 ? 's' : '' }}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div class="flex items-center gap-1 shrink-0">
+                                                {{-- Mobile: chevron hint --}}
+                                                <i class="bx md:hidden text-sm leading-none transition-transform duration-200"
+                                                   :class="selectedCollege === {{ $college->id }} ? 'bx-chevron-up text-[#00C075]' : 'bx-chevron-down text-[#72809E]'"></i>
+
+                                                <div class="dropdown dropdown-end" onclick="event.stopPropagation()">
+                                                    <label tabindex="0"
+                                                        class="w-7 h-7 rounded-[7px] flex items-center justify-center text-[#B4C0CA] hover:text-[#06754E] hover:bg-[#D5FFF0] cursor-pointer transition-all duration-150">
+                                                        <i class="bx bx-dots-vertical-rounded text-base leading-none"></i>
+                                                    </label>
+                                                    <ul tabindex="0"
+                                                        class="dropdown-content z-100 menu p-1.5 bg-white rounded-[10px] border border-[#E3E8EB] w-36 text-sm"
+                                                        style="box-shadow: 0 4px 16px rgba(16,24,40,0.10);">
+                                                        <li>
+                                                            <a class="flex items-center gap-2 px-3 py-1.5 rounded-[7px] hover:bg-[#F1F3F5] text-[#394056] text-[13px]"
+                                                               onclick="openEditCollegeModal({{ $college->id }}, @js($college->name), '{{ url('university-structure/college') }}')">
+                                                                <i class="bx bx-edit-alt text-[#3197D6] text-sm"></i> Edit
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="flex items-center gap-2 px-3 py-1.5 rounded-[7px] hover:bg-[#FFE3E2] text-[#D21B14] text-[13px]"
+                                                               onclick="openDeleteCollegeModal({{ $college->id }}, @js($college->name), {{ $college->departments_count }}, '{{ url('university-structure/college') }}')">
+                                                                <i class="bx bx-trash text-sm"></i> Delete
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
                                             </div>
                                         </div>
+                                    </button>
 
-                                        <div class="dropdown dropdown-end shrink-0" onclick="event.stopPropagation()">
-                                            <label tabindex="0"
-                                                class="w-7 h-7 rounded-[7px] flex items-center justify-center text-[#B4C0CA] hover:text-[#06754E] hover:bg-[#D5FFF0] cursor-pointer transition-all duration-150">
-                                                <i class="bx bx-dots-vertical-rounded text-base leading-none"></i>
-                                            </label>
-                                            <ul tabindex="0"
-                                                class="dropdown-content z-100 menu p-1.5 bg-white rounded-[10px] border border-[#E3E8EB] w-36 text-sm"
-                                                style="box-shadow: 0 4px 16px rgba(16,24,40,0.10);">
-                                                <li>
-                                                    <a class="flex items-center gap-2 px-3 py-1.5 rounded-[7px] hover:bg-[#F1F3F5] text-[#394056] text-[13px]"
-                                                       onclick="openEditCollegeModal({{ $college->id }}, @js($college->name), '{{ url('university-structure/college') }}')">
-                                                        <i class="bx bx-edit-alt text-[#3197D6] text-sm"></i> Edit
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a class="flex items-center gap-2 px-3 py-1.5 rounded-[7px] hover:bg-[#FFE3E2] text-[#D21B14] text-[13px]"
-                                                       onclick="openDeleteCollegeModal({{ $college->id }}, @js($college->name), {{ $college->departments_count }}, '{{ url('university-structure/college') }}')">
-                                                        <i class="bx bx-trash text-sm"></i> Delete
-                                                    </a>
-                                                </li>
-                                            </ul>
+                                    {{-- ── MOBILE ONLY: inline departments accordion ────────── --}}
+                                    <div class="md:hidden"
+                                         x-show="selectedCollege === {{ $college->id }}"
+                                         x-transition:enter="transition-all duration-200 ease-out"
+                                         x-transition:enter-start="opacity-0 max-h-0"
+                                         x-transition:enter-end="opacity-100 max-h-[2000px]"
+                                         x-transition:leave="transition-all duration-150 ease-in"
+                                         x-transition:leave-start="opacity-100 max-h-[2000px]"
+                                         x-transition:leave-end="opacity-0 max-h-0"
+                                         x-cloak>
+                                        <div class="border-t border-[#E3E8EB] bg-[#F9FAFA] p-3 space-y-3">
+
+                                            {{-- Add department button --}}
+                                            <x-ui.button variant="sm-add"
+                                                onclick="openAddDepartmentModal({{ $college->id }})">
+                                                <i class="bx bx-plus text-base leading-none"></i> Add Department
+                                            </x-ui.button>
+
+                                            @forelse($data['departments'] as $dept)
+                                                <div class="rounded-[10px] border border-[#E3E8EB] bg-white overflow-visible"
+                                                     style="box-shadow: 0 1px 2px rgba(16,24,40,0.04);">
+                                                    {{-- Dept header --}}
+                                                    <div class="flex items-center justify-between px-3 py-2.5 bg-[#F9FAFA] border-b border-[#E3E8EB] rounded-t-[10px]">
+                                                        <div class="flex items-center gap-2 min-w-0">
+                                                            <span class="w-6 h-6 rounded-md bg-[#DAF1FF] flex items-center justify-center shrink-0">
+                                                                <i class="bx bx-building text-[#143D57] text-xs leading-none"></i>
+                                                            </span>
+                                                            <span class="text-[12px] font-semibold text-[#394056] truncate">{{ $dept->name }}</span>
+                                                            <x-feedback-status.status-indicator variant="blue" size="sm">
+                                                                {{ $dept->programs->count() }}
+                                                            </x-feedback-status.status-indicator>
+                                                        </div>
+                                                        <div class="dropdown dropdown-end shrink-0" onclick="event.stopPropagation()">
+                                                            <label tabindex="0"
+                                                                class="w-6 h-6 rounded-[6px] flex items-center justify-center text-[#B4C0CA] hover:text-[#143D57] hover:bg-[#DAF1FF] cursor-pointer transition-all duration-150">
+                                                                <i class="bx bx-dots-vertical-rounded text-sm leading-none"></i>
+                                                            </label>
+                                                            <ul tabindex="0"
+                                                                class="dropdown-content z-100 menu p-1.5 bg-white rounded-[10px] border border-[#E3E8EB] w-36 text-sm"
+                                                                style="box-shadow: 0 4px 16px rgba(16,24,40,0.10);">
+                                                                <li>
+                                                                    <a class="flex items-center gap-2 px-3 py-1.5 rounded-[7px] hover:bg-[#F1F3F5] text-[#394056] text-[13px]"
+                                                                       onclick="openEditDepartmentModal({{ $dept->id }}, @js($dept->name), {{ $dept->college_id }}, '{{ url('university-structure/department') }}')">
+                                                                        <i class="bx bx-edit-alt text-[#3197D6] text-sm"></i> Edit
+                                                                    </a>
+                                                                </li>
+                                                                <li>
+                                                                    <a class="flex items-center gap-2 px-3 py-1.5 rounded-[7px] hover:bg-[#FFE3E2] text-[#D21B14] text-[13px]"
+                                                                       onclick="openDeleteDepartmentModal({{ $dept->id }}, @js($dept->name), @js($college->name), {{ $dept->programs_count }}, '{{ url('university-structure/department') }}')">
+                                                                        <i class="bx bx-trash text-sm"></i> Delete
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                    {{-- Programs --}}
+                                                    <div class="divide-y divide-[#F1F3F5]">
+                                                        @forelse($dept->programs as $program)
+                                                            @php $role = $program->pivot->role; @endphp
+                                                            <div class="flex items-center gap-2 px-3 py-2 hover:bg-[#F9FAFA] min-w-0">
+                                                                <span class="w-5 h-5 rounded-[5px] flex items-center justify-center shrink-0 {{ $role === 'primary' ? 'bg-[#D5FFF0]' : 'bg-[#FFF3CD]' }}">
+                                                                    <i class="bx bx-book-alt text-[10px] leading-none {{ $role === 'primary' ? 'text-[#06754E]' : 'text-[#856404]' }}"></i>
+                                                                </span>
+                                                                <p class="text-[12px] font-medium text-[#394056] truncate">{{ $program->name }}</p>
+                                                            </div>
+                                                        @empty
+                                                            <div class="px-3 py-2 text-center text-[11px] text-[#93A1AF]">No programs yet.</div>
+                                                        @endforelse
+                                                    </div>
+                                                    {{-- Add program footer --}}
+                                                    <button type="button"
+                                                        class="w-full flex items-center justify-center gap-1 py-1.5 text-[11px] font-semibold text-[#00965F] hover:bg-[#EDFFF8] border-t border-dashed border-[#00C075] transition-all duration-150 rounded-b-[10px]"
+                                                        onclick="tryOpenAddProgramModal()">
+                                                        <i class="bx bx-plus text-sm leading-none"></i> Add Program
+                                                    </button>
+                                                </div>
+                                            @empty
+                                                <x-feedback-status.empty-state
+                                                    icon="bx-building"
+                                                    title="No departments yet"
+                                                    message="Add a department to start building this college's structure." />
+                                            @endforelse
+
                                         </div>
                                     </div>
-                                </button>
+                                    {{-- ── END MOBILE ACCORDION ─────────────────────────── --}}
+
+                                </div>
                             @endforeach
                         </div>
 
                     </div>
                 </div>
 
-                {{-- ── RIGHT: Departments + Programs ──────────────────────────── --}}
-                <div class="col-span-1 md:col-span-7 lg:col-span-8">
+                {{-- ── RIGHT: Departments + Programs (desktop only, side-by-side) ── --}}
+                <div class="hidden md:block md:col-span-7 lg:col-span-8">
                     @foreach($collegeData as $data)
                         @php $college = $data['college']; @endphp
-                        <div x-show="selectedCollege === {{ $college->id }} && !collegeListOpen || selectedCollege === {{ $college->id }} && window.innerWidth >= 768" x-cloak
-                             @resize.window="$el.style.display = (selectedCollege === {{ $college->id }} && (!collegeListOpen || window.innerWidth >= 768)) ? '' : 'none'">
+                        <div x-show="selectedCollege === {{ $college->id }}" x-cloak>
 
-                            <x-layout.card-section icon="bx-sitemap" title="Departments & Programs"
+                            <x-layout.card-section icon="bx-sitemap" title="Departments &amp; Programs"
                                 :subtitle="$college->name">
 
                                 <x-slot name="actions">
