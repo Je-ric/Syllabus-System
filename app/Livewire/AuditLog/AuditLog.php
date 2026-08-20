@@ -96,7 +96,7 @@ class AuditLog extends Component
 
         return $query
             ->orderByDesc('id')   // id is clustered PK — faster than timestamp for ordering
-            ->paginate(25);
+            ->paginate(20);
     }
 
     public function render()

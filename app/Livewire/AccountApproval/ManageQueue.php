@@ -50,9 +50,9 @@ class ManageQueue extends Component
             'restore' => ['rejected'],
         };
 
-        $allValid = User::whereIn('id', $intIds)
+        $allValid = !User::whereIn('id', $intIds)
             ->whereNotIn('account_status', $validStatuses)
-            ->doesntExist();
+            ->exists();
 
         if (!$allValid) return;
 
@@ -105,8 +105,8 @@ class ManageQueue extends Component
         };
 
         return User::query()
-            ->select(['id', 'name', 'email', 'email_verified_at', 'phone_number', 'office', 'account_status', 'created_at'])
-            ->with('roles:id,name')
+            ->select(['id', 'name', 'email', 'email_verified_at', 'phone_number', 'office', 'account_status', 'created_at', 'synced_at', 'cais_user_id', 'cais_employee_id'])
+            ->with(['roles:id,name', 'assignments.college', 'assignments.department'])
             ->when(strlen(trim($this->search)) >= 2, function ($q) {
                 $term = '%' . trim($this->search) . '%';
                 $q->where(fn($s) =>

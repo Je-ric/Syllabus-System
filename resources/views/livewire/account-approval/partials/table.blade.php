@@ -1,264 +1,290 @@
-{{-- Table container --}}
-<div class="rounded-sm border border-[#ececee] bg-white overflow-hidden"
-     style="box-shadow: rgba(0, 0, 0, 0.04) 0px 4px 12px 0px;">
-
-    {{-- Column header --}}
-    <div class="grid grid-cols-[2.5rem_1fr_auto] md:grid-cols-[2.5rem_2fr_1fr_1fr_auto] gap-x-3 items-center
-                px-5 py-3 bg-[#fafafa] border-b border-[#ececee]
-                text-[11px] font-bold uppercase tracking-[0.14em] text-[#a1a1aa] select-none">
-        <div class="flex items-center justify-center" @click.stop>
-            <input type="checkbox" x-model="selectAll"
-                class="w-4 h-4 rounded-[6px] border-[#ececee]"
-                style="accent-color: var(--clsu-green);">
-        </div>
-        <div>User</div>
-        <div class="hidden md:block">Status</div>
-        <div class="hidden md:block">Roles</div>
-        <div class="text-right pr-1">Actions</div>
-    </div>
-
-    {{-- Rows --}}
-    <div class="divide-y divide-[#f4f4f5] empty:py-12">
-
-    @forelse($users as $user)
-    @php
-        $avatarCls = match($user->account_status) {
-            'active'   => 'bg-[#D5FFF0] text-[#06754E]',
-            'pending'  => 'bg-[#FFF6E2] text-[#875200]',
-            'rejected' => 'bg-[#FFE3E2] text-[#9D1F1A]',
-            'disabled' => 'bg-[#F1F3F5] text-[#72809E]',
-            default    => 'bg-[#F1F3F5] text-[#72809E]',
-        };
-        $uid = (string) $user->id;
-        $counter = ($users->currentPage() - 1) * $users->perPage() + $loop->index + 1;
-    @endphp
-
-        <div x-data="{ open: false }"
-            @click="open = !open"
-            class="cursor-pointer transition-colors select-none"
-            :class="open ? 'bg-[color-mix(in_srgb,var(--clsu-green)_6%,white)]' : 'bg-white hover:bg-[#fafafa]'">
-
-            <div class="grid grid-cols-[2.5rem_1fr_auto] md:grid-cols-[2.5rem_2fr_1fr_1fr_auto] gap-x-3 items-center px-5 py-3.5">
-
-                {{-- Checkbox --}}
-                <div class="flex items-center justify-center" @click.stop>
-                    <input type="checkbox"
-                        :checked="isSelected('{{ $uid }}')"
-                        @change="toggleRow('{{ $uid }}')"
-                        :disabled="!canSelect('{{ $uid }}') && !isSelected('{{ $uid }}')"
-                        :title="!canSelect('{{ $uid }}') && !isSelected('{{ $uid }}') ? 'Only same-status users can be bulk-selected' : ''"
-                        :class="(!canSelect('{{ $uid }}') && !isSelected('{{ $uid }}')) ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'"
+<x-table.container>
+    <x-table.table class="min-w-[700px]">
+        <x-table.head :sticky="true">
+            <x-table.row>
+                <x-table.th class="w-12">
+                    <input type="checkbox" x-model="selectAll"
                         class="w-4 h-4 rounded-[6px] border-[#ececee]"
                         style="accent-color: var(--clsu-green);">
-                </div>
+                </x-table.th>
+                <x-table.th>User</x-table.th>
+                <x-table.th class="hidden md:table-cell">Status</x-table.th>
+                <x-table.th class="hidden md:table-cell">Roles</x-table.th>
+                <x-table.th class="hidden md:table-cell">Phone</x-table.th>
+                <x-table.th class="hidden md:table-cell">Office</x-table.th>
+                <x-table.th class="w-32 text-right">Actions</x-table.th>
+            </x-table.row>
+        </x-table.head>
 
-                {{-- Avatar + name + counter --}}
-                <div class="flex items-center gap-3 min-w-0">
-                    <span class="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full border border-[#ececee] font-bold text-[13px] {{ $avatarCls }}">
-                        {{ strtoupper(substr($user->name, 0, 1)) }}
-                    </span>
-                    <div class="min-w-0">
-                        <div class="flex items-center gap-2">
-                            <span class="text-[13px] font-medium text-[#71717a]">{{ $counter }}.</span>
-                            <p class="text-[13px] font-semibold text-[#09090b] truncate">{{ $user->name }}</p>
-                        </div>
-                        <div class="flex items-center gap-1.5 flex-wrap">
-                            <p class="text-[12px] text-[#a1a1aa] truncate">{{ $user->email }}</p>
-                            @if($user->email_verified_at)
-                                <x-feedback-status.status-indicator variant="emerald" class="text-[10px] px-1.5 py-0.5">
-                                    <i class="bx bx-check-circle text-[10px]"></i> Verified
-                                </x-feedback-status.status-indicator>
-                            @else
-                                <x-feedback-status.status-indicator variant="amber" class="text-[10px] px-1.5 py-0.5">
-                                    <i class="bx bx-time text-[10px]"></i> Unverified
-                                </x-feedback-status.status-indicator>
-                            @endif
-                        </div>
-                    </div>
-                    <i class="bx text-[#a1a1aa] text-base shrink-0 ml-2 hidden sm:block transition-transform duration-200"
-                       :class="open ? 'bx-chevron-up' : 'bx-chevron-down'"></i>
-                </div>
+        <x-table.body>
+            @forelse($users as $user)
+                @php
+                    $avatarCls = match($user->account_status) {
+                        'active'   => 'bg-[#D5FFF0] text-[#06754E]',
+                        'pending'  => 'bg-[#FFF6E2] text-[#875200]',
+                        'rejected' => 'bg-[#FFE3E2] text-[#9D1F1A]',
+                        'disabled' => 'bg-[#F1F3F5] text-[#72809E]',
+                        default    => 'bg-[#F1F3F5] text-[#72809E]',
+                    };
+                    $uid = (string) $user->id;
+                    $counter = ($users->currentPage() - 1) * $users->perPage() + $loop->index + 1;
+                    
+                    // Get assignments
+                    $collegeAssignments = $user->assignments->where('context', 'dean')->whereNotNull('college_id');
+                    $deptAssignments = $user->assignments->where('context', 'chair')->whereNotNull('department_id');
+                    $facultyAssignments = $user->assignments->where('context', 'faculty')->whereNotNull('department_id');
+                @endphp
 
-                {{-- Status --}}
-                <div class="hidden md:flex items-center">
-                    <x-feedback-status.status-indicator :status="$user->account_status" />
-                </div>
+                {{-- Main row --}}
+                <x-table.row striped hover @click="toggleExpand('{{ $uid }}')" style="cursor: pointer;">
+                    <x-table.td @click.stop>
+                        <input type="checkbox"
+                            :checked="isSelected('{{ $uid }}')"
+                            @change="toggleRow('{{ $uid }}')"
+                            :disabled="!canSelect('{{ $uid }}') && !isSelected('{{ $uid }}')"
+                            :title="!canSelect('{{ $uid }}') && !isSelected('{{ $uid }}') ? 'Only same-status users can be bulk-selected' : ''"
+                            :class="(!canSelect('{{ $uid }}') && !isSelected('{{ $uid }}')) ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'"
+                            class="w-4 h-4 rounded-[6px] border-[#ececee]"
+                            style="accent-color: var(--clsu-green);">
+                    </x-table.td>
 
-                {{-- Roles --}}
-                <div class="hidden md:flex flex-wrap gap-1">
-                    @forelse($user->roles as $role)
-                        <x-feedback-status.status-indicator :status="$role->name" />
-                    @empty
-                        <span class="text-[12px] text-[#a1a1aa] italic">—</span>
-                    @endforelse
-                </div>
-
-                {{-- Actions --}}
-                <div class="flex items-center justify-end gap-1 flex-wrap" @click.stop>
-                    @if($user->account_status === 'pending')
-                        <x-ui.button variant="table-confirm" onclick="document.getElementById('approveModal-{{ $user->id }}').showModal()">
-                            <i class="bx bx-check leading-none"></i> Approve
-                        </x-ui.button>
-                        <x-ui.button variant="table-danger" onclick="document.getElementById('rejectModal-{{ $user->id }}').showModal()">
-                            <i class="bx bx-x leading-none"></i> Reject
-                        </x-ui.button>
-                    @elseif($user->account_status === 'disabled')
-                        <x-ui.button variant="table-confirm" onclick="document.getElementById('approveModal-{{ $user->id }}').showModal()">
-                            <i class="bx bx-check leading-none"></i> Activate
-                        </x-ui.button>
-                    @elseif($user->account_status === 'rejected')
-                        <x-ui.button variant="table-restore" onclick="document.getElementById('restoreModal-{{ $user->id }}').showModal()">
-                            <i class="bx bx-revision leading-none"></i> Restore
-                        </x-ui.button>
-                    @elseif($user->account_status === 'active')
-                        <x-ui.button variant="table-disable" onclick="document.getElementById('disableModal-{{ $user->id }}').showModal()">
-                            <i class="bx bx-pause leading-none"></i> Disable
-                        </x-ui.button>
-                    @endif
-
-                    @if($user->account_status === 'active')
-                        <x-ui.button variant="table-manage" onclick="document.getElementById('assignRoleModal-{{ $user->id }}').showModal()">
-                            <i class="bx bx-shield leading-none"></i>
-                        </x-ui.button>
-                    @endif
-
-                    <x-ui.button variant="table-edit" onclick="document.getElementById('editUserModal-{{ $user->id }}').showModal()">
-                        <i class="bx bx-edit leading-none"></i>
-                    </x-ui.button>
-                </div>
-
-            </div>
-
-            {{-- Expanded detail --}}
-            <div x-show="open"
-                x-transition:enter="transition ease-out duration-150"
-                x-transition:enter-start="opacity-0 -translate-y-1"
-                x-transition:enter-end="opacity-100 translate-y-0"
-                x-transition:leave="transition ease-in duration-100"
-                x-transition:leave-end="opacity-0"
-                class="px-5 pb-5 pt-2 border-t border-[#ececee] bg-[#fafafa]"
-                @click.stop>
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-
-                    <x-layout.card-section title="Contact" icon="bx-phone">
-                        <div class="space-y-2">
-                            <div class="flex items-center gap-2">
-                                <i class="bx bx-phone text-[#a1a1aa] text-sm shrink-0"></i>
-                                <span class="text-[13px] text-[#09090b]">{{ $user->phone_number ?: '—' }}</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <i class="bx bx-envelope text-[#a1a1aa] text-sm shrink-0"></i>
-                                <span class="text-[13px] text-[#52525b] break-all">{{ $user->email }}</span>
-                            </div>
-                        </div>
-                    </x-layout.card-section>
-
-                    <x-layout.card-section title="Office" icon="bx-buildings">
-                        <div class="space-y-2">
-                            <div class="flex items-center gap-2">
-                                <i class="bx bx-buildings text-[#a1a1aa] text-sm shrink-0"></i>
-                                <span class="text-[13px] text-[#09090b]">{{ $user->office ?: '—' }}</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                @if($user->email_verified_at)
-                                    <i class="bx bx-check-circle text-sm shrink-0" style="color: var(--clsu-green);"></i>
-                                    <span class="text-[13px] font-medium" style="color: var(--clsu-cobra, var(--clsu-green));">Email verified</span>
-                                @else
-                                    <i class="bx bx-time text-[#f59e0b] text-sm shrink-0"></i>
-                                    <span class="text-[13px] text-[#92400e] font-medium">Not verified</span>
-                                @endif
-                            </div>
-                        </div>
-                    </x-layout.card-section>
-
-                    <x-layout.card-section title="Account" icon="bx-id-card">
-                        <div class="space-y-2">
-                            <div class="flex items-center gap-2">
-                                <i class="bx bx-calendar text-[#a1a1aa] text-sm shrink-0"></i>
-                                <span class="text-[13px] text-[#52525b]">{{ $user->created_at->format('M d, Y') }}</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <i class="bx bx-id-card text-[#a1a1aa] text-sm shrink-0"></i>
-                                <span class="text-[13px] text-[#52525b]">ID #{{ $user->id }}</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <i class="bx bx-sync text-[#a1a1aa] text-sm shrink-0"></i>
-                                <span class="text-[13px] text-[#52525b]">
-                                    @if($user->synced_at)
-                                        Synced {{ $user->synced_at->format('M d, Y h:i A') }}
+                    <x-table.td>
+                        <div class="flex items-center gap-3 min-w-0">
+                            <span class="shrink-0 inline-flex items-center justify-center w-8 h-8 rounded-full border border-[#ececee] font-bold text-[12px] {{ $avatarCls }}">
+                                {{ strtoupper(substr($user->name, 0, 1)) }}
+                            </span>
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[12px] font-medium text-[#71717a]">{{ $counter }}.</span>
+                                    <p class="text-[13px] font-semibold text-[#09090b] truncate">{{ $user->name }}</p>
+                                </div>
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <p class="text-[12px] text-[#a1a1aa] truncate">{{ $user->email }}</p>
+                                    @if($user->email_verified_at)
+                                        <x-feedback-status.status-indicator variant="emerald" class="text-[10px] px-1.5 py-0.5">
+                                            <i class="bx bx-check-circle text-[10px]"></i> Verified
+                                        </x-feedback-status.status-indicator>
                                     @else
-                                        <span class="italic text-[#a1a1aa]">Not synced</span>
+                                        <x-feedback-status.status-indicator variant="amber" class="text-[10px] px-1.5 py-0.5">
+                                            <i class="bx bx-time text-[10px]"></i> Unverified
+                                        </x-feedback-status.status-indicator>
                                     @endif
-                                </span>
+                                </div>
                             </div>
+                            <i class="bx text-[#a1a1aa] text-sm shrink-0 transition-transform duration-200"
+                               :class="expandedRows['{{ $uid }}'] ? 'bx-chevron-up' : 'bx-chevron-down'"></i>
                         </div>
-                    </x-layout.card-section>
+                    </x-table.td>
 
-                </div>
-            </div>
+                    <x-table.td class="hidden md:table-cell">
+                        <x-feedback-status.status-indicator :status="$user->account_status" />
+                    </x-table.td>
 
-        </div>
+                    <x-table.td class="hidden md:table-cell">
+                        <div class="flex flex-wrap gap-1">
+                            @forelse($user->roles as $role)
+                                <x-feedback-status.status-indicator :status="$role->name" />
+                            @empty
+                                <span class="text-[12px] text-[#a1a1aa] italic">—</span>
+                            @endforelse
+                        </div>
+                    </x-table.td>
 
-    @empty
-        <div class="px-5 py-10">
-            <x-feedback-status.empty-state icon="bx-user-x" title="No users found" message="Try adjusting your filters." />
-        </div>
-    @endforelse
+                    <x-table.td class="hidden md:table-cell text-[13px] text-[#475569]">
+                        {{ $user->phone_number ?: '—' }}
+                    </x-table.td>
 
-    </div>
-</div>
+                    <x-table.td class="hidden md:table-cell text-[13px] text-[#475569]">
+                        {{ $user->office ?: '—' }}
+                    </x-table.td>
+
+                    <x-table.td class="text-right" @click.stop>
+                        <div class="flex items-center justify-end gap-1 flex-wrap">
+                            @if($user->account_status === 'pending')
+                                <x-ui.button variant="table-confirm" onclick="document.getElementById('approveModal-{{ $user->id }}').showModal()">
+                                    <i class="bx bx-check leading-none"></i> Approve
+                                </x-ui.button>
+                                <x-ui.button variant="table-danger" onclick="document.getElementById('rejectModal-{{ $user->id }}').showModal()">
+                                    <i class="bx bx-x leading-none"></i> Reject
+                                </x-ui.button>
+                            @elseif($user->account_status === 'disabled')
+                                <x-ui.button variant="table-confirm" onclick="document.getElementById('approveModal-{{ $user->id }}').showModal()">
+                                    <i class="bx bx-check leading-none"></i> Activate
+                                </x-ui.button>
+                            @elseif($user->account_status === 'rejected')
+                                <x-ui.button variant="table-restore" onclick="document.getElementById('restoreModal-{{ $user->id }}').showModal()">
+                                    <i class="bx bx-revision leading-none"></i> Restore
+                                </x-ui.button>
+                            @elseif($user->account_status === 'active')
+                                <x-ui.button variant="table-disable" onclick="document.getElementById('disableModal-{{ $user->id }}').showModal()">
+                                    <i class="bx bx-pause leading-none"></i> Disable
+                                </x-ui.button>
+                            @endif
+
+                            @if($user->account_status === 'active')
+                                <x-ui.button variant="table-manage" onclick="document.getElementById('assignRoleModal-{{ $user->id }}').showModal()">
+                                    <i class="bx bx-shield leading-none"></i>
+                                </x-ui.button>
+                            @endif
+
+                            <x-ui.button variant="table-edit" onclick="document.getElementById('editUserModal-{{ $user->id }}').showModal()">
+                                <i class="bx bx-edit leading-none"></i>
+                            </x-ui.button>
+                        </div>
+                    </x-table.td>
+                </x-table.row>
+
+                {{-- Expanded detail row --}}
+                <tr x-show="expandedRows['{{ $uid }}']"
+                    x-transition:enter="transition ease-out duration-150"
+                    x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100"
+                    x-transition:leave="transition ease-in duration-100"
+                    x-transition:leave-end="opacity-0"
+                    class="bg-[#fafafa]">
+                    <td colspan="7" class="px-4 py-4 border-t border-[#ececee]">
+                        <div class="flex flex-wrap gap-0 divide-x divide-[#ececee]">
+
+                            {{-- Contact Info --}}
+                            <div class="flex-1 min-w-[160px] space-y-2 px-4 first:pl-1">
+                                <h4 class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] flex items-center gap-1.5 pb-1.5 border-b border-[#ececee]">
+                                    <i class="bx bx-phone text-sm"></i> Contact
+                                </h4>
+                                <div class="space-y-1.5">
+                                    <div class="flex items-center gap-2">
+                                        <i class="bx bx-phone text-[#a1a1aa] text-xs shrink-0"></i>
+                                        <span class="text-[13px] text-[#09090b]">{{ $user->phone_number ?: '—' }}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <i class="bx bx-envelope text-[#a1a1aa] text-xs shrink-0"></i>
+                                        <span class="text-[13px] text-[#52525b] break-all">{{ $user->email }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Office Info --}}
+                            <div class="flex-1 min-w-[160px] space-y-2 px-4">
+                                <h4 class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] flex items-center gap-1.5 pb-1.5 border-b border-[#ececee]">
+                                    <i class="bx bx-buildings text-sm"></i> Office
+                                </h4>
+                                <div class="space-y-1.5">
+                                    <div class="flex items-center gap-2">
+                                        <i class="bx bx-buildings text-[#a1a1aa] text-xs shrink-0"></i>
+                                        <span class="text-[13px] text-[#09090b]">{{ $user->office ?: '—' }}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        @if($user->email_verified_at)
+                                            <i class="bx bx-check-circle text-xs shrink-0" style="color: var(--clsu-green);"></i>
+                                            <span class="text-[13px] font-medium" style="color: var(--clsu-cobra, var(--clsu-green));">Email verified</span>
+                                        @else
+                                            <i class="bx bx-time text-[#f59e0b] text-xs shrink-0"></i>
+                                            <span class="text-[13px] text-[#92400e] font-medium">Not verified</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Account Info --}}
+                            <div class="flex-1 min-w-[160px] space-y-2 px-4">
+                                <h4 class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] flex items-center gap-1.5 pb-1.5 border-b border-[#ececee]">
+                                    <i class="bx bx-id-card text-sm"></i> Account
+                                </h4>
+                                <div class="space-y-1.5">
+                                    <div class="flex items-center gap-2">
+                                        <i class="bx bx-calendar text-[#a1a1aa] text-xs shrink-0"></i>
+                                        <span class="text-[13px] text-[#52525b]">{{ $user->created_at->format('M d, Y') }}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <i class="bx bx-id-card text-[#a1a1aa] text-xs shrink-0"></i>
+                                        <span class="text-[13px] text-[#52525b]">ID #{{ $user->id }}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <i class="bx bx-sync text-[#a1a1aa] text-xs shrink-0"></i>
+                                        <span class="text-[13px] text-[#52525b]">
+                                            @if($user->synced_at)
+                                                Synced {{ $user->synced_at->format('M d, Y h:i A') }}
+                                            @else
+                                                <span class="italic text-[#a1a1aa]">Not synced</span>
+                                            @endif
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Assignments --}}
+                            <div class="flex-1 min-w-[160px] space-y-2 px-4 last:pr-1">
+                                <h4 class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#475569] flex items-center gap-1.5 pb-1.5 border-b border-[#ececee]">
+                                    <i class="bx bx-briefcase text-sm"></i> Assignments
+                                </h4>
+                                <div class="space-y-1.5">
+                                    {{-- Dean Assignments --}}
+                                    @if($collegeAssignments->count() > 0)
+                                        <div class="flex items-start gap-2">
+                                            <i class="bx bx-crown text-[#a1a1aa] text-xs shrink-0 mt-0.5"></i>
+                                            <div class="min-w-0">
+                                                <span class="text-[12px] font-medium text-[#09090b]">Dean:</span>
+                                                <div class="text-[12px] text-[#52525b]">
+                                                    @foreach($collegeAssignments as $assignment)
+                                                        {{ $assignment->college->name }}{{ !$loop->last ? ', ' : '' }}
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    {{-- Chair Assignments --}}
+                                    @if($deptAssignments->count() > 0)
+                                        <div class="flex items-start gap-2">
+                                            <i class="bx bx-user-voice text-[#a1a1aa] text-xs shrink-0 mt-0.5"></i>
+                                            <div class="min-w-0">
+                                                <span class="text-[12px] font-medium text-[#09090b]">Chair:</span>
+                                                <div class="text-[12px] text-[#52525b]">
+                                                    @foreach($deptAssignments as $assignment)
+                                                        {{ $assignment->department->name }}{{ !$loop->last ? ', ' : '' }}
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    {{-- Faculty Assignments --}}
+                                    @if($facultyAssignments->count() > 0)
+                                        <div class="flex items-start gap-2">
+                                            <i class="bx bx-user text-[#a1a1aa] text-xs shrink-0 mt-0.5"></i>
+                                            <div class="min-w-0">
+                                                <span class="text-[12px] font-medium text-[#09090b]">Faculty:</span>
+                                                <div class="text-[12px] text-[#52525b]">
+                                                    @foreach($facultyAssignments as $assignment)
+                                                        {{ $assignment->department->name }}{{ !$loop->last ? ', ' : '' }}
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    {{-- No Assignments --}}
+                                    @if($collegeAssignments->count() === 0 && $deptAssignments->count() === 0 && $facultyAssignments->count() === 0)
+                                        <div class="flex items-center gap-2">
+                                            <i class="bx bx-x text-[#a1a1aa] text-xs shrink-0"></i>
+                                            <span class="text-[12px] text-[#a1a1aa] italic">None</span>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+
+                        </div>
+                    </td>
+                </tr>
+
+            @empty
+                <x-table.empty :colspan="7" message="No users found. Try adjusting your filters." class="py-10" />
+            @endforelse
+        </x-table.body>
+    </x-table.table>
+</x-table.container>
 
 {{-- Pagination --}}
-@if($users->hasPages())
-    <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <p class="text-[13px] text-[#71717a]">
-            Showing {{ $users->firstItem() }}–{{ $users->lastItem() }} of {{ $users->total() }}
-        </p>
-        <div class="flex items-center gap-1">
-            {{-- Previous --}}
-            @if($users->onFirstPage())
-                <span class="px-3 py-1.5 text-[12px] text-[#a1a1aa] cursor-not-allowed">
-                    <i class="bx bx-chevron-left"></i>
-                </span>
-            @else
-                <a href="{{ $users->previousPageUrl() }}" 
-                   class="px-3 py-1.5 text-[12px] text-[#71717a] hover:text-[#09090b] hover:bg-[#f4f4f5] rounded transition-colors">
-                    <i class="bx bx-chevron-left"></i>
-                </a>
-            @endif
-
-            {{-- Page numbers --}}
-            @foreach($users->getUrlRange(1, $users->lastPage()) as $page => $url)
-                @if($page == $users->currentPage())
-                    <span class="px-3 py-1.5 text-[12px] font-semibold text-white rounded transition-colors"
-                          style="background-color: var(--clsu-green);">
-                        {{ $page }}
-                    </span>
-                @elseif($url)
-                    <a href="{{ $url }}" 
-                       class="px-3 py-1.5 text-[12px] text-[#71717a] hover:text-[#09090b] hover:bg-[#f4f4f5] rounded transition-colors">
-                        {{ $page }}
-                    </a>
-                @else
-                    <span class="px-3 py-1.5 text-[12px] text-[#a1a1aa]">...</span>
-                @endif
-            @endforeach
-
-            {{-- Next --}}
-            @if($users->hasMorePages())
-                <a href="{{ $users->nextPageUrl() }}" 
-                   class="px-3 py-1.5 text-[12px] text-[#71717a] hover:text-[#09090b] hover:bg-[#f4f4f5] rounded transition-colors">
-                    <i class="bx bx-chevron-right"></i>
-                </a>
-            @else
-                <span class="px-3 py-1.5 text-[12px] text-[#a1a1aa] cursor-not-allowed">
-                    <i class="bx bx-chevron-right"></i>
-                </span>
-            @endif
-        </div>
-    </div>
-@endif
+<x-pagination.custom :paginator="$users" />
 
 {{-- Per-user modals --}}
 @foreach($users as $user)

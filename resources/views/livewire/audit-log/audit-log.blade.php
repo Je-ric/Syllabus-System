@@ -95,14 +95,8 @@
 
     </x-layout.card-section>
 
-    {{-- ── Toolbar: count + live toggle ─────────────────────────────────── --}}
-    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-        <p class="text-[13px] text-[#94a3b8]">
-            <span class="font-semibold text-[#0f172a]">{{ number_format($this->logs->total()) }}</span> result{{ $this->logs->total() !== 1 ? 's' : '' }}
-            <span class="mx-1.5 text-[#e2e8f0]">·</span>
-            Updated <span class="font-medium text-[#475569]">{{ $lastRefreshed }}</span>
-        </p>
-
+    {{-- ── Toolbar: live toggle only ─────────────────────────────────── --}}
+    <div class="flex flex-wrap items-center justify-end gap-2 mb-3">
         <button wire:click="$toggle('liveRefresh')" type="button"
             class="inline-flex items-center gap-1.5 text-[13px] px-2.5 py-1 rounded-full border transition
                 {{ $liveRefresh
@@ -204,8 +198,6 @@
         </x-table.table>
     </x-table.container>
 
-    <div class="mt-4">
-        {{ $this->logs->links() }}
-    </div>
+    <x-pagination.custom :paginator="$this->logs" />
 
 </div>

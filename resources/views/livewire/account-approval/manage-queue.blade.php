@@ -7,6 +7,7 @@
         conflictToast: false,
         conflictTimer: null,
         conflictMsg: '',
+        expandedRows: {},
 
         init() {
             // Re-sync statusMap whenever Livewire re-renders
@@ -39,6 +40,7 @@
                     this.selectedStatus = null;
                     this.executing     = false;
                     this.bulkModal     = false;
+                    this.expandedRows = {};
                 });
             });
 
@@ -49,6 +51,7 @@
                     this.selectedStatus = null;
                     this.executing     = false;
                     this.bulkModal     = false;
+                    this.expandedRows = {};
                 });
             });
         },
@@ -113,6 +116,10 @@
             this.conflictToast = true;
             clearTimeout(this.conflictTimer);
             this.conflictTimer = setTimeout(() => { this.conflictToast = false; }, 3500);
+        },
+
+        toggleExpand(id) {
+            this.expandedRows[id] = !this.expandedRows[id];
         },
 
         get bulkActions() {
