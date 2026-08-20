@@ -84,7 +84,8 @@
 
     <div x-data="{ 
         selectedCollege: {{ $colleges->first()->id }}, 
-        searchTerm: ''
+        searchTerm: '',
+        collegeListOpen: true
     }">
 
         <x-layout.panel>
@@ -102,33 +103,45 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-12 gap-5">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
 
                 {{-- ── LEFT: College list ──────────────────────────────────────── --}}
-                <div class="col-span-4">
+                <div class="col-span-1 md:col-span-5 lg:col-span-4">
                     <div class="rounded-[12px] border border-[#E3E8EB] bg-white overflow-visible"
                          style="box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06);">
 
                         {{-- Header --}}
-                        <div class="flex items-center justify-between gap-2 px-4 py-3 border-b border-[#E3E8EB] bg-[#F1F3F5] rounded-t-[12px]">
+                        <div class="flex items-center justify-between gap-2 px-4 py-3 border-b border-[#E3E8EB] bg-[#F1F3F5] rounded-t-[12px] cursor-pointer md:cursor-default"
+                             @click.md.prevent="" @click="collegeListOpen = !collegeListOpen">
                             <div class="flex items-center gap-2">
                                 <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-[#D5FFF0] text-[#06754E]">
                                     <i class="bx bxs-school text-sm leading-none"></i>
                                 </span>
                                 <p class="text-[11px] font-bold uppercase tracking-[0.08em] text-[#394056]">Colleges</p>
                             </div>
-                            <x-feedback-status.status-indicator variant="brand" size="sm">
-                                {{ $colleges->count() }}
-                            </x-feedback-status.status-indicator>
+                            <div class="flex items-center gap-2">
+                                <x-feedback-status.status-indicator variant="brand" size="sm">
+                                    {{ $colleges->count() }}
+                                </x-feedback-status.status-indicator>
+                                <i class="bx text-[#72809E] text-sm leading-none md:hidden transition-transform duration-200"
+                                   :class="collegeListOpen ? 'bx-chevron-up' : 'bx-chevron-down'"></i>
+                            </div>
                         </div>
 
                         {{-- College rows --}}
-                        <div class="divide-y divide-[#F1F3F5]">
+                        <div class="divide-y divide-[#F1F3F5] overflow-hidden"
+                             x-show="collegeListOpen"
+                             x-transition:enter="transition-all duration-200 ease-out"
+                             x-transition:enter-start="opacity-0 max-h-0"
+                             x-transition:enter-end="opacity-100 max-h-[600px]"
+                             x-transition:leave="transition-all duration-200 ease-in"
+                             x-transition:leave-start="opacity-100 max-h-[600px]"
+                             x-transition:leave-end="opacity-0 max-h-0">
                             @foreach($collegeData as $data)
                                 @php $college = $data['college']; @endphp
 
                                 <button
-                                    @click="selectedCollege = {{ $college->id }}"
+                                    @click="selectedCollege = {{ $college->id }}; collegeListOpen = window.innerWidth >= 768 ? true : false"
                                     class="w-full text-left px-4 py-3 transition-colors duration-150 border-l-[3px]"
                                     :class="selectedCollege === {{ $college->id }}
                                         ? 'bg-[#EDFFF8] border-l-[#00C075]'
@@ -182,10 +195,11 @@
                 </div>
 
                 {{-- ── RIGHT: Departments + Programs ──────────────────────────── --}}
-                <div class="col-span-8">
+                <div class="col-span-1 md:col-span-7 lg:col-span-8">
                     @foreach($collegeData as $data)
                         @php $college = $data['college']; @endphp
-                        <div x-show="selectedCollege === {{ $college->id }}" x-cloak>
+                        <div x-show="selectedCollege === {{ $college->id }} && !collegeListOpen || selectedCollege === {{ $college->id }} && window.innerWidth >= 768" x-cloak
+                             @resize.window="$el.style.display = (selectedCollege === {{ $college->id }} && (!collegeListOpen || window.innerWidth >= 768)) ? '' : 'none'">
 
                             <x-layout.card-section icon="bx-sitemap" title="Departments & Programs"
                                 :subtitle="$college->name">
