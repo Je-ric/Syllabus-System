@@ -339,6 +339,7 @@ button:focus-visible {
 }
 
 .photo-bg-paper {
+    background-color: var(--color-paper);
     background-image:
         linear-gradient(
             180deg,
@@ -350,6 +351,7 @@ button:focus-visible {
 }
 
 .photo-bg-forest {
+    background-color: var(--color-forest);
     background-image:
         linear-gradient(
             160deg,
@@ -360,6 +362,7 @@ button:focus-visible {
 }
 
 .photo-bg-ink {
+    background-color: var(--color-ink);
     background-image:
         linear-gradient(
             180deg,

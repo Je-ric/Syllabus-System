@@ -6,9 +6,8 @@
     <title>CSMS — Course Syllabus Management System | CLSU</title>
     <meta name="description" content="Central Luzon State University's official platform for creating, reviewing, and approving course syllabi across all colleges and departments.">
 
-    <!-- <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet"> -->
+    <!-- Preload LCP image with high priority -->
+    <link rel="preload" href="{{ asset('assets/CLSU-Siever.webp') }}" as="image" fetchpriority="high">
 
     @vite(['resources/css/landing.css'])
     
@@ -200,7 +199,7 @@
         <div class="max-w-6xl mx-auto px-6">
             <div class="flex flex-col md:flex-row justify-between gap-10 mb-10">
                 <div class="flex items-start gap-3 max-w-xs">
-                    <img src="/assets/CLSU-LOGO-removebg.png" alt="CLSU official seal" class="h-9 w-9 object-contain mt-0.5">
+                    <img src="/assets/CLSU-LOGO-removebg.webp" alt="CLSU official seal" class="h-9 w-9 object-contain mt-0.5">
                     <div>
                         <p class="ledger-head text-paper text-base leading-tight">Course Syllabus<br>Management System</p>
                         <p class="text-paper/50 text-xs mt-2">Central Luzon State University<br>Science City of Muñoz, Nueva Ecija</p>
