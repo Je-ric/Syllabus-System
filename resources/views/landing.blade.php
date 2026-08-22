@@ -6,14 +6,14 @@
     <title>CSMS — Course Syllabus Management System | CLSU</title>
     <meta name="description" content="Central Luzon State University's official platform for creating, reviewing, and approving course syllabi across all colleges and departments.">
 
-    <!-- Preload LCP image with high priority -->
-    <link rel="preload" href="{{ asset('assets/CLSU-Siever.webp') }}" as="image" fetchpriority="high">
+    <!-- Preload LCP image with high priority (AVIF) -->
+    <link rel="preload" href="{{ asset('assets/CLSU-Siever.avif') }}" as="image" fetchpriority="high" type="image/avif">
 
     @vite(['resources/css/landing.css'])
     
 </head>
 <body class="font-sans text-ink antialiased" style="
-    --bg-paper: url('{{ asset('assets/CLSU-Siever.webp') }}');
+    --bg-paper: url('{{ asset('assets/CLSU-Siever.avif') }}');
     --bg-forest: url('{{ asset('assets/CLSU-Siever-1.webp') }}');
     --bg-ink: url('{{ asset('assets/CLSU-Siever-2.webp') }}');
 ">
@@ -22,7 +22,7 @@
     <nav class="fixed top-0 inset-x-0 z-50 bg-paper/90 backdrop-blur-md border-b border-ink/10">
         <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
             <a href="#top" class="flex items-center gap-3 shrink-0">
-                <img src="/assets/CLSU-LOGO-removebg.png" alt="CLSU official seal" class="h-8 w-8 object-contain">
+                <img src="{{ asset('assets/CLSU-LOGO-removebg.webp') }}" alt="CLSU official seal" class="h-8 w-8 object-contain" loading="eager">
                 <span class="ledger-head text-forest text-lg tracking-tight">CSMS</span>
             </a>
 
@@ -199,7 +199,7 @@
         <div class="max-w-6xl mx-auto px-6">
             <div class="flex flex-col md:flex-row justify-between gap-10 mb-10">
                 <div class="flex items-start gap-3 max-w-xs">
-                    <img src="/assets/CLSU-LOGO-removebg.webp" alt="CLSU official seal" class="h-9 w-9 object-contain mt-0.5">
+                    <img src="{{ asset('assets/CLSU-LOGO-removebg.webp') }}" alt="CLSU official seal" class="h-9 w-9 object-contain mt-0.5" loading="lazy">
                     <div>
                         <p class="ledger-head text-paper text-base leading-tight">Course Syllabus<br>Management System</p>
                         <p class="text-paper/50 text-xs mt-2">Central Luzon State University<br>Science City of Muñoz, Nueva Ecija</p>
