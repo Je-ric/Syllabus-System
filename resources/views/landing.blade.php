@@ -6,167 +6,12 @@
     <title>CSMS — Course Syllabus Management System | CLSU</title>
     <meta name="description" content="Central Luzon State University's official platform for creating, reviewing, and approving course syllabi across all colleges and departments.">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <!-- <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        ink:       '#003a10',
-                        forest:    '#1a5f30',
-                        moss:      '#009639',
-                        parchment: '#f1f2f3',
-                        paper:     '#f7f8f7',
-                        gold:      '#e0a70d',
-                        'gold-ink':'#a6790a',
-                        slate:     '#525252',
-                    },
-                    fontFamily: {
-                        display: ['"Oswald"', 'sans-serif'],
-                        sans: ['"Libre Franklin"', 'system-ui', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        html { scroll-behavior: smooth; }
-        @media (prefers-reduced-motion: reduce) {
-            html { scroll-behavior: auto; }
-            *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
-        }
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet"> -->
 
-        body { background: #f7f8f7; }
-
-        /* ---- Token system: radius + elevation, systematized so nothing is bespoke per-element ---- */
-        :root {
-            --radius-xs: 6px;    /* stamps, chips, index tabs */
-            --radius-sm: 9px;    /* buttons, nav pill */
-            --radius-md: 12px;   /* icon tiles, small components */
-            --radius-lg: 18px;   /* cards, panels */
-            --radius-xl: 22px;   /* hero document card */
-
-            --shadow-card: 0 1px 1px rgba(0,58,16,0.04), 0 12px 28px -14px rgba(0,58,16,0.16);
-            --shadow-card-hover: 0 1px 1px rgba(0,58,16,0.05), 0 24px 40px -16px rgba(0,58,16,0.22);
-            --shadow-button: 0 1px 2px rgba(0,58,16,0.08), 0 6px 16px -6px rgba(0,58,16,0.28);
-        }
-
-        .eyebrow { font-family: 'Oswald', sans-serif; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; }
-        .ledger-head { font-family: 'Oswald', sans-serif; font-weight: 600; letter-spacing: -0.005em; }
-        .tabular { font-variant-numeric: tabular-nums; }
-
-        .grain { position: relative; }
-        .grain::before {
-            content: '';
-            position: absolute; inset: 0;
-            pointer-events: none;
-            opacity: 0.035;
-            mix-blend-mode: multiply;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-        }
-
-        /* Registry stamp — refined: thinner rule, tighter tracking, reads as a precise mark rather than clip-art */
-        .stamp {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            font-family: 'Oswald', sans-serif;
-            font-weight: 600;
-            font-size: 11px;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            border: 1px solid currentColor;
-            border-radius: var(--radius-xs);
-            padding: 0.32rem 0.7rem;
-        }
-        .stamp-approved { color: #1a5f30; }
-        .stamp-review   { color: #a6790a; }
-
-        .doc-card {
-            background: #ffffff;
-            border: 1px solid rgba(26,95,48,0.12);
-            border-radius: var(--radius-xl);
-            box-shadow: var(--shadow-card);
-        }
-
-        .feature-card {
-            background: #ffffff;
-            border: 1px solid rgba(26,95,48,0.10);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-card);
-            transition: box-shadow 0.25s ease, transform 0.25s ease;
-        }
-        .feature-card:hover {
-            box-shadow: var(--shadow-card-hover);
-            transform: translateY(-3px);
-        }
-
-        .ruled-line {
-            background-image: repeating-linear-gradient(to bottom, transparent, transparent 27px, rgba(26,95,48,0.08) 28px);
-        }
-
-        /* Button system — one flat, one outline, both with explicit hover/active states */
-        .btn-flat {
-            border-radius: var(--radius-sm);
-            background: #1a5f30;
-            color: #f7f8f7;
-            box-shadow: var(--shadow-button);
-            transition: background-color 0.18s ease, transform 0.18s ease;
-        }
-        .btn-flat:hover  { background: #003a10; }
-        .btn-flat:active { background: #002b0c; transform: translateY(1px); }
-
-        .btn-outline {
-            border-radius: var(--radius-sm);
-            background: transparent;
-            border: 1.5px solid rgba(247,248,247,0.35);
-            color: #f7f8f7;
-            transition: border-color 0.18s ease, background-color 0.18s ease;
-        }
-        .btn-outline:hover { border-color: #e0a70d; background: rgba(247,248,247,0.06); }
-
-        .tab-link { position: relative; padding-bottom: 2px; }
-        .tab-link::after {
-            content: '';
-            position: absolute; left: 0; right: 100%; bottom: -3px;
-            height: 2px; background: #009639;
-            transition: right 0.25s ease;
-        }
-        .tab-link:hover::after { right: 0; }
-
-        a:focus-visible, button:focus-visible {
-            outline: 2.5px solid #e0a70d;
-            outline-offset: 3px;
-            border-radius: 2px;
-        }
-
-        .reveal { opacity: 0; transform: translateY(14px); transition: opacity 0.6s ease, transform 0.6s ease; }
-        .reveal.is-visible { opacity: 1; transform: translateY(0); }
-
-        .index-tab { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.02em; }
-
-        /* Campus photography, tinted to each section's palette so the photo reads as texture, not a stock banner */
-        .photo-bg { background-size: cover; background-position: center; }
-        .photo-bg-paper {
-            background-image:
-                linear-gradient(180deg, rgba(247,248,247,0.96) 0%, rgba(247,248,247,0.90) 45%, #f7f8f7 88%),
-                url('/assets/CLSU-Siever.jpeg');
-        }
-        .photo-bg-forest {
-            background-image:
-                linear-gradient(160deg, rgba(26,95,48,0.94) 0%, rgba(0,58,16,0.92) 100%),
-                url('/assets/CLSU-Siever-1.jpeg');
-        }
-        .photo-bg-ink {
-            background-image:
-                linear-gradient(180deg, rgba(0,58,16,0.90) 0%, rgba(0,58,16,0.97) 100%),
-                url('/assets/CLSU-Siever-2.jpeg');
-        }
-    </style>
+    @vite(['resources/css/landing.css'])
+    
 </head>
 <body class="font-sans text-ink antialiased">
 
@@ -174,7 +19,7 @@
     <nav class="fixed top-0 inset-x-0 z-50 bg-paper/90 backdrop-blur-md border-b border-ink/10">
         <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
             <a href="#top" class="flex items-center gap-3 shrink-0">
-                <img src="/assets/CLSU-LOGO-removebg.png" alt="CLSU official seal" class="h-8 w-8 object-contain">
+                <img src="/assets/CLSU-LOGO-removebg.webp" alt="CLSU official seal" class="h-8 w-8 object-contain">
                 <span class="ledger-head text-forest text-lg tracking-tight">CSMS</span>
             </a>
 
