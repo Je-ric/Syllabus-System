@@ -6,8 +6,8 @@
     <title>CSMS — Course Syllabus Management System | CLSU</title>
     <meta name="description" content="Central Luzon State University's official platform for creating, reviewing, and approving course syllabi across all colleges and departments.">
 
-    <!-- Preload LCP image with high priority (AVIF) -->
-    <link rel="preload" href="{{ asset('assets/CLSU-Siever.avif') }}" as="image" fetchpriority="high" type="image/avif">
+    <!-- Preload LCP image with high priority -->
+    <link rel="preload" href="{{ asset('assets/CLSU-Siever.avif') }}" as="image" fetchpriority="high">
 
     @vite(['resources/css/landing.css'])
     
