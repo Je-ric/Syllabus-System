@@ -346,7 +346,7 @@ button:focus-visible {
             rgba(247, 248, 247, 0.90) 45%,
             var(--color-paper) 88%
         ),
-        url("../../public/assets/CLSU-Siever.webp");
+        var(--bg-paper);
 }
 
 .photo-bg-forest {
@@ -356,7 +356,7 @@ button:focus-visible {
             rgba(26, 95, 48, 0.94) 0%,
             rgba(0, 58, 16, 0.92) 100%
         ),
-        url("../../public/assets/CLSU-Siever-1.webp");
+        var(--bg-forest);
 }
 
 .photo-bg-ink {
@@ -366,5 +366,5 @@ button:focus-visible {
             rgba(0, 58, 16, 0.90) 0%,
             rgba(0, 58, 16, 0.97) 100%
         ),
-        url("../../public/assets/CLSU-Siever-2.webp");
+        var(--bg-ink);
 }

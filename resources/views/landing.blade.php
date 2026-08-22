@@ -13,13 +13,17 @@
     @vite(['resources/css/landing.css'])
     
 </head>
-<body class="font-sans text-ink antialiased">
+<body class="font-sans text-ink antialiased" style="
+    --bg-paper: url('{{ asset('assets/CLSU-Siever.webp') }}');
+    --bg-forest: url('{{ asset('assets/CLSU-Siever-1.webp') }}');
+    --bg-ink: url('{{ asset('assets/CLSU-Siever-2.webp') }}');
+">
 
     {{-- NAV --}}
     <nav class="fixed top-0 inset-x-0 z-50 bg-paper/90 backdrop-blur-md border-b border-ink/10">
         <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
             <a href="#top" class="flex items-center gap-3 shrink-0">
-                <img src="/assets/CLSU-LOGO-removebg.webp" alt="CLSU official seal" class="h-8 w-8 object-contain">
+                <img src="/assets/CLSU-LOGO-removebg.png" alt="CLSU official seal" class="h-8 w-8 object-contain">
                 <span class="ledger-head text-forest text-lg tracking-tight">CSMS</span>
             </a>
 
