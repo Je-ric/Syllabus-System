@@ -5,7 +5,10 @@
 /* @import './preview.css'; */
 @import "@fontsource/libre-franklin";
 
-@plugin "daisyui";
+@plugin "daisyui" {
+    themes: light --default;
+    darkTheme: light;
+}
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';

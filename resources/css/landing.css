@@ -16,6 +16,10 @@
 /* =========================================================
    DESIGN TOKENS
    ========================================================= */
+@plugin "daisyui" {
+    themes: light --default;
+    darkTheme: light;
+}
 
 @theme {
     /* Colors */
