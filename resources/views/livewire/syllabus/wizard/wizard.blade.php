@@ -318,7 +318,7 @@
                             <x-ui.button
                                 type="button"
                                 variant="add-button"
-                                wire:click="$parent.saveAsDone"
+                                wire:click="saveAsDone"
                                 wire:loading.attr="disabled"
                                 wire:target="saveAsDone"
                                 loading="Saving…">
