@@ -5,6 +5,7 @@ namespace App\Services\Syllabus;
 use App\Models\CourseOutcome;
 use App\Models\Syllabus;
 use App\Models\WeekContent;
+use App\Helpers\SecurityValidator;
 use Illuminate\Support\Facades\DB;
 
 // All database operations for CourseOutcome records.
@@ -45,6 +46,11 @@ class CourseOutcomeService
             throw new \InvalidArgumentException('Course Outcome description cannot be blank.');
         }
 
+        if (SecurityValidator::containsAnyInjection($description)) {
+            $type = SecurityValidator::getInjectionType($description);
+            throw new \InvalidArgumentException("Course Outcome description contains {$type} injection and is not allowed.");
+        }
+
         // Temporary code — will be resynced immediately after
         $outcome = CourseOutcome::create([
             'syllabus_id' => $syllabusId,
@@ -72,6 +78,14 @@ class CourseOutcomeService
 
         if (empty($validDescriptions)) {
             return [];
+        }
+
+        // Validate each description for injection attempts
+        foreach ($validDescriptions as $index => $description) {
+            if (SecurityValidator::containsAnyInjection($description)) {
+                $type = SecurityValidator::getInjectionType($description);
+                throw new \InvalidArgumentException("Course Outcome description at index " . ($index + 1) . " contains {$type} injection and is not allowed.");
+            }
         }
 
         // Batch insert with unique temporary codes to avoid constraint violation
@@ -106,6 +120,11 @@ class CourseOutcomeService
 
         if ($description === '') {
             throw new \InvalidArgumentException('Course Outcome description cannot be blank.');
+        }
+
+        if (SecurityValidator::containsAnyInjection($description)) {
+            $type = SecurityValidator::getInjectionType($description);
+            throw new \InvalidArgumentException("Course Outcome description contains {$type} injection and is not allowed.");
         }
 
         $outcome = CourseOutcome::where('syllabus_id', $syllabusId)

@@ -89,17 +89,28 @@
                             x-bind:disabled="isSaving || deletingId !== null"
                             class="w-full rounded-lg border px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all leading-relaxed disabled:opacity-50"
                             :class="{
-                                'border-amber-300 bg-amber-50/50 focus:border-amber-400 focus:ring-amber-100':         co.id && co._dirty,
-                                'border-emerald-300 bg-emerald-50/50 focus:border-emerald-400 focus:ring-emerald-100': !co.id,
+                                'border-rose-400 bg-rose-50/60 focus:border-rose-400 focus:ring-rose-100':             hasInjection(co.description),
+                                'border-amber-300 bg-amber-50/50 focus:border-amber-400 focus:ring-amber-100':         !hasInjection(co.description) && co.id && co._dirty,
+                                'border-emerald-300 bg-emerald-50/50 focus:border-emerald-400 focus:ring-emerald-100': !hasInjection(co.description) && !co.id,
                                 'border-rose-200 bg-rose-50/50 cursor-not-allowed':                                    co.id && deletingId === co.id,
-                                'border-slate-200 bg-white focus:border-emerald-400 focus:ring-emerald-100':           co.id && !co._dirty && deletingId !== co.id
+                                'border-slate-200 bg-white focus:border-emerald-400 focus:ring-emerald-100':           !hasInjection(co.description) && co.id && !co._dirty && deletingId !== co.id
                             }"></textarea>
-                        <span x-show="!co.id" class="mt-0.5 flex items-center gap-1 text-xs text-emerald-600 font-medium">
-                            <i class="bx bx-plus-circle text-sm shrink-0"></i> New — click <strong class="mx-0.5">Save All</strong>
-                        </span>
-                        <span x-show="co.id && co._dirty" x-cloak class="mt-0.5 flex items-center gap-1 text-xs text-amber-600 font-medium">
-                            <i class="bx bx-edit-alt text-sm shrink-0"></i> Modified — not saved yet
-                        </span>
+                        <template x-if="hasInjection(co.description)">
+                            <p class="mt-1 flex items-center gap-1 text-xs text-rose-600 font-semibold">
+                                <i class="bx bx-error text-sm shrink-0"></i>
+                                Injection detected — scripts and HTML tags are not allowed.
+                            </p>
+                        </template>
+                        <template x-if="!hasInjection(co.description) && !co.id">
+                            <p class="mt-0.5 flex items-center gap-1 text-xs text-emerald-600 font-medium">
+                                <i class="bx bx-plus-circle text-sm shrink-0"></i> New — click <strong class="mx-0.5">Save All</strong>
+                            </p>
+                        </template>
+                        <template x-if="!hasInjection(co.description) && co.id && co._dirty" x-cloak>
+                            <p class="mt-0.5 flex items-center gap-1 text-xs text-amber-600 font-medium">
+                                <i class="bx bx-edit-alt text-sm shrink-0"></i> Modified — not saved yet
+                            </p>
+                        </template>
                         <span x-show="co.id && deletingId === co.id" x-cloak class="mt-0.5 flex items-center gap-1 text-xs text-rose-500 font-medium">
                             <svg class="animate-spin h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>

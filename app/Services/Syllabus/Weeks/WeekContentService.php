@@ -6,6 +6,7 @@ use App\Models\OnlineMaterial;
 use App\Models\Reference;
 use App\Models\SyllabusWeek;
 use App\Models\WeekContent;
+use App\Helpers\SecurityValidator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -239,6 +240,10 @@ class WeekContentService
                     foreach ((array) ($payload['references'] ?? []) as $ref) {
                         $text = trim((string) ($ref['text'] ?? ''));
                         if ($text !== '') {
+                            if (SecurityValidator::containsAnyInjection($text)) {
+                                $type = SecurityValidator::getInjectionType($text);
+                                throw new \RuntimeException("Reference text contains {$type} injection and is not allowed.");
+                            }
                             Reference::create([
                                 'syllabus_id'      => $syllabusId,
                                 'syllabus_week_id' => $week->id,
@@ -260,6 +265,10 @@ class WeekContentService
                         $name = trim((string) ($mat['name'] ?? ''));
                         $url  = trim((string) ($mat['url']  ?? ''));
                         if ($name !== '' || $url !== '') {
+                            if ($name !== '' && SecurityValidator::containsAnyInjection($name)) {
+                                $type = SecurityValidator::getInjectionType($name);
+                                throw new \RuntimeException("Material name contains {$type} injection and is not allowed.");
+                            }
                             OnlineMaterial::create([
                                 'syllabus_id'      => $syllabusId,
                                 'syllabus_week_id' => $week->id,

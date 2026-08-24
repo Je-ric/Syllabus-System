@@ -119,6 +119,11 @@ window.coManager = function coManager(initialOutcomes, syllabusId) {
         _keyCounter: initialOutcomes.length,
         viewModal:   { co_code: '', description: '' },
 
+        hasInjection(text) {
+            if (!text) return false;
+            return /<[^>]+>|javascript:|on\w+\s*=|<script|<\/script|--\s|union\s+select|drop\s+table|insert\s+into|delete\s+from|update\s+\w+\s+set/i.test(text);
+        },
+
         markDirty(co) {
             if (co.id) co._dirty = (co.description !== co._original);
             this.$wire.dispatch('syllabus-step-dirty', { step: 'course_outcomes', dirty: this.hasPending() });
@@ -213,6 +218,12 @@ window.coManager = function coManager(initialOutcomes, syllabusId) {
             if (this.outcomes.some(o => !o.description?.trim())) {
                 window.dispatchEvent(new CustomEvent('lw-toast', {
                     detail: { type: 'warning', message: 'All course outcomes must have a description.' }
+                }));
+                return;
+            }
+            if (this.outcomes.some(o => this.hasInjection(o.description))) {
+                window.dispatchEvent(new CustomEvent('lw-toast', {
+                    detail: { type: 'error', message: 'One or more course outcomes contain invalid content (scripts or HTML). Please fix them before saving.' }
                 }));
                 return;
             }

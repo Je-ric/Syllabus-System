@@ -10,6 +10,7 @@ use App\Services\Syllabus\Weeks\WeekGenerationService;
 use App\Services\Syllabus\Weeks\WeekLockService;
 use App\Services\Syllabus\Weeks\WeekReconciliationService;
 use App\Services\Syllabus\Weeks\WeekResourceService;
+use App\Helpers\SecurityValidator;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -132,6 +133,9 @@ class WeeklyCoverageStep extends Component
             );
 
             $this->dispatch('syllabus-step-saved', step: 'weekly_coverage');
+        } catch (\RuntimeException $e) {
+            $this->dispatch('lw-toast', type: 'error', message: $e->getMessage());
+            $this->dispatch('syllabus-step-save-failed', step: 'weekly_coverage', error: $e->getMessage());
         } catch (\Throwable $e) {
             report($e);
             $this->dispatch('syllabus-step-save-failed', step: 'weekly_coverage', error: $e->getMessage());
@@ -264,6 +268,10 @@ class WeeklyCoverageStep extends Component
             if ($url !== '' && ! preg_match('#^https?://#i', $url)) {
                 $url = '';
             }
+            if ($url !== '' && SecurityValidator::containsAnyInjection($url)) {
+                $type = SecurityValidator::getInjectionType($url);
+                throw new \RuntimeException("Material URL contains {$type} injection and is not allowed.");
+            }
             return ['name' => $mat['name'] ?? '', 'url' => $url];
         }, (array) ($fields['materials'] ?? []));
 
@@ -280,13 +288,19 @@ class WeeklyCoverageStep extends Component
         // [1] Patch in-place — weekInputs already has the new data, no reload needed.
         $this->weekInputs['w' . $weekNo] = $payload;
 
-        $changed = app(WeekContentService::class)->save(
-            $this->syllabusId,
-            $this->activeComponent,
-            $this->weekInputs,
-            $this->lockedWeeks,
-            $weekNo
-        );
+        try {
+            $changed = app(WeekContentService::class)->save(
+                $this->syllabusId,
+                $this->activeComponent,
+                $this->weekInputs,
+                $this->lockedWeeks,
+                $weekNo
+            );
+        } catch (\RuntimeException $e) {
+            $this->dispatch('lw-toast', type: 'error', message: $e->getMessage());
+            $this->dispatch('week-modal-save-failed');
+            return;
+        }
 
         // [4] Skip re-render when nothing changed.
         if (! $changed) {
@@ -314,13 +328,18 @@ class WeeklyCoverageStep extends Component
             return;
         }
 
-        $changed = app(WeekContentService::class)->save(
-            $this->syllabusId,
-            $this->activeComponent,
-            $this->weekInputs,
-            $this->lockedWeeks,
-            $weekNo
-        );
+        try {
+            $changed = app(WeekContentService::class)->save(
+                $this->syllabusId,
+                $this->activeComponent,
+                $this->weekInputs,
+                $this->lockedWeeks,
+                $weekNo
+            );
+        } catch (\RuntimeException $e) {
+            $this->dispatch('lw-toast', type: 'error', message: $e->getMessage());
+            return;
+        }
 
         // [4] Skip re-render when nothing changed.
         if (! $changed) {
@@ -346,12 +365,18 @@ class WeeklyCoverageStep extends Component
             }
         }
 
-        $changed = app(WeekContentService::class)->save(
-            $this->syllabusId,
-            $this->activeComponent,
-            $this->weekInputs,
-            $this->lockedWeeks
-        );
+        try {
+            $changed = app(WeekContentService::class)->save(
+                $this->syllabusId,
+                $this->activeComponent,
+                $this->weekInputs,
+                $this->lockedWeeks
+            );
+        } catch (\RuntimeException $e) {
+            $this->dispatch('lw-toast', type: 'error', message: $e->getMessage());
+            $this->dispatch('syllabus-save-finished');
+            return;
+        }
 
         // Full save — reload so the accordion reflects any DB-side normalisation.
         $this->loadData();

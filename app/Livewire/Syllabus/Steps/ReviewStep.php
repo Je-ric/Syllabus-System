@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Services\Syllabus\Review\SyllabusApprovalService;
 use App\Services\Syllabus\Review\SyllabusReviewFormService;
 use App\Services\Syllabus\SyllabusRevisionHistoryService;
+use App\Helpers\SecurityValidator;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -295,6 +296,22 @@ class ReviewStep extends Component
         }
         if ($revisionNo < 0) {
             $this->dispatch('lw-toast', type: 'error', message: 'Revision No. must be 0 or higher.');
+            return;
+        }
+
+        // Validate highlights and contributors for injection attempts
+        $highlights = trim($highlights);
+        $contributors = trim($contributors);
+        
+        if ($highlights !== '' && SecurityValidator::containsAnyInjection($highlights)) {
+            $type = SecurityValidator::getInjectionType($highlights);
+            $this->dispatch('lw-toast', type: 'error', message: "Highlights contains {$type} injection and is not allowed.");
+            return;
+        }
+        
+        if ($contributors !== '' && SecurityValidator::containsAnyInjection($contributors)) {
+            $type = SecurityValidator::getInjectionType($contributors);
+            $this->dispatch('lw-toast', type: 'error', message: "Contributors contains {$type} injection and is not allowed.");
             return;
         }
 
