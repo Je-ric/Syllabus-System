@@ -250,7 +250,7 @@ class CourseController extends Controller
         return [
             'program_id'           => [$course ? 'sometimes' : 'required', 'exists:programs,id'],
             'confirmed_submission' => ['accepted'],
-            'code'                 => ['required', 'string', 'max:50', 'regex:/^[A-Za-z0-9\-\.]+$/', $courseCodeRule],
+            'code'                 => ['required', 'string', 'max:50', 'regex:/^[A-Za-z0-9\-\.\s]+$/', $courseCodeRule],
             'name'                 => ['required', 'string', 'min:2', 'max:255', 'regex:/^[\p{L}\s\-\.\,0-9]+$/u', new NoInjectionRule()],
             'description'          => ['nullable', 'string', 'max:5000', new NoInjectionRule()],
             'credits'              => ['required', 'integer', 'min:1', 'max:5'],
@@ -270,7 +270,7 @@ class CourseController extends Controller
     protected function courseMessages(): array
     {
         return [
-            'code.regex'              => 'Course code can only contain letters, numbers, hyphens, and periods.',
+            'code.regex'              => 'Course code can only contain letters, numbers, hyphens, periods, and spaces.',
             'name.regex'              => 'Course name must contain only letters, numbers, spaces, and basic punctuation.',
             'name.min'                => 'Course name must be at least 2 characters.',
             'credits.min'             => 'Credit units must be at least 1.',
