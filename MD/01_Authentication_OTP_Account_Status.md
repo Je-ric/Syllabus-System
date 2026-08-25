@@ -76,6 +76,32 @@ Related docs:
 - `MD/09_Roles_Assignment.md`
 - `MD/15_User_Profile.md`
 
+## Security Implementation
+
+### Injection Prevention
+- **Server-Side Validation**: All authentication forms use `NoInjectionRule` to detect and block script, SQL, and code injection attempts.
+- **SecurityValidator Helper**: Comprehensive pattern detection for script tags, SQL commands, and code injection patterns.
+- **Validation Rules**:
+  - `name`: Letters and spaces only, no injection attempts
+  - `email`: Valid email format, no injection attempts
+  - `password`: Complex requirements (uppercase, lowercase, number), no injection attempts
+  - `phone_number`: Phone format only (digits, spaces, standard phone characters)
+  - `office`: Letters/numbers/spaces/basic punctuation only, no injection attempts
+
+### Session Security
+- **Session Regeneration**: Session is regenerated on login and logout to prevent session fixation.
+- **CAIS Token Management**: CAIS tokens stored in session and cleared on logout.
+- **Password Hashing**: All passwords hashed using Laravel's `Hash::make()`.
+
+### Rate Limiting
+- **Current Status**: Rate limiting is not currently implemented on authentication endpoints.
+- **Recommended Enhancement**: Add rate limiting to login and registration endpoints to prevent brute force attacks.
+
+### Authorization
+- **Role-Based Access Control**: All admin functions protected by `role:admin` middleware.
+- **Account Status Checks**: Users with `pending`, `rejected`, or `disabled` status are blocked from login.
+- **Double Verification**: Password changes require OTP verification via email.
+
 ## UI Notes
 
 ### auth.blade.php
@@ -106,24 +132,24 @@ Related docs:
 ### Registration (Validation)
 
 - If registering:
-  - Then `name` is required.
-  - Then `phone_number` is required, max 20 chars.
-  - Then `office` is required, max 255 chars.
-  - Then `email` is required, valid, and unique in `users`.
+  - Then `name` is required, min 2 chars, max 255 chars, letters and spaces only, no injection attempts.
+  - Then `phone_number` is required, max 20 chars, phone format only (digits, spaces, standard phone characters).
+  - Then `office` is required, max 255 chars, letters/numbers/spaces/basic punctuation only, no injection attempts.
+  - Then `email` is required, valid, unique in `users`, no injection attempts.
   - Then email must end with `@clsu.edu.ph` or `@clsu2.edu.ph`.
-  - Then `password` is required, minimum 6 chars, and must match confirmation.
+  - Then `password` is required, minimum 8 chars, must match confirmation, must contain uppercase, lowercase, and number.
 
 ### Registration (Behavior)
 
 - If registration succeeds:
   - Then create user with:
-    - `account_status = active`
+    - `account_status = pending` (changed from `active` for security)
     - `email_verified_at = now()`
     - `phone_number` and `office` from form
+  - Then `faculty` role is attached immediately (changed from admin approval only).
   - Then record an AuditLog entry for the registration.
   - Then redirect to `waiting.approval` with a success message.
-  - No role is assigned at registration — only after admin approval.
-  - No OTP is issued for registration.
+  - Note: Registration now includes injection prevention via `NoInjectionRule` on sensitive fields.
 
 ### Login (CAIS Flow)
 
@@ -142,6 +168,7 @@ Related docs:
       - Then redirect to `syllabus.index`.
     - If CAIS is unavailable or credentials are rejected:
       - Then fall back to local authentication.
+  - Note: Login inputs validated with `NoInjectionRule` to prevent script/SQL/code injection.
 
 ### Login (Local Fallback)
 
@@ -246,9 +273,9 @@ Related docs:
 
 ### New User Lifecycle
 
-1. User registers with CLSU email → account created with `active` status, email auto-verified.
+1. User registers with CLSU email → account created with `pending` status, email auto-verified, `faculty` role attached.
 2. User redirected to waiting-approval page.
-3. Admin approves user → `faculty` role attached, approval email sent.
+3. Admin approves user → account status changed to `active`, approval email sent.
 4. Admin assigns additional roles (including `ovpaa`) and organizational assignments as needed.
 5. User can log in and use the system.
 

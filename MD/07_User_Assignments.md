@@ -39,6 +39,44 @@ Rules for organizational assignments and what appears in hierarchy views.
 - Admin can assign and remove all roles. Deans and chairs can **view** the hierarchy but **cannot modify** it.
 - All assignment and removal operations run inside a DB transaction.
 - Admin users are excluded from all potential-assignee lists.
+- **Security**: All assignment operations include role validation, authorization checks, and audit logging.
+- **Validation**: Input validation ensures college_id, department_id, and user_id exist in database.
+
+## Security Implementation
+
+### Input Validation
+- **Database Validation**: All assignment operations validate that college_id, department_id, and user_id exist in the database using Laravel's `exists` validation rule.
+- **Type Safety**: All IDs are cast to integers before processing to prevent type-related injection attempts.
+- **Array Validation**: Bulk faculty assignment validates that user_ids is an array and each entry exists in the users table.
+
+### Authorization
+- **Role-Based Access Control**: 
+  - Dean assignment/removal: Protected by `role:admin` middleware
+  - Chair/faculty assignment/removal: Admin-only (checked in service layer)
+  - Hierarchy viewing: Protected by `role:admin,dean,chair` middleware
+- **Scope-Based Authorization**: 
+  - Deans restricted to their assigned college when viewing departments
+  - Chairs restricted to their own department when viewing hierarchy
+  - Unauthorized access attempts result in 403 aborts
+- **Actor Validation**: All assignment operations verify the acting user has appropriate permissions via `UserAssignmentsChecker`.
+
+### Business Logic Security
+- **Mutual Exclusivity**: Dean and chair assignments are mutually exclusive — enforced at multiple levels
+- **Single Assignment Constraints**: One dean per college, one chair per department enforced by validation
+- **Role Validation**: Users must have appropriate roles (dean/chair/faculty) before assignment
+- **Status Validation**: Only active accounts appear in potential assignee lists
+
+### Transaction Safety
+- **Database Transactions**: All assignment and removal operations run inside DB transactions.
+- **Atomic Operations**: Multiple related changes (assignment + faculty role) occur atomically.
+
+### Audit Logging
+- **Comprehensive Logging**: All assignment operations record AuditLog entries with user, action, and description.
+- **User Notifications**: Role assignment changes trigger notifications via `RoleAssignmentNotification`.
+
+### Rate Limiting
+- **Current Status**: Rate limiting is not currently implemented on assignment endpoints.
+- **Recommended Enhancement**: Add rate limiting to assignment endpoints to prevent automated bulk assignment abuse.
 
 ## Conditions (If / Then)
 
@@ -72,6 +110,8 @@ Rules for organizational assignments and what appears in hierarchy views.
 ### Dean Assignment
 
 - If assigning a dean:
+  - Then `college_id` is required and must exist in `colleges` table.
+  - Then `user_id` is required and must exist in `users` table.
   - Then user must have role `dean` (or `admin`).
   - Then user must not currently be assigned as chair anywhere — blocked with error toast.
   - Then user must not already be assigned as dean anywhere — a dean can only hold one college.
@@ -92,6 +132,8 @@ Rules for organizational assignments and what appears in hierarchy views.
 ### Chair Assignment
 
 - If assigning a chair:
+  - Then `department_id` is required and must exist in `departments` table.
+  - Then `user_id` is required and must exist in `users` table.
   - Then only admin can perform this action — non-admin gets an error toast.
   - Then user must have role `chair` (or `admin`).
   - Then user must not currently be assigned as dean anywhere — blocked with error toast.
@@ -114,6 +156,8 @@ Rules for organizational assignments and what appears in hierarchy views.
 ### Faculty Assignment
 
 - If assigning a faculty member:
+  - Then `department_id` is required and must exist in `departments` table.
+  - Then `user_id` is required and must exist in `users` table.
   - Then only admin can perform this action — non-admin gets an error toast.
   - Then user must have role `faculty` (or `admin`).
   - Then duplicate faculty assignment to the same department returns an info toast (not an error — not blocked).
@@ -125,10 +169,21 @@ Rules for organizational assignments and what appears in hierarchy views.
 ### Faculty Removal
 
 - If removing a faculty member:
+  - Then `department_id` is required and must exist in `departments` table.
+  - Then `user_id` is required and must exist in `users` table.
   - Then only admin can perform this action — non-admin gets an error toast.
   - Then delete the `user_assignments` row matching `(context = faculty, department_id, user_id)`.
   - Then notify user via `RoleAssignmentNotification`.
   - Then audit log recorded.
+
+### Bulk Faculty Assignment
+
+- If bulk assigning faculty:
+  - Then `department_id` is required and must exist in `departments` table.
+  - Then `user_ids` is required array.
+  - Then each entry in `user_ids` must exist in `users` table.
+  - Then only admin can perform this action — non-admin gets an error toast.
+  - Then system processes each user ID through individual faculty assignment logic.
 
 ### Dean + Chair Mutual Exclusivity
 

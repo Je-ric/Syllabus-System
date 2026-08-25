@@ -23,6 +23,42 @@ Rules for viewing and updating a user's own profile, managing consultation hours
 Two-column layout:
 - **Left**: Profile card (avatar, name, office, role badges, email verified badge, contact info, assignments, action buttons).
 - **Right**: Profile information form, consultation hours, recent activity, password change.
+- **Security**: All profile operations are self-only (user can only modify their own profile), with admin restrictions on certain actions.
+
+## Security Implementation
+
+### Authorization
+- **Self-Only Access**: All profile operations are restricted to the authenticated user (`Auth::id()`) only.
+- **Role-Based Restrictions**: Admin users are blocked from profile editing and password changes for security reasons.
+- **Ownership Validation**: Consultation hours operations verify ownership (403 abort if not owner).
+
+### Input Validation
+- **Profile Update Validation**:
+  - Name: Required, max 255 chars, letters/spaces only, no injection attempts
+  - Email: Required, valid email format, unique excluding own id, no injection attempts
+  - Phone: Optional, max 30 chars, phone format only (digits, spaces, standard phone characters)
+  - Office: Optional, max 255 chars, letters/numbers/spaces/basic punctuation only, no injection attempts
+- **Password Validation**: Minimum 8 chars, must include uppercase, lowercase, and number, must differ from current password
+- **Consultation Hours Validation**: Day restricted to Monday-Friday, time max 100 chars.
+
+### OTP Security
+- **Double Verification**: Password changes require OTP verification via email before committing changes.
+- **Session-Based Security**: Pending password changes stored in session with user_id verification.
+- **OTP Validation**: 6-digit OTP with 10-minute expiry, validated against hashed value.
+- **Session Mismatch Protection**: Verifies session data matches authenticated user before processing.
+- **Legacy Migration**: Support for migrating OTP from legacy columns to secure OTP table.
+
+### Transaction Safety
+- **Atomic Operations**: Password changes occur atomically after OTP validation.
+- **Session Cleanup**: OTP records and session keys are cleared immediately after successful password change.
+
+### Audit Logging
+- **Comprehensive Logging**: All profile updates and password changes record AuditLog entries.
+- **Recent Activity**: Last 20 audit log entries displayed to user for transparency.
+
+### Rate Limiting
+- **Current Status**: Rate limiting is not currently implemented on profile endpoints.
+- **Recommended Enhancement**: Add rate limiting to password change OTP verification to prevent OTP brute force attempts.
 
 ## Conditions (If / Then)
 
@@ -42,10 +78,10 @@ Two-column layout:
   - Then the update always applies to `Auth::id()` only.
   - If the user has role `admin`: blocked with warning toast ("Admin profile details cannot be edited here.").
   - If not admin:
-    - `name` required, max 255.
-    - `email` required, valid email, unique excluding own id.
-    - `phone_number` optional, max 30.
-    - `office` optional, max 255.
+    - `name` required, max 255 chars, letters/spaces only, no injection attempts.
+    - `email` required, valid email, unique excluding own id, no injection attempts.
+    - `phone_number` optional, max 30 chars, phone format only (digits, spaces, standard phone characters).
+    - `office` optional, max 255 chars, letters/numbers/spaces/basic punctuation only, no injection attempts.
     - If valid: update user, redirect with success toast.
 
 ### Consultation Hours Management
@@ -65,8 +101,8 @@ Two-column layout:
 - If a user submits a password change:
   - If admin: blocked with warning toast.
   - If not admin:
-    - `current_password` required.
-    - `password` required, min 8 chars, must be confirmed (`password_confirmation`), must differ from `current_password`.
+    - `current_password` required, validated against stored hash.
+    - `password` required, min 8 chars, must be confirmed (`password_confirmation`), must differ from `current_password`, complex requirements (uppercase, lowercase, number).
     - If `current_password` does not match stored hash: field error "Current password is incorrect."
     - If valid:
       - Issue OTP for `password_change` via `Authentication\OtpService::issueForUser()`.
@@ -108,6 +144,12 @@ Methods:
 - `validate(User, otp, purpose)` — checks existence, expiry, hash match. Returns `null` on success or error string.
 - `clear(User, purpose)` — deletes OTP record.
 - `migrateLegacyOtp(User, purpose)` — migrates OTP from legacy `users.otp` column to `user_otps` table, then clears legacy fields.
+
+**Security Features**:
+- **Hashed Storage**: OTPs are stored as hashes, not plaintext, to prevent database compromise exposure.
+- **Purpose-Based Isolation**: OTPs are isolated by purpose (password_change) to prevent cross-purpose replay attacks.
+- **Time-Based Expiry**: 10-minute expiry limits window for OTP brute force attempts.
+- **Session Binding**: Password changes require both OTP validation and session data matching.
 
 ## UI Notes (viewDetails.blade.php)
 

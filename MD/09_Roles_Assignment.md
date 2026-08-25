@@ -36,6 +36,40 @@ Both layers are required for consistent authorization.
 - Faculty assignments can coexist with dean/chair.
 - Disabling or rejecting a user removes all their assignments immediately.
 - Account must be `active` before roles can be assigned.
+- **Security**: All role operations include validation, authorization checks, and audit logging.
+- **Validation**: Role assignments use whitelist validation to prevent privilege escalation.
+
+## Security Implementation
+
+### Input Validation
+- **Role Whitelist Validation**: Role assignments are restricted to specific allowed values (`admin`, `chair`, `dean`, `faculty`) to prevent privilege escalation.
+- **User Validation**: All operations validate that user_id exists in the users table.
+- **Array Validation**: Role arrays are validated to ensure proper data structure.
+
+### Authorization
+- **Role-Based Access Control**: 
+  - Account approval actions: Protected by `role:admin` middleware
+  - Role assignment: Admin-only (checked at both controller and service level)
+  - User editing: Admin-only route
+- **Status Validation**: Roles can only be assigned to active accounts (403 abort for inactive accounts).
+- **Double-Check Validation**: Dean+chair mutual exclusivity enforced at both controller and service levels.
+
+### Business Logic Security
+- **Mutual Exclusivity**: Dean and chair roles cannot coexist — blocked with error toast and 422 abort.
+- **Faculty Role Enforcement**: Faculty role is always forced into role sets (cannot be removed via role assignment).
+- **Assignment Cleanup**: Role removal automatically triggers corresponding assignment cleanup for consistency.
+
+### Transaction Safety
+- **Database Transactions**: All role and assignment operations run inside DB transactions.
+- **Atomic Operations**: Role changes and assignment cleanups occur atomically.
+
+### Audit Logging
+- **Comprehensive Logging**: All role and account status changes record AuditLog entries.
+- **User Notifications**: Role assignment changes trigger notifications via `RoleAssignmentNotification`.
+
+### Rate Limiting
+- **Current Status**: Rate limiting is not currently implemented on role assignment endpoints.
+- **Recommended Enhancement**: Add rate limiting to role assignment endpoints to prevent automated privilege escalation attempts.
 
 ## Conditions (If / Then)
 
@@ -98,7 +132,10 @@ Both layers are required for consistent authorization.
 ### Edit User (AccountApprovalController::editUser — Authentication)
 
 - If editing a user as admin:
-  - Then validate: `name` required, `email` required + unique (excluding self), `phone_number` optional, `office` optional.
+  - Then validate: `name` required, min 2 chars, max 255 chars, letters/spaces only, no injection attempts.
+  - Then `email` required + valid + unique (excluding self), no injection attempts.
+  - Then `phone_number` optional, max 30 chars, phone format only.
+  - Then `office` optional, max 255 chars, letters/numbers/spaces/basic punctuation only, no injection attempts.
   - Then update user record.
   - Then record AuditLog.
   - Route is admin-only.

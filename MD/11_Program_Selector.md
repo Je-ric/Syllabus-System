@@ -23,6 +23,7 @@ Supports:
 - Optional auto-redirect after program selection.
 - **Locked mode** for non-admin users with scoped access.
 - Breadcrumb step indicators.
+- **Security**: Scope-based access control and authorization checks for non-admin users.
 
 ## Public Properties
 
@@ -35,6 +36,36 @@ Supports:
 - `redirectRoute` — nullable route name to redirect to
 - `autoRedirect` — default `true`
 - `locked` — `bool`, when true shows read-only locked UI
+
+## Security Implementation
+
+### Authorization
+- **Role-Based Access Control**: 
+  - Admin users: Full access to all colleges/departments/programs
+  - Non-admin users: Scoped access based on their organizational assignments
+- **Scope Validation**: 
+  - For `programs.show` and `courses.index`: Colleges/departments restricted to user's assigned scope
+  - For `syllabus.create`: Full access (no scope restriction)
+  - Authorization checks prevent access to programs outside user's department assignment
+
+### Input Validation
+- **Parameter Validation**: All IDs (collegeId, departmentId, programId) are validated to ensure they exist in the database.
+- **Type Safety**: Livewire wire.model ensures type safety for all properties.
+- **Route Validation**: Redirect routes are validated to prevent open redirect vulnerabilities.
+
+### Scope-Based Security
+- **Assignment-Based Defaults**: Preselection logic uses user's department/college assignments for secure defaults
+- **Program Ownership Verification**: When non-admin users access specific programs, system verifies program belongs to their department
+- **Access Denial**: Unauthorized access attempts result in warning toasts and redirects to appropriate index pages
+
+### UI Security
+- **Locked Mode**: Non-admin users in scoped contexts see read-only locked UI with lock icons
+- **Prevent Interaction**: Locked mode prevents users from modifying their assigned scope
+- **Visual Indicators**: Clear visual feedback shows users their current access level
+
+### Rate Limiting
+- **Current Status**: Rate limiting is not currently implemented on program selector operations.
+- **Recommended Enhancement**: Add rate limiting to program selection endpoints to prevent automated enumeration.
 
 ## Mount Parameters
 
@@ -195,3 +226,4 @@ Payload: `programId` (int|null)
 - Non-admin users in Programs/Courses pages are scoped to their assignment — locked mode.
 - Admin users always see all colleges/departments/programs.
 - Keep route names valid; invalid route names will fail redirect.
+- **Security Note**: The component implements scope-based access control to prevent unauthorized access to programs outside a user's department assignment.

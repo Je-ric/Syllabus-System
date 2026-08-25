@@ -58,6 +58,44 @@ Rules for program-level PEO/PO management, code sequencing, and PO↔PEO mapping
 - All codes are nulled first before resequencing to avoid unique constraint collisions during reorder.
 - `resequencePeoCodes()` and `resequencePoCodes()` are deprecated — use `resequencePeoCodesOrdered()` and `resequencePoCodesOrdered()` instead.
 - `PeoDisplay` and `MatrixView` are read-only reactive components that refresh when `peosUpdated` or `pos-saved` events are dispatched.
+- **Security**: All PEO and PO text inputs are validated using `SecurityValidator` to prevent script, SQL, and code injection attempts.
+- **Client-Side Detection**: JavaScript functions detect injection patterns and provide real-time visual feedback.
+
+## Security Implementation
+
+### Input Validation & Injection Prevention
+- **Server-Side Validation**: All PEO and PO forms use `SecurityValidator::containsAnyInjection()` to detect and block script, SQL, and code injection attempts.
+- **Client-Side Detection**: JavaScript functions in Livewire components detect injection patterns and provide real-time visual feedback:
+  - Pattern: `/<[^>]+>|javascript:|on\w+\s*=|<script|<\/script|--\s|union\s+select|drop\s+table|insert\s+into|delete\s+from|update\s+\w+\s+set/i`
+  - Visual feedback includes red borders, warning icons, and error messages
+  - Blocks save operations when injection is detected
+- **Text Field Validation**: 
+  - PEO text: Required, no injection attempts
+  - PO text: Required, no injection attempts
+- **Block and Validate**: When injection is detected, the system blocks submission and requires the user to fix the input — never attempts to "clean" dangerous content.
+
+### Authorization
+- **Role-Based Access Control**: 
+  - Program routes protected by `role:admin,chair` middleware
+  - Academic structure routes protected by `role:admin` middleware
+- **Program Authorization**: Additional checks in Livewire mount methods ensure chairs can only manage PEOs/POs for programs in their assigned department.
+- **Scope-Based Access**: Non-admin users restricted to their assigned college/department scope.
+
+### Transaction Safety
+- **Database Transactions**: All PEO and PO operations run inside DB transactions.
+- **Code Resequencing**: Uses transaction-safe resequencing with global nulling to prevent unique constraint violations.
+
+### Audit Logging
+- **Comprehensive Logging**: All PEO and PO operations record AuditLog entries with user, action, and description.
+- **Mapping Changes**: PO↔PEO mapping toggles are logged as "mapped" or "unmapped" actions.
+
+### Cross-Component Security
+- **Event-Based Updates**: `peosUpdated` and `pos-saved` events trigger secure refreshes across components.
+- **ID Validation**: All component operations validate that program IDs match before processing updates.
+
+### Rate Limiting
+- **Current Status**: Rate limiting is not currently implemented on PEO/PO endpoints.
+- **Recommended Enhancement**: Add rate limiting to PEO/PO save operations to prevent automated abuse.
 
 ## Conditions (If / Then)
 
@@ -73,7 +111,10 @@ Rules for program-level PEO/PO management, code sequencing, and PO↔PEO mapping
 - If any `peo_text` in the submitted rows is blank:
   - Then `RuntimeException` thrown, caught, error toast dispatched.
   - Then nothing is saved.
-- If all rows are non-empty:
+- If any `peo_text` contains injection attempts:
+  - Then `RuntimeException` thrown with injection type, caught, error toast dispatched.
+  - Then nothing is saved.
+- If all rows are non-empty and safe:
   - Then runs inside a DB transaction:
     - PEOs absent from the submission (had an id, not in submitted list) are hard-deleted.
     - Existing rows are updated (text only).
@@ -90,7 +131,10 @@ Rules for program-level PEO/PO management, code sequencing, and PO↔PEO mapping
 - If any `po_text` in the submitted rows is blank:
   - Then `RuntimeException` thrown, caught, error toast dispatched.
   - Then nothing is saved.
-- If all rows are non-empty:
+- If any `po_text` contains injection attempts:
+  - Then `RuntimeException` thrown with injection type, caught, error toast dispatched.
+  - Then nothing is saved.
+- If all rows are non-empty and safe:
   - Then runs inside a DB transaction:
     - POs absent from the submission are hard-deleted.
     - Existing rows are updated (text only).

@@ -39,19 +39,52 @@ Practical reference for how CSMS manages the academic structure hierarchy.
 - Delete modals show cascade warnings and item counts before confirming.
 - All destructive operations run inside a DB transaction via `UniversityStructureService`.
 - If a service call throws, the controller catches it and returns a generic error toast.
+- **Security**: All text inputs are validated using `NoInjectionRule` to prevent script, SQL, and code injection attempts.
+- **Validation**: Names use regex patterns to ensure only allowed characters (letters, spaces, basic punctuation).
+- **BOR Approval**: Programs include BOR approval number and date validation with cross-field requirements.
+
+## Security Implementation
+
+### Input Validation & Injection Prevention
+- **Server-Side Validation**: All academic structure forms use `NoInjectionRule` to detect and block script, SQL, and code injection attempts.
+- **Regex Patterns**: Text fields validated with specific character patterns:
+  - College/Department names: Letters, spaces, and basic punctuation only
+  - Program names: Letters, numbers, spaces, and basic punctuation only
+  - BOR approval numbers: Letters, numbers, hyphens, slashes, and periods only
+- **Character Restrictions**: All name fields prevent special characters that could be used for injection attacks.
+
+### Authorization
+- **Role-Based Access Control**: All academic structure routes protected by `role:admin` middleware.
+- **Transaction Safety**: All destructive operations run inside DB transactions to prevent partial updates.
+
+### Data Integrity
+- **Uniqueness Validation**: Names must be unique within their respective tables.
+- **Foreign Key Validation**: Department and college references validated against existing records.
+- **Cross-Field Validation**: BOR approval number requires corresponding date; dates cannot be in the future.
+
+### Cascade Protection
+- **Course Blocking**: Structure deletion blocked if courses exist under affected programs/departments.
+- **Assignment Cleanup**: User assignments automatically removed when departments/colleges are deleted.
+- **Objective Cleanup**: Department objectives and college goals removed during cascade deletions.
+
+### Rate Limiting
+- **Current Status**: Rate limiting is not currently implemented on academic structure endpoints.
+- **Recommended Enhancement**: Add rate limiting to structure creation endpoints to prevent automated abuse.
 
 ## Conditions (If / Then)
 
 ### Colleges (Create)
 
 - If creating a college:
-  - Then `name` is required and must be unique across `colleges`.
+  - Then `name` is required, min 2 chars, max 255 chars, letters/spaces/basic punctuation only, no injection attempts.
+  - Then `name` must be unique across `colleges`.
 
 ### Colleges (Update)
 
 - If updating a college:
   - Then the college must exist (route model binding).
-  - Then `name` is required and must be unique, ignoring the current college's own id.
+  - Then `name` is required, min 2 chars, max 255 chars, letters/spaces/basic punctuation only, no injection attempts.
+  - Then `name` must be unique, ignoring the current college's own id.
 
 ### Colleges (Delete)
 
@@ -74,14 +107,16 @@ Practical reference for how CSMS manages the academic structure hierarchy.
 ### Departments (Create)
 
 - If creating a department:
-  - Then `name` is required and must be unique across `departments`.
+  - Then `name` is required, min 2 chars, max 255 chars, letters/spaces/basic punctuation only, no injection attempts.
+  - Then `name` must be unique across `departments`.
   - Then `college_id` is required and must exist.
 
 ### Departments (Update)
 
 - If updating a department:
   - Then the department must exist (route model binding).
-  - Then `name` is required and must be unique, ignoring the current department's own id.
+  - Then `name` is required, min 2 chars, max 255 chars, letters/spaces/basic punctuation only, no injection attempts.
+  - Then `name` must be unique, ignoring the current department's own id.
   - Then `college_id` is required and must exist.
 
 ### Departments (Delete)
@@ -101,11 +136,14 @@ Practical reference for how CSMS manages the academic structure hierarchy.
 ### Programs (Create)
 
 - If creating a program:
-  - Then `name` is required and must be unique across `programs`.
+  - Then `name` is required, min 2 chars, max 255 chars, letters/numbers/spaces/basic punctuation only, no injection attempts.
+  - Then `name` must be unique across `programs`.
   - Then `primary_department_id` is required and must exist.
   - Then `supporting_department_ids` is optional array; each entry must exist in `departments`.
-  - Then `bor_approval_no` is optional string.
+  - Then `bor_approval_no` is optional string, max 255 chars, specific format only, no injection attempts.
   - Then `bor_approval_date` is optional date.
+  - If `bor_approval_no` is provided, then `bor_approval_date` is required.
+  - If `bor_approval_date` is provided, then it cannot be in the future.
 - If create succeeds:
   - Then `programs` row is inserted.
   - Then `program_departments` pivot row is inserted with `role = primary` for the primary department.
@@ -116,9 +154,14 @@ Practical reference for how CSMS manages the academic structure hierarchy.
 
 - If updating a program:
   - Then the program must exist (route model binding).
-  - Then `name` is required and must be unique, ignoring the current program's own id.
+  - Then `name` is required, min 2 chars, max 255 chars, letters/numbers/spaces/basic punctuation only, no injection attempts.
+  - Then `name` must be unique, ignoring the current program's own id.
   - Then `primary_department_id` is required and must exist.
   - Then `supporting_department_ids` is optional array.
+  - Then `bor_approval_no` is optional string, max 255 chars, specific format only, no injection attempts.
+  - Then `bor_approval_date` is optional date.
+  - If `bor_approval_no` is provided, then `bor_approval_date` is required.
+  - If `bor_approval_date` is being changed, then it cannot be in the future.
   - If `primary_department_id` is changing AND the program has any courses:
     - Then update is blocked with an error toast.
     - Then primary department change is only allowed when the program has no courses.

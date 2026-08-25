@@ -52,6 +52,7 @@ Practical reference for how Academic Calendars and their semester events behave 
 - Store and update of the calendar form are handled by the `AcademicCalendarForm` Livewire component; the POST/PUT controller methods do not exist.
 - Event add, edit, delete, and bulk range are handled by the `AcademicCalendarEventForm` Livewire component; the POST/PUT controller event methods do not exist.
 - CSV import is present in the codebase but **currently disabled** (commented out with `WithFileUploads`).
+- **Security**: All event name inputs are validated using `NoInjectionRule` to prevent script, SQL, and code injection attempts.
 
 ## Recent UI/UX Improvements
 
@@ -98,6 +99,26 @@ Events are categorized into three types based on how they affect syllabus week g
 - Use **`exam`** for: Midterm exams, final exams, practical exams (week locked as exam)
 - Use **`non_teaching`** for: Institutional non-teaching days, special events (week locked as non-teaching)
 - Use **`other`** for: General informational events, reminders (reference only, week remains editable)
+
+## Security Implementation
+
+### Input Validation & Injection Prevention
+- **Server-Side Validation**: All event forms use `NoInjectionRule` to detect and block script, SQL, and code injection attempts.
+- **Livewire Security**: Event names validated using `SecurityValidator::containsAnyInjection()` before database operations.
+- **Type Whitelisting**: Event types restricted to specific allowed values (`holiday`, `exam`, `break`, `non_teaching`, `other`).
+- **Date Validation**: All date inputs validated against semester boundaries and proper date formats.
+
+### Authorization
+- **Role-Based Access Control**: All calendar and event routes protected by `role:admin,ovpaa` middleware.
+- **Transaction Safety**: All destructive operations run inside DB transactions to prevent partial updates.
+
+### Audit Logging
+- **Comprehensive Logging**: All calendar and event operations record AuditLog entries with user, action, and description.
+- **Change Tracking**: Academic year changes trigger stale-weeks warnings when syllabi would be affected.
+
+### Rate Limiting
+- **Current Status**: Rate limiting is not currently implemented on calendar event endpoints.
+- **Recommended Enhancement**: Add rate limiting to event creation endpoints to prevent automated abuse.
 
 ## Conditions (If / Then)
 
@@ -172,8 +193,8 @@ Events are categorized into three types based on how they affect syllabus week g
 
 - If `type` is not one of `holiday`, `exam`, `break`, `non_teaching`, `other`:
   - Then `lw-toast` error dispatched.
-- If `name` is missing or exceeds 255 chars:
-  - Then `lw-toast` error dispatched.
+- If `name` is missing, exceeds 255 chars, or contains injection attempts:
+  - Then `lw-toast` error dispatched (validated via `NoInjectionRule`).
 - If `date` is missing, invalid, or outside the semester's `start_date`–`end_date` range:
   - Then `lw-toast` error dispatched.
 - If another event already exists on the same `date` for the same semester:
@@ -194,6 +215,8 @@ Events are categorized into three types based on how they affect syllabus week g
 
 - If `type`, `name`, `dateStart`, or `dateEnd` fail validation:
   - Then `lw-toast` error dispatched, no rows inserted.
+- If `name` contains injection attempts:
+  - Then validation fails (validated via `NoInjectionRule`).
 - If `dateStart` or `dateEnd` are outside the semester range:
   - Then validation fails.
 - If `dateEnd < dateStart`:

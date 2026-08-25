@@ -32,6 +32,33 @@ Rules for creating, updating, archiving, restoring, deleting, and PO mapping of 
     - `POST /courses/{course}/restore` — restore
     - `DELETE /courses/{course}` — delete
 
+## Security Implementation
+
+### Input Validation & Injection Prevention
+- **Server-Side Validation**: All course forms use `NoInjectionRule` to detect and block script, SQL, and code injection attempts.
+- **Regex Patterns**: Text fields validated with specific character patterns:
+  - Course code: Alphanumeric with hyphens, periods, and spaces only
+  - Course name: Letters, numbers, spaces, and basic punctuation only, no injection attempts
+  - Course description: Text content validated for injection attempts
+  - Prerequisite/Corequisite: Letters, numbers, spaces, and basic punctuation only, no injection attempts
+- **Confirmation Required**: `confirmed_submission` checkbox prevents accidental submissions.
+
+### Authorization
+- **Role-Based Access Control**: All course routes protected by `role:admin,chair` middleware.
+- **Program Authorization**: Additional checks ensure chairs can only manage courses for programs in their assigned department.
+- **Delete Authorization**: Chairs can only delete courses if their assigned department is the primary department of the course's program.
+
+### Transaction Safety
+- **Database Transactions**: All course operations (create, update, delete) run inside DB transactions.
+- **Cascade Protection**: Course deletion blocked if syllabi exist; comprehensive cascade deletion when authorized.
+
+### Audit Logging
+- **Comprehensive Logging**: All course operations record AuditLog entries with user, action, and description.
+
+### Rate Limiting
+- **Current Status**: Rate limiting is not currently implemented on course endpoints.
+- **Recommended Enhancement**: Add rate limiting to course creation/update endpoints to prevent automated abuse.
+
 ## Conditions (If / Then)
 
 ### Listing
@@ -68,18 +95,18 @@ All create, edit, update, index, archive, and restore actions check program auth
 - If creating a course:
   - Then `confirmed_submission` must be accepted (checkbox confirmation required).
   - Then `program_id` is required and must exist.
-  - Then `code` is required and unique against `courses.course_code`.
-  - Then `name` is required.
-  - Then `description` is optional string.
-  - Then `credits` is required integer, minimum `1`.
+  - Then `code` is required, max 50 chars, alphanumeric with hyphens/periods/spaces only, unique against `courses.course_code`.
+  - Then `name` is required, min 2 chars, max 255 chars, letters/numbers/spaces/basic punctuation only, no injection attempts.
+  - Then `description` is optional string, max 5000 chars, no injection attempts.
+  - Then `credits` is required integer, minimum `1`, maximum `5`.
   - Then `has_lec_lab` is optional boolean.
   - Then `passing_mark` is optional numeric between `0` and `100`.
-  - Then `lec_class_hours` is optional string.
-  - Then `lab_class_hours` is optional string.
+  - Then `lec_class_hours` is optional string, max 50 chars.
+  - Then `lab_class_hours` is optional string, max 50 chars.
   - Then `year_level` is optional integer between `1` and `5`.
   - Then `semester` is optional integer in `1,2`.
-  - Then `prerequisite` is optional string.
-  - Then `corequisite` is optional string.
+  - Then `prerequisite` is optional string, max 255 chars, letters/numbers/spaces/basic punctuation only, no injection attempts.
+  - Then `corequisite` is optional string, max 255 chars, letters/numbers/spaces/basic punctuation only, no injection attempts.
   - Then `po_mapping` is optional array.
   - If a `po_mapping` value is present:
     - Then it must be one of `I`, `E`, `D`.
@@ -110,7 +137,7 @@ All create, edit, update, index, archive, and restore actions check program auth
   - Then course is loaded with `program` and `programOutcomes`.
   - Then program authorization is checked.
 - If updating a course:
-  - Then validation rules are the same as Create.
+  - Then validation rules are the same as Create with injection prevention.
   - Except `code` uniqueness ignores the current course id.
   - Except `program_id` is `sometimes` (not required on update).
 - If `has_lec_lab` is changing AND the course already has syllabi:

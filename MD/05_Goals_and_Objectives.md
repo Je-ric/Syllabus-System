@@ -31,6 +31,36 @@ Rules and flow for encoding College Goals and Department Objectives.
     - `PUT /objectives/{objective}` — update
     - `DELETE /objectives/{objective}` — delete
 
+## Security Implementation
+
+### Input Validation & Injection Prevention
+- **Server-Side Validation**: All goal and objective forms use `NoInjectionRule` to detect and block script, SQL, and code injection attempts.
+- **Text Field Validation**: 
+  - Goal text: Required, max 5000 chars, no injection attempts
+  - Objective text: Required, max 5000 chars, no injection attempts
+- **Character Restrictions**: All text fields prevent special characters that could be used for injection attacks.
+
+### Authorization
+- **Role-Based Access Control**: 
+  - Goals: Protected by `role:admin,dean` middleware
+  - Objectives: Protected by `role:admin,chair` middleware
+- **Scope-Based Authorization**: 
+  - Non-admin users restricted to their assigned college/department
+  - `GoalObjectiveService::canManageGoal()` and `canManageObjective()` enforce scope rules
+- **Assignment Validation**: Department must belong to selected college (for objectives).
+
+### Transaction Safety
+- **Database Transactions**: All delete operations run inside DB transactions.
+- **Race Condition Prevention**: Code resequencing uses `lockForUpdate()` to prevent concurrent modification issues.
+
+### Code Generation Security
+- **Auto-Generated Codes**: Goal and objective codes are auto-generated using overflow-safe logic.
+- **Resequencing Safety**: Codes are nulled globally before reassignment to avoid unique constraint violations.
+
+### Rate Limiting
+- **Current Status**: Rate limiting is not currently implemented on goal/objective endpoints.
+- **Recommended Enhancement**: Add rate limiting to goal/objective creation endpoints to prevent automated abuse.
+
 ## Conditions (If / Then)
 
 ### College Goals (Listing)
@@ -51,7 +81,7 @@ Rules and flow for encoding College Goals and Department Objectives.
 
 - If creating a goal:
   - Then `college_id` is required and must exist.
-  - Then `goal_text` is required string.
+  - Then `goal_text` is required, max 5000 chars, no injection attempts.
   - Then `GoalObjectiveService::canManageGoal()` is checked:
     - If user is admin → always allowed.
     - If user has a college assignment → only allowed if it matches the target college.
@@ -64,7 +94,7 @@ Rules and flow for encoding College Goals and Department Objectives.
 ### College Goals (Update)
 
 - If updating a goal:
-  - Then `goal_text` is required string.
+  - Then `goal_text` is required, max 5000 chars, no injection attempts.
   - Then `canManageGoal()` is checked (same scope rules as create).
   - Then goal code is not changed on update.
   - Then redirect to goal index for that college with a success toast.
@@ -103,7 +133,7 @@ Rules and flow for encoding College Goals and Department Objectives.
   - Then `college_id` is required and must exist.
   - Then `department_id` is required.
   - Then the department must belong to the selected college (validated via `Rule::exists` with a `where` constraint).
-  - Then `objective_text` is required string.
+  - Then `objective_text` is required, max 5000 chars, no injection attempts.
   - Then `GoalObjectiveService::canManageObjective()` is checked:
     - If user is admin → always allowed.
     - If user has a department assignment → only allowed if it matches the target department.
@@ -116,7 +146,7 @@ Rules and flow for encoding College Goals and Department Objectives.
 ### Department Objectives (Update)
 
 - If updating an objective:
-  - Then `objective_text` is required string.
+  - Then `objective_text` is required, max 5000 chars, no injection attempts.
   - Then `canManageObjective()` is checked (same scope rules as create).
   - Then objective code is not changed on update.
   - Then redirect to objective index for that college + department with a success toast.

@@ -49,6 +49,40 @@ Use this when changing logic, debugging behavior, or explaining the flow to non-
 
 Related docs: `MD/02_Academic_Calendar_and_Events.md`, `MD/04_Course_Management.md`
 
+## Security Implementation
+
+### Authorization
+- **Role-Based Access Control**: Wizard routes protected by `role:admin,faculty,ovpaa` middleware.
+- **Ownership Validation**: SyllabusWizard mount verifies `prepared_by == Auth::id()` for existing syllabi (403 if not owner).
+- **Admin Override**: SyllabusController::authorizeSyllabusAccess() allows admin access regardless of ownership.
+- **Scope-Based Access**: Reviewers and deans have read-only access to syllabi they're assigned to review.
+
+### Input Validation
+- **Parameter Validation**: All IDs (syllabusId, courseId) validated to ensure existence in database.
+- **Server-Side Validation**: Each step component implements Laravel validation rules.
+- **SecurityValidator**: Used for injection detection in free-text fields (revision highlights, contributors, material URLs).
+- **PO Mapping Validation**: Course selection blocked if course has no PO mappings.
+
+### Business Logic Security
+- **Status-Based Access Control**: Syllabus editing restricted to draft and for_revision statuses only.
+- **Duplicate Prevention**: System checks for existing syllabus by user for course before creating new ones.
+- **Week Locking**: Exam and non-teaching weeks are locked to prevent tampering with assessment schedules.
+- **Reviewer Conflict Prevention**: Reviewer dropdown excludes preparer and component instructors.
+
+### Transaction Safety
+- **Database Transactions**: Week content saves, course component saves, and review form submissions run inside DB transactions.
+- **Week Generation**: Regeneration operations use transactions to ensure atomic deletion and recreation.
+- **Review Form Resubmission**: Complex multi-table operations wrapped in transactions.
+
+### Audit Logging
+- **Action Logging**: Syllabus creation, submission, version saves, reviewer assignments, and revision changes logged.
+- **User Attribution**: All audit logs include the authenticated user who performed the action.
+- **Module Tracking**: AuditLog::record() includes module name for traceability.
+
+### Rate Limiting
+- **Current Status**: Rate limiting is not currently implemented on wizard endpoints.
+- **Recommended Enhancement**: Add rate limiting to syllabus creation and week generation endpoints to prevent automated abuse.
+
 ## What It Is
 
 - A guided 6-step multi-step process to create or edit one syllabus.
@@ -80,6 +114,7 @@ Any legacy mention of `co_po_mapping` is outdated for this wizard screen.
     - Then use it.
   - If saved `current_step` is invalid:
     - Then force `academic_calendar` and update DB.
+  - **Security**: Ownership validation prevents unauthorized access to syllabi.
 
 - If `syllabusId` is missing but `courseId` is present:
   - If the course has no PO mappings (`course_curriculum_maps` is empty):
@@ -92,6 +127,7 @@ Any legacy mention of `co_po_mapping` is outdated for this wizard screen.
       - Then create a new syllabus row immediately with:
         - `status = draft`, `current_step = academic_calendar`, `prepared_by = current user`
         - `academic_calendar_id = null`
+  - **Security**: PO mapping validation prevents incomplete syllabus creation; duplicate detection prevents data duplication.
 
 - If neither `syllabusId` nor `courseId` is provided:
   - Then abort with `404`.
@@ -189,6 +225,7 @@ Validation:
 - Required.
 - Must exist in `academic_calendars`.
 - No uniqueness constraint — the same calendar can be reused across multiple syllabi (even for the same course).
+- **Security**: Server-side validation prevents injection attacks and ensures calendar ID exists in database.
 
 ### 2) Course Components Step
 
@@ -229,6 +266,7 @@ Save behavior:
   - `updateOrCreate` for LAB component (only when course has lab).
   - Schedule sync: delete all existing, re-create from current state.
   - Manual save button also available.
+- **Security**: Dirty tracking prevents data loss; schedule conflict detection prevents overlapping consultation hours.
 
 ### 3) Course Outcomes Step
 
@@ -261,6 +299,7 @@ Save behavior (via `saveAll`):
 - If all rows are blank, save exits early with warning toast.
 - Saved COs are always resequenced and re-coded as `CO1`, `CO2`, ... in save order.
 - After save: `outcomes` is refreshed from DB.
+- **Security**: Dirty tracking prevents data loss; batch operations reduce database calls.
 
 **PO Reference table**:
 - If syllabus course + program outcomes exist:
@@ -312,6 +351,7 @@ Locking rules:
   - Then server-side guards in `WeekContentService`, `WeekResourceService` prevent:
     - `saveWeek`, `saveAllWeeklyEntries`, `resetWeek`
     - `addReference`, `removeReference`, `addMaterial`, `removeMaterial`
+  - **Security**: Server-side locking prevents tampering with exam and non-teaching schedules.
 
 Editing rules:
 - Uses `weekInputs['w{week_no}']` key format to avoid PHP numeric key coercion.
@@ -325,6 +365,7 @@ Week content fields (saved via modal or inline):
 - `course_outcome_id`, `learning_outcomes`, `assessment_task`, `topic`, `teaching_activities`
 - References: dynamic `[['text' => '']]` rows
 - Materials: dynamic `[['name' => '', 'url' => '']]` rows
+- **Security**: Material URLs validated with SecurityValidator for injection attempts before saving.
 
 MVGO rule (Week 1):
 - If `week_no === 1`:
@@ -371,6 +412,7 @@ Save rules (via `CourseEvaluationService::persist()`):
   - If a row is exam: `kind = 'exam'`, `exam_type` mapped from term label.
   - Else: `kind = 'activity'`.
 - Running totals recomputed on every weight change via `updated()` hook.
+- **Security**: Dirty tracking prevents data loss; numeric validation ensures weights are valid integers.
 
 Completion rules (submit gate):
 - Assessable week contents: `assessment_task` not empty AND not `Non-Teaching Week`.
@@ -401,17 +443,20 @@ Summary data loaded includes:
 - `updateReviewerStatus(int $syllabusReviewerId, string $status)` — updates status.
 - After mutations, `syllabus-reviewers-updated` is dispatched so `ReviewStep::onReviewersUpdated()` refreshes the reviewer list.
 - Render provides `$deanUsers` and `$facultyUsers` for dropdown selection.
+- **Security**: Reviewer dropdown excludes preparer and component instructors to prevent conflict of interest.
 
 **Revision History** (via `SyllabusRevisionHistoryService`):
 - `saveRevision()` — all values as typed arguments, zero wire:model typing.
 - `resequenceRevisions()` — renumbers all revisions 0, 1, 2… by current order.
 - `removeRevision(int $revisionId)` — deletes and dispatches `revision-deleted`.
 - Audit logging on create/update/delete.
+- **Security**: Highlights and contributors fields validated with SecurityValidator for injection attempts before saving.
 
 **Approval Signatures** (via `SyllabusApprovalService`):
 - `saveApproved()` / `clearApproved()` — sets/clears `approved_by` on syllabus.
 - `saveConcurred()` / `clearConcurred()` — sets/clears `concurred_by` on syllabus.
 - Validation: Concurred-by must differ from Approved-by.
+- **Security**: Validation prevents the same user from being both approver and concurrer.
 
 **Submit for Review button**:
 - Fully functional. Triggers `submitForReview()` on the parent wizard.
@@ -420,6 +465,7 @@ Summary data loaded includes:
 **Save as Done button**:
 - Triggers `saveAsDone()` on the parent wizard (see section above).
 - Progress overlay shown during snapshot generation.
+- **Security**: Version freezing uses DB transactions with row locking to prevent race conditions.
 
 ## Event Contract (Parent ↔ Child)
 

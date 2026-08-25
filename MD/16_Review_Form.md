@@ -36,6 +36,50 @@ Practical reference for how the F.003 review form, reviewer assignments, and app
     - `GET /syllabus/review-queue` — Review queue index (reviewers, admins)
     - `GET /syllabus/review-queue/{syllabus}` — Review queue show (assigned reviewers, admins)
 
+## Security Implementation
+
+### Authorization
+- **Role-Based Access Control**: Review form routes protected by role middleware (admin, chair, faculty, reviewers).
+- **Reviewer Assignment Validation**: Users can only access review pages for syllabi they are assigned to review.
+- **Scope-Based Access**: Non-admin users restricted to their assigned reviewer queue.
+- **Chair Authorization**: Chair decision and recommendation features require chair role or admin override.
+- **Dean Authorization**: Dean approval requires dean role.
+- **Preview Access**: Live and saved preview routes check if user is author, assigned reviewer, dean, or admin.
+
+### Input Validation
+- **Classification Validation**: Classification must be set before submission (updating or revision).
+- **Nature of Change Validation**: At least one nature of change option must be selected.
+- **Decision Validation**: Decision must be one of the valid decision types.
+- **Required Actions Validation**: For `returned_for_revision` decisions, required_actions and target_compliance_date must be filled.
+- **Attachment Validation**: If "other" attachment type is selected, other_label must be provided.
+
+### Business Logic Security
+- **Decision Workflow**: System enforces correct sequence (author submit → reviewer checklist → chair decision → dean approval).
+- **Status Transitions**: Syllabus status changes based on decision type (under_review, for_revision, approved).
+- **Part H Workflow**: Part H responses required for `approved_with_corrections` and `returned_for_revision` decisions.
+- **Verification Required**: Part H verification by chair/admin required for `approved_with_corrections` before dean approval.
+- **Resubmission Flow**: Faculty resubmission resets decision, reviewer statuses, and syllabus status atomically.
+
+### Transaction Safety
+- **Database Transactions**: Decision recording, classification changes, and resubmission operations run inside DB transactions.
+- **Atomic Updates**: Checklist response upserts, decision updates, and status changes happen atomically.
+- **Rollback Protection**: Failed operations roll back all related changes to maintain consistency.
+
+### Audit Logging
+- **Comprehensive Logging**: All review form actions (classification, nature of change, attachments, decisions, approvals) logged.
+- **User Attribution**: AuditLog entries include the authenticated user who performed each action.
+- **Decision Tracking**: Chair decisions, recommendations, and dean approvals all logged with timestamps.
+- **Resubmission Logging**: Faculty resubmission for review logged with previous decision context.
+
+### File Security
+- **Snapshot Storage**: Review form HTML snapshots stored securely on disk.
+- **Path Validation**: Saved snapshot requests validate that review_form_path exists before retrieval.
+- **Access Control**: Snapshot preview routes enforce the same authorization as live preview.
+
+### Rate Limiting
+- **Current Status**: Rate limiting is not currently implemented on review form endpoints.
+- **Recommended Enhancement**: Add rate limiting to review form submission and decision recording endpoints to prevent automated abuse.
+
 ## Key Concepts
 
 - **Two tracks**: Updating (minor changes) vs Revision (substantial changes) — determines which Part C criteria apply.

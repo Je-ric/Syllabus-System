@@ -24,11 +24,42 @@ Rules for the syllabus listing page, creation entry point, and deletion. For wiz
 - Routes
   - `routes/web.php` (syllabus routes — `role:admin,faculty,ovpaa`)
 
+## Security Implementation
+
+### Authorization
+- **Role-Based Access Control**: Syllabus routes protected by `role:admin,faculty,ovpaa` middleware.
+- **Self-Only Access**: Index listing shows only syllabi where `prepared_by = Auth::id()` (users see only their own work).
+- **Ownership Validation**: Wizard operations verify `prepared_by == Auth::id()` before allowing edits.
+- **Access Control Method**: `authorizeSyllabusAccess()` throws `AuthorizationException` for unauthorized access attempts.
+
+### Input Validation
+- **Parameter Validation**: All IDs (courseId, syllabusId) are validated to ensure they exist in the database.
+- **PO Mapping Validation**: Course selection blocked if course has no PO mappings (prevents incomplete syllabus creation).
+- **Duplicate Prevention**: System checks for existing syllabus by user for course before creating new ones.
+
+### Business Logic Security
+- **Academic Record Protection**: Faculty cannot delete syllabi directly (design choice to prevent accidental data loss).
+- **Status-Based Access Control**: Syllabus editing restricted to draft and for_revision statuses only.
+- **Admin Override**: Admin users have access to all syllabi regardless of `prepared_by` field.
+
+### Transaction Safety
+- **Database Transactions**: Syllabus deletion operations run inside DB transactions via `SyllabusDeleteService`.
+- **Cascade Deletion**: Complete syllabus deletion includes all related records and disk files atomically.
+
+### File Security
+- **Disk File Management**: Syllabus deletion includes secure removal of associated PDF files.
+- **Snapshot Management**: Preview snapshots handled securely with proper file access controls.
+
+### Rate Limiting
+- **Current Status**: Rate limiting is not currently implemented on syllabus endpoints.
+- **Recommended Enhancement**: Add rate limiting to syllabus creation endpoints to prevent automated syllabus generation.
+
 ## Conditions (If / Then)
 
 ### Index (Listing)
 
 - If the user opens the syllabus index:
+  - Then verify user has appropriate role (admin, faculty, or ovpaa).
   - Then only syllabi where `prepared_by = Auth::id()` are shown (admin/faculty/ovpaa only).
   - Then syllabi are grouped into **four tabs**:
     - **Draft** — `status = draft`
@@ -43,7 +74,7 @@ Rules for the syllabus listing page, creation entry point, and deletion. For wiz
   - **Draft cards** show a progress bar (current step vs total steps).
   - **Academic year** shown if calendar is set.
   - **Program name** shown for context.
-  - No delete button in the UI.
+  - No delete button in the UI (prevents accidental academic record deletion).
 
 ### Create Entry Point (Course Selection)
 
@@ -67,10 +98,12 @@ Rules for the syllabus listing page, creation entry point, and deletion. For wiz
 ### Wizard Entry (SyllabusController::wizard)
 
 - If `syllabusId` is provided:
+  - Then validate that syllabusId exists in database.
   - Then load the existing syllabus.
   - If `prepared_by != Auth::id()`:
     - Then abort with `403 Unauthorized`.
 - If `courseId` is provided (new syllabus):
+  - Then validate that courseId exists in database.
   - If the course has no PO mappings:
     - Then redirect back to course selection with an error toast.
     - Then no syllabus row is created.
@@ -90,6 +123,7 @@ Rules for the syllabus listing page, creation entry point, and deletion. For wiz
 - `edit()` redirects to the wizard with `syllabusId` query param.
 - `update()` redirects to the wizard with info toast.
 - Both check `isEditable()` (status must be `draft` or `for_revision`).
+- **Security**: Status-based access control prevents editing of finalized academic records.
 
 ### Show (View)
 
@@ -101,6 +135,7 @@ Rules for the syllabus listing page, creation entry point, and deletion. For wiz
 - Syllabus deletion by faculty is **not allowed** — the destroy route returns a warning toast.
 - Only admins can delete syllabi (via course deletion cascade or direct DB management via `SyllabusDeleteService`).
 - Rationale: syllabi represent academic records; accidental deletion is prevented by design.
+- **Security**: Admin-only deletion with transaction-based cascade ensures safe removal of all related records and files.
 
 ### Access Control (authorizeSyllabusAccess)
 
@@ -109,6 +144,7 @@ Rules for the syllabus listing page, creation entry point, and deletion. For wiz
 - If `prepared_by != Auth::id()` AND user does not have role `admin`:
   - Then throw `AuthorizationException`.
 - If user is admin: access granted regardless of `prepared_by`.
+- **Security**: Ownership-based access control with admin override ensures users can only access their own syllabi.
 
 ## Preview & Download Routes
 

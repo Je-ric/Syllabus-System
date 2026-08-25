@@ -15,6 +15,41 @@ Beginner-friendly reference for OTP in CSMS: what it is, where it's stored, and 
 - Routes
   - `routes/web.php` (profile routes)
 
+## Security Implementation
+
+### Input Validation
+- **OTP Format Validation**: OTPs must be 6-digit numeric codes only.
+- **Purpose Validation**: OTP purpose must be one of the valid purposes (e.g., `password_change`).
+- **User Validation**: OTP operations validate that the user exists and is active.
+
+### Authorization
+- **User-Specific OTPs**: OTPs are scoped to specific user IDs and purposes.
+- **No Cross-User Access**: Users can only verify OTPs issued to their own account.
+- **Password-Change Context**: OTP verification requires the user to be authenticated and in the password-change flow.
+
+### Rate Limiting
+- **OTP Issuing**: Recommend implementing rate limiting on OTP issuance to prevent OTP spamming.
+- **OTP Verification**: Recommend implementing rate limiting on OTP verification attempts to prevent brute force attacks.
+- **Lockout Mechanism**: Recommend implementing temporary lockout after multiple failed verification attempts.
+
+### Transaction Safety
+- **Atomic Operations**: OTP creation and replacement happen atomically via `updateOrCreate`.
+- **Expiry Enforcement**: OTP expiry is enforced at verification time, preventing use of expired codes.
+
+### Audit Logging
+- **OTP Issuance**: Recommend logging OTP issuance events for security monitoring.
+- **OTP Verification**: Recommend logging successful and failed verification attempts.
+- **Migration Events**: Legacy OTP migration from `users.otp` to `user_otps` should be logged.
+
+### Cryptographic Security
+- **Hashed Storage**: OTPs are hashed before storage, never stored in plaintext.
+- **One-Time Use**: OTPs are designed for single-use verification.
+- **Expiry Time**: OTPs expire after 10 minutes by default (configurable).
+
+### Network Security
+- **Email Transmission**: OTPs sent via email using `OtpMail` - recommend using encrypted email transmission.
+- **TLS Enforcement**: Recommend enforcing HTTPS for all OTP-related endpoints.
+
 ## What OTP Means Here
 
 - OTP = One-Time Password (6-digit code).

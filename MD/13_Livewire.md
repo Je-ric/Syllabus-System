@@ -18,6 +18,41 @@ Plain-language explanation of how Livewire is used in CSMS.
 
 Related docs:
 - `MD/10_Syllabus_Wizard.md`
+- `C:\csms\.amazonq\rules\16-Scripting-Security.md`
+
+## Security Implementation
+
+### Input Validation
+- **Server-Side Validation**: All Livewire component methods should validate inputs using Laravel validation rules.
+- **SecurityValidator**: Use `SecurityValidator::containsAnyInjection()` for free-text fields to detect injection attempts.
+- **Client-Side Detection**: Implement JavaScript functions in Alpine.js to detect injection patterns and provide real-time feedback.
+- **Block and Validate**: When injection is detected, block submission and require user to fix the input - never attempt to "clean" dangerous content.
+
+### Authorization
+- **Component-Level Authorization**: Livewire mount methods should verify user permissions before loading data.
+- **Role-Based Access**: Use middleware on routes and check user roles in component methods.
+- **Scope-Based Access**: Non-admin users should be restricted to their assigned scope (college/department/program).
+- **Ownership Validation**: Verify users can only access records they own or are assigned to.
+
+### Client-Side Security
+- **Alpine.js Security**: Follow the scripting security guidelines in `16-Scripting-Security.md`.
+- **XSS Prevention**: Use Alpine's `x-text` instead of `x-html` when rendering user content.
+- **Event Validation**: Validate all event data from Alpine.js before processing in Livewire methods.
+- **No JavaScript Injection**: Never execute untrusted JavaScript passed from client-side.
+
+### State Management
+- **Dirty Tracking**: Implement dirty tracking to prevent data loss when navigating away.
+- **Save Before Navigate**: Use save-before-navigate patterns to auto-save unsaved changes.
+- **Transaction Safety**: Wrap complex operations in DB transactions to ensure atomicity.
+
+### Rate Limiting
+- **Current Status**: Rate limiting is not currently implemented on Livewire component endpoints.
+- **Recommended Enhancement**: Add rate limiting to frequently called Livewire methods to prevent automated abuse.
+
+### Audit Logging
+- **Action Logging**: Log all significant actions performed through Livewire components.
+- **User Attribution**: Include authenticated user information in all audit logs.
+- **Change Tracking**: Log record creation, updates, and deletions with context.
 
 ## What Livewire Is
 
