@@ -23,3 +23,4 @@ below (see the map at the bottom).
 | 13 | `13-condition-completeness-and-error-handling.md` | Method for making sure conditions are exhaustive and non-conflicting. Exhaustive condition coverage, conflicting conditions, all error possibilities, missing/null/empty data handling |
 | 14 | `14-input-validation-guide.md` | What to validate, where, error response shape, frontend display rules, null/missing/wrong-type handling |
 | 15 | `15-md-update.md` | — update documentation per module |
+| 16 | `16-Scripting-Security.md` | Client-side injection prevention, JavaScript validation, Alpine.js/Livewire security, rate limiting, input sanitization vs validation, project-specific security patterns |
