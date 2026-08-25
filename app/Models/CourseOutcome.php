@@ -15,17 +15,19 @@ class CourseOutcome extends Model
         'description',
     ];
 
-    // Used in: all() - CourseOutcomeService; 
-    //          create() - CourseOutcomeService; 
-    //          delete() - CourseOutcomeService; 
-    //          eagerLoad() - SyllabusPreviewService
+    // Used in: all() - CourseOutcomeService;
+    //          create() - CourseOutcomeService;
+    //          delete() - CourseOutcomeService;
+    //          eagerLoad() - SyllabusPreviewService;
+    //          buildCoPoLetterMap() - SyllabusPreviewService
     public function syllabus()
     {
         return $this->belongsTo(Syllabus::class);
     }
 
     // Used in: buildCoPoLetterMap() - SyllabusPreviewService;
-    //          deletePo() - ProgramController (existence check)
+    //          deletePo() - ProgramController (existence check);
+    //          syncPoMappings() - CourseOutcome
     public function programOutcomes()
     {
         return $this->belongsToMany(

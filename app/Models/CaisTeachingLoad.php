@@ -30,25 +30,28 @@ class CaisTeachingLoad extends Model
         'synced_at'              => 'datetime',
     ];
 
-    // Used in: syllabus wizard step 2 — get the faculty user this load belongs to
+    // Used in: syllabus wizard step 2 — get the faculty user this load belongs to;
+    //          WorkloadSyncService — syncing teaching loads
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // Used in: syllabus wizard step 2 — get semester context
+    // Used in: syllabus wizard step 2 — get semester context;
+    //          WorkloadSyncService — syncing teaching loads
     public function caisSemester()
     {
         return $this->belongsTo(CaisSemester::class);
     }
 
-    // Used in: syllabus wizard step 2 — get schedule details (subject, room, time)
+    // Used in: syllabus wizard step 2 — get schedule details (subject, room, time);
+    //          WorkloadSyncService — syncing teaching loads
     public function classSchedule()
     {
         return $this->belongsTo(CaisClassSchedule::class, 'cais_class_schedule_id');
     }
 
-    // Exclude soft-deleted CAIS loads from queries
+    // Used in: WorkloadSyncService — exclude soft-deleted CAIS loads from queries
     public function scopeActive($query)
     {
         return $query->where('is_deleted', false);

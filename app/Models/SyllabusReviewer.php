@@ -22,14 +22,16 @@ class SyllabusReviewer extends Model
     ];
 
     // Used in: delete() - SyllabusDeleteService;
-    //          eagerLoad() - SyllabusPreviewService
+    //          eagerLoad() - SyllabusPreviewService;
+    //          loadReviewerLists() - ReviewStep (Livewire)
     public function syllabus()
     {
         return $this->belongsTo(Syllabus::class);
     }
 
     // Used in: eagerLoad() - SyllabusPreviewService;
-    //          loadReviewerLists() - ReviewStep (Livewire)
+    //          loadReviewerLists() - ReviewStep (Livewire);
+    //          sharedData() - SyllabusPreviewService
     public function user()
     {
         return $this->belongsTo(User::class);

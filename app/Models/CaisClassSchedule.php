@@ -37,13 +37,15 @@ class CaisClassSchedule extends Model
         'synced_at'              => 'datetime',
     ];
 
-    // Used in: syllabus wizard step 2 — pre-fill schedule, room, time, subject details
+    // Used in: syllabus wizard step 2 — pre-fill schedule, room, time, subject details;
+    //          WorkloadSyncService — syncing class schedules
     public function caisSemester()
     {
         return $this->belongsTo(CaisSemester::class);
     }
 
-    // Used in: filtering schedules by department
+    // Used in: filtering schedules by department;
+    //          WorkloadSyncService — syncing class schedules
     public function department()
     {
         return $this->belongsTo(Department::class);
@@ -55,7 +57,8 @@ class CaisClassSchedule extends Model
         return $this->belongsTo(Course::class);
     }
 
-    // Used in: CaisTeachingLoad — loads assigned to this schedule
+    // Used in: CaisTeachingLoad — loads assigned to this schedule;
+    //          WorkloadSyncService — syncing teaching loads
     public function teachingLoads()
     {
         return $this->hasMany(CaisTeachingLoad::class);

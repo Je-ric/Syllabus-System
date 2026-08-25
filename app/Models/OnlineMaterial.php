@@ -16,9 +16,9 @@ class OnlineMaterial extends Model
         'url',
     ];
 
-    // Used in: save() - WeekContentService; 
-    //          reset() - WeekContentService; 
-    //          buildReferences() - SyllabusPreviewService; 
+    // Used in: save() - WeekContentService;
+    //          reset() - WeekContentService;
+    //          buildReferences() - SyllabusPreviewService;
     //          delete() - SyllabusDeleteService
     public function syllabus()
     {

@@ -23,16 +23,24 @@ class UserAssignment extends Model
         'cais_department_id' => 'integer',
     ];
 
+    // Used in: getPrimaryDepartmentAssignment() - User;
+    //          getPrimaryCollegeAssignment() - User;
+    //          collegesIndexData() - UserAssignmentsService;
+    //          departmentsIndexData() - UserAssignmentsService
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
+    // Used in: collegesIndexData() - UserAssignmentsService;
+    //          getPrimaryCollegeAssignment() - User
     public function college()
     {
         return $this->belongsTo(College::class);
     }
 
+    // Used in: departmentsIndexData() - UserAssignmentsService;
+    //          getPrimaryDepartmentAssignment() - User
     public function department()
     {
         return $this->belongsTo(Department::class);

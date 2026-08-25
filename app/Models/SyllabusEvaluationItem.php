@@ -25,9 +25,10 @@ class SyllabusEvaluationItem extends Model
         'weight' => 'integer',
     ];
 
-    // Used in: loadRows() - CourseEvaluationService; 
-    //          buildEvaluationRows() - SyllabusPreviewService; 
-    //          delete() - SyllabusDeleteService (via WeekContent::evaluation())
+    // Used in: loadRows() - CourseEvaluationService;
+    //          buildEvaluationRows() - SyllabusPreviewService;
+    //          delete() - SyllabusDeleteService (via WeekContent::evaluation());
+    //          persist() - CourseEvaluationService
     public function weekContent()
     {
         return $this->belongsTo(WeekContent::class);

@@ -12,7 +12,8 @@ class Role extends Model
 
     protected $fillable = ['name'];
 
-    // Used in: render() - ManageQueue (Livewire); (available for role-based queries)
+    // Used in: render() - ManageQueue (Livewire);
+    //          (available for role-based queries)
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'user_roles');

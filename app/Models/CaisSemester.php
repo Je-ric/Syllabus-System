@@ -23,24 +23,28 @@ class CaisSemester extends Model
         'synced_at'            => 'datetime',
     ];
 
-    // Used in: AcademicCalendarStep (syllabus wizard) — map CAIS semester to CSMS calendar
+    // Used in: AcademicCalendarStep (syllabus wizard) — map CAIS semester to CSMS calendar;
+    //          WorkloadSyncService — syncing semesters
     public function academicCalendar()
     {
         return $this->belongsTo(AcademicCalendar::class);
     }
 
-    // Used in: CaisClassSchedule — schedules belonging to this semester
+    // Used in: CaisClassSchedule — schedules belonging to this semester;
+    //          WorkloadSyncService — syncing class schedules
     public function classSchedules()
     {
         return $this->hasMany(CaisClassSchedule::class);
     }
 
-    // Used in: CaisTeachingLoad — teaching loads for this semester
+    // Used in: CaisTeachingLoad — teaching loads for this semester;
+    //          WorkloadSyncService — syncing teaching loads
     public function teachingLoads()
     {
         return $this->hasMany(CaisTeachingLoad::class);
     }
 
+    // Used in: WorkloadSyncService — filter active semesters
     public function isActive(): bool
     {
         return $this->status === 'active';

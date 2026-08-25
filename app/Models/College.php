@@ -19,8 +19,10 @@ class College extends Model
     ];
 
     // Used in: goal_index() - GoalController;
-    //          destroyCollege() - AcademicStructureController
-    //          sharedData() - SyllabusPreviewService;
+    //          goal_store() - GoalController;
+    //          goal_destroy() - GoalController;
+    //          destroyCollege() - AcademicStructureController;
+    //          sharedData() - SyllabusPreviewService
     public function goals()
     {
         return $this->hasMany(CollegeGoal::class);
@@ -45,13 +47,15 @@ class College extends Model
             ->first();
     }
 
-    // Used in: goal_index() - GoalController
+    // Used in: goal_index() - GoalController;
+    //          preselectFromUserAssignments() - ProgramSelector
     public function userAssignments()
     {
         return $this->hasMany(UserAssignment::class);
     }
 
-    // Used in: goal_store() - GoalController
+    // Used in: goal_store() - GoalController;
+    //          resequenceGoalCodes() - College
     public function getNextGoalCode(): string
     {
         $count = $this->goals()->count();
@@ -63,7 +67,8 @@ class College extends Model
         return $first . $second;
     }
 
-    // Used in: goal_destroy() - GoalController
+    // Used in: goal_destroy() - GoalController;
+    //          resequenceGoalCodes() - College
     public function resequenceGoalCodes(): void
     {
         $goals = $this->goals()->orderBy('id')->lockForUpdate()->get();

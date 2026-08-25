@@ -32,8 +32,10 @@ class Department extends Model
 
     // Used in: objective_index() - ObjectiveController;
     //          objective_store() - ObjectiveController;
+    //          objective_destroy() - ObjectiveController;
     //          destroyDepartment() - AcademicStructureController;
-    //          resequenceObjectiveCodes() - Department
+    //          resequenceObjectiveCodes() - Department;
+    //          sharedData() - SyllabusPreviewService
     public function objectives()
     {
         return $this->hasMany(DepartmentObjective::class);
@@ -62,7 +64,8 @@ class Department extends Model
         return $assignment ? $assignment->user : null;
     }
 
-    // Used in: objective_index() - ObjectiveController
+    // Used in: objective_index() - ObjectiveController;
+    //          preselectFromUserAssignments() - ProgramSelector
     public function userAssignments()
     {
         return $this->hasMany(UserAssignment::class);
@@ -77,7 +80,8 @@ class Department extends Model
         }]);
     }
 
-    // Used in: objective_store() - ObjectiveController
+    // Used in: objective_store() - ObjectiveController;
+    //          resequenceObjectiveCodes() - Department
     public function getNextObjectiveCode(): string
     {
         $count = $this->objectives()->count();
@@ -89,7 +93,8 @@ class Department extends Model
         return $first . $second;
     }
 
-    // Used in: objective_destroy() - ObjectiveController
+    // Used in: objective_destroy() - ObjectiveController;
+    //          resequenceObjectiveCodes() - Department
     public function resequenceObjectiveCodes(): void
     {
         $objectives = $this->objectives()->orderBy('id')->lockForUpdate()->get();

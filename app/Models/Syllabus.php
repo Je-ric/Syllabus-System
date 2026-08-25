@@ -124,40 +124,46 @@ class Syllabus extends Model
     }
 
     // Used in: ReviewStep (Livewire) — loadReviewForm();
-    //          SyllabusReviewFormService — findOrCreate()
+    //          SyllabusReviewFormService — findOrCreate();
+    //          delete() - SyllabusDeleteService
     public function reviewForm()
     {
         return $this->hasOne(SyllabusReviewForm::class);
     }
 
-    // Used in: getLecComponent() - Syllabus; 
-    //          getLabComponent() - Syllabus; 
-    //          eagerLoad() - SyllabusPreviewService
+    // Used in: getLecComponent() - Syllabus;
+    //          getLabComponent() - Syllabus;
+    //          eagerLoad() - SyllabusPreviewService;
+    //          loadRows() - CourseEvaluationService
     public function getLecComponent()
     {
         return $this->components()->where('type', 'LEC')->first();
     }
 
-    // Used in: mount() - ComponentsStep (Livewire)
+    // Used in: mount() - ComponentsStep (Livewire);
+    //          loadRows() - CourseEvaluationService
     public function getLabComponent()
     {
         return $this->components()->where('type', 'LAB')->first();
     }
 
-    // Used in: edit() - SyllabusController; 
-    //          update() - SyllabusController
+    // Used in: edit() - SyllabusController;
+    //          update() - SyllabusController;
+    //          destroy() - SyllabusController
     public function isEditable(): bool
     {
         return in_array($this->status, ['draft', 'for_revision']);
     }
 
-    // Used in: mount() - SyllabusRevisionHistoryService
+    // Used in: mount() - SyllabusRevisionHistoryService;
+    //          getCurrentRevisionNumber() - Syllabus
     public function getCurrentRevisionNumber(): int
     {
         return (int) ($this->revisions()->max('revision_no') ?? 0);
     }
 
-    // Used in: (available — wizard step list for UI rendering)
+    // Used in: wizard() - SyllabusController;
+    //          (available for wizard step list for UI rendering)
     public function getWizardSteps(): array
     {
         return [

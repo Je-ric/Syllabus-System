@@ -32,18 +32,19 @@ class Course extends Model
         'created_by',
     ];
 
-    // Used in: edit() - CourseController; 
-    //          logAction() - CourseService; 
-    //          sharedData() - SyllabusPreviewService; 
+    // Used in: edit() - CourseController;
+    //          logAction() - CourseService;
+    //          sharedData() - SyllabusPreviewService;
     //          getCoursesGroupedByYearAndSemester() - Program
     public function program()
     {
         return $this->belongsTo(Program::class);
     }
 
-    // Used in: update() - CourseService; 
-    //          deleteCourse() - CourseService; 
-    //          edit() - CourseController; 
+    // Used in: edit() - CourseController;
+    //          logAction() - CourseService;
+    //          syncPoMappings() - Course;
+    //          getCoursesGroupedByYearAndSemester() - Program;
     //          deletePo() - ProgramController
     public function programOutcomes()
     {
@@ -51,7 +52,7 @@ class Course extends Model
                     ->withPivot('ied');
     }
 
-    // Used in: (available — who created the course)
+    // Used in: (available for future use — who created the course)
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
@@ -66,8 +67,9 @@ class Course extends Model
         return $this->hasMany(Syllabus::class);
     }
 
-    // Used in: store() - CourseController; 
-    //          createCourse() - CourseService
+    // Used in: store() - CourseController;
+    //          createCourse() - CourseService;
+    //          update() - CourseService
     public function syncPoMappings(array $poMapping): void
     {
         $this->programOutcomes()->detach();

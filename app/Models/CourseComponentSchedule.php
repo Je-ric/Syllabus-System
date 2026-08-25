@@ -12,6 +12,7 @@ class CourseComponentSchedule extends Model
         'time',
     ];
 
+    // Used in: (available for future use — component that owns this schedule)
     public function component()
     {
         return $this->belongsTo(CourseComponent::class, 'course_component_id');

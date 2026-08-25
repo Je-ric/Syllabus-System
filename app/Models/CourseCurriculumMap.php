@@ -12,13 +12,15 @@ class CourseCurriculumMap extends Model
         'ied',
     ];
 
-    // Used in: (pivot model — direct queries via Course::programOutcomes() or ProgramOutcome::courses())
+    // Used in: (pivot model — direct queries via Course::programOutcomes() or ProgramOutcome::courses());
+    //          syncPoMappings() - Course
     public function course()
     {
         return $this->belongsTo(Course::class);
     }
 
-    // Used in: (pivot model — direct queries via Course::programOutcomes() or ProgramOutcome::courses())
+    // Used in: (pivot model — direct queries via Course::programOutcomes() or ProgramOutcome::courses());
+    //          syncPoMappings() - Course
     public function programOutcome()
     {
         return $this->belongsTo(ProgramOutcome::class);

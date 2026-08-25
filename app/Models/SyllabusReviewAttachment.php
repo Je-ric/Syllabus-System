@@ -21,7 +21,8 @@ class SyllabusReviewAttachment extends Model
         'is_submitted'   => 'boolean',
     ];
 
-    // Used in: SyllabusReviewFormService — syncAttachments()
+    // Used in: SyllabusReviewFormService — syncAttachments();
+    //          delete() - SyllabusDeleteService
     public function reviewForm()
     {
         return $this->belongsTo(SyllabusReviewForm::class, 'review_form_id');

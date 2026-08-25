@@ -57,6 +57,7 @@ class User extends Authenticatable
      * Called on every successful CAIS-verified login to keep data fresh.
      * Only updates fields CAIS owns — phone_number and office stay user-managed.
      * $caisUser = normalized array from CaisApiService::verifyUser() / normalizeUser().
+     * Used in: login() - Authentication\OtpService
      */
     public function syncFromCais(array $caisUser): void
     {
@@ -98,17 +99,25 @@ class User extends Authenticatable
     }
 
     // Used in: approve() - AccountApprovalController;
-    //          assignRole() - AccountApprovalController
+    //          assignRole() - AccountApprovalController;
+    //          hasRole() - User;
+    //          syncFromCais() - User;
+    //          ensureFacultyRoleAndAssignment() - User
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'user_roles');
     }
 
+    // Used in: issueForUser() - Authentication\OtpService;
+    //          validate() - Authentication\OtpService;
+    //          clear() - Authentication\OtpService;
+    //          migrateLegacyOtp() - Authentication\OtpService
     public function otps()
     {
         return $this->hasMany(UserOtp::class);
     }
 
+    // Used in: (available for future use — user's consultation hours)
     public function consultationHours()
     {
         return $this->hasMany(UserConsultationHour::class)->orderByRaw(
@@ -126,7 +135,12 @@ class User extends Authenticatable
 
     // Used in: assignDean() - OrganizationalHierarchyController;
     //          assignChair() - OrganizationalHierarchyController;
-    //          assignFaculty() - OrganizationalHierarchyController
+    //          assignFaculty() - OrganizationalHierarchyController;
+    //          isDean() - User;
+    //          getPrimaryDepartmentAssignment() - User;
+    //          getPrimaryCollegeAssignment() - User;
+    //          isAssignedAsDean() - User;
+    //          isAssignedAsChair() - User
     public function assignments()
     {
         return $this->hasMany(UserAssignment::class);

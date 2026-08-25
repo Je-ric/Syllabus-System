@@ -25,7 +25,8 @@ class AuditLog extends Model
 
     public $timestamps = true;
 
-    // Used in: logs() - AuditLog (Livewire)
+    // Used in: logs() - AuditLog (Livewire);
+    //          sharedData() - SyllabusPreviewService
     public function user()
     {
         return $this->belongsTo(User::class);

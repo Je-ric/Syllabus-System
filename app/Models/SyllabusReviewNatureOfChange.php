@@ -18,7 +18,8 @@ class SyllabusReviewNatureOfChange extends Model
         'review_form_id' => 'integer',
     ];
 
-    // Used in: SyllabusReviewFormService — syncNatureOfChange()
+    // Used in: SyllabusReviewFormService — syncNatureOfChange();
+    //          delete() - SyllabusDeleteService
     public function reviewForm()
     {
         return $this->belongsTo(SyllabusReviewForm::class, 'review_form_id');

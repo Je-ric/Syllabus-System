@@ -35,13 +35,13 @@ class CompleteSyllabus extends Model
         return $this->belongsTo(Syllabus::class);
     }
 
-    // Used in: (available for future use — course context on snapshot)
+    // Used in: sharedData() - SyllabusPreviewService
     public function course()
     {
         return $this->belongsTo(Course::class);
     }
 
-    // Used in: (available for future use — who approved the snapshot)
+    // Used in: sharedData() - SyllabusPreviewService
     public function approver()
     {
         return $this->belongsTo(User::class, 'approved_by');

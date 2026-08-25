@@ -19,24 +19,28 @@ class WeekContent extends Model
         'tla',
     ];
 
-    // Used in: populateInputs() - WeekContentService; 
-    //          save() - WeekContentService; 
-    //          reset() - WeekContentService
+    // Used in: populateInputs() - WeekContentService;
+    //          save() - WeekContentService;
+    //          reset() - WeekContentService;
+    //          delete() - SyllabusDeleteService
     public function syllabusWeek()
     {
         return $this->belongsTo(SyllabusWeek::class);
     }
 
-    // Used in: buildWeeklyCoverageRows() - SyllabusPreviewService; 
-    //          loadRows() - CourseEvaluationService
+    // Used in: buildWeeklyCoverageRows() - SyllabusPreviewService;
+    //          loadRows() - CourseEvaluationService;
+    //          populateInputs() - WeekContentService;
+    //          save() - WeekContentService
     public function courseOutcome()
     {
         return $this->belongsTo(CourseOutcome::class, 'course_outcome_id');
     }
 
-    // Used in: delete() - SyllabusDeleteService; 
-    //          loadRows() - CourseEvaluationService; 
-    //          persist() - CourseEvaluationService
+    // Used in: delete() - SyllabusDeleteService;
+    //          loadRows() - CourseEvaluationService;
+    //          persist() - CourseEvaluationService;
+    //          buildEvaluationRows() - SyllabusPreviewService
     public function evaluation()
     {
         return $this->hasOne(SyllabusEvaluationItem::class);

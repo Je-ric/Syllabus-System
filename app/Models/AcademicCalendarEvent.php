@@ -29,7 +29,8 @@ class AcademicCalendarEvent extends Model
     public const TYPE_LOCK = ['exam', 'non_teaching'];
     public const TYPE_REFERENCE = ['holiday', 'other'];
 
-    // Used in: destroy() - AcademicCalendarEventController
+    // Used in: destroy() - AcademicCalendarEventController;
+    //          WorkloadSyncService — syncing academic calendar events
     public function calendar()
     {
         return $this->belongsTo(AcademicCalendar::class, 'academic_calendar_id');

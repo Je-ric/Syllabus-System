@@ -18,18 +18,19 @@ class SyllabusWeek extends Model
         'exam_type',
     ];
 
-    // Used in: save() - WeekContentService; 
-    //          delete() - SyllabusDeleteService; 
-    //          loadRows() - CourseEvaluationService
+    // Used in: save() - WeekContentService;
+    //          delete() - SyllabusDeleteService;
+    //          loadRows() - CourseEvaluationService;
+    //          populateInputs() - WeekContentService
     public function syllabus()
     {
         return $this->belongsTo(Syllabus::class);
     }
 
-    // Used in: delete() - SyllabusDeleteService; 
-    //          populateInputs() - WeekContentService; 
-    //          save() - WeekContentService; 
-    //          loadRows() - CourseEvaluationService; 
+    // Used in: delete() - SyllabusDeleteService;
+    //          populateInputs() - WeekContentService;
+    //          save() - WeekContentService;
+    //          loadRows() - CourseEvaluationService;
     //          buildWeeklyCoverageRows() - SyllabusPreviewService
     public function contents()
     {

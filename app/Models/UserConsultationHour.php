@@ -12,6 +12,7 @@ class UserConsultationHour extends Model
         'time',
     ];
 
+    // Used in: consultationHours() - User
     public function user()
     {
         return $this->belongsTo(User::class);

@@ -17,15 +17,17 @@ class ProgramEducationalObjective extends Model
         'peo_text',
     ];
 
-    // Used in: deletePeo() - ProgramController; 
-    //          eagerLoad() - SyllabusPreviewService
+    // Used in: deletePeo() - ProgramController;
+    //          eagerLoad() - SyllabusPreviewService;
+    //          sharedData() - SyllabusPreviewService
     public function program()
     {
         return $this->belongsTo(Program::class);
     }
 
-    // Used in: deletePeo() - ProgramController (detach before delete); 
-    //          toggleMapping() - ManagePos
+    // Used in: deletePeo() - ProgramController (detach before delete);
+    //          toggleMapping() - ManagePos;
+    //          sharedData() - SyllabusPreviewService
     public function outcomes()
     {
         return $this->belongsToMany(

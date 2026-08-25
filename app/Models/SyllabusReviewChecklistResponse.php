@@ -23,7 +23,8 @@ class SyllabusReviewChecklistResponse extends Model
         'reviewer_user_id' => 'integer',
     ];
 
-    // Used in: SyllabusReviewFormService — saveChecklistResponse(), isChecklistComplete()
+    // Used in: SyllabusReviewFormService — saveChecklistResponse(), isChecklistComplete();
+    //          delete() - SyllabusDeleteService
     public function reviewForm()
     {
         return $this->belongsTo(SyllabusReviewForm::class, 'review_form_id');

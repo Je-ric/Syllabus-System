@@ -43,22 +43,25 @@ class AcademicCalendar extends Model
         });
     }
 
-    // Used in: index() - AcademicCalendarController; 
-    //          index() - AcademicCalendarEventController; 
-    //          destroy() - AcademicCalendarController; 
-    //          mount() - AcademicCalendarForm (Livewire)
+    // Used in: index() - AcademicCalendarController;
+    //          index() - AcademicCalendarEventController;
+    //          destroy() - AcademicCalendarController;
+    //          mount() - AcademicCalendarForm (Livewire);
+    //          WorkloadSyncService — syncing academic calendars
     public function events()
     {
         return $this->hasMany(AcademicCalendarEvent::class);
     }
 
-    // Used in: destroy() - AcademicCalendarController (checks linked syllabi)
+    // Used in: destroy() - AcademicCalendarController (checks linked syllabi);
+    //          WorkloadSyncService — syncing academic calendars
     public function syllabi()
     {
         return $this->hasMany(Syllabus::class, 'academic_calendar_id');
     }
 
-    // Used in: mount() - AcademicCalendarStep (Livewire)
+    // Used in: mount() - AcademicCalendarStep (Livewire);
+    //          WorkloadSyncService — syncing academic calendars
     public function getFormattedSemester(): string
     {
         return $this->semester . ' Sem ' . $this->academic_year;

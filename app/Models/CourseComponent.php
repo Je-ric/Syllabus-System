@@ -27,16 +27,19 @@ class CourseComponent extends Model
         return $this->belongsTo(Syllabus::class);
     }
 
+    // Used in: (available for future use — faculty assigned to this component)
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
+    // Used in: (available for future use — schedule details for this component)
     public function schedules()
     {
         return $this->hasMany(CourseComponentSchedule::class);
     }
 
+    // Used in: eagerLoad() - SyllabusPreviewService
     public function course()
     {
         // return $this->belongsTo(Course::class);

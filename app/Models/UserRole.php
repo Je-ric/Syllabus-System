@@ -13,4 +13,16 @@ class UserRole extends Model
         'user_id',
         'role_id',
     ];
+
+    // Used in: (pivot model — direct queries via User::roles() or Role::users())
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    // Used in: (pivot model — direct queries via User::roles() or Role::users())
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
 }

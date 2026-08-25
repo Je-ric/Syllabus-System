@@ -15,12 +15,13 @@ class Program extends Model
         'bor_approval_date',
     ];
 
-    // Used in: storeProgram() - AcademicStructureController; 
-    //          updateProgram() - AcademicStructureController; 
-    //          destroyProgram() - AcademicStructureController; 
-    //          savePeos() - ManagePeos; 
-    //          savePos() - ManagePos; 
-    //          preselectFromProgram() - ProgramSelector
+    // Used in: storeProgram() - AcademicStructureController;
+    //          updateProgram() - AcademicStructureController;
+    //          destroyProgram() - AcademicStructureController;
+    //          savePeos() - ManagePeos;
+    //          savePos() - ManagePos;
+    //          preselectFromProgram() - ProgramSelector;
+    //          sharedData() - SyllabusPreviewService
     public function departments()
     {
         return $this->belongsToMany(Department::class, 'program_departments')
@@ -59,8 +60,9 @@ class Program extends Model
         return $this->hasMany(Course::class);
     }
 
-    // Used in: index() - CourseController; 
-    //          buildProgramSelectionData() - SyllabusController
+    // Used in: index() - CourseController;
+    //          buildProgramSelectionData() - SyllabusController;
+    //          getCoursesGroupedByYearAndSemester() - Program
     public function scopeWithOrderedOutcomes($query)
     {
         return $query->with(['outcomes' => fn ($q) => $q->orderBy('po_code')]);
