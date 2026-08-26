@@ -3,7 +3,9 @@
 namespace App\Services\Dashboard;
 
 use App\Models\AcademicCalendar;
+use App\Models\AcademicCalendarEvent;
 use App\Models\College;
+use App\Models\Course;
 use App\Models\Department;
 use App\Models\Program;
 use App\Models\Syllabus;
@@ -74,12 +76,39 @@ class DashboardService
             return null;
         }
 
+        $now = now();
+        $startDate = $calendar->start_date;
+        $endDate = $calendar->end_date;
+        
+        // Calculate current week number of semester
+        $currentWeek = 1;
+        $daysRemaining = 0;
+        
+        if ($startDate && $endDate) {
+            if ($now->gte($startDate) && $now->lte($endDate)) {
+                // Current date is within semester
+                $daysPassed = $now->diffInDays($startDate) + 1;
+                $currentWeek = (int) ceil($daysPassed / 7);
+                $daysRemaining = $endDate->diffInDays($now);
+            } elseif ($now->lt($startDate)) {
+                // Semester hasn't started yet
+                $daysRemaining = $startDate->diffInDays($now);
+            } else {
+                // Semester has ended
+                $currentWeek = (int) ceil($endDate->diffInDays($startDate) / 7) + 1;
+                $daysRemaining = 0;
+            }
+        }
+
         return [
-            'label'         => $calendar->getFormattedSemester(),
-            'academic_year' => $calendar->academic_year,
-            'semester'      => $calendar->semester,
-            'start_date'    => $calendar->start_date?->format('M d, Y'),
-            'end_date'      => $calendar->end_date?->format('M d, Y'),
+            'label'           => $calendar->getFormattedSemester(),
+            'academic_year'   => $calendar->academic_year,
+            'semester'        => $calendar->semester,
+            'start_date'      => $calendar->start_date?->format('M d, Y'),
+            'end_date'        => $calendar->end_date?->format('M d, Y'),
+            'current_week'    => $currentWeek,
+            'current_date'    => $now->format('F j, Y'),
+            'days_remaining'  => $daysRemaining,
         ];
     }
 
@@ -171,6 +200,8 @@ class DashboardService
                 'for_revision_count' => 0,
                 'approved_count' => 0,
                 'recent_syllabi' => [],
+                'courses_without_ied' => [],
+                'upcoming_events' => [],
             ];
         }
 
@@ -213,6 +244,8 @@ class DashboardService
                 'for_revision_count' => 0,
                 'approved_count' => 0,
                 'recent_syllabi' => [],
+                'courses_without_ied' => [],
+                'upcoming_events' => [],
             ];
         }
 
@@ -272,6 +305,46 @@ class DashboardService
             })
             ->all();
 
+        // Get courses with no IED mapping
+        $coursesWithoutIed = Course::query()
+            ->where('status', 'active')
+            ->whereDoesntHave('programOutcomes')
+            ->whereHas('syllabi', function ($query) use ($user) {
+                $query->where('prepared_by', $user->id);
+            })
+            ->with('program')
+            ->get(['id', 'course_code', 'course_title', 'program_id'])
+            ->map(function ($course) {
+                return [
+                    'id' => $course->id,
+                    'course_code' => $course->course_code ?? 'Unknown',
+                    'title' => $course->course_title ?? 'Untitled',
+                    'program' => $course->program?->name ?? 'Unknown',
+                ];
+            })
+            ->all();
+
+        // Get upcoming events from active semester
+        $upcomingEvents = [];
+        $activeCalendar = AcademicCalendar::active()->first();
+        if ($activeCalendar) {
+            $upcomingEvents = $activeCalendar->events()
+                ->where('date', '>=', now()->toDateString())
+                ->where('date', '<=', now()->addDays(14)->toDateString())
+                ->orderBy('date')
+                ->get(['id', 'type', 'name', 'date'])
+                ->map(function ($event) {
+                    return [
+                        'id' => $event->id,
+                        'type' => $event->type,
+                        'name' => $event->name,
+                        'date' => $event->date?->format('M d, Y'),
+                        'days_until' => now()->diffInDays($event->date, false),
+                    ];
+                })
+                ->all();
+        }
+
         return [
             'no_assignment'  => false,
             'no_courses'     => false,
@@ -292,6 +365,8 @@ class DashboardService
             'for_revision_count' => $forRevisionCount,
             'approved_count' => $approvedCount,
             'recent_syllabi' => $recentSyllabi,
+            'courses_without_ied' => $coursesWithoutIed,
+            'upcoming_events' => $upcomingEvents,
         ];
     }
 
