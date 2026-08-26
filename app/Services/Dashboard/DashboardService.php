@@ -4,7 +4,6 @@ namespace App\Services\Dashboard;
 
 use App\Models\AcademicCalendar;
 use App\Models\College;
-use App\Models\Course;
 use App\Models\Department;
 use App\Models\Program;
 use App\Models\Syllabus;
@@ -13,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardService
 {
-    public function __construct(private AcademicHealthService $academicHealth) {}
+    public function __construct() {}
 
     public function resolveDashboardType(User $user): string
     {
@@ -106,9 +105,6 @@ class DashboardService
                 ['key' => 'colleges', 'label' => 'Colleges', 'value' => College::count(), 'icon' => 'bx-buildings', 'color' => 'blue'],
                 ['key' => 'departments', 'label' => 'Departments', 'value' => Department::count(), 'icon' => 'bx-sitemap', 'color' => 'slate'],
                 ['key' => 'programs', 'label' => 'Programs', 'value' => Program::count(), 'icon' => 'bx-network-chart', 'color' => 'emerald'],
-                ['key' => 'curricula', 'label' => 'Curriculum Maps', 'value' => DB::table('course_curriculum_maps')->count(), 'icon' => 'bx-grid-alt', 'color' => 'violet'],
-                ['key' => 'courses', 'label' => 'Courses', 'value' => Course::where('status', 'active')->count(), 'icon' => 'bx-book-content', 'color' => 'blue'],
-                ['key' => 'syllabi', 'label' => 'Syllabi', 'value' => Syllabus::count(), 'icon' => 'bx-notepad', 'color' => 'emerald'],
             ],
         ];
     }
@@ -132,9 +128,11 @@ class DashboardService
             ];
         }
 
-        $programIds = $this->academicHealth->programIdsForDepartment((int) $department->id);
+        $programIds = DB::table('programs')
+            ->where('department_id', $department->id)
+            ->pluck('id')
+            ->all();
         $scopeStats = $this->buildScopeStats($programIds, (int) $department->id, null);
-        $health = $this->academicHealth->summarizeForPrograms($programIds);
 
         return [
             'no_assignment'  => false,
@@ -148,7 +146,6 @@ class DashboardService
             ],
             'stats'          => $scopeStats['overview'],
             'syllabus_stats' => $scopeStats['syllabus'],
-            'health'         => $health,
         ];
     }
 
@@ -167,7 +164,6 @@ class DashboardService
                 'college'       => null,
                 'stats'         => [],
                 'syllabus_stats'=> [],
-                'health'        => ['warnings' => [], 'mapping_issues' => []],
                 'has_draft'      => false,
                 'latest_draft_id'=> null,
                 'draft_syllabi_count' => 0,
@@ -210,7 +206,30 @@ class DashboardService
                 ],
                 'stats'          => $this->emptyScopeOverview(null, $department->college_id),
                 'syllabus_stats' => $this->emptySyllabusStats(),
-                'health'         => ['warnings' => [], 'mapping_issues' => []],
+                'has_draft'      => false,
+                'latest_draft_id'=> null,
+                'draft_syllabi_count' => 0,
+                'under_review_count' => 0,
+                'for_revision_count' => 0,
+                'approved_count' => 0,
+                'recent_syllabi' => [],
+            ];
+        }
+
+        if (empty($programIds)) {
+            return [
+                'no_assignment'  => false,
+                'no_courses'     => true,
+                'department'     => [
+                    'id'   => $department->id,
+                    'name' => $department->name,
+                ],
+                'college'        => [
+                    'id'   => $department->college?->id,
+                    'name' => $department->college?->name,
+                ],
+                'stats'          => $this->emptyScopeOverview(null, $department->college_id),
+                'syllabus_stats' => $this->emptySyllabusStats(),
                 'has_draft'      => false,
                 'latest_draft_id'=> null,
                 'draft_syllabi_count' => 0,
@@ -222,13 +241,9 @@ class DashboardService
         }
 
         $scopeStats = $this->buildScopeStats($programIds, null, $department->college_id);
-        $health = $this->academicHealth->summarizeForPrograms($programIds);
 
         // Get faculty-specific syllabus statistics
         $facultySyllabi = Syllabus::where('prepared_by', $user->id)
-            ->whereIn('course_id', function ($query) use ($programIds) {
-                $query->whereIn('program_id', $programIds);
-            })
             ->get();
 
         $draftSyllabiCount = $facultySyllabi->where('status', 'draft')->count();
@@ -270,7 +285,6 @@ class DashboardService
             ],
             'stats'          => $scopeStats['overview'],
             'syllabus_stats' => $scopeStats['syllabus'],
-            'health'         => $health,
             'has_draft'      => $latestDraft !== null,
             'latest_draft_id'=> $latestDraft?->id,
             'draft_syllabi_count' => $draftSyllabiCount,
@@ -311,13 +325,18 @@ class DashboardService
                 'stats'         => [],
                 'departments'   => [],
                 'syllabus_stats'=> [],
-                'health'        => ['warnings' => [], 'mapping_issues' => []],
             ];
         }
 
-        $programIds = $this->academicHealth->programIdsForCollege((int) $college->id);
+        $programIds = DB::table('programs')
+            ->whereIn('department_id', function($query) use ($college) {
+                $query->select('id')
+                    ->from('departments')
+                    ->where('college_id', $college->id);
+            })
+            ->pluck('id')
+            ->all();
         $scopeStats = $this->buildScopeStats($programIds, null, (int) $college->id);
-        $health = $this->academicHealth->summarizeForPrograms($programIds);
 
         $departments = Department::query()
             ->where('college_id', $college->id)
@@ -340,7 +359,6 @@ class DashboardService
             'stats'          => $scopeStats['overview'],
             'departments'    => $departments,
             'syllabus_stats' => $scopeStats['syllabus'],
-            'health'         => $health,
         ];
     }
 
@@ -353,50 +371,14 @@ class DashboardService
         if ($programIds === []) {
             return [
                 'overview' => $this->emptyScopeOverview($departmentId, $collegeId),
-                'syllabus' => $this->emptySyllabusStats(),
+                'syllabus' => [],
             ];
         }
 
-        $courseQuery = Course::query()
-            ->whereIn('program_id', $programIds)
-            ->where('status', 'active');
-
-        $courseCount = (clone $courseQuery)->count();
-        $courseIds = (clone $courseQuery)->pluck('id')->all();
-
-        $syllabusQuery = Syllabus::query()->whereIn('course_id', $courseIds);
-        $totalSyllabi = (clone $syllabusQuery)->count();
-        $draftSyllabi = (clone $syllabusQuery)->where('status', 'draft')->count();
-
-        $activeCalendar = AcademicCalendar::active()->first();
-        $syllabiForActiveSemester = 0;
-        $coursesWithoutSyllabus = 0;
-
-        if ($activeCalendar && $courseIds !== []) {
-            $syllabiForActiveSemester = Syllabus::query()
-                ->whereIn('course_id', $courseIds)
-                ->where('academic_calendar_id', $activeCalendar->id)
-                ->count();
-
-            $coursesWithActiveSyllabus = Syllabus::query()
-                ->whereIn('course_id', $courseIds)
-                ->where('academic_calendar_id', $activeCalendar->id)
-                ->distinct('course_id')
-                ->count('course_id');
-
-            $coursesWithoutSyllabus = max(0, $courseCount - $coursesWithActiveSyllabus);
-        }
-
         $programCount = count($programIds);
-        $curriculumCount = DB::table('course_curriculum_maps')
-            ->whereIn('course_id', $courseIds)
-            ->count();
 
         $overview = [
             ['key' => 'programs', 'label' => 'Programs', 'value' => $programCount, 'icon' => 'bx-network-chart', 'color' => 'emerald'],
-            ['key' => 'courses', 'label' => 'Active Courses', 'value' => $courseCount, 'icon' => 'bx-book-content', 'color' => 'blue'],
-            ['key' => 'curricula', 'label' => 'Curriculum Maps', 'value' => $curriculumCount, 'icon' => 'bx-grid-alt', 'color' => 'violet'],
-            ['key' => 'syllabi', 'label' => 'Syllabi', 'value' => $totalSyllabi, 'icon' => 'bx-notepad', 'color' => 'slate'],
         ];
 
         if ($departmentId !== null) {
@@ -420,34 +402,9 @@ class DashboardService
             ]);
         }
 
-        $syllabusStats = [
-            ['key' => 'total', 'label' => 'Total Syllabi', 'value' => $totalSyllabi, 'icon' => 'bx-notepad', 'color' => 'slate'],
-            ['key' => 'draft', 'label' => 'Draft Syllabi', 'value' => $draftSyllabi, 'icon' => 'bx-edit', 'color' => 'amber'],
-        ];
-
-        if ($activeCalendar) {
-            $syllabusStats[] = [
-                'key'   => 'active_semester',
-                'label' => 'Syllabi This Semester',
-                'value' => $syllabiForActiveSemester,
-                'icon'  => 'bx-calendar',
-                'color' => 'emerald',
-            ];
-
-            if ($coursesWithoutSyllabus > 0) {
-                $syllabusStats[] = [
-                    'key'   => 'missing',
-                    'label' => 'Courses Without Syllabus',
-                    'value' => $coursesWithoutSyllabus,
-                    'icon'  => 'bx-error-circle',
-                    'color' => 'rose',
-                ];
-            }
-        }
-
         return [
             'overview' => $overview,
-            'syllabus' => $syllabusStats,
+            'syllabus' => [],
         ];
     }
 
@@ -474,9 +431,6 @@ class DashboardService
         }
 
         $overview[] = ['key' => 'programs', 'label' => 'Programs', 'value' => 0, 'icon' => 'bx-network-chart', 'color' => 'emerald'];
-        $overview[] = ['key' => 'courses', 'label' => 'Active Courses', 'value' => 0, 'icon' => 'bx-book-content', 'color' => 'blue'];
-        $overview[] = ['key' => 'curricula', 'label' => 'Curriculum Maps', 'value' => 0, 'icon' => 'bx-grid-alt', 'color' => 'violet'];
-        $overview[] = ['key' => 'syllabi', 'label' => 'Syllabi', 'value' => 0, 'icon' => 'bx-notepad', 'color' => 'slate'];
 
         return $overview;
     }
@@ -486,9 +440,6 @@ class DashboardService
      */
     private function emptySyllabusStats(): array
     {
-        return [
-            ['key' => 'total', 'label' => 'Total Syllabi', 'value' => 0, 'icon' => 'bx-notepad', 'color' => 'slate'],
-            ['key' => 'draft', 'label' => 'Draft Syllabi', 'value' => 0, 'icon' => 'bx-edit', 'color' => 'amber'],
-        ];
+        return [];
     }
 }

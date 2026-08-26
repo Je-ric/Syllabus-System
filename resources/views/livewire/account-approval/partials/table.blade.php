@@ -117,18 +117,7 @@
                                     <span class="text-[12px] font-medium text-[#71717a]">{{ $counter }}.</span>
                                     <p class="text-[13px] font-semibold text-[#09090b] truncate">{{ $user->name }}</p>
                                 </div>
-                                <div class="flex items-center gap-1.5 flex-wrap">
-                                    <p class="text-[12px] text-[#a1a1aa] truncate">{{ $user->email }}</p>
-                                    @if($user->email_verified_at)
-                                        <x-feedback-status.status-indicator variant="emerald" class="text-[10px] px-1.5 py-0.5">
-                                            <i class="bx bx-check-circle text-[10px]"></i> Verified
-                                        </x-feedback-status.status-indicator>
-                                    @else
-                                        <x-feedback-status.status-indicator variant="amber" class="text-[10px] px-1.5 py-0.5">
-                                            <i class="bx bx-time text-[10px]"></i> Unverified
-                                        </x-feedback-status.status-indicator>
-                                    @endif
-                                </div>
+                                <p class="text-[12px] text-[#a1a1aa] truncate">{{ $user->email }}</p>
                             </div>
                             <i class="bx text-[#a1a1aa] text-sm shrink-0 transition-transform duration-200"
                                :class="expandedRows['{{ $uid }}'] ? 'bx-chevron-up' : 'bx-chevron-down'"></i>
