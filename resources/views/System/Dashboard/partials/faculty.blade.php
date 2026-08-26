@@ -29,21 +29,27 @@
 <x-layout.card-section title="Semester Timeline" icon="bx-calendar-event" class="mb-6">
     @if ($data['active_semester'])
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div class="bg-[#F9FAFB] rounded-lg p-4">
-                <h4 class="text-xs font-semibold text-[#72809E] uppercase tracking-wide">Current Week</h4>
-                <p class="text-2xl font-bold text-[#394056] mt-1">Week {{ $data['active_semester']['current_week'] ?? '-' }}</p>
+            <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg p-4 border border-emerald-200">
+                <h4 class="text-xs font-semibold text-emerald-700 uppercase tracking-wide">Current Week</h4>
+                <p class="text-2xl font-bold text-emerald-800 mt-1">Week {{ $data['active_semester']['current_week'] ?? '-' }}</p>
             </div>
-            <div class="bg-[#F9FAFB] rounded-lg p-4">
-                <h4 class="text-xs font-semibold text-[#72809E] uppercase tracking-wide">Current Date</h4>
-                <p class="text-lg font-bold text-[#394056] mt-1">{{ $data['active_semester']['current_date'] ?? '-' }}</p>
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+                <h4 class="text-xs font-semibold text-blue-700 uppercase tracking-wide">Current Date</h4>
+                <p class="text-lg font-bold text-blue-800 mt-1">{{ $data['active_semester']['current_date'] ?? '-' }}</p>
             </div>
-            <div class="bg-[#F9FAFB] rounded-lg p-4">
-                <h4 class="text-xs font-semibold text-[#72809E] uppercase tracking-wide">Days Remaining</h4>
-                <p class="text-2xl font-bold text-[#394056] mt-1">{{ $data['active_semester']['days_remaining'] ?? '-' }}</p>
+            <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
+                <h4 class="text-xs font-semibold text-purple-700 uppercase tracking-wide">Days Remaining</h4>
+                <p class="text-2xl font-bold text-purple-800 mt-1">
+                    @if(($data['active_semester']['days_remaining'] ?? 0) < 0)
+                        <span class="text-red-600">{{ abs($data['active_semester']['days_remaining']) }} days ago</span>
+                    @else
+                        {{ $data['active_semester']['days_remaining'] ?? '-' }}
+                    @endif
+                </p>
             </div>
-            <div class="bg-[#F9FAFB] rounded-lg p-4">
-                <h4 class="text-xs font-semibold text-[#72809E] uppercase tracking-wide">Semester</h4>
-                <p class="text-lg font-bold text-[#394056] mt-1">{{ $data['active_semester']['label'] }}</p>
+            <div class="bg-gradient-to-br from-amber-50 to-amber-100 rounded-lg p-4 border border-amber-200">
+                <h4 class="text-xs font-semibold text-amber-700 uppercase tracking-wide">Semester</h4>
+                <p class="text-lg font-bold text-amber-800 mt-1">{{ $data['active_semester']['label'] }}</p>
             </div>
         </div>
     @else

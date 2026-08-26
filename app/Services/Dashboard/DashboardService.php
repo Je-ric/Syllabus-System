@@ -18,6 +18,11 @@ class DashboardService
 
     public function resolveDashboardType(User $user): string
     {
+        // If user has faculty role, show faculty dashboard regardless of other roles
+        if ($user->hasRole('faculty')) {
+            return 'faculty';
+        }
+
         if ($user->hasRole('admin')) {
             return 'admin';
         }
@@ -28,10 +33,6 @@ class DashboardService
 
         if ($user->hasRole('chair')) {
             return 'chair';
-        }
-
-        if ($user->hasRole('faculty')) {
-            return 'faculty';
         }
 
         return 'default';
@@ -89,10 +90,10 @@ class DashboardService
                 // Current date is within semester
                 $daysPassed = $now->diffInDays($startDate) + 1;
                 $currentWeek = (int) ceil($daysPassed / 7);
-                $daysRemaining = $endDate->diffInDays($now);
+                $daysRemaining = $endDate->diffInDays($now, false);
             } elseif ($now->lt($startDate)) {
                 // Semester hasn't started yet
-                $daysRemaining = $startDate->diffInDays($now);
+                $daysRemaining = $startDate->diffInDays($now, false);
             } else {
                 // Semester has ended
                 $currentWeek = (int) ceil($endDate->diffInDays($startDate) / 7) + 1;
