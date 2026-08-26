@@ -337,12 +337,13 @@ class DashboardService
                 ->orderBy('date')
                 ->get(['id', 'type', 'name', 'date'])
                 ->map(function ($event) {
+                    $eventDate = $event->date ? \Carbon\Carbon::parse($event->date) : null;
                     return [
                         'id' => $event->id,
                         'type' => $event->type,
                         'name' => $event->name,
-                        'date' => $event->date?->format('M d, Y'),
-                        'days_until' => now()->diffInDays($event->date, false),
+                        'date' => $eventDate?->format('M d, Y'),
+                        'days_until' => $eventDate ? now()->diffInDays($eventDate, false) : null,
                     ];
                 })
                 ->all();
