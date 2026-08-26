@@ -93,11 +93,13 @@ class DashboardService
                 $daysRemaining = $endDate->diffInDays($now, false);
             } elseif ($now->lt($startDate)) {
                 // Semester hasn't started yet
+                $currentWeek = 0;
                 $daysRemaining = $startDate->diffInDays($now, false);
             } else {
                 // Semester has ended
-                $currentWeek = (int) ceil($endDate->diffInDays($startDate) / 7) + 1;
-                $daysRemaining = 0;
+                $totalWeeks = (int) ceil($endDate->diffInDays($startDate) / 7) + 1;
+                $currentWeek = $totalWeeks;
+                $daysRemaining = $endDate->diffInDays($now, false);
             }
         }
 
