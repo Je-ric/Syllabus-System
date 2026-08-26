@@ -88,18 +88,18 @@ class DashboardService
         if ($startDate && $endDate) {
             if ($now->gte($startDate) && $now->lte($endDate)) {
                 // Current date is within semester
-                $daysPassed = $now->diffInDays($startDate) + 1;
+                $daysPassed = (int) $now->diffInDays($startDate) + 1;
                 $currentWeek = (int) ceil($daysPassed / 7);
-                $daysRemaining = $endDate->diffInDays($now, false);
+                $daysRemaining = (int) $endDate->diffInDays($now, false);
             } elseif ($now->lt($startDate)) {
                 // Semester hasn't started yet
                 $currentWeek = 0;
-                $daysRemaining = $startDate->diffInDays($now, false);
+                $daysRemaining = (int) $startDate->diffInDays($now, false);
             } else {
                 // Semester has ended
                 $totalWeeks = (int) ceil($endDate->diffInDays($startDate) / 7) + 1;
                 $currentWeek = $totalWeeks;
-                $daysRemaining = $endDate->diffInDays($now, false);
+                $daysRemaining = (int) $now->diffInDays($endDate, false);
             }
         }
 
@@ -343,7 +343,7 @@ class DashboardService
                         'type' => $event->type,
                         'name' => $event->name,
                         'date' => $eventDate?->format('M d, Y'),
-                        'days_until' => $eventDate ? now()->diffInDays($eventDate, false) : null,
+                        'days_until' => $eventDate ? (int) now()->diffInDays($eventDate, false) : null,
                     ];
                 })
                 ->all();
