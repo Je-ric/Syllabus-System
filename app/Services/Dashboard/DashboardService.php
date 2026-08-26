@@ -128,9 +128,9 @@ class DashboardService
             ];
         }
 
-        $programIds = DB::table('programs')
+        $programIds = DB::table('program_departments')
             ->where('department_id', $department->id)
-            ->pluck('id')
+            ->pluck('program_id')
             ->all();
         $scopeStats = $this->buildScopeStats($programIds, (int) $department->id, null);
 
@@ -328,13 +328,13 @@ class DashboardService
             ];
         }
 
-        $programIds = DB::table('programs')
+        $programIds = DB::table('program_departments')
             ->whereIn('department_id', function($query) use ($college) {
                 $query->select('id')
                     ->from('departments')
                     ->where('college_id', $college->id);
             })
-            ->pluck('id')
+            ->pluck('program_id')
             ->all();
         $scopeStats = $this->buildScopeStats($programIds, null, (int) $college->id);
 
