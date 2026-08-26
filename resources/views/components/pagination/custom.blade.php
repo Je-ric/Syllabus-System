@@ -21,6 +21,9 @@
     
     // Calculate limited page range (show max 3 pages centered around current page)
     $urlRange = [];
+    $showEllipsisAfter = false;
+    $showLastPage = false;
+    
     if ($paginator) {
         $maxPagesToShow = 3;
         if ($lastPage <= $maxPagesToShow) {
@@ -38,6 +41,10 @@
             }
             
             $urlRange = $paginator->getUrlRange($startPage, $endPage);
+            
+            // Determine if we need ellipsis and last page
+            $showEllipsisAfter = $endPage < $lastPage;
+            $showLastPage = $endPage < $lastPage;
         }
     }
 @endphp
@@ -97,6 +104,20 @@
                     </span>
                 @endif
             @endforeach
+            
+            @if($showEllipsisAfter)
+                <span aria-hidden="true"
+                    class="flex items-center justify-center shrink-0 text-sm font-semibold text-slate-900 w-9 h-9 rounded-md">
+                    ...
+                </span>
+            @endif
+            
+            @if($showLastPage)
+                <a href="{{ $paginator->url($lastPage) }}"
+                    class="flex items-center justify-center shrink-0 text-sm font-semibold text-slate-900 w-9 h-9 rounded-md hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500">
+                    {{ $lastPage }}
+                </a>
+            @endif
 
             {{-- Next --}}
             @if($hasMorePages)
