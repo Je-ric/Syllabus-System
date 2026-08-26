@@ -109,7 +109,7 @@ class DashboardService
             'end_date'        => $calendar->end_date?->format('M d, Y'),
             'current_week'    => $currentWeek,
             'current_date'    => $now->format('F j, Y'),
-            'days_remaining'  => $daysRemaining,
+            'days_remaining'  => (int) $daysRemaining,
         ];
     }
 
