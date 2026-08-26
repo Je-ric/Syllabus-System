@@ -70,7 +70,6 @@
                 <x-table.th>User</x-table.th>
                 <x-table.th>Status</x-table.th>
                 <x-table.th>Roles</x-table.th>
-                <x-table.th>Phone</x-table.th>
                 <x-table.th>Office</x-table.th>
                 <x-table.th class="w-32 text-right">Actions</x-table.th>
             </x-table.row>
@@ -151,10 +150,6 @@
                     </x-table.td>
 
                     <x-table.td class="text-[13px] text-[#475569]">
-                        {{ $user->phone_number ?: '—' }}
-                    </x-table.td>
-
-                    <x-table.td class="text-[13px] text-[#475569]">
                         {{ $user->office ?: '—' }}
                     </x-table.td>
 
@@ -202,7 +197,7 @@
                     x-transition:leave="transition ease-in duration-100"
                     x-transition:leave-end="opacity-0"
                     class="bg-[#fafafa]">
-                    <td colspan="7" class="px-4 py-4 border-t border-[#ececee]">
+                    <td colspan="6" class="px-4 py-4 border-t border-[#ececee]">
                         <div class="flex flex-wrap gap-0 divide-x divide-[#ececee]">
 
                             {{-- Contact Info --}}
@@ -337,7 +332,7 @@
                 </tr>
 
             @empty
-                <x-table.empty :colspan="7" message="No users found. Try adjusting your filters." class="py-10" />
+                <x-table.empty :colspan="6" message="No users found. Try adjusting your filters." class="py-10" />
             @endforelse
         </x-table.body>
     </x-table.table>

@@ -18,7 +18,19 @@
     $nextPageUrl = $nextPageUrl ?? $paginator?->nextPageUrl();
     $currentPage = $currentPage ?? $paginator?->currentPage() ?? 1;
     $lastPage = $lastPage ?? $paginator?->lastPage() ?? 1;
-    $urlRange = $urlRange ?? ($paginator ? $paginator->getUrlRange(1, $lastPage) : []);
+    
+    // Calculate limited page range (show max 3 pages: 1, 2, 3, ...)
+    $urlRange = [];
+    if ($paginator) {
+        $maxPagesToShow = 3;
+        if ($lastPage <= $maxPagesToShow) {
+            // Show all pages if total is less than or equal to max
+            $urlRange = $paginator->getUrlRange(1, $lastPage);
+        } else {
+            // Show first 3 pages
+            $urlRange = $paginator->getUrlRange(1, $maxPagesToShow);
+        }
+    }
 @endphp
 
 @if($paginator && $paginator->hasPages())
