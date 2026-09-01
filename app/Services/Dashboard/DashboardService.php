@@ -3,7 +3,6 @@
 namespace App\Services\Dashboard;
 
 use App\Models\AcademicCalendar;
-use App\Models\AcademicCalendarEvent;
 use App\Models\College;
 use App\Models\Course;
 use App\Models\Department;
@@ -84,7 +83,7 @@ class DashboardService
         // Calculate current week number of semester
         $currentWeek = 1;
         $daysRemaining = 0;
-        
+
         if ($startDate && $endDate) {
             if ($now->gte($startDate) && $now->lte($endDate)) {
                 // Current date is within semester
@@ -157,6 +156,10 @@ class DashboardService
                 'stats'         => [],
                 'syllabus_stats'=> [],
                 'health'        => ['warnings' => [], 'mapping_issues' => []],
+                'courses_with_syllabus_count' => 0,
+                'courses_without_ied' => [],
+                'upcoming_events' => [],
+                'recent_syllabi' => [],
             ];
         }
 
@@ -165,6 +168,59 @@ class DashboardService
             ->pluck('program_id')
             ->all();
         $scopeStats = $this->buildScopeStats($programIds, (int) $department->id, null);
+
+        // Get courses with syllabus count for the department
+        $coursesWithSyllabusCount = Course::query()
+            ->where('status', 'active')
+            ->whereIn('program_id', $programIds)
+            ->whereHas('syllabi')
+            ->count();
+
+        // Get total courses count for the department
+        $totalCoursesCount = Course::query()
+            ->where('status', 'active')
+            ->whereIn('program_id', $programIds)
+            ->count();
+
+        // Get courses without IED mapping for the department
+        $coursesWithoutIed = Course::query()
+            ->where('status', 'active')
+            ->whereIn('program_id', $programIds)
+            ->whereDoesntHave('programOutcomes')
+            ->with('program')
+            ->get(['id', 'course_code', 'course_title', 'program_id'])
+            ->map(function ($course) {
+                return [
+                    'id' => $course->id,
+                    'course_code' => $course->course_code ?? 'Unknown',
+                    'title' => $course->course_title ?? 'Untitled',
+                    'program' => $course->program?->name ?? 'Unknown',
+                ];
+            })
+            ->all();
+
+        $upcomingEvents = $this->getUpcomingEvents();
+
+        // Get recent syllabus activity for the department
+        $recentSyllabi = Syllabus::query()
+            ->whereHas('course', function ($query) use ($programIds) {
+                $query->where('status', 'active')->whereIn('program_id', $programIds);
+            })
+            ->with('course:id,course_code,course_title')
+            ->orderByDesc('updated_at')
+            ->take(5)
+            ->get()
+            ->map(function ($syllabus) {
+                return [
+                    'id' => $syllabus->id,
+                    'course_code' => $syllabus->course?->course_code,
+                    'title' => $syllabus->course?->course_title,
+                    'status' => $syllabus->status,
+                    'status_label' => $this->getStatusLabel($syllabus->status),
+                    'updated_at' => $syllabus->updated_at?->diffForHumans(),
+                ];
+            })
+            ->all();
 
         return [
             'no_assignment'  => false,
@@ -178,6 +234,11 @@ class DashboardService
             ],
             'stats'          => $scopeStats['overview'],
             'syllabus_stats' => $scopeStats['syllabus'],
+            'courses_with_syllabus_count' => $coursesWithSyllabusCount,
+            'total_courses_count' => $totalCoursesCount,
+            'courses_without_ied' => $coursesWithoutIed,
+            'upcoming_events' => $upcomingEvents,
+            'recent_syllabi' => $recentSyllabi,
         ];
     }
 
@@ -204,26 +265,23 @@ class DashboardService
                 'approved_count' => 0,
                 'recent_syllabi' => [],
                 'courses_without_ied' => [],
+                'courses_with_syllabus_count' => 0,
                 'upcoming_events' => [],
             ];
         }
 
-        // Get programs where the faculty teaches courses
-        // $programIds = CourseComponent::where('user_id', $user->id)
-        //     ->whereHas('course', function ($query) {
-        //         $query->where('status', 'active');
-        //     })
-        //     ->with('course')
-        //     ->get()
-        // Get programs where the faculty teaches courses (via their syllabus components)
-        $programIds = Syllabus::where('prepared_by', $user->id)
-            ->whereHas('course', fn ($q) => $q->where('status', 'active'))
-            ->with('course:id,program_id')
-            ->get('course_id')
-            ->pluck('course.program_id')
-            ->filter()
+        // Get programs from faculty's department assignments
+        $departmentIds = $user->assignments()
+            ->where('context', 'faculty')
+            ->whereNotNull('department_id')
+            ->pluck('department_id')
             ->unique()
-            ->values()
+            ->all();
+
+        $programIds = DB::table('program_departments')
+            ->whereIn('department_id', $departmentIds)
+            ->pluck('program_id')
+            ->unique()
             ->all();
 
         if (empty($programIds)) {
@@ -238,7 +296,7 @@ class DashboardService
                     'id'   => $department->college?->id,
                     'name' => $department->college?->name,
                 ],
-                'stats'          => $this->emptyScopeOverview(null, $department->college_id),
+                'stats'          => $this->emptyScopeOverview(null, $department->college_id ? (int) $department->college_id : null),
                 'syllabus_stats' => $this->emptySyllabusStats(),
                 'has_draft'      => false,
                 'latest_draft_id'=> null,
@@ -248,39 +306,17 @@ class DashboardService
                 'approved_count' => 0,
                 'recent_syllabi' => [],
                 'courses_without_ied' => [],
+                'courses_with_syllabus_count' => 0,
                 'upcoming_events' => [],
             ];
         }
 
-        if (empty($programIds)) {
-            return [
-                'no_assignment'  => false,
-                'no_courses'     => true,
-                'department'     => [
-                    'id'   => $department->id,
-                    'name' => $department->name,
-                ],
-                'college'        => [
-                    'id'   => $department->college?->id,
-                    'name' => $department->college?->name,
-                ],
-                'stats'          => $this->emptyScopeOverview(null, $department->college_id),
-                'syllabus_stats' => $this->emptySyllabusStats(),
-                'has_draft'      => false,
-                'latest_draft_id'=> null,
-                'draft_syllabi_count' => 0,
-                'under_review_count' => 0,
-                'for_revision_count' => 0,
-                'approved_count' => 0,
-                'recent_syllabi' => [],
-            ];
-        }
+        $scopeStats = $this->buildScopeStats($programIds, null, $department->college_id ? (int) $department->college_id : null);
 
-        $scopeStats = $this->buildScopeStats($programIds, null, $department->college_id);
-
-        // Get faculty-specific syllabus statistics
+        // Get faculty-specific syllabus statistics and recent activity
         $facultySyllabi = Syllabus::where('prepared_by', $user->id)
-            ->get();
+            ->with('course:id,course_code,course_title')
+            ->get(['id', 'status', 'updated_at', 'course_id']);
 
         $draftSyllabiCount = $facultySyllabi->where('status', 'draft')->count();
         $underReviewCount = $facultySyllabi->where('status', 'under_review')->count();
@@ -292,7 +328,7 @@ class DashboardService
             ->sortByDesc('updated_at')
             ->first();
 
-        // Get recent syllabus activity
+        // Get recent syllabus activity for faculty
         $recentSyllabi = $facultySyllabi
             ->sortByDesc('updated_at')
             ->take(5)
@@ -308,7 +344,7 @@ class DashboardService
             })
             ->all();
 
-        // Get courses with no IED mapping
+        // Get courses with no IED mapping for faculty's courses
         $coursesWithoutIed = Course::query()
             ->where('status', 'active')
             ->whereDoesntHave('programOutcomes')
@@ -327,27 +363,20 @@ class DashboardService
             })
             ->all();
 
-        // Get upcoming events from active semester
-        $upcomingEvents = [];
-        $activeCalendar = AcademicCalendar::active()->first();
-        if ($activeCalendar) {
-            $upcomingEvents = $activeCalendar->events()
-                ->where('date', '>=', now()->toDateString())
-                ->where('date', '<=', now()->addDays(14)->toDateString())
-                ->orderBy('date')
-                ->get(['id', 'type', 'name', 'date'])
-                ->map(function ($event) {
-                    $eventDate = $event->date ? \Carbon\Carbon::parse($event->date) : null;
-                    return [
-                        'id' => $event->id,
-                        'type' => $event->type,
-                        'name' => $event->name,
-                        'date' => $eventDate?->format('M d, Y'),
-                        'days_until' => $eventDate ? (int) now()->diffInDays($eventDate, false) : null,
-                    ];
-                })
-                ->all();
-        }
+        // Get courses with syllabus count for faculty's department(s)
+        $coursesWithSyllabusCount = Course::query()
+            ->where('status', 'active')
+            ->whereIn('program_id', $programIds)
+            ->whereHas('syllabi')
+            ->count();
+
+        // Get total courses count for faculty's department(s)
+        $totalCoursesCount = Course::query()
+            ->where('status', 'active')
+            ->whereIn('program_id', $programIds)
+            ->count();
+
+        $upcomingEvents = $this->getUpcomingEvents();
 
         return [
             'no_assignment'  => false,
@@ -370,8 +399,44 @@ class DashboardService
             'approved_count' => $approvedCount,
             'recent_syllabi' => $recentSyllabi,
             'courses_without_ied' => $coursesWithoutIed,
+            'courses_with_syllabus_count' => $coursesWithSyllabusCount,
+            'total_courses_count' => $totalCoursesCount,
             'upcoming_events' => $upcomingEvents,
         ];
+    }
+
+    /**
+     * Fetch calendar events within a 30-day window centred on today.
+     * Shared by faculty, chair, and dean dashboard methods.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function getUpcomingEvents(): array
+    {
+        $calendar = AcademicCalendar::active()->first();
+
+        if (! $calendar) {
+            return [];
+        }
+
+        return $calendar->events()
+            ->whereBetween('date', [now()->subDays(30)->toDateString(), now()->addDays(30)->toDateString()])
+            ->orderBy('date')
+            ->get(['id', 'type', 'name', 'date'])
+            ->map(function ($event) {
+                $eventDate = $event->date ? \Carbon\Carbon::parse($event->date) : null;
+                $isPast    = $eventDate && $eventDate->lt(now());
+
+                return [
+                    'id'        => $event->id,
+                    'type'      => $event->type,
+                    'name'      => $event->name,
+                    'date'      => $eventDate?->format('M d, Y'),
+                    'days_until'=> $eventDate ? (int) now()->diffInDays($eventDate, false) : null,
+                    'is_past'   => $isPast,
+                ];
+            })
+            ->all();
     }
 
     /**
@@ -404,6 +469,10 @@ class DashboardService
                 'stats'         => [],
                 'departments'   => [],
                 'syllabus_stats'=> [],
+                'courses_with_syllabus_count' => 0,
+                'courses_without_ied' => [],
+                'upcoming_events' => [],
+                'recent_syllabi' => [],
             ];
         }
 
@@ -429,6 +498,59 @@ class DashboardService
             ])
             ->all();
 
+        // Get courses with syllabus count for the college
+        $coursesWithSyllabusCount = Course::query()
+            ->where('status', 'active')
+            ->whereIn('program_id', $programIds)
+            ->whereHas('syllabi')
+            ->count();
+
+        // Get total courses count for the college
+        $totalCoursesCount = Course::query()
+            ->where('status', 'active')
+            ->whereIn('program_id', $programIds)
+            ->count();
+
+        // Get courses without IED mapping for the college
+        $coursesWithoutIed = Course::query()
+            ->where('status', 'active')
+            ->whereIn('program_id', $programIds)
+            ->whereDoesntHave('programOutcomes')
+            ->with('program')
+            ->get(['id', 'course_code', 'course_title', 'program_id'])
+            ->map(function ($course) {
+                return [
+                    'id' => $course->id,
+                    'course_code' => $course->course_code ?? 'Unknown',
+                    'title' => $course->course_title ?? 'Untitled',
+                    'program' => $course->program?->name ?? 'Unknown',
+                ];
+            })
+            ->all();
+
+        $upcomingEvents = $this->getUpcomingEvents();
+
+        // Get recent syllabus activity for the college
+        $recentSyllabi = Syllabus::query()
+            ->whereHas('course', function ($query) use ($programIds) {
+                $query->where('status', 'active')->whereIn('program_id', $programIds);
+            })
+            ->with('course:id,course_code,course_title')
+            ->orderByDesc('updated_at')
+            ->take(5)
+            ->get()
+            ->map(function ($syllabus) {
+                return [
+                    'id' => $syllabus->id,
+                    'course_code' => $syllabus->course?->course_code,
+                    'title' => $syllabus->course?->course_title,
+                    'status' => $syllabus->status,
+                    'status_label' => $this->getStatusLabel($syllabus->status),
+                    'updated_at' => $syllabus->updated_at?->diffForHumans(),
+                ];
+            })
+            ->all();
+
         return [
             'no_assignment'  => false,
             'college'        => [
@@ -438,6 +560,11 @@ class DashboardService
             'stats'          => $scopeStats['overview'],
             'departments'    => $departments,
             'syllabus_stats' => $scopeStats['syllabus'],
+            'courses_with_syllabus_count' => $coursesWithSyllabusCount,
+            'total_courses_count' => $totalCoursesCount,
+            'courses_without_ied' => $coursesWithoutIed,
+            'upcoming_events' => $upcomingEvents,
+            'recent_syllabi' => $recentSyllabi,
         ];
     }
 

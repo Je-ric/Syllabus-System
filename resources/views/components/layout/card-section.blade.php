@@ -65,7 +65,7 @@
     </div>
 
     {{-- Card body --}}
-    <div x-show="open" x-collapse class="{{ $padded ? 'p-4' : '' }}">
+    <div x-show="open" x-collapse class="{{ $padded ? 'p-4' : '' }} flex-1 min-h-0">
         {{ $slot }}
     </div>
 
@@ -119,7 +119,7 @@
     </div>
 
     {{-- Card body --}}
-    <div class="{{ $padded ? 'p-4' : '' }}">
+    <div class="{{ $padded ? 'p-4' : '' }} flex-1 min-h-0">
         {{ $slot }}
     </div>
 

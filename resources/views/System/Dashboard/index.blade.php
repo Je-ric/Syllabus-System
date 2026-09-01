@@ -15,12 +15,16 @@
             'dean'    => 'College-level academic completeness and department summary',
             'faculty' => 'Track your syllabi, drafts, and approvals',
         ];
-        $primaryRole = match ($data['type']) {
-            'admin'   => 'admin',
-            'chair'   => 'chair',
-            'dean'    => 'dean',
-            'faculty' => 'faculty',
-            default   => $user->roles->first()?->name,
+
+        // Collect all display badges in priority order.
+        // Faculty always shows; dean/chair appended when the user also holds that role.
+        $roleBadges = match ($data['type']) {
+            'admin'   => ['admin'],
+            'faculty' => array_values(array_filter(
+                ['faculty', 'dean', 'chair'],
+                fn ($r) => $user->hasRole($r)
+            )),
+            default   => [$data['type']],
         };
     @endphp
 
@@ -28,15 +32,13 @@
         icon="bx-grid-alt"
         :title="$dashboardTitles[$data['type']] ?? 'Dashboard'"
         :desc="$dashboardDescriptions[$data['type']] ?? 'Welcome to CSMS'">
-        @if ($primaryRole)
-            <x-feedback-status.status-indicator :status="$primaryRole" />
-        @endif
+        @foreach ($roleBadges as $badge)
+            <x-feedback-status.status-indicator :status="$badge" />
+        @endforeach
     </x-layout.page-header>
 
     <x-layout.panel>
         <div class="space-y-4">
-
-            @include('System.Dashboard.partials.active-semester', ['activeSemester' => $data['active_semester']])
 
             @switch($data['type'])
                 @case('admin')
