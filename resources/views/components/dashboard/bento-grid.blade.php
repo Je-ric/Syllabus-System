@@ -81,17 +81,17 @@
 
                     {{-- Detail row --}}
                     <div class="grid grid-cols-3 gap-3 mt-auto">
-                        <div class="rounded-xl p-3 border border-[#AEFFE2] bg-[#f0fff8]">
-                            <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-[#00965F] mb-1">Today</p>
-                            <p class="text-sm font-bold text-[#003a10] leading-snug">{{ $semester['current_date'] ?? '—' }}</p>
+                        <div class="rounded-xl p-3 border border-[#A7F3D0] bg-[#ECFDF5]">
+                            <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-[#047857] mb-1">Today</p>
+                            <p class="text-sm font-bold text-[#064E3B] leading-snug">{{ $semester['current_date'] ?? '—' }}</p>
                         </div>
-                        <div class="rounded-xl p-3 border border-[#E9D5FF] bg-[#faf5ff]">
-                            <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-[#7C3AED] mb-1">Days Left</p>
-                            <p class="text-2xl font-black text-[#4C1D95] leading-none">{{ $daysRemaining }}</p>
+                        <div class="rounded-xl p-3 border border-[#1a5f30] bg-linear-to-br from-[#009639] to-[#1a5f30] shadow-sm">
+                            <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-[#D5FFF0] mb-1">Days Left</p>
+                            <p class="text-2xl font-black text-white leading-none">{{ $daysRemaining }}</p>
                         </div>
-                        <div class="rounded-xl p-3 border border-[#FFE9B5] bg-[#fffcf0]">
-                            <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-[#B45309] mb-1">End Date</p>
-                            <p class="text-sm font-bold text-[#78350F] leading-snug">{{ $semester['end_date'] ?? '—' }}</p>
+                        <div class="rounded-xl p-3 border border-[#E2E8F0] bg-[#F8FAFC]">
+                            <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-[#64748B] mb-1">End Date</p>
+                            <p class="text-sm font-bold text-[#1E293B] leading-snug">{{ $semester['end_date'] ?? '—' }}</p>
                         </div>
                     </div>
                 @else
