@@ -307,11 +307,13 @@
                                 </p>
                                 <p class="text-[11px] text-rose-600 mt-0.5 truncate">{{ $course['program'] ?? 'Unknown program' }}</p>
                             </div>
-                            <a href="{{ route('courses.edit', ['course' => $course['id']]) }}"
-                               class="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold
-                                      bg-rose-600 text-white hover:bg-rose-700 transition-colors min-h-[28px]">
-                                <i class="bx bx-edit text-xs leading-none"></i> Fix
-                            </a>
+                            @if ($user->hasRole('chair'))
+                                <a href="{{ route('courses.edit', ['course' => $course['id']]) }}"
+                                   class="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold
+                                          bg-rose-600 text-white hover:bg-rose-700 transition-colors min-h-[28px]">
+                                    <i class="bx bx-edit text-xs leading-none"></i> Fix
+                                </a>
+                            @endif
                         </div>
                     </div>
                 @empty
