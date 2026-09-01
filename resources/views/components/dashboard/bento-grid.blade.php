@@ -239,7 +239,7 @@
                 @if ($user->hasRole('dean'))
                     <x-dashboard.bento-grid.quick-link href="{{ route('syllabus.index') }}" icon="bx-list-ul" primary>View Syllabi</x-dashboard.bento-grid.quick-link>
                     <x-dashboard.bento-grid.quick-link href="{{ route('syllabus.courses') }}" icon="bx-book-content">Browse Courses</x-dashboard.bento-grid.quick-link>
-                    <x-dashboard.bento-grid.quick-link href="{{ route('goals.index') }}" icon="bxs-bullseye">Manage Goals</x-dashboard.bento-grid.quick-link>
+                    <x-dashboard.bento-grid.quick-link href="{{ route('goal.index') }}" icon="bxs-bullseye">Manage Goals</x-dashboard.bento-grid.quick-link>
                     <x-dashboard.bento-grid.quick-link href="{{ route('user-assignments.hierarchy') }}" icon="bx-sitemap">Manage Departments</x-dashboard.bento-grid.quick-link>
                 @elseif ($user->hasRole('chair'))
                     <x-dashboard.bento-grid.quick-link href="{{ route('syllabus.index') }}" icon="bx-list-ul" primary>View Syllabi</x-dashboard.bento-grid.quick-link>

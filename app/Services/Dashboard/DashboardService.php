@@ -83,8 +83,11 @@ class DashboardService
         // Calculate current week number of semester
         $currentWeek = 1;
         $daysRemaining = 0;
+        $totalWeeks = 1;
 
         if ($startDate && $endDate) {
+            $totalWeeks = (int) ceil($endDate->diffInDays($startDate) / 7) + 1;
+            
             if ($now->gte($startDate) && $now->lte($endDate)) {
                 // Current date is within semester
                 $daysPassed = (int) $now->diffInDays($startDate) + 1;
@@ -96,7 +99,6 @@ class DashboardService
                 $daysRemaining = (int) $startDate->diffInDays($now, false);
             } else {
                 // Semester has ended
-                $totalWeeks = (int) ceil($endDate->diffInDays($startDate) / 7) + 1;
                 $currentWeek = $totalWeeks;
                 $daysRemaining = (int) $now->diffInDays($endDate, false);
             }
@@ -109,6 +111,7 @@ class DashboardService
             'start_date'      => $calendar->start_date?->format('M d, Y'),
             'end_date'        => $calendar->end_date?->format('M d, Y'),
             'current_week'    => $currentWeek,
+            'total_weeks'     => $totalWeeks,
             'current_date'    => $now->format('F j, Y'),
             'days_remaining'  => (int) $daysRemaining,
         ];
