@@ -43,8 +43,9 @@ class SecurityValidator
         '/\bALTER\s+(TABLE|DATABASE)\b/i',
         '/\bTRUNCATE\s+TABLE\b/i',
         '/\bEXEC(UTE)?\s*\(/i',
-        // SQL comment sequences used to terminate queries
-        '/--[\s\S]/',
+        // SQL comment sequences — only flag when preceded by a quote or digit (actual injection context)
+        '/[\'"]\s*--/',
+        '/\d\s*--\s*$/',
         '/\/\*[\s\S]*?\*\//',
         // Dangerous stored procedures
         '/\bxp_cmdshell\b/i',
@@ -65,7 +66,7 @@ class SecurityValidator
         '/\$\{.*?\}/', // expression language injection
         '/#\{.*?\}/', // EL interpolation
         '/@System\./i', // C# System calls
-        '/\\u[0-9a-f]{4}/i', // unicode escape sequences
+        '/\\\\u[0-9a-f]{4}/i', // unicode escape sequences like \uXXXX
     ];
 
     /**
