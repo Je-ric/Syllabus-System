@@ -17,11 +17,7 @@ class DashboardService
 
     public function resolveDashboardType(User $user): string
     {
-        // If user has faculty role, show faculty dashboard regardless of other roles
-        if ($user->hasRole('faculty')) {
-            return 'faculty';
-        }
-
+        // Admin takes priority — admins always have faculty role too (every active account does)
         if ($user->hasRole('admin')) {
             return 'admin';
         }
@@ -32,6 +28,10 @@ class DashboardService
 
         if ($user->hasRole('chair')) {
             return 'chair';
+        }
+
+        if ($user->hasRole('faculty')) {
+            return 'faculty';
         }
 
         return 'default';
@@ -132,17 +132,56 @@ class DashboardService
             ->groupBy('roles.name')
             ->pluck('total', 'name');
 
+        $syllabusCounts = Syllabus::query()
+            ->selectRaw('status, COUNT(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        $pendingApprovals = User::where('account_status', 'pending')->count();
+
+        $upcomingEvents = $this->getUpcomingEvents();
+
+        $recentSyllabi = Syllabus::query()
+            ->with('course:id,course_code,course_title', 'preparer:id,name')
+            ->orderByDesc('updated_at')
+            ->take(8)
+            ->get()
+            ->map(function ($syllabus) {
+                return [
+                    'id'          => $syllabus->id,
+                    'course_code' => $syllabus->course?->course_code,
+                    'title'       => $syllabus->course?->course_title,
+                    'status'      => $syllabus->status,
+                    'status_label'=> $this->getStatusLabel($syllabus->status),
+                    'updated_at'  => $syllabus->updated_at?->diffForHumans(),
+                    'preparer'    => $syllabus->preparer?->name,
+                ];
+            })
+            ->all();
+
         return [
-            'stats' => [
-                ['key' => 'users', 'label' => 'Total Users', 'value' => User::count(), 'icon' => 'bx-group', 'color' => 'slate'],
-                ['key' => 'faculty', 'label' => 'Faculty', 'value' => (int) ($roleCounts['faculty'] ?? 0), 'icon' => 'bx-user', 'color' => 'emerald'],
-                ['key' => 'chairs', 'label' => 'Chairpersons', 'value' => (int) ($roleCounts['chair'] ?? 0), 'icon' => 'bx-user-pin', 'color' => 'blue'],
-                ['key' => 'deans', 'label' => 'Deans', 'value' => (int) ($roleCounts['dean'] ?? 0), 'icon' => 'bx-medal', 'color' => 'violet'],
-                ['key' => 'admins', 'label' => 'Administrators', 'value' => (int) ($roleCounts['admin'] ?? 0), 'icon' => 'bx-crown', 'color' => 'amber'],
-                ['key' => 'colleges', 'label' => 'Colleges', 'value' => College::count(), 'icon' => 'bx-buildings', 'color' => 'blue'],
-                ['key' => 'departments', 'label' => 'Departments', 'value' => Department::count(), 'icon' => 'bx-sitemap', 'color' => 'slate'],
-                ['key' => 'programs', 'label' => 'Programs', 'value' => Program::count(), 'icon' => 'bx-network-chart', 'color' => 'emerald'],
+            'pending_approvals'  => $pendingApprovals,
+            'total_users'        => User::count(),
+            'role_counts'        => [
+                'faculty' => (int) ($roleCounts['faculty'] ?? 0),
+                'chair'   => (int) ($roleCounts['chair']   ?? 0),
+                'dean'    => (int) ($roleCounts['dean']    ?? 0),
+                'admin'   => (int) ($roleCounts['admin']   ?? 0),
             ],
+            'structure_counts'   => [
+                'colleges'    => College::count(),
+                'departments' => Department::count(),
+                'programs'    => Program::count(),
+                'courses'     => Course::where('status', 'active')->count(),
+            ],
+            'syllabus_counts'    => [
+                'draft'        => (int) ($syllabusCounts['draft']        ?? 0),
+                'under_review' => (int) ($syllabusCounts['under_review'] ?? 0),
+                'for_revision' => (int) ($syllabusCounts['for_revision'] ?? 0),
+                'approved'     => (int) ($syllabusCounts['approved']     ?? 0),
+            ],
+            'upcoming_events'    => $upcomingEvents,
+            'recent_syllabi'     => $recentSyllabi,
         ];
     }
 
