@@ -95,15 +95,11 @@
                         </div>
                     </div>
                 @else
-                    <div class="flex-1 flex flex-col items-center justify-center text-center gap-3 py-4">
-                        <span class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200">
-                            <i class="bx bx-calendar-x text-amber-500 text-2xl leading-none"></i>
-                        </span>
-                        <div>
-                            <p class="font-bold text-[#394056]">No active semester</p>
-                            <p class="text-xs text-[#72809E] mt-1">Set an active calendar under Academic Calendars.</p>
-                        </div>
-                    </div>
+                    <x-dashboard.empty-state
+                        icon="bx-calendar-x"
+                        title="No active semester"
+                        message="Set an active calendar under Academic Calendars."
+                    />
                 @endif
             </div>
         </div>
@@ -207,11 +203,11 @@
                         </div>
                     </div>
                 @empty
-                    <div class="h-full flex flex-col items-center justify-center text-center gap-2 py-8">
-                        <i class="bx bx-calendar-check text-3xl text-[#c8ddd4]"></i>
-                        <p class="text-[11px] font-bold uppercase tracking-[0.14em] text-[#93A1AF]">No upcoming events</p>
-                        <p class="text-[11px] text-[#93A1AF]">No academic events in the next 30 days.</p>
-                    </div>
+                    <x-dashboard.empty-state
+                        icon="bx-calendar-check"
+                        title="No upcoming events"
+                        message="No academic events in the next 30 days."
+                    />
                 @endforelse
             </div>
         </div>
@@ -237,22 +233,41 @@
             </div>
             <div class="p-4 flex-1 flex flex-col gap-2.5">
                 @if ($user->hasRole('dean'))
-                    <x-dashboard.bento-grid.quick-link href="{{ route('syllabus.index') }}" icon="bx-list-ul" primary>View Syllabi</x-dashboard.bento-grid.quick-link>
-                    <x-dashboard.bento-grid.quick-link href="{{ route('syllabus.courses') }}" icon="bx-book-content">Browse Courses</x-dashboard.bento-grid.quick-link>
-                    <x-dashboard.bento-grid.quick-link href="{{ route('goal.index') }}" icon="bxs-bullseye">Manage Goals</x-dashboard.bento-grid.quick-link>
-                    <x-dashboard.bento-grid.quick-link href="{{ route('user-assignments.hierarchy') }}" icon="bx-sitemap">Manage Departments</x-dashboard.bento-grid.quick-link>
+                    <x-ui.button href="{{ route('syllabus.index') }}" variant="primary" class="w-full justify-start">
+                        <i class="bx bx-list-ul"></i> View Syllabi
+                    </x-ui.button>
+                    <x-ui.button href="{{ route('syllabus.courses') }}" variant="secondary" class="w-full justify-start">
+                        <i class="bx bx-book-content"></i> Browse Courses
+                    </x-ui.button>
+                    <x-ui.button href="{{ route('goal.index') }}" variant="secondary" class="w-full justify-start">
+                        <i class="bx bxs-bullseye"></i> Manage Goals
+                    </x-ui.button>
+                    <x-ui.button href="{{ route('user-assignments.hierarchy') }}" variant="secondary" class="w-full justify-start">
+                        <i class="bx bx-sitemap"></i> Manage Departments
+                    </x-ui.button>
                 @elseif ($user->hasRole('chair'))
-                    <x-dashboard.bento-grid.quick-link href="{{ route('syllabus.index') }}" icon="bx-list-ul" primary>View Syllabi</x-dashboard.bento-grid.quick-link>
-                    <x-dashboard.bento-grid.quick-link href="{{ route('syllabus.courses') }}" icon="bx-book-content">Browse Courses</x-dashboard.bento-grid.quick-link>
-                    <x-dashboard.bento-grid.quick-link href="{{ route('programs.index') }}" icon="bx-network-chart">Manage Programs</x-dashboard.bento-grid.quick-link>
-                    <x-dashboard.bento-grid.quick-link href="{{ route('objective.index') }}" icon="bx-target-lock">Manage Objectives</x-dashboard.bento-grid.quick-link>
+                    <x-ui.button href="{{ route('syllabus.index') }}" variant="primary" class="w-full justify-start">
+                        <i class="bx bx-list-ul"></i> View Syllabi
+                    </x-ui.button>
+                    <x-ui.button href="{{ route('syllabus.courses') }}" variant="secondary" class="w-full justify-start">
+                        <i class="bx bx-book-content"></i> Browse Courses
+                    </x-ui.button>
+                    <x-ui.button href="{{ route('programs.index') }}" variant="secondary" class="w-full justify-start">
+                        <i class="bx bx-network-chart"></i> Manage Programs
+                    </x-ui.button>
+                    <x-ui.button href="{{ route('objective.index') }}" variant="secondary" class="w-full justify-start">
+                        <i class="bx bx-target-lock"></i> Manage Objectives
+                    </x-ui.button>
                 @else
-                    <x-dashboard.bento-grid.quick-link href="{{ route('syllabus.create') }}" icon="bx-notepad" primary>Create Syllabus</x-dashboard.bento-grid.quick-link>
-                    @if ($data['has_draft'] ?? false)
-                        <x-dashboard.bento-grid.quick-link href="{{ route('syllabus.edit', ['syllabus' => $data['latest_draft_id']]) }}" icon="bx-pencil" gold>Continue Draft</x-dashboard.bento-grid.quick-link>
-                    @endif
-                    <x-dashboard.bento-grid.quick-link href="{{ route('syllabus.index') }}" icon="bx-list-ul">View Syllabi</x-dashboard.bento-grid.quick-link>
-                    <x-dashboard.bento-grid.quick-link href="{{ route('syllabus.courses') }}" icon="bx-book-content">Browse Courses</x-dashboard.bento-grid.quick-link>
+                    <x-ui.button href="{{ route('syllabus.create') }}" variant="primary" class="w-full justify-start">
+                        <i class="bx bx-notepad"></i> Create Syllabus
+                    </x-ui.button>
+                    <x-ui.button href="{{ route('syllabus.index') }}" variant="secondary" class="w-full justify-start">
+                        <i class="bx bx-list-ul"></i> View Syllabi
+                    </x-ui.button>
+                    <x-ui.button href="{{ route('syllabus.courses') }}" variant="secondary" class="w-full justify-start">
+                        <i class="bx bx-book-content"></i> Browse Courses
+                    </x-ui.button>
                 @endif
             </div>
         </div>
@@ -300,13 +315,11 @@
                         </div>
                     </div>
                 @empty
-                    <div class="h-full flex flex-col items-center justify-center text-center gap-2 py-8">
-                        <span class="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-[#D5FFF0] border border-[#AEFFE2]">
-                            <i class="bx bx-check-shield text-[#009639] text-xl leading-none"></i>
-                        </span>
-                        <p class="text-[11px] font-bold uppercase tracking-[0.14em] text-[#00965F]">All courses mapped</p>
-                        <p class="text-[11px] text-[#72809E] px-4">{{ $iedEmptyMessage ?? 'All courses have IED mappings configured.' }}</p>
-                    </div>
+                    <x-dashboard.empty-state
+                        icon="bx-check-shield"
+                        title="All courses mapped"
+                        :message="$iedEmptyMessage"
+                    />
                 @endforelse
             </div>
         </div>
@@ -365,11 +378,11 @@
                         </div>
                     </div>
                 @empty
-                    <div class="h-full flex flex-col items-center justify-center text-center gap-2 py-8">
-                        <i class="bx bx-file text-3xl text-[#c8ddd4]"></i>
-                        <p class="text-[11px] font-bold uppercase tracking-[0.14em] text-[#93A1AF]">No recent activity</p>
-                        <p class="text-[11px] text-[#93A1AF] px-4">{{ $syllabiEmptyMessage ?? 'No syllabi updated recently.' }}</p>
-                    </div>
+                    <x-dashboard.empty-state
+                        icon="bx-file"
+                        title="No recent activity"
+                        :message="$syllabiEmptyMessage"
+                    />
                 @endforelse
             </div>
         </div>
