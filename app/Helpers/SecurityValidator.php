@@ -25,24 +25,33 @@ class SecurityValidator
     ];
 
     /**
-     * Patterns that indicate SQL injection attempts
+     * Patterns that indicate SQL injection attempts.
+     * These are scoped to actual SQL syntax, not standalone English words.
      */
     private const SQL_PATTERNS = [
+        // Tautology patterns: OR 1=1, AND 1=1, OR 'a'='a'
         '/\b(OR|AND)\s+\d+\s*=\s*\d+/i',
-        '/\b(OR|AND)\s+["\']?\w+["\']?\s*=\s*["\']?\w+["\']?/i',
-        '/\b(UNION|SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|TRUNCATE|EXEC|EXECUTE)\b/i',
-        '/--\s*$/',
-        '/\/\*/',
-        '/\*\//',
-        '/;\s*$/',
+        '/\b(OR|AND)\s+["\']\w+["\']\s*=\s*["\']\w+["\']\s*--/i',
+        // UNION SELECT is the real attack vector, not UNION alone
+        '/\bUNION\s+(ALL\s+)?SELECT\b/i',
+        // DML/DDL only when followed by SQL-specific syntax
+        '/\bSELECT\s+.+\s+FROM\b/i',
+        '/\bINSERT\s+INTO\b/i',
+        '/\bUPDATE\s+\w+\s+SET\b/i',
+        '/\bDELETE\s+FROM\b/i',
+        '/\bDROP\s+(TABLE|DATABASE|INDEX|VIEW|PROCEDURE)\b/i',
+        '/\bALTER\s+(TABLE|DATABASE)\b/i',
+        '/\bTRUNCATE\s+TABLE\b/i',
+        '/\bEXEC(UTE)?\s*\(/i',
+        // SQL comment sequences used to terminate queries
+        '/--[\s\S]/',
+        '/\/\*[\s\S]*?\*\//',
+        // Dangerous stored procedures
         '/\bxp_cmdshell\b/i',
         '/\bsp_executesql\b/i',
         '/\bwaitfor\s+delay\b/i',
-        '/\bcast\s*\(/i',
-        '/\bconvert\s*\(/i',
-        '/0x[0-9a-f]+/i', // hex encoded strings
-        '/char\s*\(/i',
-        '/concat\s*\(/i',
+        // Hex-encoded payloads
+        '/0x[0-9a-f]{4,}/i',
     ];
 
     /**
@@ -51,15 +60,12 @@ class SecurityValidator
     private const CODE_PATTERNS = [
         '/<\?php/i',
         '/<\?=/i',
-        '/\?>/i',
-        '/<%/i',
-        '/%>/i',
-        '/\$\{.*?\}/', // expression language
-        '/#\{.*?\}/', // interpolation
-        '/\{\{.*?\}\}/', // template literals
-        '/@\w+\(/i', // C# like function calls
+        '/<%[^=]/', // ASP-style tags, but not <%=
+        '/%>/',
+        '/\$\{.*?\}/', // expression language injection
+        '/#\{.*?\}/', // EL interpolation
         '/@System\./i', // C# System calls
-        '/\\\\u[0-9a-f]{4}/i', // unicode escape sequences (escaped backslash)
+        '/\\u[0-9a-f]{4}/i', // unicode escape sequences
     ];
 
     /**
@@ -139,9 +145,8 @@ class SecurityValidator
             return false;
         }
 
-        // Then check for allowed characters (letters, numbers, spaces, basic punctuation, newlines, tabs)
-        // Using character classes for whitespace instead of explicit \n\r\t
-        return (bool) preg_match('/^[\p{L}\p{N}\s\-\.\,\:\;\(\)\[\]\{\}\"\'\!\?]+$/u', $input);
+        // Then check for allowed characters (letters, numbers, spaces, and common punctuation)
+        return (bool) preg_match('/^[\p{L}\p{N}\s\-\.\,\:\;\(\)\[\]\{\}\"\'\!\?\&\%\+\/\#\@\*\=]+$/u', $input);
     }
 
     /**
