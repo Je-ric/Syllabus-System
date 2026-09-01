@@ -48,6 +48,18 @@
                         </form>
                     </x-layout.card-section>
 
+                @elseif ($colleges->count() === 1)
+                    <x-layout.card-section title="College" icon="bx-buildings">
+                        <div class="relative">
+                            <div class="w-full rounded-[14px] border border-[#e4e4e7] bg-[#f4f4f5] px-3 py-2 pr-9 text-[13px] text-[#a1a1aa] cursor-not-allowed truncate">
+                                {{ $colleges->first()->name }}
+                            </div>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                <i class="bx bx-lock-alt text-[#d4d4d8] text-base"></i>
+                            </div>
+                        </div>
+                    </x-layout.card-section>
+
                 @elseif ($noAssignment)
                     <x-layout.card-section title="Select College" icon="bx-buildings">
                         <x-form.select disabled>
@@ -76,6 +88,18 @@
                                     @endforeach
                                 </x-form.select>
                             </form>
+                        </x-layout.card-section>
+
+                    @elseif ($departments->count() === 1)
+                        <x-layout.card-section title="Department" icon="bx-sitemap">
+                            <div class="relative">
+                                <div class="w-full rounded-[14px] border border-[#e4e4e7] bg-[#f4f4f5] px-3 py-2 pr-9 text-[13px] text-[#a1a1aa] cursor-not-allowed truncate">
+                                    {{ $departments->first()->name }}
+                                </div>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                    <i class="bx bx-lock-alt text-[#d4d4d8] text-base"></i>
+                                </div>
+                            </div>
                         </x-layout.card-section>
 
                     @elseif ($departments->count() === 0)

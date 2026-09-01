@@ -50,18 +50,13 @@ class GoalObjectiveService
 
     public function getAccessibleDepartments(User $user, int $collegeId)
     {
+        // Only return the department the user is assigned to as chair — not all departments
+        // they may be a faculty member of. Faculty assignments in other departments must not
+        // grant access to manage objectives for those departments.
         $assignment = $user->getPrimaryDepartmentAssignment();
 
         if ($assignment?->department && (int) $assignment->department->college_id === (int) $collegeId) {
-            return Department::where('college_id', $collegeId)
-                ->whereHas('userAssignments', fn ($q) => $q->where('user_id', $user->id)->whereIn('context', ['chair', 'faculty']))
-                ->orderBy('name')
-                ->get();
-        }
-
-        if ($user->hasRole('chair')) {
-            return Department::where('college_id', $collegeId)
-                ->orderBy('name')
+            return Department::where('id', $assignment->department_id)
                 ->get();
         }
 
