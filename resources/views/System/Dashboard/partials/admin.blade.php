@@ -108,7 +108,7 @@
                     <p class="text-[11px] text-[#72809E] mt-1 font-medium">registered accounts</p>
                 </div>
                 @if (($data['pending_approvals'] ?? 0) > 0)
-                    <a href="{{ route('account-approval.index') }}"
+                    <a href="{{ route('accounts.approval') }}"
                        class="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold
                               bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200 hover:bg-amber-100 transition-colors">
                         <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
