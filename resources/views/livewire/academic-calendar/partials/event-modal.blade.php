@@ -50,14 +50,19 @@
                         <p class="text-[11px] font-semibold text-[#71717a] mb-1.5">Reference Events</p>
                         <div class="flex flex-wrap gap-2">
                             <button type="button"
-                                x-on:click="type = 'holiday'; name = 'Class Suspension'"
+                                x-on:click="type = 'other'; name = 'Lantern Festival'"
                                 class="text-[11px] px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 flex items-center gap-1">
-                                <i class="bx bx-info-circle text-xs"></i> Suspension
+                                <i class="bx bx-info-circle text-xs"></i> Lantern Festival
                             </button>
                             <button type="button"
-                                x-on:click="type = 'other'; name = 'Department Meeting'"
+                                x-on:click="type = 'other'; name = 'SIKAD Week'"
                                 class="text-[11px] px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 flex items-center gap-1">
-                                <i class="bx bx-info-circle text-xs"></i> Meeting
+                                <i class="bx bx-info-circle text-xs"></i> SIKAD Week
+                            </button>
+                            <button type="button"
+                                x-on:click="type = 'other'; name = 'Intramurals'"
+                                class="text-[11px] px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 flex items-center gap-1">
+                                <i class="bx bx-info-circle text-xs"></i> Intramurals
                             </button>
                         </div>
                     </div>
@@ -119,7 +124,7 @@
                         onblur="this.style.boxShadow='none'">
                         <option value="holiday">Holiday (Reference)</option>
                         <option value="other">Other (Reference)</option>
-                        <option value="break">⏭Break (Skip Week)</option>
+                        <option value="break">Break (Skip Week)</option>
                         <option value="exam">Exam (Lock Week)</option>
                         <option value="non_teaching">Non-Teaching (Lock Week)</option>
                     </select>
