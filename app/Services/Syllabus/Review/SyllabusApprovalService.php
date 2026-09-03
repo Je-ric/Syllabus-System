@@ -4,6 +4,7 @@ namespace App\Services\Syllabus\Review;
 
 use App\Models\AuditLog;
 use App\Models\Syllabus;
+use App\Models\User;
 use Illuminate\Validation\ValidationException;
 
 // Handles all approved_by / concurred_by mutations on a syllabus.
@@ -24,8 +25,8 @@ class SyllabusApprovalService
             module: 'Syllabus',
             referenceId: $syllabus->id,
             description: $userId
-                ? "Set approved-by to user #{$userId} on syllabus #{$syllabus->id}."
-                : "Cleared approved-by on syllabus #{$syllabus->id}."
+                ? 'Set approved-by to ' . $this->userName($userId) . ' on ' . $this->syllabusLabel($syllabus) . '.'
+                : 'Cleared approved-by on ' . $this->syllabusLabel($syllabus) . '.'
         );
     }
 
@@ -37,7 +38,7 @@ class SyllabusApprovalService
             action: 'approved_by_cleared',
             module: 'Syllabus',
             referenceId: $syllabus->id,
-            description: "Cleared approved-by on syllabus #{$syllabus->id}."
+            description: 'Cleared approved-by on ' . $this->syllabusLabel($syllabus) . '.'
         );
     }
 
@@ -61,8 +62,8 @@ class SyllabusApprovalService
             module: 'Syllabus',
             referenceId: $syllabus->id,
             description: $userId
-                ? "Set concurred-by to user #{$userId} on syllabus #{$syllabus->id}."
-                : "Cleared concurred-by on syllabus #{$syllabus->id}."
+                ? 'Set concurred-by to ' . $this->userName($userId) . ' on ' . $this->syllabusLabel($syllabus) . '.'
+                : 'Cleared concurred-by on ' . $this->syllabusLabel($syllabus) . '.'
         );
     }
 
@@ -74,7 +75,22 @@ class SyllabusApprovalService
             action: 'concurred_by_cleared',
             module: 'Syllabus',
             referenceId: $syllabus->id,
-            description: "Cleared concurred-by on syllabus #{$syllabus->id}."
+            description: 'Cleared concurred-by on ' . $this->syllabusLabel($syllabus) . '.'
         );
+    }
+
+    private function userName(int $userId): string
+    {
+        return User::find($userId)?->name ?? "user #{$userId}";
+    }
+
+    private function syllabusLabel(Syllabus $syllabus): string
+    {
+        $syllabus->loadMissing('course');
+        $courseCode = $syllabus->course?->course_code;
+
+        return $courseCode
+            ? "syllabus #{$syllabus->id} ({$courseCode})"
+            : "syllabus #{$syllabus->id}";
     }
 }

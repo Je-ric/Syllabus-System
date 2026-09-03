@@ -42,11 +42,18 @@ class UserController extends Controller
             'time' => ['required', 'string', 'max:100', new NoInjectionRule()],
         ]);
 
-        UserConsultationHour::create([
+        $hour = UserConsultationHour::create([
             'user_id' => Auth::id(),
             'day'     => $validated['day'],
             'time'    => $validated['time'],
         ]);
+
+        AuditLog::record(
+            action: 'created',
+            module: 'Consultation Hours',
+            referenceId: $hour->id,
+            description: "Added consultation hours on {$hour->day} at {$hour->time}."
+        );
 
         return back()->with('toast', ['message' => 'Consultation hour added.', 'type' => 'success']);
     }
@@ -54,7 +61,16 @@ class UserController extends Controller
     public function destroyConsultationHour(UserConsultationHour $hour)
     {
         abort_if($hour->user_id !== Auth::id(), 403);
+        $description = "Removed consultation hours on {$hour->day} at {$hour->time}.";
+        $hourId = $hour->id;
         $hour->delete();
+
+        AuditLog::record(
+            action: 'deleted',
+            module: 'Consultation Hours',
+            referenceId: $hourId,
+            description: $description
+        );
         return back()->with('toast', ['message' => 'Consultation hour removed.', 'type' => 'success']);
     }
 
@@ -89,7 +105,7 @@ class UserController extends Controller
             action: 'updated',
             module: 'Profile',
             referenceId: $user->id,
-            description: "User updated their profile."
+            description: "Updated profile details for {$user->name} ({$user->email})."
         );
 
         return redirect()
@@ -172,6 +188,13 @@ class UserController extends Controller
         $this->otpService->clear($user, OtpService::PURPOSE_PASSWORD_CHANGE);
 
         $request->session()->forget(self::PASSWORD_CHANGE_OTP_SESSION_KEY);
+
+        AuditLog::record(
+            action: 'password_changed',
+            module: 'Profile',
+            referenceId: $user->id,
+            description: "Changed the account password for {$user->name} ({$user->email})."
+        );
 
         return redirect()
             ->route('profile.index')

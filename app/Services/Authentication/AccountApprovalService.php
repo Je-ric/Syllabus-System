@@ -168,11 +168,12 @@ class AccountApprovalService
                 action: 'roles_updated',
                 module: 'Account Approval',
                 referenceId: $user->id,
-                description: 'Updated roles for ' . $user->name . '. New roles: ' . implode(', ', $newRoleNames) . '.'
+                description: 'Updated roles for ' . $user->name
+                    . '. Previous roles: ' . ($oldRoleNames ? implode(', ', $oldRoleNames) : 'none')
+                    . '. New roles: ' . ($newRoleNames ? implode(', ', $newRoleNames) : 'none') . '.'
             );
 
             return $user;
         });
     }
 }
-

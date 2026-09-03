@@ -188,7 +188,7 @@ class AccountApprovalController extends Controller
             action: 'updated',
             module: 'Account Approval',
             referenceId: $user->id,
-            description: "Admin edited user {$user->name} ({$user->email})."
+            description: "Updated phone number and office details for {$user->name} ({$user->email})."
         );
 
         // Clear old input after successful submission

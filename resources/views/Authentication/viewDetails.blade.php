@@ -155,8 +155,10 @@
                         </div>
                         <div>
                             <x-form.label class="block">Email</x-form.label>
-                            <x-form.input type="email" name="email" class="mt-1.5"
-                                :value="old('email', $user->email)" required :disabled="$isAdmin" />
+                            <x-form.input type="email" name="email"
+                                :value="old('email', $user->email)" required readonly
+                                class="mt-1.5 bg-[#f4f4f5] text-[#71717a] cursor-not-allowed" />
+                            <p class="mt-1 text-[11px] text-[#94a3b8]">Email cannot be changed here.</p>
                             @error('email')<span class="text-rose-600 text-xs">{{ $message }}</span>@enderror
                         </div>
                         <div>
