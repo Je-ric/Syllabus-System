@@ -116,10 +116,10 @@ class SyllabusWizard extends Component
             $this->currentStep = $previousStep;
             $this->syllabus->update(['current_step' => $previousStep]);
             $this->dispatch('syllabus-step-changed', step: $previousStep);
-            
-            $this->dispatch('lw-toast', type: 'error', message: "Save failed: {$error}. Returning to previous step.");
+
+            $this->dispatch('lw-toast', type: 'error', message: "Couldn't save your changes. Please try again.");
         } else {
-            $this->dispatch('lw-toast', type: 'error', message: "Save failed: {$error}");
+            $this->dispatch('lw-toast', type: 'error', message: "Couldn't save your changes. Please try again.");
         }
     }
 
@@ -365,12 +365,12 @@ class SyllabusWizard extends Component
             || $completion->isMissing($syllabusId, 'course_outcomes',   $hasLecLab)
             || $completion->isMissing($syllabusId, 'weekly_coverage',   $hasLecLab)
             || $completion->isMissing($syllabusId, 'course_evaluation', $hasLecLab)) {
-            $this->dispatch('lw-toast', type: 'error', message: 'Complete all required fields before submitting.');
+            $this->dispatch('lw-toast', type: 'error', message: 'Please fill in all required information first.');
             return null;
         }
 
         if (($this->stepDirty['course_outcomes'] ?? false) === true) { // set via setStepDirty(), no re-render
-            $this->dispatch('lw-toast', type: 'warning', message: 'Save Course Outcomes first before submitting.');
+            $this->dispatch('lw-toast', type: 'warning', message: 'Please save your Course Outcomes first.');
             return null;
         }
 

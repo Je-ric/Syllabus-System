@@ -165,24 +165,17 @@ class WeeklyCoverageStep extends Component
 
         if ($ok) {
             $this->loadData();
-            
+
             // Get generation statistics for better user feedback
             $stats = app(\App\Services\Syllabus\Weeks\CalendarWeekSequenceBuilder::class)
                 ->getGenerationStats($syllabus->academicCalendar, (int) $syllabus->academic_calendar_id);
-            
-            $message = "Weekly coverage generated ({$stats['totalWeeks']} weeks";
-            if ($stats['skippedWeeks'] > 0) {
-                $message .= ", {$stats['skippedWeeks']} skipped";
-            }
-            if ($stats['lockedWeeks'] > 0) {
-                $message .= ", {$stats['lockedWeeks']} locked";
-            }
-            $message .= ").";
-            
+
+            $message = "{$stats['totalWeeks']} weeks created successfully.";
+
             $this->dispatch('lw-toast', type: 'success', message: $message);
             $this->dispatch('syllabus-step-saved', step: 'weekly_coverage');
         }
-        
+
         $this->dispatch('syllabus-save-finished');
     }
 
@@ -193,7 +186,7 @@ class WeeklyCoverageStep extends Component
 
         if ($syllabus?->academicCalendar && ! $syllabus->academicCalendar->is_active) {
             $this->dispatch('lw-toast', type: 'error',
-                message: 'Refresh Dates can only be used with the active academic calendar. Go to Step 1 and switch to the current active calendar first.');
+                message: 'Please use the current active academic calendar to refresh dates.');
             $this->dispatch('syllabus-save-finished');
             return;
         }
@@ -241,7 +234,7 @@ class WeeklyCoverageStep extends Component
 
         $this->loadData();
 
-        $this->dispatch('lw-toast', type: 'success', message: 'Weeks rebuilt from scratch. All previous content has been cleared.');
+        $this->dispatch('lw-toast', type: 'success', message: 'Weeks reset. All content has been removed.');
         $this->dispatch('syllabus-step-saved', step: 'weekly_coverage');
         $this->dispatch('syllabus-save-finished');
     }
@@ -359,7 +352,7 @@ class WeeklyCoverageStep extends Component
             }
             if (empty($input['course_outcome_id'] ?? null)) {
                 $this->dispatch('lw-toast', type: 'error',
-                    message: "Week {$wn} needs a Course Outcome before saving all weeks.");
+                    message: "Please fill in all weeks to use Save All. You can save individual weeks instead.");
                 $this->dispatch('syllabus-save-finished');
                 return;
             }
@@ -531,7 +524,7 @@ class WeeklyCoverageStep extends Component
             $this->activeComponent,
             $this->syllabusWeeks
         );
-        
+
         $this->isLoaded = true;
     }
 }

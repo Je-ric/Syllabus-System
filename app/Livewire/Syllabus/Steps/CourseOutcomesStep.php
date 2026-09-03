@@ -94,14 +94,14 @@ class CourseOutcomesStep extends Component
             $service->delete($this->syllabusId, $outcomeId);
         } catch (\Throwable $e) {
             report($e);
-            $this->dispatch('lw-toast', type: 'error', message: 'Unable to delete Course Outcome.');
+            $this->dispatch('lw-toast', type: 'error', message: 'Could not delete this Course Outcome.');
             $this->dispatch('co-save-failed');
             return;
         }
 
         $this->outcomes = $service->all($this->syllabusId);
         $this->dispatch('co-all-saved', outcomes: $this->outcomes);
-        $this->dispatch('lw-toast', type: 'success', message: 'Course Outcome deleted.');
+        $this->dispatch('lw-toast', type: 'success', message: 'Course Outcome removed.');
         $this->dispatch('syllabus-course-outcomes-updated');
     }
 
