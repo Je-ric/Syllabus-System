@@ -10,7 +10,7 @@
 
 <x-modal.dialog :id="$modalId" maxWidth="max-w-lg" width="w-11/12" variant="edit">
     @php
-        $hasEditErrors = $errors->hasAny(['name', 'email', 'phone_number', 'office'])
+        $hasEditErrors = $errors->hasAny(['phone_number', 'office'])
                       && (string) old('user_id') === (string) $user->id;
     @endphp
 
@@ -26,13 +26,11 @@
             origPhone: @js($user->phone_number ?? ''),
             origOffice: @js($user->office ?? ''),
             get hasChanged() {
-                return this.name.trim()  !== this.origName.trim()
-                    || this.email.trim() !== this.origEmail.trim()
-                    || this.phone.trim() !== this.origPhone.trim()
+                return this.phone.trim() !== this.origPhone.trim()
                     || this.office.trim() !== this.origOffice.trim();
             },
             get canSubmit() {
-                return this.hasChanged && this.name.trim() !== '' && this.email.trim() !== '';
+                return this.hasChanged;
             },
             resetForm() {
                 this.name = this.origName;
@@ -108,18 +106,9 @@
                         <x-form.input type="text" name="name"
                             value="{{ $user->name }}"
                             x-model="name"
-                            pattern="[\p{L}\s]+"
-                            title="Name must contain letters and spaces only"
-                            ::readonly="submitting"
-                            ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
-                            required />
-                        @if($hasEditErrors)
-                            @error('name')
-                                <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
-                                    <i class="bx bx-error-circle"></i> {{ $message }}
-                                </p>
-                            @enderror
-                        @endif
+                            readonly
+                            class="bg-[#f4f4f5] text-[#71717a] cursor-not-allowed" />
+                        <p class="mt-1 text-[11px] text-[#94a3b8]">Name cannot be changed here.</p>
                     </div>
                     <div>
                         <x-modal.modal-label>Phone Number</x-modal.modal-label>
@@ -139,19 +128,12 @@
                     </div>
                     <div>
                         <x-modal.modal-label isRequired>Email Address</x-modal.modal-label>
-                        <x-form.input type="text" name="email"
+                        <x-form.input type="email" name="email"
                             value="{{ $user->email }}"
                             x-model="email"
-                            ::readonly="submitting"
-                            ::class="submitting ? 'opacity-60 cursor-not-allowed' : ''"
-                            required />
-                        @if($hasEditErrors)
-                            @error('email')
-                                <p class="text-xs text-[#E52F28] flex items-center gap-1 mt-1">
-                                    <i class="bx bx-error-circle"></i> {{ $message }}
-                                </p>
-                            @enderror
-                        @endif
+                            readonly
+                            class="bg-[#f4f4f5] text-[#71717a] cursor-not-allowed" />
+                        <p class="mt-1 text-[11px] text-[#94a3b8]">Email cannot be changed here.</p>
                     </div>
                     <div class="sm:col-span-2">
                         <x-modal.modal-label>Office / Department</x-modal.modal-label>
@@ -172,7 +154,7 @@
                 </div>
 
                 <x-feedback-status.alert type="warning" :showTitle="false"
-                    message="Changes take effect immediately. Email changes will update the user's login credentials." />
+                    message="Phone number and office changes take effect immediately. Name and email are read-only." />
             </div>
         </x-modal.body>
 

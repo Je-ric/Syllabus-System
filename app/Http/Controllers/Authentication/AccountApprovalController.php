@@ -181,7 +181,8 @@ class AccountApprovalController extends Controller
         }
 
         $user = \App\Models\User::findOrFail($request->input('user_id'));
-        $user->update($request->only('name', 'email', 'phone_number', 'office'));
+        // Name and email are identity fields and cannot be changed from Account Approval.
+        $user->update($request->only('phone_number', 'office'));
 
         AuditLog::record(
             action: 'updated',
