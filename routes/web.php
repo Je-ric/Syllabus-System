@@ -177,8 +177,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/syllabus/saved/{completeSyllabus}/abridged/preview', [SyllabusController::class, 'previewSavedAbridged'])->name('syllabus.saved.abridged.preview');
         Route::get('/syllabus/saved/{completeSyllabus}/assessment/preview', [SyllabusController::class, 'previewSavedAssessment'])->name('syllabus.saved.assessment.preview');
         Route::get('/syllabus/saved/{completeSyllabus}/download', [SyllabusController::class, 'downloadSavedComplete'])->name('syllabus.saved.complete.download');
+        Route::get('/syllabus/saved/{completeSyllabus}/download/html', [SyllabusController::class, 'downloadSavedCompleteHtml'])->name('syllabus.saved.complete.html.download');
         Route::get('/syllabus/saved/{completeSyllabus}/abridged/download', [SyllabusController::class, 'downloadSavedAbridged'])->name('syllabus.saved.abridged.download');
+        Route::get('/syllabus/saved/{completeSyllabus}/abridged/download/html', [SyllabusController::class, 'downloadSavedAbridgedHtml'])->name('syllabus.saved.abridged.html.download');
         Route::get('/syllabus/saved/{completeSyllabus}/assessment/download', [SyllabusController::class, 'downloadSavedAssessment'])->name('syllabus.saved.assessment.download');
+        Route::get('/syllabus/saved/{completeSyllabus}/assessment/download/html', [SyllabusController::class, 'downloadSavedAssessmentHtml'])->name('syllabus.saved.assessment.html.download');
 
         // Live syllabus — wildcard {syllabus} must come after all static-segment routes
         Route::get('/syllabus/{syllabus}', [SyllabusController::class, 'show'])->name('syllabus.show');

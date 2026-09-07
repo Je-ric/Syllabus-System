@@ -51,6 +51,8 @@
         top: 0;
         right: 0;
         height: 100vh;
+        height: 100dvh;
+        box-sizing: border-box;
         width: 450px;
         max-width: calc(100vw - 38px);
         z-index: 100000;
@@ -104,6 +106,9 @@
     }
 
     .vd-body {
+        min-width: 0;
+        min-height: 0;
+        overflow-wrap: anywhere;
         padding: 12px 14px 16px;
         overflow: auto;
         flex: 1;
@@ -183,6 +188,7 @@
     }
 
     .vd-version-top {
+        flex-wrap: wrap;
         display: flex;
         justify-content: space-between;
         align-items: baseline;
@@ -199,22 +205,27 @@
     .vd-date {
         font-size: 11px;
         color: #64748b;
-        white-space: nowrap;
+        white-space: normal;
     }
 
     .vd-actions {
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-columns: minmax(0, 1fr);
         gap: 8px;
     }
 
     .vd-action-group {
-        display: flex;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 40px 40px;
+        min-width: 0;
         gap: 6px;
         align-items: center;
     }
 
     .vd-action-group a {
+        min-width: 0;
+        box-sizing: border-box;
+        overflow-wrap: anywhere;
         flex: 1;
         font-weight: 800;
         justify-content: center;
@@ -241,6 +252,16 @@
         box-shadow: 0 4px 12px rgba(0, 150, 57, 0.3);
     }
 
+    .vd-download svg {
+        width: 17px;
+        height: 17px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
     .vd-empty {
         font-size: 12px;
         color: #64748b;
@@ -256,6 +277,7 @@
         }
     }
 </style>
+
 
 @if ($openButton === 'floating')
     <button type="button" class="versions-fab" onclick="openSyllabusVersions()">Versions</button>
@@ -305,15 +327,18 @@
                 <div class="vd-actions">
                     <div class="vd-action-group">
                         <a href="{{ route('syllabus.saved.complete.preview', $v) }}">Complete</a>
-                        <a class="vd-download" href="{{ route('syllabus.saved.complete.download', $v) }}">↓</a>
+                        <x-ui.file-download href="{{ route('syllabus.saved.complete.html.download', $v) }}" format="html" label="Download complete syllabus as HTML" />
+                        <x-ui.file-download href="{{ route('syllabus.saved.complete.download', $v) }}" format="pdf" label="Download complete syllabus as PDF" />
                     </div>
                     <div class="vd-action-group">
                         <a href="{{ route('syllabus.saved.abridged.preview', $v) }}">Abridged</a>
-                        <a class="vd-download" href="{{ route('syllabus.saved.abridged.download', $v) }}">↓</a>
+                        <x-ui.file-download href="{{ route('syllabus.saved.abridged.html.download', $v) }}" format="html" label="Download abridged syllabus as HTML" />
+                        <x-ui.file-download href="{{ route('syllabus.saved.abridged.download', $v) }}" format="pdf" label="Download abridged syllabus as PDF" />
                     </div>
                     <div class="vd-action-group">
                         <a href="{{ route('syllabus.saved.assessment.preview', $v) }}">Assessment</a>
-                        <a class="vd-download" href="{{ route('syllabus.preview.assessment.download', $syllabus) }}">↓</a>
+                        <x-ui.file-download href="{{ route('syllabus.saved.assessment.html.download', $v) }}" format="html" label="Download assessment plan as HTML" />
+                        <x-ui.file-download href="{{ route('syllabus.saved.assessment.download', $v) }}" format="pdf" label="Download assessment plan as PDF" />
                     </div>
                 </div>
             </div>

@@ -9,6 +9,7 @@ use App\Models\Program;
 use App\Models\Syllabus;
 use App\Services\Syllabus\SyllabusDeleteService;
 use App\Services\Syllabus\Snapshots\SyllabusPreviewService;
+use App\Services\Syllabus\Snapshots\SyllabusPdfService;
 use App\Services\Syllabus\Snapshots\SyllabusSnapshotService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,6 +21,7 @@ class SyllabusController extends Controller
     public function __construct(
         private readonly SyllabusPreviewService  $previewService,
         private readonly SyllabusSnapshotService $snapshotService,
+        private readonly SyllabusPdfService      $pdfService,
         private readonly SyllabusDeleteService   $deleteService,
     ) {}
 
@@ -125,6 +127,15 @@ class SyllabusController extends Controller
                 ]);
         }
 
+        $syllabus->loadMissing(['course', 'academicCalendar']);
+        $courseCode = $syllabus->course?->course_code ?? "course #{$syllabus->course_id}";
+        $courseTitle = $syllabus->course?->course_title;
+        $courseLabel = $courseTitle ? "{$courseCode} ({$courseTitle})" : $courseCode;
+        $term = $syllabus->academicCalendar
+            ? "{$syllabus->academicCalendar->academic_year}, {$syllabus->academicCalendar->semester} semester"
+            : 'academic term not specified';
+        $syllabusId = $syllabus->id;
+
         // Cascade-delete all child records and disk files.
         // SyllabusDeleteService::delete() owns its own transaction internally.
         $this->deleteService->delete($syllabus);
@@ -132,8 +143,8 @@ class SyllabusController extends Controller
         AuditLog::record(
             action: 'deleted',
             module: 'Syllabus',
-            referenceId: $syllabus->id,
-            description: "Deleted draft syllabus for course #{$syllabus->course_id}."
+            referenceId: $syllabusId,
+            description: "Deleted draft syllabus for {$courseLabel}, {$term}."
         );
 
         return redirect()->route('syllabus.index')
@@ -238,36 +249,21 @@ class SyllabusController extends Controller
     {
         $this->authorizeSyllabusAccess($syllabus);
         $html     = $this->snapshotService->generateCompleteHtml($syllabus);
-        $filename = 'syllabus-complete-' . $syllabus->course->course_code . '.html';
-
-        return response($html, 200, [
-            'Content-Type'        => 'text/html; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ]);
+        return $this->pdfDownload($html, 'syllabus-complete-' . $syllabus->course->course_code . '.pdf');
     }
 
     public function downloadAbridged(Syllabus $syllabus)
     {
         $this->authorizeSyllabusAccess($syllabus);
         $html     = $this->snapshotService->generateAbridgedHtml($syllabus);
-        $filename = 'syllabus-abridged-' . $syllabus->course->course_code . '.html';
-
-        return response($html, 200, [
-            'Content-Type'        => 'text/html; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ]);
+        return $this->pdfDownload($html, 'syllabus-abridged-' . $syllabus->course->course_code . '.pdf');
     }
 
     public function downloadAssessment(Syllabus $syllabus)
     {
         $this->authorizeSyllabusAccess($syllabus);
         $html     = $this->snapshotService->generateAssessmentHtml($syllabus);
-        $filename = 'syllabus-assessment-' . $syllabus->course->course_code . '.html';
-
-        return response($html, 200, [
-            'Content-Type'        => 'text/html; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ]);
+        return $this->pdfDownload($html, 'syllabus-assessment-' . $syllabus->course->course_code . '.pdf');
     }
 
     // ── Saved versions ────────────────────────────────────────────────────────
@@ -303,12 +299,15 @@ class SyllabusController extends Controller
             abort(400, 'No assessment path stored.');
         }
 
-        $html = $this->readSavedFile($path) ?? abort(404, 'Assessment saved version file not found.');
+        return $this->savedPdfDownload($path);
+    }
 
-        return response($html, 200, [
-            'Content-Type'        => 'text/html; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="' . basename($path) . '"',
-        ]);
+    public function downloadSavedAssessmentHtml(CompleteSyllabus $completeSyllabus)
+    {
+        $syllabus = $completeSyllabus->syllabus()->firstOrFail();
+        $this->authorizeSyllabusAccess($syllabus);
+
+        return $this->savedHtmlDownload((string) $completeSyllabus->evaluation_path);
     }
 
     public function previewSavedComplete(CompleteSyllabus $completeSyllabus)
@@ -342,12 +341,15 @@ class SyllabusController extends Controller
             abort(400, 'No complete path stored.');
         }
 
-        $html = $this->readSavedFile($path) ?? abort(404, 'Saved version file not found.');
+        return $this->savedPdfDownload($path);
+    }
 
-        return response($html, 200, [
-            'Content-Type'        => 'text/html; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="' . basename($path) . '"',
-        ]);
+    public function downloadSavedCompleteHtml(CompleteSyllabus $completeSyllabus)
+    {
+        $syllabus = $completeSyllabus->syllabus()->firstOrFail();
+        $this->authorizeSyllabusAccess($syllabus);
+
+        return $this->savedHtmlDownload((string) $completeSyllabus->pdf_path);
     }
 
     public function previewSavedAbridged(CompleteSyllabus $completeSyllabus)
@@ -381,12 +383,15 @@ class SyllabusController extends Controller
             abort(400, 'No abridged path stored.');
         }
 
-        $html = $this->readSavedFile($path) ?? abort(404, 'Abridged saved version file not found.');
+        return $this->savedPdfDownload($path);
+    }
 
-        return response($html, 200, [
-            'Content-Type'        => 'text/html; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="' . basename($path) . '"',
-        ]);
+    public function downloadSavedAbridgedHtml(CompleteSyllabus $completeSyllabus)
+    {
+        $syllabus = $completeSyllabus->syllabus()->firstOrFail();
+        $this->authorizeSyllabusAccess($syllabus);
+
+        return $this->savedHtmlDownload((string) $completeSyllabus->abridged_path);
     }
 
     // ── Private helpers ───────────────────────────────────────────────────────
@@ -402,6 +407,56 @@ class SyllabusController extends Controller
         }
 
         return compact('program', 'groupedCourses');
+    }
+
+    private function savedPdfDownload(string $htmlPath)
+    {
+        $pdfPath = preg_replace('/\.html?$/i', '.pdf', $htmlPath) ?: $htmlPath . '.pdf';
+        $disk = Storage::disk('syllabus_snapshots');
+
+        if ($disk->exists($pdfPath)) {
+            return response($disk->get($pdfPath), 200, $this->pdfHeaders(basename($pdfPath)));
+        }
+
+        $html = $this->readSavedFile($htmlPath) ?? abort(404, 'Saved version file not found.');
+        $pdf = $this->pdfService->render($html);
+        $disk->put($pdfPath, $pdf);
+
+        try {
+            Storage::disk('google')->put($pdfPath, $pdf);
+        } catch (\Throwable) {
+            // The local snapshot disk remains the source of truth.
+        }
+
+        return response($pdf, 200, $this->pdfHeaders(basename($pdfPath)));
+    }
+
+    private function savedHtmlDownload(string $path)
+    {
+        $path = trim($path);
+        if ($path === '') {
+            abort(400, 'No HTML snapshot path stored.');
+        }
+
+        $html = $this->readSavedFile($path) ?? abort(404, 'Saved version file not found.');
+
+        return response($html, 200, [
+            'Content-Type'        => 'text/html; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . str_replace('"', '', basename($path)) . '"',
+        ]);
+    }
+
+    private function pdfDownload(string $html, string $filename)
+    {
+        return response($this->pdfService->render($html), 200, $this->pdfHeaders($filename));
+    }
+
+    private function pdfHeaders(string $filename): array
+    {
+        return [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . str_replace('"', '', $filename) . '"',
+        ];
     }
 
     // Read a saved snapshot from local disk first, Google Drive fallback.

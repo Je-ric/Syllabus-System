@@ -40,18 +40,21 @@
                         $completeIsExt    = preg_match('#^https?://#i', $completePath) || str_starts_with($completePath, '/');
                         $completePreview  = $completeIsExt ? $completePath : route('syllabus.saved.complete.preview',  $sv['id']);
                         $completeDownload = $completeIsExt ? null          : route('syllabus.saved.complete.download', $sv['id']);
+                        $completeHtmlDownload = $completeIsExt ? null : route('syllabus.saved.complete.html.download', $sv['id']);
 
                         $abridgedPath     = (string) ($sv['abridged_path'] ?? '');
                         $hasAbridged      = $abridgedPath !== '';
                         $abridgedIsExt    = $hasAbridged && (preg_match('#^https?://#i', $abridgedPath) || str_starts_with($abridgedPath, '/'));
                         $abridgedPreview  = $hasAbridged ? ($abridgedIsExt ? $abridgedPath : route('syllabus.saved.abridged.preview',  $sv['id'])) : null;
                         $abridgedDownload = ($hasAbridged && ! $abridgedIsExt) ? route('syllabus.saved.abridged.download', $sv['id']) : null;
+                        $abridgedHtmlDownload = ($hasAbridged && ! $abridgedIsExt) ? route('syllabus.saved.abridged.html.download', $sv['id']) : null;
 
                         $assessPath     = (string) ($sv['evaluation_path'] ?? '');
                         $hasAssess      = $assessPath !== '';
                         $assessIsExt    = $hasAssess && (preg_match('#^https?://#i', $assessPath) || str_starts_with($assessPath, '/'));
                         $assessPreview  = $hasAssess ? ($assessIsExt ? $assessPath : route('syllabus.saved.assessment.preview',  $sv['id'])) : null;
                         $assessDownload = ($hasAssess && ! $assessIsExt) ? route('syllabus.saved.assessment.download', $sv['id']) : null;
+                        $assessHtmlDownload = ($hasAssess && ! $assessIsExt) ? route('syllabus.saved.assessment.html.download', $sv['id']) : null;
 
                         $rfPath     = (string) ($sv['review_form_path'] ?? '');
                         $hasRf      = $rfPath !== '';
@@ -105,9 +108,8 @@
                                             <i class="bx bx-link-external text-sm"></i> Open
                                         </x-ui.button>
                                         @if ($completeDownload)
-                                            <x-ui.button href="{{ $completeDownload }}" variant="outline">
-                                                <i class="bx bx-download text-sm"></i> Download
-                                            </x-ui.button>
+                                            <x-ui.file-download href="{{ $completeHtmlDownload }}" format="html" label="Download complete syllabus as HTML" />
+                                            <x-ui.file-download href="{{ $completeDownload }}" format="pdf" label="Download complete syllabus as PDF" />
                                         @endif
                                     </div>
                                 </div>
@@ -123,9 +125,8 @@
                                                 <i class="bx bx-link-external text-sm"></i> Open
                                             </x-ui.button>
                                             @if ($abridgedDownload)
-                                                <x-ui.button href="{{ $abridgedDownload }}" variant="cancel">
-                                                    <i class="bx bx-download text-sm"></i> Download
-                                                </x-ui.button>
+                                                <x-ui.file-download href="{{ $abridgedHtmlDownload }}" format="html" label="Download abridged syllabus as HTML" />
+                                                <x-ui.file-download href="{{ $abridgedDownload }}" format="pdf" label="Download abridged syllabus as PDF" />
                                             @endif
                                         </div>
                                     @else
@@ -144,9 +145,8 @@
                                                 <i class="bx bx-link-external text-sm"></i> Open
                                             </x-ui.button>
                                             @if ($assessDownload)
-                                                <x-ui.button href="{{ $assessDownload }}" variant="cancel">
-                                                    <i class="bx bx-download text-sm"></i> Download
-                                                </x-ui.button>
+                                                <x-ui.file-download href="{{ $assessHtmlDownload }}" format="html" label="Download assessment plan as HTML" />
+                                                <x-ui.file-download href="{{ $assessDownload }}" format="pdf" label="Download assessment plan as PDF" />
                                             @endif
                                         </div>
                                     @else
