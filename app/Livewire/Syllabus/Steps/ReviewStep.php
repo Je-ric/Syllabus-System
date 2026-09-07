@@ -8,10 +8,11 @@ use App\Models\Syllabus;
 use App\Models\SyllabusReviewForm;
 use App\Models\SyllabusRevision;
 use App\Models\User;
+use App\Helpers\SecurityValidator;
 use App\Services\Syllabus\Review\SyllabusApprovalService;
 use App\Services\Syllabus\Review\SyllabusReviewFormService;
+use App\Services\Syllabus\Review\SyllabusReviewService;
 use App\Services\Syllabus\SyllabusRevisionHistoryService;
-use App\Helpers\SecurityValidator;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -632,16 +633,6 @@ class ReviewStep extends Component
 
     private function syllabusLabel(): string
     {
-        $this->syllabus->loadMissing(['course', 'academicCalendar']);
-        $course = $this->syllabus->course;
-        $calendar = $this->syllabus->academicCalendar;
-        $courseLabel = $course
-            ? "{$course->course_code} ({$course->course_title})"
-            : "syllabus #{$this->syllabus->id}";
-        $term = $calendar
-            ? "{$calendar->academic_year}, {$calendar->semester} semester"
-            : 'academic term not specified';
-
-        return "syllabus {$courseLabel} for {$term}";
+        return app(SyllabusReviewService::class)->syllabusLabel($this->syllabus);
     }
 }

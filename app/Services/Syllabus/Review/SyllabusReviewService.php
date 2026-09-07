@@ -89,7 +89,7 @@ class SyllabusReviewService
         );
     }
 
-    private function syllabusLabel(Syllabus $syllabus): string
+    public function syllabusLabel(Syllabus $syllabus): string
     {
         $syllabus->loadMissing(['course', 'academicCalendar']);
         $course = $syllabus->course;

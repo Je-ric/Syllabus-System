@@ -8,6 +8,7 @@ use App\Models\Syllabus;
 use App\Models\SyllabusReviewForm;
 use App\Models\SyllabusReviewer;
 use App\Services\Syllabus\Review\SyllabusReviewFormService;
+use App\Services\Syllabus\Review\SyllabusReviewService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -283,16 +284,7 @@ class SyllabusReviewPage extends Component
 
     private function syllabusLabel(): string
     {
-        $course = $this->syllabus?->course;
-        $calendar = $this->syllabus?->academicCalendar;
-        $courseLabel = $course
-            ? "{$course->course_code} ({$course->course_title})"
-            : "syllabus #{$this->syllabusId}";
-        $term = $calendar
-            ? "{$calendar->academic_year}, {$calendar->semester} semester"
-            : 'academic term not specified';
-
-        return "syllabus {$courseLabel} for {$term}";
+        return app(SyllabusReviewService::class)->syllabusLabel($this->syllabus);
     }
 
     private function getOrCreateForm(): SyllabusReviewForm

@@ -14,6 +14,11 @@ use Illuminate\Validation\ValidationException;
 //   concurred_by — any dean; nullable; must differ from approved_by when both are set
 class SyllabusApprovalService
 {
+    public function __construct(
+        private readonly SyllabusReviewService $reviewService,
+    ) {
+    }
+
     // ── Approved By ───────────────────────────────────────────────────────────
 
     public function setApprovedBy(Syllabus $syllabus, ?int $userId): void
@@ -25,8 +30,8 @@ class SyllabusApprovalService
             module: 'Syllabus',
             referenceId: $syllabus->id,
             description: $userId
-                ? 'Set approved-by to ' . $this->userName($userId) . ' on ' . $this->syllabusLabel($syllabus) . '.'
-                : 'Cleared approved-by on ' . $this->syllabusLabel($syllabus) . '.'
+                ? 'Set approved-by to ' . $this->userName($userId) . ' on ' . $this->reviewService->syllabusLabel($syllabus) . '.'
+                : 'Cleared approved-by on ' . $this->reviewService->syllabusLabel($syllabus) . '.'
         );
     }
 
@@ -38,7 +43,7 @@ class SyllabusApprovalService
             action: 'approved_by_cleared',
             module: 'Syllabus',
             referenceId: $syllabus->id,
-            description: 'Cleared approved-by on ' . $this->syllabusLabel($syllabus) . '.'
+            description: 'Cleared approved-by on ' . $this->reviewService->syllabusLabel($syllabus) . '.'
         );
     }
 
@@ -62,8 +67,8 @@ class SyllabusApprovalService
             module: 'Syllabus',
             referenceId: $syllabus->id,
             description: $userId
-                ? 'Set concurred-by to ' . $this->userName($userId) . ' on ' . $this->syllabusLabel($syllabus) . '.'
-                : 'Cleared concurred-by on ' . $this->syllabusLabel($syllabus) . '.'
+                ? 'Set concurred-by to ' . $this->userName($userId) . ' on ' . $this->reviewService->syllabusLabel($syllabus) . '.'
+                : 'Cleared concurred-by on ' . $this->reviewService->syllabusLabel($syllabus) . '.'
         );
     }
 
@@ -75,27 +80,12 @@ class SyllabusApprovalService
             action: 'concurred_by_cleared',
             module: 'Syllabus',
             referenceId: $syllabus->id,
-            description: 'Cleared concurred-by on ' . $this->syllabusLabel($syllabus) . '.'
+            description: 'Cleared concurred-by on ' . $this->reviewService->syllabusLabel($syllabus) . '.'
         );
     }
 
     private function userName(int $userId): string
     {
         return User::find($userId)?->name ?? "user #{$userId}";
-    }
-
-    private function syllabusLabel(Syllabus $syllabus): string
-    {
-        $syllabus->loadMissing(['course', 'academicCalendar']);
-        $course = $syllabus->course;
-        $calendar = $syllabus->academicCalendar;
-        $courseLabel = $course
-            ? "{$course->course_code} ({$course->course_title})"
-            : "syllabus #{$syllabus->id}";
-        $term = $calendar
-            ? "{$calendar->academic_year}, {$calendar->semester} semester"
-            : 'academic term not specified';
-
-        return "syllabus {$courseLabel} for {$term}";
     }
 }
