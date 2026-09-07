@@ -188,7 +188,7 @@ class ReviewStep extends Component
                 action: 'submitted',
                 module: 'Syllabus Review Form',
                 referenceId: $this->syllabus->id,
-                description: "Faculty submitted F.003 review form for syllabus #{$this->syllabus->id}."
+                description: "Faculty submitted the F.003 review form for {$this->syllabusLabel()}."
             );
             $this->dispatch('lw-toast', type: 'success', message: 'Review form submitted. Reviewers have been notified.');
         } catch (\Throwable $e) {
@@ -241,7 +241,7 @@ class ReviewStep extends Component
                 action: 'resubmitted_for_review',
                 module: 'Syllabus Review',
                 referenceId: $this->syllabus->id,
-                description: "Faculty resubmitted syllabus #{$this->syllabus->id} for review after revisions."
+                description: "Faculty resubmitted {$this->syllabusLabel()} for review after revisions."
             );
 
             $this->dispatch('lw-toast', type: 'success', message: 'Syllabus resubmitted for review. Reviewers have been notified.');
@@ -341,7 +341,7 @@ class ReviewStep extends Component
             action: $isEdit ? 'updated' : 'created',
             module: 'Syllabus Revision',
             referenceId: $this->syllabus->id,
-            description: ($isEdit ? 'Updated' : 'Added') . " revision #{$revisionNo} on syllabus #{$this->syllabus->id}."
+            description: ($isEdit ? 'Updated' : 'Added') . " revision {$revisionNo} for {$this->syllabusLabel()}."
         );
 
         // 'revision-saved' tells Alpine to reset the form.
@@ -395,7 +395,7 @@ class ReviewStep extends Component
             action: 'deleted',
             module: 'Syllabus Revision',
             referenceId: $this->syllabus->id,
-            description: "Removed revision #{$revisionId} from syllabus #{$this->syllabus->id}."
+            description: "Removed revision record {$revisionId} from {$this->syllabusLabel()}."
         );
 
         $this->dispatch('revision-deleted', id: $revisionId);
@@ -628,5 +628,20 @@ class ReviewStep extends Component
                     'contributors'            => $rev->contributors ?? '',
                 ];
             })->values()->all();
+    }
+
+    private function syllabusLabel(): string
+    {
+        $this->syllabus->loadMissing(['course', 'academicCalendar']);
+        $course = $this->syllabus->course;
+        $calendar = $this->syllabus->academicCalendar;
+        $courseLabel = $course
+            ? "{$course->course_code} ({$course->course_title})"
+            : "syllabus #{$this->syllabus->id}";
+        $term = $calendar
+            ? "{$calendar->academic_year}, {$calendar->semester} semester"
+            : 'academic term not specified';
+
+        return "syllabus {$courseLabel} for {$term}";
     }
 }
