@@ -32,13 +32,14 @@ class UniversityStructureService
 
     public function updateCollege(College $college, array $data): void
     {
+        $previousName = $college->name;
         $college->update(['name' => $data['name']]);
 
         AuditLog::record(
             action: 'updated',
             module: 'Academic Structure',
             referenceId: $college->id,
-            description: "Updated college to {$college->name}."
+            description: "Renamed college from {$previousName} to {$college->name}."
         );
     }
 
@@ -91,12 +92,13 @@ class UniversityStructureService
             'name'       => $data['name'],
             'college_id' => $data['college_id'],
         ]);
+        $department->loadMissing('college');
 
         AuditLog::record(
             action: 'created',
             module: 'Academic Structure',
             referenceId: $department->id,
-            description: "Created department {$department->name} under college #{$department->college_id}."
+            description: "Created department {$department->name} under {$department->college?->name}."
         );
 
         return $department;
@@ -104,16 +106,20 @@ class UniversityStructureService
 
     public function updateDepartment(Department $department, array $data): void
     {
+        $department->loadMissing('college');
+        $previousName = $department->name;
+        $previousCollege = $department->college?->name ?? 'Unknown college';
         $department->update([
             'name'       => $data['name'],
             'college_id' => $data['college_id'],
         ]);
+        $department->load('college');
 
         AuditLog::record(
             action: 'updated',
             module: 'Academic Structure',
             referenceId: $department->id,
-            description: "Updated department {$department->name} under college #{$department->college_id}."
+            description: "Updated department from {$previousName} ({$previousCollege}) to {$department->name} ({$department->college?->name})."
         );
     }
 
@@ -194,7 +200,7 @@ class UniversityStructureService
                 action: 'created',
                 module: 'Academic Structure',
                 referenceId: $program->id,
-                description: "Created program {$program->name} with primary department #{$data['primary_department_id']}."
+                description: "Created program {$program->name} with {$primaryDepartment->name} as its primary department."
             );
 
             DB::commit();
@@ -214,6 +220,10 @@ class UniversityStructureService
     // Returns a string error message if the department change is blocked, null otherwise.
     public function updateProgram(Program $program, array $data): string|null
     {
+        $previousName = $program->name;
+        $previousPrimaryDepartment = $program->departments()
+            ->wherePivot('role', 'primary')
+            ->first()?->name ?? 'Unknown department';
         $currentDeptId = $program->departments()->wherePivot('role', 'primary')->value('departments.id');
         if ((int) $data['primary_department_id'] !== (int) $currentDeptId && $program->courses()->exists()) {
             return 'Cannot change primary department: this program has courses assigned to it. Remove all courses first.';
@@ -264,7 +274,7 @@ class UniversityStructureService
                 action: 'updated',
                 module: 'Academic Structure',
                 referenceId: $program->id,
-                description: "Updated program {$program->name} and set primary department #{$data['primary_department_id']}."
+                description: "Updated program from {$previousName} ({$previousPrimaryDepartment}) to {$program->name} ({$primaryDepartment->name} as primary department)."
             );
 
             DB::commit();
