@@ -86,11 +86,16 @@ class SyllabusApprovalService
 
     private function syllabusLabel(Syllabus $syllabus): string
     {
-        $syllabus->loadMissing('course');
-        $courseCode = $syllabus->course?->course_code;
-
-        return $courseCode
-            ? "syllabus #{$syllabus->id} ({$courseCode})"
+        $syllabus->loadMissing(['course', 'academicCalendar']);
+        $course = $syllabus->course;
+        $calendar = $syllabus->academicCalendar;
+        $courseLabel = $course
+            ? "{$course->course_code} ({$course->course_title})"
             : "syllabus #{$syllabus->id}";
+        $term = $calendar
+            ? "{$calendar->academic_year}, {$calendar->semester} semester"
+            : 'academic term not specified';
+
+        return "syllabus {$courseLabel} for {$term}";
     }
 }

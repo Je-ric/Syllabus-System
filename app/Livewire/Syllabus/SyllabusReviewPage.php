@@ -188,7 +188,7 @@ class SyllabusReviewPage extends Component
             action: 'decision_recorded',
             module: 'Syllabus Review',
             referenceId: $this->syllabusId,
-            description: "Chair recorded decision '{$this->decision}' on syllabus #{$this->syllabusId}."
+            description: "Recorded decision '{$this->decision}' for {$this->syllabusLabel()}."
         );
 
         $this->dispatch('lw-toast', type: 'success', message: 'Decision saved.');
@@ -220,7 +220,7 @@ class SyllabusReviewPage extends Component
             action: 'recommended_approval',
             module: 'Syllabus Review',
             referenceId: $this->syllabusId,
-            description: "Chair #" . Auth::id() . " recommended approval for syllabus #{$this->syllabusId}."
+            description: Auth::user()->name . " recommended approval for {$this->syllabusLabel()}."
         );
 
         $this->dispatch('lw-toast', type: 'success', message: 'Approval recommended.');
@@ -255,7 +255,7 @@ class SyllabusReviewPage extends Component
             action: 'verified_part_h',
             module: 'Syllabus Review',
             referenceId: $this->syllabusId,
-            description: 'Chair verified faculty Part H response on syllabus #' . $this->syllabusId . '.'
+            description: Auth::user()->name . " verified the faculty Part H response for {$this->syllabusLabel()}."
         );
 
         $this->dispatch('lw-toast', type: 'success', message: 'Faculty response marked as verified.');
@@ -279,6 +279,20 @@ class SyllabusReviewPage extends Component
         if (! $assigned) {
             abort(403);
         }
+    }
+
+    private function syllabusLabel(): string
+    {
+        $course = $this->syllabus?->course;
+        $calendar = $this->syllabus?->academicCalendar;
+        $courseLabel = $course
+            ? "{$course->course_code} ({$course->course_title})"
+            : "syllabus #{$this->syllabusId}";
+        $term = $calendar
+            ? "{$calendar->academic_year}, {$calendar->semester} semester"
+            : 'academic term not specified';
+
+        return "syllabus {$courseLabel} for {$term}";
     }
 
     private function getOrCreateForm(): SyllabusReviewForm
