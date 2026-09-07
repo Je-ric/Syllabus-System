@@ -413,7 +413,8 @@ class SyllabusController extends Controller
     {
         $pdfPath = preg_replace('/\.html?$/i', '.pdf', $htmlPath) ?: $htmlPath . '.pdf';
         if (config('syllabus_pdf.driver') === 'dompdf') {
-            $pdfPath = preg_replace('/\.pdf$/i', '.dompdf.pdf', $pdfPath);
+            // Bypass PDFs produced before the XML processing-instruction fix.
+            $pdfPath = preg_replace('/\.pdf$/i', '.dompdf-v2.pdf', $pdfPath);
         }
         $disk = Storage::disk('syllabus_snapshots');
 

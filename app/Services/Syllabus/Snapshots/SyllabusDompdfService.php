@@ -22,6 +22,11 @@ class SyllabusDompdfService
             libxml_use_internal_errors($previous);
         }
         $xpath = new DOMXPath($document);
+        // The encoding hint is only for libxml. Dompdf's HTML parser can treat
+        // the serialized XML instruction as a document that renders blank.
+        foreach (iterator_to_array($xpath->query('//processing-instruction()')) as $node) {
+            $node->parentNode->removeChild($node);
+        }
         $source = $xpath->query('//*[@id="syllabus-content"]')->item(0);
         if (! $source) {
             throw new RuntimeException('This snapshot does not contain the syllabus source required by Dompdf.');
