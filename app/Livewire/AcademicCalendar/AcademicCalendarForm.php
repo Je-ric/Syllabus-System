@@ -138,7 +138,7 @@ class AcademicCalendarForm extends Component
                 'end_date'      => $validated['end_date_1'],
             ]);
 
-            AcademicCalendar::create([
+            $sem2 = AcademicCalendar::create([
                 'academic_year' => $validated['academic_year'],
                 'semester'      => '2nd',
                 'start_date'    => $validated['start_date_2'],
@@ -154,7 +154,13 @@ class AcademicCalendarForm extends Component
                 action: 'created',
                 module: 'Academic Calendar',
                 referenceId: $sem1->id,
-                description: "Created academic calendar for {$validated['academic_year']}."
+                description: "Created the 1st-semester academic calendar for {$validated['academic_year']}."
+            );
+            AuditLog::record(
+                action: 'created',
+                module: 'Academic Calendar',
+                referenceId: $sem2->id,
+                description: "Created the 2nd-semester academic calendar for {$validated['academic_year']}."
             );
 
             DB::commit();

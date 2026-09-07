@@ -98,7 +98,6 @@ class AcademicCalendarController extends Controller
 
         // Block if any syllabus is linked to this academic year's calendars
         $calendarIds = $calendars->pluck('id');
-
         $linkedSyllabi = Syllabus::whereIn('academic_calendar_id', $calendarIds)->count();
 
         if ($linkedSyllabi > 0) {
@@ -114,12 +113,14 @@ class AcademicCalendarController extends Controller
         try {
             AcademicCalendar::whereIn('id', $calendarIds)->delete();
 
-            AuditLog::record(
-                action: 'deleted',
-                module: 'Academic Calendar',
-                referenceId: null,
-                description: "Deleted academic calendar for {$academic_year}."
-            );
+            foreach ($calendars as $calendar) {
+                AuditLog::record(
+                    action: 'deleted',
+                    module: 'Academic Calendar',
+                    referenceId: $calendar->id,
+                    description: "Deleted the {$calendar->semester}-semester academic calendar for {$academic_year}."
+                );
+            }
 
             DB::commit();
         } catch (\Throwable $e) {
