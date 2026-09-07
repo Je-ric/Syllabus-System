@@ -412,6 +412,9 @@ class SyllabusController extends Controller
     private function savedPdfDownload(string $htmlPath)
     {
         $pdfPath = preg_replace('/\.html?$/i', '.pdf', $htmlPath) ?: $htmlPath . '.pdf';
+        if (config('syllabus_pdf.driver') === 'dompdf') {
+            $pdfPath = preg_replace('/\.pdf$/i', '.dompdf.pdf', $pdfPath);
+        }
         $disk = Storage::disk('syllabus_snapshots');
 
         if ($disk->exists($pdfPath)) {

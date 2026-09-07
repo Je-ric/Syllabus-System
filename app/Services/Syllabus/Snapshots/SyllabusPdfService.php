@@ -10,6 +10,10 @@ class SyllabusPdfService
 {
     public function render(string $html): string
     {
+        if (config('syllabus_pdf.driver') === 'dompdf') {
+            return app(SyllabusDompdfService::class)->render($html);
+        }
+
         $workDir = storage_path('app/private/pdf-render/' . bin2hex(random_bytes(12)));
         $profilePath = $workDir . DIRECTORY_SEPARATOR . 'chrome-profile';
         $htmlPath = $workDir . DIRECTORY_SEPARATOR . 'snapshot.html';
