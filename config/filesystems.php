@@ -68,13 +68,11 @@ return [
         ],
 
         'google' => [
-            'driver'             => 'google',
-            'serviceAccountJson' => env('GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON', 'storage/app/csms-489705-0132f004c56b.json'),
-            'folder'             => env('GOOGLE_DRIVE_FOLDER', ''),
+            'driver'           => 'google',
+            'oauthCredentials' => env('GOOGLE_DRIVE_OAUTH_CREDENTIALS', 'storage/app/csms-oauth-client.json'),
+            'refreshToken'     => env('GOOGLE_DRIVE_REFRESH_TOKEN', ''),
+            'folder'           => env('GOOGLE_DRIVE_FOLDER', ''),
         ],
-        // The adapter is treating the folder ID as a display name and creating a new folder with that ID string as the name,
-        // instead of using it as the root.
-        // This is because useDisplayPaths => true resolves paths by name.
     ],
 
     /*

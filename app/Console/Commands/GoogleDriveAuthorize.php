@@ -25,9 +25,14 @@ class GoogleDriveAuthorize extends Command
         $client->setScopes([\Google\Service\Drive::DRIVE]);
         $client->setAccessType('offline');
         $client->setPrompt('consent');
+        $client->setRedirectUri('urn:ietf:wg:oauth:2.0:oob');
 
         $this->info('Open this URL in your browser and authorize:');
+        $this->line('');
         $this->line($client->createAuthUrl());
+        $this->line('');
+        $this->warn('After authorizing, Google will show you a code on the page — copy and paste it below.');
+        $this->warn('(This only works if your OAuth client type is "Desktop app" in Google Cloud Console)');
 
         $code  = $this->ask('Paste the authorization code here');
         $token = $client->fetchAccessTokenWithAuthCode($code);

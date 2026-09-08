@@ -90,12 +90,16 @@ class SyllabusSnapshotService
 
         // Mirror to Google Drive — secondary, silent, never blocks save
         try {
-            Storage::disk('google')->put($pathComplete,   $html);
-            Storage::disk('google')->put($pathAbridged,   $htmlAbridged);
-            Storage::disk('google')->put($pathAssessment, $htmlAssessment);
-            Storage::disk('google')->put($pathReviewForm, $htmlReviewForm);
-        } catch (\Throwable) {
-            // Non-fatal — local copy is the source of truth
+            $this->mirrorToGoogleDrive([
+                $pathComplete   => $html,
+                $pathAbridged   => $htmlAbridged,
+                $pathAssessment => $htmlAssessment,
+                $pathReviewForm => $htmlReviewForm,
+            ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Google Drive mirror failed', [
+                'error' => $e->getMessage(),
+            ]);
         }
 
         // Step C — persist DB record now that files exist
@@ -185,8 +189,7 @@ class SyllabusSnapshotService
 
     // ── Saved version file access ─────────────────────────────────────────────
 
-    // Read a saved HTML snapshot — local disk first, Google Drive fallback.
-    // Returns null if not found on either.
+    // Read a saved HTML snapshot from local disk. Returns null if not found.
     public function getSavedHtml(string $path): ?string
     {
         $path = trim($path);
@@ -195,18 +198,8 @@ class SyllabusSnapshotService
             return null;
         }
 
-        // Primary: local disk
         if (Storage::disk('syllabus_snapshots')->exists($path)) {
             return Storage::disk('syllabus_snapshots')->get($path);
-        }
-
-        // Fallback: Google Drive
-        try {
-            if (Storage::disk('google')->exists($path)) {
-                return Storage::disk('google')->get($path);
-            }
-        } catch (\Throwable) {
-            // Google Drive unavailable — local-only
         }
 
         return null;
@@ -241,6 +234,23 @@ class SyllabusSnapshotService
             : substr($html, 0, $pos) . $drawer . substr($html, $pos);
     }
 
+    // ── Google Drive mirror ───────────────────────────────────────────────────
+
+    // Mirror snapshot files to Google Drive using OAuth (refresh token).
+    // Skipped silently if the refresh token is not configured.
+    private function mirrorToGoogleDrive(array $files): void
+    {
+        if (! env('GOOGLE_DRIVE_REFRESH_TOKEN')) {
+            return;
+        }
+
+        $disk = Storage::disk('google');
+
+        foreach ($files as $path => $content) {
+            $disk->put($path, $content);
+        }
+    }
+
     // ── Private helpers ───────────────────────────────────────────────────────
 
     private function readCss(string $filename): ?string
@@ -256,4 +266,5 @@ class SyllabusSnapshotService
             ? 'data:image/png;base64,' . base64_encode((string) file_get_contents($path))
             : null;
     }
+
 }
