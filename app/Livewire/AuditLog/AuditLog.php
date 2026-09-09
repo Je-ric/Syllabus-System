@@ -4,6 +4,7 @@ namespace App\Livewire\AuditLog;
 
 use App\Models\AuditLog as AuditLogModel;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -24,10 +25,16 @@ class AuditLog extends Component
 
     // ── UI state ──────────────────────────────────────────────────────────
     public bool   $liveRefresh   = true;
-    public int    $pollInterval  = 30; // Default to 30s instead of 10s
+    public int    $pollInterval  = 30;
     public string $lastRefreshed = '';
     public bool   $isPageVisible = true;
     public bool   $isLoading     = false;
+
+    // ── Purge state ───────────────────────────────────────────────────────
+    public bool   $confirmingPurge      = false;
+    public int    $purgeMonths          = 6;
+    public bool   $protectSyllabusLogs  = true;
+    public int    $purgePreviewCount    = 0;
 
     // ── Cached filter options (loaded once in mount) ──────────────────────
     public array $users   = [];
@@ -50,11 +57,20 @@ class AuditLog extends Component
             ->distinct()->orderBy('action')->pluck('action')->toArray();
     }
 
+    // Show loading state during filter updates
+    public function updating(string $property): void
+    {
+        if (in_array($property, ['userId', 'module', 'action', 'referenceId', 'dateFrom', 'dateTo', 'keyword'])) {
+            $this->isLoading = true;
+        }
+    }
+
     // Reset page on any filter change
     public function updated(string $property): void
     {
         if (in_array($property, ['userId', 'module', 'action', 'referenceId', 'dateFrom', 'dateTo', 'keyword'])) {
             $this->resetPage();
+            $this->isLoading = false;
         }
     }
 
@@ -97,6 +113,69 @@ class AuditLog extends Component
         return $query
             ->orderByDesc('id')   // id is clustered PK — faster than timestamp for ordering
             ->paginate(20);
+    }
+
+    // ── Protected modules excluded from purge by default ─────────────────
+    private const PROTECTED_MODULES = ['Syllabus', 'Course'];
+
+    public function openPurgeModal(): void
+    {
+        $this->purgePreviewCount = $this->countPurgeable();
+        $this->confirmingPurge   = true;
+    }
+
+    public function updatedPurgeMonths(): void
+    {
+        $this->purgePreviewCount = $this->countPurgeable();
+    }
+
+    public function updatedProtectSyllabusLogs(): void
+    {
+        $this->purgePreviewCount = $this->countPurgeable();
+    }
+
+    private function countPurgeable(): int
+    {
+        $cutoff = now()->subMonths($this->purgeMonths);
+
+        $query = AuditLogModel::where('timestamp', '<', $cutoff);
+
+        if ($this->protectSyllabusLogs) {
+            $query->whereNotIn('module', self::PROTECTED_MODULES);
+        }
+
+        // Use count with raw query for better performance on large datasets
+        return (int) $query->count();
+    }
+
+    public function executePurge(): void
+    {
+        $cutoff = now()->subMonths($this->purgeMonths);
+
+        $query = AuditLogModel::where('timestamp', '<', $cutoff);
+
+        if ($this->protectSyllabusLogs) {
+            $query->whereNotIn('module', self::PROTECTED_MODULES);
+        }
+
+        // Delete directly and get affected rows count - more efficient than count + delete
+        $deleted = $query->delete();
+
+        $protected = $this->protectSyllabusLogs ? ' (Syllabus & Course logs preserved)' : '';
+
+        AuditLogModel::record(
+            'deleted',
+            'AuditLog',
+            null,
+            "Purged {$deleted} audit log entries older than {$this->purgeMonths} months.{$protected}"
+        );
+
+        $this->confirmingPurge = false;
+        $this->purgePreviewCount = 0; // Reset preview count after purge
+        session()->flash('toast', [
+            'message' => "Purged {$deleted} audit log " . ($deleted === 1 ? 'entry' : 'entries') . '.',
+            'type'    => 'success',
+        ]);
     }
 
     public function render()
