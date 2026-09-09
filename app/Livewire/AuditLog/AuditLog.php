@@ -122,6 +122,7 @@ class AuditLog extends Component
     {
         $this->purgePreviewCount = $this->countPurgeable();
         $this->confirmingPurge   = true;
+        $this->dispatch('openPurgeModal');
     }
 
     public function updatedPurgeMonths(): void
@@ -172,6 +173,7 @@ class AuditLog extends Component
 
         $this->confirmingPurge = false;
         $this->purgePreviewCount = 0; // Reset preview count after purge
+        $this->dispatch('closePurgeModal');
         session()->flash('toast', [
             'message' => "Purged {$deleted} audit log " . ($deleted === 1 ? 'entry' : 'entries') . '.',
             'type'    => 'success',

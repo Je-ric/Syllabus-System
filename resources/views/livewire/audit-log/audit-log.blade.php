@@ -24,7 +24,7 @@
                     <i class="bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base pointer-events-none"></i>
                         <x-form.input
                             type="text"
-                            wire:model.live.debounce.400ms="keyword"
+                            wire:model.live.debounce.150ms="keyword"
                             placeholder="Search…"
                             class="pl-9"/>
                     </div>
@@ -98,11 +98,9 @@
     {{-- ── Toolbar ─────────────────────────────────────────────────────── --}}
     <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
 
-        <button wire:click="openPurgeModal" type="button"
-            class="inline-flex items-center gap-1.5 text-[13px] px-3 py-1.5 rounded-lg border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 transition font-medium">
-            <i class="bx bx-trash text-sm leading-none"></i>
-            Purge Old Logs
-        </button>
+        <x-ui.button wire:click="openPurgeModal" variant="danger" type="button">
+            <i class="bx bx-trash"></i> Purge Old Logs
+        </x-ui.button>
 
         <button wire:click="$toggle('liveRefresh')" type="button"
             class="inline-flex items-center gap-1.5 text-[13px] px-2.5 py-1 rounded-full border transition
