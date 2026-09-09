@@ -29,7 +29,7 @@ class SyllabusDeleteService
                 if ($path === '') {
                     continue;
                 }
-                foreach (['local', 'google'] as $disk) {
+                foreach (['syllabus_snapshots', 'google'] as $disk) {
                     try {
                         if (Storage::disk($disk)->exists($path)) {
                             Storage::disk($disk)->delete($path);

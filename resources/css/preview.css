@@ -567,6 +567,13 @@ table.fcas th {
     .weekly-coverage-table td {
         width: auto !important;
     }
+
+    /* Force table header backgrounds to print */
+    table th {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        background-color: #d9d9d9 !important;
+    }
 }
 
 /* ═══════════════════════════════════════════════

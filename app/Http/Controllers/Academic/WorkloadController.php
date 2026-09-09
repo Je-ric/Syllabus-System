@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Academic;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\CaisTeachingLoad;
 use App\Services\CaisAPI\WorkloadSyncService;
 use Illuminate\Http\Request;
@@ -45,10 +46,18 @@ class WorkloadController extends Controller
         $user = Auth::user();
 
         try {
-            $this->syncService->syncForUser(
+            $syncedLoads = $this->syncService->syncForUser(
                 $user,
                 $request->cais_email,
                 $request->cais_password
+            );
+
+            $loadCount = count($syncedLoads);
+            AuditLog::record(
+                action: 'synced',
+                module: 'Workload',
+                referenceId: $user->id,
+                description: "Synchronized {$loadCount} teaching " . ($loadCount === 1 ? 'load' : 'loads') . " from CAIS for {$user->name}."
             );
 
             return redirect()->route('workload.index')

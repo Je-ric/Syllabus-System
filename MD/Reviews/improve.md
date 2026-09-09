@@ -213,8 +213,6 @@ When a Livewire session expires, the page shows a cryptic error or silently fail
 ### F9. Search / Filter on Syllabus Index
 Currently the syllabus index shows all syllabi with no search or filter. Add filters for: academic year, status (draft/approved), course name.
 
-### F10. Bulk Delete for Audit Logs (Admin)
-Audit logs will grow indefinitely. Add an admin tool to archive or purge old audit logs (e.g., older than N months).
 
 ---
 

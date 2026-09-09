@@ -55,8 +55,11 @@ class SyllabusController extends Controller
 
     public function wizard(Request $request)
     {
-        $syllabusId = $request->query('syllabusId');
-        $courseId   = $request->query('courseId');
+        // syllabusId = $request->query('syllabusId');
+        // $courseId   = $request->query('courseId');
+
+        $syllabusId = $request->query('syllabusId') ? (int) $request->query('syllabusId') : null;
+        $courseId   = $request->query('courseId')   ? (int) $request->query('courseId')   : null;
 
         if (! $syllabusId && ! $courseId) {
             abort(404, 'No syllabus or course specified.');
