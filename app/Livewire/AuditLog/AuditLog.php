@@ -122,7 +122,6 @@ class AuditLog extends Component
     {
         $this->purgePreviewCount = $this->countPurgeable();
         $this->confirmingPurge   = true;
-        $this->dispatch('openPurgeModal');
     }
 
     public function updatedPurgeMonths(): void
