@@ -32,7 +32,7 @@ class AuditLog extends Component
 
     // ── Purge state ───────────────────────────────────────────────────────
     public bool   $confirmingPurge      = false;
-    public int    $purgeMonths          = 6;
+    public int    $purgeMonths          = 0;
     public bool   $protectSyllabusLogs  = true;
     public int    $purgePreviewCount    = 0;
 
@@ -136,9 +136,13 @@ class AuditLog extends Component
 
     private function countPurgeable(): int
     {
-        $cutoff = now()->subMonths($this->purgeMonths);
+        $query = AuditLogModel::query();
 
-        $query = AuditLogModel::where('timestamp', '<', $cutoff);
+        // If "All time" is selected (0 months), don't filter by date
+        if ($this->purgeMonths > 0) {
+            $cutoff = now()->subMonths($this->purgeMonths);
+            $query->where('timestamp', '<', $cutoff);
+        }
 
         if ($this->protectSyllabusLogs) {
             $query->whereNotIn('module', self::PROTECTED_MODULES);
@@ -150,9 +154,13 @@ class AuditLog extends Component
 
     public function executePurge(): void
     {
-        $cutoff = now()->subMonths($this->purgeMonths);
+        $query = AuditLogModel::query();
 
-        $query = AuditLogModel::where('timestamp', '<', $cutoff);
+        // If "All time" is selected (0 months), don't filter by date
+        if ($this->purgeMonths > 0) {
+            $cutoff = now()->subMonths($this->purgeMonths);
+            $query->where('timestamp', '<', $cutoff);
+        }
 
         if ($this->protectSyllabusLogs) {
             $query->whereNotIn('module', self::PROTECTED_MODULES);
@@ -161,18 +169,18 @@ class AuditLog extends Component
         // Delete directly and get affected rows count - more efficient than count + delete
         $deleted = $query->delete();
 
+        $timeRange = $this->purgeMonths === 0 ? 'all time' : "{$this->purgeMonths} months";
         $protected = $this->protectSyllabusLogs ? ' (Syllabus & Course logs preserved)' : '';
 
         AuditLogModel::record(
             'deleted',
             'AuditLog',
             null,
-            "Purged {$deleted} audit log entries older than {$this->purgeMonths} months.{$protected}"
+            "Purged {$deleted} audit log entries from {$timeRange}.{$protected}"
         );
 
         $this->confirmingPurge = false;
         $this->purgePreviewCount = 0; // Reset preview count after purge
-        $this->dispatch('closePurgeModal');
         session()->flash('toast', [
             'message' => "Purged {$deleted} audit log " . ($deleted === 1 ? 'entry' : 'entries') . '.',
             'type'    => 'success',

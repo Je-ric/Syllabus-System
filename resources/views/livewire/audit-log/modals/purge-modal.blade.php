@@ -7,6 +7,7 @@
 
 @php
     $monthsOptions = [
+        0 => 'All time',
         3 => '3 months',
         6 => '6 months',
         12 => '1 year',
