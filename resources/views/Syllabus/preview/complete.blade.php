@@ -89,7 +89,7 @@
 
         <div style="display:grid; grid-template-columns: 80px 1fr 80px; align-items:center; column-gap: 12px;">
             <div style="display:flex; justify-content:flex-start;">
-                <img src="{{ !empty($isSnapshot) && !empty($inlineLogoDataUri) ? $inlineLogoDataUri : asset('assets/clsu-logo-green.png') }}"
+                <img src="{{ !empty($isSnapshot) && !empty($inlineLogoDataUri) ? $inlineLogoDataUri : asset('assets/clsu-logo-circle-cropped.png') }}"
                     alt="CLSU Logo" style="width:100px; height:auto;" />
             </div>
             <div style="text-align:center;">

@@ -260,7 +260,7 @@ class SyllabusSnapshotService
 
     private function logoDataUri(): ?string
     {
-        $path = public_path('assets/clsu-logo-green.png');
+        $path = public_path('assets/clsu-logo-circle-cropped.png');
 
         return is_file($path)
             ? 'data:image/png;base64,' . base64_encode((string) file_get_contents($path))
