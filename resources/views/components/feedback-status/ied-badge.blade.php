@@ -5,7 +5,7 @@
     // consistent with status-indicator and alert components.
     // I → Blue    (Introductory)
     // E → Amber   (Enabling)
-    // D → Emerald (Demonstrating)
+    // D → Emerald (Demonstrative)
     $colors = [
         'I' => 'bg-[#DAF1FF] text-[#143D57] ring-1 ring-inset ring-[#AEDFFF]',
         'E' => 'bg-[#FFF6E2] text-[#875200] ring-1 ring-inset ring-[#FFE9B5]',
@@ -22,13 +22,13 @@
 {{--
 x-feedback-status.ied-badge
 ─────────────────────────────────────────────────────────────────
-Displays an IED (Introductory / Enabling / Demonstrating) level badge.
+Displays an IED (Introductory / Enabling / Demonstrative) level badge.
 Used in course-outcome mapping tables.
 
 Colors (light bg + saturated text, ring one step lighter than text):
     I → Blue    (Introductory)
     E → Amber   (Enabling)
-    D → Emerald (Demonstrating)
+    D → Emerald (Demonstrative)
     – → Slate   (no mapping / fallback)
 
 USAGE:

@@ -1,164 +1,69 @@
-{{-- Help content: Courses — Updated with latest system organization --}}
+{{-- Help content: courses --}}
 
-<x-layout.accordion title="Overview" icon="info-circle" color="emerald" :open="true">
-    <div class="space-y-2 text-[13px] text-[#3f3f46] leading-relaxed">
-        <p>Courses are the individual subjects within a program. Each course belongs to a specific year level and semester, carries credit units, and is mapped to Program Outcomes (POs) using IED levels.</p>
-        <p class="mt-1">A course must have at least one PO mapping before a syllabus can be created for it. This ensures alignment between course content and program outcomes.</p>
-        <p class="mt-1">Access course management via <strong>Academic → Courses</strong> in the navigation menu.</p>
+<x-layout.accordion title="About Courses" icon="info-circle" color="emerald" :open="true">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <p>Use <strong>Academic Setup &gt; Courses</strong> to maintain subjects in a program, including their units, class hours, and links to Program Outcomes (POs). A PO describes an ability students should have by graduation.</p>        <p>Administrators and department chairs can access this page. Chairs manage courses for programs in their assigned department.</p>
     </div>
 </x-layout.accordion>
 
-<x-layout.accordion title="Browsing Courses" icon="list-ul" color="slate">
-    <div class="space-y-3 text-[13px] text-[#3f3f46]">
-        <p>Courses are grouped by <strong>Year Level → Semester</strong>. Each row shows:</p>
-        <ul class="space-y-1.5 mt-1">
-            <li class="flex gap-2">
-                <i class="bx bx-chevron-right text-[#a1a1aa] shrink-0 mt-0.5"></i>
-                <span><strong>Course Code & Title</strong> — unique identifier and descriptive name</span>
-            </li>
-            <li class="flex gap-2">
-                <i class="bx bx-chevron-right text-[#a1a1aa] shrink-0 mt-0.5"></i>
-                <span><strong>Units</strong> — credit units for the course</span>
-            </li>
-            <li class="flex gap-2">
-                <i class="bx bx-chevron-right text-[#a1a1aa] shrink-0 mt-0.5"></i>
-                <span><strong>Type</strong> — LEC only, or LEC+LAB</span>
-            </li>
-            <li class="flex gap-2">
-                <i class="bx bx-chevron-right text-[#a1a1aa] shrink-0 mt-0.5"></i>
-                <span><strong>Class Hours</strong> — LEC hours and LAB hours (if applicable)</span>
-            </li>
-            <li class="flex gap-2">
-                <i class="bx bx-chevron-right text-[#a1a1aa] shrink-0 mt-0.5"></i>
-                <span><strong>PO columns</strong> — IED level badge per Program Outcome (I, E, or D)</span>
-            </li>
+<x-layout.accordion title="Find and review a course" icon="list-ul" color="slate">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <ol class="list-decimal pl-5 space-y-2">
+            <li>Select the college, department, and program using the selectors at the top.</li>
+            <li>Choose <strong>Active</strong> or <strong>Archived</strong>. Courses are grouped by year level and semester.</li>
+            <li>Review the course code, title, units, lecture/laboratory details, and PO columns. Use the <strong>View details</strong> icon to see more information.</li>
+            <li>Open <strong>Program Outcomes</strong> to read the full PO statements for the selected program.</li>
+        </ol>
+    </div>
+</x-layout.accordion>
+
+<x-layout.accordion title="Add a course" icon="list-ul" color="slate">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <ol class="list-decimal pl-5 space-y-2">
+            <li>Select the correct program and click <strong>Add Course</strong>.</li>
+            <li>Enter the required <strong>Course Code</strong> and <strong>Course Title</strong>. Use the official course code; it must be unique across the course records. The description is optional.</li>
+            <li>Choose <strong>Credit Units</strong> (1 to 5), <strong>Has Laboratory</strong>, <strong>Year Level</strong>, and <strong>Semester</strong>.</li>
+            <li>Review <strong>Passing Mark</strong> and <strong>LEC Class Hours</strong> (lecture hours). If the course has a laboratory, also set <strong>LAB Class Hours</strong>.</li>
+            <li>Enter a <strong>Prerequisite</strong> for a subject required before this course, and a <strong>Corequisite</strong> for a subject taken alongside it. If none applies, enter “None”; blank entries are also saved as “None”.</li>
+            <li>In <strong>Program Outcomes Mapping</strong>, select the appropriate I, E, or D level for each PO the course supports. Leave unrelated POs unselected.</li>
+            <li>Click <strong>Create Course</strong>, review the confirmation, and confirm creation. Check for the success message.</li>
+        </ol>
+    </div>
+</x-layout.accordion>
+
+<x-layout.accordion title="Understand I, E, and D" icon="list-ul" color="slate">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <p>These letters describe how the course supports a Program Outcome. Choose the level in the approved curriculum map.</p>        <ul class="list-disc pl-5 space-y-2">
+            <li><strong>I — Introductory:</strong> Students first learn the ideas or skills.</li>
+            <li><strong>E — Enabling:</strong> Students build and practise the ideas or skills.</li>
+            <li><strong>D — Demonstrative:</strong> Students show that they can apply the outcome.</li>
+        </ul>        <p><strong>Reset IED Levels</strong> clears the selections in the open form. Review the mappings before submitting; on an update, saving cleared selections removes the corresponding course-to-PO links.</p>        <p>If no POs are listed, add them for this program under <strong>PEOs &amp; POs</strong>, then return to the course form.</p>
+    </div>
+</x-layout.accordion>
+
+<x-layout.accordion title="Edit a course" icon="list-ul" color="slate">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <p>On the Active list, click the course’s pencil icon. Update the details or PO selections, click <strong>Update Course</strong>, and review and confirm the changes. Use <strong>Cancel</strong> to leave without saving.</p>        <p>The <strong>Has Laboratory</strong> setting is locked once the course has linked syllabi. If it is incorrect, ask your administrator or department chair to review the affected records before deciding how to correct it.</p>
+    </div>
+</x-layout.accordion>
+
+<x-layout.accordion title="Archive, restore, or delete" icon="list-ul" color="slate">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <ul class="list-disc pl-5 space-y-2">
+            <li><strong>Archive:</strong> Use the archive icon and confirm to move the course out of the Active list while keeping its data.</li>
+            <li><strong>Restore:</strong> Open <strong>Archived</strong> and click the restore icon to return a course to the Active list.</li>
+            <li><strong>Delete:</strong> Use the trash icon and review the confirmation carefully. This permanently removes the course, its PO mappings, and associated syllabi and their data. There is no restore option for a deleted course.</li>
+        </ul>        <p>Use Archive when a course is no longer offered but its records should be kept. Deletion is available to administrators and the chair responsible for the course’s department.</p>
+    </div>
+</x-layout.accordion>
+
+<x-layout.accordion title="If something does not work" icon="list-ul" color="slate">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <ul class="list-disc pl-5 space-y-2">
+            <li><strong>A course is missing:</strong> Check the selected program and the Archived tab.</li>
+            <li><strong>The course code is already used:</strong> Check for an existing course, including archived records, before creating another.</li>
+            <li><strong>The form will not save:</strong> Read the highlighted field messages, correct the entries, and complete the confirmation step.</li>
+            <li><strong>No program is available:</strong> Ask an administrator to check your department assignment and the program’s department.</li>
         </ul>
-        <p class="mt-2">Click <strong>Program Outcomes</strong> to open a reference panel showing the full text of each PO for the selected program.</p>
-        <p class="mt-1">Use the <strong>Active / Archived</strong> toggle to switch between active courses and archived ones.</p>
     </div>
-</x-layout.accordion>
-
-<x-layout.accordion title="Adding a Course" icon="plus-circle" color="emerald">
-    <ol class="space-y-2.5 text-[13.5px] text-[#3f3f46]">
-        <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">1</span>
-            <span>Select a program using the dropdowns at the top, then click <strong>Add Course</strong>.</span>
-        </li>
-        <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">2</span>
-            <span>Fill in the <strong>Course Code</strong>, <strong>Course Title</strong>, and optional description.</span>
-        </li>
-        <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">3</span>
-            <span>Set <strong>Credit Units</strong>, <strong>Has Laboratory</strong> (Yes/No), <strong>Year Level</strong>, and <strong>Semester</strong>.</span>
-        </li>
-        <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">4</span>
-            <span>Set <strong>LEC Class Hours</strong> (and <strong>LAB Class Hours</strong> if the course has a lab component). Optionally set the <strong>Passing Mark</strong>, <strong>Prerequisite</strong>, and <strong>Corequisite</strong>.</span>
-        </li>
-        <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">5</span>
-            <span>In the <strong>Program Outcomes Mapping</strong> table, select an IED level (I, E, or D) for each applicable PO. Leave blank if the PO does not apply to this course.</span>
-        </li>
-        <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">6</span>
-            <span>Click <strong>Save Course</strong> — a confirmation dialog will appear. Review and click <strong>Confirm & Create</strong>.</span>
-        </li>
-    </ol>
-</x-layout.accordion>
-
-<x-layout.accordion title="IED Levels Explained" icon="info-circle" color="blue">
-    <div class="space-y-2 text-[13px] text-[#3f3f46]">
-        <p>IED indicates how deeply a course addresses each Program Outcome:</p>
-        <div class="space-y-2 mt-2">
-            <div class="flex items-start gap-3 p-2.5 rounded-lg bg-[#f0fdf4] border border-[#d1fae5]">
-                <span class="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded bg-emerald-600 text-white text-[11px] font-bold">I</span>
-                <div>
-                    <p class="font-semibold text-[#166534]">Introductory</p>
-                    <p class="text-[12px] text-[#3f3f46] mt-0.5">The course introduces the concept — foundational exposure only.</p>
-                </div>
-            </div>
-            <div class="flex items-start gap-3 p-2.5 rounded-lg bg-[#eff6ff] border border-[#bfdbfe]">
-                <span class="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded bg-blue-600 text-white text-[11px] font-bold">E</span>
-                <div>
-                    <p class="font-semibold text-[#1e40af]">Enabling</p>
-                    <p class="text-[12px] text-[#3f3f46] mt-0.5">The course builds on the concept — students develop the skill further.</p>
-                </div>
-            </div>
-            <div class="flex items-start gap-3 p-2.5 rounded-lg bg-[#fdf4ff] border border-[#e9d5ff]">
-                <span class="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded bg-purple-600 text-white text-[11px] font-bold">D</span>
-                <div>
-                    <p class="font-semibold text-[#6b21a8]">Demonstrating</p>
-                    <p class="text-[12px] text-[#3f3f46] mt-0.5">The course requires full demonstration of the outcome — mastery level.</p>
-                </div>
-            </div>
-        </div>
-        <p class="mt-2 text-[12px] text-[#71717a]">Use <strong>Reset IED Levels</strong> on the form to clear all selections and start over.</p>
-    </div>
-</x-layout.accordion>
-
-<x-layout.accordion title="Archive vs Delete" icon="error-circle" color="amber">
-    <div class="space-y-2 text-[13px] text-[#3f3f46]">
-        <div class="flex items-start gap-3 p-2.5 rounded-lg bg-[#fffbeb] border border-[#fde68a]">
-            <i class="bx bx-archive text-[#d97706] text-base shrink-0 mt-0.5"></i>
-            <div>
-                <p class="font-semibold text-[#92400e]">Archive</p>
-                <p class="text-[12px] mt-0.5">Hides the course from the active list. The course and all its data are preserved. You can restore it at any time from the <strong>Archived</strong> tab.</p>
-            </div>
-        </div>
-        <div class="flex items-start gap-3 p-2.5 rounded-lg bg-[#fff1f2] border border-[#fecdd3]">
-            <i class="bx bx-trash text-[#e11d48] text-base shrink-0 mt-0.5"></i>
-            <div>
-                <p class="font-semibold text-[#9f1239]">Delete</p>
-                <p class="text-[12px] mt-0.5">Permanently removes the course and <strong>all associated syllabi</strong>, components, outcomes, weekly coverage, evaluations, and PO mappings. This cannot be undone.</p>
-            </div>
-        </div>
-        <p class="mt-1 text-[12px] text-[#71717a]">Delete is only available to Admins and Chairs managing their own department's programs.</p>
-    </div>
-</x-layout.accordion>
-
-<x-layout.accordion title="Tips" icon="bulb" color="amber">
-    <ul class="space-y-2 text-[13px] text-[#3f3f46]">
-        <li class="flex gap-2">
-            <i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i>
-            <span>Map at least one PO before creating a syllabus — the syllabus wizard will block creation otherwise.</span>
-        </li>
-        <li class="flex gap-2">
-            <i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i>
-            <span>The <strong>Has Laboratory</strong> field is locked once syllabi exist for the course — delete all syllabi first if you need to change it.</span>
-        </li>
-        <li class="flex gap-2">
-            <i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i>
-            <span>Enter "None" in the Prerequisite or Corequisite fields if there are no requirements — don't leave them blank if the program requires a value.</span>
-        </li>
-        <li class="flex gap-2">
-            <i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i>
-            <span>Use the reference panel to review PO definitions while mapping — click <strong>Program Outcomes</strong> to open it.</span>
-        </li>
-        <li class="flex gap-2">
-            <i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i>
-            <span>Archive courses that are no longer offered but may be needed in the future rather than deleting them.</span>
-        </li>
-    </ul>
-</x-layout.accordion>
-
-<x-layout.accordion title="Common Mistakes" icon="error-circle" color="rose">
-    <ul class="space-y-2 text-[13px] text-[#3f3f46]">
-        <li class="flex gap-2">
-            <i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i>
-            <span>Creating a course without PO mappings — this prevents syllabus creation.</span>
-        </li>
-        <li class="flex gap-2">
-            <i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i>
-            <span>Using inconsistent course codes — follow your institution's coding standard.</span>
-        </li>
-        <li class="flex gap-2">
-            <i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i>
-            <span>Deleting a course with existing syllabi — archive instead to preserve the syllabi.</span>
-        </li>
-        <li class="flex gap-2">
-            <i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i>
-            <span>Not setting class hours correctly — this affects the syllabus weekly coverage generation.</span>
-        </li>
-    </ul>
 </x-layout.accordion>

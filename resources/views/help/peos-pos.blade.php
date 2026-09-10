@@ -1,170 +1,57 @@
-{{-- Help content: PEOs & POs (Programs module) — Updated with latest system organization --}}
+{{-- Help content: peos-pos --}}
 
-<x-layout.accordion title="Overview" icon="info-circle" color="emerald" :open="true">
-    <div class="space-y-2 text-[13.5px] text-[#3f3f46] leading-relaxed">
-        <p>This module manages two things for a selected program:</p>
-        <ul class="space-y-1.5 mt-2">
-            <li class="flex gap-2">
-                <span class="shrink-0 inline-flex items-center justify-center w-5 h-5 rounded bg-emerald-100 text-emerald-700 text-[10px] font-bold mt-0.5">PEO</span>
-                <span><strong>Program Educational Objectives</strong> — what graduates are expected to be professionally, 3–5 years after graduation.</span>
-            </li>
-            <li class="flex gap-2">
-                <span class="shrink-0 inline-flex items-center justify-center w-5 h-5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold mt-0.5">PO</span>
-                <span><strong>Program Outcomes</strong> — abilities and competencies students must have by the time of graduation.</span>
-            </li>
+<x-layout.accordion title="About PEOs and POs" icon="info-circle" color="emerald" :open="true">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <p>Open <strong>Academic Setup &gt; PEOs &amp; POs</strong> to maintain a program’s approved objectives and outcomes. Administrators and department chairs can access this page; chairs work with programs in their assigned department.</p>        <ul class="list-disc pl-5 space-y-2">
+            <li><strong>PEO — Program Educational Objective:</strong> What graduates are expected to achieve professionally about three to five years after graduation.</li>
+            <li><strong>PO — Program Outcome:</strong> What students should know or be able to do by graduation.</li>
+            <li><strong>Mapping:</strong> Linking a PO to the PEOs it supports. A PO can support more than one PEO.</li>
         </ul>
-        <p class="mt-2">Each PO can be mapped to one or more PEOs. The <strong>Matrix View</strong> tab shows the full mapping at a glance.</p>
-        <p class="mt-1">Access this module via <strong>CQI → Programs</strong> in the navigation menu.</p>
     </div>
 </x-layout.accordion>
 
-<x-layout.accordion title="Step-by-Step Guide" icon="list-ol" color="slate">
-    <div class="space-y-4 text-[13.5px] text-[#3f3f46]">
-
-        <div>
-            <p class="font-bold text-[#09090b] mb-2">1. Select a Program</p>
-            <p>Use the college → department → program dropdowns at the top of the page. The page reloads with the selected program's data.</p>
-        </div>
-
-        <div>
-            <p class="font-bold text-[#09090b] mb-2">2. Add PEOs (PEOs tab)</p>
-            <ol class="space-y-1.5 pl-1">
-                <li class="flex gap-2">
-                    <span class="shrink-0 w-4 text-[#a1a1aa] font-bold">a.</span>
-                    <span>Click <strong>Add PEO</strong> — a new row appears with an empty text area.</span>
-                </li>
-                <li class="flex gap-2">
-                    <span class="shrink-0 w-4 text-[#a1a1aa] font-bold">b.</span>
-                    <span>Type the PEO description. The code (PEO 1, PEO 2…) is assigned automatically on save.</span>
-                </li>
-                <li class="flex gap-2">
-                    <span class="shrink-0 w-4 text-[#a1a1aa] font-bold">c.</span>
-                    <span>Add as many PEOs as needed, then click <strong>Save All</strong> once. A confirmation dialog will appear.</span>
-                </li>
-            </ol>
-        </div>
-
-        <div>
-            <p class="font-bold text-[#09090b] mb-2">3. Add POs (POs tab)</p>
-            <ol class="space-y-1.5 pl-1">
-                <li class="flex gap-2">
-                    <span class="shrink-0 w-4 text-[#a1a1aa] font-bold">a.</span>
-                    <span>Click <strong>Add PO</strong> — a new row appears.</span>
-                </li>
-                <li class="flex gap-2">
-                    <span class="shrink-0 w-4 text-[#a1a1aa] font-bold">b.</span>
-                    <span>Type the PO description, then click <strong>Save All</strong>.</span>
-                </li>
-            </ol>
-        </div>
-
-        <div>
-            <p class="font-bold text-[#09090b] mb-2">4. Map POs to PEOs</p>
-            <p>After saving a PO, a row of PEO chips appears below its text. Click a chip to toggle the mapping — it saves immediately without needing Save All. A spinning indicator shows while the save is in progress.</p>
-            <p class="mt-1.5">Click <strong>View PEOs</strong> on any PO row to open a reference panel showing the full text of each PEO.</p>
-        </div>
-
-        <div>
-            <p class="font-bold text-[#09090b] mb-2">5. Review the Matrix</p>
-            <p>Switch to the <strong>Matrix View</strong> tab to see a read-only grid of all POs vs PEOs with mapping counts. This is useful for verifying coverage before creating syllabi.</p>
-        </div>
-
+<x-layout.accordion title="Select a program and add statements" icon="list-ul" color="slate">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <ol class="list-decimal pl-5 space-y-2">
+            <li>Use the college, department, and program selectors to open the correct program.</li>
+            <li>Open the <strong>Program Educational Objectives (PEOs)</strong> tab. Click <strong>Add PEO</strong> and type one approved statement in the new row. Fill that row before adding another.</li>
+            <li>Click <strong>Save All</strong>, then confirm with <strong>Save All</strong>. Wait for the success message. Codes are assigned automatically.</li>
+            <li>Open the <strong>Program Outcomes (POs)</strong> tab. Click <strong>Add PO</strong>, enter the statement, and use that tab’s <strong>Save All</strong> button and confirmation.</li>
+        </ol>        <p>Save each tab’s changes separately. A row marked <strong>New</strong> or <strong>Modified — not saved yet</strong> still needs to be saved. Blank rows cannot be saved; fill them in or remove them.</p>
     </div>
 </x-layout.accordion>
 
-<x-layout.accordion title="Unsaved Changes" icon="error-circle" color="amber">
-    <div class="space-y-2 text-[13.5px] text-[#3f3f46]">
-        <p>PEOs and POs use a <strong>batch save</strong> pattern — changes are staged locally until you click <strong>Save All</strong>.</p>
-        <ul class="space-y-1.5 mt-2">
-            <li class="flex gap-2">
-                <span class="shrink-0 w-2 h-2 rounded-full bg-emerald-400 mt-1.5"></span>
-                <span>Green border = new, unsaved row.</span>
-            </li>
-            <li class="flex gap-2">
-                <span class="shrink-0 w-2 h-2 rounded-full bg-amber-400 mt-1.5"></span>
-                <span>Amber border = existing row with unsaved edits.</span>
-            </li>
-            <li class="flex gap-2">
-                <span class="shrink-0 w-2 h-2 rounded-full bg-slate-300 mt-1.5"></span>
-                <span>No border highlight = saved and unchanged.</span>
-            </li>
+<x-layout.accordion title="Link POs to PEOs" icon="list-ul" color="slate">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <ol class="list-decimal pl-5 space-y-2">
+            <li>Save the PEOs and the PO first. A new, unsaved PO cannot be mapped yet.</li>
+            <li>Under a saved PO, find <strong>Maps to PEOs</strong>. Use <strong>View PEOs</strong> to read the full statements.</li>
+            <li>Select the checkbox for each PEO that the PO supports. Clear a checkbox to remove that link.</li>
+            <li>Wait for the saving indicator to finish. Mapping changes save as you make them; they do not wait for <strong>Save All</strong>.</li>
+            <li>Open <strong>Matrix View</strong> to review the links across the program. This view is for checking; make mapping changes in the POs tab.</li>
+        </ol>
+    </div>
+</x-layout.accordion>
+
+<x-layout.accordion title="Edit, revert, or remove statements" icon="list-ul" color="slate">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <ul class="list-disc pl-5 space-y-2">
+            <li><strong>Edit text:</strong> Change the text directly in its row, then click <strong>Save All</strong> and confirm.</li>
+            <li><strong>Revert:</strong> Discard unsaved text edits and remove new, unsaved rows in the current tab. It does not undo saved mapping changes or deletions.</li>
+            <li><strong>Remove a new row:</strong> Click its <strong>&times;</strong> button before saving.</li>
+            <li><strong>Delete a saved row:</strong> Click its trash icon and confirm <strong>Delete</strong>. This takes effect immediately and cannot be undone with Revert. Save any other text edits before deleting, because deletion reloads the page.</li>
+        </ul>        <p>Deleting a PEO removes its PO links. Deleting a PO removes its PEO and course links. Remaining codes are assigned again, so review the affected mappings and code references afterward.</p>
+    </div>
+</x-layout.accordion>
+
+<x-layout.accordion title="If something does not work" icon="list-ul" color="slate">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <ul class="list-disc pl-5 space-y-2">
+            <li><strong>No program is available:</strong> Check the college and department selectors. Ask an administrator to check your department assignment if needed.</li>
+            <li><strong>No PEO checkboxes appear:</strong> Add and save PEOs in the PEOs tab first.</li>
+            <li><strong>Add or Save All is unavailable:</strong> Fill in any blank row and wait for a save or deletion already in progress to finish.</li>
+            <li><strong>Text is rejected:</strong> Use plain statement text without HTML tags or scripts and follow the message shown.</li>
+            <li><strong>A mapping did not save:</strong> Check for an error message, retry the checkbox change, and verify the result before leaving.</li>
         </ul>
-        <p class="mt-2">Click <strong>Revert</strong> to discard all staged changes and restore the last saved state.</p>
-        <p class="mt-1">PEO–PO mappings (the chips) save <em>immediately</em> on toggle — no Save All needed.</p>
-    </div>
-</x-layout.accordion>
-
-<x-layout.accordion title="Tips" icon="bulb" color="amber">
-    <ul class="space-y-2 text-[13.5px] text-[#3f3f46]">
-        <li class="flex gap-2">
-            <i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i>
-            <span>Add all PEOs before adding POs — PEO mapping chips only appear on saved POs, and only if PEOs already exist.</span>
-        </li>
-        <li class="flex gap-2">
-            <i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i>
-            <span>A PO cannot be deleted if it is already mapped in an existing syllabus course outcome. Remove the mapping from the syllabus first.</span>
-        </li>
-        <li class="flex gap-2">
-            <i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i>
-            <span>Codes (PEO 1, PEO 2 / PO a, PO b…) are auto-assigned and resequenced when a row is deleted — you cannot set them manually.</span>
-        </li>
-        <li class="flex gap-2">
-            <i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i>
-            <span>A course must have at least one PO mapping before a syllabus can be created for it.</span>
-        </li>
-        <li class="flex gap-2">
-            <i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i>
-            <span>Use the Matrix View to verify that all PEOs have adequate PO coverage before course mapping.</span>
-        </li>
-    </ul>
-</x-layout.accordion>
-
-<x-layout.accordion title="Common Mistakes" icon="error-circle" color="rose">
-    <ul class="space-y-2 text-[13.5px] text-[#3f3f46]">
-        <li class="flex gap-2">
-            <i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i>
-            <span>Navigating away before clicking <strong>Save All</strong> — unsaved rows are lost.</span>
-        </li>
-        <li class="flex gap-2">
-            <i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i>
-            <span>Trying to map PEOs on an unsaved PO — the mapping chips are locked until the PO is saved.</span>
-        </li>
-        <li class="flex gap-2">
-            <i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i>
-            <span>Confusing PEOs (post-graduation, 3–5 years) with POs (at graduation). They serve different accreditation purposes.</span>
-        </li>
-        <li class="flex gap-2">
-            <i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i>
-            <span>Adding a blank row and clicking Save All — you'll be warned to fill it in first.</span>
-        </li>
-        <li class="flex gap-2">
-            <i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i>
-            <span>Not mapping POs to PEOs — the matrix view helps ensure adequate coverage.</span>
-        </li>
-    </ul>
-</x-layout.accordion>
-
-<x-layout.accordion title="Frequently Asked Questions" icon="question-mark" color="slate">
-    <div class="space-y-3 text-[13.5px] text-[#3f3f46]">
-        <div>
-            <p class="font-semibold text-[#09090b]">Who can manage PEOs and POs?</p>
-            <p class="mt-0.5 text-[#52525b]">Admins (all programs) and Chairs (programs within their assigned department only).</p>
-        </div>
-        <div>
-            <p class="font-semibold text-[#09090b]">Can I reorder PEOs or POs?</p>
-            <p class="mt-0.5 text-[#52525b]">No — they are ordered by creation date. Codes are resequenced automatically when a row is deleted.</p>
-        </div>
-        <div>
-            <p class="font-semibold text-[#09090b]">Why is the mapping chip locked?</p>
-            <p class="mt-0.5 text-[#52525b]">The PO must be saved first. Unsaved POs show a lock icon — click Save All on the PO, then the chips become interactive.</p>
-        </div>
-        <div>
-            <p class="font-semibold text-[#09090b]">What does the Matrix View show?</p>
-            <p class="mt-0.5 text-[#52525b]">A read-only grid of every PO (rows) against every PEO (columns), with a checkmark where a mapping exists. This helps verify coverage balance.</p>
-        </div>
-        <div>
-            <p class="font-semibold text-[#09090b]">How many PEOs and POs should a program have?</p>
-            <p class="mt-0.5 text-[#52525b]">This varies by program and accreditation requirements. Typically 3-5 PEOs and 8-12 POs are common.</p>
-        </div>
     </div>
 </x-layout.accordion>

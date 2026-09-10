@@ -128,7 +128,7 @@
                         Program Outcomes Mapping
                     </p>
                     <span class="text-[10px] text-[#B4C0CA]">
-                        I — Introductory · E — Enabling · D — Demonstrating
+                        I — Introductory · E — Enabling · D — Demonstrative
                     </span>
                 </div>
 

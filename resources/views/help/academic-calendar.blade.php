@@ -1,195 +1,73 @@
-{{-- Help: Academic Calendar Management --}}
+{{-- Help content: academic-calendar --}}
 
-<x-layout.accordion title="Overview" icon="info-circle" color="emerald" :open="true">
-    <p class="text-[13px] text-[#3f3f46] leading-relaxed">
-        Academic Calendars define the date ranges for academic years and semesters. They are used to generate weekly coverage in syllabi and determine when specific events occur.
-    </p>
-    <p class="text-[13px] text-[#3f3f46] leading-relaxed mt-2">
-        Access calendar management via <strong>Academic → Academic Calendar</strong> in the navigation menu. Each academic year contains two semesters (1st and 2nd).
-    </p>
-</x-layout.accordion>
-
-<x-layout.accordion title="Creating an Academic Calendar" icon="plus-circle" color="emerald">
-    <ol class="space-y-2 text-[13.5px] text-[#3f3f46]">
-        <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">1</span>
-            <span>Click <strong>Add Academic Year</strong> on the index page.</span>
-        </li>
-        <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">2</span>
-            <span>Enter the <strong>Academic Year</strong> in YYYY-YYYY format (e.g., 2025-2026). The end year must be greater than the start year.</span>
-        </li>
-        <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">3</span>
-            <span>Select start and end dates for <strong>1st Semester</strong> using the date picker.</span>
-        </li>
-        <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">4</span>
-            <span>Select start and end dates for <strong>2nd Semester</strong>. The 2nd semester must start after the 1st semester ends.</span>
-        </li>
-        <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">5</span>
-            <span>Click <strong>Create Calendar</strong> and confirm the action.</span>
-        </li>
-    </ol>
-</x-layout.accordion>
-
-<x-layout.accordion title="Managing Events" icon="calendar-event" color="blue">
-    <div class="space-y-2 text-[13px] text-[#3f3f46]">
-        <p>After creating a calendar, click <strong>Manage Events</strong> to add holidays, breaks, exams, and other events for each semester.</p>
-        <p class="mt-1">Events control how weeks are generated in syllabi:</p>
-        
-        <div class="space-y-2 mt-2">
-            <div class="flex items-start gap-3 p-2.5 rounded-lg bg-blue-50 border border-blue-200">
-                <i class="bx bx-info-circle text-blue-600 shrink-0 mt-0.5"></i>
-                <div>
-                    <p class="font-semibold text-blue-800">Reference Events (Holiday, Other)</p>
-                    <p class="text-[12px] text-blue-700 mt-0.5">Weeks are created normally and remain editable by faculty. Use for class suspensions, observances, deadlines.</p>
-                </div>
-            </div>
-            <div class="flex items-start gap-3 p-2.5 rounded-lg bg-amber-50 border border-amber-200">
-                <i class="bx bx-skip-next text-amber-600 shrink-0 mt-0.5"></i>
-                <div>
-                    <p class="font-semibold text-amber-800">Skip Events (Break)</p>
-                    <p class="text-[12px] text-amber-700 mt-0.5">Weeks are SKIPPED entirely. No syllabus week row is created. Use for Christmas break, semester breaks, health breaks.</p>
-                </div>
-            </div>
-            <div class="flex items-start gap-3 p-2.5 rounded-lg bg-red-50 border border-red-200">
-                <i class="bx bx-lock text-red-600 shrink-0 mt-0.5"></i>
-                <div>
-                    <p class="font-semibold text-red-800">Lock Events (Exam, Non-Teaching)</p>
-                    <p class="text-[12px] text-red-700 mt-0.5">Weeks are created but LOCKED. Faculty cannot edit the content. Use for exam periods, institutional events.</p>
-                </div>
-            </div>
-        </div>
+<x-layout.accordion title="About Academic Calendars" icon="info-circle" color="emerald" :open="true">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <p>Use <strong>Academic Setup &gt; Academic Calendars</strong> to set the dates for each academic year and record holidays, breaks, exams, and other events. An academic year contains a first and second semester.</p>        <p>This page is available to administrators and users assigned the <strong>OVPAA</strong> role (Office of the Vice President for Academic Affairs). Have the approved calendar ready before entering dates.</p>
     </div>
 </x-layout.accordion>
 
-<x-layout.accordion title="Week Generation Feedback" icon="bar-chart" color="purple">
-    <div class="space-y-2 text-[13px] text-[#3f3f46]">
-        <p>When faculty generate weekly coverage for a syllabus, the system now provides detailed feedback:</p>
-        <ul class="space-y-1.5 mt-2">
-            <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span><strong>Total weeks</strong> created for the semester</span></li>
-            <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span><strong>Skipped weeks</strong> due to break events</span></li>
-            <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span><strong>Locked weeks</strong> due to exam/non-teaching events</span></li>
-        </ul>
-        <p class="mt-2 text-[12px] text-[#71717a]">Example: "Weekly coverage generated (16 weeks, 2 skipped, 3 locked)."</p>
-        <p class="mt-1 text-[12px] text-[#71717a]">This helps faculty understand the impact of calendar events on their syllabus structure.</p>
-    </div>
-</x-layout.accordion>
-
-<x-layout.accordion title="Adding Events" icon="list-ol" color="slate">
-    <ol class="space-y-2 text-[13.5px] text-[#3f3f46]">
-        <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">1</span>
-            <span>Click <strong>Add Event</strong> on the events page.</span>
-        </li>
-        <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">2</span>
-            <span>Select the <strong>Event Type</strong> using the dropdown or quick buttons.</span>
-        </li>
-        <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">3</span>
-            <span>Choose a date range (for breaks) or single date (for holidays/exams).</span>
-        </li>
-        <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">4</span>
-            <span>Enter the <strong>Event Name</strong> (e.g., "Christmas Break", "Midterm Exam").</span>
-        </li>
-        <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">5</span>
-            <span>Click <strong>Add Event</strong> to save.</span>
-        </li>
-    </ol>
-</x-layout.accordion>
-
-<x-layout.accordion title="Setting Active Calendar" icon="check-circle" color="emerald">
-    <div class="space-y-2 text-[13px] text-[#3f3f46]">
-        <p>The <strong>Active Calendar</strong> is the default calendar used for new syllabi. Set a calendar as active when it represents the current academic year.</p>
-        <p class="mt-1">To set active:</p>
-        <ol class="space-y-1 mt-2 pl-1">
-            <li class="flex gap-2">
-                <span class="shrink-0 w-4 text-[#a1a1aa] font-bold">1.</span>
-                <span>Locate the academic year on the index page</span>
-            </li>
-            <li class="flex gap-2">
-                <span class="shrink-0 w-4 text-[#a1a1aa] font-bold">2.</span>
-                <span>Click <strong>Set Active</strong> button</span>
-            </li>
-            <li class="flex gap-2">
-                <span class="shrink-0 w-4 text-[#a1a1aa] font-bold">3.</span>
-                <span>The calendar will show a green "Active" indicator</span>
-            </li>
+<x-layout.accordion title="Create an academic year" icon="list-ul" color="slate">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <ol class="list-decimal pl-5 space-y-2">
+            <li>Click <strong>Add Academic Year</strong>.</li>
+            <li>Enter the year in <strong>YYYY-YYYY</strong> format, such as <strong>2026-2027</strong>. Do not add an academic year that already exists.</li>
+            <li>Choose the start and end dates for both semesters. Each end date must be on or after its start date. The second semester must start after the first semester ends.</li>
+            <li>Click <strong>Create Calendar</strong>, review the details, and click <strong>Confirm &amp; Create</strong>.</li>
+            <li>After creation, the events page opens. Add events to the appropriate semester.</li>
         </ol>
     </div>
 </x-layout.accordion>
 
-<x-layout.accordion title="Editing and Deleting" icon="edit" color="slate">
-    <div class="space-y-2 text-[13px] text-[#3f3f46]">
-        <p><strong>Editing Calendars:</strong></p>
-        <ul class="space-y-1 mt-1">
-            <li class="flex gap-2"><i class="bx bx-chevron-right text-[#a1a1aa] shrink-0 mt-0.5"></i><span>Click the edit icon on a calendar card</span></li>
-            <li class="flex gap-2"><i class="bx bx-chevron-right text-[#a1a1aa] shrink-0 mt-0.5"></i><span>You can only edit dates, not the academic year itself</span></li>
-            <li class="flex gap-2"><i class="bx bx-chevron-right text-[#a1a1aa] shrink-0 mt-0.5"></i><span>Calendars with events are locked - remove events first to edit</span></li>
-        </ul>
-        
-        <p class="mt-2"><strong>Deleting Calendars:</strong></p>
-        <ul class="space-y-1 mt-1">
-            <li class="flex gap-2"><i class="bx bx-chevron-right text-[#a1a1aa] shrink-0 mt-0.5"></i><span>Click the trash icon on a calendar card</span></li>
-            <li class="flex gap-2"><i class="bx bx-chevron-right text-[#a1a1aa] shrink-0 mt-0.5"></i><span>Cannot delete if syllabi are linked to it</span></li>
-            <li class="flex gap-2"><i class="bx bx-chevron-right text-[#a1a1aa] shrink-0 mt-0.5"></i><span>Cannot delete the active calendar - set another as active first</span></li>
-        </ul>
-        
-        <p class="mt-2"><strong>Editing Events:</strong></p>
-        <ul class="space-y-1 mt-1">
-            <li class="flex gap-2"><i class="bx bx-chevron-right text-[#a1a1aa] shrink-0 mt-0.5"></i><span>Click on an event in the calendar view to edit it</span></li>
-            <li class="flex gap-2"><i class="bx bx-chevron-right text-[#a1a1aa] shrink-0 mt-0.5"></i><span>You can change type, date, and name</span></li>
-        </ul>
+<x-layout.accordion title="Set the active academic year" icon="list-ul" color="slate">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <p>The <strong>Active</strong> badge identifies the selected academic year on the list. Click <strong>Set Active</strong> on another year to switch the selection; the previous year’s records remain available.</p>        <p>When no calendar is active, creating an academic year activates its first semester automatically. Creating another year does not replace an existing active selection.</p>
     </div>
 </x-layout.accordion>
 
-<x-layout.accordion title="Tips" icon="bulb" color="amber">
-    <ul class="space-y-2 text-[13px] text-[#3f3f46]">
-        <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Semesters can span calendar years (e.g., 2nd sem: Nov 2025 - Apr 2026).</span></li>
-        <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Use "Break" type for Christmas break to skip weeks in syllabi.</span></li>
-        <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Use "Holiday" type for class suspensions - they remain as reference for faculty.</span></li>
-        <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Use quick buttons in the event form for common event types.</span></li>
-        <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Set the correct calendar as active before faculty create syllabi.</span></li>
-        <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Review the calendar preview to ensure events are placed correctly.</span></li>
-    </ul>
+<x-layout.accordion title="Add an event or date range" icon="list-ul" color="slate">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <ol class="list-decimal pl-5 space-y-2">
+            <li>On the academic year’s card, click <strong>Manage Events</strong>.</li>
+            <li>Choose the <strong>1st Semester</strong> or <strong>2nd Semester</strong> tab, then click <strong>Add Event</strong>.</li>
+            <li>Choose the event <strong>Type</strong> and enter a clear <strong>Event Name</strong>, such as “Midterm Examination”.</li>
+            <li>Select the date. For a single-day event, use the same start and end date. For several days, select the first and last date; both are included. Dates must be within the selected semester.</li>
+            <li>Check the dates and click <strong>Add Event</strong> or the <strong>Add … Events</strong> button for a range. Wait for the success message and review the calendar.</li>
+        </ol>        <p>A date range creates a separate entry for each day, including weekends. Only one event per date is allowed in a semester. A single-day duplicate is rejected; a range skips dates that already have events and keeps those existing entries.</p>
+    </div>
 </x-layout.accordion>
 
-<x-layout.accordion title="Common Mistakes" icon="error-circle" color="rose">
-    <ul class="space-y-2 text-[13px] text-[#3f3f46]">
-        <li class="flex gap-2"><i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i><span>Using "Holiday" for Christmas break - this won't skip the week. Use "Break" instead.</span></li>
-        <li class="flex gap-2"><i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i><span>Forgetting to add break events - weeks will be generated incorrectly.</span></li>
-        <li class="flex gap-2"><i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i><span>Not setting the active calendar - new syllabi will use the wrong dates.</span></li>
-        <li class="flex gap-2"><i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i><span>Deleting a calendar with linked syllabi - this is blocked for data protection.</span></li>
-        <li class="flex gap-2"><i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i><span>Entering invalid academic year format - must be YYYY-YYYY with end year greater than start.</span></li>
-    </ul>
+<x-layout.accordion title="Choose the right event type" icon="list-ul" color="slate">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <ul class="list-disc pl-5 space-y-2">
+            <li><strong>Holiday (Reference):</strong> Record a holiday or suspension as a reference.</li>
+            <li><strong>Other (Reference):</strong> Record another date or activity for reference.</li>
+            <li><strong>Break (Skip Week):</strong> Use for an official break that should be excluded from generated teaching weeks.</li>
+            <li><strong>Exam (Lock Week):</strong> Use for an examination period reserved from regular teaching edits.</li>
+            <li><strong>Non-Teaching (Lock Week):</strong> Use for another period reserved for a non-teaching activity.</li>
+        </ul>        <p>“Reference” records information, “Skip” excludes a week, and “Lock” reserves a week from editing in generated schedules. These types affect scheduling, so follow the approved calendar rather than choosing a type by its display color.</p>
+    </div>
 </x-layout.accordion>
 
-<x-layout.accordion title="Frequently Asked Questions" icon="question-mark" color="slate">
-    <div class="space-y-3 text-[13px] text-[#3f3f46]">
-        <div>
-            <p class="font-semibold text-[#09090b]">What's the difference between Holiday and Break?</p>
-            <p class="mt-0.5 text-[#52525b]">Holiday creates a week that faculty can edit (reference only). Break skips the week entirely - no syllabus week is created.</p>
-        </div>
-        <div>
-            <p class="font-semibold text-[#09090b]">Can a semester span multiple calendar years?</p>
-            <p class="mt-0.5 text-[#52525b]">Yes. For example, 2nd semester can start in November 2025 and end in April 2026.</p>
-        </div>
-        <div>
-            <p class="font-semibold text-[#09090b]">What happens if I change calendar dates after syllabi are created?</p>
-            <p class="mt-0.5 text-[#52525b]">You'll see a warning about stale weeks. Faculty will need to regenerate their weeks manually in the syllabus wizard.</p>
-        </div>
-        <div>
-            <p class="font-semibold text-[#09090b]">Can I have multiple events on the same date?</p>
-            <p class="mt-0.5 text-[#52525b]">No. Each date can only have one event. Edit the existing event if you need to change it.</p>
-        </div>
-        <div>
-            <p class="font-semibold text-[#09090b]">Who can manage academic calendars?</p>
-            <p class="mt-0.5 text-[#52525b]">Admins only. This is a system-level configuration that affects all syllabi.</p>
-        </div>
+<x-layout.accordion title="Edit or delete events" icon="list-ul" color="slate">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <p>Click an existing event on the calendar to open its details. Change the type, name, or date and click <strong>Update Event</strong>. Use <strong>Cancel</strong> to close without saving.</p>        <p>Use the trash icon on an event to remove that day’s entry. Events created from a range are separate entries, so changes or deletions apply to individual days. Check the other dates in the range if the whole period has changed.</p>
+    </div>
+</x-layout.accordion>
+
+<x-layout.accordion title="Change or delete an academic year" icon="list-ul" color="slate">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <p>Use the pencil icon on the academic year’s card to change its year label or semester dates, then click <strong>Update Calendar</strong>. Read any warning shown before continuing.</p>        <p><strong>Edit and Delete are disabled while the year has events.</strong> The page asks you to remove all events first. Keep a copy of their names, types, and dates if they will need to be entered again after an approved date correction.</p>        <p>To delete an academic year, use its trash icon and review the confirmation. Deletion removes both semester records and cannot be undone from this page. The system also blocks deletion when linked syllabi exist; ask the responsible administrator to review those dependencies.</p>
+    </div>
+</x-layout.accordion>
+
+<x-layout.accordion title="If something does not work" icon="list-ul" color="slate">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <ul class="list-disc pl-5 space-y-2">
+            <li><strong>The academic year already exists:</strong> Return to the list and use the existing year.</li>
+            <li><strong>A date cannot be selected:</strong> Check the semester tab and its date limits. An event cannot be placed outside that semester.</li>
+            <li><strong>Fewer events were added than expected:</strong> Dates already containing an event were skipped. Review those dates individually.</li>
+            <li><strong>The form will not save:</strong> Check the highlighted fields. The event name is required and can contain up to 255 characters.</li>
+            <li><strong>Cannot add by clicking an empty calendar day:</strong> Use the <strong>Add Event</strong> button above the calendar.</li>
+        </ul>
     </div>
 </x-layout.accordion>

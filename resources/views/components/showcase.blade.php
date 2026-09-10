@@ -423,7 +423,7 @@
                     <div class="flex flex-col items-center gap-2">
                         <x-feedback-status.ied-badge :level="$lvl" />
                         <span class="font-mono text-[9.5px] text-[#B4C0CA]">
-                            {{ $lvl === 'I' ? 'Introductory' : ($lvl === 'E' ? 'Enabling' : ($lvl === 'D' ? 'Demonstrating' : 'None')) }}
+                            {{ $lvl === 'I' ? 'Introductory' : ($lvl === 'E' ? 'Enabling' : ($lvl === 'D' ? 'Demonstrative' : 'None')) }}
                         </span>
                     </div>
                 @endforeach

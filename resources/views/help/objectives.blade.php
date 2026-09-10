@@ -1,117 +1,44 @@
-{{-- Help content: Department Objectives — Updated with latest system organization --}}
+{{-- Help content: objectives --}}
 
-<x-layout.accordion title="Overview" icon="info-circle" color="emerald" :open="true">
-    <p class="text-[13px] text-[#3f3f46] leading-relaxed">
-        Department Objectives are specific, measurable outcomes that support the broader College Goals. They are scoped to a single department and feed into program-level PEOs.
-    </p>
-    <p class="text-[13px] text-[#3f3f46] leading-relaxed mt-2">
-        Access objective management via <strong>CQI → Objectives</strong> in the navigation menu. Objectives are organized by college and department.
-    </p>
-</x-layout.accordion>
-
-<x-layout.accordion title="Step-by-Step Guide" icon="list-ol" color="slate">
-    <ol class="space-y-2.5 text-[13.5px] text-[#3f3f46]">
-        <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">1</span>
-            <span>Select a college, then select a department from the dropdowns. Admins see all departments; Chairs see only their assigned department.</span>
-        </li>
-        <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">2</span>
-            <span>Click <strong>Add Objective</strong> to open the form modal.</span>
-        </li>
-        <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">3</span>
-            <span>Enter the objective text and save. The code is assigned automatically based on existing objectives count.</span>
-        </li>
-        <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">4</span>
-            <span>Use the <i class="bx bx-edit text-[#2563eb]"></i> icon to edit or <i class="bx bx-trash text-[#e11d48]"></i> to delete.</span>
-        </li>
-    </ol>
-</x-layout.accordion>
-
-<x-layout.accordion title="Objective Hierarchy" icon="pyramid" color="blue">
-    <div class="space-y-2 text-[13px] text-[#3f3f46]">
-        <p>Department Objectives bridge College Goals and Program PEOs:</p>
-        <div class="mt-2 space-y-1.5 pl-2 border-l-2 border-[#a1a1aa]">
-            <div class="flex items-center gap-2">
-                <span class="font-semibold text-[#09090b]">College Goals</span>
-                <span class="text-[12px] text-[#71717a]">→</span>
-                <span class="font-semibold text-[#09090b]">Department Objectives</span>
-            </div>
-            <div class="flex items-center gap-2 pl-4">
-                <span class="text-[12px] text-[#52525b]">Department Objectives</span>
-                <span class="text-[12px] text-[#71717a]">→</span>
-                <span class="text-[12px] text-[#52525b]">Program PEOs</span>
-            </div>
-        </div>
-        <p class="mt-2 text-[12px] text-[#71717a]">Objectives should be more specific than college goals but broader than program outcomes.</p>
+<x-layout.accordion title="About Department Objectives" icon="info-circle" color="emerald" :open="true">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <p>Department objectives describe what a department aims to accomplish. This page keeps the approved statements for each department together, with one objective per entry.</p>        <p>Open <strong>Academic Setup &gt; Department Objectives</strong>. Administrators and department chairs can access this page. A chair with a department assignment works with that department.</p>
     </div>
 </x-layout.accordion>
 
-<x-layout.accordion title="Tips" icon="bulb" color="amber">
-    <ul class="space-y-2 text-[13px] text-[#3f3f46]">
-        <li class="flex gap-2">
-            <i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i>
-            <span>Write objectives as measurable outcomes — start with action verbs (e.g. "Demonstrate", "Apply", "Analyze").</span>
-        </li>
-        <li class="flex gap-2">
-            <i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i>
-            <span>Codes are resequenced automatically when an objective is deleted.</span>
-        </li>
-        <li class="flex gap-2">
-            <i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i>
-            <span>Chairs can only manage objectives for their assigned department.</span>
-        </li>
-        <li class="flex gap-2">
-            <i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i>
-            <span>Align objectives with college goals — each objective should support one or more college goals.</span>
-        </li>
-        <li class="flex gap-2">
-            <i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i>
-            <span>Limit objectives to 6-10 per department for focus and measurability.</span>
-        </li>
-    </ul>
+<x-layout.accordion title="Add an objective" icon="list-ul" color="slate">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <ol class="list-decimal pl-5 space-y-2">
+            <li>Check the selected <strong>College</strong> and <strong>Department</strong>. If the selectors are available, choose the college first, then its department.</li>
+            <li>Review the existing objectives to avoid duplicates.</li>
+            <li>Click <strong>Add Objective</strong> and enter the approved objective description. The system supplies the code.</li>
+            <li>Click <strong>Add Objective</strong> in the form. Wait for the success message and check the new entry.</li>
+        </ol>        <p>The description is required and can contain up to <strong>5,000 characters</strong>. Each objective belongs to the selected department.</p>
+    </div>
 </x-layout.accordion>
 
-<x-layout.accordion title="Common Mistakes" icon="error-circle" color="rose">
-    <ul class="space-y-2 text-[13px] text-[#3f3f46]">
-        <li class="flex gap-2">
-            <i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i>
-            <span>Confusing department objectives with program PEOs — objectives are department-wide, PEOs are program-specific.</span>
-        </li>
-        <li class="flex gap-2">
-            <i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i>
-            <span>Adding vague objectives like "Improve quality" — be specific and measurable.</span>
-        </li>
-        <li class="flex gap-2">
-            <i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i>
-            <span>Not aligning objectives with college goals — ensure each objective supports at least one college goal.</span>
-        </li>
-        <li class="flex gap-2">
-            <i class="bx bx-x-circle text-[#e11d48] shrink-0 mt-0.5"></i>
-            <span>Writing objectives that are too specific to a single program — keep them department-wide.</span>
-        </li>
-    </ul>
+<x-layout.accordion title="Edit or delete an objective" icon="list-ul" color="slate">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <ul class="list-disc pl-5 space-y-2">
+            <li><strong>Edit:</strong> Click the pencil icon beside the objective, change the description, and click <strong>Save Changes</strong>.</li>
+            <li><strong>Cancel:</strong> Use <strong>Cancel</strong> to close the form without saving the edits.</li>
+            <li><strong>Delete:</strong> Click the trash icon, check the statement in the confirmation window, then click <strong>Delete Objective</strong>. There is no restore option on this page.</li>
+        </ul>        <p>Deleting an objective also updates the remaining codes so they stay in sequence. Check any references to the old codes. There is no manual reorder control on this page.</p>
+    </div>
 </x-layout.accordion>
 
-<x-layout.accordion title="Frequently Asked Questions" icon="question-mark" color="slate">
-    <div class="space-y-3 text-[13px] text-[#3f3f46]">
-        <div>
-            <p class="font-semibold text-[#09090b]">Who can manage objectives?</p>
-            <p class="mt-0.5 text-[#52525b]">Admins (all departments) and Chairs (their assigned department only).</p>
-        </div>
-        <div>
-            <p class="font-semibold text-[#09090b]">How are objectives related to PEOs?</p>
-            <p class="mt-0.5 text-[#52525b]">Objectives are department-level. PEOs are defined per program within that department and should align with these objectives.</p>
-        </div>
-        <div>
-            <p class="font-semibold text-[#09090b]">Can I reference objectives in syllabi?</p>
-            <p class="mt-0.5 text-[#52525b]">Objectives are primarily for curriculum planning. PEOs and POs are what appear in syllabi.</p>
-        </div>
-        <div>
-            <p class="font-semibold text-[#09090b]">What happens when I delete an objective?</p>
-            <p class="mt-0.5 text-[#52525b]">The objective is removed and codes are resequenced. Verify if it's referenced in program planning before deleting.</p>
-        </div>
+<x-layout.accordion title="Choose the right kind of statement" icon="list-ul" color="slate">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <p><strong>College goals</strong> describe the college’s broad aims. <strong>Department objectives</strong> describe the department’s aims. <strong>Program Educational Objectives (PEOs)</strong> describe graduates’ expected achievements after graduation and are maintained under <strong>PEOs &amp; POs</strong>.</p>        <p>Use your department’s approved wording. Keep each objective focused on one idea and avoid repeating an existing statement. You do not need to select a college goal or create a link to a PEO in this form.</p>
+    </div>
+</x-layout.accordion>
+
+<x-layout.accordion title="If something does not work" icon="list-ul" color="slate">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <ul class="list-disc pl-5 space-y-2">
+            <li><strong>No department is available:</strong> Check the college selection. If your account shows a missing assignment message, ask an administrator to check your department assignment.</li>
+            <li><strong>The form will not save:</strong> Correct the highlighted description field. It must contain plain text and stay within 5,000 characters.</li>
+            <li><strong>The list is empty:</strong> Confirm the selected department before creating its first objective.</li>
+        </ul>
     </div>
 </x-layout.accordion>

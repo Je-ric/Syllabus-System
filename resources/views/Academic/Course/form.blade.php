@@ -185,7 +185,7 @@
             <x-layout.card-section title="Program Outcomes Mapping" icon="bx-target-lock" :padded="false">
                 <x-slot:actions>
                     <span class="text-[11px] text-[#93A1AF] whitespace-nowrap hidden sm:inline">
-                        <strong class="text-[#4F5D6B]">IED:</strong> I – Introductory · E – Enabling · D – Demonstrating
+                        <strong class="text-[#4F5D6B]">IED:</strong> I – Introductory · E – Enabling · D – Demonstrative
                     </span>
                 </x-slot:actions>
 
