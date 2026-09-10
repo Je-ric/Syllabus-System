@@ -229,7 +229,7 @@
                     <thead>
                         <tr>
                             <th><b>Program Educational Objectives</b><br>
-                                <p>Three to five years after graduation, the BSIT graduates are:</p>
+                                <p>Three to five years after graduation, the {{ $program->name }} graduates are:</p>
                             </th>
                             <th>Mission</th>
                         </tr>
@@ -544,7 +544,7 @@
                 </tbody>
             </table>
 
-            
+
             <br>
             @if ($syllabus->course->has_lec_lab)
                 <p style="margin-top: 10px;"><strong>Laboratory (LAB)</strong></p>

@@ -404,17 +404,17 @@
     "src": "node_modules/boxicons/fonts/boxicons.woff2"
   },
   "resources/css/app.css": {
-    "file": "assets/app-DZ0doSJC.css",
+    "file": "assets/app-8xPIg2Mo.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/css/landing.css": {
-    "file": "assets/landing-DyEVqI8M.css",
+    "file": "assets/landing-Bg4qLYid.css",
     "src": "resources/css/landing.css",
     "isEntry": true
   },
   "resources/css/preview.css": {
-    "file": "assets/preview-DZcg8OJN.css",
+    "file": "assets/preview-Du1o-quf.css",
     "src": "resources/css/preview.css",
     "isEntry": true
   },
