@@ -1,110 +1,87 @@
-{{-- Help: User Assignments Management --}}
+{{-- Help content: user-assignments --}}
 
-<x-layout.accordion title="Overview" icon="info-circle" color="emerald" :open="true">
-    <p class="text-[13px] text-[#3f3f46] leading-relaxed">
-        User Assignments manage institutional leadership roles across your academic structure. This module allows you to assign deans to colleges, chairs to departments, and faculty members to specific departments.
-    </p>
-    <p class="text-[13px] text-[#3f3f46] leading-relaxed mt-2">
-        Access assignment management via <strong>User Management → User Assignments</strong> in the navigation menu. The interface is organized by colleges and their departments.
-    </p>
-</x-layout.accordion>
-
-<x-layout.accordion title="Role Hierarchy" icon="building" color="blue">
-    <div class="space-y-3 text-[13px] text-[#3f3f46]">
-        <div class="flex items-start gap-3 p-2.5 rounded-lg bg-green-50 border border-green-200">
-            <i class="bx bxs-school text-green-600 shrink-0 mt-0.5"></i>
-            <div>
-                <p class="font-semibold text-green-800">College Dean</p>
-                <p class="text-[12px] text-green-700 mt-0.5">Manages all departments within a college. Each college can have one dean. Oversees academic and administrative operations at the college level.</p>
-            </div>
-        </div>
-        <div class="flex items-start gap-3 p-2.5 rounded-lg bg-blue-50 border border-blue-200">
-            <i class="bx bx-building text-blue-600 shrink-0 mt-0.5"></i>
-            <div>
-                <p class="font-semibold text-blue-800">Department Chair</p>
-                <p class="text-[12px] text-blue-700 mt-0.5">Leads a specific department within a college. Each department can have one chair. Manages faculty, curriculum, and departmental operations.</p>
-            </div>
-        </div>
-        <div class="flex items-start gap-3 p-2.5 rounded-lg bg-amber-50 border border-amber-200">
-            <i class="bx bx-user text-amber-600 shrink-0 mt-0.5"></i>
-            <div>
-                <p class="font-semibold text-amber-800">Faculty Member</p>
-                <p class="text-[12px] text-amber-700 mt-0.5">Academic staff assigned to teach and conduct research within a department. Can be assigned to multiple departments (maximum 5).</p>
-            </div>
-        </div>
+<x-layout.accordion title="About University Faculties" icon="info-circle" color="emerald" :open="true">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <p>Open <strong>Administration &gt; University Faculties</strong> to assign people to colleges and departments. Administrators can add and remove assignments. Deans and chairs who access their department view can review the records available to them.</p>
+        <p>A <strong>role</strong> identifies what a person can do, such as dean, chair, or faculty. An <strong>assignment</strong> identifies the college or department they work with. For example, a user needs both the Chair role and a department assignment to manage that department’s academic setup.</p>
+        <p>Manage account status and roles under <strong>Administration &gt; User Management</strong>. Create colleges and departments under <strong>University Structure</strong>.</p>
     </div>
 </x-layout.accordion>
 
-<x-layout.accordion title="Assignment Rules" icon="shield" color="purple">
-    <div class="space-y-2 text-[13px] text-[#3f3f46]">
-        <p>The system enforces these assignment rules to maintain data integrity:</p>
-        <ul class="space-y-1.5 mt-2">
-            <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>A user cannot be both a dean and a chair simultaneously</span></li>
-            <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Users must have the appropriate role assigned before being assigned to a position</span></li>
-            <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Each college can have only one dean</span></li>
-            <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Each department can have only one chair</span></li>
-            <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Faculty can be assigned to multiple departments (maximum 5 for effective management)</span></li>
+<x-layout.accordion title="Find the college or department" icon="list-ul" color="slate">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <ol class="list-decimal pl-5 space-y-2">
+            <li>On the college list, use the search field to find a college by its name or its dean’s name.</li>
+            <li>Check the <strong>College Dean</strong> section on the college card.</li>
+            <li>Click <strong>Manage Departments</strong> to view that college’s department chairs and faculty lists.</li>
+            <li>On the department page, search by department, chair, or faculty name. Clear the search to show all available cards again.</li>
+        </ol>
+    </div>
+</x-layout.accordion>
+
+<x-layout.accordion title="Check who can be assigned" icon="list-ul" color="slate">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <ul class="list-disc pl-5 space-y-2">
+            <li>The selection lists show <strong>active accounts</strong> with the matching Dean, Chair, or Faculty role. Administrator accounts are excluded from these lists.</li>
+            <li>A person can be assigned as dean of only one college, or chair of only one department. They cannot hold both a dean and a chair assignment at the same time.</li>
+            <li>Each college card provides one dean position, and each department card provides one chair position. Remove the current assignment before assigning a replacement.</li>
+            <li>Faculty can be assigned to more than one department. The system blocks another faculty assignment once the user has five faculty assignment records.</li>
+            <li>The same faculty member cannot be added twice to the same department.</li>
         </ul>
+        <p>Assigning a dean or chair also ensures the user has the Faculty role and creates a related faculty assignment. A chair may therefore appear in the department’s faculty list as well.</p>
     </div>
 </x-layout.accordion>
 
-<x-layout.accordion title="Assigning Users" icon="user-plus" color="emerald">
-    <ol class="space-y-2 text-[13.5px] text-[#3f3f46]">
-        <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">1</span>
-            <span>Navigate to the college or department you want to manage</span>
-        </li>
-        <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">2</span>
-            <span>Click <strong>Assign Dean</strong>, <strong>Assign Chair</strong>, or <strong>Add Faculty</strong> button</span>
-        </li>
-        <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">3</span>
-            <span>Select a user from the available users list (only users with appropriate roles are shown)</span>
-        </li>
-        <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">4</span>
-            <span>Confirm the assignment in the modal</span>
-        </li>
-        <li class="flex gap-2.5">
-            <span class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#dcfce7] text-[#166534] text-[11px] font-bold mt-0.5">5</span>
-            <span>For faculty, you can select multiple users at once using bulk assignment</span>
-        </li>
-    </ol>
-</x-layout.accordion>
-
-<x-layout.accordion title="Removing Assignments" icon="trash" color="red">
-    <div class="space-y-2 text-[13px] text-[#3f3f46]">
-        <p>To remove an assignment, click the trash icon next to the assigned user. The system will show a confirmation modal before proceeding.</p>
-        <div class="flex items-start gap-3 p-2.5 rounded-lg bg-red-50 border border-red-200 mt-2">
-            <i class="bx bx-error text-red-600 shrink-0 mt-0.5"></i>
-            <div>
-                <p class="font-semibold text-red-800">Important Notes</p>
-                <p class="text-[12px] text-red-700 mt-0.5">This action is immediate and cannot be undone. Plan leadership changes in advance to avoid temporary gaps in management. Consider reassigning roles before removing current assignments.</p>
-            </div>
-        </div>
+<x-layout.accordion title="Assign a dean or chair" icon="list-ul" color="slate">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <ol class="list-decimal pl-5 space-y-2">
+            <li>For a dean, find the college card and click <strong>Assign Dean</strong>. For a chair, open <strong>Manage Departments</strong> and click <strong>Assign Chair</strong> on the correct department.</li>
+            <li>Check the college or department name in the form.</li>
+            <li>Select the person from the available users. Check their name and email to avoid choosing someone with a similar name.</li>
+            <li>Click <strong>Assign Dean</strong> or <strong>Assign Chair</strong> in the form.</li>
+            <li>Wait for the success message and check that the person appears in the position.</li>
+        </ol>
+        <p>If the person already leads another college or department, remove that earlier assignment before moving them. Use <strong>Cancel</strong> if you need to review the selection first.</p>
     </div>
 </x-layout.accordion>
 
-<x-layout.accordion title="Search and Filter" icon="search" color="slate">
-    <div class="space-y-2 text-[13px] text-[#3f3f46]">
-        <p>Use the search bar at the top of each page to quickly find:</p>
-        <ul class="space-y-1.5 mt-2">
-            <li class="flex gap-2"><i class="bx bx-chevron-right text-[#a1a1aa] shrink-0 mt-0.5"></i><span><strong>Colleges page:</strong> Search by college name or dean name</span></li>
-            <li class="flex gap-2"><i class="bx bx-chevron-right text-[#a1a1aa] shrink-0 mt-0.5"></i><span><strong>Departments page:</strong> Search by department name, chair name, or faculty names</span></li>
-        </ul>
-        <p class="mt-2 text-[12px] text-[#71717a]">The search filters in real-time as you type, making it easy to locate specific assignments in large institutions.</p>
+<x-layout.accordion title="Add one or more faculty members" icon="list-ul" color="slate">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <ol class="list-decimal pl-5 space-y-2">
+            <li>Open the correct college’s <strong>Manage Departments</strong> page.</li>
+            <li>Click <strong>Add Faculty</strong> on the department card.</li>
+            <li>Use <strong>Search Faculty</strong> to find people by name or email. Select the people to add; you may choose one or several.</li>
+            <li>Use <strong>Select All</strong> only when you want all available people in the current search results. Check the selected count before submitting.</li>
+            <li>Click <strong>Assign Selected</strong> and wait for the result message.</li>
+            <li>Check the department’s faculty list. The message may report that some users were skipped or could not be assigned.</li>
+        </ol>
+        <p>Users already in the department are not available for selection. A bulk request can also skip users who no longer meet the role or assignment-limit rules. Check individual users if the assigned count is lower than expected.</p>
     </div>
 </x-layout.accordion>
 
-<x-layout.accordion title="Best Practices" icon="star" color="amber">
-    <div class="space-y-2 text-[13px] text-[#3f3f46]">
-        <ul class="space-y-1.5">
-            <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Ensure users have the correct role before assigning them to positions</span></li>
-            <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Plan leadership changes in advance to avoid temporary gaps in oversight</span></li>
-            <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Review faculty assignments regularly to keep department rosters current</span></li>
-            <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Use bulk faculty assignment for efficient onboarding of multiple users</span></li>
-            <li class="flex gap-2"><i class="bx bx-check-circle text-[#16a34a] shrink-0 mt-0.5"></i><span>Monitor faculty cross-department assignments to ensure manageable workloads</span></li>
+<x-layout.accordion title="Remove or replace an assignment" icon="list-ul" color="slate">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <ol class="list-decimal pl-5 space-y-2">
+            <li>Click the trash icon beside the dean, chair, or faculty member.</li>
+            <li>Check the person and college or department named in the confirmation.</li>
+            <li>Click <strong>Remove Dean</strong>, <strong>Remove Chair</strong>, or <strong>Remove Faculty</strong>. Use <strong>Cancel</strong> to keep the assignment.</li>
+            <li>For a replacement, use the appropriate Assign button after removal and check the new assignment.</li>
+        </ol>
+        <p>Removal takes effect after confirmation. It removes that assignment, not the user’s account or account roles. Other assignments remain, including a faculty assignment created when the person became a dean or chair. Review those separately if their responsibilities have changed.</p>
+        <p>There is no Undo button, but an administrator can assign the person again if they still meet the rules. Assignment changes also create a notification for the affected user.</p>
+    </div>
+</x-layout.accordion>
+
+<x-layout.accordion title="If something does not work" icon="list-ul" color="slate">
+    <div class="space-y-3 text-[13px] text-[#3f3f46] leading-relaxed">
+        <ul class="list-disc pl-5 space-y-2">
+            <li><strong>A person is missing from the selection list:</strong> Check that their account is active and has the required role in User Management. Administrator accounts are excluded. A dean or chair already assigned elsewhere is also excluded from the corresponding list.</li>
+            <li><strong>No available users to assign:</strong> Review account roles and existing assignments before trying again.</li>
+            <li><strong>A dean/chair conflict is reported:</strong> Remove the person’s conflicting leadership assignment first. Having a role alone is different from holding an assignment.</li>
+            <li><strong>The faculty limit is reached:</strong> Review the person’s existing faculty assignments and remove any that no longer apply before adding another.</li>
+            <li><strong>Assign or Remove buttons are missing:</strong> These actions are available to administrators. Ask an administrator to make the change.</li>
+            <li><strong>No Assignment Found:</strong> Ask an administrator to check your dean or chair assignment.</li>
+            <li><strong>A college or department is missing:</strong> Check the search and selected college. An administrator can add missing structure records under University Structure.</li>
         </ul>
     </div>
 </x-layout.accordion>
